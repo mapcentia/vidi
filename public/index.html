@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<html>
+<head>
+    <title>MapCentia Vidi</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" value="notranslate">
+    <link rel="shortcut icon" href="/favicon.ico?8dc183e6834c438d" type="image/x-icon">
+    <link rel="icon" href="/favicon.ico?8dc183e6834c438d" type="image/x-icon">
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="/js/div/html5shiv.js?262bb88879efaaf7"></script>
+    <![endif]-->
+    <!-- build:css /apps/viewer/css/build/all.min.css -->
+    <link rel="stylesheet" href="http://eu1.mapcentia.com/js/bootstrap3/css/bootstrap.min.css?8a7442ca6bedd62c"
+          type='text/css'>
+    <link rel="stylesheet"
+          href="http://eu1.mapcentia.com/js/MultiLevelPushMenu/jquery.multilevelpushmenu.css?199f4e647ca1f66e"
+          type='text/css'>
+    <link rel="stylesheet" href="css/styles.css?" type="text/css">
+    <!-- /build -->
+    <link rel='stylesheet' href='//fonts.googleapis.com/css?family=Open+Sans+Condensed:300' type='text/css'>
+</head>
+<body>
+<div class="center">
+    <div class="bouncywrap">
+        <div class="dotcon dc1">
+            <div class="dot"></div>
+        </div>
+        <div class="dotcon dc2">
+            <div class="dot"></div>
+        </div>
+        <div class="dotcon dc3">
+            <div class="dot"></div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    window.go = function () {
+        $("body").html(this.Templates["default.tmpl"].render(gc2i18n.dict));
+        window.MapCentia = new Vidi().init.init();
+        $("[data-toggle=tooltip]").tooltip();
+        $(".center").hide();
+        $("#pane").hide().fadeIn(1500);
+        var max = $(document).height() - $('.tab-pane').offset().top;
+        $('.tab-pane').not("#result-content").css('max-height', max);
+        $('#result-content .tab-pane').css('max-height', max-110);
+        $('#places').css('height', max - 30);
+        $('#places .tt-dropdown-menu').css('max-height', max - 100);
+    }
+</script>
+<script src="http://eu1.mapcentia.com/js/jquery/1.10.0/jquery.min.js?"></script>
+<script src="http://eu1.mapcentia.com/js/bootstrap3/js/bootstrap.min.js"></script>
+<script src="http://eu1.mapcentia.com/js/typeahead.js-0.10.5/dist/typeahead.bundle.js"></script>
+<script src="http://eu1.mapcentia.com/js/common.js"></script>
+<script src="http://twitter.github.com/hogan.js/builds/3.0.1/hogan-3.0.1.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/bundle.js"></script>
+<script src="/baselayer"></script>
+<script src="http://192.168.33.11/api/v3/js/geocloud.php?callback=go&maplib=leaflet&"
+        type="text/javascript"></script>
+</html>

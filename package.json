@@ -1,0 +1,33 @@
+{
+  "name": "vidi",
+  "version": "1.0.0",
+  "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://mapcentia@github.com/mapcentia/vidi.git"
+  },
+  "author": "Martin Høgh",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/mapcentia/vidi/issues"
+  },
+  "homepage": "https://github.com/mapcentia/vidi#readme",
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-browserify": "^5.0.0",
+    "grunt-git": "^1.0.0",
+    "grunt-templates-hogan": "^0.3.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.1",
+    "cors": "^2.7.1",
+    "express": "^4.13.4",
+    "moment": "^2.13.0",
+    "request": "^2.72.0",
+    "socket.io": "^1.4.6"
+  }
+}
