@@ -11,11 +11,9 @@ module.exports = module.exports = {
     init: function (name, visible, doNotLegend) {
         if (visible) {
             cloud.showLayer(name);
-            $('*[data-gc2-id="' + name + '"]').next("span").show();
             $('*[data-gc2-id="' + name + '"]').prop('checked', true);
         } else {
             cloud.hideLayer(name);
-            $('*[data-gc2-id="' + name + '"]').next("span").hide();
             $('*[data-gc2-id="' + name + '"]').prop('checked', false);
         }
         try {

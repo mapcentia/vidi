@@ -4,34 +4,50 @@
         <div id="map"></div>
         <div id="side-panel">
             <div id="top">
-                <div id="progress-container"><span id="progress"></span><span id="spinner">&nbsp;<span><img src='http://www.gifstache.com/images/ajax_loader.gif' class='spinner'/></span></span></div>
+                <div id="progress-container"><span id="progress"></span><span id="spinner">&nbsp;<span><img
+                        src='http://www.gifstache.com/images/ajax_loader.gif' class='spinner'/></span></span></div>
             </div>
             <div role="tabpanel">
                 <!-- Nav tabs -->
                 <ul class="nav nav-tabs" role="tablist" id="main-tabs">
-                    <li role="presentation" class="active"><a href="#search-content" aria-controls="search-content"
-                                                              role="tab"
-                                                              data-toggle="tab">{{Search}}</a></li>
-                    <li role="presentation"><a href="#info-content" aria-controls="info-content" role="tab"
-                                               data-toggle="tab">{{Info}}</a></li>
-                    <li role="presentation"><a href="#layer-content" aria-controls="" role="tab"
-                                               data-toggle="tab">{{Layers}}</a></li>
-                    <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab"
-                                               data-toggle="tab">{{Baselayers}}</a></li>
-                    <li role="presentation"><a href="#legend-content" aria-controls="" role="tab"
-                                               data-toggle="tab">{{Legend}}</a></li>
-                    <li role="presentation"><a href="#help-content" aria-controls="" role="tab"
-                                               data-toggle="tab">{{Help}}</a></li>
-                    <li role="presentation"><a href="#log-content" aria-controls="" role="tab"
-                                               data-toggle="tab">{{Log}}</a></li>
+                    <li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>
+                    <li role="presentation"><a href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">{{Info}}</a></li>
+                    <li role="presentation"><a href="#layer-content" aria-controls="" role="tab" data-toggle="tab">{{Layers}}</a></li>
+                    <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>
+                    <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
+                    <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
+                    <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
                 </ul>
 
                 <!-- Tab panes -->
                 <div class="tab-content">
                     <div role="tabpanel" class="tab-pane active" id="search-content">
-                        <div id="places">
-                            <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
+                        <ul class="nav nav-tabs" role="tablist" id="search-tabs">
+                            <li role="presentation" class="active"><a href="#place-search" aria-controls="place-search" role="tab" data-toggle="tab">Place</a></li>
+                            <li role="presentation"><a href="#advanced-search" aria-controls="advanced-search" role="tab" data-toggle="tab">Advanced</a></li>
+                            <li role="presentation"><a href="#conflict-search" aria-controls="conflict-search" role="tab" data-toggle="tab">Conflict</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active" id="place-search">
+                                <div class="alert alert-dismissible alert-info" role="alert">
+                                    <button type="button" class="close" data-dismiss="alert">×</button>
+                                    Søg på adresse og matrikelnr.
+                                </div>
+                                <div id="places">
+                                    <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
+                                </div>
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane" id="advanced-search">
+                                advanced
+                            </div>
+
+                            <div role="tabpanel" class="tab-pane" id="conflict-search">
+                                conflict
+                            </div>
                         </div>
+
+
                     </div>
                     <div role="tabpanel" class="tab-pane" id="info-content">
                         <div class="alert alert-info" role="alert">{{{Info text}}}</div>
@@ -42,22 +58,36 @@
                                 <div class="tab-content" id="info-pane"></div>
                             </div>
                         </div>
+                        <table id="dtable" data-show-toggle="true"></table>
+
                     </div>
                     <div role="tabpanel" class="tab-pane" id="layer-content">
-                        <div class="panel-group" id="layers" role="tablist" aria-multiselectable="true"></div>
+                        <div class="form-group">
+                            <div class="panel-group" id="layers" role="tablist" aria-multiselectable="true"></div>
+                        </div>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="baselayer-content">
-                        <div class="panel-group" id="baselayers" role="tablist" aria-multiselectable="true">
-                            <ul class="list-group" id="base-layer-list"></ul>
+                        <div class="panel panel-default">
+                            <div class="form-group">
+                                <div class="panel-body">
+                                    <ul class="list-group" id="base-layer-list"></ul>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="legend-content">
-                        <div id="legend"></div>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div id="legend"></div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="draw-content">
+                        <button id="draw-btn" type="button" class="btn btn-default">Draw</button>
                     </div>
                     <div role="tabpanel" class="tab-pane" id="help-content">...</div>
-                    <div role="tabpanel" class="tab-pane" id="log-content">
-                        <textarea style="width: 100%" rows="8" id="console"></textarea>
-                    </div>
+
                 </div>
             </div>
         </div>

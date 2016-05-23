@@ -29,7 +29,9 @@ window.Vidi = function () {
         state: require('./modules/state'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
-        search: require('./modules/search/danish')
+        search: require('./modules/search/danish'),
+        bindEvent: require('./modules/bindEvent'),
+        draw: require('./modules/draw')
 
     };
 
@@ -44,6 +46,8 @@ window.Vidi = function () {
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
     modules.search.set(modules);
+    modules.bindEvent.set(modules);
+    modules.draw.set(modules);
 
     L.drawLocal = require('./modules/drawLocal');
 

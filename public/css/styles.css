@@ -1,10 +1,6 @@
 body {
     margin: 0px;
     padding: 0px;
-    font-family: 'Open Sans Condensed', sans-serif, sans-serif;
-    font-size: 16px;
-    font-weight: normal;
-    background: #fff;
 }
 
 .modal-title {
@@ -32,15 +28,22 @@ body {
 }
 
 #side-panel {
+    height: 100%;
     position: absolute;
     width: 450px;
     right: 0;
     top: 0;
-    padding: 16px 6px 6px 6px;
+    border: 0;
+    -webkizt-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+
 }
 
 #legend {
     position: relative;
+}
+#legend li {
+    list-style-type: none;
 }
 
 #info-box {
@@ -97,6 +100,11 @@ input[type="radio"], input[type="checkbox"] {
     padding-left: 0 !important;
     margin-top: 0 !important;
     margin-bottom: 0 !important;
+}
+
+.check{
+    margin-right: 5px !important;
+
 }
 
 .infobox {
@@ -204,57 +212,36 @@ input[type="radio"], input[type="checkbox"] {
     margin-top: 0 !important;
 }
 
-.navbar-absolute + div {
-    smargin-top: 68px;
-}
-
-.leaflet-control-layers {
-    display: none !important;
-}
-
-.navbar-brand {
-    padding: 12px 0 0 7px !important;
-}
-
-.navbar-collapse {
-    padding-left: 50px !important;
-}
-
-.navbar-nav {
-    margin: 0 !important;
-    float: right;
-}
-
-.navbar-form {
-    border-top: 0 !important;
-    border-bottom: 0 !important;
-}
-
 .meta-info {
     padding: 0 !important;
 }
 
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
     padding: 4px;
-    font-size: 12px;
     line-height: 1.428571429;
     vertical-align: top;
     border-top: 1px solid rgb(245, 245, 245);
-    font-family: 'Open Sans Condensed', sans-serif, sans-serif !important;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+    font-weight: 300;
     border-bottom: 0px;
 }
 
 .nav-tabs > li > a, .dropdown-menu > li > a {
-    font-size: 14px !important;
-    font-family: 'Open Sans Condensed', sans-serif, sans-serif !important;
+    font-weight: 500;
+    font-family: 'Roboto', sans-serif, sans-serif !important;
     padding: 6px 10px !important;
     text-decoration: none !important;
 }
 
+.nav-tabs>.active {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+
+}
+
 .pane input,
 .pane textarea {
-    font-size: 12px !important;
-    font-family: 'Open Sans Condensed', sans-serif, sans-serif !important;
+    font-weight: 300;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
 .navbar {
@@ -273,9 +260,8 @@ input[type="radio"], input[type="checkbox"] {
 
 .popover-content td, .popover-content span {
     vertical-align: top !important;
-    font-size: 1em;
-    font-family: 'Open Sans Condensed', sans-serif, sans-serif !important;
-    font-size: 14px !important;
+    font-weight: 300;
+    font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
 /*
@@ -335,11 +321,6 @@ div.olControlZoom {
     color: #ffffff;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
 
 .center {
     position: absolute;
@@ -540,9 +521,9 @@ div.olControlZoom {
     font-size: 24px;
     line-height: 30px;
     border: 1px solid #ccc;
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
     outline: none;
     margin-top: 10px;
 }
@@ -572,12 +553,12 @@ div.olControlZoom {
     background-color: #fff;
     border: 1px solid #ccc;
     border: 1px solid rgba(0, 0, 0, 0.2);
-    -webkit-border-radius: 8px;
-    -moz-border-radius: 8px;
-    border-radius: 8px;
-    -webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-    -moz-box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
-    box-shadow: 0 5px 10px rgba(0, 0, 0, .2);
+    -webkit-border-radius: 2px;
+    -moz-border-radius: 2px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
+    -moz-box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, .2);
 }
 
 .tt-suggestion {
@@ -637,6 +618,10 @@ div.olControlZoom {
 }
 .layer-item label {
     padding: 10px 15px;
+    font-weight: 300;
+    font-size: 14px;
+    font-family: 'Roboto', sans-serif, sans-serif !important;
+    margin-bottom: 0 !important;
 }
 
 .base-layer-item .fa {
@@ -646,4 +631,16 @@ div.olControlZoom {
 .layer-item .fa {
     float: right;
     display: none;
+}
+.leaflet-control-layers {
+    display: none;
+}
+.panel-title, .panel-title:hover {
+    text-decoration: none !important;
+}
+.form-group {
+    margin: 0 !important;
+}
+.alert{
+    margin-bottom: 10px;
 }

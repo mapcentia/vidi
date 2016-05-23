@@ -6,6 +6,7 @@ var state;
 var anchor;
 var infoClick;
 var search;
+var bindEvent;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -16,6 +17,7 @@ module.exports = {
         anchor = o.anchor;
         infoClick = o.infoClick;
         search = o.search;
+        bindEvent = o.bindEvent;
         return this;
     },
     init: function () {
@@ -25,6 +27,7 @@ module.exports = {
         state.init();
         infoClick.init();
         search.init();
+        bindEvent.init();
 
         var moveEndCallBack = function () {
             try {
@@ -34,5 +37,6 @@ module.exports = {
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
-    }
+        $.material.init()
+        $.material.ripples()    }
 };

@@ -60,11 +60,11 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        "<li class='base-layer-item list-group-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></li>"
+                                        "<li class='base-layer-item list-group-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><span class='radio radio-primary'><label style='display: block'><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></span></li>"
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><span class="checkbox"><label style="display: block;"><input style="display: none" type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '<span class="fa fa-check" aria-hidden="true"></span></label></span></li>');
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label style="display: block;"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label></div></li>');
                                     l.push({});
                                 }
                             }
@@ -85,10 +85,6 @@ module.exports = {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
-                    $(".base-layer-item span").hide();
-
-                    $(this).css("background-color", "#f5f5f5");
-                    $(this).children("span").show();
                 });
             },
             error: function (response) {

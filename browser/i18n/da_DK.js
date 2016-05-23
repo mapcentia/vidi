@@ -8,6 +8,7 @@ module.exports = {
         "Info": "Info",
         "Layers": "Lag",
         "Legend": "Signatur",
+        "Draw": "Tegn",
         "Help": "Hjælp",
         "Log": "Log",
         "Address": "Adresse eller matrikelnr.",

@@ -9,6 +9,7 @@ gc2i18n = {
         "Layers": "Layers",
         "Legend": "Legend",
         "Help": "help",
+        "Draw": "Draw",
         "Log": "Log",
         "Address": "Address",
         "With conflicts": "With conflicts",

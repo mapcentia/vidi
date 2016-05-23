@@ -3,9 +3,9 @@ var db = urlparser.db;
 var cloud;
 var clicktimer;
 var meta;
+var draw;
 var qstore = [];
 var host = require('../../config/config.js').gc2.host;
-
 
 var BACKEND = "gc2";
 
@@ -13,6 +13,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        draw = o.draw;
         return this;
     },
     init: function () {
@@ -20,10 +21,12 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.on("click", function (e) {
+            // Do not get info if drawing
+            if(draw.getDrawOn()){
+                return;
+            }
             var layers, count = 0, hit = false, event = new geocloud.clickEvent(e, cloud), distance;
             var metaDataKeys = meta.getMetaDataKeys();
-
-
             if (clicktimer) {
                 clearTimeout(clicktimer);
             }
@@ -36,9 +39,9 @@ module.exports = {
                         cloud.removeGeoJsonStore(store);
                     });
                     layers = cloud.getVisibleLayers().split(";");
-                    $("#info-tab").empty();
-                    $("#info-pane").empty();
-                    $("#info-content .alert").hide();
+                        $("#info-tab").empty();
+                        $("#info-pane").empty();
+                    //$("#info-content .alert").hide();
                     $.each(layers, function (index, value) {
                         if (layers[0] === "") {
                             return false;
@@ -58,13 +61,14 @@ module.exports = {
                             distance = 5 * res[cloud.getZoom()];
                         }
                         var onLoad = function () {
-                            var layerObj = qstore[this.id], out = [], fieldLabel;
+                            var layerObj = qstore[this.id], out = [], fieldLabel, cm=[], first = true, storeId=this.id;
+
                             isEmpty = layerObj.isEmpty();
                             if (!isEmpty && !not_querable) {
                                 $('#modal-info-body').show();
                                 var fieldConf = $.parseJSON(metaDataKeys[value.split(".")[1]].fieldconf);
-                                $("#info-tab").append('<li><a data-toggle="tab" href="#_' + index + '">' + layerTitel + '</a></li>');
-                                $("#info-pane").append('<div class="tab-pane" id="_' + index + '"><button type="button" class="btn btn-primary btn-xs" data-gc2-title="' + layerTitel + '" data-gc2-store="' + index + '">' + __('Search with this object') + '</button><table class="table table-condensed"><thead><tr><th>' + __("Property") + '</th><th>' + __("Value") + '</th></tr></thead></table></div>');
+                                $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
+                                $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
 
                                 $.each(layerObj.geoJSON.features, function (i, feature) {
                                     if (fieldConf === null) {
@@ -90,18 +94,35 @@ module.exports = {
                                     out.sort(function (a, b) {
                                         return a[1] - b[1];
                                     });
-                                    $.each(out, function (name, property) {
-                                        $("#_" + index + " table").append('<tr><td>' + property[2] + '</td><td>' + property[3] + '</td></tr>');
-                                    });
+                                    if (first) {
+                                        $.each(out, function (name, property) {
+                                            cm.push({
+                                                header: property[2],
+                                                dataIndex: property[0]
+                                            })
+                                        });
+                                        first = false;
+                                    }
+                                    $('#tab_' + storeId).tab('show');
                                     out = [];
-                                    $('#info-tab a:first').tab('show');
                                 });
+                                setTimeout(function(){gc2table.init({
+                                    "el": "#_" + storeId + " table",
+                                    "geocloud2": cloud,
+                                    "store": layerObj,
+                                    "cm": cm,
+                                    "autoUpdate": false,
+                                    loadData: false,
+                                    height: 300
+                                })},100);
                                 hit = true;
                             } else {
                                 layerObj.reset();
                             }
                             count++;
                             if (count === layers.length) {
+                                //$('#info-tab a:first').tab('show');
+
                                 if (!hit) {
                                     $('#modal-info-body').hide();
                                 }
@@ -155,7 +176,7 @@ module.exports = {
                                 }
                             }
                         }
-                        sql = sql + "LIMIT 5";
+                        sql = sql + "LIMIT 15";
                         qstore[index].sql = sql;
                         qstore[index].load();
                     });

@@ -9,6 +9,7 @@ module.exports = {
         "Info": "Info",
         "Layers": "Lag",
         "Legend": "Signatur",
+        "Draw": "Tegn",
         "Help": "Hjælp",
         "Log": "Log",
         "Address": "Adresse eller matrikelnr.",
@@ -97,7 +98,9 @@ window.Vidi = function () {
         state: require('./modules/state'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
-        search: require('./modules/search/danish')
+        search: require('./modules/search/danish'),
+        bindEvent: require('./modules/bindEvent'),
+        draw: require('./modules/draw')
 
     };
 
@@ -112,6 +115,8 @@ window.Vidi = function () {
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
     modules.search.set(modules);
+    modules.bindEvent.set(modules);
+    modules.draw.set(modules);
 
     L.drawLocal = require('./modules/drawLocal');
 
@@ -121,7 +126,7 @@ window.Vidi = function () {
     }
 };
 
-},{"../config/config.js":17,"./i18n/da_DK":1,"./modules/anchor":3,"./modules/baseLayer":4,"./modules/cloud":5,"./modules/drawLocal":6,"./modules/gc2/legend":7,"./modules/gc2/meta":8,"./modules/gc2/setting":9,"./modules/infoClick":10,"./modules/init":11,"./modules/search/danish":12,"./modules/setBaseLayer":13,"./modules/state":14,"./modules/switchLayer":15}],3:[function(require,module,exports){
+},{"../config/config.js":19,"./i18n/da_DK":1,"./modules/anchor":3,"./modules/baseLayer":4,"./modules/bindEvent":5,"./modules/cloud":6,"./modules/draw":7,"./modules/drawLocal":8,"./modules/gc2/legend":9,"./modules/gc2/meta":10,"./modules/gc2/setting":11,"./modules/infoClick":12,"./modules/init":13,"./modules/search/danish":14,"./modules/setBaseLayer":15,"./modules/state":16,"./modules/switchLayer":17}],3:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var urlVars = urlparser.urlVars;
 var db = urlparser.db;
@@ -140,7 +145,7 @@ module.exports = {
         return "/" + db + "/" + schema + "/" + (typeof urlVars.i === "undefined" ? "" : "?i=" + urlVars.i.split("#")[0]) + anchor();
     }
 };
-},{"./urlparser":16}],4:[function(require,module,exports){
+},{"./urlparser":18}],4:[function(require,module,exports){
 var cloud;
 module.exports = module.exports = {
     set: function (o) {
@@ -161,13 +166,26 @@ module.exports = module.exports = {
             if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
-                    "<li class='base-layer-item list-group-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'>" + window.setBaseLayers[i].name + "<span class='fa fa-check' aria-hidden='true'></span></li>"
+                    "<li class='base-layer-item list-group-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><span class='radio radio-primary'><label style='display: block;'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></span></li>"
                 );
             }
         }
     }
 };
 },{}],5:[function(require,module,exports){
+var draw;
+module.exports = module.exports = {
+    set: function (o) {
+        draw = o.draw;
+        return this;
+    },
+    init: function (str) {
+        $("#draw-btn").on("click", function () {
+            draw.init();
+        });
+    }
+};
+},{}],6:[function(require,module,exports){
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -179,7 +197,79 @@ var zoomControl = L.control.zoom({
 cloud.map.addControl(zoomControl);
 
 module.exports = cloud;
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
+var cloud;
+var drawOn = false;
+var drawnItems;
+var drawControl;
+var drawLayer;
+module.exports = module.exports = {
+    set: function (o) {
+        cloud = o.cloud;
+        return this;
+    },
+    init: function (str) {
+        cloud.map.on('draw:created', function (e) {
+            var type = e.layerType;
+            drawLayer = e.layer;
+            if (type === 'marker') {
+                var text = prompt("Enter a text for the marker or cancel to add without text", "");
+                if (text !== null) {
+                    drawLayer.bindLabel(text, {noHide: true}).on("click", function () {
+                    }).showLabel();
+                }
+            }
+            drawnItems.addLayer(drawLayer);
+        });
+            if (!drawOn) {
+                drawnItems = new L.FeatureGroup();
+                drawControl = new L.Control.Draw({
+                    position: 'bottomright',
+                    draw: {
+                        polygon: {
+                            title: 'Draw a polygon!',
+                            allowIntersection: false,
+                            drawError: {
+                                color: '#b00b00',
+                                timeout: 1000
+                            },
+                            shapeOptions: {
+                                color: '#bada55'
+                            },
+                            showArea: true
+                        },
+                        polyline: {
+                            metric: true
+                        },
+                        circle: {
+                            shapeOptions: {
+                                color: '#662d91'
+                            }
+                        }
+                    },
+                    edit: {
+                        featureGroup: drawnItems
+                    }
+                });
+                cloud.map.addLayer(drawnItems);
+                cloud.map.addControl(drawControl);
+
+                drawOn = true;
+            } else {
+                console.log(drawnItems);
+                cloud.map.removeControl(drawControl);
+                drawnItems.removeLayer(drawLayer);
+                cloud.map.removeLayer(drawnItems);
+                drawOn = false;
+            }
+    },
+    getDrawOn: function(){
+        return drawOn;
+    }
+};
+
+
+},{}],8:[function(require,module,exports){
 module.exports = {
     draw: {
         toolbar: {
@@ -272,7 +362,7 @@ module.exports = {
         }
     }
 };
-},{}],7:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 var cloud;
 var urlparser = require('../urlparser');
 var db = urlparser.db;
@@ -319,7 +409,7 @@ module.exports = module.exports = {
         });
     }
 };
-},{"../urlparser":16}],8:[function(require,module,exports){
+},{"../urlparser":18}],10:[function(require,module,exports){
 var urlparser = require('../urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
@@ -382,11 +472,11 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        "<li class='base-layer-item list-group-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></li>"
+                                        "<li class='base-layer-item list-group-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><span class='radio radio-primary'><label style='display: block'><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></span></li>"
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><span class="checkbox"><label style="display: block;"><input style="display: none" type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '<span class="fa fa-check" aria-hidden="true"></span></label></span></li>');
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label style="display: block;"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label></div></li>');
                                     l.push({});
                                 }
                             }
@@ -407,10 +497,6 @@ module.exports = {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
-                    $(".base-layer-item span").hide();
-
-                    $(this).css("background-color", "#f5f5f5");
-                    $(this).children("span").show();
                 });
             },
             error: function (response) {
@@ -428,7 +514,7 @@ module.exports = {
 
 
 
-},{"../../../config/config.js":17,"../urlparser":16}],9:[function(require,module,exports){
+},{"../../../config/config.js":19,"../urlparser":18}],11:[function(require,module,exports){
 var urlparser = require('../urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
@@ -455,15 +541,15 @@ module.exports = {
         return ready;
     }
 };
-},{"../urlparser":16}],10:[function(require,module,exports){
+},{"../urlparser":18}],12:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var cloud;
 var clicktimer;
 var meta;
+var draw;
 var qstore = [];
 var host = require('../../config/config.js').gc2.host;
-
 
 var BACKEND = "gc2";
 
@@ -471,6 +557,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        draw = o.draw;
         return this;
     },
     init: function () {
@@ -478,10 +565,12 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.on("click", function (e) {
+            // Do not get info if drawing
+            if(draw.getDrawOn()){
+                return;
+            }
             var layers, count = 0, hit = false, event = new geocloud.clickEvent(e, cloud), distance;
             var metaDataKeys = meta.getMetaDataKeys();
-
-
             if (clicktimer) {
                 clearTimeout(clicktimer);
             }
@@ -494,9 +583,9 @@ module.exports = {
                         cloud.removeGeoJsonStore(store);
                     });
                     layers = cloud.getVisibleLayers().split(";");
-                    $("#info-tab").empty();
-                    $("#info-pane").empty();
-                    $("#info-content .alert").hide();
+                        $("#info-tab").empty();
+                        $("#info-pane").empty();
+                    //$("#info-content .alert").hide();
                     $.each(layers, function (index, value) {
                         if (layers[0] === "") {
                             return false;
@@ -516,13 +605,14 @@ module.exports = {
                             distance = 5 * res[cloud.getZoom()];
                         }
                         var onLoad = function () {
-                            var layerObj = qstore[this.id], out = [], fieldLabel;
+                            var layerObj = qstore[this.id], out = [], fieldLabel, cm=[], first = true, storeId=this.id;
+
                             isEmpty = layerObj.isEmpty();
                             if (!isEmpty && !not_querable) {
                                 $('#modal-info-body').show();
                                 var fieldConf = $.parseJSON(metaDataKeys[value.split(".")[1]].fieldconf);
-                                $("#info-tab").append('<li><a data-toggle="tab" href="#_' + index + '">' + layerTitel + '</a></li>');
-                                $("#info-pane").append('<div class="tab-pane" id="_' + index + '"><button type="button" class="btn btn-primary btn-xs" data-gc2-title="' + layerTitel + '" data-gc2-store="' + index + '">' + __('Search with this object') + '</button><table class="table table-condensed"><thead><tr><th>' + __("Property") + '</th><th>' + __("Value") + '</th></tr></thead></table></div>');
+                                $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
+                                $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
 
                                 $.each(layerObj.geoJSON.features, function (i, feature) {
                                     if (fieldConf === null) {
@@ -548,18 +638,35 @@ module.exports = {
                                     out.sort(function (a, b) {
                                         return a[1] - b[1];
                                     });
-                                    $.each(out, function (name, property) {
-                                        $("#_" + index + " table").append('<tr><td>' + property[2] + '</td><td>' + property[3] + '</td></tr>');
-                                    });
+                                    if (first) {
+                                        $.each(out, function (name, property) {
+                                            cm.push({
+                                                header: property[2],
+                                                dataIndex: property[0]
+                                            })
+                                        });
+                                        first = false;
+                                    }
+                                    $('#tab_' + storeId).tab('show');
                                     out = [];
-                                    $('#info-tab a:first').tab('show');
                                 });
+                                setTimeout(function(){gc2table.init({
+                                    "el": "#_" + storeId + " table",
+                                    "geocloud2": cloud,
+                                    "store": layerObj,
+                                    "cm": cm,
+                                    "autoUpdate": false,
+                                    loadData: false,
+                                    height: 300
+                                })},100);
                                 hit = true;
                             } else {
                                 layerObj.reset();
                             }
                             count++;
                             if (count === layers.length) {
+                                //$('#info-tab a:first').tab('show');
+
                                 if (!hit) {
                                     $('#modal-info-body').hide();
                                 }
@@ -613,7 +720,7 @@ module.exports = {
                                 }
                             }
                         }
-                        sql = sql + "LIMIT 5";
+                        sql = sql + "LIMIT 15";
                         qstore[index].sql = sql;
                         qstore[index].load();
                     });
@@ -625,7 +732,7 @@ module.exports = {
 
 
 
-},{"../../config/config.js":17,"./urlparser":16}],11:[function(require,module,exports){
+},{"../../config/config.js":19,"./urlparser":18}],13:[function(require,module,exports){
 var cloud;
 var baseLayer;
 var meta;
@@ -634,6 +741,7 @@ var state;
 var anchor;
 var infoClick;
 var search;
+var bindEvent;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -644,6 +752,7 @@ module.exports = {
         anchor = o.anchor;
         infoClick = o.infoClick;
         search = o.search;
+        bindEvent = o.bindEvent;
         return this;
     },
     init: function () {
@@ -653,6 +762,7 @@ module.exports = {
         state.init();
         infoClick.init();
         search.init();
+        bindEvent.init();
 
         var moveEndCallBack = function () {
             try {
@@ -662,9 +772,10 @@ module.exports = {
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
-    }
+        $.material.init()
+        $.material.ripples()    }
 };
-},{}],12:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var cloud;
 module.exports = {
     set: function (o) {
@@ -791,7 +902,7 @@ module.exports = {
 }
 
 
-},{}],13:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 var cloud;
 var anchor;
 module.exports = module.exports = {
@@ -809,7 +920,7 @@ module.exports = module.exports = {
         //addLegend();
     }
 };
-},{}],14:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var hash = urlparser.hash;
 var cloud;
@@ -867,7 +978,7 @@ module.exports = {
         }());
     }
 };
-},{"./urlparser":16}],15:[function(require,module,exports){
+},{"./urlparser":18}],17:[function(require,module,exports){
 var cloud;
 var legend;
 var anchor;
@@ -881,11 +992,9 @@ module.exports = module.exports = {
     init: function (name, visible, doNotLegend) {
         if (visible) {
             cloud.showLayer(name);
-            $('*[data-gc2-id="' + name + '"]').next("span").show();
             $('*[data-gc2-id="' + name + '"]').prop('checked', true);
         } else {
             cloud.hideLayer(name);
-            $('*[data-gc2-id="' + name + '"]').next("span").hide();
             $('*[data-gc2-id="' + name + '"]').prop('checked', false);
         }
         try {
@@ -901,7 +1010,7 @@ module.exports = module.exports = {
 
 
 
-},{}],16:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var uri = geocloud.pathName;
 module.exports = {
     hostname: geocloud_host,
@@ -910,7 +1019,7 @@ module.exports = {
     schema: uri[2],
     urlVars: geocloud.urlVars
 }
-},{}],17:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 module.exports = {
     gc2: {
         host: "http://192.168.33.11"
