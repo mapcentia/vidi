@@ -3,8 +3,8 @@ var router = express.Router();
 var http = require('http');
 var config = require('../../config/config.js').gc2;
 
-router.get('/setting', function (req, response) {
-    var db = req.query.db, url;
+router.get('/api/setting/:db', function (req, response) {
+    var db = req.params.db, url;
     url = config.host + "/api/v1/setting/" + db;
     http.get(url, function (res) {
         var chunks = [];

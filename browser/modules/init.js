@@ -7,6 +7,9 @@ var anchor;
 var infoClick;
 var search;
 var bindEvent;
+var draw;
+var print;
+var advancedInfo;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -18,6 +21,9 @@ module.exports = {
         infoClick = o.infoClick;
         search = o.search;
         bindEvent = o.bindEvent;
+        draw = o.draw;
+        print = o.print;
+        advancedInfo = o.advancedInfo;
         return this;
     },
     init: function () {
@@ -27,7 +33,10 @@ module.exports = {
         state.init();
         infoClick.init();
         search.init();
+        draw.init();
         bindEvent.init();
+        advancedInfo.init();
+        setTimeout(function(){print.init()}, 1000);
 
         var moveEndCallBack = function () {
             try {
@@ -37,6 +46,7 @@ module.exports = {
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
-        $.material.init()
-        $.material.ripples()    }
+        $.material.init();
+        $.material.ripples();
+    }
 };

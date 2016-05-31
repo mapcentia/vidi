@@ -13,6 +13,6 @@ module.exports = {
         return this;
     },
     init: function () {
-        return "/" + db + "/" + schema + "/" + (typeof urlVars.i === "undefined" ? "" : "?i=" + urlVars.i.split("#")[0]) + anchor();
+        return "/app/" + db + "/" + schema + "/" + (typeof urlVars.i === "undefined" ? "" : "?i=" + urlVars.i.split("#")[0]) + anchor();
     }
 };

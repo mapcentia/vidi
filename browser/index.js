@@ -31,8 +31,10 @@ window.Vidi = function () {
         infoClick: require('./modules/infoClick'),
         search: require('./modules/search/danish'),
         bindEvent: require('./modules/bindEvent'),
-        draw: require('./modules/draw')
-
+        draw: require('./modules/draw'),
+        print: require('./modules/print'),
+        advancedInfo: require('./modules/advancedInfo'),
+        sqlQuery: require('./modules/sqlQuery')
     };
 
     // Use setters in modules so they can interact
@@ -48,8 +50,10 @@ window.Vidi = function () {
     modules.search.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
+    modules.print.set(modules);
+    modules.advancedInfo.set(modules);
+    modules.sqlQuery.set(modules);
 
-    L.drawLocal = require('./modules/drawLocal');
 
 
     return {

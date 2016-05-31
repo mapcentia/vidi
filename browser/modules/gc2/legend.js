@@ -9,7 +9,7 @@ module.exports = module.exports = {
     init: function () {
         var param = 'l=' + cloud.getVisibleLayers(true) + '&db=' + db;
         $.ajax({
-            url: '/legend?' + param,
+            url: '/api/legend/' +db + '?' + param,
             success: function (response) {
                 var list = $("<ul/>"), li, classUl, title, className;
                 $.each(response, function (i, v) {

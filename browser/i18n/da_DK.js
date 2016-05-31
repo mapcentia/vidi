@@ -20,7 +20,7 @@ module.exports = {
         "Number of objects": "Antal objekter",
         "Show": "Vis",
         "Severity": "Alvorlighed",
-        "Info text": "Når du klikker på et tændt lag, vises resultatet har. Du kan derefter søge med objektet.",
+        "Info text": "Når du klikker på et tændt lag, vises resultatet har.",
         "Baselayers": "Baggrund",
         "Print report": "Print rapport",
         "Search with this object": "Søg med dette objekt",

@@ -3,8 +3,8 @@ var router = express.Router();
 var http = require('http');
 var config = require('../../config/config.js').gc2;
 
-router.get('/baselayer', function (req, response) {
-    var db = req.query.db, url, jsfile;
+router.get('/api/baselayer', function (req, response) {
+    var db = req.params.db, url, jsfile;
     url = config.host + "/api/v1/baselayerjs/" + db;
     http.get(url, function (res) {
         var chunks = [];

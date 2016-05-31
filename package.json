@@ -26,7 +26,9 @@
     "body-parser": "^1.15.1",
     "cors": "^2.7.1",
     "express": "^4.13.4",
+    "jsts": "^1.1.2",
     "moment": "^2.13.0",
+    "reproject": "^1.1.1",
     "request": "^2.72.0",
     "socket.io": "^1.4.6"
   }

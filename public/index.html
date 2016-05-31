@@ -51,7 +51,6 @@
         $("#pane").hide().fadeIn(1500);
         var max = $(document).height() - $('.tab-pane').offset().top;
         $('.tab-pane').not("#result-content").css('max-height', max);
-        $('#result-content .tab-pane').css('max-height', max - 110);
         $('#places').css('height', max - 130);
         $('#places .tt-dropdown-menu').css('max-height', max - 200);
     }
@@ -69,7 +68,8 @@
 <script src="http://twitter.github.com/hogan.js/builds/3.0.1/hogan-3.0.1.js"></script>
 <script src="/static/js/templates.js"></script>
 <script src="/static/js/bundle.js"></script>
-<script src="/baselayer"></script>
-<script src="http://192.168.33.11/apps/widgets/gc2map/js/gc2table.js" type="text/javascript"></script>
+<script src="/api/baselayer"></script>
+<script src="http://192.168.33.11/apps/widgets/gc2table/js/gc2table.js" type="text/javascript"></script>
+<script src="http://eu1.mapcentia.com/apps/viewer/printproxy.php"></script>
 <script src="http://192.168.33.11/api/v3/js/geocloud.php?callback=go&maplib=leaflet&" type="text/javascript"></script>
 </html>

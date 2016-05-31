@@ -7,7 +7,7 @@ module.exports = {
     },
     init: function () {
         $.ajax({
-            url: '/setting?db=' + db,
+            url: '/api/setting/' + db,
             scriptCharset: "utf-8",
             success: function (response) {
                 if (typeof response.data.extents === "object") {

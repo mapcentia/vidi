@@ -3,7 +3,7 @@ var path = require('path');
 
 var app = express();
 
-app.use('/:db/:schema', express.static(path.join(__dirname, 'public')));
+app.use('/app/:db/:schema', express.static(path.join(__dirname, 'public')));
 app.use('/static', express.static(path.join(__dirname, 'public')));
 
 app.use(require('./controllers'));

@@ -18,7 +18,7 @@ module.exports = module.exports = {
             if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
-                    "<li class='base-layer-item list-group-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><span class='radio radio-primary'><label style='display: block;'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></span></li>"
+                    "<li class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label style='display: block;'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></li>"
                 );
             }
         }
