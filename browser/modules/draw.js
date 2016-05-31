@@ -145,7 +145,7 @@ module.exports = {
                     ],
                     "autoUpdate": false,
                     loadData: false,
-                    height: require('./height')().max - 200,
+                    height: require('./height')().max - 210,
                     setSelectedStyle: false,
                     openPopUp: true
                 });

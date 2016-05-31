@@ -3,6 +3,7 @@ var db = urlparser.db;
 var cloud;
 var meta;
 var draw;
+var advancedInfo;
 var host = require('../../config/config.js').gc2.host;
 
 var BACKEND = "gc2";
@@ -12,6 +13,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         draw = o.draw;
+        advancedInfo = o.advancedInfo;
         return this;
     },
     init: function (qstore, wkt, proj) {
@@ -97,8 +99,8 @@ module.exports = {
                         cm: cm,
                         autoUpdate: false,
                         openPopUp: true,
-                        setViewOnSelect: false,
-                        height: require('./height')().max - 230
+                        setViewOnSelect: true,
+                        height: require('./height')().max - 370
                     });
                     hit = true;
                 } else {
@@ -119,7 +121,6 @@ module.exports = {
                     //clearDrawItems();
                 }
             };
-
             switch (BACKEND) {
                 case "gc2":
                     qstore[index] = new geocloud.sqlStore({
@@ -134,7 +135,6 @@ module.exports = {
                             dashArray: '',
                             fillOpacity: 0.2
                         }
-
                     });
                     break;
                 case "cartodb":
@@ -154,7 +154,7 @@ module.exports = {
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
             } else {
-                if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
+                if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT * FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";

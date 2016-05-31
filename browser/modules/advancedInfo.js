@@ -1,6 +1,7 @@
 var cloud;
 var sqlQuery;
 var reproject = require('reproject');
+var _ = require('underscore');
 var jsts = require('jsts');
 var searchOn = false;
 var drawnItems = new L.FeatureGroup();
@@ -18,17 +19,21 @@ noUiSlider.create(bufferSlider, {
     step: 1,
     range: {
         min: 0,
-        max: 200
+        max: 500
     }
 });
 
 // When the slider value changes, update the input
-bufferSlider.noUiSlider.on('update', function( values, handle ) {
+bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
     bufferValue.value = values[handle];
-});
+    if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+        bufferItems.clearLayers();
+        makeSearch()
+    }
+}, 300));
 
 // When the input changes, set the slider value
-bufferValue.addEventListener('change', function(){
+bufferValue.addEventListener('change', function () {
     bufferSlider.noUiSlider.set([this.value]);
 });
 
@@ -37,11 +42,44 @@ var clearDrawItems = function () {
     bufferItems.clearLayers();
     foundedItems.clearLayers();
     sqlQuery.reset(qstore);
-
 };
 
-var geoJSONFromDraw = function () {
+var makeSearch = function () {
+    var primitive,
+        layer, buffer = parseFloat($("#buffer-value").val());
+    for (var prop in drawnItems._layers) {
+        layer = drawnItems._layers[prop];
+        break;
+    }
+    if (typeof layer === "undefined") {
+        return;
+    }
+    if (typeof layer._mRadius !== "undefined") {
+        if (typeof layer._mRadius !== "undefined") {
+            buffer = buffer + layer._mRadius;
+        }
+    }
+    primitive = layer.toGeoJSON();
 
+    if (primitive) {
+        var crss = {
+            "proj": "+proj=utm +zone=" + "32" + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+            "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
+        };
+        var reader = new jsts.io.GeoJSONReader();
+        var writer = new jsts.io.GeoJSONWriter();
+        var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
+        var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
+        var buffered = reader.read(buffer4326);
+        L.geoJson(buffer4326, {
+            "color": "#ff7800",
+            "weight": 1,
+            "opacity": 1,
+            "fillOpacity": 0.1,
+            "dashArray": '5,3'
+        }).addTo(bufferItems);
+        sqlQuery.init(qstore, buffered.toText(), "4326");
+    }
 };
 
 module.exports = {
@@ -50,7 +88,6 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
-
         return this;
     },
     control: function () {
@@ -110,54 +147,14 @@ module.exports = {
                 clearDrawItems();
             });
             cloud.map.on('draw:drawstop', function (e) {
-                var primitive,
-                layer, buffer = parseFloat($("#buffer-value").val());
-                console.log(buffer);
-                for (var prop in drawnItems._layers) {
-                    layer = drawnItems._layers[prop];
-                    break;
-                }
-                if (typeof layer === "undefined") {
-                    return;
-                }
-                if (typeof layer._mRadius !== "undefined") {
-                    if (typeof layer._mRadius !== "undefined") {
-                        buffer = buffer + layer._mRadius;
-                    }
-                }
-                primitive = layer.toGeoJSON();
-
-
-                if (primitive) {
-                    var crss = {
-                        "proj": "+proj=utm +zone=" + "32" + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
-                        "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
-                    };
-                    var reader = new jsts.io.GeoJSONReader();
-                    var writer = new jsts.io.GeoJSONWriter();
-                    var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
-                    var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
-                    var buffered = reader.read(buffer4326);
-                    L.geoJson(buffer4326,{
-                        "color": "#ff7800",
-                        "weight": 1,
-                        "opacity": 1,
-                        "fillOpacity": 0.1,
-                        "dashArray": '5,3'
-                    }).addTo(bufferItems);
-                    sqlQuery.init(qstore, buffered.toText(), "4326");
-                }
-
+                makeSearch();
             });
             cloud.map.on('draw:editstop', function (e) {
-                var geoJSON = geoJSONFromDraw();
-                if (geoJSON) {
-                    console.log(geoJSON);
-                }
+                makeSearch();
             });
             cloud.map.on('draw:editstart', function (e) {
+                bufferItems.clearLayers();
             });
-
         } else {
             // Clean up
             console.log("Stoping advanced search");
@@ -179,6 +176,5 @@ module.exports = {
     getSearchOn: function () {
         return searchOn;
     }
-}
-;
+};
 

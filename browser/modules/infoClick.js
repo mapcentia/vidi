@@ -1,5 +1,6 @@
 var urlparser = require('./urlparser');
 var cloud;
+var advancedInfo;
 var clicktimer;
 var meta;
 var draw;
@@ -12,6 +13,7 @@ module.exports = {
         meta = o.meta;
         draw = o.draw;
         sqlQuery = o.sqlQuery;
+        advancedInfo = o.advancedInfo;
         return this;
     },
     init: function () {
@@ -20,12 +22,10 @@ module.exports = {
         });
         cloud.on("click", function (e) {
             // Do not get info if drawing
-            if (draw.getDrawOn()) {
+            if (draw.getDrawOn() || advancedInfo.getSearchOn()) {
                 return;
             }
             var event = new geocloud.clickEvent(e, cloud);
-
-
             if (clicktimer) {
                 clearTimeout(clicktimer);
             }

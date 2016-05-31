@@ -54,8 +54,6 @@ window.Vidi = function () {
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);
 
-
-
     return {
         init: modules.init
     }
