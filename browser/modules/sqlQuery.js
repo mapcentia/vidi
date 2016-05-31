@@ -17,13 +17,13 @@ module.exports = {
     init: function (qstore, wkt, proj) {
         var layers, count = 0, hit = false, distance;
         var metaDataKeys = meta.getMetaDataKeys();
-        $.each(qstore, function (index, store) {
+       /* $.each(qstore, function (index, store) {
             store.reset();
             cloud.removeGeoJsonStore(store);
-        });
+        });*/
+        this.reset(qstore);
         layers = cloud.getVisibleLayers().split(";");
-        $("#info-tab").empty();
-        $("#info-pane").empty();
+
         //$("#info-content .alert").hide();
         $.each(layers, function (index, value) {
             if (layers[0] === "") {
@@ -167,9 +167,17 @@ module.exports = {
                     }
                 }
             }
-            sql = sql + "LIMIT 15";
+            sql = sql + "LIMIT 500";
             qstore[index].sql = sql;
             qstore[index].load();
         });
+    },
+    reset: function(qstore){
+        $.each(qstore, function (index, store) {
+            store.reset();
+            cloud.removeGeoJsonStore(store);
+        });
+        $("#info-tab").empty();
+        $("#info-pane").empty();
     }
 };

@@ -8,19 +8,36 @@ var bufferItems = new L.FeatureGroup();
 var foundedItems = new L.FeatureGroup();
 var drawControl;
 var qstore = [];
+var noUiSlider = require('nouislider');
+var bufferSlider = document.getElementById('buffer-slider');
+var bufferValue = document.getElementById('buffer-value');
+
+noUiSlider.create(bufferSlider, {
+    start: 40,
+    connect: "lower",
+    step: 1,
+    range: {
+        min: 0,
+        max: 200
+    }
+});
+
+// When the slider value changes, update the input
+bufferSlider.noUiSlider.on('update', function( values, handle ) {
+    bufferValue.value = values[handle];
+});
+
+// When the input changes, set the slider value
+bufferValue.addEventListener('change', function(){
+    bufferSlider.noUiSlider.set([this.value]);
+});
 
 var clearDrawItems = function () {
     drawnItems.clearLayers();
-    clearBufferItems();
-};
-
-var clearFoundedItems = function () {
-    foundedItems.clearLayers();
-    clearBufferItems();
-};
-
-var clearBufferItems = function () {
     bufferItems.clearLayers();
+    foundedItems.clearLayers();
+    sqlQuery.reset(qstore);
+
 };
 
 var geoJSONFromDraw = function () {
@@ -38,6 +55,7 @@ module.exports = {
     },
     control: function () {
         if (!searchOn) {
+            $("#buffer").show();
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -49,19 +67,31 @@ module.exports = {
                             timeout: 1000
                         },
                         shapeOptions: {
-                            color: '#bada55'
+                            color: '#662d91',
+                            fillOpacity: 0
                         },
                         showArea: true
                     },
                     polyline: {
-                        metric: true
+                        metric: true,
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
                     },
                     circle: {
                         shapeOptions: {
-                            color: '#662d91'
+                            color: '#662d91',
+                            fillOpacity: 0
                         }
                     },
-                    marker: false
+                    rectangle: {
+                        shapeOptions: {
+                            color: '#662d91',
+                            fillOpacity: 0
+                        }
+                    },
+                    marker: true
                 },
                 edit: {
                     featureGroup: drawnItems,
@@ -81,7 +111,8 @@ module.exports = {
             });
             cloud.map.on('draw:drawstop', function (e) {
                 var primitive,
-                layer, buffer = 200;
+                layer, buffer = parseFloat($("#buffer-value").val());
+                console.log(buffer);
                 for (var prop in drawnItems._layers) {
                     layer = drawnItems._layers[prop];
                     break;
@@ -107,8 +138,13 @@ module.exports = {
                     var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
                     var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
                     var buffered = reader.read(buffer4326);
-                    console.log(buffered.toText());
-                    L.geoJson(buffer4326).addTo(bufferItems);
+                    L.geoJson(buffer4326,{
+                        "color": "#ff7800",
+                        "weight": 1,
+                        "opacity": 1,
+                        "fillOpacity": 0.1,
+                        "dashArray": '5,3'
+                    }).addTo(bufferItems);
                     sqlQuery.init(qstore, buffered.toText(), "4326");
                 }
 
@@ -134,6 +170,7 @@ module.exports = {
             cloud.map.off('draw:editstart');
             cloud.map.removeControl(drawControl);
             searchOn = false;
+            $("#buffer").hide();
         }
     },
     init: function (str) {

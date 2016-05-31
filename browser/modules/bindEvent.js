@@ -10,7 +10,9 @@ module.exports = module.exports = {
         $("#draw-btn").on("click", function () {
             // Stop advancedInfo
             if (advancedInfo.getSearchOn()) {
-                advancedInfo.control();
+                advancedInfo.control(); // Will toggle the control off
+                $("#advanced-info-btn").prop( "checked", false );
+                $("#buffer").hide();
             }
             draw.control();
         });
@@ -18,7 +20,8 @@ module.exports = module.exports = {
         $("#advanced-info-btn").on("click", function () {
             // Stop drawing
             if (draw.getDrawOn()) {
-                draw.control();
+                draw.control(); // Will toggle the control off
+                $("#draw-btn").prop( "checked", false );
             }
             advancedInfo.control();
         });
