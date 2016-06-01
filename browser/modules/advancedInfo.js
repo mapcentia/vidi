@@ -7,50 +7,21 @@ var jsts = require('jsts');
 var searchOn = false;
 var drawnItems = new L.FeatureGroup();
 var bufferItems = new L.FeatureGroup();
-var foundedItems = new L.FeatureGroup();
 var drawControl;
 var qstore = [];
 var noUiSlider = require('nouislider');
 var bufferSlider = document.getElementById('buffer-slider');
 var bufferValue = document.getElementById('buffer-value');
 
-noUiSlider.create(bufferSlider, {
-    start: 40,
-    connect: "lower",
-    step: 1,
-    range: {
-        min: 0,
-        max: 500
-    }
-});
-
-// When the slider value changes, update the input
-bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
-    bufferValue.value = values[handle];
-    if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
-        bufferItems.clearLayers();
-        makeSearch()
-    }
-}, 300));
-
-// When the input changes, set the slider value
-bufferValue.addEventListener('change', function () {
-    bufferSlider.noUiSlider.set([this.value]);
-});
-
 var clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
-    foundedItems.clearLayers();
     sqlQuery.reset(qstore);
 };
 
 var makeSearch = function () {
     var primitive,
         layer, buffer = parseFloat($("#buffer-value").val());
-
-    foundedItems.clearLayers();
-    sqlQuery.reset(qstore);
 
     for (var prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
@@ -84,10 +55,7 @@ var makeSearch = function () {
             "dashArray": '5,3'
         }).addTo(bufferItems);
 
-        // Time out before making search so cleaning can finish
-        setTimeout(function () {
-            sqlQuery.init(qstore, buffered.toText(), "4326");
-        }, 100)
+        sqlQuery.init(qstore, buffered.toText(), "4326");
     }
 };
 
@@ -186,6 +154,27 @@ module.exports = {
     },
     init: function (str) {
         L.drawLocal = require('./drawLocales/advancedInfo.js');
+        noUiSlider.create(bufferSlider, {
+            start: 40,
+            connect: "lower",
+            step: 1,
+            range: {
+                min: 0,
+                max: 500
+            }
+        });
+        bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+            bufferValue.value = values[handle];
+            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+                bufferItems.clearLayers();
+                makeSearch()
+            }
+        }, 300));
+
+        // When the input changes, set the slider value
+        bufferValue.addEventListener('change', function () {
+            bufferSlider.noUiSlider.set([this.value]);
+        });
     },
     getSearchOn: function () {
         return searchOn;
