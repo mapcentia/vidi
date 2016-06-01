@@ -131,6 +131,7 @@ window.Vidi = function () {
 },{"../config/config.js":24,"./i18n/da_DK":1,"./modules/advancedInfo":3,"./modules/anchor":4,"./modules/baseLayer":5,"./modules/bindEvent":6,"./modules/cloud":7,"./modules/draw":8,"./modules/gc2/legend":11,"./modules/gc2/meta":12,"./modules/gc2/setting":13,"./modules/infoClick":15,"./modules/init":16,"./modules/print":17,"./modules/search/danish":18,"./modules/setBaseLayer":19,"./modules/sqlQuery":20,"./modules/state":21,"./modules/switchLayer":22}],3:[function(require,module,exports){
 var cloud;
 var sqlQuery;
+var infoClick;
 var reproject = require('reproject');
 var _ = require('underscore');
 var jsts = require('jsts');
@@ -178,6 +179,10 @@ var clearDrawItems = function () {
 var makeSearch = function () {
     var primitive,
         layer, buffer = parseFloat($("#buffer-value").val());
+
+    foundedItems.clearLayers();
+    sqlQuery.reset(qstore);
+    
     for (var prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
         break;
@@ -209,7 +214,11 @@ var makeSearch = function () {
             "fillOpacity": 0.1,
             "dashArray": '5,3'
         }).addTo(bufferItems);
-        sqlQuery.init(qstore, buffered.toText(), "4326");
+
+        // Time out before making search so cleaning can finish
+        setTimeout(function () {
+            sqlQuery.init(qstore, buffered.toText(), "4326");
+        }, 100)
     }
 };
 
@@ -217,6 +226,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
+        infoClick = o.infoClick;
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
         return this;
@@ -224,6 +234,10 @@ module.exports = {
     control: function () {
         if (!searchOn) {
             $("#buffer").show();
+
+            // Reset layer made by clickInfo
+            infoClick.reset();
+
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -885,6 +899,9 @@ module.exports = {
                 }, 250);
             }
         });
+    },
+    reset: function(){
+        sqlQuery.reset(qstore);
     }
 };
 
@@ -1395,7 +1412,7 @@ module.exports = {
 },{}],24:[function(require,module,exports){
 module.exports = {
     gc2: {
-        host: "http://192.168.33.11"
+        host: "http://geofyn.mapcentia.com"
     }
 };
 },{}],25:[function(require,module,exports){

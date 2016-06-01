@@ -7,6 +7,7 @@ var config = require('../../config/config.js').gc2;
 router.get('/api/meta/:db/:schema', function (req, response) {
     var db = req.params.db, schema = req.params.schema, url, data = [], jsfile = "";
     url = config.host + "/api/v1/meta/" + db + "/" + schema;
+    //console.log(url);
     http.get(url, function (res) {
         if (res.statusCode != 200) {
             response.header('content-type', 'application/json');

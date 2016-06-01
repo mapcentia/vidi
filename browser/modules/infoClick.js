@@ -38,6 +38,9 @@ module.exports = {
                 }, 250);
             }
         });
+    },
+    reset: function(){
+        sqlQuery.reset(qstore);
     }
 };
 

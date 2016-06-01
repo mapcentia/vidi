@@ -1,5 +1,6 @@
 var cloud;
 var sqlQuery;
+var infoClick;
 var reproject = require('reproject');
 var _ = require('underscore');
 var jsts = require('jsts');
@@ -47,6 +48,10 @@ var clearDrawItems = function () {
 var makeSearch = function () {
     var primitive,
         layer, buffer = parseFloat($("#buffer-value").val());
+
+    foundedItems.clearLayers();
+    sqlQuery.reset(qstore);
+
     for (var prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
         break;
@@ -78,7 +83,11 @@ var makeSearch = function () {
             "fillOpacity": 0.1,
             "dashArray": '5,3'
         }).addTo(bufferItems);
-        sqlQuery.init(qstore, buffered.toText(), "4326");
+
+        // Time out before making search so cleaning can finish
+        setTimeout(function () {
+            sqlQuery.init(qstore, buffered.toText(), "4326");
+        }, 100)
     }
 };
 
@@ -86,6 +95,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
+        infoClick = o.infoClick;
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
         return this;
@@ -93,6 +103,10 @@ module.exports = {
     control: function () {
         if (!searchOn) {
             $("#buffer").show();
+
+            // Reset layer made by clickInfo
+            infoClick.reset();
+
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
