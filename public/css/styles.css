@@ -20,7 +20,7 @@ body {
 #map {
     position: absolute;
     height: 100%;
-    right: 450px;
+    right: 0;
     left: 0;
     z-index: 0;
     border-right: 1px solid #ddd;
@@ -28,20 +28,16 @@ body {
 }
 
 #side-panel {
-    height: 100%;
     position: absolute;
     width: 450px;
     right: 0;
-    top: 0;
     border: 0;
-    -webkizt-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-    box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-
 }
 
 #legend {
     position: relative;
 }
+
 #legend li {
     list-style-type: none;
 }
@@ -102,7 +98,7 @@ input[type="radio"], input[type="checkbox"] {
     margin-bottom: 0 !important;
 }
 
-.check{
+.check {
     margin-right: 5px !important;
 
 }
@@ -121,54 +117,6 @@ input[type="radio"], input[type="checkbox"] {
 
 .modal-header {
     padding: 10px 15px;
-
-}
-
-@media (max-width: 767px) {
-
-    #legend-popover-li {
-        display: none !important;
-    }
-
-    .navbar-fixed-top {
-        margin-bottom: 0;
-    }
-
-    .navbar-fixed-top.navbar-absolute {
-        position: absolute;
-        margin: 0;
-    }
-
-    .leaflet-control-zoom {
-        display: none;
-    }
-
-    #group-iframe {
-        display: none;
-    }
-
-    #group-javascript {
-        display: none;
-    }
-}
-
-@media (min-width: 768px) {
-
-    #legend-modal-li {
-        display: none !important;
-    }
-
-    .modal-infobox {
-        width: 280px !important;
-    }
-
-    .infobox {
-        top: 35px !important;
-        right: 0 !important;
-        width: 300px !important;
-        position: fixed !important;
-        left: auto !important;
-    }
 
 }
 
@@ -233,7 +181,7 @@ input[type="radio"], input[type="checkbox"] {
     text-decoration: none !important;
 }
 
-.nav-tabs>.active {
+.nav-tabs > .active {
     background-color: rgba(255, 255, 255, 0.1) !important;
 
 }
@@ -320,7 +268,6 @@ div.olControlZoom {
 .leaflet-draw-actions > li > a {
     color: #ffffff;
 }
-
 
 .center {
     position: absolute;
@@ -607,15 +554,19 @@ div.olControlZoom {
 .table-data > tbody > tr {
     border-top: 1px solid rgb(230, 230, 230);
 }
-.leaflet-control-print{
+
+.leaflet-control-print {
     display: none !important;
 }
+
 .base-layer-item {
     cursor: pointer;
 }
+
 .layer-item {
     padding: 0 !important;
 }
+
 .layer-item label {
     padding: 10px 15px;
     font-weight: 300;
@@ -628,22 +579,28 @@ div.olControlZoom {
     float: right;
     display: none;
 }
+
 .layer-item .fa {
     float: right;
     display: none;
 }
+
 .leaflet-control-layers {
     display: none;
 }
+
 .panel-title, .panel-title:hover {
     text-decoration: none !important;
 }
+
 .form-group {
     margin: 0 !important;
 }
-.alert{
+
+.alert {
     margin-bottom: 10px;
 }
+
 .custom-popup .leaflet-popup-content {
     margin: 7px 12px !important;
 }
@@ -673,4 +630,41 @@ div.olControlZoom {
     padding-right: 10px;
     vertical-align: top;
     padding-bottom: 3px;
+}
+
+.navbar-toggle {
+    float: left;
+    margin-left: 15px;
+}
+
+@media (min-width: 0) {
+    .navbar-toggle {
+        display: block; /* force showing the toggle */
+    }
+}
+
+body {
+    padding: 0;
+}
+
+.navbar {
+    left: auto;
+    background: none;
+    border: none;
+}
+
+.leaflet-top {
+    top: 50px !important;
+}
+
+.navmenu, .navbar-offcanvas {
+    width: 450px;
+}
+
+.navmenu-brand {
+    display: block;
+    font-size: 18px;
+    line-height: 20px;
+    padding: 10px 15px;
+    margin: 5px 0;
 }
