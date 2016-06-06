@@ -9,6 +9,10 @@ module.exports = {
                 title: __('Delete last point drawn'),
                 text: __('Delete last point')
             },
+            finish: {
+                title: __('Finish drawing.'),
+                text: __('Finish')
+            },
             buttons: {
                 polyline: __('Search with a line'),
                 polygon: __('Search with an area'),
@@ -64,6 +68,10 @@ module.exports = {
                     text: __('Save')
                 },
                 cancel: {
+                    title: __('Cancel editing, discards all changes.'),
+                    text: __('Cancel')
+                },
+                finish: {
                     title: __('Cancel editing, discards all changes.'),
                     text: __('Cancel')
                 }

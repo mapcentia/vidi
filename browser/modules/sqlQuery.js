@@ -96,6 +96,7 @@ module.exports = {
                         autoUpdate: false,
                         openPopUp: true,
                         setViewOnSelect: true,
+                        responsive: false,
                         height: (height > 300) ? height : 300
                     });
                     hit = true;

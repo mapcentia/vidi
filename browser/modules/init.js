@@ -47,6 +47,5 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
-        $.material.ripples();
     }
 };
