@@ -87,6 +87,7 @@ module.exports = {
                         $('#tab_' + storeId).tab('show');
                         out = [];
                     });
+                    var height = require('./height')().max - 370;
                     gc2table.init({
                         el: "#_" + storeId + " table",
                         geocloud2: cloud,
@@ -95,7 +96,7 @@ module.exports = {
                         autoUpdate: false,
                         openPopUp: true,
                         setViewOnSelect: true,
-                        height: require('./height')().max - 370
+                        height: (height > 300) ? height : 300
                     });
                     hit = true;
                 } else {

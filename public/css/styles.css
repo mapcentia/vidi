@@ -1,3 +1,5 @@
+
+
 body {
     margin: 0px;
     padding: 0px;
@@ -28,8 +30,7 @@ body {
 }
 
 #side-panel {
-    position: absolute;
-    width: 450px;
+    width: 100%;
     right: 0;
     border: 0;
 }
@@ -668,3 +669,10 @@ body {
     padding: 10px 15px;
     margin: 5px 0;
 }
+
+@media (max-width: 450px) {
+    .navmenu, .navbar-offcanvas {
+        width: 75%;
+    }
+}
+

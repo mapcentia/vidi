@@ -56,7 +56,9 @@
         var max = $(document).height() - $('.tab-pane').offset().top - 100;
         $('.tab-pane').not("#result-content").css('max-height', max);
         $('#places').css('height', max - 130);
+        $('#places').css('min-height', 400);
         $('#places .tt-dropdown-menu').css('max-height', max - 200);
+        $('#places .tt-dropdown-menu').css('min-height', 400);
     }
 </script>
 <script src="http://eu1.mapcentia.com/js/jquery/1.10.0/jquery.min.js?"></script>
