@@ -1,5 +1,4 @@
 
-
 body {
     margin: 0px;
     padding: 0px;
@@ -665,17 +664,27 @@ body {
 .navmenu-brand {
     display: block;
     font-size: 18px;
-    line-height: 20px;
+    line-height: 28px;
     padding: 10px 15px;
-    margin: 5px 0;
+    margin: 0;
+    background-color: #009688 !important;
+    font-style: normal;
+    color: white !important;
+
 }
 
 @media (max-width: 450px) {
     .navmenu, .navbar-offcanvas {
         width: 75%;
     }
+
+    .export {
+        display: none !important;
+    }
+
 }
 
 .nav-tabs {
-     border-bottom: 0;
+    border-bottom: 0;
 }
+

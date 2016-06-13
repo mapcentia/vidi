@@ -487,6 +487,9 @@ module.exports = {
                 if (type === 'polyline') {
                     distance = getDistance(drawLayer);
                 }
+                if (type === 'circle') {
+                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                }
                 drawLayer.feature = {
                     properties: {
                         type: type,
@@ -536,21 +539,25 @@ module.exports = {
                     "cm": [
                         {
                             header: "Type",
-                            dataIndex: "type"
+                            dataIndex: "type",
+                            sortable: true
                         },
                         {
                             header: "Area",
-                            dataIndex: "area"
+                            dataIndex: "area",
+                            sortable: true
                         },
                         {
-                            header: "Distance",
-                            dataIndex: "distance"
+                            header: "Distance/Radius",
+                            dataIndex: "distance",
+                            sortable: true
                         }
                     ],
                     "autoUpdate": false,
                     loadData: false,
                     height: require('./height')().max - 210,
                     setSelectedStyle: false,
+                    responsive: false,
                     openPopUp: true
                 });
 
@@ -867,7 +874,7 @@ module.exports = {
                         l = [];
                         cv = ( typeof (metaDataKeysTitle[arr[i]]) === "object") ? metaDataKeysTitle[arr[i]].f_table_name : null;
                         base64name = Base64.encode(arr[i]).replace(/=/g, "");
-                        $("#layers").append('<div class="panel panel-default" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
+                        $("#layers").append('<div class="panel panel-default" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4><span>0</span>/<span></span></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
                         $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
                         for (u = 0; u < response.data.length; ++u) {
                             if (response.data[u].layergroup == arr[i]) {
@@ -883,6 +890,7 @@ module.exports = {
                                 }
                             }
                         }
+                        $("#layer-panel-" + base64name + " span:eq(1)").html(l.length)
                         // Remove the group if empty
                         if (l.length === 0) {
                             $("#layer-panel-" + base64name).remove();
@@ -1299,7 +1307,8 @@ module.exports = {
                             $.each(out, function (name, property) {
                                 cm.push({
                                     header: property[2],
-                                    dataIndex: property[0]
+                                    dataIndex: property[0],
+                                    sortable: true
                                 })
                             });
                             first = false;
@@ -1471,13 +1480,28 @@ module.exports = module.exports = {
         return this;
     },
     init: function (name, visible, doNotLegend) {
+        var el = $('*[data-gc2-id="' + name + '"]');
+
         if (visible) {
             cloud.showLayer(name);
-            $('*[data-gc2-id="' + name + '"]').prop('checked', true);
+            el.prop('checked', true);
         } else {
             cloud.hideLayer(name);
-            $('*[data-gc2-id="' + name + '"]').prop('checked', false);
+            el.prop('checked', false);
         }
+
+        var siblings = el.parents(".accordion-body").find("input");
+        console.log(siblings);
+
+        var c = 0;
+        $.each(siblings, function (i, v) {
+            if (v.checked) {
+                c = c + 1;
+            }
+
+        });
+        el.parents(".panel").find("span:eq(0)").html(c);
+
         try {
             history.pushState(null, null, anchor.init());
         } catch (e) {

@@ -9,13 +9,28 @@ module.exports = module.exports = {
         return this;
     },
     init: function (name, visible, doNotLegend) {
+        var el = $('*[data-gc2-id="' + name + '"]');
+
         if (visible) {
             cloud.showLayer(name);
-            $('*[data-gc2-id="' + name + '"]').prop('checked', true);
+            el.prop('checked', true);
         } else {
             cloud.hideLayer(name);
-            $('*[data-gc2-id="' + name + '"]').prop('checked', false);
+            el.prop('checked', false);
         }
+
+        var siblings = el.parents(".accordion-body").find("input");
+        console.log(siblings);
+
+        var c = 0;
+        $.each(siblings, function (i, v) {
+            if (v.checked) {
+                c = c + 1;
+            }
+
+        });
+        el.parents(".panel").find("span:eq(0)").html(c);
+
         try {
             history.pushState(null, null, anchor.init());
         } catch (e) {

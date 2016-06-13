@@ -83,6 +83,9 @@ module.exports = {
                 if (type === 'polyline') {
                     distance = getDistance(drawLayer);
                 }
+                if (type === 'circle') {
+                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                }
                 drawLayer.feature = {
                     properties: {
                         type: type,
@@ -132,21 +135,25 @@ module.exports = {
                     "cm": [
                         {
                             header: "Type",
-                            dataIndex: "type"
+                            dataIndex: "type",
+                            sortable: true
                         },
                         {
                             header: "Area",
-                            dataIndex: "area"
+                            dataIndex: "area",
+                            sortable: true
                         },
                         {
-                            header: "Distance",
-                            dataIndex: "distance"
+                            header: "Distance/Radius",
+                            dataIndex: "distance",
+                            sortable: true
                         }
                     ],
                     "autoUpdate": false,
                     loadData: false,
                     height: require('./height')().max - 210,
                     setSelectedStyle: false,
+                    responsive: false,
                     openPopUp: true
                 });
 

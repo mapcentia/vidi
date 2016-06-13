@@ -79,7 +79,8 @@ module.exports = {
                             $.each(out, function (name, property) {
                                 cm.push({
                                     header: property[2],
-                                    dataIndex: property[0]
+                                    dataIndex: property[0],
+                                    sortable: true
                                 })
                             });
                             first = false;

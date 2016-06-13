@@ -5,7 +5,7 @@
     </div>
 </div>
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
-    <a class="navmenu-brand" href="#">Geo Fyn A/S</a>
+    <i class="navmenu-brand">Geo Fyn A/S</i>
     <div id="side-panel">
         <div id="top">
             <div id="progress-container"><span id="progress"></span><span id="spinner">&nbsp;<span><img
@@ -26,25 +26,20 @@
             <!-- Tab panes -->
             <div class="tab-content">
                 <div role="tabpanel" class="tab-pane active" id="search-content">
-                    <ul class="nav nav-tabs" role="tablist" id="search-tabs">
-                        <li role="presentation" class="active"><a href="#place-search" aria-controls="place-search" role="tab" data-toggle="tab">Place</a></li>
-                        <li role="presentation"><a href="#conflict-search" aria-controls="conflict-search" role="tab" data-toggle="tab">Conflict</a></li>
-                    </ul>
-                    <div class="tab-content">
-                        <div role="tabpanel" class="tab-pane active" id="place-search">
-                            <div class="alert alert-dismissible alert-info" role="alert">
-                                <button type="button" class="close" data-dismiss="alert">×</button>
-                                Søg på adresse og matrikelnr.
-                            </div>
-                            <div id="places">
-                                <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
-                            </div>
+                    <div role="tabpanel" class="tab-pane active" id="place-search">
+                        <div class="alert alert-dismissible alert-info" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            Søg på adresse og matrikelnr.
                         </div>
-
-                        <div role="tabpanel" class="tab-pane" id="conflict-search">
-
+                        <div id="places">
+                            <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
                         </div>
                     </div>
+
+                    <div role="tabpanel" class="tab-pane" id="conflict-search">
+
+                    </div>
+
 
 
                 </div>
@@ -56,7 +51,7 @@
 
                     <div class="togglebutton">
                         <label>
-                            <input id="advanced-info-btn" type="checkbox"> Advanceret søgning
+                            <input id="advanced-info-btn" type="checkbox"> Avanceret søgning
                         </label>
                     </div>
                     <div id="buffer" style="display: none">
