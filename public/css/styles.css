@@ -688,3 +688,8 @@ body {
     border-bottom: 0;
 }
 
+.layer-count {
+    float: right;
+}
+
+
