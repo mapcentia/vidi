@@ -6,7 +6,7 @@ module.exports = {
     },
     init: function () {
         var type1, type2, gids = [], searchString,
-            komKode = "101",
+            komKode = "461",
             placeStore = new geocloud.geoJsonStore({
                 host: "http://eu1.mapcentia.com",
                 db: "dk",
