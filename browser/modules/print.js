@@ -9,7 +9,7 @@ module.exports = {
             provider: L.print.provider({
                 capabilities: window.printConfig,
                 method: 'POST',
-                dpi: 127,
+                dpi: 72,
                 outputFormat: 'pdf',
                 proxy: 'http://eu1.mapcentia.com/cgi/proxy.cgi?url=',
                 customParams: window.gc2Options.customPrintParams

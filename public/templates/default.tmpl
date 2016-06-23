@@ -5,7 +5,33 @@
     </div>
 </div>
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
-    <i class="navmenu-brand">Geo Fyn A/S</i>
+
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="javascript:void(0)">Geo Fyn A/S</a>
+            </div>
+            <div class="navbar-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="javascript:void(0)">Link</a></li>
+                    <li class="dropdown">
+                        <a href="bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                            <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="javascript:void(0)">Action</a></li>
+                            <li><a href="javascript:void(0)">Another action</a></li>
+                            <li><a href="javascript:void(0)">Something else here</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Dropdown header</li>
+                            <li><a href="javascript:void(0)">Separated link</a></li>
+                            <li><a href="javascript:void(0)">One more separated link</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <div id="side-panel">
         <div id="top">
             <div id="progress-container"><span id="progress"></span><span id="spinner">&nbsp;<span><img
@@ -20,6 +46,7 @@
                 <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>
                 <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
                 <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
+                <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">Print</a></li>
                 <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
             </ul>
 
@@ -124,6 +151,17 @@
                         <div class="panel-body">
                             <div id="draw-table"></div>
                         </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane" id="print-content">
+                    <div class="alert alert-dismissible alert-info" role="alert">
+                        <button type="button" class="close" data-dismiss="alert">×</button>
+                        Her kan du printe dit kortet.
+                    </div>
+                    <div class="togglebutton">
+                        <label>
+                            <input id="print-btn" type="checkbox"> Tegning
+                        </label>
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="help-content">...</div>
