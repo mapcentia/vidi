@@ -103,7 +103,8 @@ window.Vidi = function () {
         draw: require('./modules/draw'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
-        sqlQuery: require('./modules/sqlQuery')
+        sqlQuery: require('./modules/sqlQuery'),
+        serializeLayers: require('./modules/serializeLayers')
     };
 
     // Use setters in modules so they can interact
@@ -122,13 +123,14 @@ window.Vidi = function () {
     modules.print.set(modules);
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);
+    modules.serializeLayers.set(modules);
 
     return {
         init: modules.init
     }
 };
 
-},{"../config/config.js":24,"./i18n/da_DK":1,"./modules/advancedInfo":3,"./modules/anchor":4,"./modules/baseLayer":5,"./modules/bindEvent":6,"./modules/cloud":7,"./modules/draw":8,"./modules/gc2/legend":11,"./modules/gc2/meta":12,"./modules/gc2/setting":13,"./modules/infoClick":15,"./modules/init":16,"./modules/print":17,"./modules/search/danish":18,"./modules/setBaseLayer":19,"./modules/sqlQuery":20,"./modules/state":21,"./modules/switchLayer":22}],3:[function(require,module,exports){
+},{"../config/config.js":25,"./i18n/da_DK":1,"./modules/advancedInfo":3,"./modules/anchor":4,"./modules/baseLayer":5,"./modules/bindEvent":6,"./modules/cloud":7,"./modules/draw":8,"./modules/gc2/legend":11,"./modules/gc2/meta":12,"./modules/gc2/setting":13,"./modules/infoClick":15,"./modules/init":16,"./modules/print":17,"./modules/search/danish":18,"./modules/serializeLayers":19,"./modules/setBaseLayer":20,"./modules/sqlQuery":21,"./modules/state":22,"./modules/switchLayer":23}],3:[function(require,module,exports){
 var cloud;
 var sqlQuery;
 var infoClick;
@@ -186,9 +188,6 @@ var makeSearch = function () {
             "dashArray": '5,3'
         }).addTo(bufferItems);
         l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
-        console.log(l)
-
-
         sqlQuery.init(qstore, buffered.toText(), "4326");
     }
 };
@@ -317,7 +316,7 @@ module.exports = {
 };
 
 
-},{"./drawLocales/advancedInfo.js":9,"jsts":26,"nouislider":28,"reproject":98,"underscore":100}],4:[function(require,module,exports){
+},{"./drawLocales/advancedInfo.js":9,"jsts":26,"nouislider":28,"reproject":97,"underscore":98}],4:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var urlVars = urlparser.urlVars;
 var db = urlparser.db;
@@ -333,10 +332,19 @@ module.exports = {
         return this;
     },
     init: function () {
-        return "/app/" + db + "/" + schema + "/" + (typeof urlVars.i === "undefined" ? "" : "?i=" + urlVars.i.split("#")[0]) + anchor();
+        var param = [], paramStr;
+        $.each(urlVars, function (i, v) {
+            parr = v.split("#");
+            if (parr.length > 1) {
+                parr.pop();
+            }
+            param.push(i + "=" + parr.join());
+        });
+        paramStr = param.join("&");
+        return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     }
 };
-},{"./urlparser":23}],5:[function(require,module,exports){
+},{"./urlparser":24}],5:[function(require,module,exports){
 var cloud;
 module.exports = module.exports = {
     set: function (o) {
@@ -611,6 +619,12 @@ module.exports = {
     },
     getDrawOn: function () {
         return drawOn;
+    },
+    getLayer: function(){
+        return store.layer;
+    },
+    getTable: function(){
+        return table;
     }
 }
 ;
@@ -861,7 +875,7 @@ module.exports = module.exports = {
         });
     }
 };
-},{"../urlparser":23}],12:[function(require,module,exports){
+},{"../urlparser":24}],12:[function(require,module,exports){
 var urlparser = require('../urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
@@ -967,7 +981,7 @@ module.exports = {
 
 
 
-},{"../../../config/config.js":24,"../urlparser":23}],13:[function(require,module,exports){
+},{"../../../config/config.js":25,"../urlparser":24}],13:[function(require,module,exports){
 var urlparser = require('../urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
@@ -994,7 +1008,7 @@ module.exports = {
         return ready;
     }
 };
-},{"../urlparser":23}],14:[function(require,module,exports){
+},{"../urlparser":24}],14:[function(require,module,exports){
 module.exports = function () {
     var max = $(document).height() - $('.tab-pane').offset().top - 70;
     return {
@@ -1050,7 +1064,7 @@ module.exports = {
 
 
 
-},{"./urlparser":23}],16:[function(require,module,exports){
+},{"./urlparser":24}],16:[function(require,module,exports){
 var cloud;
 var baseLayer;
 var meta;
@@ -1091,10 +1105,8 @@ module.exports = {
         advancedInfo.init();
 
         var moveEndCallBack = function () {
-            try {
                 history.pushState(null, null, anchor.init());
-            } catch (e) {
-            }
+
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
@@ -1109,49 +1121,85 @@ var printOn = false;
 var recEdit;
 var recScale;
 var test;
-var snapshot = require("snapshot")
-
+var serializeLayers;
+var anchor;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        serializeLayers = o.serializeLayers;
+        anchor = o.anchor;
         return this;
     },
     init: function () {
     },
     print: function () {
+        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], e;
         try {
             recEdit.editing.disable();
         } catch (e) {
         }
-        var e = _encodeLayers(cloud.map);
-        console.log(e);
-        $.each(cloud.map._layers, function (i, v) {
-            cloud.map.removeLayer(v);
+        e = serializeLayers.serialize({
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": true,
+            "draw": false
         });
-        setTimeout(function () {
-            var n = 0;
-            $.each(e, function (i, v) {
-                if (v.type === "Vector") {
-                    L.geoJson(v.geoJson, {
-                        style: function (f) {
-                            return f.style;
-                        }
-                    }).addTo(cloud.map);
-                }
-                if (v.type === "TMS") {
-                    L.tileLayer(v.baseURL + '1.0.0/' + v.layer + '/{z}/{x}/{y}.png', {
-                        tms: true
-                    }).addTo(cloud.map);
-                }
-                if (v.type === "OSM") {
-                    L.tileLayer(v.baseURL + "{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-                        maxZoom: 20,
-                        maxNativeZoom: 18
-                    }).addTo(cloud.map);
-                }
-            });
-        }, 1000)
+
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+            /*if (v.type === "TMS") {
+             L.tileLayer(v.baseURL + '1.0.0/' + v.layer + '/{z}/{x}/{y}.png', {
+             tms: true
+             }).addTo(cloud.map);
+             }
+             if (v.type === "OSM") {
+             L.tileLayer(v.baseURL + "{z}/{x}/{y}.png", {
+             attribution: "&copy; <a target='_blank' href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+             maxZoom: 20,
+             maxNativeZoom: 18
+             }).addTo(cloud.map);
+             }*/
+        });
+
+        e = serializeLayers.serialize({
+            "query_draw": false,
+            "query_buffer": true,
+            "query_result": true,
+            "draw": true
+        });
+
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerQueryDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        var form = document.createElement("form");
+        form.setAttribute("method", "get");
+        //form.setAttribute("action", "test.jsp");
+
+// setting form target to a window named 'formresult'
+        form.setAttribute("target", "formresult");
+
+        var hiddenField1 = document.createElement("input");
+        hiddenField1.setAttribute("name", "draw");
+        hiddenField1.setAttribute("value", JSON.stringify(layerDraw));
+        form.appendChild(hiddenField1);
+
+        var hiddenField2 = document.createElement("input");
+        hiddenField2.setAttribute("name", "queryDraw");
+        hiddenField2.setAttribute("value", JSON.stringify(layerQueryDraw));
+        form.appendChild(hiddenField2);
+
+        document.body.appendChild(form);
+
+// creating the 'formresult' window with custom features prior to submitting the form
+        //window.open('', 'formresult', 'scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=no');
+
+        form.submit();
+
     },
     control: function () {
         if (!printOn) {
@@ -1209,7 +1257,6 @@ module.exports = {
                 console.log(pxwidth);
                 console.log(scale);
                 console.log(mscale);
-
                 return scale;
             };
 
@@ -1249,6 +1296,158 @@ module.exports = {
             cloud.map.removeLayer(recEdit);
             printOn = false;
         }
+    }
+};
+},{}],18:[function(require,module,exports){
+var cloud;
+module.exports = {
+    set: function (o) {
+        cloud = o.cloud;
+        return this;
+    },
+    init: function () {
+        var type1, type2, gids = [], searchString,
+            komKode = "461",
+            placeStore = new geocloud.geoJsonStore({
+                host: "http://eu1.mapcentia.com",
+                db: "dk",
+                sql: null,
+                pointToLayer: null,
+                onLoad: function () {
+                    var resultLayer = new L.FeatureGroup();
+                    cloud.map.addLayer(resultLayer);
+                    resultLayer.addLayer(this.layer);
+                    cloud.zoomToExtentOfgeoJsonStore(this);
+                }
+            });
+        $('#custom-search').typeahead({
+            highlight: false
+        }, {
+            name: 'adresse',
+            displayKey: 'value',
+            templates: {
+                header: '<h2 class="typeahead-heading">Adresser</h2>'
+            },
+            source: function (query, cb) {
+                if (query.match(/\d+/g) === null && query.match(/\s+/g) === null) {
+                    type1 = "vejnavn,bynavn";
+                }
+                if (query.match(/\d+/g) === null && query.match(/\s+/g) !== null) {
+                    type1 = "vejnavn_bynavn";
+                }
+                if (query.match(/\d+/g) !== null) {
+                    type1 = "adresse";
+                }
+                var names = [];
+
+                (function ca() {
+                    $.ajax({
+                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
+                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase().replace(",", "")) + '","default_operator":"AND"}},"filter":{"term":{"kommunekode":"0' + komKode + '"}}}}}',
+                        contentType: "application/json; charset=utf-8",
+                        scriptCharset: "utf-8",
+                        dataType: 'jsonp',
+                        jsonp: 'jsonp_callback',
+                        success: function (response) {
+                            $.each(response.hits.hits, function (i, hit) {
+                                var str = hit._source.properties.string;
+                                gids[str] = hit._source.properties.gid;
+                                names.push({value: str});
+                            });
+                            if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
+                                type1 = "adresse";
+                                names = [];
+                                gids = [];
+                                ca();
+                            } else {
+                                cb(names);
+                            }
+                        }
+                    })
+                })();
+            }
+        }, {
+            name: 'matrikel',
+            displayKey: 'value',
+            templates: {
+                header: '<h2 class="typeahead-heading">Matrikel</h2>'
+            },
+            source: function (query, cb) {
+                var names = [];
+                type2 = (query.match(/\d+/g) != null) ? "jordstykke" : "ejerlav";
+                (function ca() {
+                    $.ajax({
+                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
+                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase()) + '","default_operator":"AND"}},"filter":{"term":{"komkode":"' + komKode + '"}}}}}',
+                        contentType: "application/json; charset=utf-8",
+                        scriptCharset: "utf-8",
+                        dataType: 'jsonp',
+                        jsonp: 'jsonp_callback',
+                        success: function (response) {
+                            $.each(response.hits.hits, function (i, hit) {
+                                var str = hit._source.properties.string;
+                                gids[str] = hit._source.properties.gid;
+                                names.push({value: str});
+                            });
+                            if (names.length === 1 && (type2 === "ejerlav")) {
+                                type2 = "jordstykke";
+                                names = [];
+                                gids = [];
+                                ca();
+                            } else {
+                                cb(names);
+                            }
+                        }
+                    })
+                })();
+            }
+        });
+        $('#custom-search').bind('typeahead:selected', function (obj, datum, name) {
+            if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
+                placeStore.reset();
+
+                if (name === "matrikel") {
+                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid=" + gids[datum.value];
+                }
+                if (name === "adresse") {
+                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM adresse.adgang WHERE gid=" + gids[datum.value];
+                }
+                searchString = datum.value;
+                placeStore.load();
+            } else {
+                setTimeout(function () {
+                    $(".typeahead").val(datum.value + " ").trigger("paste").trigger("input");
+                }, 100)
+            }
+        });
+    }
+
+}
+
+
+},{}],19:[function(require,module,exports){
+var cloud;
+module.exports = module.exports = {
+    set: function (o) {
+        cloud = o.cloud;
+        return this;
+    },
+    init: function (str) {
+
+    },
+    serialize: function(filters){
+        var e = _encodeLayers(cloud.map);
+        $.each(e, function (i, v) {
+            if (typeof v.geoJson !== "undefined") {
+                // Loop backwards
+                for (var key = v.geoJson.features.length -1 ; key > -1 ; key--) {
+                    if (filters[v.geoJson.features[key]._vidi_type]) {
+                        v.geoJson.features.splice(key, 1);
+                    }
+                }
+            }
+        });
+        return e;
     }
 };
 
@@ -1406,7 +1605,6 @@ var _encoders = {
             };
         },
         vector: function (features) {
-            console.log(features);
             var encFeatures = [],
                 encStyles = {},
                 opacity,
@@ -1478,6 +1676,7 @@ var _encoders = {
         }
     }
 };
+
 var _getLayers = function (map) {
     var markers = [],
         vectors = [],
@@ -1632,136 +1831,7 @@ var _project = function (crsClass, coords) {
     }
 };
 
-
-
-},{"snapshot":99}],18:[function(require,module,exports){
-var cloud;
-module.exports = {
-    set: function (o) {
-        cloud = o.cloud;
-        return this;
-    },
-    init: function () {
-        var type1, type2, gids = [], searchString,
-            komKode = "461",
-            placeStore = new geocloud.geoJsonStore({
-                host: "http://eu1.mapcentia.com",
-                db: "dk",
-                sql: null,
-                pointToLayer: null,
-                onLoad: function () {
-                    var resultLayer = new L.FeatureGroup();
-                    cloud.map.addLayer(resultLayer);
-                    resultLayer.addLayer(this.layer);
-                    cloud.zoomToExtentOfgeoJsonStore(this);
-                }
-            });
-        $('#custom-search').typeahead({
-            highlight: false
-        }, {
-            name: 'adresse',
-            displayKey: 'value',
-            templates: {
-                header: '<h2 class="typeahead-heading">Adresser</h2>'
-            },
-            source: function (query, cb) {
-                if (query.match(/\d+/g) === null && query.match(/\s+/g) === null) {
-                    type1 = "vejnavn,bynavn";
-                }
-                if (query.match(/\d+/g) === null && query.match(/\s+/g) !== null) {
-                    type1 = "vejnavn_bynavn";
-                }
-                if (query.match(/\d+/g) !== null) {
-                    type1 = "adresse";
-                }
-                var names = [];
-
-                (function ca() {
-                    $.ajax({
-                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
-                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase().replace(",", "")) + '","default_operator":"AND"}},"filter":{"term":{"kommunekode":"0' + komKode + '"}}}}}',
-                        contentType: "application/json; charset=utf-8",
-                        scriptCharset: "utf-8",
-                        dataType: 'jsonp',
-                        jsonp: 'jsonp_callback',
-                        success: function (response) {
-                            $.each(response.hits.hits, function (i, hit) {
-                                var str = hit._source.properties.string;
-                                gids[str] = hit._source.properties.gid;
-                                names.push({value: str});
-                            });
-                            if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
-                                type1 = "adresse";
-                                names = [];
-                                gids = [];
-                                ca();
-                            } else {
-                                cb(names);
-                            }
-                        }
-                    })
-                })();
-            }
-        }, {
-            name: 'matrikel',
-            displayKey: 'value',
-            templates: {
-                header: '<h2 class="typeahead-heading">Matrikel</h2>'
-            },
-            source: function (query, cb) {
-                var names = [];
-                type2 = (query.match(/\d+/g) != null) ? "jordstykke" : "ejerlav";
-                (function ca() {
-                    $.ajax({
-                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
-                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase()) + '","default_operator":"AND"}},"filter":{"term":{"komkode":"' + komKode + '"}}}}}',
-                        contentType: "application/json; charset=utf-8",
-                        scriptCharset: "utf-8",
-                        dataType: 'jsonp',
-                        jsonp: 'jsonp_callback',
-                        success: function (response) {
-                            $.each(response.hits.hits, function (i, hit) {
-                                var str = hit._source.properties.string;
-                                gids[str] = hit._source.properties.gid;
-                                names.push({value: str});
-                            });
-                            if (names.length === 1 && (type2 === "ejerlav")) {
-                                type2 = "jordstykke";
-                                names = [];
-                                gids = [];
-                                ca();
-                            } else {
-                                cb(names);
-                            }
-                        }
-                    })
-                })();
-            }
-        });
-        $('#custom-search').bind('typeahead:selected', function (obj, datum, name) {
-            if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
-                placeStore.reset();
-
-                if (name === "matrikel") {
-                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid=" + gids[datum.value];
-                }
-                if (name === "adresse") {
-                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM adresse.adgang WHERE gid=" + gids[datum.value];
-                }
-                searchString = datum.value;
-                placeStore.load();
-            } else {
-                setTimeout(function () {
-                    $(".typeahead").val(datum.value + " ").trigger("paste").trigger("input");
-                }, 100)
-            }
-        });
-    }
-
-}
-
-
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 var cloud;
 var anchor;
 module.exports = module.exports = {
@@ -1779,7 +1849,7 @@ module.exports = module.exports = {
         //addLegend();
     }
 };
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var cloud;
@@ -1920,13 +1990,8 @@ module.exports = {
                         },
                         onEachFeature: function (f, l) {
                             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
-                            console.log(l._layers);
-
                         }
-
                     });
-                    console.log(qstore[index].layer);
-
                     break;
                 case "cartodb":
                     qstore[index] = new geocloud.cartoDbStore({
@@ -1973,15 +2038,17 @@ module.exports = {
         $("#info-pane").empty();
     }
 };
-},{"../../config/config.js":24,"./height":14,"./urlparser":23}],21:[function(require,module,exports){
+},{"../../config/config.js":25,"./height":14,"./urlparser":24}],22:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var hash = urlparser.hash;
+var urlVars = urlparser.urlVars;
 var cloud;
 var meta;
 var setting;
 var setBaseLayer;
 var switchLayer;
 var legend;
+var draw;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -1990,6 +2057,7 @@ module.exports = {
         setBaseLayer = o.setBaseLayer;
         switchLayer = o.switchLayer;
         legend = o.legend;
+        draw = o.draw;
         return this;
     },
     init: function () {
@@ -2016,22 +2084,58 @@ module.exports = {
                     setBaseLayer.init(window.setBaseLayers[0].id);
                     if (extent !== null) {
                         /*if (BACKEND === "cartodb") {
-                            cloud.map.fitBounds(extent);
-                        } else {
-                            cloud.zoomToExtent(extent);
-                        }*/
+                         cloud.map.fitBounds(extent);
+                         } else {
+                         cloud.zoomToExtent(extent);
+                         }*/
                         cloud.zoomToExtent(extent);
                     } else {
                         cloud.zoomToExtent();
                     }
                 }
+                var parr, v, l, t;
+                if (typeof urlVars.draw !== "undefined") {
+                    parr = urlVars.draw.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    draw.control();
+                    l = draw.getLayer();
+                    t = draw.getTable();
+                    var g = L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    });
+                    $.each(g._layers, function(i, v){
+                        l.addLayer(v);
+                    });
+                    t.loadDataInTable();
+                    draw.control();
+                }
+
+                if (typeof urlVars.queryDraw !== "undefined") {
+                    parr = urlVars.queryDraw.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    }).addTo(cloud.map);
+                }
+
+
             } else {
                 setTimeout(pollForLayers, 10);
             }
         }());
     }
 };
-},{"./urlparser":23}],22:[function(require,module,exports){
+},{"./urlparser":24}],23:[function(require,module,exports){
 var cloud;
 var legend;
 var anchor;
@@ -2078,7 +2182,7 @@ module.exports = module.exports = {
 
 
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 var uri = geocloud.pathName;
 module.exports = {
     hostname: geocloud_host,
@@ -2087,37 +2191,12 @@ module.exports = {
     schema: uri[3],
     urlVars: geocloud.urlVars
 }
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 module.exports = {
     gc2: {
         host: "http://geofyn.mapcentia.com"
     }
 };
-},{}],25:[function(require,module,exports){
-if (typeof Object.create === 'function') {
-  // implementation from standard node.js 'util' module
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    ctor.prototype = Object.create(superCtor.prototype, {
-      constructor: {
-        value: ctor,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      }
-    });
-  };
-} else {
-  // old school shim for old browsers
-  module.exports = function inherits(ctor, superCtor) {
-    ctor.super_ = superCtor
-    var TempCtor = function () {}
-    TempCtor.prototype = superCtor.prototype
-    ctor.prototype = new TempCtor()
-    ctor.prototype.constructor = ctor
-  }
-}
-
 },{}],26:[function(require,module,exports){
 // JSTS. See https://github.com/bjornharrtell/jsts
 // Licenses:
@@ -4844,102 +4923,6 @@ function closure ( target, options, originalOptions ){
 
 }));
 },{}],29:[function(require,module,exports){
-// shim for using process in browser
-
-var process = module.exports = {};
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = setTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    clearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        setTimeout(drainQueue, 0);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],30:[function(require,module,exports){
 var mgrs = require('mgrs');
 
 function Point(x, y, z) {
@@ -4975,7 +4958,7 @@ Point.prototype.toMGRS = function(accuracy) {
 };
 module.exports = Point;
 
-},{"mgrs":27}],31:[function(require,module,exports){
+},{"mgrs":27}],30:[function(require,module,exports){
 var parseCode = require("./parseCode");
 var extend = require('./extend');
 var projections = require('./projections');
@@ -5010,7 +4993,7 @@ Projection.projections = projections;
 Projection.projections.start();
 module.exports = Projection;
 
-},{"./deriveConstants":62,"./extend":63,"./parseCode":67,"./projections":69}],32:[function(require,module,exports){
+},{"./deriveConstants":61,"./extend":62,"./parseCode":66,"./projections":68}],31:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
   var xin = point.x,
     yin = point.y,
@@ -5063,14 +5046,14 @@ module.exports = function(crs, denorm, point) {
   return point;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],32:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var sign = require('./sign');
 
 module.exports = function(x) {
   return (Math.abs(x) < HALF_PI) ? x : (x - (sign(x) * Math.PI));
 };
-},{"./sign":50}],34:[function(require,module,exports){
+},{"./sign":49}],33:[function(require,module,exports){
 var TWO_PI = Math.PI * 2;
 // SPI is slightly greater than Math.PI, so values that exceed the -180..180
 // degree range by a tiny amount don't get wrapped. This prevents points that
@@ -5082,35 +5065,35 @@ var sign = require('./sign');
 module.exports = function(x) {
   return (Math.abs(x) <= SPI) ? x : (x - (sign(x) * TWO_PI));
 };
-},{"./sign":50}],35:[function(require,module,exports){
+},{"./sign":49}],34:[function(require,module,exports){
 module.exports = function(x) {
   if (Math.abs(x) > 1) {
     x = (x > 1) ? 1 : -1;
   }
   return Math.asin(x);
 };
-},{}],36:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 module.exports = function(x) {
   return (1 - 0.25 * x * (1 + x / 16 * (3 + 1.25 * x)));
 };
-},{}],37:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 module.exports = function(x) {
   return (0.375 * x * (1 + 0.25 * x * (1 + 0.46875 * x)));
 };
-},{}],38:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 module.exports = function(x) {
   return (0.05859375 * x * x * (1 + 0.75 * x));
 };
-},{}],39:[function(require,module,exports){
+},{}],38:[function(require,module,exports){
 module.exports = function(x) {
   return (x * x * x * (35 / 3072));
 };
-},{}],40:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 module.exports = function(a, e, sinphi) {
   var temp = e * sinphi;
   return a / Math.sqrt(1 - temp * temp);
 };
-},{}],41:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 module.exports = function(ml, e0, e1, e2, e3) {
   var phi;
   var dphi;
@@ -5127,7 +5110,7 @@ module.exports = function(ml, e0, e1, e2, e3) {
   //..reportError("IMLFN-CONV:Latitude failed to converge after 15 iterations");
   return NaN;
 };
-},{}],42:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, q) {
@@ -5160,16 +5143,16 @@ module.exports = function(eccent, q) {
   //console.log("IQSFN-CONV:Latitude failed to converge after 30 iterations");
   return NaN;
 };
-},{}],43:[function(require,module,exports){
+},{}],42:[function(require,module,exports){
 module.exports = function(e0, e1, e2, e3, phi) {
   return (e0 * phi - e1 * Math.sin(2 * phi) + e2 * Math.sin(4 * phi) - e3 * Math.sin(6 * phi));
 };
-},{}],44:[function(require,module,exports){
+},{}],43:[function(require,module,exports){
 module.exports = function(eccent, sinphi, cosphi) {
   var con = eccent * sinphi;
   return cosphi / (Math.sqrt(1 - con * con));
 };
-},{}],45:[function(require,module,exports){
+},{}],44:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 module.exports = function(eccent, ts) {
   var eccnth = 0.5 * eccent;
@@ -5186,7 +5169,7 @@ module.exports = function(eccent, ts) {
   //console.log("phi2z has NoConvergence");
   return -9999;
 };
-},{}],46:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 var C00 = 1;
 var C02 = 0.25;
 var C04 = 0.046875;
@@ -5211,7 +5194,7 @@ module.exports = function(es) {
   en[4] = t * es * C88;
   return en;
 };
-},{}],47:[function(require,module,exports){
+},{}],46:[function(require,module,exports){
 var pj_mlfn = require("./pj_mlfn");
 var EPSLN = 1.0e-10;
 var MAX_ITER = 20;
@@ -5232,13 +5215,13 @@ module.exports = function(arg, es, en) {
   //..reportError("cass:pj_inv_mlfn: Convergence error");
   return phi;
 };
-},{"./pj_mlfn":48}],48:[function(require,module,exports){
+},{"./pj_mlfn":47}],47:[function(require,module,exports){
 module.exports = function(phi, sphi, cphi, en) {
   cphi *= sphi;
   sphi *= sphi;
   return (en[0] * phi - cphi * (en[1] + sphi * (en[2] + sphi * (en[3] + sphi * en[4]))));
 };
-},{}],49:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 module.exports = function(eccent, sinphi) {
   var con;
   if (eccent > 1.0e-7) {
@@ -5249,15 +5232,15 @@ module.exports = function(eccent, sinphi) {
     return (2 * sinphi);
   }
 };
-},{}],50:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 module.exports = function(x) {
   return x<0 ? -1 : 1;
 };
-},{}],51:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 module.exports = function(esinp, exp) {
   return (Math.pow((1 - esinp) / (1 + esinp), exp));
 };
-},{}],52:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 module.exports = function (array){
   var out = {
     x: array[0],
@@ -5271,7 +5254,7 @@ module.exports = function (array){
   }
   return out;
 };
-},{}],53:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, phi, sinphi) {
@@ -5280,7 +5263,7 @@ module.exports = function(eccent, phi, sinphi) {
   con = Math.pow(((1 - con) / (1 + con)), com);
   return (Math.tan(0.5 * (HALF_PI - phi)) / con);
 };
-},{}],54:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 exports.wgs84 = {
   towgs84: "0,0,0",
   ellipse: "WGS84",
@@ -5361,7 +5344,7 @@ exports.rnb72 = {
   ellipse: "intl",
   datumName: "Reseau National Belge 1972"
 };
-},{}],55:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 exports.MERIT = {
   a: 6378137.0,
   rf: 298.257,
@@ -5577,7 +5560,7 @@ exports.sphere = {
   b: 6370997.0,
   ellipseName: "Normal Sphere (r=6370997)"
 };
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 exports.greenwich = 0.0; //"0dE",
 exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
 exports.paris = 2.337229166667; //"2d20'14.025\"E",
@@ -5591,11 +5574,11 @@ exports.brussels = 4.367975; //"4d22'4.71\"E",
 exports.stockholm = 18.058277777778; //"18d3'29.8\"E",
 exports.athens = 23.7163375; //"23d42'58.815\"E",
 exports.oslo = 10.722916666667; //"10d43'22.5\"E"
-},{}],57:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 exports.ft = {to_meter: 0.3048};
 exports['us-ft'] = {to_meter: 1200 / 3937};
 
-},{}],58:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 var proj = require('./Proj');
 var transform = require('./transform');
 var wgs84 = proj('WGS84');
@@ -5660,7 +5643,7 @@ function proj4(fromProj, toProj, coord) {
   }
 }
 module.exports = proj4;
-},{"./Proj":31,"./transform":95}],59:[function(require,module,exports){
+},{"./Proj":30,"./transform":94}],58:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
@@ -6065,7 +6048,7 @@ datum.prototype = {
 */
 module.exports = datum;
 
-},{}],60:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
 var PJD_GRIDSHIFT = 3;
@@ -6166,7 +6149,7 @@ module.exports = function(source, dest, point) {
 };
 
 
-},{}],61:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 var globals = require('./global');
 var parseProj = require('./projString');
 var wkt = require('./wkt');
@@ -6223,7 +6206,7 @@ function defs(name) {
 globals(defs);
 module.exports = defs;
 
-},{"./global":64,"./projString":68,"./wkt":96}],62:[function(require,module,exports){
+},{"./global":63,"./projString":67,"./wkt":95}],61:[function(require,module,exports){
 var Datum = require('./constants/Datum');
 var Ellipsoid = require('./constants/Ellipsoid');
 var extend = require('./extend');
@@ -6281,7 +6264,7 @@ module.exports = function(json) {
   return json;
 };
 
-},{"./constants/Datum":54,"./constants/Ellipsoid":55,"./datum":59,"./extend":63}],63:[function(require,module,exports){
+},{"./constants/Datum":53,"./constants/Ellipsoid":54,"./datum":58,"./extend":62}],62:[function(require,module,exports){
 module.exports = function(destination, source) {
   destination = destination || {};
   var value, property;
@@ -6297,7 +6280,7 @@ module.exports = function(destination, source) {
   return destination;
 };
 
-},{}],64:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 module.exports = function(defs) {
   defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
   defs('EPSG:4269', "+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees");
@@ -6310,7 +6293,7 @@ module.exports = function(defs) {
   defs['EPSG:102113'] = defs['EPSG:3857'];
 };
 
-},{}],65:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 var projs = [
   require('./projections/tmerc'),
   require('./projections/utm'),
@@ -6340,7 +6323,7 @@ module.exports = function(proj4){
     proj4.Proj.projections.add(proj);
   });
 };
-},{"./projections/aea":70,"./projections/aeqd":71,"./projections/cass":72,"./projections/cea":73,"./projections/eqc":74,"./projections/eqdc":75,"./projections/gnom":77,"./projections/krovak":78,"./projections/laea":79,"./projections/lcc":80,"./projections/mill":83,"./projections/moll":84,"./projections/nzmg":85,"./projections/omerc":86,"./projections/poly":87,"./projections/sinu":88,"./projections/somerc":89,"./projections/stere":90,"./projections/sterea":91,"./projections/tmerc":92,"./projections/utm":93,"./projections/vandg":94}],66:[function(require,module,exports){
+},{"./projections/aea":69,"./projections/aeqd":70,"./projections/cass":71,"./projections/cea":72,"./projections/eqc":73,"./projections/eqdc":74,"./projections/gnom":76,"./projections/krovak":77,"./projections/laea":78,"./projections/lcc":79,"./projections/mill":82,"./projections/moll":83,"./projections/nzmg":84,"./projections/omerc":85,"./projections/poly":86,"./projections/sinu":87,"./projections/somerc":88,"./projections/stere":89,"./projections/sterea":90,"./projections/tmerc":91,"./projections/utm":92,"./projections/vandg":93}],65:[function(require,module,exports){
 var proj4 = require('./core');
 proj4.defaultDatum = 'WGS84'; //default datum
 proj4.Proj = require('./Proj');
@@ -6353,7 +6336,7 @@ proj4.mgrs = require('mgrs');
 proj4.version = require('../package.json').version;
 require('./includedProjections')(proj4);
 module.exports = proj4;
-},{"../package.json":97,"./Point":30,"./Proj":31,"./common/toPoint":52,"./core":58,"./defs":61,"./includedProjections":65,"./transform":95,"mgrs":27}],67:[function(require,module,exports){
+},{"../package.json":96,"./Point":29,"./Proj":30,"./common/toPoint":51,"./core":57,"./defs":60,"./includedProjections":64,"./transform":94,"mgrs":27}],66:[function(require,module,exports){
 var defs = require('./defs');
 var wkt = require('./wkt');
 var projStr = require('./projString');
@@ -6390,7 +6373,7 @@ function parse(code){
 }
 
 module.exports = parse;
-},{"./defs":61,"./projString":68,"./wkt":96}],68:[function(require,module,exports){
+},{"./defs":60,"./projString":67,"./wkt":95}],67:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var PrimeMeridian = require('./constants/PrimeMeridian');
 var units = require('./constants/units');
@@ -6524,7 +6507,7 @@ module.exports = function(defData) {
   return self;
 };
 
-},{"./constants/PrimeMeridian":56,"./constants/units":57}],69:[function(require,module,exports){
+},{"./constants/PrimeMeridian":55,"./constants/units":56}],68:[function(require,module,exports){
 var projs = [
   require('./projections/merc'),
   require('./projections/longlat')
@@ -6560,7 +6543,7 @@ exports.start = function() {
   projs.forEach(add);
 };
 
-},{"./projections/longlat":81,"./projections/merc":82}],70:[function(require,module,exports){
+},{"./projections/longlat":80,"./projections/merc":81}],69:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var qsfnz = require('../common/qsfnz');
@@ -6683,7 +6666,7 @@ exports.phi1z = function(eccent, qs) {
 };
 exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
-},{"../common/adjust_lon":34,"../common/asinz":35,"../common/msfnz":44,"../common/qsfnz":49}],71:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/asinz":34,"../common/msfnz":43,"../common/qsfnz":48}],70:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -6882,7 +6865,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
-},{"../common/adjust_lon":34,"../common/asinz":35,"../common/e0fn":36,"../common/e1fn":37,"../common/e2fn":38,"../common/e3fn":39,"../common/gN":40,"../common/imlfn":41,"../common/mlfn":43}],72:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/asinz":34,"../common/e0fn":35,"../common/e1fn":36,"../common/e2fn":37,"../common/e3fn":38,"../common/gN":39,"../common/imlfn":40,"../common/mlfn":42}],71:[function(require,module,exports){
 var mlfn = require('../common/mlfn');
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
@@ -6986,7 +6969,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["Cassini", "Cassini_Soldner", "cass"];
-},{"../common/adjust_lat":33,"../common/adjust_lon":34,"../common/e0fn":36,"../common/e1fn":37,"../common/e2fn":38,"../common/e3fn":39,"../common/gN":40,"../common/imlfn":41,"../common/mlfn":43}],73:[function(require,module,exports){
+},{"../common/adjust_lat":32,"../common/adjust_lon":33,"../common/e0fn":35,"../common/e1fn":36,"../common/e2fn":37,"../common/e3fn":38,"../common/gN":39,"../common/imlfn":40,"../common/mlfn":42}],72:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var qsfnz = require('../common/qsfnz');
 var msfnz = require('../common/msfnz');
@@ -7051,7 +7034,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["cea"];
 
-},{"../common/adjust_lon":34,"../common/iqsfnz":42,"../common/msfnz":44,"../common/qsfnz":49}],74:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/iqsfnz":41,"../common/msfnz":43,"../common/qsfnz":48}],73:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 exports.init = function() {
@@ -7094,7 +7077,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
-},{"../common/adjust_lat":33,"../common/adjust_lon":34}],75:[function(require,module,exports){
+},{"../common/adjust_lat":32,"../common/adjust_lon":33}],74:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -7206,7 +7189,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equidistant_Conic", "eqdc"];
 
-},{"../common/adjust_lat":33,"../common/adjust_lon":34,"../common/e0fn":36,"../common/e1fn":37,"../common/e2fn":38,"../common/e3fn":39,"../common/imlfn":41,"../common/mlfn":43,"../common/msfnz":44}],76:[function(require,module,exports){
+},{"../common/adjust_lat":32,"../common/adjust_lon":33,"../common/e0fn":35,"../common/e1fn":36,"../common/e2fn":37,"../common/e3fn":38,"../common/imlfn":40,"../common/mlfn":42,"../common/msfnz":43}],75:[function(require,module,exports){
 var FORTPI = Math.PI/4;
 var srat = require('../common/srat');
 var HALF_PI = Math.PI/2;
@@ -7253,7 +7236,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gauss"];
 
-},{"../common/srat":51}],77:[function(require,module,exports){
+},{"../common/srat":50}],76:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 var asinz = require('../common/asinz');
@@ -7354,7 +7337,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gnom"];
 
-},{"../common/adjust_lon":34,"../common/asinz":35}],78:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/asinz":34}],77:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
   this.a = 6377397.155;
@@ -7454,7 +7437,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Krovak", "krovak"];
 
-},{"../common/adjust_lon":34}],79:[function(require,module,exports){
+},{"../common/adjust_lon":33}],78:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var FORTPI = Math.PI/4;
 var EPSLN = 1.0e-10;
@@ -7744,7 +7727,7 @@ exports.authlat = function(beta, APA) {
 };
 exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
-},{"../common/adjust_lon":34,"../common/qsfnz":49}],80:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/qsfnz":48}],79:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var tsfnz = require('../common/tsfnz');
@@ -7881,7 +7864,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
-},{"../common/adjust_lon":34,"../common/msfnz":44,"../common/phi2z":45,"../common/sign":50,"../common/tsfnz":53}],81:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/msfnz":43,"../common/phi2z":44,"../common/sign":49,"../common/tsfnz":52}],80:[function(require,module,exports){
 exports.init = function() {
   //no-op for longlat
 };
@@ -7893,7 +7876,7 @@ exports.forward = identity;
 exports.inverse = identity;
 exports.names = ["longlat", "identity"];
 
-},{}],82:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 var msfnz = require('../common/msfnz');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -7992,7 +7975,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
-},{"../common/adjust_lon":34,"../common/msfnz":44,"../common/phi2z":45,"../common/tsfnz":53}],83:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/msfnz":43,"../common/phi2z":44,"../common/tsfnz":52}],82:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 /*
   reference
@@ -8039,7 +8022,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Miller_Cylindrical", "mill"];
 
-},{"../common/adjust_lon":34}],84:[function(require,module,exports){
+},{"../common/adjust_lon":33}],83:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 exports.init = function() {};
@@ -8118,7 +8101,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Mollweide", "moll"];
 
-},{"../common/adjust_lon":34}],85:[function(require,module,exports){
+},{"../common/adjust_lon":33}],84:[function(require,module,exports){
 var SEC_TO_RAD = 4.84813681109535993589914102357e-6;
 /*
   reference
@@ -8338,7 +8321,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["New_Zealand_Map_Grid", "nzmg"];
-},{}],86:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 var tsfnz = require('../common/tsfnz');
 var adjust_lon = require('../common/adjust_lon');
 var phi2z = require('../common/phi2z');
@@ -8507,7 +8490,7 @@ exports.inverse = function(p) {
 };
 
 exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
-},{"../common/adjust_lon":34,"../common/phi2z":45,"../common/tsfnz":53}],87:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/phi2z":44,"../common/tsfnz":52}],86:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -8636,7 +8619,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Polyconic", "poly"];
-},{"../common/adjust_lat":33,"../common/adjust_lon":34,"../common/e0fn":36,"../common/e1fn":37,"../common/e2fn":38,"../common/e3fn":39,"../common/gN":40,"../common/mlfn":43}],88:[function(require,module,exports){
+},{"../common/adjust_lat":32,"../common/adjust_lon":33,"../common/e0fn":35,"../common/e1fn":36,"../common/e2fn":37,"../common/e3fn":38,"../common/gN":39,"../common/mlfn":42}],87:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 var pj_enfn = require('../common/pj_enfn');
@@ -8743,7 +8726,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Sinusoidal", "sinu"];
-},{"../common/adjust_lat":33,"../common/adjust_lon":34,"../common/asinz":35,"../common/pj_enfn":46,"../common/pj_inv_mlfn":47,"../common/pj_mlfn":48}],89:[function(require,module,exports){
+},{"../common/adjust_lat":32,"../common/adjust_lon":33,"../common/asinz":34,"../common/pj_enfn":45,"../common/pj_inv_mlfn":46,"../common/pj_mlfn":47}],88:[function(require,module,exports){
 /*
   references:
     Formules et constantes pour le Calcul pour la
@@ -8825,7 +8808,7 @@ exports.inverse = function(p) {
 
 exports.names = ["somerc"];
 
-},{}],90:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
 var sign = require('../common/sign');
@@ -8993,7 +8976,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["stere", "Stereographic_South_Pole", "Polar Stereographic (variant B)"];
 
-},{"../common/adjust_lon":34,"../common/msfnz":44,"../common/phi2z":45,"../common/sign":50,"../common/tsfnz":53}],91:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/msfnz":43,"../common/phi2z":44,"../common/sign":49,"../common/tsfnz":52}],90:[function(require,module,exports){
 var gauss = require('./gauss');
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
@@ -9052,7 +9035,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
-},{"../common/adjust_lon":34,"./gauss":76}],92:[function(require,module,exports){
+},{"../common/adjust_lon":33,"./gauss":75}],91:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -9189,7 +9172,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
-},{"../common/adjust_lon":34,"../common/asinz":35,"../common/e0fn":36,"../common/e1fn":37,"../common/e2fn":38,"../common/e3fn":39,"../common/mlfn":43,"../common/sign":50}],93:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/asinz":34,"../common/e0fn":35,"../common/e1fn":36,"../common/e2fn":37,"../common/e3fn":38,"../common/mlfn":42,"../common/sign":49}],92:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var tmerc = require('./tmerc');
 exports.dependsOn = 'tmerc';
@@ -9209,7 +9192,7 @@ exports.init = function() {
 };
 exports.names = ["Universal Transverse Mercator System", "utm"];
 
-},{"./tmerc":92}],94:[function(require,module,exports){
+},{"./tmerc":91}],93:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -9330,7 +9313,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
-},{"../common/adjust_lon":34,"../common/asinz":35}],95:[function(require,module,exports){
+},{"../common/adjust_lon":33,"../common/asinz":34}],94:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var R2D = 57.29577951308232088;
 var PJD_3PARAM = 1;
@@ -9403,7 +9386,7 @@ module.exports = function transform(source, dest, point) {
 
   return point;
 };
-},{"./Proj":31,"./adjust_axis":32,"./common/toPoint":52,"./datum_transform":60}],96:[function(require,module,exports){
+},{"./Proj":30,"./adjust_axis":31,"./common/toPoint":51,"./datum_transform":59}],95:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var extend = require('./extend');
 
@@ -9628,7 +9611,7 @@ module.exports = function(wkt, self) {
   return extend(self, obj.output);
 };
 
-},{"./extend":63}],97:[function(require,module,exports){
+},{"./extend":62}],96:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -9762,7 +9745,7 @@ module.exports={
   "version": "2.3.14"
 }
 
-},{}],98:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 'use strict';
 
 var proj4 = require('proj4');
@@ -9899,143 +9882,7 @@ module.exports = {
     }
   };
 
-},{"proj4":66}],99:[function(require,module,exports){
-var util = require('util');
-
-function snapshot(scope) {
-  var seenObjs = [ ],
-      objects = [ ],
-      // three kinds of things can contain references to other objects: arrays, hashes and serializable objects
-      // other values are primitives (potentially native types)
-      arrRefs = [],
-      hashRefs = [],
-      deserializeParams = [];
-
-  function Reference(to) {
-    this.from = null;
-    this.to = to;
-  }
-
-  function implode(value, parent) {
-    var type = typeof value;
-
-    if(type === 'string') {
-      return JSON.stringify(value);
-    } else if (type === 'number' || type === 'boolean') {
-      return value;
-    } else if (type === 'undefined') {
-      return 'undefined';
-    } else {
-      // object or function
-      var stype = Object.prototype.toString.call(value);
-      // apparently Chrome <= 12 is nonconformant and returns typeof /regexp/ as 'function'
-      if(value === null) {
-        return 'null';
-      }
-      if (stype === '[object RegExp]') {
-        return value.toString();
-      } else if (stype === '[object Date]') {
-        return 'new Date('+value.valueOf()+')';
-      } else {
-        // non-native object or function
-        if(type === 'function') {
-          return value.toString();
-        } else {
-          // object (can contain circular depencency)
-          var index = seenObjs.indexOf(value);
-          if(index > -1) {
-//            console.log('Circular dependency from ' + parent + ' to ' + index);
-            return new Reference(index);
-          } else {
-            index = seenObjs.length;
-            seenObjs.push(value);
-//            console.log('Seen', index, (value.a ? value.a : ( value.b ? value.b : '')));
-          }
-
-          if(stype === '[object Array]') {
-            objects[index] = '[' + value.map(function(i, key) {
-              var val = implode(i);
-//              console.log('array!!!', i, val);
-              if(val instanceof Reference) {
-                val.from = index;
-                val.key = key;
-                arrRefs.push(val);
-                return 'null'; // placeholder
-              } else {
-                return val;
-              }
-            }) +']';
-          } else if(value.serialize && typeof value.serialize === 'function') {
-            var parts = value.serialize();
-//            console.log('parts:', parts);
-            // objects with custom serialization are always created empty
-            objects[index] = 'new ' +parts.shift()+'()';
-            // all the parameters from the serialize call need to be translated into deserialize calls later on
-            deserializeParams[index] = parts.map(function(item, key) {
-              var val = implode(item, index);
-//              console.log('val', val);
-              if(val instanceof Reference) {
-                val.from = index;
-                val.isObject = true;
-              }
-              return val;
-            });
-          } else {
-            objects[index] = '{ ' + Object.keys(value).map(function(key) {
-              var val = implode(value[key], index);
-              if(val instanceof Reference) {
-                // hash keys that are references need to be materialized later
-                val.from = index;
-                val.key = key;
-                hashRefs.push(val);
-                return val;
-              } else {
-                // hash keys that are not references can be stored directly
-                return JSON.stringify(key) +': '+val;
-              }
-            }).filter(function(v) { return !(v instanceof Reference); }).join(',') + ' }';
-          }
-
-          return new Reference(index);
-
-        }
-      }
-    }
-  }
-
-  var values = implode(scope, 0);
-
-  return '(function() { var Obj = [' + objects.join(',')+'];\n' +
-
-          // array deserialization
-
-          arrRefs.map(function(link) {
-            return 'Obj['+link.from+']['+link.key+'] = Obj['+link.to+'];';
-          }).join('\n')+
-
-          // hash deserialiazation
-
-          hashRefs.map(function(link) {
-            return 'Obj['+link.from+']['+JSON.stringify(link.key)+'] = Obj['+link.to+'];';
-          }).join('\n')+
-
-          // object deserialization
-
-          deserializeParams.map(function(init, index) {
-            return 'Obj['+index+'].deserialize('+init.map(function(val){
-                if(val instanceof Reference && val.isObject) {
-                  return 'Obj['+val.to+']';
-                } else {
-                  return val;
-                }
-              }).join(',')+');'
-          }).join('\n')+
-          '\n return Obj[0];}());';
-}
-
-module.exports = snapshot;
-
-},{"util":102}],100:[function(require,module,exports){
+},{"proj4":65}],98:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -11585,601 +11432,4 @@ module.exports = snapshot;
   }
 }.call(this));
 
-},{}],101:[function(require,module,exports){
-module.exports = function isBuffer(arg) {
-  return arg && typeof arg === 'object'
-    && typeof arg.copy === 'function'
-    && typeof arg.fill === 'function'
-    && typeof arg.readUInt8 === 'function';
-}
-},{}],102:[function(require,module,exports){
-(function (process,global){
-// Copyright Joyent, Inc. and other Node contributors.
-//
-// Permission is hereby granted, free of charge, to any person obtaining a
-// copy of this software and associated documentation files (the
-// "Software"), to deal in the Software without restriction, including
-// without limitation the rights to use, copy, modify, merge, publish,
-// distribute, sublicense, and/or sell copies of the Software, and to permit
-// persons to whom the Software is furnished to do so, subject to the
-// following conditions:
-//
-// The above copyright notice and this permission notice shall be included
-// in all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
-// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN
-// NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
-// USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-var formatRegExp = /%[sdj%]/g;
-exports.format = function(f) {
-  if (!isString(f)) {
-    var objects = [];
-    for (var i = 0; i < arguments.length; i++) {
-      objects.push(inspect(arguments[i]));
-    }
-    return objects.join(' ');
-  }
-
-  var i = 1;
-  var args = arguments;
-  var len = args.length;
-  var str = String(f).replace(formatRegExp, function(x) {
-    if (x === '%%') return '%';
-    if (i >= len) return x;
-    switch (x) {
-      case '%s': return String(args[i++]);
-      case '%d': return Number(args[i++]);
-      case '%j':
-        try {
-          return JSON.stringify(args[i++]);
-        } catch (_) {
-          return '[Circular]';
-        }
-      default:
-        return x;
-    }
-  });
-  for (var x = args[i]; i < len; x = args[++i]) {
-    if (isNull(x) || !isObject(x)) {
-      str += ' ' + x;
-    } else {
-      str += ' ' + inspect(x);
-    }
-  }
-  return str;
-};
-
-
-// Mark that a method should not be used.
-// Returns a modified function which warns once by default.
-// If --no-deprecation is set, then it is a no-op.
-exports.deprecate = function(fn, msg) {
-  // Allow for deprecating things in the process of starting up.
-  if (isUndefined(global.process)) {
-    return function() {
-      return exports.deprecate(fn, msg).apply(this, arguments);
-    };
-  }
-
-  if (process.noDeprecation === true) {
-    return fn;
-  }
-
-  var warned = false;
-  function deprecated() {
-    if (!warned) {
-      if (process.throwDeprecation) {
-        throw new Error(msg);
-      } else if (process.traceDeprecation) {
-        console.trace(msg);
-      } else {
-        console.error(msg);
-      }
-      warned = true;
-    }
-    return fn.apply(this, arguments);
-  }
-
-  return deprecated;
-};
-
-
-var debugs = {};
-var debugEnviron;
-exports.debuglog = function(set) {
-  if (isUndefined(debugEnviron))
-    debugEnviron = process.env.NODE_DEBUG || '';
-  set = set.toUpperCase();
-  if (!debugs[set]) {
-    if (new RegExp('\\b' + set + '\\b', 'i').test(debugEnviron)) {
-      var pid = process.pid;
-      debugs[set] = function() {
-        var msg = exports.format.apply(exports, arguments);
-        console.error('%s %d: %s', set, pid, msg);
-      };
-    } else {
-      debugs[set] = function() {};
-    }
-  }
-  return debugs[set];
-};
-
-
-/**
- * Echos the value of a value. Trys to print the value out
- * in the best way possible given the different types.
- *
- * @param {Object} obj The object to print out.
- * @param {Object} opts Optional options object that alters the output.
- */
-/* legacy: obj, showHidden, depth, colors*/
-function inspect(obj, opts) {
-  // default options
-  var ctx = {
-    seen: [],
-    stylize: stylizeNoColor
-  };
-  // legacy...
-  if (arguments.length >= 3) ctx.depth = arguments[2];
-  if (arguments.length >= 4) ctx.colors = arguments[3];
-  if (isBoolean(opts)) {
-    // legacy...
-    ctx.showHidden = opts;
-  } else if (opts) {
-    // got an "options" object
-    exports._extend(ctx, opts);
-  }
-  // set default options
-  if (isUndefined(ctx.showHidden)) ctx.showHidden = false;
-  if (isUndefined(ctx.depth)) ctx.depth = 2;
-  if (isUndefined(ctx.colors)) ctx.colors = false;
-  if (isUndefined(ctx.customInspect)) ctx.customInspect = true;
-  if (ctx.colors) ctx.stylize = stylizeWithColor;
-  return formatValue(ctx, obj, ctx.depth);
-}
-exports.inspect = inspect;
-
-
-// http://en.wikipedia.org/wiki/ANSI_escape_code#graphics
-inspect.colors = {
-  'bold' : [1, 22],
-  'italic' : [3, 23],
-  'underline' : [4, 24],
-  'inverse' : [7, 27],
-  'white' : [37, 39],
-  'grey' : [90, 39],
-  'black' : [30, 39],
-  'blue' : [34, 39],
-  'cyan' : [36, 39],
-  'green' : [32, 39],
-  'magenta' : [35, 39],
-  'red' : [31, 39],
-  'yellow' : [33, 39]
-};
-
-// Don't use 'blue' not visible on cmd.exe
-inspect.styles = {
-  'special': 'cyan',
-  'number': 'yellow',
-  'boolean': 'yellow',
-  'undefined': 'grey',
-  'null': 'bold',
-  'string': 'green',
-  'date': 'magenta',
-  // "name": intentionally not styling
-  'regexp': 'red'
-};
-
-
-function stylizeWithColor(str, styleType) {
-  var style = inspect.styles[styleType];
-
-  if (style) {
-    return '\u001b[' + inspect.colors[style][0] + 'm' + str +
-           '\u001b[' + inspect.colors[style][1] + 'm';
-  } else {
-    return str;
-  }
-}
-
-
-function stylizeNoColor(str, styleType) {
-  return str;
-}
-
-
-function arrayToHash(array) {
-  var hash = {};
-
-  array.forEach(function(val, idx) {
-    hash[val] = true;
-  });
-
-  return hash;
-}
-
-
-function formatValue(ctx, value, recurseTimes) {
-  // Provide a hook for user-specified inspect functions.
-  // Check that value is an object with an inspect function on it
-  if (ctx.customInspect &&
-      value &&
-      isFunction(value.inspect) &&
-      // Filter out the util module, it's inspect function is special
-      value.inspect !== exports.inspect &&
-      // Also filter out any prototype objects using the circular check.
-      !(value.constructor && value.constructor.prototype === value)) {
-    var ret = value.inspect(recurseTimes, ctx);
-    if (!isString(ret)) {
-      ret = formatValue(ctx, ret, recurseTimes);
-    }
-    return ret;
-  }
-
-  // Primitive types cannot have properties
-  var primitive = formatPrimitive(ctx, value);
-  if (primitive) {
-    return primitive;
-  }
-
-  // Look up the keys of the object.
-  var keys = Object.keys(value);
-  var visibleKeys = arrayToHash(keys);
-
-  if (ctx.showHidden) {
-    keys = Object.getOwnPropertyNames(value);
-  }
-
-  // IE doesn't make error fields non-enumerable
-  // http://msdn.microsoft.com/en-us/library/ie/dww52sbt(v=vs.94).aspx
-  if (isError(value)
-      && (keys.indexOf('message') >= 0 || keys.indexOf('description') >= 0)) {
-    return formatError(value);
-  }
-
-  // Some type of object without properties can be shortcutted.
-  if (keys.length === 0) {
-    if (isFunction(value)) {
-      var name = value.name ? ': ' + value.name : '';
-      return ctx.stylize('[Function' + name + ']', 'special');
-    }
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    }
-    if (isDate(value)) {
-      return ctx.stylize(Date.prototype.toString.call(value), 'date');
-    }
-    if (isError(value)) {
-      return formatError(value);
-    }
-  }
-
-  var base = '', array = false, braces = ['{', '}'];
-
-  // Make Array say that they are Array
-  if (isArray(value)) {
-    array = true;
-    braces = ['[', ']'];
-  }
-
-  // Make functions say that they are functions
-  if (isFunction(value)) {
-    var n = value.name ? ': ' + value.name : '';
-    base = ' [Function' + n + ']';
-  }
-
-  // Make RegExps say that they are RegExps
-  if (isRegExp(value)) {
-    base = ' ' + RegExp.prototype.toString.call(value);
-  }
-
-  // Make dates with properties first say the date
-  if (isDate(value)) {
-    base = ' ' + Date.prototype.toUTCString.call(value);
-  }
-
-  // Make error with message first say the error
-  if (isError(value)) {
-    base = ' ' + formatError(value);
-  }
-
-  if (keys.length === 0 && (!array || value.length == 0)) {
-    return braces[0] + base + braces[1];
-  }
-
-  if (recurseTimes < 0) {
-    if (isRegExp(value)) {
-      return ctx.stylize(RegExp.prototype.toString.call(value), 'regexp');
-    } else {
-      return ctx.stylize('[Object]', 'special');
-    }
-  }
-
-  ctx.seen.push(value);
-
-  var output;
-  if (array) {
-    output = formatArray(ctx, value, recurseTimes, visibleKeys, keys);
-  } else {
-    output = keys.map(function(key) {
-      return formatProperty(ctx, value, recurseTimes, visibleKeys, key, array);
-    });
-  }
-
-  ctx.seen.pop();
-
-  return reduceToSingleString(output, base, braces);
-}
-
-
-function formatPrimitive(ctx, value) {
-  if (isUndefined(value))
-    return ctx.stylize('undefined', 'undefined');
-  if (isString(value)) {
-    var simple = '\'' + JSON.stringify(value).replace(/^"|"$/g, '')
-                                             .replace(/'/g, "\\'")
-                                             .replace(/\\"/g, '"') + '\'';
-    return ctx.stylize(simple, 'string');
-  }
-  if (isNumber(value))
-    return ctx.stylize('' + value, 'number');
-  if (isBoolean(value))
-    return ctx.stylize('' + value, 'boolean');
-  // For some reason typeof null is "object", so special case here.
-  if (isNull(value))
-    return ctx.stylize('null', 'null');
-}
-
-
-function formatError(value) {
-  return '[' + Error.prototype.toString.call(value) + ']';
-}
-
-
-function formatArray(ctx, value, recurseTimes, visibleKeys, keys) {
-  var output = [];
-  for (var i = 0, l = value.length; i < l; ++i) {
-    if (hasOwnProperty(value, String(i))) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          String(i), true));
-    } else {
-      output.push('');
-    }
-  }
-  keys.forEach(function(key) {
-    if (!key.match(/^\d+$/)) {
-      output.push(formatProperty(ctx, value, recurseTimes, visibleKeys,
-          key, true));
-    }
-  });
-  return output;
-}
-
-
-function formatProperty(ctx, value, recurseTimes, visibleKeys, key, array) {
-  var name, str, desc;
-  desc = Object.getOwnPropertyDescriptor(value, key) || { value: value[key] };
-  if (desc.get) {
-    if (desc.set) {
-      str = ctx.stylize('[Getter/Setter]', 'special');
-    } else {
-      str = ctx.stylize('[Getter]', 'special');
-    }
-  } else {
-    if (desc.set) {
-      str = ctx.stylize('[Setter]', 'special');
-    }
-  }
-  if (!hasOwnProperty(visibleKeys, key)) {
-    name = '[' + key + ']';
-  }
-  if (!str) {
-    if (ctx.seen.indexOf(desc.value) < 0) {
-      if (isNull(recurseTimes)) {
-        str = formatValue(ctx, desc.value, null);
-      } else {
-        str = formatValue(ctx, desc.value, recurseTimes - 1);
-      }
-      if (str.indexOf('\n') > -1) {
-        if (array) {
-          str = str.split('\n').map(function(line) {
-            return '  ' + line;
-          }).join('\n').substr(2);
-        } else {
-          str = '\n' + str.split('\n').map(function(line) {
-            return '   ' + line;
-          }).join('\n');
-        }
-      }
-    } else {
-      str = ctx.stylize('[Circular]', 'special');
-    }
-  }
-  if (isUndefined(name)) {
-    if (array && key.match(/^\d+$/)) {
-      return str;
-    }
-    name = JSON.stringify('' + key);
-    if (name.match(/^"([a-zA-Z_][a-zA-Z_0-9]*)"$/)) {
-      name = name.substr(1, name.length - 2);
-      name = ctx.stylize(name, 'name');
-    } else {
-      name = name.replace(/'/g, "\\'")
-                 .replace(/\\"/g, '"')
-                 .replace(/(^"|"$)/g, "'");
-      name = ctx.stylize(name, 'string');
-    }
-  }
-
-  return name + ': ' + str;
-}
-
-
-function reduceToSingleString(output, base, braces) {
-  var numLinesEst = 0;
-  var length = output.reduce(function(prev, cur) {
-    numLinesEst++;
-    if (cur.indexOf('\n') >= 0) numLinesEst++;
-    return prev + cur.replace(/\u001b\[\d\d?m/g, '').length + 1;
-  }, 0);
-
-  if (length > 60) {
-    return braces[0] +
-           (base === '' ? '' : base + '\n ') +
-           ' ' +
-           output.join(',\n  ') +
-           ' ' +
-           braces[1];
-  }
-
-  return braces[0] + base + ' ' + output.join(', ') + ' ' + braces[1];
-}
-
-
-// NOTE: These type checking functions intentionally don't use `instanceof`
-// because it is fragile and can be easily faked with `Object.create()`.
-function isArray(ar) {
-  return Array.isArray(ar);
-}
-exports.isArray = isArray;
-
-function isBoolean(arg) {
-  return typeof arg === 'boolean';
-}
-exports.isBoolean = isBoolean;
-
-function isNull(arg) {
-  return arg === null;
-}
-exports.isNull = isNull;
-
-function isNullOrUndefined(arg) {
-  return arg == null;
-}
-exports.isNullOrUndefined = isNullOrUndefined;
-
-function isNumber(arg) {
-  return typeof arg === 'number';
-}
-exports.isNumber = isNumber;
-
-function isString(arg) {
-  return typeof arg === 'string';
-}
-exports.isString = isString;
-
-function isSymbol(arg) {
-  return typeof arg === 'symbol';
-}
-exports.isSymbol = isSymbol;
-
-function isUndefined(arg) {
-  return arg === void 0;
-}
-exports.isUndefined = isUndefined;
-
-function isRegExp(re) {
-  return isObject(re) && objectToString(re) === '[object RegExp]';
-}
-exports.isRegExp = isRegExp;
-
-function isObject(arg) {
-  return typeof arg === 'object' && arg !== null;
-}
-exports.isObject = isObject;
-
-function isDate(d) {
-  return isObject(d) && objectToString(d) === '[object Date]';
-}
-exports.isDate = isDate;
-
-function isError(e) {
-  return isObject(e) &&
-      (objectToString(e) === '[object Error]' || e instanceof Error);
-}
-exports.isError = isError;
-
-function isFunction(arg) {
-  return typeof arg === 'function';
-}
-exports.isFunction = isFunction;
-
-function isPrimitive(arg) {
-  return arg === null ||
-         typeof arg === 'boolean' ||
-         typeof arg === 'number' ||
-         typeof arg === 'string' ||
-         typeof arg === 'symbol' ||  // ES6 symbol
-         typeof arg === 'undefined';
-}
-exports.isPrimitive = isPrimitive;
-
-exports.isBuffer = require('./support/isBuffer');
-
-function objectToString(o) {
-  return Object.prototype.toString.call(o);
-}
-
-
-function pad(n) {
-  return n < 10 ? '0' + n.toString(10) : n.toString(10);
-}
-
-
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-              'Oct', 'Nov', 'Dec'];
-
-// 26 Feb 16:19:34
-function timestamp() {
-  var d = new Date();
-  var time = [pad(d.getHours()),
-              pad(d.getMinutes()),
-              pad(d.getSeconds())].join(':');
-  return [d.getDate(), months[d.getMonth()], time].join(' ');
-}
-
-
-// log is just a thin wrapper to console.log that prepends a timestamp
-exports.log = function() {
-  console.log('%s - %s', timestamp(), exports.format.apply(exports, arguments));
-};
-
-
-/**
- * Inherit the prototype methods from one constructor into another.
- *
- * The Function.prototype.inherits from lang.js rewritten as a standalone
- * function (not on Function.prototype). NOTE: If this file is to be loaded
- * during bootstrapping this function needs to be rewritten using some native
- * functions as prototype setup using normal JavaScript does not work as
- * expected during bootstrapping (see mirror.js in r114903).
- *
- * @param {function} ctor Constructor function which needs to inherit the
- *     prototype.
- * @param {function} superCtor Constructor function to inherit prototype from.
- */
-exports.inherits = require('inherits');
-
-exports._extend = function(origin, add) {
-  // Don't do anything if add isn't an object
-  if (!add || !isObject(add)) return origin;
-
-  var keys = Object.keys(add);
-  var i = keys.length;
-  while (i--) {
-    origin[keys[i]] = add[keys[i]];
-  }
-  return origin;
-};
-
-function hasOwnProperty(obj, prop) {
-  return Object.prototype.hasOwnProperty.call(obj, prop);
-}
-
-}).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":101,"_process":29,"inherits":25}]},{},[2]);
+},{}]},{},[2]);

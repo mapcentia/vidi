@@ -13,6 +13,15 @@ module.exports = {
         return this;
     },
     init: function () {
-        return "/app/" + db + "/" + schema + "/" + (typeof urlVars.i === "undefined" ? "" : "?i=" + urlVars.i.split("#")[0]) + anchor();
+        var param = [], paramStr;
+        $.each(urlVars, function (i, v) {
+            parr = v.split("#");
+            if (parr.length > 1) {
+                parr.pop();
+            }
+            param.push(i + "=" + parr.join());
+        });
+        paramStr = param.join("&");
+        return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     }
 };

@@ -34,7 +34,8 @@ window.Vidi = function () {
         draw: require('./modules/draw'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
-        sqlQuery: require('./modules/sqlQuery')
+        sqlQuery: require('./modules/sqlQuery'),
+        serializeLayers: require('./modules/serializeLayers')
     };
 
     // Use setters in modules so they can interact
@@ -53,6 +54,7 @@ window.Vidi = function () {
     modules.print.set(modules);
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);
+    modules.serializeLayers.set(modules);
 
     return {
         init: modules.init

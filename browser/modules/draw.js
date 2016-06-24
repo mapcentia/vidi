@@ -165,6 +165,12 @@ module.exports = {
     },
     getDrawOn: function () {
         return drawOn;
+    },
+    getLayer: function(){
+        return store.layer;
+    },
+    getTable: function(){
+        return table;
     }
 }
 ;

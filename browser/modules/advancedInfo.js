@@ -55,9 +55,6 @@ var makeSearch = function () {
             "dashArray": '5,3'
         }).addTo(bufferItems);
         l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
-        console.log(l)
-
-
         sqlQuery.init(qstore, buffered.toText(), "4326");
     }
 };

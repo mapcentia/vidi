@@ -1,11 +1,13 @@
 var urlparser = require('./urlparser');
 var hash = urlparser.hash;
+var urlVars = urlparser.urlVars;
 var cloud;
 var meta;
 var setting;
 var setBaseLayer;
 var switchLayer;
 var legend;
+var draw;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -14,6 +16,7 @@ module.exports = {
         setBaseLayer = o.setBaseLayer;
         switchLayer = o.switchLayer;
         legend = o.legend;
+        draw = o.draw;
         return this;
     },
     init: function () {
@@ -40,15 +43,51 @@ module.exports = {
                     setBaseLayer.init(window.setBaseLayers[0].id);
                     if (extent !== null) {
                         /*if (BACKEND === "cartodb") {
-                            cloud.map.fitBounds(extent);
-                        } else {
-                            cloud.zoomToExtent(extent);
-                        }*/
+                         cloud.map.fitBounds(extent);
+                         } else {
+                         cloud.zoomToExtent(extent);
+                         }*/
                         cloud.zoomToExtent(extent);
                     } else {
                         cloud.zoomToExtent();
                     }
                 }
+                var parr, v, l, t;
+                if (typeof urlVars.draw !== "undefined") {
+                    parr = urlVars.draw.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    draw.control();
+                    l = draw.getLayer();
+                    t = draw.getTable();
+                    var g = L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    });
+                    $.each(g._layers, function(i, v){
+                        l.addLayer(v);
+                    });
+                    t.loadDataInTable();
+                    draw.control();
+                }
+
+                if (typeof urlVars.queryDraw !== "undefined") {
+                    parr = urlVars.queryDraw.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    }).addTo(cloud.map);
+                }
+
+
             } else {
                 setTimeout(pollForLayers, 10);
             }

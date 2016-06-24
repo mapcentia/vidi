@@ -38,10 +38,8 @@ module.exports = {
         advancedInfo.init();
 
         var moveEndCallBack = function () {
-            try {
                 history.pushState(null, null, anchor.init());
-            } catch (e) {
-            }
+
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
