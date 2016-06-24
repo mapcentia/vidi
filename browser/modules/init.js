@@ -36,7 +36,6 @@ module.exports = {
         draw.init();
         bindEvent.init();
         advancedInfo.init();
-        setTimeout(function(){print.init()}, 1000);
 
         var moveEndCallBack = function () {
             try {

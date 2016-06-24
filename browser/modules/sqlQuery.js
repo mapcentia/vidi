@@ -101,6 +101,7 @@ module.exports = {
                         height: (height > 300) ? height : 300
                     });
                     hit = true;
+
                 } else {
                     layerObj.reset();
                 }
@@ -134,8 +135,16 @@ module.exports = {
                             color: '#660000',
                             dashArray: '',
                             fillOpacity: 0.2
+                        },
+                        onEachFeature: function (f, l) {
+                            l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                            console.log(l._layers);
+
                         }
+
                     });
+                    console.log(qstore[index].layer);
+
                     break;
                 case "cartodb":
                     qstore[index] = new geocloud.cartoDbStore({

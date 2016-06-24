@@ -47,13 +47,16 @@ var makeSearch = function () {
         var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
         var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
         var buffered = reader.read(buffer4326);
-        L.geoJson(buffer4326, {
+        var l = L.geoJson(buffer4326, {
             "color": "#ff7800",
             "weight": 1,
             "opacity": 1,
             "fillOpacity": 0.1,
             "dashArray": '5,3'
         }).addTo(bufferItems);
+        l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
+        console.log(l)
+
 
         sqlQuery.init(qstore, buffered.toText(), "4326");
     }
@@ -123,6 +126,7 @@ module.exports = {
 
             // Bind events
             cloud.map.on('draw:created', function (e) {
+                e.layer._vidi_type = "query_draw";
                 drawnItems.addLayer(e.layer);
             });
             cloud.map.on('draw:drawstart', function (e) {

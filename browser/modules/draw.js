@@ -86,6 +86,7 @@ module.exports = {
                 if (type === 'circle') {
                     distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
                 }
+                drawLayer._vidi_type = "draw";
                 drawLayer.feature = {
                     properties: {
                         type: type,
