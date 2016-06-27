@@ -125,8 +125,9 @@ module.exports = {
                     qstore[index] = new geocloud.sqlStore({
                         jsonp: false,
                         method: "POST",
-                        host: host,
+                        host: "",
                         db: db,
+                        uri: "/api/sql",
                         clickable: true,
                         id: index,
                         onLoad: onLoad,

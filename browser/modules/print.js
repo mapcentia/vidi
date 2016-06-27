@@ -5,6 +5,8 @@ var recScale;
 var test;
 var serializeLayers;
 var anchor;
+var lz = require('lz-string');
+var base64 = require('base64-url')
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -24,7 +26,7 @@ module.exports = {
             "query_draw": true,
             "query_buffer": true,
             "query_result": true,
-            "draw": false
+            "draw": false // Get draw
         });
 
         $.each(e, function (i, v) {
@@ -46,7 +48,7 @@ module.exports = {
         });
 
         e = serializeLayers.serialize({
-            "query_draw": false,
+            "query_draw": false, // Get query draw
             "query_buffer": true,
             "query_result": true,
             "draw": true
@@ -62,12 +64,12 @@ module.exports = {
         form.setAttribute("method", "get");
         //form.setAttribute("action", "test.jsp");
 
-// setting form target to a window named 'formresult'
+        // setting form target to a window named 'formresult'
         form.setAttribute("target", "formresult");
 
         var hiddenField1 = document.createElement("input");
         hiddenField1.setAttribute("name", "draw");
-        hiddenField1.setAttribute("value", JSON.stringify(layerDraw));
+        hiddenField1.setAttribute("value", base64.encode(JSON.stringify(layerDraw)));
         form.appendChild(hiddenField1);
 
         var hiddenField2 = document.createElement("input");
@@ -77,7 +79,7 @@ module.exports = {
 
         document.body.appendChild(form);
 
-// creating the 'formresult' window with custom features prior to submitting the form
+        // creating the 'formresult' window with custom features prior to submitting the form
         //window.open('', 'formresult', 'scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=no');
 
         form.submit();

@@ -23,11 +23,15 @@
     "grunt-templates-hogan": "^0.3.0"
   },
   "dependencies": {
-    "body-parser": "^1.15.1",
+    "base64-js": "^1.1.2",
+    "base64-url": "^1.2.2",
+    "body-parser": "^1.15.2",
     "circular-functions": "0.0.3",
     "cors": "^2.7.1",
+    "crypto-browserify": "^3.11.0",
     "express": "^4.13.4",
     "jsts": "^1.1.2",
+    "lz-string": "^1.4.4",
     "moment": "^2.13.0",
     "nouislider": "^8.5.1",
     "reproject": "^1.1.1",

@@ -8,6 +8,9 @@ var setBaseLayer;
 var switchLayer;
 var legend;
 var draw;
+var lz = require('lz-string');
+var base64 = require('base64-url')
+
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -58,7 +61,7 @@ module.exports = {
                     if (parr.length > 1) {
                         parr.pop();
                     }
-                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    v = JSON.parse(base64.decode(decodeURIComponent(parr.join("&"))));
                     draw.control();
                     l = draw.getLayer();
                     t = draw.getTable();
