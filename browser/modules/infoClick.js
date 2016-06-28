@@ -6,6 +6,7 @@ var meta;
 var draw;
 var sqlQuery;
 var qstore = [];
+var active = true;
 
 module.exports = {
     set: function (o) {
@@ -22,10 +23,11 @@ module.exports = {
         });
         cloud.on("click", function (e) {
             // Do not get info if drawing
-            if (draw.getDrawOn() || advancedInfo.getSearchOn()) {
+           /* if (draw.getDrawOn() || advancedInfo.getSearchOn()) {
                 return;
-            }
+            }*/
             var event = new geocloud.clickEvent(e, cloud);
+
             if (clicktimer) {
                 clearTimeout(clicktimer);
             }
@@ -41,6 +43,9 @@ module.exports = {
     },
     reset: function(){
         sqlQuery.reset(qstore);
+    },
+    active: function(a){
+        active = a;
     }
 };
 

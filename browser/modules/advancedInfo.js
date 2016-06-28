@@ -121,6 +121,12 @@ module.exports = {
             cloud.map.addControl(drawControl);
             searchOn = true;
 
+            // Unbind events
+            cloud.map.off('draw:created');
+            cloud.map.off('draw:drawstart');
+            cloud.map.off('draw:drawstop');
+            cloud.map.off('draw:editstart');
+
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";

@@ -65,6 +65,13 @@ module.exports = {
             cloud.map.addControl(drawControl);
             drawOn = true;
 
+            // Unbind events
+            cloud.map.off('draw:created');
+            cloud.map.off('draw:drawstart');
+            cloud.map.off('draw:drawstop');
+            cloud.map.off('draw:editstart');
+            cloud.map.off('draw:deleted');
+
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;

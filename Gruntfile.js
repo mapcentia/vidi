@@ -35,6 +35,9 @@ module.exports = function (grunt) {
             publish: {
                 files: {
                     'public/js/bundle.js': ['browser/index.js']
+                },
+                options: {
+                    transform: ['require-globify']
                 }
             }
         }/*,

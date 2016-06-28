@@ -10,6 +10,7 @@ var bindEvent;
 var draw;
 var print;
 var advancedInfo;
+var extensions;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -24,6 +25,7 @@ module.exports = {
         draw = o.draw;
         print = o.print;
         advancedInfo = o.advancedInfo;
+        extensions = o.extensions;
         return this;
     },
     init: function () {
@@ -38,13 +40,13 @@ module.exports = {
         advancedInfo.init();
 
         var moveEndCallBack = function () {
-                history.pushState(null, null, anchor.init());
+            history.pushState(null, null, anchor.init());
 
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
-
-
         $.material.init();
+
+
     }
 };

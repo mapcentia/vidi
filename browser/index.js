@@ -1,12 +1,10 @@
 window.gc2i18n = require('./i18n/da_DK');
+
 window.Vidi = function () {
     "use strict";
 
     // Declare vars
-    var init, switchLayer, setBaseLayer, meta, setting, addLegend, autocomplete, hostname, nodeHostname, cloud, db, schema, hash, osm,
-        qstore = [], anchor, drawLayer, drawControl, zoomControl, metaDataKeys = [], metaDataKeysTitle = [],
-        awesomeMarker, metaDataReady = false, settingsReady = false, makeConflict, socketId,
-        drawing = false, searchFinish, zoomToFeature, fileId, geomStr, urlVars, config;
+    var config, socketId;
 
     // Set vars
     socketId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -16,7 +14,7 @@ window.Vidi = function () {
 
     config = require('../config/config.js');
 
-    // Require modules
+    // Require standard modules
     var modules = {
         cloud: require('./modules/cloud'),
         init: require('./modules/init'),
@@ -35,7 +33,8 @@ window.Vidi = function () {
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
         sqlQuery: require('./modules/sqlQuery'),
-        serializeLayers: require('./modules/serializeLayers')
+        serializeLayers: require('./modules/serializeLayers'),
+        extensions: {}
     };
 
     // Use setters in modules so they can interact
@@ -55,6 +54,20 @@ window.Vidi = function () {
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);
     modules.serializeLayers.set(modules);
+
+    // Hack to compile Glob files. Don´t call this function!
+    function ಠ_ಠ() {
+        require('./modules/extensions/**/*.js', {glob: true});
+    }
+
+    // Require extensions
+    $.each(config.extensions.browser, function (i, v) {
+        modules.extensions[Object.keys(v)[0]] = {};
+        $.each(v[Object.keys(v)[0]], function (n, m) {
+            modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
+            modules.extensions[Object.keys(v)[0]][m].set(modules);
+        })
+    });
 
     return {
         init: modules.init
