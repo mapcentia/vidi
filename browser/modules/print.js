@@ -60,6 +60,19 @@ module.exports = {
             }
         });
 
+        e = serializeLayers.serialize({
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": false, // Get result
+            "draw": true
+        });
+
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerQueryResult.push({geojson: v.geoJson})
+            }
+        });
+
         var form = document.createElement("form");
         form.setAttribute("method", "get");
         //form.setAttribute("action", "test.jsp");
@@ -76,6 +89,11 @@ module.exports = {
         hiddenField2.setAttribute("name", "queryDraw");
         hiddenField2.setAttribute("value", JSON.stringify(layerQueryDraw));
         form.appendChild(hiddenField2);
+
+        var hiddenField3 = document.createElement("input");
+        hiddenField3.setAttribute("name", "queryResult");
+        hiddenField3.setAttribute("value", JSON.stringify(layerQueryResult));
+        form.appendChild(hiddenField3);
 
         document.body.appendChild(form);
 

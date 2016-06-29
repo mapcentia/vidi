@@ -5,7 +5,6 @@ var config = require('../../config/config.js').gc2;
 
 
 router.post('/api/sql/:db', function (req, response) {
-    console.log(req.body.srs)
     var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, url, data = [], jsfile = "";
     url = config.host + "/api/v1/sql/" + db + "?q=" + q + "&srs=" + srs +  "&lifetime=" + lifetime + "&client_encoding=" + client_encoding;
     console.log(url);

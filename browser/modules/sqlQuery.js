@@ -4,7 +4,6 @@ var cloud;
 var meta;
 var draw;
 var advancedInfo;
-var host = require('../../config/config.js').gc2.host;
 
 var BACKEND = "gc2";
 
@@ -120,38 +119,31 @@ module.exports = {
                     //clearDrawItems();
                 }
             };
-            switch (BACKEND) {
-                case "gc2":
-                    qstore[index] = new geocloud.sqlStore({
-                        jsonp: false,
-                        method: "POST",
-                        host: "",
-                        db: db,
-                        uri: "/api/sql",
-                        clickable: true,
-                        id: index,
-                        onLoad: onLoad,
-                        styleMap: {
-                            weight: 5,
-                            color: '#660000',
-                            dashArray: '',
-                            fillOpacity: 0.2
-                        },
-                        onEachFeature: function (f, l) {
-                            l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
-                        }
-                    });
-                    break;
-                case "cartodb":
-                    qstore[index] = new geocloud.cartoDbStore({
-                        host: host,
-                        db: db,
-                        clickable: false,
-                        id: index,
-                        onLoad: onLoad
-                    });
-                    break;
-            }
+
+            qstore[index] = new geocloud.sqlStore({
+                jsonp: false,
+                method: "POST",
+                host: "",
+                db: db,
+                uri: "/api/sql",
+                clickable: true,
+                id: index,
+                onLoad: onLoad,
+                styleMap: {
+                    weight: 5,
+                    color: '#660000',
+                    dashArray: '',
+                    fillOpacity: 0.2
+                },
+                onEachFeature: function (f, l) {
+                    if (typeof l._layers !== "undefined") {
+                        l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                    } else {
+                        l._vidi_type = "query_result";
+                    }
+                }
+            });
+
             cloud.addGeoJsonStore(qstore[index]);
             var sql, f_geometry_column = metaDataKeys[value.split(".")[1]].f_geometry_column;
             if (geoType === "RASTER") {

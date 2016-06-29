@@ -90,6 +90,19 @@ module.exports = {
                     }).addTo(cloud.map);
                 }
 
+                if (typeof urlVars.queryResult !== "undefined") {
+                    parr = urlVars.queryResult.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    }).addTo(cloud.map);
+                }
+
 
             } else {
                 setTimeout(pollForLayers, 10);

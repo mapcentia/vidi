@@ -73,7 +73,7 @@ window.Vidi = function () {
     "use strict";
 
     // Declare vars
-    var config, socketId;
+    var config, socketId, tmpl;
 
     // Set vars
     socketId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -83,10 +83,35 @@ window.Vidi = function () {
 
     config = require('../config/config.js');
 
-    // Require standard modules
+    // Load style sheet
+    $('<link/>').attr({
+        rel: 'stylesheet',
+        type: 'text/css',
+        href: '/static/css/styles.css'
+    }).appendTo('head');
+
+    // Render template and set some styling
+    if (typeof config.template === "undefined") {
+        tmpl = "default.tmpl";
+    } else {
+        tmpl = config.template;
+    }
+    $("body").html(Templates[tmpl].render(gc2i18n.dict));
+
+    $("[data-toggle=tooltip]").tooltip();
+    $(".center").hide();
+    $("#pane").hide().fadeIn(1500);
+    var max = $(document).height() - $('.tab-pane').offset().top - 100;
+    $('.tab-pane').not("#result-content").css('max-height', max);
+    $('#places').css('height', max - 130);
+    $('#places').css('min-height', 400);
+    $('#places .tt-dropdown-menu').css('max-height', max - 200);
+    $('#places .tt-dropdown-menu').css('min-height', 400);
+
+    // Require the standard modules
     var modules = {
-        cloud: require('./modules/cloud'),
         init: require('./modules/init'),
+        cloud: require('./modules/cloud'),
         switchLayer: require('./modules/switchLayer'),
         setBaseLayer: require('./modules/setBaseLayer'),
         meta: require('./modules/gc2/meta'),
@@ -106,7 +131,7 @@ window.Vidi = function () {
         extensions: {}
     };
 
-    // Use setters in modules so they can interact
+    // Use the setters in modules so they can interact
     modules.init.set(modules);
     modules.meta.set(modules);
     modules.switchLayer.set(modules);
@@ -124,20 +149,22 @@ window.Vidi = function () {
     modules.sqlQuery.set(modules);
     modules.serializeLayers.set(modules);
 
+    // Require extensions modules
+
     // Hack to compile Glob files. Don´t call this function!
     function ಠ_ಠ() {
         require('./modules/extensions/cowiDetail/bufferSearch.js');
     }
-
-    // Require extensions
-    $.each(config.extensions.browser, function (i, v) {
-        modules.extensions[Object.keys(v)[0]] = {};
-        $.each(v[Object.keys(v)[0]], function (n, m) {
-            modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
-            modules.extensions[Object.keys(v)[0]][m].set(modules);
-        })
-    });
-
+    if (typeof config.extensions !== "undefined" && typeof config.extensions.browser !== "undefined") {
+        $.each(config.extensions.browser, function (i, v) {
+            modules.extensions[Object.keys(v)[0]] = {};
+            $.each(v[Object.keys(v)[0]], function (n, m) {
+                modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
+                modules.extensions[Object.keys(v)[0]][m].set(modules);
+            })
+        });
+    }
+    // Return the init module to be called in index.html
     return {
         init: modules.init
     }
@@ -861,7 +888,7 @@ var circle1, circle2, marker;
 var jsts = require('jsts');
 var reproject = require('reproject');
 var store;
-var db = "geofyn";
+var db = "test";
 var drawnItems = new L.FeatureGroup();
 var drawControl;
 var clearDrawItems = function () {
@@ -870,8 +897,12 @@ var clearDrawItems = function () {
     try {
         cloud.map.removeLayer(circle1);
         cloud.map.removeLayer(circle2);
-        reset(store);
 
+    } catch (e) {
+        console.log(e.message)
+    }
+    try {
+        reset(store);
     } catch (e) {
         console.log(e.message)
     }
@@ -929,9 +960,9 @@ module.exports = {
         });
         cloud.map.on('draw:drawstop', function (e) {
             if (e.layerType === "marker") {
-                buffer(e);
+                buffer();
             } else {
-                alert();
+                polygon();
             }
 
         });
@@ -939,10 +970,8 @@ module.exports = {
     }
 };
 
-var buffer = function (marker) {
-    var hit = false, layer;
-    console.log(marker.layerType);
-
+var buffer = function () {
+    var layer;
     for (var prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
         break;
@@ -977,8 +1006,59 @@ var buffer = function (marker) {
         "dashArray": '5,3'
     }).addTo(cloud.map);
 
-    var isEmpty = true;
-    store = new geocloud.sqlStore({
+    store = createStore();
+    store.sql = JSON.stringify([reader.read(c1).toText(),reader.read(c2).toText()]);
+    cloud.addGeoJsonStore(store);
+    store.load();
+
+    // Create a clean up click event
+    cloud.on("click", function (e) {
+        try {
+            drawnItems.clearLayers();
+            cloud.map.removeLayer(circle1);
+            cloud.map.removeLayer(circle2);
+
+        } catch (e) {
+        }
+    });
+
+    // Enable standard info click again
+    //infoClick.init();
+};
+
+var polygon = function () {
+    var layer;
+    for (var prop in drawnItems._layers) {
+        layer = drawnItems._layers[prop];
+        break;
+    }
+    if (typeof layer === "undefined") {
+        return;
+    }
+
+    var reader = new jsts.io.GeoJSONReader();
+    var geom = reader.read(layer.toGeoJSON());
+    console.log(geom.geometry.toText());
+
+    store = createStore();
+    store.sql = JSON.stringify([geom.geometry.toText()]);
+    cloud.addGeoJsonStore(store);
+    store.load();
+
+    // Create a clean up click event
+    cloud.on("click", function (e) {
+        try {
+            drawnItems.clearLayers();
+
+        } catch (e) {
+        }
+    });
+
+};
+
+var createStore = function () {
+    var hit = false, isEmpty = true;
+    return new geocloud.sqlStore({
         jsonp: false,
         method: "POST",
         host: "",
@@ -991,7 +1071,7 @@ var buffer = function (marker) {
             isEmpty = layerObj.isEmpty();
             if (!isEmpty) {
                 $('#modal-info-body').show();
-                $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">Buffer</a></li>');
+                $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">Antal indbyggere</a></li>');
                 $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
 
                 $.each(layerObj.geoJSON.features, function (i, feature) {
@@ -1039,33 +1119,19 @@ var buffer = function (marker) {
             $('#main-tabs a[href="#info-content"]').tab('show');
         },
         styleMap: {
-            weight: 5,
+            weight: 2,
             color: '#660000',
             dashArray: '',
             fillOpacity: 0.2
         },
         onEachFeature: function (f, l) {
-            l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+            if (typeof l._layers !== "undefined") {
+                l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+            } else {
+                l._vidi_type = "query_result";
+            }
         }
     });
-
-    store.sql = "SELECT * FROM dagi.sogn limit 10";
-    cloud.addGeoJsonStore(store);
-    store.load();
-
-    // Create a clean up click event
-    cloud.on("click", function (e) {
-        try {
-            drawnItems.clearLayers();
-            cloud.map.removeLayer(circle1);
-            cloud.map.removeLayer(circle2);
-
-        } catch (e) {
-        }
-    });
-
-    // Enable standard info click again
-   //infoClick.init();
 };
 
 },{"./../../height":15,"jsts":32,"reproject":104}],12:[function(require,module,exports){
@@ -1425,6 +1491,19 @@ module.exports = {
             }
         });
 
+        e = serializeLayers.serialize({
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": false, // Get result
+            "draw": true
+        });
+
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerQueryResult.push({geojson: v.geoJson})
+            }
+        });
+
         var form = document.createElement("form");
         form.setAttribute("method", "get");
         //form.setAttribute("action", "test.jsp");
@@ -1441,6 +1520,11 @@ module.exports = {
         hiddenField2.setAttribute("name", "queryDraw");
         hiddenField2.setAttribute("value", JSON.stringify(layerQueryDraw));
         form.appendChild(hiddenField2);
+
+        var hiddenField3 = document.createElement("input");
+        hiddenField3.setAttribute("name", "queryResult");
+        hiddenField3.setAttribute("value", JSON.stringify(layerQueryResult));
+        form.appendChild(hiddenField3);
 
         document.body.appendChild(form);
 
@@ -2105,7 +2189,6 @@ var cloud;
 var meta;
 var draw;
 var advancedInfo;
-var host = require('../../config/config.js').gc2.host;
 
 var BACKEND = "gc2";
 
@@ -2221,38 +2304,31 @@ module.exports = {
                     //clearDrawItems();
                 }
             };
-            switch (BACKEND) {
-                case "gc2":
-                    qstore[index] = new geocloud.sqlStore({
-                        jsonp: false,
-                        method: "POST",
-                        host: "",
-                        db: db,
-                        uri: "/api/sql",
-                        clickable: true,
-                        id: index,
-                        onLoad: onLoad,
-                        styleMap: {
-                            weight: 5,
-                            color: '#660000',
-                            dashArray: '',
-                            fillOpacity: 0.2
-                        },
-                        onEachFeature: function (f, l) {
-                            l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
-                        }
-                    });
-                    break;
-                case "cartodb":
-                    qstore[index] = new geocloud.cartoDbStore({
-                        host: host,
-                        db: db,
-                        clickable: false,
-                        id: index,
-                        onLoad: onLoad
-                    });
-                    break;
-            }
+
+            qstore[index] = new geocloud.sqlStore({
+                jsonp: false,
+                method: "POST",
+                host: "",
+                db: db,
+                uri: "/api/sql",
+                clickable: true,
+                id: index,
+                onLoad: onLoad,
+                styleMap: {
+                    weight: 5,
+                    color: '#660000',
+                    dashArray: '',
+                    fillOpacity: 0.2
+                },
+                onEachFeature: function (f, l) {
+                    if (typeof l._layers !== "undefined") {
+                        l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                    } else {
+                        l._vidi_type = "query_result";
+                    }
+                }
+            });
+
             cloud.addGeoJsonStore(qstore[index]);
             var sql, f_geometry_column = metaDataKeys[value.split(".")[1]].f_geometry_column;
             if (geoType === "RASTER") {
@@ -2288,7 +2364,7 @@ module.exports = {
         $("#info-pane").empty();
     }
 };
-},{"../../config/config.js":26,"./height":15,"./urlparser":25}],23:[function(require,module,exports){
+},{"./height":15,"./urlparser":25}],23:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var hash = urlparser.hash;
 var urlVars = urlparser.urlVars;
@@ -2381,6 +2457,19 @@ module.exports = {
                     }).addTo(cloud.map);
                 }
 
+                if (typeof urlVars.queryResult !== "undefined") {
+                    parr = urlVars.queryResult.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    v = JSON.parse(decodeURIComponent(parr.join("&")));
+                    L.geoJson(v[0].geojson, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    }).addTo(cloud.map);
+                }
+
 
             } else {
                 setTimeout(pollForLayers, 10);
@@ -2447,12 +2536,13 @@ module.exports = {
 },{}],26:[function(require,module,exports){
 module.exports = {
     gc2: {
-        host: "http://geofyn.mapcentia.com"
+        host: "http://cowi.mapcentia.com"
     },
     extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
-    }
+    },
+    template: "cowiDetail.tmpl"
 };
 },{}],27:[function(require,module,exports){
 'use strict'
