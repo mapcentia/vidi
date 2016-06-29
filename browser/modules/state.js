@@ -55,24 +55,51 @@ module.exports = {
                         cloud.zoomToExtent();
                     }
                 }
-                var parr, v, l, t;
+                var parr, v, l, t, g;
+
+                // Recreate Drawings
                 if (typeof urlVars.draw !== "undefined") {
                     parr = urlVars.draw.split("#");
                     if (parr.length > 1) {
                         parr.pop();
                     }
                     v = JSON.parse(base64.decode(decodeURIComponent(parr.join("&"))));
+                    console.log(v);
+
+
                     draw.control();
                     l = draw.getLayer();
                     t = draw.getTable();
-                    var g = L.geoJson(v[0].geojson, {
-                        style: function (f) {
-                            return f.style;
+
+                    $.each(v[0].geojson.features, function (n, m) {
+                        if (m.type === "Feature") {
+                            console.log(m.type)
+                            g = L.geoJson(v[0].geojson, {
+                                style: function (f) {
+                                    return f.style;
+                                }
+                            });
+                            $.each(g._layers, function (i, v) {
+                                l.addLayer(v);
+                            });
                         }
+                        if (m.type === "Circle") {
+                            console.log(m.type)
+                            g = L.circle(m._latlng, m._mRadius, m.style);
+                            g.feature = m.feature;
+                            console.log(g)
+                            l.addLayer(g);
+                        }
+                        if (m.type === "Rectangle") {
+                            console.log(m)
+                            g = L.rectangle([m._latlngs[0],m._latlngs[2]], m.style);
+                            g.feature = m.feature;
+                            console.log(g)
+                            l.addLayer(g);
+                        }
+
                     });
-                    $.each(g._layers, function(i, v){
-                        l.addLayer(v);
-                    });
+
                     t.loadDataInTable();
                     draw.control();
                 }

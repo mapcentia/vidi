@@ -608,10 +608,14 @@ module.exports = {
             });
             cloud.map.on('draw:edited', function (e) {
                 $.each(e.layers._layers, function (i, v) {
-                    if (v.feature.properties.distance !== null) {
+                    if (typeof v._mRadius !== "undefined") {
+                        v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
+                    }
+                    else if (typeof v._icon !== "undefined") {
+                    } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = getDistance(v);
                     }
-                    if (v.feature.properties.area !== null) {
+                    else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = getArea(v);
                     }
                 });
@@ -1464,18 +1468,6 @@ module.exports = {
             if (v.type === "Vector") {
                 layerDraw.push({geojson: v.geoJson})
             }
-            /*if (v.type === "TMS") {
-             L.tileLayer(v.baseURL + '1.0.0/' + v.layer + '/{z}/{x}/{y}.png', {
-             tms: true
-             }).addTo(cloud.map);
-             }
-             if (v.type === "OSM") {
-             L.tileLayer(v.baseURL + "{z}/{x}/{y}.png", {
-             attribution: "&copy; <a target='_blank' href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-             maxZoom: 20,
-             maxNativeZoom: 18
-             }).addTo(cloud.map);
-             }*/
         });
 
         e = serializeLayers.serialize({
@@ -1981,10 +1973,22 @@ var _encoders = {
                     encStyles[styleName] = style;
                 }
 
-                featureGeoJson = (feature instanceof L.Circle) ? _circleGeoJSON(feature) : feature.toGeoJSON();
-                featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
-                //featureGeoJson.properties._leaflet_style = styleName;
-                featureGeoJson.type = "Feature";
+                console.log(feature)
+                if (feature instanceof L.Circle){
+                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius};
+                    featureGeoJson.type = "Circle";
+                    featureGeoJson.feature = feature.feature;
+                } else if (feature instanceof L.Rectangle) {
+                    featureGeoJson = {_latlngs: feature._latlngs};
+                    featureGeoJson.type = "Rectangle";
+                    featureGeoJson.feature = feature.feature;
+                } else
+                {
+                    featureGeoJson = feature.toGeoJSON();
+                    featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
+                    featureGeoJson.type = "Feature";
+                }
+
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
 
@@ -1992,7 +1996,6 @@ var _encoders = {
                 if (opacity === null) {
                     opacity = feature.options.opacity || 1.0;
                 }
-
                 encFeatures.push(featureGeoJson);
             }
 
@@ -2422,24 +2425,51 @@ module.exports = {
                         cloud.zoomToExtent();
                     }
                 }
-                var parr, v, l, t;
+                var parr, v, l, t, g;
+
+                // Recreate Drawings
                 if (typeof urlVars.draw !== "undefined") {
                     parr = urlVars.draw.split("#");
                     if (parr.length > 1) {
                         parr.pop();
                     }
                     v = JSON.parse(base64.decode(decodeURIComponent(parr.join("&"))));
+                    console.log(v);
+
+
                     draw.control();
                     l = draw.getLayer();
                     t = draw.getTable();
-                    var g = L.geoJson(v[0].geojson, {
-                        style: function (f) {
-                            return f.style;
+
+                    $.each(v[0].geojson.features, function (n, m) {
+                        if (m.type === "Feature") {
+                            console.log(m.type)
+                            g = L.geoJson(v[0].geojson, {
+                                style: function (f) {
+                                    return f.style;
+                                }
+                            });
+                            $.each(g._layers, function (i, v) {
+                                l.addLayer(v);
+                            });
                         }
+                        if (m.type === "Circle") {
+                            console.log(m.type)
+                            g = L.circle(m._latlng, m._mRadius, m.style);
+                            g.feature = m.feature;
+                            console.log(g)
+                            l.addLayer(g);
+                        }
+                        if (m.type === "Rectangle") {
+                            console.log(m)
+                            g = L.rectangle([m._latlngs[0],m._latlngs[2]], m.style);
+                            g.feature = m.feature;
+                            console.log(g)
+                            l.addLayer(g);
+                        }
+
                     });
-                    $.each(g._layers, function(i, v){
-                        l.addLayer(v);
-                    });
+
                     t.loadDataInTable();
                     draw.control();
                 }
@@ -2538,11 +2568,11 @@ module.exports = {
     gc2: {
         host: "http://cowi.mapcentia.com"
     },
-    extensions: {
+    _extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl"
+    _template: "cowiDetail.tmpl"
 };
 },{}],27:[function(require,module,exports){
 'use strict'

@@ -220,10 +220,22 @@ var _encoders = {
                     encStyles[styleName] = style;
                 }
 
-                featureGeoJson = (feature instanceof L.Circle) ? _circleGeoJSON(feature) : feature.toGeoJSON();
-                featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
-                //featureGeoJson.properties._leaflet_style = styleName;
-                featureGeoJson.type = "Feature";
+                console.log(feature)
+                if (feature instanceof L.Circle){
+                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius};
+                    featureGeoJson.type = "Circle";
+                    featureGeoJson.feature = feature.feature;
+                } else if (feature instanceof L.Rectangle) {
+                    featureGeoJson = {_latlngs: feature._latlngs};
+                    featureGeoJson.type = "Rectangle";
+                    featureGeoJson.feature = feature.feature;
+                } else
+                {
+                    featureGeoJson = feature.toGeoJSON();
+                    featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
+                    featureGeoJson.type = "Feature";
+                }
+
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
 
@@ -231,7 +243,6 @@ var _encoders = {
                 if (opacity === null) {
                     opacity = feature.options.opacity || 1.0;
                 }
-
                 encFeatures.push(featureGeoJson);
             }
 

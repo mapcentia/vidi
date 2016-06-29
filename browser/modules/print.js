@@ -33,18 +33,6 @@ module.exports = {
             if (v.type === "Vector") {
                 layerDraw.push({geojson: v.geoJson})
             }
-            /*if (v.type === "TMS") {
-             L.tileLayer(v.baseURL + '1.0.0/' + v.layer + '/{z}/{x}/{y}.png', {
-             tms: true
-             }).addTo(cloud.map);
-             }
-             if (v.type === "OSM") {
-             L.tileLayer(v.baseURL + "{z}/{x}/{y}.png", {
-             attribution: "&copy; <a target='_blank' href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
-             maxZoom: 20,
-             maxNativeZoom: 18
-             }).addTo(cloud.map);
-             }*/
         });
 
         e = serializeLayers.serialize({

@@ -108,10 +108,14 @@ module.exports = {
             });
             cloud.map.on('draw:edited', function (e) {
                 $.each(e.layers._layers, function (i, v) {
-                    if (v.feature.properties.distance !== null) {
+                    if (typeof v._mRadius !== "undefined") {
+                        v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
+                    }
+                    else if (typeof v._icon !== "undefined") {
+                    } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = getDistance(v);
                     }
-                    if (v.feature.properties.area !== null) {
+                    else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = getArea(v);
                     }
                 });
