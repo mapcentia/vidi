@@ -23,9 +23,9 @@ module.exports = {
         });
         cloud.on("click", function (e) {
             // Do not get info if drawing
-           /* if (draw.getDrawOn() || advancedInfo.getSearchOn()) {
+           if (draw.getDrawOn() || advancedInfo.getSearchOn() || active === false) {
                 return;
-            }*/
+            }
             var event = new geocloud.clickEvent(e, cloud);
 
             if (clicktimer) {

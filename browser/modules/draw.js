@@ -6,6 +6,8 @@ var table;
 var store = new geocloud.sqlStore({
     clickable: true
 });
+var destructFunctions = [];
+
 
 var getDistance = function (e) {
     var tempLatLng = null;
@@ -132,6 +134,11 @@ module.exports = {
             cloud.map.off('draw:created');
             cloud.map.off('draw:deleted');
             cloud.map.off('draw:edited');
+
+            // Call destruct functions
+            $.each(destructFunctions, function(i, v){
+                v();
+            })
         }
     },
     init: function (str) {
@@ -177,11 +184,14 @@ module.exports = {
     getDrawOn: function () {
         return drawOn;
     },
-    getLayer: function(){
+    getLayer: function () {
         return store.layer;
     },
-    getTable: function(){
+    getTable: function () {
         return table;
+    },
+    setDestruct: function (f) {
+        destructFunctions.push(f);
     }
 }
 ;

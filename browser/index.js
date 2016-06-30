@@ -92,6 +92,7 @@ window.Vidi = function () {
             $.each(v[Object.keys(v)[0]], function (n, m) {
                 modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
                 modules.extensions[Object.keys(v)[0]][m].set(modules);
+                modules.extensions[Object.keys(v)[0]][m].init();
             })
         });
     }

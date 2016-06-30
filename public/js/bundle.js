@@ -161,6 +161,7 @@ window.Vidi = function () {
             $.each(v[Object.keys(v)[0]], function (n, m) {
                 modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
                 modules.extensions[Object.keys(v)[0]][m].set(modules);
+                modules.extensions[Object.keys(v)[0]][m].init();
             })
         });
     }
@@ -506,6 +507,8 @@ var table;
 var store = new geocloud.sqlStore({
     clickable: true
 });
+var destructFunctions = [];
+
 
 var getDistance = function (e) {
     var tempLatLng = null;
@@ -632,6 +635,11 @@ module.exports = {
             cloud.map.off('draw:created');
             cloud.map.off('draw:deleted');
             cloud.map.off('draw:edited');
+
+            // Call destruct functions
+            $.each(destructFunctions, function(i, v){
+                v();
+            })
         }
     },
     init: function (str) {
@@ -677,11 +685,14 @@ module.exports = {
     getDrawOn: function () {
         return drawOn;
     },
-    getLayer: function(){
+    getLayer: function () {
         return store.layer;
     },
-    getTable: function(){
+    getTable: function () {
         return table;
+    },
+    setDestruct: function (f) {
+        destructFunctions.push(f);
     }
 }
 ;
@@ -888,6 +899,7 @@ module.exports = {
 },{}],11:[function(require,module,exports){
 var cloud;
 var infoClick;
+var draw;
 var circle1, circle2, marker;
 var jsts = require('jsts');
 var reproject = require('reproject');
@@ -924,6 +936,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         infoClick = o.infoClick;
+        draw = o.draw;
         drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
@@ -948,18 +961,24 @@ module.exports = {
             },
             edit: false
         });
-
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItems);
 
-        console.log(drawControl);
-
+        // Set destruct in draw module, so this modules events are bound again
+        var me = this.init;
+        draw.setDestruct(function(){
+            me();
+        });
+        return this;
+    },
+    init: function(){
         // Bind events
         cloud.map.on('draw:created', function (e) {
             e.layer._vidi_type = "query_draw";
             drawnItems.addLayer(e.layer);
         });
         cloud.map.on('draw:drawstart', function (e) {
+            infoClick.active(false); // Switch standard info click off
             clearDrawItems();
         });
         cloud.map.on('draw:drawstop', function (e) {
@@ -968,9 +987,8 @@ module.exports = {
             } else {
                 polygon();
             }
-
+            infoClick.active(true); // Switch standard info click on again
         });
-        return this;
     }
 };
 
@@ -1042,7 +1060,6 @@ var polygon = function () {
 
     var reader = new jsts.io.GeoJSONReader();
     var geom = reader.read(layer.toGeoJSON());
-    console.log(geom.geometry.toText());
 
     store = createStore();
     store.sql = JSON.stringify([geom.geometry.toText()]);
@@ -1351,9 +1368,9 @@ module.exports = {
         });
         cloud.on("click", function (e) {
             // Do not get info if drawing
-           /* if (draw.getDrawOn() || advancedInfo.getSearchOn()) {
+           if (draw.getDrawOn() || advancedInfo.getSearchOn() || active === false) {
                 return;
-            }*/
+            }
             var event = new geocloud.clickEvent(e, cloud);
 
             if (clicktimer) {
@@ -2568,11 +2585,11 @@ module.exports = {
     gc2: {
         host: "http://cowi.mapcentia.com"
     },
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl"
+    template: "cowiDetail.tmpl"
 };
 },{}],27:[function(require,module,exports){
 'use strict'

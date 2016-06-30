@@ -1,5 +1,6 @@
 var cloud;
 var infoClick;
+var draw;
 var circle1, circle2, marker;
 var jsts = require('jsts');
 var reproject = require('reproject');
@@ -36,6 +37,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         infoClick = o.infoClick;
+        draw = o.draw;
         drawControl = new L.Control.Draw({
             position: 'topright',
             draw: {
@@ -60,18 +62,24 @@ module.exports = {
             },
             edit: false
         });
-
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItems);
 
-        console.log(drawControl);
-
+        // Set destruct in draw module, so this modules events are bound again
+        var me = this.init;
+        draw.setDestruct(function(){
+            me();
+        });
+        return this;
+    },
+    init: function(){
         // Bind events
         cloud.map.on('draw:created', function (e) {
             e.layer._vidi_type = "query_draw";
             drawnItems.addLayer(e.layer);
         });
         cloud.map.on('draw:drawstart', function (e) {
+            infoClick.active(false); // Switch standard info click off
             clearDrawItems();
         });
         cloud.map.on('draw:drawstop', function (e) {
@@ -80,9 +88,8 @@ module.exports = {
             } else {
                 polygon();
             }
-
+            infoClick.active(true); // Switch standard info click on again
         });
-        return this;
     }
 };
 
@@ -154,7 +161,6 @@ var polygon = function () {
 
     var reader = new jsts.io.GeoJSONReader();
     var geom = reader.read(layer.toGeoJSON());
-    console.log(geom.geometry.toText());
 
     store = createStore();
     store.sql = JSON.stringify([geom.geometry.toText()]);
