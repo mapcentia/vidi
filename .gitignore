@@ -79,8 +79,7 @@ node_modules
 
 config/config.js
 
-tmp/
-public/tmp
+
 
 !tmp/.gitignore
 !public/tmp/.gitignore
