@@ -81,9 +81,3 @@ config/config.js
 
 
 
-!tmp/.gitignore
-!public/tmp/.gitignore
-!public/tmp/print/.gitignore
-!public/tmp/print/pdf/.gitignore
-!public/tmp/print/json/.gitignore
-
