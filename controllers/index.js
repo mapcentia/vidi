@@ -6,5 +6,6 @@ router.use(require('./gc2/setting'));
 router.use(require('./gc2/baseLayer'));
 router.use(require('./gc2/legend'));
 router.use(require('./gc2/sql'));
+router.use(require('./print'));
 
 module.exports = router;

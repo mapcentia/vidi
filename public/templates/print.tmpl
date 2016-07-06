@@ -1,10 +1,14 @@
 <!-- map -->
-<div id="pane">
-    <div id="container">
+<div id="pane1" style="position: absolute; width: {{printWidth}}; height: {{printHeight}}; display: block; overflow: hidden">
+    <div id="scalebar" style="position: absolute; top: 40px; left: 40px"></div>
+    <div id="scale" style="position: absolute; top: 140px; left: 140px; z-index: 1"></div>
+    <div id="container1" style="position: relative; width: 200%; height: 200%; left:-50%; top:-50%; display: inline-block;">
         <div id="map"></div>
     </div>
 </div>
-<nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
+<div id="test" style="position: absolute; top: 240px; left: 140px; z-index: 1"></div>
+
+<nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden; display: none">
 
     <div class="navbar navbar-default">
         <div class="container-fluid">
@@ -66,6 +70,7 @@
                     <div role="tabpanel" class="tab-pane" id="conflict-search">
 
                     </div>
+
 
 
                 </div>
@@ -163,46 +168,12 @@
                         </label>
                     </div>
                     <div>
-
-                        <form class="form-horizontal" id="print-form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label for="select-scale" class="col-md-2 control-label">Scale</label>
-
-                                    <div class="col-md-10">
-                                        <select id="select-scale" class="form-control" disabled></select>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Templates</label>
-                                    <div class="col-md-10" id="print-tmpl"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Paper size</label>
-                                    <div class="col-md-10" id="print-size"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Orientation size</label>
-                                    <div class="col-md-10" id="print-orientation"></div>
-                                </div>
-
-                            </fieldset>
-                        </form>
-                        <div>
-                            <button id="start-print-btn" class="btn btn-primary" disabled>print</button>
-                        </div>
+                        <button id="start-print-btn" class="button">print</button>
                     </div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="help-content">...</div>
+
             </div>
         </div>
     </div>
 </nav>
-
-<div class="navbar navbar-default navbar-fixed-top">
-    <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#myNavmenu" data-canvas="body">
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-    </button>
-</div>

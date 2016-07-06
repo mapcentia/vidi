@@ -12,8 +12,14 @@ window.Vidi = function () {
         return v.toString(16);
     });
 
+    var urlparser = require('./modules/urlparser');
+    var urlVars = urlparser.urlVars;
+
     config = require('../config/config.js');
 
+    $( window ).load(function() {
+        window.status = "all_loaded";
+    });
     // Load style sheet
     $('<link/>').attr({
         rel: 'stylesheet',
@@ -26,6 +32,21 @@ window.Vidi = function () {
         tmpl = "default.tmpl";
     } else {
         tmpl = config.template;
+    }
+
+    // Check if template is set in URL vars
+    if (typeof urlVars.tmpl !=="undefined") {
+        var par = urlVars.tmpl.split("#");
+        if (par.length > 1) {
+            par.pop();
+        }
+        tmpl = par.join();
+    }
+
+    // If px and py is provided for print templates, add the values to the dict before rendering
+    if (urlVars.px && urlVars.py) {
+        gc2i18n.dict.printWidth = urlVars.px + "px";
+        gc2i18n.dict.printHeight = urlVars.py + "px";
     }
     $("body").html(Templates[tmpl].render(gc2i18n.dict));
 

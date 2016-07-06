@@ -38,6 +38,7 @@ module.exports = {
         draw.init();
         bindEvent.init();
         advancedInfo.init();
+        print.init();
 
         var moveEndCallBack = function () {
             history.pushState(null, null, anchor.init());
@@ -46,7 +47,5 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
-
-
     }
 };

@@ -20,9 +20,7 @@ module.exports = module.exports = {
             }
             draw.control();
         });
-        $("#print-btn").on("click", function () {
-            print.control();
-        });
+
 
         $("#advanced-info-btn").on("click", function () {
             // Stop drawing
@@ -37,6 +35,9 @@ module.exports = module.exports = {
             print.print();
         });
 
+        $("#print-btn").on("click", function () {
+            print.activate();
+        });
 
     }
 };

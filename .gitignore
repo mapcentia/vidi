@@ -78,3 +78,13 @@ node_modules
 # Created by .ignore support plugin (hsz.mobi)
 
 config/config.js
+
+tmp/
+public/tmp
+
+!tmp/.gitignore
+!public/tmp/.gitignore
+!public/tmp/print/.gitignore
+!public/tmp/print/pdf/.gitignore
+!public/tmp/print/json/.gitignore
+

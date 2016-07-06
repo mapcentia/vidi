@@ -1,3 +1,4 @@
+
 window.cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -6,12 +7,13 @@ window.cloud = new geocloud.map({
 var zoomControl = L.control.zoom({
     position: 'topright'
 });
-
-
 cloud.map.addControl(zoomControl);
 
 var map = cloud.map;
 
+
+/*var scaleControl = L.control.scale({position: "bottomright"});
+cloud.map.addControl(scaleControl);*/
 
 
 var graphicScale = L.control.graphicScale({

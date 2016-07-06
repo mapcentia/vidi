@@ -23,5 +23,8 @@ module.exports = {
         });
         paramStr = param.join("&");
         return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+    },
+    getAnchor: function(){
+        return anchor();
     }
 };

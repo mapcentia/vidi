@@ -185,6 +185,12 @@ module.exports = {
     },
     getSearchOn: function () {
         return searchOn;
+    },
+    getDrawLayer: function () {
+        return drawnItems;
+    },
+    getBufferLayer: function () {
+        return bufferItems;
     }
 };
 

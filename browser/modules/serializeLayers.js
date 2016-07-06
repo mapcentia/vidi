@@ -30,6 +30,7 @@ var _encodeLayers = function (map) {
         i;
 
     var layers = _getLayers(map);
+
     for (i = 0; i < layers.length; i++) {
         layer = layers[i];
         if (layer instanceof L.TileLayer.WMS) {
@@ -45,6 +46,8 @@ var _encodeLayers = function (map) {
         }
     }
     if (vectors.length) {
+        console.log(vectors)
+
         enc.push(_encoders.layers.vector.call(this, vectors));
     }
     return enc;
@@ -220,14 +223,17 @@ var _encoders = {
                     encStyles[styleName] = style;
                 }
 
-                console.log(feature)
                 if (feature instanceof L.Circle){
-                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius};
+                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius, _radius: feature._radius};
                     featureGeoJson.type = "Circle";
                     featureGeoJson.feature = feature.feature;
                 } else if (feature instanceof L.Rectangle) {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
+                    featureGeoJson.feature = feature.feature;
+                } else if (feature instanceof L.Marker) {
+                    featureGeoJson = {_latlng: feature._latlng};
+                    featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
                 } else
                 {
@@ -235,6 +241,7 @@ var _encoders = {
                     featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
                 }
+
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;

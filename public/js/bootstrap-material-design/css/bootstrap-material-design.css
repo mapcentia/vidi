@@ -1360,7 +1360,7 @@ label.radio-inline {
 }
 .form-group.is-focused .radio label,
 .form-group.is-focused label.radio-inline {
-    color: rgba(0,0,0, 0.26);
+    /*color: rgba(0,0,0, 0.26);*/
 }
 .form-group.is-focused .radio label:hover,
 .form-group.is-focused label.radio-inline:hover,

@@ -38,28 +38,35 @@ module.exports = {
         cloud = o.cloud;
         infoClick = o.infoClick;
         draw = o.draw;
+        L.DrawToolbar.include({
+            getModeHandlers: function (map) {
+                return [
+                    {
+                        enabled: true,
+                        handler: new L.Draw.Marker(map, { icon: new L.Icon.Default() }),
+                        title: 'Sæt en markør'
+                    },
+                    {
+                        enabled: true,
+                        handler: new L.Draw.Polygon(map, {
+                            shapeOptions: {
+                                color: '#662d91',
+                                fillOpacity: 0
+                            },
+                            allowIntersection: false,
+                            drawError: {
+                                color: '#b00b00',
+                                timeout: 1000
+                            }
+                        }),
+                        title: 'Tegn en polygon'
+
+                    }
+                ];
+            }
+        });
         drawControl = new L.Control.Draw({
             position: 'topright',
-            draw: {
-                polygon: {
-                    id: "sdsd",
-                    title: 'Draw a polygon!',
-                    allowIntersection: false,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    },
-                    showArea: true
-                },
-                polyline: false,
-                circle: false,
-                rectangle: false,
-                marker: true
-            },
             edit: false
         });
         cloud.map.addControl(drawControl);

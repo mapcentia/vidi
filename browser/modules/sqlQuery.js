@@ -137,7 +137,10 @@ module.exports = {
                 },
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
-                        l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                        //l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                        $.each(l._layers, function(i, v){
+                            v._vidi_type = "query_result";
+                        })
                     } else {
                         l._vidi_type = "query_result";
                     }

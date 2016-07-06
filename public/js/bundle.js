@@ -81,8 +81,14 @@ window.Vidi = function () {
         return v.toString(16);
     });
 
+    var urlparser = require('./modules/urlparser');
+    var urlVars = urlparser.urlVars;
+
     config = require('../config/config.js');
 
+    $( window ).load(function() {
+        window.status = "all_loaded";
+    });
     // Load style sheet
     $('<link/>').attr({
         rel: 'stylesheet',
@@ -95,6 +101,21 @@ window.Vidi = function () {
         tmpl = "default.tmpl";
     } else {
         tmpl = config.template;
+    }
+
+    // Check if template is set in URL vars
+    if (typeof urlVars.tmpl !=="undefined") {
+        var par = urlVars.tmpl.split("#");
+        if (par.length > 1) {
+            par.pop();
+        }
+        tmpl = par.join();
+    }
+
+    // If px and py is provided for print templates, add the values to the dict before rendering
+    if (urlVars.px && urlVars.py) {
+        gc2i18n.dict.printWidth = urlVars.px + "px";
+        gc2i18n.dict.printHeight = urlVars.py + "px";
     }
     $("body").html(Templates[tmpl].render(gc2i18n.dict));
 
@@ -171,7 +192,7 @@ window.Vidi = function () {
     }
 };
 
-},{"../config/config.js":26,"./i18n/da_DK":1,"./modules/advancedInfo":3,"./modules/anchor":4,"./modules/baseLayer":5,"./modules/bindEvent":6,"./modules/cloud":7,"./modules/draw":8,"./modules/extensions/cowiDetail/bufferSearch.js":11,"./modules/gc2/legend":12,"./modules/gc2/meta":13,"./modules/gc2/setting":14,"./modules/infoClick":16,"./modules/init":17,"./modules/print":18,"./modules/search/danish":19,"./modules/serializeLayers":20,"./modules/setBaseLayer":21,"./modules/sqlQuery":22,"./modules/state":23,"./modules/switchLayer":24}],3:[function(require,module,exports){
+},{"../config/config.js":26,"./i18n/da_DK":1,"./modules/advancedInfo":3,"./modules/anchor":4,"./modules/baseLayer":5,"./modules/bindEvent":6,"./modules/cloud":7,"./modules/draw":8,"./modules/extensions/cowiDetail/bufferSearch.js":11,"./modules/gc2/legend":12,"./modules/gc2/meta":13,"./modules/gc2/setting":14,"./modules/infoClick":16,"./modules/init":17,"./modules/print":18,"./modules/search/danish":19,"./modules/serializeLayers":20,"./modules/setBaseLayer":21,"./modules/sqlQuery":22,"./modules/state":23,"./modules/switchLayer":24,"./modules/urlparser":25}],3:[function(require,module,exports){
 var cloud;
 var sqlQuery;
 var infoClick;
@@ -359,6 +380,12 @@ module.exports = {
     },
     getSearchOn: function () {
         return searchOn;
+    },
+    getDrawLayer: function () {
+        return drawnItems;
+    },
+    getBufferLayer: function () {
+        return bufferItems;
     }
 };
 
@@ -389,6 +416,9 @@ module.exports = {
         });
         paramStr = param.join("&");
         return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+    },
+    getAnchor: function(){
+        return anchor();
     }
 };
 },{"./urlparser":25}],5:[function(require,module,exports){
@@ -441,9 +471,7 @@ module.exports = module.exports = {
             }
             draw.control();
         });
-        $("#print-btn").on("click", function () {
-            print.control();
-        });
+
 
         $("#advanced-info-btn").on("click", function () {
             // Stop drawing
@@ -458,10 +486,14 @@ module.exports = module.exports = {
             print.print();
         });
 
+        $("#print-btn").on("click", function () {
+            print.activate();
+        });
 
     }
 };
 },{}],7:[function(require,module,exports){
+
 window.cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -470,12 +502,13 @@ window.cloud = new geocloud.map({
 var zoomControl = L.control.zoom({
     position: 'topright'
 });
-
-
 cloud.map.addControl(zoomControl);
 
 var map = cloud.map;
 
+
+/*var scaleControl = L.control.scale({position: "bottomright"});
+cloud.map.addControl(scaleControl);*/
 
 
 var graphicScale = L.control.graphicScale({
@@ -937,28 +970,35 @@ module.exports = {
         cloud = o.cloud;
         infoClick = o.infoClick;
         draw = o.draw;
+        L.DrawToolbar.include({
+            getModeHandlers: function (map) {
+                return [
+                    {
+                        enabled: true,
+                        handler: new L.Draw.Marker(map, { icon: new L.Icon.Default() }),
+                        title: 'Sæt en markør'
+                    },
+                    {
+                        enabled: true,
+                        handler: new L.Draw.Polygon(map, {
+                            shapeOptions: {
+                                color: '#662d91',
+                                fillOpacity: 0
+                            },
+                            allowIntersection: false,
+                            drawError: {
+                                color: '#b00b00',
+                                timeout: 1000
+                            }
+                        }),
+                        title: 'Tegn en polygon'
+
+                    }
+                ];
+            }
+        });
         drawControl = new L.Control.Draw({
             position: 'topright',
-            draw: {
-                polygon: {
-                    id: "sdsd",
-                    title: 'Draw a polygon!',
-                    allowIntersection: false,
-                    drawError: {
-                        color: '#b00b00',
-                        timeout: 1000
-                    },
-                    shapeOptions: {
-                        color: '#662d91',
-                        fillOpacity: 0
-                    },
-                    showArea: true
-                },
-                polyline: false,
-                circle: false,
-                rectangle: false,
-                marker: true
-            },
             edit: false
         });
         cloud.map.addControl(drawControl);
@@ -1437,6 +1477,7 @@ module.exports = {
         draw.init();
         bindEvent.init();
         advancedInfo.init();
+        print.init();
 
         var moveEndCallBack = function () {
             history.pushState(null, null, anchor.init());
@@ -1445,8 +1486,6 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
-
-
     }
 };
 },{}],18:[function(require,module,exports){
@@ -1454,30 +1493,154 @@ var cloud;
 var printOn = false;
 var recEdit;
 var recScale;
-var test;
 var serializeLayers;
 var anchor;
 var lz = require('lz-string');
-var base64 = require('base64-url')
+var base64 = require('base64-url');
+var printItems = new L.FeatureGroup();
+var urlparser = require('./urlparser');
+var db = urlparser.db;
+var schema = urlparser.schema;
+var scale;
+var center;
+config = require('../../config/config.js');
+
+var printC = config.print.templates;
+var scales = config.print.scales;
+var tmpl;
+var pageSize;
+var orientation;
+
+
+Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+
+var cleanUp = function () {
+    try {
+        cloud.map.removeLayer(recScale);
+        cloud.map.removeLayer(recEdit);
+    } catch (e) {
+    }
+    printOn = false;
+};
+
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         serializeLayers = o.serializeLayers;
         anchor = o.anchor;
+        cloud.map.addLayer(printItems);
         return this;
     },
     init: function () {
+
+
+
+    },
+    activate: function () {
+        if (!printOn) {
+
+
+            $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
+            $("#print-tmpl").empty();
+            $("#print-size").empty();
+            $("#print-orientation").empty();
+            $("#select-scale").empty();
+            center = null;
+            scale = null;
+
+            // Set up print dialog
+            for (var i = 0; i < scales.length; i++) {
+                $("#select-scale").append("<option value='" + scales[i] + "'>1:" + scales[i] + "</option>");
+            }
+            $("#select-scale").change(function (e) {
+                console.log(e.target.value)
+                scale = e.target.value;
+                change();
+
+            });
+
+            $.each(printC, function (i, v) {
+                $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+            });
+
+            $(".print-tmpl").change(function (e) {
+                $("#print-size").empty();
+                $("#print-orientation").empty();
+
+                $.each(printC[e.target.value], function (i, v) {
+                    $("#print-size").append('<div class="radio radio-primary"><label><input type="radio" class="print print-size" name="print-size" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+                });
+
+                // Click the first options in size
+                setTimeout(function () {
+                    $("input:radio[name=print-size]:first").trigger("click");
+                }, 100);
+
+                $(".print-size").change(function (e) {
+                    $("#print-orientation").empty();
+                    change();
+
+                    // Click the first options in orientation
+                    setTimeout(function () {
+                        $("input:radio[name=print-orientation]:first").trigger("click");
+                    }, 100);
+                });
+
+                $(".print-size").change(function (e) {
+                    $("#print-orientation").empty();
+                    $.each(printC[$('input[name=print-tmpl]:checked', '#print-form').val()][e.target.value], function (i, v) {
+                        $("#print-orientation").append('<div class="radio radio-primary"><label><input type="radio" class="print print-orientation" name="print-orientation" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+                    });
+                    $(".print-orientation").change(function (e) {
+                        change();
+                    });
+                });
+            });
+
+            // Click the first options in all
+            $("input:radio[name=print-tmpl]:first").trigger("click");
+            setTimeout(function () {
+                $("input:radio[name=print-size]:first").trigger("click");
+                setTimeout(function () {
+                    $("input:radio[name=print-orientation]:first").trigger("click");
+                }, 100)
+            }, 100);
+
+
+            $(".print-tmpl").change(function (e) {
+                change();
+            });
+
+            var me = this;
+            var change = function () {
+                var arr = $("#print-form").serializeArray();
+                if (arr.length === 3) {
+                    cleanUp();
+                    tmpl = arr[0].value;
+                    pageSize = arr[1].value;
+                    orientation = arr[2].value;
+                    me.control();
+                } else {
+                    cleanUp();
+                }
+            };
+        } else {
+            cleanUp();
+            $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+        }
     },
     print: function () {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], e;
+        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
         try {
             recEdit.editing.disable();
         } catch (e) {
         }
         e = serializeLayers.serialize({
+            "printHelper": true,
             "query_draw": true,
             "query_buffer": true,
             "query_result": true,
+            "print": true,
             "draw": false // Get draw
         });
 
@@ -1488,10 +1651,12 @@ module.exports = {
         });
 
         e = serializeLayers.serialize({
+            "printHelper": true,
             "query_draw": false, // Get query draw
             "query_buffer": true,
             "query_result": true,
-            "draw": true
+            "draw": true,
+            "print": true
         });
 
         $.each(e, function (i, v) {
@@ -1501,10 +1666,27 @@ module.exports = {
         });
 
         e = serializeLayers.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": false, // Get query buffer draw
+            "query_result": true,
+            "draw": true,
+            "print": true
+        });
+
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerQueryBuffer.push({geojson: v.geoJson})
+            }
+        });
+
+        e = serializeLayers.serialize({
+            "printHelper": true,
             "query_draw": true,
             "query_buffer": true,
             "query_result": false, // Get result
-            "draw": true
+            "draw": true,
+            "print": true
         });
 
         $.each(e, function (i, v) {
@@ -1512,135 +1694,167 @@ module.exports = {
                 layerQueryResult.push({geojson: v.geoJson})
             }
         });
+        //console.log(layerQueryResult)
 
-        var form = document.createElement("form");
-        form.setAttribute("method", "get");
-        //form.setAttribute("action", "test.jsp");
+        e = serializeLayers.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": true,
+            "draw": true,
+            "print": false // Get print
+        });
 
-        // setting form target to a window named 'formresult'
-        form.setAttribute("target", "formresult");
+        $.each(e, function (i, v) {
+            if (v.type === "Vector") {
+                layerPrint.push({geojson: v.geoJson})
+            }
+        });
 
-        var hiddenField1 = document.createElement("input");
-        hiddenField1.setAttribute("name", "draw");
-        hiddenField1.setAttribute("value", base64.encode(JSON.stringify(layerDraw)));
-        form.appendChild(hiddenField1);
+        recEdit.editing.enable();
 
-        var hiddenField2 = document.createElement("input");
-        hiddenField2.setAttribute("name", "queryDraw");
-        hiddenField2.setAttribute("value", JSON.stringify(layerQueryDraw));
-        form.appendChild(hiddenField2);
 
-        var hiddenField3 = document.createElement("input");
-        hiddenField3.setAttribute("name", "queryResult");
-        hiddenField3.setAttribute("value", JSON.stringify(layerQueryResult));
-        form.appendChild(hiddenField3);
+        $.ajax({
+            dataType: "json",
+            method: "post",
+            url: '/api/print/',
+            contentType: "application/json",
+            data: JSON.stringify({
+                db: db,
+                schema: schema,
+                draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
+                queryDraw: (typeof  layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
+                queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
+                queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
+                print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
+                anchor: anchor.getAnchor(),
+                bounds: recScale.getBounds(),
+                scale: scale,
+                tmpl: tmpl,
+                pageSize: pageSize,
+                orientation: orientation
 
-        document.body.appendChild(form);
+            }),
+            scriptCharset: "utf-8",
+            success: function (response) {
+                var link = document.createElement('a');
+                link.href = "/static/tmp/print/pdf/" + response.key + '.pdf';
+                link.download = response.key + '.pdf';
+                link.dispatchEvent(new MouseEvent('click'));
 
-        // creating the 'formresult' window with custom features prior to submitting the form
-        //window.open('', 'formresult', 'scrollbars=no,menubar=no,height=600,width=800,resizable=yes,toolbar=no,status=no');
+            }
+        });
 
-        form.submit();
 
     },
     control: function () {
         if (!printOn) {
             printOn = true;
-            test = cloud.map.addControl(L.control.print({
-                provider: L.print.provider({
-                    capabilities: window.printConfig,
-                    method: 'POST',
-                    dpi: 72,
-                    outputFormat: 'pdf',
-                    proxy: 'http://eu1.mapcentia.com/cgi/proxy.cgi?url=',
-                    customParams: window.gc2Options.customPrintParams
-                }),
-                position: 'topright'
-            }));
 
-            //cloud.map.editTools.startPolygon()
-
-            var a4 = [297, 210];
-
-            L.CRS.EPSG3857.unproject = function (point) { // (Point) -> LatLng
-                var earthRadius = 6378137,
-                    normalizedPoint = point.divideBy(earthRadius);
-                return this.projection.unproject(normalizedPoint);
-            };
-
-            var _getScale = function (scaleObject, x) {
+            var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
+            var _getScale = function (scaleObject) {
                 var bounds = scaleObject.getBounds(),
-                    inchesKm = L.print.Provider.INCHES_PER_METER * 1000,
-                    scales = [{"name": "1:250", "value": "250.0"}, {"name": "1:500", "value": "500.0"}, {"name": "1:1,000", "value": "1000.0"}, {"name": "1:2,000", "value": "2000.0"}, {"name": "1:3,000", "value": "3000.0"}, {"name": "1:4,000", "value": "4000.0"}, {
-                        "name": "1:5,000",
-                        "value": "5000.0"
-                    }, {"name": "1:7,500", "value": "7500.0"}, {"name": "1:10,000", "value": "10000.0"}, {"name": "1:15,000", "value": "15000.0"}, {"name": "1:25,000", "value": "25000.0"}, {"name": "1:50,000", "value": "50000.0"}, {"name": "1:100,000", "value": "100000.0"}],
+                //scales = [250, 500, 1000, 2000, 3000, 4000, 5000, 5000, 7500, 10000, 15000, 25000, 50000, 100000],
                     sw = bounds.getSouthWest(),
                     ne = bounds.getNorthEast(),
                     halfLat = (sw.lat + ne.lat) / 2,
                     midLeft = L.latLng(halfLat, sw.lng),
                     midRight = L.latLng(halfLat, ne.lng),
                     mwidth = midLeft.distanceTo(midRight),
-                    pxwidth = cloud.map.getSize().x,
-                    kmPx = mwidth / pxwidth / 1000,
-                    mscale = (kmPx || 0.000001) * inchesKm * (96 * 2),
                     closest = Number.POSITIVE_INFINITY,
                     i = scales.length,
                     diff,
-                    scale, tmp;
+                    mscale = mwidth * 1000 / ps[0];
+
+                curScale = scale;
 
                 while (i--) {
-                    diff = Math.abs(mscale - scales[i].value);
+                    diff = Math.abs(mscale - scales[i]);
                     if (diff < closest) {
                         closest = diff;
-                        scale = parseInt(scales[i].value, 10);
+                        scale = parseInt(scales[i], 10);
                     }
                 }
-                console.log(pxwidth);
-                console.log(scale);
-                console.log(mscale);
+                newScale = scale;
+                newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+                //console.log(mscale);
+                //console.log(scale);
                 return scale;
             };
 
-            var rectangle = function (center, scaleObject, color, x) {
-                var scale = _getScale(scaleObject, x);
-                var centerM = L.CRS.EPSG3857.project(center);
+            var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
+                scale = initScale || _getScale(scaleObject);
+                $("#select-scale").val(scale);
 
-                var printSizeM = [(a4[0] * scale / 1000), (a4[1] * scale / 1000)];
+                if (isFirst) {
+                    var scaleIndex = scales.indexOf(scale);
+                    if (scaleIndex > 0) {
+                        scaleIndex--;
+                    }
+                    scale = scales[scaleIndex];
+                }
 
-                var printSwM = L.point(centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2));
-                var printNeM = L.point(centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2));
-
-                var rectangle = L.rectangle([L.CRS.EPSG3857.unproject(printSwM), L.CRS.EPSG3857.unproject(printNeM)], {
+                var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
+                var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+                var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
+                var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
+                var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
+                var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
+                var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
                     color: color,
-                    aspectRatio: (a4[0] / a4[1]) // 1:4
+                    fillOpacity: 0,
+                    aspectRatio: (ps[0] / ps[1])
                 });
+                center = rectangle.getBounds().getCenter();
                 return rectangle;
             };
 
-            recEdit = rectangle(cloud.map.getCenter(), cloud.map, "yellow");
-            cloud.map.addLayer(recEdit);
+            var first = center ? false : true;
+            center = center || cloud.map.getCenter(); // Init center as map center
+            recEdit = rectangle(center, cloud.map, "yellow", scale, first);
+            recEdit._vidi_type = "printHelper";
+            printItems.addLayer(recEdit);
             recEdit.editing.enable();
 
+            recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+            recScale._vidi_type = "print";
+            printItems.addLayer(recScale);
 
-            recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red", true);
-            cloud.map.addLayer(recScale);
+            var sw = recEdit.getBounds().getSouthWest(),
+                ne = recEdit.getBounds().getNorthEast();
 
+            curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
 
-            recEdit.on('edit', function () {
-                cloud.map.removeLayer(recScale);
-                recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red", true);
-                cloud.map.addLayer(recScale);
-            });
+            recEdit.on('edit', function (e) {
+                    rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+
+                    if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
+                        cloud.map.removeLayer(recScale);
+                        recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+                        recScale._vidi_type = "print";
+                        printItems.addLayer(recScale);
+                    }
+                    recEdit.editing.disable();
+                    recEdit.setBounds(recScale.getBounds());
+                    recEdit.editing.enable();
+
+                    var sw = recEdit.getBounds().getSouthWest(),
+                        ne = recEdit.getBounds().getNorthEast();
+                    curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+                }
+            );
+
         } else {
             //clean up
-            cloud.map.removeLayer(recScale);
-            cloud.map.removeLayer(recEdit);
-            printOn = false;
+            cleanUp();
         }
     }
 };
-},{"base64-url":28,"lz-string":33}],19:[function(require,module,exports){
+
+
+
+
+},{"../../config/config.js":26,"./urlparser":25,"base64-url":28,"lz-string":33}],19:[function(require,module,exports){
 var cloud;
 module.exports = {
     set: function (o) {
@@ -1800,6 +2014,7 @@ var _encodeLayers = function (map) {
         i;
 
     var layers = _getLayers(map);
+
     for (i = 0; i < layers.length; i++) {
         layer = layers[i];
         if (layer instanceof L.TileLayer.WMS) {
@@ -1815,6 +2030,8 @@ var _encodeLayers = function (map) {
         }
     }
     if (vectors.length) {
+        console.log(vectors)
+
         enc.push(_encoders.layers.vector.call(this, vectors));
     }
     return enc;
@@ -1990,14 +2207,17 @@ var _encoders = {
                     encStyles[styleName] = style;
                 }
 
-                console.log(feature)
                 if (feature instanceof L.Circle){
-                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius};
+                    featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius, _radius: feature._radius};
                     featureGeoJson.type = "Circle";
                     featureGeoJson.feature = feature.feature;
                 } else if (feature instanceof L.Rectangle) {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
+                    featureGeoJson.feature = feature.feature;
+                } else if (feature instanceof L.Marker) {
+                    featureGeoJson = {_latlng: feature._latlng};
+                    featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
                 } else
                 {
@@ -2005,6 +2225,7 @@ var _encoders = {
                     featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
                 }
+
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
@@ -2342,7 +2563,10 @@ module.exports = {
                 },
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
-                        l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                        //l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
+                        $.each(l._layers, function(i, v){
+                            v._vidi_type = "query_result";
+                        })
                     } else {
                         l._vidi_type = "query_result";
                     }
@@ -2395,6 +2619,7 @@ var setBaseLayer;
 var switchLayer;
 var legend;
 var draw;
+var advancedInfo;
 var lz = require('lz-string');
 var base64 = require('base64-url')
 
@@ -2407,6 +2632,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         legend = o.legend;
         draw = o.draw;
+        advancedInfo = o.advancedInfo;
         return this;
     },
     init: function () {
@@ -2442,82 +2668,189 @@ module.exports = {
                         cloud.zoomToExtent();
                     }
                 }
-                var parr, v, l, t, g;
-
-                // Recreate Drawings
-                if (typeof urlVars.draw !== "undefined") {
-                    parr = urlVars.draw.split("#");
+                if (typeof urlVars.k !== "undefined") {
+                    var parr, v, l, t, GeoJsonAdded = false;
+                    parr = urlVars.k.split("#");
                     if (parr.length > 1) {
                         parr.pop();
                     }
-                    v = JSON.parse(base64.decode(decodeURIComponent(parr.join("&"))));
-                    console.log(v);
+                    $.ajax({
+                        dataType: "json",
+                        method: "get",
+                        url: '/api/postdata/',
+                        //contentType: "application/json",
+                        data: {
+                            k: parr.join()
+                        },
+                        scriptCharset: "utf-8",
+                        success: function (response) {
+                            console.log(response)
+                            if (response.data.bounds !== null) {
+                                var bounds = response.data.bounds;
+                                cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
+                            }
+                            // Recreate print
+                            if (response.data.print !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.print;
+                                v = parr;
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Rectangle") {
+                                        var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                            fillOpacity: 0
+                                        });
+                                        g.feature = m.feature;
+                                        cloud.map.addLayer(g);
+                                        setTimeout(function () {
+                                            var bounds = g.getBounds(),
+                                                sw = bounds.getSouthWest(),
+                                                ne = bounds.getNorthEast(),
+                                                halfLat = (sw.lat + ne.lat) / 2,
+                                                midLeft = L.latLng(halfLat, sw.lng),
+                                                midRight = L.latLng(halfLat, ne.lng),
+                                                scaleFactor = ($("#pane1").width() / (cloud.map.project(midRight).x - cloud.map.project(midLeft).x));
+
+                                            $("#container1").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                            $("#scale").html("1 : " + response.data.scale);
+                                            $("#test").html($("#pane1").width() + " x " + $("#pane1").height());
+                                            // Check
+                                            var mwidth = midLeft.distanceTo(midRight);
+                                            var mscale = mwidth * 1000 / 297;
+                                        }, 300)
+                                    }
+                                });
+                            }
+
+                            // Recreate Drawings
+                            if (response.data.draw !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.draw;
+                                v = parr;
+                                draw.control();
+                                l = draw.getLayer();
+                                t = draw.getTable();
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            l.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                    if (m.type === "Circle") {
+                                        g = L.circle(m._latlng, m._mRadius, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Rectangle") {
+                                        g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Marker") {
+                                        g = L.marker(m._latlng, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                });
+                                t.loadDataInTable();
+                                draw.control();
+                            }
+
+                            // Recreate query draw
+                            if (response.data.queryDraw !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryDraw;
+                                v = parr;
+                                l = advancedInfo.getDrawLayer();
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            l.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                    if (m.type === "Circle") {
+                                        g = L.circle(m._latlng, m._mRadius, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Rectangle") {
+                                        g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Marker") {
+                                        g = L.marker(m._latlng, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                });
+                            }
+
+                            // Recreate query buffer
+                            if (response.data.queryBuffer !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryBuffer;
+                                v = parr;
+                                l = advancedInfo.getDrawLayer();
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            l.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                });
+                            }
+
+                            // Recreate result
+                            if (response.data.queryResult !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryResult;
+                                v = parr;
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            cloud.map.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                    if (m.type === "Circle") {
+                                        g = L.circleMarker(m._latlng, m.style);
+                                        g.setRadius(m._radius);
+                                        g.feature = m.feature;
+                                        cloud.map.addLayer(g);
+                                    }
+                                });
+                            }
 
 
-                    draw.control();
-                    l = draw.getLayer();
-                    t = draw.getTable();
-
-                    $.each(v[0].geojson.features, function (n, m) {
-                        if (m.type === "Feature") {
-                            console.log(m.type)
-                            g = L.geoJson(v[0].geojson, {
-                                style: function (f) {
-                                    return f.style;
-                                }
-                            });
-                            $.each(g._layers, function (i, v) {
-                                l.addLayer(v);
-                            });
                         }
-                        if (m.type === "Circle") {
-                            console.log(m.type)
-                            g = L.circle(m._latlng, m._mRadius, m.style);
-                            g.feature = m.feature;
-                            console.log(g)
-                            l.addLayer(g);
-                        }
-                        if (m.type === "Rectangle") {
-                            console.log(m)
-                            g = L.rectangle([m._latlngs[0],m._latlngs[2]], m.style);
-                            g.feature = m.feature;
-                            console.log(g)
-                            l.addLayer(g);
-                        }
-
                     });
 
-                    t.loadDataInTable();
-                    draw.control();
+
                 }
-
-                if (typeof urlVars.queryDraw !== "undefined") {
-                    parr = urlVars.queryDraw.split("#");
-                    if (parr.length > 1) {
-                        parr.pop();
-                    }
-                    v = JSON.parse(decodeURIComponent(parr.join("&")));
-                    L.geoJson(v[0].geojson, {
-                        style: function (f) {
-                            return f.style;
-                        }
-                    }).addTo(cloud.map);
-                }
-
-                if (typeof urlVars.queryResult !== "undefined") {
-                    parr = urlVars.queryResult.split("#");
-                    if (parr.length > 1) {
-                        parr.pop();
-                    }
-                    v = JSON.parse(decodeURIComponent(parr.join("&")));
-                    L.geoJson(v[0].geojson, {
-                        style: function (f) {
-                            return f.style;
-                        }
-                    }).addTo(cloud.map);
-                }
-
-
             } else {
                 setTimeout(pollForLayers, 10);
             }
@@ -2583,13 +2916,62 @@ module.exports = {
 },{}],26:[function(require,module,exports){
 module.exports = {
     gc2: {
-        host: "http://cowi.mapcentia.com"
+        host: "http://192.168.33.11"
     },
-    extensions: {
+    print: {
+        templates: {
+            "print": {
+                A4: {
+                    l: {
+                        mapsizePx: [1000, 700],
+                        mapsizeMm: [270, 190]
+                    },
+                    p: {
+                        mapsizePx: [500, 1000],
+                        mapsizeMm: [190, 270]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [2000, 1400],
+                        mapsizeMm: [600, 400]
+                    }
+                },
+                Letter: {
+                    l: {
+                        mapsizePx: [2000, 1400],
+                        mapsizeMm: [600, 400]
+                    }
+                }
+            },
+            "print2": {
+                A4: {
+                    l: {
+                        mapsizePx: [1000, 700],
+                        mapsizeMm: [270, 190]
+                    },
+                    p: {
+                        mapsizePx: [500, 1000],
+                        mapsizeMm: [190, 270]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [2000, 1400],
+                        mapsizeMm: [600, 400]
+                    }
+                }
+            }
+        },
+        scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000],
+
+    },
+
+    _extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl"
+    _template: "cowiDetail.tmpl"
 };
 },{}],27:[function(require,module,exports){
 'use strict'

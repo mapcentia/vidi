@@ -748,5 +748,12 @@ body {
     height: 30px;
     line-height: 30px;
 }
+.leaflet-control-graphicscale-inner {
+    margin-right: 10px;
+}
+.leaflet-control-graphicscale .label {
+    color: black !important;
+    background: none !important;
+}
 
 
