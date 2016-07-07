@@ -17,10 +17,10 @@ cloud.map.addControl(scaleControl);*/
 
 
 var graphicScale = L.control.graphicScale({
-    doubleLine: true,
+    doubleLine: false,
     fill: 'hollow',
-    showSubunits: true,
-    position: "bottomright"
+    showSubunits: false,
+    position: "bottomleft"
 }).addTo(map);
 
 var scaleText = L.DomUtil.create('div', 'scaleText' );

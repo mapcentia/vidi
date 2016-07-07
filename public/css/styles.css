@@ -59,6 +59,7 @@ body {
     right: 0px;
     width: 100%;
     z-index: 0;
+    transition:300ms linear;
 }
 
 #menu {
@@ -653,7 +654,7 @@ body {
     border: none;
 }
 
-.leaflet-top {
+.leaflet-top.leaflet-right{
     top: 50px !important;
 }
 
@@ -754,6 +755,14 @@ body {
 .leaflet-control-graphicscale .label {
     color: black !important;
     background: none !important;
+}
+
+.leaflet-control-graphicscale {
+    background-color: white;
+    padding: 10px 10px 3px 10px;
+    border-radius: 2px;
+    -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
 }
 
 

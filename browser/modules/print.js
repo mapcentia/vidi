@@ -98,7 +98,7 @@ module.exports = {
                 $(".print-size").change(function (e) {
                     $("#print-orientation").empty();
                     $.each(printC[$('input[name=print-tmpl]:checked', '#print-form').val()][e.target.value], function (i, v) {
-                        $("#print-orientation").append('<div class="radio radio-primary"><label><input type="radio" class="print print-orientation" name="print-orientation" id="' + i + '" value="' + i + '">' + i + '</label></div>');
+                        $("#print-orientation").append('<div class="radio radio-primary"><label><input type="radio" class="print print-orientation" name="print-orientation" id="' + i + '" value="' + i + '">' + (i === "l" ? "Landscape" : "Portrait") + '</label></div>');
                     });
                     $(".print-orientation").change(function (e) {
                         change();
@@ -123,6 +123,7 @@ module.exports = {
             var me = this;
             var change = function () {
                 var arr = $("#print-form").serializeArray();
+                $("#get-print-fieldset").prop("disabled", true);
                 if (arr.length === 3) {
                     cleanUp();
                     tmpl = arr[0].value;
@@ -144,6 +145,8 @@ module.exports = {
             recEdit.editing.disable();
         } catch (e) {
         }
+
+        $("#start-print-btn").snackbar("show");
         e = serializeLayers.serialize({
             "printHelper": true,
             "query_draw": true,
@@ -242,15 +245,14 @@ module.exports = {
                 tmpl: tmpl,
                 pageSize: pageSize,
                 orientation: orientation
-
             }),
             scriptCharset: "utf-8",
             success: function (response) {
-                var link = document.createElement('a');
-                link.href = "/static/tmp/print/pdf/" + response.key + '.pdf';
-                link.download = response.key + '.pdf';
-                link.dispatchEvent(new MouseEvent('click'));
-
+                $("#get-print-fieldset").prop("disabled", false);
+                $("#download-pdf, #open-pdf").attr("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+                $("#download-pdf").attr("download", response.key);
+                $("#open-html").attr("href", response.url);
+                $("#start-print-btn").button('reset')
             }
         });
 
@@ -297,8 +299,10 @@ module.exports = {
 
                 if (isFirst) {
                     var scaleIndex = scales.indexOf(scale);
-                    if (scaleIndex > 0) {
-                        scaleIndex--;
+                    if (scaleIndex > 1) {
+                        scaleIndex = scaleIndex-2;
+                    } else if (scaleIndex > 0) {
+                        scaleIndex = scaleIndex-1;
                     }
                     scale = scales[scaleIndex];
                 }
@@ -342,6 +346,7 @@ module.exports = {
                         recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
                         recScale._vidi_type = "print";
                         printItems.addLayer(recScale);
+                        $("#get-print-fieldset").prop("disabled", true);
                     }
                     recEdit.editing.disable();
                     recEdit.setBounds(recScale.getBounds());

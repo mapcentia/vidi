@@ -33,10 +33,13 @@ module.exports = module.exports = {
 
         $("#start-print-btn").on("click", function () {
             print.print();
+            $(this).button('loading');
+            $("#get-print-fieldset").prop("disabled", true);
         });
 
         $("#print-btn").on("click", function () {
             print.activate();
+            $("#get-print-fieldset").prop("disabled", true);
         });
 
     }

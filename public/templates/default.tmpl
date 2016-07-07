@@ -13,7 +13,7 @@
             </div>
             <div class="navbar-collapse collapse navbar-responsive-collapse">
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="javascript:void(0)">Link</a></li>
+                    <!--<li><a href="javascript:void(0)">Link</a></li>
                     <li class="dropdown">
                         <a href="bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
                             <b class="caret"></b></a>
@@ -26,7 +26,7 @@
                             <li><a href="javascript:void(0)">Separated link</a></li>
                             <li><a href="javascript:void(0)">One more separated link</a></li>
                         </ul>
-                    </li>
+                    </li>-->
                 </ul>
             </div>
         </div>
@@ -47,7 +47,9 @@
                 <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
                 <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
                 <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">Print</a></li>
-                <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
+                <!--
+                                <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
+                -->
             </ul>
 
             <!-- Tab panes -->
@@ -75,16 +77,20 @@
                         {{{Info text}}}
                     </div>
 
-                    <div class="togglebutton">
-                        <label>
-                            <input id="advanced-info-btn" type="checkbox"> Avanceret søgning
-                        </label>
-                    </div>
-                    <div id="buffer" style="display: none">
-                        <div>
-                            <label for="buffer-value" class="control-label">Buffer</label>
-                            <input id="buffer-value" class="form-control">
-                            <div id="buffer-slider" class="slider shor"></div>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="togglebutton">
+                                <label>
+                                    <input id="advanced-info-btn" type="checkbox"> Avanceret søgning
+                                </label>
+                            </div>
+                            <div id="buffer" style="display: none">
+                                <div>
+                                    <label for="buffer-value" class="control-label">Buffer</label>
+                                    <input id="buffer-value" class="form-control">
+                                    <div id="buffer-slider" class="slider shor"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -141,13 +147,14 @@
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         TODO. Gem kortet i browserens data store.
                     </div>
-                    <div class="togglebutton">
-                        <label>
-                            <input id="draw-btn" type="checkbox"> Tegning
-                        </label>
-                    </div>
+
                     <div class="panel panel-default" id="draw-panel">
                         <div class="panel-body">
+                            <div class="togglebutton">
+                                <label>
+                                    <input id="draw-btn" type="checkbox"> Tegning
+                                </label>
+                            </div>
                             <div id="draw-table"></div>
                         </div>
                     </div>
@@ -157,39 +164,56 @@
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         Her kan du printe dit kortet.
                     </div>
-                    <div class="togglebutton">
-                        <label>
-                            <input id="print-btn" type="checkbox"> Aktiver print
-                        </label>
-                    </div>
-                    <div>
-
-                        <form class="form-horizontal" id="print-form">
-                            <fieldset>
-                                <div class="form-group">
-                                    <label for="select-scale" class="col-md-2 control-label">Scale</label>
-
-                                    <div class="col-md-10">
-                                        <select id="select-scale" class="form-control" disabled></select>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="togglebutton">
+                                <label>
+                                    <input id="print-btn" type="checkbox"> Aktiver print
+                                </label>
+                            </div>
+                            <div class="btn-toolbar bs-component" style="margin: 0;">
+                                <div class="btn-group">
+                                    <button id="start-print-btn" class="btn btn-raised" style="width: 130px" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> Make PDF
+                                    " disabled><i class='fa fa-cog fa-lg'></i> Make PDF</button>
+                                </div>
+                                <fieldset disabled id="get-print-fieldset">
+                                    <div class="btn-group">
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-raised" id="download-pdf"><i class="material-icons" style="font-size: 18px">file_download</i> Download</a>
+                                        <a href="bootstrap-elements.html" data-target="#" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                                        <ul class="dropdown-menu">
+                                            <li><a target="_blank" href="javascript:void(0)" id="open-pdf">Open PDF</a></li>
+                                            <li><a target="_blank" href="javascript:void(0)" id="open-html">Open HTML page</a></li>
+                                        </ul>
                                     </div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Templates</label>
-                                    <div class="col-md-10" id="print-tmpl"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Paper size</label>
-                                    <div class="col-md-10" id="print-size"></div>
-                                </div>
-                                <div class="form-group">
-                                    <label class="col-md-2 control-label">Orientation size</label>
-                                    <div class="col-md-10" id="print-orientation"></div>
-                                </div>
+                                </fieldset>
+                            </div>
+                            <div>
+                                <form class="form-horizontal" id="print-form">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label for="select-scale" class="col-md-2 control-label">Scale</label>
 
-                            </fieldset>
-                        </form>
-                        <div>
-                            <button id="start-print-btn" class="btn btn-primary" disabled>print</button>
+                                            <div class="col-md-10">
+                                                <select id="select-scale" class="form-control" disabled></select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">Template</label>
+                                            <div class="col-md-10" id="print-tmpl"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">Page size</label>
+                                            <div class="col-md-10" id="print-size"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-2 control-label">Orientation</label>
+                                            <div class="col-md-10" id="print-orientation"></div>
+                                        </div>
+
+                                    </fieldset>
+                                </form>
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -199,10 +223,28 @@
     </div>
 </nav>
 
-<div class="navbar navbar-default navbar-fixed-top">
+<div class="navbar navbar-default navbar-fixed-top" id="navbar-fixed-top">
     <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#myNavmenu" data-canvas="body">
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
+</div>
+
+<div class="modal" id="print-modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Modal title</h4>
+            </div>
+            <div class="modal-body">
+                <p>One fine body…</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
 </div>
