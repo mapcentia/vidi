@@ -1,4 +1,8 @@
-window.gc2i18n = require('./i18n/da_DK');
+// Hack to compile Glob files. Don´t call this function!
+function ಠ_ಠ() {
+    require('./i18n/*.js', {glob: true});
+}
+window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
 
 window.Vidi = function () {
     "use strict";
@@ -17,7 +21,7 @@ window.Vidi = function () {
 
     config = require('../config/config.js');
 
-    $( window ).load(function() {
+    $(window).load(function () {
         window.status = "all_loaded";
     });
     // Load style sheet
@@ -35,7 +39,7 @@ window.Vidi = function () {
     }
 
     // Check if template is set in URL vars
-    if (typeof urlVars.tmpl !=="undefined") {
+    if (typeof urlVars.tmpl !== "undefined") {
         var par = urlVars.tmpl.split("#");
         if (par.length > 1) {
             par.pop();
@@ -107,6 +111,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/extensions/**/*.js', {glob: true});
     }
+
     if (typeof config.extensions !== "undefined" && typeof config.extensions.browser !== "undefined") {
         $.each(config.extensions.browser, function (i, v) {
             modules.extensions[Object.keys(v)[0]] = {};

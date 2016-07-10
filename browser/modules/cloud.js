@@ -15,6 +15,15 @@ var map = cloud.map;
 /*var scaleControl = L.control.scale({position: "bottomright"});
 cloud.map.addControl(scaleControl);*/
 
+var lc = L.control.locate({
+    position: 'topright',
+    strings: {
+        title: "Find me"
+    },
+    position: "topright",
+    icon: "fa fa-location-arrow",
+    iconLoading: "fa fa-circle-o-notch fa-spin"
+}).addTo(map);
 
 var graphicScale = L.control.graphicScale({
     doubleLine: false,

@@ -6,24 +6,10 @@ var jsts = require('jsts');
 var reproject = require('reproject');
 var store;
 var db = "test";
-var drawnItems = new L.FeatureGroup();
+var drawnItemsMarker = new L.FeatureGroup();
+var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
-var clearDrawItems = function () {
-    drawnItems.clearLayers();
-    // Clean up
-    try {
-        cloud.map.removeLayer(circle1);
-        cloud.map.removeLayer(circle2);
 
-    } catch (e) {
-        console.log(e.message)
-    }
-    try {
-        reset(store);
-    } catch (e) {
-        console.log(e.message)
-    }
-};
 var reset = function (s) {
     s.abort();
     s.reset();
@@ -43,7 +29,7 @@ module.exports = {
                 return [
                     {
                         enabled: true,
-                        handler: new L.Draw.Marker(map, { icon: new L.Icon.Default() }),
+                        handler: new L.Draw.Marker(map, {icon: new L.Icon.Default()}),
                         title: 'Sæt en markør'
                     },
                     {
@@ -70,24 +56,41 @@ module.exports = {
             edit: false
         });
         cloud.map.addControl(drawControl);
-        cloud.map.addLayer(drawnItems);
+        cloud.map.addLayer(drawnItemsMarker);
+        cloud.map.addLayer(drawnItemsPolygon);
 
         // Set destruct in draw module, so this modules events are bound again
         var me = this.init;
-        draw.setDestruct(function(){
+        draw.setDestruct(function () {
             me();
         });
         return this;
     },
-    init: function(){
+    init: function () {
         // Bind events
         cloud.map.on('draw:created', function (e) {
-            e.layer._vidi_type = "query_draw";
-            drawnItems.addLayer(e.layer);
+            e.layer._vidi_type = "draw";
+            if (e.layerType === "marker") {
+                console.log(e.layer);
+                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});
+                drawnItemsMarker.addLayer(awm);
+            } else {
+                drawnItemsPolygon.addLayer(e.layer);
+            }
         });
         cloud.map.on('draw:drawstart', function (e) {
             infoClick.active(false); // Switch standard info click off
-            clearDrawItems();
+            if (e.layerType === "marker") {
+                drawnItemsMarker.clearLayers();
+                try {
+                    cloud.map.removeLayer(circle1);
+                    cloud.map.removeLayer(circle2);
+                } catch (e) {
+                    console.log(e.message)
+                }
+            } else {
+                drawnItemsPolygon.clearLayers();
+            }
         });
         cloud.map.on('draw:drawstop', function (e) {
             if (e.layerType === "marker") {
@@ -102,8 +105,8 @@ module.exports = {
 
 var buffer = function () {
     var layer;
-    for (var prop in drawnItems._layers) {
-        layer = drawnItems._layers[prop];
+    for (var prop in drawnItemsMarker._layers) {
+        layer = drawnItemsMarker._layers[prop];
         break;
     }
     if (typeof layer === "undefined") {
@@ -137,20 +140,20 @@ var buffer = function () {
     }).addTo(cloud.map);
 
     store = createStore();
-    store.sql = JSON.stringify([reader.read(c1).toText(),reader.read(c2).toText()]);
-    cloud.addGeoJsonStore(store);
+    store.sql = JSON.stringify([reader.read(c1).toText(), reader.read(c2).toText()]);
+    //cloud.addGeoJsonStore(store);
     store.load();
 
     // Create a clean up click event
-    cloud.on("click", function (e) {
-        try {
-            drawnItems.clearLayers();
-            cloud.map.removeLayer(circle1);
-            cloud.map.removeLayer(circle2);
+    /*cloud.on("click", function (e) {
+     try {
+     drawnItemsMarker.clearLayers();
+     cloud.map.removeLayer(circle1);
+     cloud.map.removeLayer(circle2);
 
-        } catch (e) {
-        }
-    });
+     } catch (e) {
+     }
+     });*/
 
     // Enable standard info click again
     //infoClick.init();
@@ -158,8 +161,8 @@ var buffer = function () {
 
 var polygon = function () {
     var layer;
-    for (var prop in drawnItems._layers) {
-        layer = drawnItems._layers[prop];
+    for (var prop in drawnItemsPolygon._layers) {
+        layer = drawnItemsPolygon._layers[prop];
         break;
     }
     if (typeof layer === "undefined") {
@@ -171,13 +174,13 @@ var polygon = function () {
 
     store = createStore();
     store.sql = JSON.stringify([geom.geometry.toText()]);
-    cloud.addGeoJsonStore(store);
+    //cloud.addGeoJsonStore(store);
     store.load();
 
     // Create a clean up click event
     cloud.on("click", function (e) {
         try {
-            drawnItems.clearLayers();
+            drawnItemsPolygon.clearLayers();
 
         } catch (e) {
         }
@@ -196,55 +199,26 @@ var createStore = function () {
         clickable: true,
         id: 1,
         onLoad: function () {
-            var layerObj = this, out = [], cm = [], first = true, storeId = this.id;
-            isEmpty = layerObj.isEmpty();
-            if (!isEmpty) {
-                $('#modal-info-body').show();
-                $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">Antal indbyggere</a></li>');
-                $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
-
-                $.each(layerObj.geoJSON.features, function (i, feature) {
-                    $.each(feature.properties, function (name, property) {
-                        out.push([name, 0, name, property]);
-                    });
-                    out.sort(function (a, b) {
-                        return a[1] - b[1];
-                    });
-                    if (first) {
-                        $.each(out, function (name, property) {
-                            cm.push({
-                                header: property[2],
-                                dataIndex: property[0],
-                                sortable: true
-                            })
-                        });
-                        first = false;
+            var layerObj = this;
+            $('#modal-info-body').show();
+            $.each(layerObj.geoJSON.features, function (i, feature) {
+                if (feature.properties.radius) {
+                    var layer;
+                    for (var prop in drawnItemsMarker._layers) {
+                        layer = drawnItemsMarker._layers[prop];
+                        break;
                     }
-                    $('#tab_' + storeId).tab('show');
-                    out = [];
-                });
-                var height = require('./../../height')().max - 370;
-                gc2table.init({
-                    el: "#_" + storeId + " table",
-                    geocloud2: cloud,
-                    store: layerObj,
-                    cm: cm,
-                    autoUpdate: false,
-                    openPopUp: true,
-                    setViewOnSelect: true,
-                    responsive: false,
-                    height: (height > 300) ? height : 300
-                });
-                hit = true;
+                    $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "  B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
-            } else {
-                layerObj.reset();
-            }
-
-            if (!hit) {
-                $('#modal-info-body').hide();
-            }
-
+                    if (feature.properties.radius === "500") {
+                        $("#r500-val").html(feature.properties.antal)
+                    } else {
+                        $("#r1000-val").html(feature.properties.antal)
+                    }
+                } else {
+                    $("#polygon-val").html(feature.properties.antal)
+                }
+            });
             $('#main-tabs a[href="#info-content"]').tab('show');
         },
         styleMap: {
