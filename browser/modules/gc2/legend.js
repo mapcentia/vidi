@@ -1,22 +1,22 @@
 var cloud;
+var meta;
 var urlparser = require('../urlparser');
 var db = urlparser.db;
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        meta = o.meta;
         return this;
     },
     init: function () {
         var param = 'l=' + cloud.getVisibleLayers(true) + '&db=' + db;
         $.ajax({
-            url: '/api/legend/' +db + '?' + param,
+            url: '/api/legend/' + db + '?' + param,
             success: function (response) {
-                var list = $("<ul/>"), li, classUl, title, className;
+                var list = $('<ul class="list-group"/>'), li, classUl, title, className;
                 $.each(response, function (i, v) {
-                    try {
-                        title = metaDataKeys[v.id.split(".")[1]].f_table_title;
-                    }
-                    catch (e) {
+                    if (typeof v.id !== "undefined") {
+                        title = meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title ? meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title: meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_name;
                     }
                     var u, showLayer = false;
                     if (typeof v === "object") {
@@ -26,8 +26,8 @@ module.exports = module.exports = {
                             }
                         }
                         if (showLayer) {
-                            li = $("<li/>");
-                            classUl = $("<ul/>");
+                            li = $("<li class=''/>");
+                            classUl = $('<ul />');
                             for (u = 0; u < v.classes.length; u = u + 1) {
                                 if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
                                     className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";

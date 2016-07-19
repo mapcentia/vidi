@@ -46,8 +46,7 @@ var _encodeLayers = function (map) {
         }
     }
     if (vectors.length) {
-        console.log(vectors)
-
+        //console.log(vectors);
         enc.push(_encoders.layers.vector.call(this, vectors));
     }
     return enc;

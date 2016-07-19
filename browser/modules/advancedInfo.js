@@ -20,7 +20,7 @@ var clearDrawItems = function () {
 };
 
 var makeSearch = function () {
-    var primitive,
+    var primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
 
     for (var prop in drawnItems._layers) {
@@ -38,8 +38,15 @@ var makeSearch = function () {
     primitive = layer.toGeoJSON();
 
     if (primitive) {
+        if (typeof layer.getBounds !== "undefined") {
+            coord = layer.getBounds().getSouthWest();
+        } else {
+            coord = layer.getLatLng();
+        }
+        // Get utm zone
+        var zone = require('./utmZone.js').getZone(coord.lat, coord.lng);
         var crss = {
-            "proj": "+proj=utm +zone=" + "32" + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
+            "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
             "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
         };
         var reader = new jsts.io.GeoJSONReader();

@@ -21,7 +21,7 @@ module.exports = {
             url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
             scriptCharset: "utf-8",
             success: function (response) {
-                var base64name, authIcon, isBaseLayer, arr, groups, i, l, cv, metaData;
+                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData;
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {

@@ -86,7 +86,10 @@ module.exports = {
                                 $.each(v[0].geojson.features, function (n, m) {
                                     if (m.type === "Rectangle") {
                                         var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
-                                            fillOpacity: 0
+                                            fillOpacity: 0,
+                                            opacity: 1,
+                                            color: 'red',
+                                            weight: 1
                                         });
                                         g.feature = m.feature;
                                         cloud.map.addLayer(g);
@@ -102,10 +105,16 @@ module.exports = {
                                             $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
                                             $("#scale").html("1 : " + response.data.scale);
-                                            $("#test").html($("#pane1").width() + " x " + $("#pane1").height());
+                                            $("#title").html(decodeURI(urlVars.t));
+                                            parr = urlVars.c.split("#");
+                                            if (parr.length > 1) {
+                                                parr.pop();
+                                            }
+                                            $("#comment").html(decodeURI(parr.join()));
                                             // Check
                                             var mwidth = midLeft.distanceTo(midRight);
                                             var mscale = mwidth * 1000 / 297;
+                                            cloud.map.removeLayer(g);
                                         }, 300)
                                     }
                                 });

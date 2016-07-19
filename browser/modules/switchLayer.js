@@ -20,7 +20,6 @@ module.exports = module.exports = {
         }
 
         var siblings = el.parents(".accordion-body").find("input");
-        console.log(siblings);
 
         var c = 0;
         $.each(siblings, function (i, v) {

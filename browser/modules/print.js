@@ -20,9 +20,6 @@ var tmpl;
 var pageSize;
 var orientation;
 
-
-Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
-
 var cleanUp = function () {
     try {
         cloud.map.removeLayer(recScale);
@@ -41,14 +38,10 @@ module.exports = {
         return this;
     },
     init: function () {
-
-
-
+        // pass
     },
     activate: function () {
         if (!printOn) {
-
-
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
             $("#print-tmpl").empty();
             $("#print-size").empty();
@@ -225,7 +218,6 @@ module.exports = {
 
         recEdit.editing.enable();
 
-
         $.ajax({
             dataType: "json",
             method: "post",
@@ -244,7 +236,9 @@ module.exports = {
                 scale: scale,
                 tmpl: tmpl,
                 pageSize: pageSize,
-                orientation: orientation
+                orientation: orientation,
+                title: $("#print-title").val(),
+                comment: $("#print-comment").val()
             }),
             scriptCharset: "utf-8",
             success: function (response) {
@@ -255,17 +249,13 @@ module.exports = {
                 $("#start-print-btn").button('reset')
             }
         });
-
-
     },
     control: function () {
         if (!printOn) {
             printOn = true;
-
             var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
             var _getScale = function (scaleObject) {
                 var bounds = scaleObject.getBounds(),
-                //scales = [250, 500, 1000, 2000, 3000, 4000, 5000, 5000, 7500, 10000, 15000, 25000, 50000, 100000],
                     sw = bounds.getSouthWest(),
                     ne = bounds.getNorthEast(),
                     halfLat = (sw.lat + ne.lat) / 2,
@@ -276,9 +266,7 @@ module.exports = {
                     i = scales.length,
                     diff,
                     mscale = mwidth * 1000 / ps[0];
-
                 curScale = scale;
-
                 while (i--) {
                     diff = Math.abs(mscale - scales[i]);
                     if (diff < closest) {
@@ -290,6 +278,10 @@ module.exports = {
                 newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
                 //console.log(mscale);
                 //console.log(scale);
+
+                // Get utm zone
+                var zone = require('./utmZone.js').getZone(sw.lat, sw.lng);
+                Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
                 return scale;
             };
 
@@ -364,6 +356,3 @@ module.exports = {
         }
     }
 };
-
-
-
