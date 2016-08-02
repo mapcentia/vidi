@@ -1,8 +1,21 @@
+<!-- override standard styles -->
+<style>
+    #legend, #header {
+        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12); box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+    }
+    .deactiveBtn {
+        pointer-events: none;
+        opacity: 0.3 !important;
+    }
+
+</style>
+
 <!-- map -->
 <div id="pane">
     <div id="container">
         <div id="map"></div>
     </div>
+    <div id="legend" style="position: absolute; top: 5px; left: 5px; padding: 10px; background-color: white"></div>
 </div>
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
 
@@ -22,14 +35,12 @@
         <div role="tabpanel">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist" id="main-tabs">
-                <li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>
-                <li role="presentation"><a href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">{{Info}}</a></li>
+                <!--<li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>-->
+                <li role="presentation" class="active"><a href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">{{Info}}</a></li>
                 <li role="presentation"><a href="#layer-content" aria-controls="" role="tab" data-toggle="tab">{{Layers}}</a></li>
-                <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>
-                <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
-<!--
-                <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
--->
+                <!--<li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>-->
+                <!--<li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>-->
+                <!--<li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>-->
                 <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">Print</a></li>
             </ul>
 
@@ -74,10 +85,22 @@
                         <div class="panel-body">
                             <table id="detail-data-r" class="table">
                                 <caption>Punkt</caption>
-                                <tr><td>Adresse</td><td id="r-adr-val">-</td></tr>
-                                <tr><td>Koordinat</td><td id="r-coord-val">-</td></tr>
-                                <tr><td>Indenfor 500 m</td><td id="r500-val">-</td></tr>
-                                <tr><td>Indenfor 1000 m</td><td id="r1000-val">-</td></tr>
+                                <tr>
+                                    <td>Adresse</td>
+                                    <td id="r-adr-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Koordinat</td>
+                                    <td id="r-coord-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Indenfor 500 m</td>
+                                    <td id="r500-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Indenfor 1000 m</td>
+                                    <td id="r1000-val">-</td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -86,7 +109,10 @@
                         <div class="panel-body">
                             <table id="detail-data-p" class="table">
                                 <caption>Polygon</caption>
-                                <tr><td>Indenfor</td><td id="polygon-val">-</td></tr>
+                                <tr>
+                                    <td>Indenfor</td>
+                                    <td id="polygon-val">-</td>
+                                </tr>
                             </table>
                         </div>
                     </div>
@@ -129,7 +155,9 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
+<!--
                             <div id="legend"></div>
+-->
 
                         </div>
                     </div>

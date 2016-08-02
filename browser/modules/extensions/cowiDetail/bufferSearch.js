@@ -9,6 +9,7 @@ var db = "test";
 var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
+var setBaseLayer;
 
 var reset = function (s) {
     s.abort();
@@ -19,11 +20,142 @@ var reset = function (s) {
     $("#info-pane").empty();
 };
 
+var createBufferBtn = function(){
+    // Create buttons
+    var ImmediateSubAction = L._ToolbarAction.extend({
+        initialize: function (map, myAction) {
+            this.map = cloud.map;
+            this.myAction = myAction;
+            L._ToolbarAction.prototype.initialize.call(this);
+        },
+        addHooks: function () {
+            //this.myAction.disable();
+        }
+    });
+    var circle1Btn = ImmediateSubAction.extend({
+        options: {
+            toolbarIcon: {
+                html: 'Vis 500 m'
+            }
+        },
+        addHooks: function () {
+            circle1.addTo(cloud.map);
+            ImmediateSubAction.prototype.addHooks.call(this);
+        }
+    });
+    var circle2Btn = ImmediateSubAction.extend({
+        options: {
+            toolbarIcon: {
+                html: 'Vis 1000 m'
+            }
+        },
+        addHooks: function () {
+            circle2.addTo(cloud.map);
+            ImmediateSubAction.prototype.addHooks.call(this);
+        }
+    });
+    var Cancel = ImmediateSubAction.extend({
+        options: {
+            toolbarIcon: {
+                html: '<i class="fa fa-times"></i>',
+                tooltip: 'Cancel'
+            }
+        },
+        addHooks: function () {
+            this.myAction.disable();
+            cloud.map.removeLayer(circle1);
+            cloud.map.removeLayer(circle2);
+            ImmediateSubAction.prototype.addHooks.call(this);
+        }
+    });
+    var MyCustomAction = L._ToolbarAction.extend({
+        options: {
+            toolbarIcon: {
+                className: 'fa  fa-circle-thin deactiveBtn'
+            },
+            /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
+             * by definition, contained inside another toolbar, so it
+             * doesn't need the additional styling and behavior of a
+             * L.Toolbar.Control or L.Toolbar.Popup.
+             */
+            subToolbar: new L._Toolbar({
+                actions: [Cancel, circle2Btn, circle1Btn]
+            })
+        }
+    });
+
+    // Create buttons
+    var ImmediateSubAction2 = L._ToolbarAction.extend({
+        initialize: function (map, myAction) {
+            this.map = cloud.map;
+            this.myAction = myAction;
+            L._ToolbarAction.prototype.initialize.call(this);
+        },
+        addHooks: function () {
+            //this.myAction.disable();
+        }
+    });
+    var osm = ImmediateSubAction2.extend({
+        options: {
+            toolbarIcon: {
+                html: 'Open Street Map'
+            }
+        },
+        addHooks: function () {
+            setBaseLayer.init("osm");
+            ImmediateSubAction2.prototype.addHooks.call(this);
+        }
+    });
+    var ghybrid = ImmediateSubAction2.extend({
+        options: {
+            toolbarIcon: {
+                html: 'Satellite'
+            }
+        },
+        addHooks: function () {
+            setBaseLayer.init("googleHybrid");
+            ImmediateSubAction2.prototype.addHooks.call(this);
+        }
+    });
+    var Cancel = ImmediateSubAction2.extend({
+        options: {
+            toolbarIcon: {
+                html: '<i class="fa fa-times"></i>',
+                tooltip: 'Cancel'
+            }
+        },
+        addHooks: function () {
+            this.myAction.disable();
+            ImmediateSubAction2.prototype.addHooks.call(this);
+        }
+    });
+    var MyCustomAction2 = L._ToolbarAction.extend({
+        options: {
+            toolbarIcon: {
+                className: 'fa fa-map-o'
+            },
+            /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
+             * by definition, contained inside another toolbar, so it
+             * doesn't need the additional styling and behavior of a
+             * L.Toolbar.Control or L.Toolbar.Popup.
+             */
+            subToolbar: new L._Toolbar({
+                actions: [Cancel, osm, ghybrid]
+            })
+        }
+    });
+    return new L._Toolbar.Control({
+        position: 'topright',
+        actions: [MyCustomAction, MyCustomAction2]
+    });
+};
+
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         infoClick = o.infoClick;
         draw = o.draw;
+        setBaseLayer = o.setBaseLayer;
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -46,7 +178,6 @@ module.exports = {
                             }
                         }),
                         title: 'Tegn en polygon'
-
                     }
                 ];
             }
@@ -58,30 +189,31 @@ module.exports = {
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItemsMarker);
         cloud.map.addLayer(drawnItemsPolygon);
-
-        // Set destruct in draw module, so this modules events are bound again
-        var me = this.init;
-        draw.setDestruct(function () {
-            me();
-        });
         return this;
     },
     init: function () {
+        createBufferBtn().addTo(cloud.map);
+
         // Bind events
         cloud.map.on('draw:created', function (e) {
             e.layer._vidi_type = "draw";
             if (e.layerType === "marker") {
-                console.log(e.layer);
                 var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});
                 drawnItemsMarker.addLayer(awm);
+                $(".fa-circle-thin").removeClass("deactiveBtn");
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
             }
         });
         cloud.map.on('draw:drawstart', function (e) {
             infoClick.active(false); // Switch standard info click off
+
+            // Recreate buttons, so subtool bar is closed
+            createBufferBtn().addTo(cloud.map);
+
             if (e.layerType === "marker") {
                 drawnItemsMarker.clearLayers();
+                $(".fa-circle-thin").addClass("deactiveBtn");
                 try {
                     cloud.map.removeLayer(circle1);
                     cloud.map.removeLayer(circle2);
@@ -128,7 +260,7 @@ var buffer = function () {
         "opacity": 1,
         "fillOpacity": 0.1,
         "dashArray": '5,3'
-    }).addTo(cloud.map);
+    });
 
     var c2 = reproject.reproject(writer.write(geom.geometry.buffer(1000)), "proj", "unproj", crss);
     circle2 = L.geoJson(c2, {
@@ -137,26 +269,12 @@ var buffer = function () {
         "opacity": 1,
         "fillOpacity": 0.1,
         "dashArray": '5,3'
-    }).addTo(cloud.map);
+    });
 
     store = createStore();
     store.sql = JSON.stringify([reader.read(c1).toText(), reader.read(c2).toText()]);
     //cloud.addGeoJsonStore(store);
     store.load();
-
-    // Create a clean up click event
-    /*cloud.on("click", function (e) {
-     try {
-     drawnItemsMarker.clearLayers();
-     cloud.map.removeLayer(circle1);
-     cloud.map.removeLayer(circle2);
-
-     } catch (e) {
-     }
-     });*/
-
-    // Enable standard info click again
-    //infoClick.init();
 };
 
 var polygon = function () {
@@ -178,13 +296,12 @@ var polygon = function () {
     store.load();
 
     // Create a clean up click event
-    cloud.on("click", function (e) {
+    /*cloud.on("click", function (e) {
         try {
             drawnItemsPolygon.clearLayers();
-
         } catch (e) {
         }
-    });
+    });*/
 
 };
 
