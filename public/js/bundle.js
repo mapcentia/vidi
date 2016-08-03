@@ -577,8 +577,8 @@ module.exports = module.exports = {
     }
 };
 },{}],8:[function(require,module,exports){
-
-window.cloud = new geocloud.map({
+geocloud.setHost(require('../../config/config.js').gc2.host);
+var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
     numZoomLevels: 21
@@ -624,7 +624,7 @@ for (var i = 0; i < styleChoices.length; i++) {
 }
 
 module.exports = cloud;
-},{}],9:[function(require,module,exports){
+},{"../../config/config.js":28}],9:[function(require,module,exports){
 var cloud;
 var drawOn = false;
 var drawnItems = new L.FeatureGroup();
@@ -1045,7 +1045,7 @@ var reset = function (s) {
     $("#info-pane").empty();
 };
 
-var createBufferBtn = function(){
+var createBufferBtn = function () {
     // Create buttons
     var ImmediateSubAction = L._ToolbarAction.extend({
         initialize: function (map, myAction) {
@@ -1233,12 +1233,13 @@ module.exports = {
         cloud.map.on('draw:drawstart', function (e) {
             infoClick.active(false); // Switch standard info click off
 
-            // Recreate buttons, so subtool bar is closed
-            createBufferBtn().addTo(cloud.map);
-
             if (e.layerType === "marker") {
                 drawnItemsMarker.clearLayers();
                 $(".fa-circle-thin").addClass("deactiveBtn");
+
+                // Recreate buttons, so subtool bar is closed
+                createBufferBtn().addTo(cloud.map);
+
                 try {
                     cloud.map.removeLayer(circle1);
                     cloud.map.removeLayer(circle2);
@@ -1322,12 +1323,16 @@ var polygon = function () {
 
     // Create a clean up click event
     /*cloud.on("click", function (e) {
-        try {
-            drawnItemsPolygon.clearLayers();
-        } catch (e) {
-        }
-    });*/
+     try {
+     drawnItemsPolygon.clearLayers();
+     } catch (e) {
+     }
+     });*/
 
+};
+var upDatePrintComment = function(){
+    $('#main-tabs a[href="#info-content"]').tab('show');
+    $("#print-comment").html($("#detail-data-r-container").html() + $("#detail-data-p-container").html());
 };
 
 var createStore = function () {
@@ -1344,24 +1349,29 @@ var createStore = function () {
             var layerObj = this;
             $('#modal-info-body').show();
             $.each(layerObj.geoJSON.features, function (i, feature) {
-                if (feature.properties.radius) {
+                if (feature.properties.radius) { // Then Marker
                     var layer;
                     for (var prop in drawnItemsMarker._layers) {
                         layer = drawnItemsMarker._layers[prop];
                         break;
                     }
-                    $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "  B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
+                    $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "<br>B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
                     if (feature.properties.radius === "500") {
                         $("#r500-val").html(feature.properties.antal)
                     } else {
                         $("#r1000-val").html(feature.properties.antal)
                     }
+                    $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
+                        $("#r-adr-val").html(data.results[0].formatted_address);
+                        upDatePrintComment();
+                    });
+
                 } else {
                     $("#polygon-val").html(feature.properties.antal)
                 }
             });
-            $('#main-tabs a[href="#info-content"]').tab('show');
+            upDatePrintComment();
         },
         styleMap: {
             weight: 2,
@@ -3133,12 +3143,12 @@ module.exports = {
 },{}],28:[function(require,module,exports){
 module.exports = {
     gc2: {
-        //host: "http://192.168.33.11"
-        host: "http://cowi.mapcentia.com"
+        host: "http://192.168.33.11"
+        //host: "http://cowi.mapcentia.com"
     },
     print: {
         templates: {
-            "geofyn": {
+            "cowiDetailPrint": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -3148,12 +3158,6 @@ module.exports = {
                         mapsizePx: [700, 1000],
                         mapsizeMm: [190, 270]
                     }
-                },
-                A3: {
-                    l: {
-                        mapsizePx: [2000, 1400],
-                        mapsizeMm: [600, 400]
-                    }
                 }
             }
         },
@@ -3161,11 +3165,11 @@ module.exports = {
 
     },
 
-    extensions: {
+    _extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl"
+    _template: "cowiDetail.tmpl"
 };
 },{}],29:[function(require,module,exports){
 'use strict'

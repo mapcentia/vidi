@@ -1,5 +1,5 @@
-
-window.cloud = new geocloud.map({
+geocloud.setHost(require('../../config/config.js').gc2.host);
+var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
     numZoomLevels: 21

@@ -1,8 +1,10 @@
 <!-- override standard styles -->
 <style>
     #legend, #header {
-        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12); box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
     }
+
     .deactiveBtn {
         pointer-events: none;
         opacity: 0.3 !important;
@@ -82,7 +84,7 @@
                     </div>
 
                     <div class="panel panel-default">
-                        <div class="panel-body">
+                        <div id="detail-data-r-container" class="panel-body">
                             <table id="detail-data-r" class="table">
                                 <caption>Punkt</caption>
                                 <tr>
@@ -106,7 +108,7 @@
                     </div>
 
                     <div class="panel panel-default">
-                        <div class="panel-body">
+                        <div id="detail-data-p-container" class="panel-body">
                             <table id="detail-data-p" class="table">
                                 <caption>Polygon</caption>
                                 <tr>
@@ -155,9 +157,9 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
-<!--
-                            <div id="legend"></div>
--->
+                            <!--
+                                                        <div id="legend"></div>
+                            -->
 
                         </div>
                     </div>
@@ -221,17 +223,36 @@
                                                 <select id="select-scale" class="form-control" disabled></select>
                                             </div>
                                         </div>
+
                                         <div class="form-group">
                                             <label class="col-md-2 control-label">Template</label>
                                             <div class="col-md-10" id="print-tmpl"></div>
                                         </div>
+
                                         <div class="form-group">
                                             <label class="col-md-2 control-label">Page size</label>
                                             <div class="col-md-10" id="print-size"></div>
                                         </div>
+
                                         <div class="form-group">
                                             <label class="col-md-2 control-label">Orientation</label>
                                             <div class="col-md-10" id="print-orientation"></div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="print-title" class="col-md-2 control-label">Title</label>
+
+                                            <div class="col-md-10">
+                                                <input type="text" class="form-control" id="print-title" disabled>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="print-comment" class="col-md-2 control-label">Comment</label>
+                                            <div class="col-md-10">
+                                                <textarea class="form-control" rows="30" id="print-comment" disabled></textarea>
+                                                <span class="help-block">The comment will be placed on the PDF.</span>
+                                            </div>
                                         </div>
 
                                     </fieldset>
