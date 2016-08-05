@@ -576,7 +576,7 @@ module.exports = module.exports = {
         }
         cloud.bingApiKey = window.bingApiKey;
         cloud.digitalGlobeKey = window.digitalGlobeKey;
-        for (i = 0; i < window.setBaseLayers.length; i = i + 1) {
+        for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
             if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
@@ -1876,13 +1876,13 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
-        if ($(document).width() > 767 ) {
+        cloud.map.on('load', function(){ if ($(document).width() > 767 ) {
             setTimeout(
                 function () {
                     $(".navbar-toggle").trigger("click");
                 }, 500
             )
-        }
+        }});
     }
 };
 },{}],19:[function(require,module,exports){
