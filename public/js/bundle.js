@@ -9,8 +9,8 @@ module.exports = {
         "Info": "Info",
         "Layers": "Lag",
         "Legend": "Signatur",
-        "Draw": "Tegn",
         "Help": "Hjælp",
+        "Draw": "Tegn",
         "Log": "Log",
         "Address": "Adresse eller matrikelnr.",
         "With conflicts": "Med konflikter",
@@ -63,11 +63,40 @@ module.exports = {
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
-        "No Conflicts": "Ingen konflikter"
+        "No Conflicts": "Ingen konflikter",
+
+        "Print": "Print",
+        "Search places": "Søg på steder",
+        "Activate advanced query": "Aktivér avanceret forespørgsel",
+        "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
+        "Help text baselayers": "Vælg baggrundskort.",
+        "Help text legend": "Signatur for tændte overlejringskort",
+        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Du kan redigere og skifte farve på et allerede tegnet element.",
+        "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
+        "Activate drawing tools": "Aktivér tegneværktøjer",
+        "Activate print tools": "Aktivér printværktøjer",
+        "Make PDF": "Lav PDF",
+        "Download": "Download",
+        "Open PDF": "Åben PDF",
+        "Open HTML page": "Åben HTML side",
+        "Scale": "Skala",
+        "Template": "Skabelon",
+        "Page size": "Papirstørrelse",
+        "Orientation": "Orientering",
+        "Title": "Tittel",
+        "Comment": "Kommentar",
+        "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
+
+        "Draw a line": "Tegn en linje",
+        "Draw an area": "Tegn en flade",
+        "Draw a rectangle": "Tegn en rektangel",
+        "Draw a circle": "Tegn en cirkel",
+        "Draw a marker": "Tegn en markør"
+
     }
 };
 },{}],2:[function(require,module,exports){
-gc2i18n = {
+module.exports = {
     dict: {
         /* Start of viewer and widget */
         "Meters": "Meters",
@@ -131,10 +160,37 @@ gc2i18n = {
         // Report
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
-        "No Conflicts": "No Conflicts"
+        "No Conflicts": "No Conflicts",
+
+        "Print": "Print",
+        "Search places": "Search places",
+        "Activate advanced query": "Activate advanced query",
+        "Help text overlays": "Turn overlay maps on and off. Visible overlays becomes queryable.",
+        "Help text baselayers": "Choose base layer.",
+        "Help text legend": "Legend for visible overlay maps.",
+        "Help text draw": "Draw your own map. Use markers, lines, areas, squares and circles. You can edit and change color on already drawn features.",
+        "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
+        "Activate drawing tools": "Activate drawing tools",
+        "Activate print tools": "Activate print tools",
+        "Make PDF": "Make PDF",
+        "Download": "Download",
+        "Open PDF": "Open PDF",
+        "Open HTML page": "Open HTML page",
+        "Scale": "Scale",
+        "Template": "Template",
+        "Page size": "Page size",
+        "Orientation": "Orientation",
+        "Title": "Title",
+        "Comment": "Comment",
+        "The comment will be placed on the PDF": "The comment will be placed on the PDF",
+
+        "Draw a line": "Draw a line",
+        "Draw an area": "Draw an area",
+        "Draw a rectangle": "Draw a rectangle",
+        "Draw a circle": "Draw a circle",
+        "Draw a marker": "Draw a marker"
     }
 };
-module.exports = gc2i18n;
 },{}],3:[function(require,module,exports){
 // Hack to compile Glob files. Don´t call this function!
 function ಠ_ಠ() {
@@ -190,11 +246,13 @@ window.Vidi = function () {
         gc2i18n.dict.printWidth = urlVars.px + "px";
         gc2i18n.dict.printHeight = urlVars.py + "px";
     }
+
+    gc2i18n.dict.brandName = config.brandName;
+
     $("body").html(Templates[tmpl].render(gc2i18n.dict));
 
     $("[data-toggle=tooltip]").tooltip();
     $(".center").hide();
-    $("#pane").hide().fadeIn(1500);
     var max = $(document).height() - $('.tab-pane').offset().top - 100;
     $('.tab-pane').not("#result-content").css('max-height', max);
     $('#places').css('height', max - 130);
@@ -350,7 +408,7 @@ module.exports = {
 
             // Reset layer made by clickInfo
             infoClick.reset();
-
+            L.drawLocal = require('./drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -436,7 +494,6 @@ module.exports = {
         }
     },
     init: function (str) {
-        L.drawLocal = require('./drawLocales/advancedInfo.js');
         noUiSlider.create(bufferSlider, {
             start: 40,
             connect: "lower",
@@ -661,6 +718,27 @@ module.exports = {
     },
     control: function () {
         if (!drawOn) {
+            L.drawLocal = require('./drawLocales/draw.js');
+
+            var editActions = [
+                //L.Edit.Popup.Edit,
+                //L.Edit.Popup.Delete,
+                /*L._ToolbarAction.extendOptions({
+                    toolbarIcon: {
+                        className: 'leaflet-color-picker',
+                        html: '<span class="fa fa-eyedropper"></span>'
+                    },
+                    subToolbar: new L._Toolbar({
+                        actions: [
+                            L.ColorPicker.extendOptions({color: '#db1d0f'}),
+                            L.ColorPicker.extendOptions({color: '#025100'}),
+                            L.ColorPicker.extendOptions({color: '#ffff00'}),
+                            L.ColorPicker.extendOptions({color: '#0000ff'})
+                        ]
+                    })
+                })*/
+            ];
+
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -712,6 +790,14 @@ module.exports = {
                     }
                 }
                 drawnItems.addLayer(drawLayer);
+
+                drawLayer.on('click', function (event) {
+                    new L.EditToolbar.Popup(event.latlng, {
+                        className: 'leaflet-draw-toolbar',
+                        actions: editActions
+                    }).addTo(cloud.map, drawLayer);
+                });
+
                 if (type === "polygon" || type === "rectangle") {
                     area = getArea(drawLayer);
                     //distance = getDistance(drawLayer);
@@ -763,13 +849,12 @@ module.exports = {
             cloud.map.off('draw:edited');
 
             // Call destruct functions
-            $.each(destructFunctions, function(i, v){
+            $.each(destructFunctions, function (i, v) {
                 v();
             })
         }
     },
     init: function (str) {
-        L.drawLocal = require('./drawLocales/draw.js');
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -797,10 +882,10 @@ module.exports = {
                     ],
                     "autoUpdate": false,
                     loadData: false,
-                    height: require('./height')().max - 210,
+                    height: require('./height')().max - 350,
                     setSelectedStyle: false,
                     responsive: false,
-                    openPopUp: true
+                    openPopUp: false
                 });
 
             } else {
@@ -821,7 +906,118 @@ module.exports = {
         destructFunctions.push(f);
     }
 }
-;
+
+L.Edit = L.Edit || {};
+L.Edit.Popup = L.Edit.Popup || {};
+
+L.Edit.Popup.Edit = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-draw-edit-edit'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._map = map;
+
+        this._shape = shape;
+        this._shape.options.editing = this._shape.options.editing || {};
+
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    enable: function () {
+        var map = this._map,
+            shape = this._shape;
+
+        shape.editing.enable();
+        map.removeLayer(this.toolbar);
+
+        map.on('click', function () {
+            shape.editing.disable();
+        });
+    }
+});
+
+L.Edit = L.Edit || {};
+L.Edit.Popup = L.Edit.Popup || {};
+
+L.Edit.Popup.Delete = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-draw-edit-remove'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._map = map;
+        this._shape = shape;
+
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    addHooks: function () {
+        this._map.removeLayer(this._shape);
+        this._map.removeLayer(this.toolbar);
+        table.loadDataInTable();
+
+    }
+});
+
+
+L.EditToolbar.Popup = L._Toolbar.Popup.extend({
+    options: {
+        actions: [
+            L.Edit.Popup.Edit,
+            L.Edit.Popup.Delete
+        ]
+    },
+
+    onAdd: function (map) {
+        var shape = this._arguments[1];
+
+        if (shape instanceof L.Marker) {
+            /* Adjust the toolbar position so that it doesn't cover the marker. */
+            this.options.anchor = L.point(shape.options.icon.options.popupAnchor);
+        }
+
+        L._Toolbar.Popup.prototype.onAdd.call(this, map);
+    }
+});
+
+L.ColorPicker = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-color-swatch'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._shape = shape;
+
+        L.setOptions(this, options);
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    addHooks: function () {
+        this._shape.setStyle({color: this.options.color});
+        this.disable();
+    },
+
+    _createIcon: function (toolbar, container, args) {
+        var colorSwatch = L.DomUtil.create('div'),
+            width, height;
+
+        L._ToolbarAction.prototype._createIcon.call(this, toolbar, container, args);
+
+        L.extend(colorSwatch.style, {
+            backgroundColor: this.options.color,
+            width: L.DomUtil.getStyle(this._link, 'width'),
+            height: L.DomUtil.getStyle(this._link, 'height'),
+            border: '3px solid ' + L.DomUtil.getStyle(this._link, 'backgroundColor')
+        });
+
+        this._link.appendChild(colorSwatch);
+
+        L.DomEvent.on(this._link, 'click', function () {
+            cloud.map.removeLayer(this.toolbar.parentToolbar);
+        }, this);
+    }
+});
 
 
 },{"./drawLocales/draw.js":11,"./height":16}],10:[function(require,module,exports){
@@ -938,11 +1134,11 @@ module.exports = {
                 text: __('Finish')
             },
             buttons: {
-                polyline: __('Search with a line'),
-                polygon: __('Search with an area'),
-                rectangle: __('Search with a rectangle'),
-                circle: __('Search with a circle'),
-                marker: __('Search with a point')
+                polyline: __('Draw a line'),
+                polygon: __('Draw an area'),
+                rectangle: __('Draw a rectangle'),
+                circle: __('Draw a circle'),
+                marker: __('Draw a marker')
             }
         },
         handlers: {
@@ -1680,6 +1876,13 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
+        if ($(document).width() > 767 ) {
+            setTimeout(
+                function () {
+                    $(".navbar-toggle").trigger("click");
+                }, 500
+            )
+        }
     }
 };
 },{}],19:[function(require,module,exports){
@@ -1824,7 +2027,6 @@ module.exports = {
         } catch (e) {
         }
 
-        $("#start-print-btn").snackbar("show");
         e = serializeLayers.serialize({
             "printHelper": true,
             "query_draw": true,
@@ -2661,7 +2863,7 @@ module.exports = {
                 if (!isEmpty && !not_querable) {
                     $('#modal-info-body').show();
                     $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                    $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
+                    $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
 
                     $.each(layerObj.geoJSON.features, function (i, feature) {
                         if (fieldConf === null) {
@@ -2700,7 +2902,7 @@ module.exports = {
                         $('#tab_' + storeId).tab('show');
                         out = [];
                     });
-                    var height = require('./height')().max - 370;
+                    var height = require('./height')().max - 400;
                     gc2table.init({
                         el: "#_" + storeId + " table",
                         geocloud2: cloud,
@@ -2710,10 +2912,11 @@ module.exports = {
                         openPopUp: true,
                         setViewOnSelect: true,
                         responsive: false,
-                        height: (height > 300) ? height : 300
+                        height: (height > 500) ? 500 : (height < 300) ? 300 : height
                     });
                     hit = true;
-
+                    // Add fancy material raised style to buttons
+                    $(".bootstrap-table .btn-default").addClass("btn-raised");
                 } else {
                     layerObj.reset();
                 }
@@ -2795,6 +2998,7 @@ module.exports = {
         $("#info-pane").empty();
     }
 };
+
 },{"./height":16,"./urlparser":26}],24:[function(require,module,exports){
 var urlparser = require('./urlparser');
 var hash = urlparser.hash;
@@ -3068,8 +3272,12 @@ module.exports = module.exports = {
         var el = $('*[data-gc2-id="' + name + '"]');
 
         if (visible) {
-            cloud.showLayer(name);
-            el.prop('checked', true);
+            try {
+                cloud.showLayer(name);
+                el.prop('checked', true);
+            } catch (e) {
+                //Pass
+            }
         } else {
             cloud.hideLayer(name);
             el.prop('checked', false);
@@ -3169,7 +3377,8 @@ module.exports = {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl"
+    _template: "cowiDetail.tmpl",
+    brandName: "MapCentia"
 };
 },{}],29:[function(require,module,exports){
 'use strict'

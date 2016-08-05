@@ -48,7 +48,7 @@ module.exports = {
                 if (!isEmpty && !not_querable) {
                     $('#modal-info-body').show();
                     $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                    $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
+                    $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
 
                     $.each(layerObj.geoJSON.features, function (i, feature) {
                         if (fieldConf === null) {
@@ -87,7 +87,7 @@ module.exports = {
                         $('#tab_' + storeId).tab('show');
                         out = [];
                     });
-                    var height = require('./height')().max - 370;
+                    var height = require('./height')().max - 400;
                     gc2table.init({
                         el: "#_" + storeId + " table",
                         geocloud2: cloud,
@@ -97,10 +97,11 @@ module.exports = {
                         openPopUp: true,
                         setViewOnSelect: true,
                         responsive: false,
-                        height: (height > 300) ? height : 300
+                        height: (height > 500) ? 500 : (height < 300) ? 300 : height
                     });
                     hit = true;
-
+                    // Add fancy material raised style to buttons
+                    $(".bootstrap-table .btn-default").addClass("btn-raised");
                 } else {
                     layerObj.reset();
                 }

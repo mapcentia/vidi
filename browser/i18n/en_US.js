@@ -1,4 +1,4 @@
-gc2i18n = {
+module.exports = {
     dict: {
         /* Start of viewer and widget */
         "Meters": "Meters",
@@ -62,7 +62,34 @@ gc2i18n = {
         // Report
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
-        "No Conflicts": "No Conflicts"
+        "No Conflicts": "No Conflicts",
+
+        "Print": "Print",
+        "Search places": "Search places",
+        "Activate advanced query": "Activate advanced query",
+        "Help text overlays": "Turn overlay maps on and off. Visible overlays becomes queryable.",
+        "Help text baselayers": "Choose base layer.",
+        "Help text legend": "Legend for visible overlay maps.",
+        "Help text draw": "Draw your own map. Use markers, lines, areas, squares and circles. You can edit and change color on already drawn features.",
+        "Help text print": "Make scaled PDF map. Tweak the orange square in the map to set view extent and scale.",
+        "Activate drawing tools": "Activate drawing tools",
+        "Activate print tools": "Activate print tools",
+        "Make PDF": "Make PDF",
+        "Download": "Download",
+        "Open PDF": "Open PDF",
+        "Open HTML page": "Open HTML page",
+        "Scale": "Scale",
+        "Template": "Template",
+        "Page size": "Page size",
+        "Orientation": "Orientation",
+        "Title": "Title",
+        "Comment": "Comment",
+        "The comment will be placed on the PDF": "The comment will be placed on the PDF",
+
+        "Draw a line": "Draw a line",
+        "Draw an area": "Draw an area",
+        "Draw a rectangle": "Draw a rectangle",
+        "Draw a circle": "Draw a circle",
+        "Draw a marker": "Draw a marker"
     }
 };
-module.exports = gc2i18n;

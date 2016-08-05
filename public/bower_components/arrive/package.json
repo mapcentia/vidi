@@ -1,0 +1,34 @@
+{
+  "name": "arrive",
+  "version": "2.3.1",
+  "description": "arrive.js provides events to watch for DOM elements creation and removal. It makes use of Mutation Observers internally.",
+  "main": "src/arrive.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "open ./tests/SpecRunner.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://git@github.com/uzairfarooq/arrive.git"
+  },
+  "keywords": [
+    "jquery",
+    "javascript",
+    "js",
+    "watch",
+    "dynamic",
+    "creation",
+    "new",
+    "element",
+    "insertion",
+    "listen"
+  ],
+  "author": "Uzair Farooq <uzair.farooq@outlook.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/uzairfarooq/arrive/issues"
+  },
+  "homepage": "https://github.com/uzairfarooq/arrive#readme"
+}

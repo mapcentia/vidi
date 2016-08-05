@@ -659,7 +659,9 @@ body {
 }
 
 .navmenu, .navbar-offcanvas {
-    width: 450px;
+    max-width: 650px;
+    min-width: 350px;
+    width: 30%;
 }
 
 .navmenu-brand {
@@ -677,6 +679,7 @@ body {
 @media (max-width: 450px) {
     .navmenu, .navbar-offcanvas {
         width: 75%;
+        min-width: 250px;
     }
 
     .export {
@@ -768,6 +771,9 @@ body {
 .leaflet-control-toolbar .leaflet-toolbar-1 {
     right: 26px !important;
     left: inherit !important;
+}
+#main-tabs {
+    overflow: hidden !important;
 }
 
 

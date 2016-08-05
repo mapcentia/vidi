@@ -14,11 +14,11 @@ module.exports = {
                 text: __('Finish')
             },
             buttons: {
-                polyline: __('Search with a line'),
-                polygon: __('Search with an area'),
-                rectangle: __('Search with a rectangle'),
-                circle: __('Search with a circle'),
-                marker: __('Search with a point')
+                polyline: __('Draw a line'),
+                polygon: __('Draw an area'),
+                rectangle: __('Draw a rectangle'),
+                circle: __('Draw a circle'),
+                marker: __('Draw a marker')
             }
         },
         handlers: {

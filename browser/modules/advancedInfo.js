@@ -81,7 +81,7 @@ module.exports = {
 
             // Reset layer made by clickInfo
             infoClick.reset();
-
+            L.drawLocal = require('./drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -167,7 +167,6 @@ module.exports = {
         }
     },
     init: function (str) {
-        L.drawLocal = require('./drawLocales/advancedInfo.js');
         noUiSlider.create(bufferSlider, {
             start: 40,
             connect: "lower",

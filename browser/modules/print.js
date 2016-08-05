@@ -139,7 +139,6 @@ module.exports = {
         } catch (e) {
         }
 
-        $("#start-print-btn").snackbar("show");
         e = serializeLayers.serialize({
             "printHelper": true,
             "query_draw": true,

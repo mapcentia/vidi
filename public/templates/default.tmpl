@@ -9,7 +9,7 @@
     <div class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="javascript:void(0)">Geo Fyn A/S</a>
+                <a class="navbar-brand" href="javascript:void(0)">{{brandName}}</a>
             </div>
             <div class="navbar-collapse collapse navbar-responsive-collapse">
                 <ul class="nav navbar-nav navbar-right">
@@ -33,10 +33,6 @@
     </div>
 
     <div id="side-panel">
-        <div id="top">
-            <div id="progress-container"><span id="progress"></span><span id="spinner">&nbsp;<span><img
-                    src='http://www.gifstache.com/images/ajax_loader.gif' class='spinner'/></span></span></div>
-        </div>
         <div role="tabpanel">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist" id="main-tabs">
@@ -46,7 +42,7 @@
                 <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>
                 <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
                 <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
-                <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">Print</a></li>
+                <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">{{Print}}</a></li>
                 <!--
                                 <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
                 -->
@@ -58,7 +54,7 @@
                     <div role="tabpanel" class="tab-pane active" id="place-search">
                         <div class="alert alert-dismissible alert-info" role="alert">
                             <button type="button" class="close" data-dismiss="alert">×</button>
-                            Søg på adresse og matrikelnr.
+                            {{Search places}}
                         </div>
                         <div id="places">
                             <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
@@ -81,12 +77,12 @@
                         <div class="panel-body">
                             <div class="togglebutton">
                                 <label>
-                                    <input id="advanced-info-btn" type="checkbox"> Avanceret søgning
+                                    <input id="advanced-info-btn" type="checkbox"> {{Activate advanced query}}
                                 </label>
                             </div>
                             <div id="buffer" style="display: none">
                                 <div>
-                                    <label for="buffer-value" class="control-label">Buffer</label>
+                                    <label for="buffer-value" class="control-label">{{Buffer}}</label>
                                     <input id="buffer-value" class="form-control">
                                     <div id="buffer-slider" class="slider shor"></div>
                                 </div>
@@ -107,7 +103,7 @@
                 <div role="tabpanel" class="tab-pane" id="layer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
-                        Her kan du tænde og slukke for kortlag.
+                        {{Help text overlays}}
                     </div>
                     <div class="form-group">
                         <div id="layers" role="tablist"></div>
@@ -116,7 +112,7 @@
                 <div role="tabpanel" class="tab-pane" id="baselayer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
-                        Her kan du vælge baggrundskort.
+                        {{Help text baselayers}}
                     </div>
                     <div class="panel panel-default">
                         <div class="form-group">
@@ -129,7 +125,7 @@
                 <div role="tabpanel" class="tab-pane" id="legend-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
-                        Her vises signature for tændte kortlag..
+                        {{Help text legend}}
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
@@ -141,18 +137,13 @@
                 <div role="tabpanel" class="tab-pane" id="draw-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
-                        Her kan du tegne dit eget kort.
+                        {{Help text draw}}
                     </div>
-                    <div class="alert alert-dismissible alert-warning" role="alert">
-                        <button type="button" class="close" data-dismiss="alert">×</button>
-                        TODO. Gem kortet i browserens data store.
-                    </div>
-
                     <div class="panel panel-default" id="draw-panel">
                         <div class="panel-body">
                             <div class="togglebutton">
                                 <label>
-                                    <input id="draw-btn" type="checkbox"> Tegning
+                                    <input id="draw-btn" type="checkbox"> {{Activate drawing tools}}
                                 </label>
                             </div>
                             <div id="draw-table"></div>
@@ -162,27 +153,27 @@
                 <div role="tabpanel" class="tab-pane" id="print-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
-                        Her kan du printe dit kortet.
+                        {{Help text print}}
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
                             <div class="togglebutton">
                                 <label>
-                                    <input id="print-btn" type="checkbox"> Aktiver print
+                                    <input id="print-btn" type="checkbox"> {{Activate print tools}}
                                 </label>
                             </div>
                             <div class="btn-toolbar bs-component" style="margin: 0;">
                                 <div class="btn-group">
-                                    <button id="start-print-btn" class="btn btn-raised" style="width: 130px" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> Make PDF
-                                    " disabled><i class='fa fa-cog fa-lg'></i> Make PDF</button>
+                                    <button id="start-print-btn" class="btn btn-raised" style="width: 130px" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}
+                                    " disabled><i class='fa fa-cog fa-lg'></i> {{Make PDF}}</button>
                                 </div>
                                 <fieldset disabled id="get-print-fieldset">
                                     <div class="btn-group">
-                                        <a href="javascript:void(0)" class="btn btn-primary btn-raised" id="download-pdf"><i class="material-icons" style="font-size: 18px">file_download</i> Download</a>
+                                        <a href="javascript:void(0)" class="btn btn-primary btn-raised" id="download-pdf"><i class="material-icons" style="font-size: 18px">file_download</i> {{Download}}</a>
                                         <a href="bootstrap-elements.html" data-target="#" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                         <ul class="dropdown-menu">
-                                            <li><a target="_blank" href="javascript:void(0)" id="open-pdf">Open PDF</a></li>
-                                            <li><a target="_blank" href="javascript:void(0)" id="open-html">Open HTML page</a></li>
+                                            <li><a target="_blank" href="javascript:void(0)" id="open-pdf">{{Open PDF}}</a></li>
+                                            <li><a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a></li>
                                         </ul>
                                     </div>
                                 </fieldset>
@@ -191,7 +182,7 @@
                                 <form class="form-horizontal" id="print-form">
                                     <fieldset>
                                         <div class="form-group">
-                                            <label for="select-scale" class="col-md-2 control-label">Scale</label>
+                                            <label for="select-scale" class="col-md-2 control-label">{{Scale}}</label>
 
                                             <div class="col-md-10">
                                                 <select id="select-scale" class="form-control" disabled></select>
@@ -199,22 +190,22 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label class="col-md-2 control-label">Template</label>
+                                            <label class="col-md-2 control-label">{{Template}}</label>
                                             <div class="col-md-10" id="print-tmpl"></div>
                                         </div>
 
                                         <div class="form-group">
-                                            <label class="col-md-2 control-label">Page size</label>
+                                            <label class="col-md-2 control-label">{{Page size}}</label>
                                             <div class="col-md-10" id="print-size"></div>
                                         </div>
 
                                         <div class="form-group">
-                                            <label class="col-md-2 control-label">Orientation</label>
+                                            <label class="col-md-2 control-label">{{Orientation}}</label>
                                             <div class="col-md-10" id="print-orientation"></div>
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="print-title" class="col-md-2 control-label">Title</label>
+                                            <label for="print-title" class="col-md-2 control-label">{{Title}}</label>
 
                                             <div class="col-md-10">
                                                 <input type="text" class="form-control" id="print-title" disabled>
@@ -222,10 +213,10 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <label for="print-comment" class="col-md-2 control-label">Comment</label>
+                                            <label for="print-comment" class="col-md-2 control-label">{{Comment}}</label>
                                             <div class="col-md-10">
                                                 <textarea class="form-control" rows="3" id="print-comment" disabled></textarea>
-                                                <span class="help-block">The comment will be placed on the PDF.</span>
+                                                <span class="help-block">{{The comment will be placed on the PDF}}</span>
                                             </div>
                                         </div>
 
@@ -248,22 +239,4 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
-</div>
-
-<div class="modal" id="print-modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title">Modal title</h4>
-            </div>
-            <div class="modal-body">
-                <p>One fine body…</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-        </div>
-    </div>
 </div>

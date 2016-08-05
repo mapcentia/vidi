@@ -34,6 +34,27 @@ module.exports = {
     },
     control: function () {
         if (!drawOn) {
+            L.drawLocal = require('./drawLocales/draw.js');
+
+            var editActions = [
+                //L.Edit.Popup.Edit,
+                //L.Edit.Popup.Delete,
+                /*L._ToolbarAction.extendOptions({
+                    toolbarIcon: {
+                        className: 'leaflet-color-picker',
+                        html: '<span class="fa fa-eyedropper"></span>'
+                    },
+                    subToolbar: new L._Toolbar({
+                        actions: [
+                            L.ColorPicker.extendOptions({color: '#db1d0f'}),
+                            L.ColorPicker.extendOptions({color: '#025100'}),
+                            L.ColorPicker.extendOptions({color: '#ffff00'}),
+                            L.ColorPicker.extendOptions({color: '#0000ff'})
+                        ]
+                    })
+                })*/
+            ];
+
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -85,6 +106,14 @@ module.exports = {
                     }
                 }
                 drawnItems.addLayer(drawLayer);
+
+                drawLayer.on('click', function (event) {
+                    new L.EditToolbar.Popup(event.latlng, {
+                        className: 'leaflet-draw-toolbar',
+                        actions: editActions
+                    }).addTo(cloud.map, drawLayer);
+                });
+
                 if (type === "polygon" || type === "rectangle") {
                     area = getArea(drawLayer);
                     //distance = getDistance(drawLayer);
@@ -136,13 +165,12 @@ module.exports = {
             cloud.map.off('draw:edited');
 
             // Call destruct functions
-            $.each(destructFunctions, function(i, v){
+            $.each(destructFunctions, function (i, v) {
                 v();
             })
         }
     },
     init: function (str) {
-        L.drawLocal = require('./drawLocales/draw.js');
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -170,10 +198,10 @@ module.exports = {
                     ],
                     "autoUpdate": false,
                     loadData: false,
-                    height: require('./height')().max - 210,
+                    height: require('./height')().max - 350,
                     setSelectedStyle: false,
                     responsive: false,
-                    openPopUp: true
+                    openPopUp: false
                 });
 
             } else {
@@ -194,5 +222,116 @@ module.exports = {
         destructFunctions.push(f);
     }
 }
-;
+
+L.Edit = L.Edit || {};
+L.Edit.Popup = L.Edit.Popup || {};
+
+L.Edit.Popup.Edit = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-draw-edit-edit'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._map = map;
+
+        this._shape = shape;
+        this._shape.options.editing = this._shape.options.editing || {};
+
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    enable: function () {
+        var map = this._map,
+            shape = this._shape;
+
+        shape.editing.enable();
+        map.removeLayer(this.toolbar);
+
+        map.on('click', function () {
+            shape.editing.disable();
+        });
+    }
+});
+
+L.Edit = L.Edit || {};
+L.Edit.Popup = L.Edit.Popup || {};
+
+L.Edit.Popup.Delete = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-draw-edit-remove'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._map = map;
+        this._shape = shape;
+
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    addHooks: function () {
+        this._map.removeLayer(this._shape);
+        this._map.removeLayer(this.toolbar);
+        table.loadDataInTable();
+
+    }
+});
+
+
+L.EditToolbar.Popup = L._Toolbar.Popup.extend({
+    options: {
+        actions: [
+            L.Edit.Popup.Edit,
+            L.Edit.Popup.Delete
+        ]
+    },
+
+    onAdd: function (map) {
+        var shape = this._arguments[1];
+
+        if (shape instanceof L.Marker) {
+            /* Adjust the toolbar position so that it doesn't cover the marker. */
+            this.options.anchor = L.point(shape.options.icon.options.popupAnchor);
+        }
+
+        L._Toolbar.Popup.prototype.onAdd.call(this, map);
+    }
+});
+
+L.ColorPicker = L._ToolbarAction.extend({
+    options: {
+        toolbarIcon: {className: 'leaflet-color-swatch'}
+    },
+
+    initialize: function (map, shape, options) {
+        this._shape = shape;
+
+        L.setOptions(this, options);
+        L._ToolbarAction.prototype.initialize.call(this, map, options);
+    },
+
+    addHooks: function () {
+        this._shape.setStyle({color: this.options.color});
+        this.disable();
+    },
+
+    _createIcon: function (toolbar, container, args) {
+        var colorSwatch = L.DomUtil.create('div'),
+            width, height;
+
+        L._ToolbarAction.prototype._createIcon.call(this, toolbar, container, args);
+
+        L.extend(colorSwatch.style, {
+            backgroundColor: this.options.color,
+            width: L.DomUtil.getStyle(this._link, 'width'),
+            height: L.DomUtil.getStyle(this._link, 'height'),
+            border: '3px solid ' + L.DomUtil.getStyle(this._link, 'backgroundColor')
+        });
+
+        this._link.appendChild(colorSwatch);
+
+        L.DomEvent.on(this._link, 'click', function () {
+            cloud.map.removeLayer(this.toolbar.parentToolbar);
+        }, this);
+    }
+});
 

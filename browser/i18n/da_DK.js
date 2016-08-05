@@ -8,8 +8,8 @@ module.exports = {
         "Info": "Info",
         "Layers": "Lag",
         "Legend": "Signatur",
-        "Draw": "Tegn",
         "Help": "Hjælp",
+        "Draw": "Tegn",
         "Log": "Log",
         "Address": "Adresse eller matrikelnr.",
         "With conflicts": "Med konflikter",
@@ -62,6 +62,35 @@ module.exports = {
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
-        "No Conflicts": "Ingen konflikter"
+        "No Conflicts": "Ingen konflikter",
+
+        "Print": "Print",
+        "Search places": "Søg på steder",
+        "Activate advanced query": "Aktivér avanceret forespørgsel",
+        "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
+        "Help text baselayers": "Vælg baggrundskort.",
+        "Help text legend": "Signatur for tændte overlejringskort",
+        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Du kan redigere og skifte farve på et allerede tegnet element.",
+        "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
+        "Activate drawing tools": "Aktivér tegneværktøjer",
+        "Activate print tools": "Aktivér printværktøjer",
+        "Make PDF": "Lav PDF",
+        "Download": "Download",
+        "Open PDF": "Åben PDF",
+        "Open HTML page": "Åben HTML side",
+        "Scale": "Skala",
+        "Template": "Skabelon",
+        "Page size": "Papirstørrelse",
+        "Orientation": "Orientering",
+        "Title": "Tittel",
+        "Comment": "Kommentar",
+        "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
+
+        "Draw a line": "Tegn en linje",
+        "Draw an area": "Tegn en flade",
+        "Draw a rectangle": "Tegn en rektangel",
+        "Draw a circle": "Tegn en cirkel",
+        "Draw a marker": "Tegn en markør"
+
     }
 };

@@ -11,27 +11,20 @@
     <!--[if lt IE 9]>
     <script type="text/javascript" src="/js/div/html5shiv.js"></script>
     <![endif]-->
-    <!-- build:css /apps/viewer/css/build/all.min.css -->
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
-
-    <link rel="stylesheet" href="/static/css/jasny-bootstrap.min.css" type="text/css">
-
 
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:200,300,400,500,700" type="text/css">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <!-- Bootstrap Material Design -->
-    <link href="/static/js/bootstrap-material-design/css/bootstrap-material-design.css" rel="stylesheet">
-    <link href="/static/js/bootstrap-material-design/css/ripples.min.css" rel="stylesheet">
-    <link href="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.css" rel="stylesheet">
-
+    <!-- build:css /static/css/build/all.min.css -->
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css" rel="stylesheet">
+    <link href="bower_components/bootstrap-material-design/dist/css/ripples.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/jasny-bootstrap.min.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/L.Control.Locate.min.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/Leaflet.GraphicScale.min.css" type="text/css">
+    <link rel="stylesheet" href="/static/css/leaflet.toolbar.css" type="text/css">
     <link rel="stylesheet" href="/static/css/styles.css" type="text/css">
-
-    <link rel="stylesheet" href="http://nerik.github.io/leaflet-graphicscale/dist/Leaflet.GraphicScale.min.css" type="text/css">
-    <link rel="stylesheet" href="http://cowi.mapcentia.com/js/leaflet/plugins/Leaflet.Toolbar/leaflet.toolbar-src.css" type="text/css">
-    <link rel="stylesheet" href="https://www.domoritz.de/leaflet-locatecontrol/dist/L.Control.Locate.min.css" type="text/css">
-
     <!-- /build -->
 </head>
 <body>
@@ -50,32 +43,35 @@
 </div>
 </body>
 <script src="/locale"></script>
-<script src="http://eu1.mapcentia.com/js/jquery/1.10.0/jquery.min.js?"></script>
-<script src="http://eu1.mapcentia.com/js/bootstrap3/js/bootstrap.min.js"></script>
-<script src="http://eu1.mapcentia.com/js/typeahead.js-0.10.5/dist/typeahead.bundle.js"></script>
-<script src="http://twitter.github.com/hogan.js/builds/3.0.1/hogan-3.0.1.js"></script>
-<script src="http://cowi.mapcentia.com/js/bootstrap-table/bootstrap-table.js"></script>
-<script src="http://cowi.mapcentia.com/js/bootstrap-table/extensions/export/bootstrap-table-export.js"></script>
-<script src="//rawgit.com/hhurz/tableExport.jquery.plugin/master/tableExport.js"></script>
-
-<script src="/static/js/arrive.min.js"></script>
+<!-- build:js /static/js/build/store/all.min.js -->
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<script src="bower_components/typeahead.js/dist/typeahead.jquery.min.js"></script>
+<script src="bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js"></script>
+<script src="bower_components/bootstrap-table/dist/bootstrap-table.js"></script>
+<script src="bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
+<script src="bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
+<script src="bower_components/arrive/minified/arrive.min.js"></script>
+<script src="bower_components/bootstrap-material-design/dist/js/ripples.js"></script>
+<script src="bower_components/bootstrap-material-design/dist/js/material.js"></script>
 <script src="/static/js/jasny-bootstrap.min.js"></script>
-<script src="/static/js/bootstrap-material-design/js/ripples.min.js"></script>
-<script src="/static/js/bootstrap-material-design/js/material.js"></script>
-<script src="//fezvrasta.github.io/snackbarjs/dist/snackbar.min.js"></script>
-
-<script src="http://eu1.mapcentia.com/js/common.js"></script>
-<script src="http://cowi.mapcentia.com/apps/widgets/gc2table/js/gc2table.js" type="text/javascript"></script>
-
 <script src="/static/js/templates.js"></script>
 <script src="/static/js/bundle.js"></script>
+<!-- /build -->
+<script src="http://cowi.mapcentia.com/js/common.js"></script>
+<script src="http://cowi.mapcentia.com/apps/widgets/gc2table/js/gc2table.js"></script>
 <script src="/api/baselayer"></script>
-
 <script>
-
+    function detailFormatter(index, row) {
+        var html = [];
+        $.each(row, function (key, value) {
+            html.push('<p><b>' + key + ':</b> ' + value + '</p>');
+        });
+        return html.join('');
+    }
     window.go = function () {
         window.MapCentia = new Vidi().init.init();
     }
 </script>
-<script src="http://cowi.mapcentia.com/api/v3/js/geocloud.php?callback=go&maplib=leaflet" type="text/javascript"></script>
+<script src="http://geofyn.mapcentia.com/api/v3/js/geocloud.php?callback=go&maplib=leaflet&i18n=false" type="text/javascript"></script>
 </html>

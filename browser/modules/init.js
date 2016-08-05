@@ -47,5 +47,12 @@ module.exports = {
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
+        if ($(document).width() > 767 ) {
+            setTimeout(
+                function () {
+                    $(".navbar-toggle").trigger("click");
+                }, 500
+            )
+        }
     }
 };

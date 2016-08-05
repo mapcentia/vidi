@@ -52,11 +52,13 @@ window.Vidi = function () {
         gc2i18n.dict.printWidth = urlVars.px + "px";
         gc2i18n.dict.printHeight = urlVars.py + "px";
     }
+
+    gc2i18n.dict.brandName = config.brandName;
+
     $("body").html(Templates[tmpl].render(gc2i18n.dict));
 
     $("[data-toggle=tooltip]").tooltip();
     $(".center").hide();
-    $("#pane").hide().fadeIn(1500);
     var max = $(document).height() - $('.tab-pane').offset().top - 100;
     $('.tab-pane').not("#result-content").css('max-height', max);
     $('#places').css('height', max - 130);

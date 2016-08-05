@@ -12,8 +12,12 @@ module.exports = module.exports = {
         var el = $('*[data-gc2-id="' + name + '"]');
 
         if (visible) {
-            cloud.showLayer(name);
-            el.prop('checked', true);
+            try {
+                cloud.showLayer(name);
+                el.prop('checked', true);
+            } catch (e) {
+                //Pass
+            }
         } else {
             cloud.hideLayer(name);
             el.prop('checked', false);
