@@ -2930,6 +2930,10 @@ module.exports = {
                     hit = true;
                     // Add fancy material raised style to buttons
                     $(".bootstrap-table .btn-default").addClass("btn-raised");
+                    // Stop the click on detail icon from bubbling up the DOM tree
+                    $(".detail-icon").click(function (event) {
+                        event.stopPropagation();
+                    })
                 } else {
                     layerObj.reset();
                 }
@@ -2967,7 +2971,7 @@ module.exports = {
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         //l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
-                        $.each(l._layers, function(i, v){
+                        $.each(l._layers, function (i, v) {
                             v._vidi_type = "query_result";
                         })
                     } else {
