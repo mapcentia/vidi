@@ -54,5 +54,6 @@ module.exports = {
                 }, 500
             )
         }});
+        touchScroll(".tab-pane")
     }
 };

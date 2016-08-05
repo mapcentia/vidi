@@ -1,0 +1,57 @@
+{
+  "name": "leaflet-measure",
+  "authors": [
+    "Brandon Copeland <br@ndoncopeland.com>"
+  ],
+  "description": "Coordinate, linear, and area measure tool for Leaflet maps",
+  "main": [
+    "dist/leaflet-measure.min.js",
+    "dist/leaflet-measure.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ljagis/leaflet-measure.git"
+  },
+  "keywords": [
+    "leaflet",
+    "measure",
+    "measurement",
+    "control",
+    "coordinate",
+    "line",
+    "length",
+    "area",
+    "polygon",
+    "path"
+  ],
+  "license": "MIT",
+  "ignore": [
+    ".sass-cache",
+    ".DS_Store",
+    "node_modules",
+    "bower_components",
+    "examples",
+    "scss",
+    "src",
+    ".gitignore",
+    ".jscsrc",
+    ".jshintrc",
+    "Gruntfile.js",
+    "package.json",
+    "README.md"
+  ],
+  "devDependencies": {
+    "normalize.css": "~3.0.2"
+  },
+  "homepage": "https://github.com/mapcentia/leaflet-measure",
+  "version": "2.0.2",
+  "_release": "2.0.2",
+  "_resolution": {
+    "type": "version",
+    "tag": "2.0.2",
+    "commit": "fb2b675103a28f3b7114c3bfc90d2cb1bd7abbd1"
+  },
+  "_source": "git://github.com/mapcentia/leaflet-measure.git",
+  "_target": "^2.0.2",
+  "_originalSource": "git://github.com/mapcentia/leaflet-measure.git"
+}

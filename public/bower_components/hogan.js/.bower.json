@@ -37,6 +37,5 @@
   },
   "_source": "https://github.com/twitter/hogan.js.git",
   "_target": "^3.0.2",
-  "_originalSource": "hogan",
-  "_direct": true
+  "_originalSource": "hogan"
 }

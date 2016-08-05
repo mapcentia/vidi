@@ -580,7 +580,7 @@ module.exports = module.exports = {
             if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
-                    "<li class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label style='display: block;'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></li>"
+                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             }
         }
@@ -649,7 +649,7 @@ var map = cloud.map;
 
 
 /*var scaleControl = L.control.scale({position: "bottomright"});
-cloud.map.addControl(scaleControl);*/
+ cloud.map.addControl(scaleControl);*/
 
 var lc = L.control.locate({
     position: 'topright',
@@ -668,17 +668,26 @@ var graphicScale = L.control.graphicScale({
     position: "bottomleft"
 }).addTo(map);
 
-var scaleText = L.DomUtil.create('div', 'scaleText' );
+var scaleText = L.DomUtil.create('div', 'scaleText');
 graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
 //scaleText.innerHTML = '<h1>Leaflet Graphic Scale</h1><p>style: <span class="choice">hollow</span>-<span class="choice">line</span>-<span class="choice">fill</span>-<span class="choice">nofill</span></p>';
 
 var styleChoices = scaleText.querySelectorAll('.choice');
 
 for (var i = 0; i < styleChoices.length; i++) {
-    styleChoices[i].addEventListener('click', function(e) {
-        graphicScale._setStyle( { fill: e.currentTarget.innerHTML } );
+    styleChoices[i].addEventListener('click', function (e) {
+        graphicScale._setStyle({fill: e.currentTarget.innerHTML});
     });
 }
+
+var measureControl = new L.Control.Measure({
+    position: 'topright',
+    primaryLengthUnit: 'kilometers',
+    secondaryLengthUnit: 'meters',
+    primaryAreaUnit: 'hectares',
+    secondaryAreaUnit: 'sqmeters'
+});
+measureControl.addTo(map);
 
 module.exports = cloud;
 },{"../../config/config.js":28}],9:[function(require,module,exports){
@@ -1695,7 +1704,8 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        "<li class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></li>"
+                                        //"<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
+                                        "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
                                     );
                                 }
                                 else {
@@ -1883,6 +1893,7 @@ module.exports = {
                 }, 500
             )
         }});
+        touchScroll(".tab-pane")
     }
 };
 },{}],19:[function(require,module,exports){

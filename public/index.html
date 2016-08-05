@@ -20,6 +20,7 @@
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css" rel="stylesheet">
     <link href="bower_components/bootstrap-material-design/dist/css/ripples.min.css" rel="stylesheet">
+    <link href="bower_components/leaflet-measure/dist/leaflet-measure.css" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/jasny-bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/static/css/L.Control.Locate.min.css" type="text/css">
     <link rel="stylesheet" href="/static/css/Leaflet.GraphicScale.min.css" type="text/css">
@@ -43,7 +44,10 @@
 </div>
 </body>
 <script src="/locale"></script>
+<script src="http://geofyn.mapcentia.com/js/leaflet/leaflet-all.js"></script>
+
 <!-- build:js /static/js/build/store/all.min.js -->
+<script src="bower_components/leaflet-measure/dist/leaflet-measure.js"></script>
 <script src="bower_components/jquery/dist/jquery.min.js"></script>
 <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 <script src="bower_components/typeahead.js/dist/typeahead.jquery.min.js"></script>
@@ -68,6 +72,36 @@
             html.push('<p><b>' + key + ':</b> ' + value + '</p>');
         });
         return html.join('');
+    }
+    function isTouchDevice(){
+        try{
+            document.createEvent("TouchEvent");
+            return true;
+        }catch(e){
+            return false;
+        }
+    }
+    function touchScroll(selector) {
+        if (isTouchDevice()) {
+            var scrollStartPosY=0;
+            var scrollStartPosX=0;
+            $("body").delegate(selector, 'touchstart', function(e) {
+                scrollStartPosY=this.scrollTop+e.originalEvent.touches[0].pageY;
+                scrollStartPosX=this.scrollLeft+e.originalEvent.touches[0].pageX;
+            });
+            $("body").delegate(selector, 'touchmove', function(e) {
+                if ((this.scrollTop < this.scrollHeight-this.offsetHeight &&
+                        this.scrollTop+e.originalEvent.touches[0].pageY < scrollStartPosY-5) ||
+                        (this.scrollTop != 0 && this.scrollTop+e.originalEvent.touches[0].pageY > scrollStartPosY+5))
+                    e.preventDefault();
+                if ((this.scrollLeft < this.scrollWidth-this.offsetWidth &&
+                        this.scrollLeft+e.originalEvent.touches[0].pageX < scrollStartPosX-5) ||
+                        (this.scrollLeft != 0 && this.scrollLeft+e.originalEvent.touches[0].pageX > scrollStartPosX+5))
+                    e.preventDefault();
+                this.scrollTop=scrollStartPosY-e.originalEvent.touches[0].pageY;
+                this.scrollLeft=scrollStartPosX-e.originalEvent.touches[0].pageX;
+            });
+        }
     }
     window.go = function () {
         window.MapCentia = new Vidi().init.init();

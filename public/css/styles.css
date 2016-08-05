@@ -569,11 +569,8 @@ div.olControlZoom {
 }
 
 .layer-item label {
-    padding: 10px 15px;
-    font-weight: 300;
-    font-size: 14px;
-    font-family: 'Roboto', sans-serif, sans-serif !important;
-    margin-bottom: 0 !important;
+    padding: 3px 15px;
+
 }
 
 .base-layer-item .fa {
@@ -776,4 +773,15 @@ body {
     overflow: hidden !important;
 }
 
+.list-group .list-group-separator:before {
+    width: 100%;
+    margin: 0 !important;
+}
+.list-group-item{
+    padding: 16px;
+    overflow: visible !important;
+}
 
+.list-group-item label:hover {
+    color: #009688;
+}

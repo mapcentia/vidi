@@ -105,9 +105,7 @@
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text overlays}}
                     </div>
-                    <div class="form-group">
-                        <div id="layers" role="tablist"></div>
-                    </div>
+                    <div id="layers" role="tablist"></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="baselayer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
@@ -115,10 +113,8 @@
                         {{Help text baselayers}}
                     </div>
                     <div class="panel panel-default">
-                        <div class="form-group">
-                            <div class="panel-body">
-                                <div id="base-layer-list"></div>
-                            </div>
+                        <div class="panel-body">
+                            <div class="list-group" id="base-layer-list"></div>
                         </div>
                     </div>
                 </div>
@@ -165,7 +161,8 @@
                             <div class="btn-toolbar bs-component" style="margin: 0;">
                                 <div class="btn-group">
                                     <button id="start-print-btn" class="btn btn-raised" style="width: 130px" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}
-                                    " disabled><i class='fa fa-cog fa-lg'></i> {{Make PDF}}</button>
+                                    " disabled><i class='fa fa-cog fa-lg'></i> {{Make PDF}}
+                                    </button>
                                 </div>
                                 <fieldset disabled id="get-print-fieldset">
                                     <div class="btn-group">
