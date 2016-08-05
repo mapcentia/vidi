@@ -785,3 +785,8 @@ body {
 .list-group-item label:hover {
     color: #009688;
 }
+
+.leaflet-control-measure .leaflet-control-measure-toggle, .leaflet-control-measure .leaflet-control-measure-toggle:hover {
+    width: 26px;
+    height: 26px;
+}

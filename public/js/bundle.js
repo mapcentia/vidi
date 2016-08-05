@@ -685,7 +685,9 @@ var measureControl = new L.Control.Measure({
     primaryLengthUnit: 'kilometers',
     secondaryLengthUnit: 'meters',
     primaryAreaUnit: 'hectares',
-    secondaryAreaUnit: 'sqmeters'
+    secondaryAreaUnit: 'sqmeters',
+    localization: 'da'
+
 });
 measureControl.addTo(map);
 
