@@ -83,7 +83,7 @@ module.exports = {
         "Template": "Skabelon",
         "Page size": "Papirstørrelse",
         "Orientation": "Orientering",
-        "Title": "Tittel",
+        "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
 
