@@ -2,6 +2,7 @@
 module.exports = {
     dict: {
         /* Start of viewer and widget */
+        "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
         "Search": "Søg",
@@ -91,14 +92,16 @@ module.exports = {
         "Draw an area": "Tegn en flade",
         "Draw a rectangle": "Tegn en rektangel",
         "Draw a circle": "Tegn en cirkel",
-        "Draw a marker": "Tegn en markør"
+        "Draw a marker": "Tegn en markør",
 
+        "Close": "Luk"
     }
 };
 },{}],2:[function(require,module,exports){
 module.exports = {
     dict: {
         /* Start of viewer and widget */
+        "About": "About",
         "Meters": "Meters",
         "Buffer": "Buffer",
         "Search": "Search",
@@ -188,7 +191,9 @@ module.exports = {
         "Draw an area": "Draw an area",
         "Draw a rectangle": "Draw a rectangle",
         "Draw a circle": "Draw a circle",
-        "Draw a marker": "Draw a marker"
+        "Draw a marker": "Draw a marker",
+
+        "Close": "Close"
     }
 };
 },{}],3:[function(require,module,exports){

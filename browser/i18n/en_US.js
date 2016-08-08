@@ -1,6 +1,7 @@
 module.exports = {
     dict: {
         /* Start of viewer and widget */
+        "About": "About",
         "Meters": "Meters",
         "Buffer": "Buffer",
         "Search": "Search",
@@ -90,6 +91,8 @@ module.exports = {
         "Draw an area": "Draw an area",
         "Draw a rectangle": "Draw a rectangle",
         "Draw a circle": "Draw a circle",
-        "Draw a marker": "Draw a marker"
+        "Draw a marker": "Draw a marker",
+
+        "Close": "Close"
     }
 };

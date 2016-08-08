@@ -1,6 +1,7 @@
 module.exports = {
     dict: {
         /* Start of viewer and widget */
+        "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
         "Search": "Søg",
@@ -90,7 +91,8 @@ module.exports = {
         "Draw an area": "Tegn en flade",
         "Draw a rectangle": "Tegn en rektangel",
         "Draw a circle": "Tegn en cirkel",
-        "Draw a marker": "Tegn en markør"
+        "Draw a marker": "Tegn en markør",
 
+        "Close": "Luk"
     }
 };
