@@ -7,6 +7,7 @@ var store = new geocloud.sqlStore({
     clickable: true
 });
 var destructFunctions = [];
+//var editPopUp;
 
 
 var getDistance = function (e) {
@@ -39,20 +40,20 @@ module.exports = {
             var editActions = [
                 //L.Edit.Popup.Edit,
                 //L.Edit.Popup.Delete,
-                /*L._ToolbarAction.extendOptions({
+                L._ToolbarAction.extendOptions({
                     toolbarIcon: {
                         className: 'leaflet-color-picker',
                         html: '<span class="fa fa-eyedropper"></span>'
                     },
                     subToolbar: new L._Toolbar({
                         actions: [
-                            L.ColorPicker.extendOptions({color: '#db1d0f'}),
-                            L.ColorPicker.extendOptions({color: '#025100'}),
-                            L.ColorPicker.extendOptions({color: '#ffff00'}),
-                            L.ColorPicker.extendOptions({color: '#0000ff'})
+                            L.ColorPicker.extendOptions({color: '#ff0000'}),
+                            L.ColorPicker.extendOptions({color: '#00ff00'}),
+                            L.ColorPicker.extendOptions({color: '#0000ff'}),
+                            L.ColorPicker.extendOptions({color: '#000000'})
                         ]
                     })
-                })*/
+                })
             ];
 
             drawControl = new L.Control.Draw({
@@ -60,22 +61,26 @@ module.exports = {
                 draw: {
                     polygon: {
                         title: 'Draw a polygon!',
-                        allowIntersection: false,
-                        drawError: {
-                            color: '#b00b00',
-                            timeout: 1000
-                        },
+                        allowIntersection: true,
                         shapeOptions: {
-                            color: '#bada55'
+                            color: '#ff0000'
                         },
                         showArea: true
                     },
                     polyline: {
-                        metric: true
+                        metric: true,
+                        shapeOptions: {
+                            color: '#ff0000'
+                        }
+                    },
+                    rectangle: {
+                        shapeOptions: {
+                            color: '#ff0000'
+                        }
                     },
                     circle: {
                         shapeOptions: {
-                            color: '#662d91'
+                            color: '#ff0000'
                         }
                     }
                 },
@@ -99,7 +104,7 @@ module.exports = {
             cloud.map.on('draw:created', function (e) {
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
                 if (type === 'marker') {
-                    var text = prompt("Enter a text for the marker or cancel to add without text", "");
+                    var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
                     if (text !== null) {
                         drawLayer.bindLabel(text, {noHide: true}).on("click", function () {
                         }).showLabel();
@@ -108,7 +113,7 @@ module.exports = {
                 drawnItems.addLayer(drawLayer);
 
                 drawLayer.on('click', function (event) {
-                    new L.EditToolbar.Popup(event.latlng, {
+                    window.editPopUp = new L.EditToolbar.Popup(event.latlng, {
                         className: 'leaflet-draw-toolbar',
                         actions: editActions
                     }).addTo(cloud.map, drawLayer);
@@ -292,8 +297,8 @@ L.EditToolbar.Popup = L._Toolbar.Popup.extend({
             /* Adjust the toolbar position so that it doesn't cover the marker. */
             this.options.anchor = L.point(shape.options.icon.options.popupAnchor);
         }
-
         L._Toolbar.Popup.prototype.onAdd.call(this, map);
+        $(".leaflet-color-picker span").trigger("click");
     }
 });
 
