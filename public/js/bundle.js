@@ -84,7 +84,7 @@ module.exports = {
         "Template": "Skabelon",
         "Page size": "Papirstørrelse",
         "Orientation": "Orientering",
-        "Title": "Tittel",
+        "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
 
@@ -2379,7 +2379,7 @@ module.exports = {
                     placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid=" + gids[datum.value];
                 }
                 if (name === "adresse") {
-                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM adresse.adgang WHERE gid=" + gids[datum.value];
+                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM adresse.adgang4 WHERE gid=" + gids[datum.value];
                 }
                 searchString = datum.value;
                 placeStore.load();
