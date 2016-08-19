@@ -3378,12 +3378,12 @@ module.exports = {
 },{}],28:[function(require,module,exports){
 module.exports = {
     gc2: {
-        host: "http://192.168.33.11"
-        //host: "http://cowi.mapcentia.com"
+        //host: "http://192.168.33.11"
+        host: "http://cowi.mapcentia.com"
     },
     print: {
         templates: {
-            "cowiDetailPrint": {
+            "cowi": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -3396,15 +3396,14 @@ module.exports = {
                 }
             }
         },
-        scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000],
-
+        scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
 
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],29:[function(require,module,exports){

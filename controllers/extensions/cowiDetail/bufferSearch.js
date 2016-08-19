@@ -10,10 +10,10 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
     console.log(wkt)
 
     if (wkt.length > 1) {
-        sql = "SELECT '500' as radius, sum(antal_personer_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.befolkning WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[0] + "',4326),25832))" +
-            "UNION SELECT '1000' as radius, sum(antal_personer_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.befolkning WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[1] + "',4326),25832))";
+        sql = "SELECT '500' as radius, sum(pers_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.dkn_befolkning_og_arbejdspladser WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[0] + "',4326),25832))" +
+            "UNION SELECT '1000' as radius, sum(pers_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.dkn_befolkning_og_arbejdspladser WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[1] + "',4326),25832))";
     } else {
-        sql = "SELECT sum(antal_personer_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.befolkning WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[0] + "',4326),25832))";
+        sql = "SELECT sum(pers_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.dkn_befolkning_og_arbejdspladser WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[0] + "',4326),25832))";
     }
 
     url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=" + srs +  "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=ce5ab76892183d8b68c0486f724b011d";
