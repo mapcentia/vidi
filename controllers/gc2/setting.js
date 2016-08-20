@@ -3,7 +3,7 @@ var router = express.Router();
 var http = require('http');
 var config = require('../../config/config.js').gc2;
 
-router.get('/api/setting/:db', function (req, response) {
+router.get('/api/setting/:db/:schema', function (req, response) {
     var db = req.params.db, url;
     url = config.host + "/api/v1/setting/" + db;
     http.get(url, function (res) {

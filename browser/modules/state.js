@@ -10,7 +10,8 @@ var legend;
 var draw;
 var advancedInfo;
 var lz = require('lz-string');
-var base64 = require('base64-url')
+var base64 = require('base64-url');
+var BACKEND = require('../../config/config.js').backend;
 
 module.exports = {
     set: function (o) {
@@ -25,10 +26,16 @@ module.exports = {
         return this;
     },
     init: function () {
+        var p, hashArr = hash.replace("#", "").split("/");
+        if (hashArr[1] && hashArr[2] && hashArr[3]) {
+            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
+            cloud.zoomToPoint(p.x, p.y, hashArr[1]);
+        } else {
+            cloud.zoomToExtent();
+        }
         (function pollForLayers() {
             if (meta.ready() && setting.ready()) {
-                var p, arr, i, hashArr;
-                hashArr = hash.replace("#", "").split("/");
+                var p, arr, i;
                 if (hashArr[0]) {
                     $(".base-map-button").removeClass("active");
                     $("#" + hashArr[0]).addClass("active");
@@ -40,19 +47,16 @@ module.exports = {
                                 switchLayer.init(arr[i], true, true);
                             }
                         }
-                        p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
-                        cloud.zoomToPoint(p.x, p.y, hashArr[1]);
                     }
                     legend.init();
                 } else {
                     setBaseLayer.init(window.setBaseLayers[0].id);
                     if (extent !== null) {
-                        /*if (BACKEND === "cartodb") {
-                         cloud.map.fitBounds(extent);
-                         } else {
-                         cloud.zoomToExtent(extent);
-                         }*/
-                        cloud.zoomToExtent(extent);
+                        if (BACKEND === "cartodb") {
+                            cloud.map.fitBounds(extent);
+                        } else {
+                            cloud.zoomToExtent(extent);
+                        }
                     } else {
                         cloud.zoomToExtent();
                     }
@@ -250,7 +254,7 @@ module.exports = {
 
                 }
             } else {
-                setTimeout(pollForLayers, 10);
+                setTimeout(pollForLayers, 50);
             }
         }());
     }

@@ -72,10 +72,10 @@ window.Vidi = function () {
         cloud: require('./modules/cloud'),
         switchLayer: require('./modules/switchLayer'),
         setBaseLayer: require('./modules/setBaseLayer'),
-        meta: require('./modules/gc2/meta'),
-        setting: require('./modules/gc2/setting'),
+        meta: require('./modules/meta'),
+        setting: require('./modules/setting'),
         baseLayer: require('./modules/baseLayer'),
-        legend: require('./modules/gc2/legend'),
+        legend: require('./modules/legend'),
         state: require('./modules/state'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
@@ -86,6 +86,7 @@ window.Vidi = function () {
         advancedInfo: require('./modules/advancedInfo'),
         sqlQuery: require('./modules/sqlQuery'),
         serializeLayers: require('./modules/serializeLayers'),
+        pushState: require('./modules/pushState'),
         extensions: {}
     };
 
@@ -106,6 +107,7 @@ window.Vidi = function () {
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);
     modules.serializeLayers.set(modules);
+    modules.pushState.set(modules);
 
     // Require extensions modules
 

@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="/static/css/Leaflet.GraphicScale.min.css" type="text/css">
     <link rel="stylesheet" href="/static/css/leaflet.toolbar.css" type="text/css">
     <link rel="stylesheet" href="/static/css/styles.css" type="text/css">
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
     <!-- /build -->
 </head>
 <body>
@@ -44,7 +45,8 @@
 </div>
 </body>
 <script src="/locale"></script>
-<script src="http://geofyn.mapcentia.com/js/leaflet/leaflet-all.js"></script>
+<script src="http://192.168.33.11/js/leaflet/leaflet-all.js"></script>
+
 
 <!-- build:js /static/js/build/store/all.min.js -->
 <script src="bower_components/leaflet-measure/dist/leaflet-measure.js"></script>
@@ -107,5 +109,5 @@
         window.MapCentia = new Vidi().init.init();
     }
 </script>
-<script src="http://geofyn.mapcentia.com/api/v3/js/geocloud.php?callback=go&maplib=leaflet&i18n=false" type="text/javascript"></script>
+<script src="http://192.168.33.11/api/v3/js/geocloud.php?callback=go&maplib=leaflet&i18n=false" type="text/javascript"></script>
 </html>

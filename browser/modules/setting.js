@@ -1,4 +1,4 @@
-var urlparser = require('../urlparser');
+var urlparser = require('./urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
 var ready = false;
@@ -7,11 +7,11 @@ module.exports = {
     },
     init: function () {
         $.ajax({
-            url: '/api/setting/' + db,
+            url: '/api/setting/' + db + '/' + schema,
             scriptCharset: "utf-8",
             success: function (response) {
                 if (typeof response.data.extents === "object") {
-                    var firstSchema = schema.split(",").length > 1 ? schema.split(",")[0] : schema
+                    var firstSchema = schema.split(",").length > 1 ? schema.split(",")[0] : schema;
                     if (typeof response.data.extents[firstSchema] === "object") {
                         extent = response.data.extents[firstSchema];
                     }

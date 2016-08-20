@@ -1,8 +1,10 @@
-var express = require('express')
-var router = express.Router()
+var express = require('express');
+var router = express.Router();
+var http = require('http');
+var config = require('../../config/config.js').cartodb;
 
-router.get('/meta', function (req, response) {
-    var db = req.query.db, schema = req.query.schema, url, layers, data = [], u = 0, jsfile = "",
+router.get('/api/meta/:db/:schema', function (req, response) {
+    var db = req.params.db, schema = req.params.schema, url, layers, data = [], u = 0, jsfile = "",
         schemas = schema.split(",");
     (function iter() {
         if (u === schemas.length) {
@@ -45,7 +47,7 @@ router.get('/meta', function (req, response) {
                         f_table_title: layers[i].options.layer_name,
                         f_geometry_column: "the_geom_webmercator",
                         pkey: "cartodb_id",
-                        srid: "900913",
+                        srid: "3857",
                         sql: layers[i].options.sql,
                         cartocss: layers[i].options.cartocss,
                         layergroup: JSON.parse(jsfile).title,

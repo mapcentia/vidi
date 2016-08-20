@@ -1,15 +1,18 @@
 var cloud;
 var legend;
 var anchor;
+var pushState;
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         legend = o.legend;
         anchor = o.anchor;
+        pushState = o.pushState;
         return this;
     },
     init: function (name, visible, doNotLegend) {
         var el = $('*[data-gc2-id="' + name + '"]');
+
 
         if (visible) {
             try {
@@ -34,10 +37,8 @@ module.exports = module.exports = {
         });
         el.parents(".panel").find("span:eq(0)").html(c);
 
-        try {
-            history.pushState(null, null, anchor.init());
-        } catch (e) {
-        }
+        pushState.init();
+
         if (!doNotLegend) {
             legend.init();
 

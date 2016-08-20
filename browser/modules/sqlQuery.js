@@ -4,8 +4,7 @@ var cloud;
 var meta;
 var draw;
 var advancedInfo;
-
-var BACKEND = "gc2";
+var BACKEND = require('../../config/config.js').backend;
 
 module.exports = {
     set: function (o) {
@@ -49,7 +48,6 @@ module.exports = {
                     $('#modal-info-body').show();
                     $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
                     $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
-
                     $.each(layerObj.geoJSON.features, function (i, feature) {
                         if (fieldConf === null) {
                             $.each(feature.properties, function (name, property) {

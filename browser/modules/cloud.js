@@ -4,10 +4,19 @@ var cloud = new geocloud.map({
     zoomControl: false,
     numZoomLevels: 21
 });
+cloud.map.on('load', function(){ if ($(document).width() > 767 ) {
+    setTimeout(
+        function () {
+            $(".navbar-toggle").trigger("click");
+        }, 500
+    );
+}});
+
 var zoomControl = L.control.zoom({
     position: 'topright'
 });
 cloud.map.addControl(zoomControl);
+
 
 var map = cloud.map;
 

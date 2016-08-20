@@ -1,4 +1,4 @@
-var urlparser = require('../urlparser');
+var urlparser = require('./urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
 var urlVars = urlparser.urlVars;
@@ -7,8 +7,10 @@ var metaDataKeysTitle = [];
 var cloud;
 var switchLayer;
 var setBaseLayer;
-var host = require('../../../config/config.js').gc2.host;
+var host = require('../../config/config.js').gc2.host;
 var ready = false;
+var cartoDbLayersready = false;
+var BACKEND = require('../../config/config.js').backend;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -32,21 +34,55 @@ module.exports = {
                     groups[i] = response.data[i].layergroup;
                 }
                 arr = array_unique(groups);
-                for (var u = 0; u < response.data.length; ++u) {
-                    isBaseLayer = response.data[u].baselayer ? true : false;
-                    layers[[response.data[u].f_table_schema + "." + response.data[u].f_table_name]] = cloud.addTileLayers({
-                        host: host,
-                        layers: [response.data[u].f_table_schema + "." + response.data[u].f_table_name],
-                        db: db,
-                        isBaseLayer: isBaseLayer,
-                        tileCached: true,
-                        visibility: false,
-                        wrapDateLine: false,
-                        displayInLayerSwitcher: true,
-                        name: response.data[u].f_table_name,
-                        type: "tms"
-                    });
+
+                switch (BACKEND) {
+                    case "gc2":
+                        for (var u = 0; u < response.data.length; ++u) {
+                            isBaseLayer = response.data[u].baselayer ? true : false;
+                            layers[[response.data[u].f_table_schema + "." + response.data[u].f_table_name]] = cloud.addTileLayers({
+                                host: host,
+                                layers: [response.data[u].f_table_schema + "." + response.data[u].f_table_name],
+                                db: db,
+                                isBaseLayer: isBaseLayer,
+                                tileCached: true,
+                                visibility: false,
+                                wrapDateLine: false,
+                                displayInLayerSwitcher: true,
+                                name: response.data[u].f_table_name,
+                                type: "tms"
+                            });
+                        }
+                        break;
+
+                    case "cartodb":
+                        var j = 0, tmpData = response.data.slice(); // Clone the array for async adding of CartoDB layers
+                        (function iter() {
+                            cartodb.createLayer(cloud.map, {
+                                user_name: db,
+                                type: 'cartodb',
+                                sublayers: [{
+                                    sql: tmpData[j].sql,
+                                    cartocss: tmpData[j].cartocss
+                                }]
+                            }).on('done', function (layer) {
+                                layer.baseLayer = false;
+                                layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
+                                cloud.addLayer(layer, tmpData[j].f_table_name);
+                                // We switch the layer on/off, so they become ready for state.
+                                cloud.showLayer(layer.id);
+                                cloud.hideLayer(layer.id);
+                                j++;
+                                if (j < tmpData.length) {
+                                    iter();
+                                } else {
+                                    cartoDbLayersready = true; // CartoDB layer are now created
+                                    return null;
+                                }
+                            });
+                        }());
+                        break;
                 }
+
                 response.data.reverse();
                 for (i = 0; i < arr.length; ++i) {
                     if (arr[i]) {
@@ -60,7 +96,6 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        //"<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
                                         "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
                                     );
                                 }
@@ -77,7 +112,6 @@ module.exports = {
                         }
                     }
                 }
-                ready = true;
                 // Bind switch layer event
                 $(".checkbox input[type=checkbox]").change(function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
@@ -88,17 +122,27 @@ module.exports = {
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
                 });
+                ready = true;
+
             },
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
         }); // Ajax call end
     },
-    getMetaDataKeys: function(){
-      return metaDataKeys;
+    getMetaDataKeys: function () {
+        return metaDataKeys;
     },
-    ready: function(){
-        return ready;
+    ready: function () {
+        if (BACKEND === "cartodb") { // If CartoDB, we wait for cartodb.createLayer to finish
+            if (ready && cartoDbLayersready) {
+                return true;
+            } else {
+                return false;
+            }
+        } else { // GC2 layers are direct tile request
+            return ready;
+        }
     }
 };
 

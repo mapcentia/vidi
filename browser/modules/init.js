@@ -10,6 +10,7 @@ var bindEvent;
 var draw;
 var print;
 var advancedInfo;
+var pushState;
 var extensions;
 module.exports = {
     set: function (o) {
@@ -24,6 +25,7 @@ module.exports = {
         bindEvent = o.bindEvent;
         draw = o.draw;
         print = o.print;
+        pushState = o.pushState;
         advancedInfo = o.advancedInfo;
         extensions = o.extensions;
         return this;
@@ -41,19 +43,12 @@ module.exports = {
         print.init();
 
         var moveEndCallBack = function () {
-            history.pushState(null, null, anchor.init());
-
+            pushState.init();
         };
         cloud.on("dragend", moveEndCallBack);
         cloud.on("moveend", moveEndCallBack);
         $.material.init();
-        cloud.map.on('load', function(){ if ($(document).width() > 767 ) {
-            setTimeout(
-                function () {
-                    $(".navbar-toggle").trigger("click");
-                }, 500
-            )
-        }});
-        touchScroll(".tab-pane")
+
+        touchScroll(".tab-pane");
     }
 };
