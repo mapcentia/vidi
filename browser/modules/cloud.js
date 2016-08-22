@@ -38,7 +38,7 @@ var graphicScale = L.control.graphicScale({
     doubleLine: false,
     fill: 'hollow',
     showSubunits: false,
-    position: "bottomleft"
+    position: "topleft"
 }).addTo(map);
 
 var scaleText = L.DomUtil.create('div', 'scaleText');
