@@ -654,7 +654,9 @@ module.exports = module.exports = {
     }
 };
 },{}],8:[function(require,module,exports){
+// TODO don't set GC2 host if not defined, in case of using CartoDB
 geocloud.setHost(require('../../config/config.js').gc2.host);
+
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -1464,9 +1466,10 @@ module.exports = {
         cloud.map.on('draw:created', function (e) {
             e.layer._vidi_type = "draw";
             if (e.layerType === "marker") {
-                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});
-                drawnItemsMarker.addLayer(awm);
+                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})}).bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+                drawnItemsMarker.addLayer(awm).openPopup();
                 $(".fa-circle-thin").removeClass("deactiveBtn");
+
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
             }
@@ -1599,12 +1602,12 @@ var createStore = function () {
                     $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "<br>B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
                     if (feature.properties.radius === "500") {
-                        $("#r500-val").html(feature.properties.antal)
+                        $(".r500-val").html(feature.properties.antal)
                     } else {
-                        $("#r1000-val").html(feature.properties.antal)
+                        $(".r1000-val").html(feature.properties.antal)
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
-                        $("#r-adr-val").html(data.results[0].formatted_address);
+                        $(".r-adr-val").html(data.results[0].formatted_address);
                         upDatePrintComment();
                     });
 
@@ -3529,11 +3532,11 @@ module.exports = {
 };
 },{}],29:[function(require,module,exports){
 module.exports = {
-    backend: "cartodb",
-    //backend: "gc2",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
-        host: "http://192.168.33.11"
-        //host: "http://cowi.mapcentia.com"
+        //host: "http://192.168.33.11"
+        host: "http://cowi.mapcentia.com"
     },
     cartodb: {
         db: "mhoegh",
@@ -3568,11 +3571,11 @@ module.exports = {
         scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
 
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],30:[function(require,module,exports){

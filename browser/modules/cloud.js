@@ -1,4 +1,6 @@
+// TODO don't set GC2 host if not defined, in case of using CartoDB
 geocloud.setHost(require('../../config/config.js').gc2.host);
+
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
