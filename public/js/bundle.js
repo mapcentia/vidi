@@ -3571,12 +3571,12 @@ module.exports = {
 };
 },{}],29:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
-   /* gc2: {
-        host: "http://192.168.33.11"
-        //host: "http://cowi.mapcentia.com"
-    },*/
+    backend: "gc2",
+    //backend: "cartodb",
+    gc2: {
+        //host: "http://192.168.33.11"
+        host: "http://cowi.mapcentia.com"
+    },
     cartodb: {
         db: "mhoegh",
         baseLayers: [
@@ -3614,11 +3614,11 @@ module.exports = {
           komkode: "147"
       }
     },
-    _extensions: {
-        browser: [{cowiDetail: ["bufferSearch"]}],
-        server: [{cowiDetail: ["bufferSearch"]}]
+    extensions: {
+        //browser: [{cowiDetail: ["bufferSearch"]}],
+        //server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],30:[function(require,module,exports){
