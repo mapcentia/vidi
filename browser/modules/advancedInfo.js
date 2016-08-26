@@ -167,27 +167,32 @@ module.exports = {
         }
     },
     init: function (str) {
-        noUiSlider.create(bufferSlider, {
-            start: 40,
-            connect: "lower",
-            step: 1,
-            range: {
-                min: 0,
-                max: 500
-            }
-        });
-        bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
-            bufferValue.value = values[handle];
-            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
-                bufferItems.clearLayers();
-                makeSearch()
-            }
-        }, 300));
+        try {
+            noUiSlider.create(bufferSlider, {
+                start: 40,
+                connect: "lower",
+                step: 1,
+                range: {
+                    min: 0,
+                    max: 500
+                }
+            });
 
-        // When the input changes, set the slider value
-        bufferValue.addEventListener('change', function () {
-            bufferSlider.noUiSlider.set([this.value]);
-        });
+            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+                bufferValue.value = values[handle];
+                if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+                    bufferItems.clearLayers();
+                    makeSearch()
+                }
+            }, 300));
+
+            // When the input changes, set the slider value
+            bufferValue.addEventListener('change', function () {
+                bufferSlider.noUiSlider.set([this.value]);
+            });
+        } catch (e) {
+            console.info(e.message);
+        }
     },
     getSearchOn: function () {
         return searchOn;

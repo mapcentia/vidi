@@ -258,7 +258,11 @@ window.Vidi = function () {
 
     $("[data-toggle=tooltip]").tooltip();
     $(".center").hide();
-    var max = $(document).height() - $('.tab-pane').offset().top - 100;
+    try {
+        var max = $(document).height() - $('.tab-pane').offset().top - 100;
+    } catch (e){
+        console.info(e.message);
+    }
     $('.tab-pane').not("#result-content").css('max-height', max);
     $('#places').css('height', max - 130);
     $('#places').css('min-height', 400);
@@ -501,27 +505,32 @@ module.exports = {
         }
     },
     init: function (str) {
-        noUiSlider.create(bufferSlider, {
-            start: 40,
-            connect: "lower",
-            step: 1,
-            range: {
-                min: 0,
-                max: 500
-            }
-        });
-        bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
-            bufferValue.value = values[handle];
-            if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
-                bufferItems.clearLayers();
-                makeSearch()
-            }
-        }, 300));
+        try {
+            noUiSlider.create(bufferSlider, {
+                start: 40,
+                connect: "lower",
+                step: 1,
+                range: {
+                    min: 0,
+                    max: 500
+                }
+            });
 
-        // When the input changes, set the slider value
-        bufferValue.addEventListener('change', function () {
-            bufferSlider.noUiSlider.set([this.value]);
-        });
+            bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
+                bufferValue.value = values[handle];
+                if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
+                    bufferItems.clearLayers();
+                    makeSearch()
+                }
+            }, 300));
+
+            // When the input changes, set the slider value
+            bufferValue.addEventListener('change', function () {
+                bufferSlider.noUiSlider.set([this.value]);
+            });
+        } catch (e) {
+            console.info(e.message);
+        }
     },
     getSearchOn: function () {
         return searchOn;
@@ -654,8 +663,11 @@ module.exports = module.exports = {
     }
 };
 },{}],8:[function(require,module,exports){
-// TODO don't set GC2 host if not defined, in case of using CartoDB
-geocloud.setHost(require('../../config/config.js').gc2.host);
+try {
+    geocloud.setHost(require('../../config/config.js').gc2.host);
+} catch (e){
+    console.info(e.message);
+}
 
 var cloud = new geocloud.map({
     el: "map",
@@ -906,6 +918,13 @@ module.exports = {
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
+                var height;
+                try {
+                    height = require('./height')().max - 350;
+                } catch (e) {
+                    console.info(e.message);
+                    height = 0;
+                }
                 table = gc2table.init({
                     "el": "#draw-table table",
                     "geocloud2": cloud,
@@ -929,7 +948,7 @@ module.exports = {
                     ],
                     "autoUpdate": false,
                     loadData: false,
-                    height: require('./height')().max - 350,
+                    height: height,
                     setSelectedStyle: false,
                     responsive: false,
                     openPopUp: false
@@ -1635,9 +1654,14 @@ var createStore = function () {
 
 },{"jsts":35,"reproject":107}],13:[function(require,module,exports){
 module.exports = function () {
-    var max = $(document).height() - $('.tab-pane').offset().top - 70;
-    return {
-        max: max
+    try {
+        var max = $(document).height() - $('.tab-pane').offset().top - 70;
+        return {
+            max: max
+        }
+    } catch (e) {
+        console.info(e.message);
+        return 0;
     }
 };
 },{}],14:[function(require,module,exports){
@@ -1873,10 +1897,15 @@ var metaDataKeysTitle = [];
 var cloud;
 var switchLayer;
 var setBaseLayer;
-var host = require('../../config/config.js').gc2.host;
 var ready = false;
 var cartoDbLayersready = false;
 var BACKEND = require('../../config/config.js').backend;
+var host;
+try {
+    host = require('../../config/config.js').gc2.host;
+} catch (e){
+    console.info(e.message);
+}
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -1889,7 +1918,7 @@ module.exports = {
             url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
             scriptCharset: "utf-8",
             success: function (response) {
-                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData;
+                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData, layers = [];
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
@@ -2396,6 +2425,8 @@ module.exports = module.exports = {
 };
 },{}],20:[function(require,module,exports){
 var cloud;
+var config = require('../../../config/config.js').search.danish;
+
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -2403,7 +2434,7 @@ module.exports = {
     },
     init: function () {
         var type1, type2, gids = [], searchString,
-            komKode = "461",
+            komKode = config.komkode,
             placeStore = new geocloud.geoJsonStore({
                 host: "http://eu1.mapcentia.com",
                 db: "dk",
@@ -2414,6 +2445,9 @@ module.exports = {
                     cloud.map.addLayer(resultLayer);
                     resultLayer.addLayer(this.layer);
                     cloud.zoomToExtentOfgeoJsonStore(this);
+                    if (cloud.map.getZoom() > 17) {
+                        cloud.map.setZoom(17);
+                    }
                 }
             });
         $('#custom-search').typeahead({
@@ -2521,7 +2555,7 @@ module.exports = {
 }
 
 
-},{}],21:[function(require,module,exports){
+},{"../../../config/config.js":29}],21:[function(require,module,exports){
 var cloud;
 module.exports = module.exports = {
     set: function (o) {
@@ -3075,7 +3109,13 @@ module.exports = {
                         $('#tab_' + storeId).tab('show');
                         out = [];
                     });
-                    var height = require('./height')().max - 400;
+                    var height;
+                    try {
+                        height = require('./height')().max - 400;
+                    } catch (e) {
+                        console.info(e.message);
+                        height = 0;
+                    }
                     gc2table.init({
                         el: "#_" + storeId + " table",
                         geocloud2: cloud,
@@ -3256,7 +3296,6 @@ module.exports = {
                         },
                         scriptCharset: "utf-8",
                         success: function (response) {
-                            console.log(response)
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -3532,12 +3571,12 @@ module.exports = {
 };
 },{}],29:[function(require,module,exports){
 module.exports = {
-    backend: "gc2",
-    //backend: "cartodb",
-    gc2: {
-        //host: "http://192.168.33.11"
-        host: "http://cowi.mapcentia.com"
-    },
+    //backend: "gc2",
+    backend: "cartodb",
+   /* gc2: {
+        host: "http://192.168.33.11"
+        //host: "http://cowi.mapcentia.com"
+    },*/
     cartodb: {
         db: "mhoegh",
         baseLayers: [
@@ -3555,7 +3594,7 @@ module.exports = {
     },
     print: {
         templates: {
-            "cowi": {
+            "geofyn": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -3570,12 +3609,16 @@ module.exports = {
         },
         scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
-
-    extensions: {
+    search: {
+      danish : {
+          komkode: "147"
+      }
+    },
+    _extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl",
+    _template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],30:[function(require,module,exports){

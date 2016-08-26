@@ -59,7 +59,11 @@ window.Vidi = function () {
 
     $("[data-toggle=tooltip]").tooltip();
     $(".center").hide();
-    var max = $(document).height() - $('.tab-pane').offset().top - 100;
+    try {
+        var max = $(document).height() - $('.tab-pane').offset().top - 100;
+    } catch (e){
+        console.info(e.message);
+    }
     $('.tab-pane').not("#result-content").css('max-height', max);
     $('#places').css('height', max - 130);
     $('#places').css('min-height', 400);

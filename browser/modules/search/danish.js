@@ -1,4 +1,6 @@
 var cloud;
+var config = require('../../../config/config.js').search.danish;
+
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -6,7 +8,7 @@ module.exports = {
     },
     init: function () {
         var type1, type2, gids = [], searchString,
-            komKode = "461",
+            komKode = config.komkode,
             placeStore = new geocloud.geoJsonStore({
                 host: "http://eu1.mapcentia.com",
                 db: "dk",
@@ -17,6 +19,9 @@ module.exports = {
                     cloud.map.addLayer(resultLayer);
                     resultLayer.addLayer(this.layer);
                     cloud.zoomToExtentOfgeoJsonStore(this);
+                    if (cloud.map.getZoom() > 17) {
+                        cloud.map.setZoom(17);
+                    }
                 }
             });
         $('#custom-search').typeahead({

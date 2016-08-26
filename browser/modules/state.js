@@ -77,7 +77,6 @@ module.exports = {
                         },
                         scriptCharset: "utf-8",
                         success: function (response) {
-                            console.log(response)
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
