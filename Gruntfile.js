@@ -40,7 +40,7 @@ module.exports = function (grunt) {
                     transform: ['require-globify']
                 }
             }
-        }/*,
+        },
         gitpull: {
             production: {
                 options: {}
@@ -52,14 +52,14 @@ module.exports = function (grunt) {
                     mode: 'hard'
                 }
             }
-        }*/
+        }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
 
     grunt.registerTask('default', ['browserify', 'hogan']);
-    //grunt.registerTask('production', ['gitreset', 'gitpull', 'hogan', 'browserify']);
+    grunt.registerTask('production', ['gitreset', 'gitpull']);
 };
 
 
