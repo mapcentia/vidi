@@ -23,7 +23,7 @@ router.post('/api/print', function (req, response) {
         var url = '/app/' + q.db + '/' + q.schema + '/?tmpl=' + q.tmpl + '.tmpl&px=' + p[0] +'&py=' + p[1] +'&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log("http://127.0.0.1:3000" + url);
         wkhtmltopdf("http://127.0.0.1:3000" + url, {
-            pageSize: 'A4',
+            pageSize: q.pageSize,
             orientation: (q.orientation === 'l') ? 'Landscape' : 'Portrait',
             B: 0,
             L: 0,

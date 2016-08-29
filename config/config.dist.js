@@ -33,12 +33,12 @@ module.exports = {
                 },
                 A3: {
                     l: {
-                        mapsizePx: [1000, 700],
-                        mapsizeMm: [270, 190]
+                        mapsizePx: [1480, 1040],
+                        mapsizeMm: [401, 282]
                     },
                     p: {
-                        mapsizePx: [700, 1000],
-                        mapsizeMm: [190, 270]
+                        mapsizePx: [1040, 1480],
+                        mapsizeMm: [282, 401]
                     }
                 }
             }/*,

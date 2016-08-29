@@ -3594,7 +3594,7 @@ module.exports = {
     },
     print: {
         templates: {
-            "geofyn": {
+            "print": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -3603,6 +3603,16 @@ module.exports = {
                     p: {
                         mapsizePx: [700, 1000],
                         mapsizeMm: [190, 270]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1480, 1040],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1040, 1480],
+                        mapsizeMm: [282, 401]
                     }
                 }
             }
@@ -3618,7 +3628,7 @@ module.exports = {
         //browser: [{cowiDetail: ["bufferSearch"]}],
         //server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl",
+    _template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],30:[function(require,module,exports){
