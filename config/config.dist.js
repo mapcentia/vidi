@@ -1,5 +1,5 @@
 module.exports = {
-    backend: "gc2", // gc2 or cartodb
+    backend: "WHAT_BACKEND", // gc2 or cartodb
     gc2: {
         host: "http://my_gc2_server.com" // IP or DNS to the GC2 server. Use external address
     },
