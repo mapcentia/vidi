@@ -160,7 +160,7 @@ module.exports = {
 
         } else {
             // Clean up
-            console.log("Stooping drawing");
+            console.log("Stoping drawing");
             cloud.map.removeControl(drawControl);
             drawOn = false;
 
@@ -233,7 +233,7 @@ module.exports = {
     setDestruct: function (f) {
         destructFunctions.push(f);
     }
-}
+};
 
 L.Edit = L.Edit || {};
 L.Edit.Popup = L.Edit.Popup || {};

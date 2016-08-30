@@ -898,7 +898,7 @@ module.exports = {
 
         } else {
             // Clean up
-            console.log("Stooping drawing");
+            console.log("Stoping drawing");
             cloud.map.removeControl(drawControl);
             drawOn = false;
 
@@ -971,7 +971,7 @@ module.exports = {
     setDestruct: function (f) {
         destructFunctions.push(f);
     }
-}
+};
 
 L.Edit = L.Edit || {};
 L.Edit.Popup = L.Edit.Popup || {};
@@ -3575,7 +3575,8 @@ module.exports = {
     //backend: "cartodb",
     gc2: {
         //host: "http://192.168.33.11"
-        host: "http://cowi.mapcentia.com"
+        //host: "http://cowi.mapcentia.com"
+        host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh",
