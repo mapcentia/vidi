@@ -93,6 +93,7 @@ module.exports = {
         "Draw a circle": "Tegn en cirkel",
         "Draw a marker": "Tegn en markør",
 
-        "Close": "Luk"
+        "Close": "Luk",
+        "Show legend on print": "Vis signatur på print"
     }
 };

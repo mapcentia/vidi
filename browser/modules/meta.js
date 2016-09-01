@@ -13,7 +13,7 @@ var BACKEND = require('../../config/config.js').backend;
 var host;
 try {
     host = require('../../config/config.js').gc2.host;
-} catch (e){
+} catch (e) {
     console.info(e.message);
 }
 module.exports = {
@@ -90,7 +90,7 @@ module.exports = {
 
                 response.data.reverse();
                 for (i = 0; i < arr.length; ++i) {
-                    if (arr[i]) {
+                    if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                         l = [];
                         cv = ( typeof (metaDataKeysTitle[arr[i]]) === "object") ? metaDataKeysTitle[arr[i]].f_table_name : null;
                         base64name = Base64.encode(arr[i]).replace(/=/g, "");

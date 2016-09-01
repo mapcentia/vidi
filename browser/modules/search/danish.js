@@ -1,5 +1,5 @@
 var cloud;
-var config = require('../../../config/config.js').search.danish;
+var config = require('../../../config/config.js').searchConfig;
 
 module.exports = {
     set: function (o) {
@@ -126,5 +126,5 @@ module.exports = {
         });
     }
 
-}
+};
 

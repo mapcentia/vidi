@@ -237,7 +237,8 @@ module.exports = {
                 pageSize: pageSize,
                 orientation: orientation,
                 title: $("#print-title").val(),
-                comment: $("#print-comment").val()
+                comment: $("#print-comment").val(),
+                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none"
             }),
             scriptCharset: "utf-8",
             success: function (response) {

@@ -198,10 +198,9 @@ module.exports = {
         cloud.map.on('draw:created', function (e) {
             e.layer._vidi_type = "draw";
             if (e.layerType === "marker") {
-                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})}).bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
-                drawnItemsMarker.addLayer(awm).openPopup();
+                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+                drawnItemsMarker.addLayer(awm);//.openPopup();
                 $(".fa-circle-thin").removeClass("deactiveBtn");
-
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
             }

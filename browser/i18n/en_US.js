@@ -93,6 +93,7 @@ module.exports = {
         "Draw a circle": "Draw a circle",
         "Draw a marker": "Draw a marker",
 
-        "Close": "Close"
+        "Close": "Close",
+        "Show legend on print": "Show legend on print"
     }
 };

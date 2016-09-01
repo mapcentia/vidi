@@ -1,6 +1,6 @@
 <!-- override standard styles -->
 <style>
-    #legend, #header {
+    #legend-container, #header {
         -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
         box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
     }
@@ -20,14 +20,35 @@
     <div id="container">
         <div id="map"></div>
     </div>
-    <div id="legend" style="position: absolute; bottom: 5px; left: 5px; padding: 10px; background-color: white"></div>
+
+    <div id="legend-container" style="position: absolute; bottom: 5px; left: 5px; padding: 10px; background-color: white; -webkit-transform: scale(0.7); -webkit-transform-origin:left bottom">
+        <button type="button" class="btn btn-info btn-sm" data-toggle="collapse" data-target="#legend" aria-expanded="false">Vis/skjul signatur</button>
+        <div id="legend" class="collapse in"></div>
+    </div>
+    <div id="scale" style="position: absolute; bottom: 5px; right: 10px; font-size: 0.8em;"></div>
 </div>
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
 
     <div class="navbar navbar-default">
         <div class="container-fluid">
             <div class="navbar-header">
-                <a class="navbar-brand" href="javascript:void(0)">COWI A/S</a>
+                <a class="navbar-brand" href="javascript:void(0)">{{brandName}}</a>
+            </div>
+            <div class="navbar-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#" data-toggle="modal" data-target="#about-model">{{About}}</a></li>
+                    <!--<li class="dropdown">
+                        <a href="bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                            <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-toggle="modal" data-target="#about-model">About</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Dropdown header</li>
+                            <li><a href="javascript:void(0)">Separated link</a></li>
+                            <li><a href="javascript:void(0)">One more separated link</a></li>
+                        </ul>
+                    </li>-->
+                </ul>
             </div>
         </div>
     </div>
@@ -36,8 +57,8 @@
         <div role="tabpanel">
             <!-- Nav tabs -->
             <ul class="nav nav-tabs" role="tablist" id="main-tabs">
-                <!--<li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>-->
-                <li role="presentation" class="active"><a href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">{{Info}}</a></li>
+                <li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>
+                <li role="presentation"><a href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">{{Info}}</a></li>
                 <li role="presentation"><a href="#layer-content" aria-controls="" role="tab" data-toggle="tab">{{Layers}}</a></li>
                 <!--<li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">{{Baselayers}}</a></li>-->
                 <!--<li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>-->
@@ -47,14 +68,10 @@
 
             <!-- Tab panes -->
             <div class="tab-content">
-                <div role="tabpanel" class="tab-pane" id="search-content">
+                <div role="tabpanel" class="tab-pane active" id="search-content">
                     <div role="tabpanel" class="tab-pane active" id="place-search">
-                        <div class="alert alert-dismissible alert-info" role="alert">
-                            <button type="button" class="close" data-dismiss="alert">×</button>
-                            Søg på adresse og matrikelnr.
-                        </div>
                         <div id="places">
-                            <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
+                            <input id="custom-search" class="typeahead" type="text" placeholder="Søg på adresse eller sted">
                         </div>
                     </div>
 
@@ -63,7 +80,7 @@
                     </div>
 
                 </div>
-                <div role="tabpanel" class="tab-pane active" id="info-content">
+                <div role="tabpanel" class="tab-pane" id="info-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         Når du laver en søgning på antal indbygere, vises resultatet her.
@@ -85,7 +102,7 @@
                     <div class="panel panel-default">
                         <div id="detail-data-r-container" class="panel-body">
                             <table id="detail-data-r" class="table">
-                                <caption>Punkt</caption>
+                                <caption>Placering</caption>
                                 <tr>
                                     <td>Adresse</td>
                                     <td class="r-adr-val">-</td>
@@ -94,14 +111,7 @@
                                     <td>Koordinat</td>
                                     <td id="r-coord-val">-</td>
                                 </tr>
-                                <tr>
-                                    <td>Indenfor 500 m</td>
-                                    <td class="r500-val">-</td>
-                                </tr>
-                                <tr>
-                                    <td>Indenfor 1000 m</td>
-                                    <td class="r1000-val">-</td>
-                                </tr>
+
                             </table>
                         </div>
                     </div>
@@ -109,9 +119,17 @@
                     <div class="panel panel-default">
                         <div id="detail-data-p-container" class="panel-body">
                             <table id="detail-data-p" class="table">
-                                <caption>Polygon</caption>
+                                <caption>Befolkningsinformation</caption>
                                 <tr>
-                                    <td>Indenfor</td>
+                                    <td>500 m buffer</td>
+                                    <td class="r500-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>1000 m buffer</td>
+                                    <td class="r1000-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Tegnet opland</td>
                                     <td id="polygon-val">-</td>
                                 </tr>
                             </table>
@@ -223,7 +241,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" style="display: none">
                                             <label class="col-md-2 control-label">Template</label>
                                             <div class="col-md-10" id="print-tmpl"></div>
                                         </div>
@@ -246,11 +264,19 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" style="display: none">
                                             <label for="print-comment" class="col-md-2 control-label">Comment</label>
                                             <div class="col-md-10">
                                                 <textarea class="form-control" rows="30" id="print-comment" disabled></textarea>
                                                 <span class="help-block">The comment will be placed on the PDF.</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="togglebutton">
+                                                <label>
+                                                    <input id="add-legend-btn" type="checkbox" disabled> {{Show legend on print}}
+                                                </label>
                                             </div>
                                         </div>
 
@@ -274,4 +300,22 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
     </button>
+</div>
+
+<!-- About Modal -->
+<div class="modal fade" id="about-model" tabindex="-1" role="dialog" aria-labelledby="about-modelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="about-modelLabel">{{About}}</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
 </div>

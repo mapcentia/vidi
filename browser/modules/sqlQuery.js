@@ -59,12 +59,7 @@ module.exports = {
                                 if (property.querable) {
                                     fieldLabel = (property.alias !== null && property.alias !== "") ? property.alias : name;
                                     if (feature.properties[name] !== undefined) {
-                                        if (property.link) {
-                                            out.push([name, property.sort_id, fieldLabel, "<a target='_blank' href='" + (property.linkprefix !== null ? property.linkprefix : "") + feature.properties[name] + "'>" + feature.properties[name] + "</a>"]);
-                                        }
-                                        else {
-                                            out.push([name, property.sort_id, fieldLabel, feature.properties[name]]);
-                                        }
+                                        out.push([name, property.sort_id, fieldLabel, property.link]);
                                     }
                                 }
                             });
@@ -77,7 +72,8 @@ module.exports = {
                                 cm.push({
                                     header: property[2],
                                     dataIndex: property[0],
-                                    sortable: true
+                                    sortable: true,
+                                    link: property[3]
                                 })
                             });
                             first = false;
@@ -92,17 +88,23 @@ module.exports = {
                         console.info(e.message);
                         height = 0;
                     }
-                    gc2table.init({
+                    var _table = gc2table.init({
                         el: "#_" + storeId + " table",
                         geocloud2: cloud,
                         store: layerObj,
                         cm: cm,
                         autoUpdate: false,
+                        autoPan: true,
                         openPopUp: true,
                         setViewOnSelect: true,
                         responsive: false,
                         height: (height > 500) ? 500 : (height < 300) ? 300 : height
                     });
+
+                    // If only one feature is selected, when activate it.
+                    if (Object.keys(layerObj.layer._layers).length === 1) {
+                        _table.object.trigger("selected", layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                    }
                     hit = true;
                     // Add fancy material raised style to buttons
                     $(".bootstrap-table .btn-default").addClass("btn-raised");
@@ -125,7 +127,6 @@ module.exports = {
                         //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
                     });
                     $('#main-tabs a[href="#info-content"]').tab('show');
-                    //clearDrawItems();
                 }
             };
 
@@ -146,7 +147,6 @@ module.exports = {
                 },
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
-                        //l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_result";
                         $.each(l._layers, function (i, v) {
                             v._vidi_type = "query_result";
                         })
@@ -191,3 +191,4 @@ module.exports = {
         $("#info-pane").empty();
     }
 };
+

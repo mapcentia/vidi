@@ -53,6 +53,11 @@ window.Vidi = function () {
         gc2i18n.dict.printHeight = urlVars.py + "px";
     }
 
+    //
+    if (urlVars.l) {
+        gc2i18n.dict._showLegend = urlVars.l;
+    }
+
     gc2i18n.dict.brandName = config.brandName;
 
     $("body").html(Templates[tmpl].render(gc2i18n.dict));
@@ -83,7 +88,6 @@ window.Vidi = function () {
         state: require('./modules/state'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
-        search: require('./modules/search/danish'),
         bindEvent: require('./modules/bindEvent'),
         draw: require('./modules/draw'),
         print: require('./modules/print'),
@@ -93,6 +97,12 @@ window.Vidi = function () {
         pushState: require('./modules/pushState'),
         extensions: {}
     };
+
+    // Require search module
+    function ಠ_ಠ() {
+        require('./modules/search/*.js', {glob: true});
+    }
+    modules.search = require('./modules/search/' + config.searchModule + '.js');
 
     // Use the setters in modules so they can interact
     modules.init.set(modules);

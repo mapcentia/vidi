@@ -103,7 +103,7 @@
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text overlays}}
                     </div>
-                    <div id="layers" role="tablist"></div>
+                    <div class="form-group" id="layers" role="tablist"></div>
                 </div>
                 <div role="tabpanel" class="tab-pane" id="baselayer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
@@ -112,7 +112,7 @@
                     </div>
                     <div class="panel panel-default">
                         <div class="panel-body">
-                            <div class="list-group" id="base-layer-list"></div>
+                            <div class="form-group" id="base-layer-list"></div>
                         </div>
                     </div>
                 </div>
@@ -212,6 +212,14 @@
                                             <div class="col-md-10">
                                                 <textarea class="form-control" rows="3" id="print-comment" disabled></textarea>
                                                 <span class="help-block">{{The comment will be placed on the PDF}}</span>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <div class="togglebutton">
+                                                <label>
+                                                    <input id="add-legend-btn" type="checkbox" disabled> {{Show legend on print}}
+                                                </label>
                                             </div>
                                         </div>
 
