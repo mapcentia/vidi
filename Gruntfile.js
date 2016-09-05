@@ -52,14 +52,20 @@ module.exports = function (grunt) {
                     mode: 'hard'
                 }
             }
+        },
+        shell: {
+            default: {
+                command: 'cp ./config/_variables.less ./public/bower_components/bootstrap-material-design/less'
+            }
         }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
+    grunt.loadNpmTasks('grunt-shell');
 
-    grunt.registerTask('default', ['browserify', 'hogan']);
-    grunt.registerTask('production', ['gitreset', 'gitpull']);
+    grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
+    grunt.registerTask('production', ['gitreset', 'gitpull', 'shell']);
 };
 
 

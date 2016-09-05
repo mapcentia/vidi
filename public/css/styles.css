@@ -845,3 +845,14 @@ body {
     float: right;
 }
 
+
+.popover>.arrow, .popover>.arrow:after {
+    display: inline;
+}
+
+.popover.left>.arrow {
+    border-left-color: rgba(101,101,101,0.0);
+}
+.popover.left>.arrow:after {
+    border-left-color:rgba(101,101,101,0.9);
+}

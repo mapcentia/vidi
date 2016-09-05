@@ -158,6 +158,12 @@ module.exports = {
                 table.loadDataInTable();
             });
 
+            var po = $('.leaflet-draw-section').popover({content: __("Use the tools to the right for drawing markers, lines, areas, squares and circles"), placement: "left"});
+            po.popover("show");
+            setTimeout(function () {
+                po.popover("hide");
+            }, 2500)
+
         } else {
             // Clean up
             console.log("Stoping drawing");

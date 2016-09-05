@@ -299,6 +299,7 @@ window.Vidi = function () {
         extensions: {}
     };
 
+    // Require search module
     function ಠ_ಠ() {
         require('./modules/search/danish.js');require('./modules/search/google.js');
     }
@@ -500,6 +501,13 @@ module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
+
+            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
+            po.popover("show");
+            setTimeout(function(){
+                po.popover("hide");
+            }, 2500)
+
         } else {
             // Clean up
             console.log("Stoping advanced search");
@@ -539,6 +547,7 @@ module.exports = {
             bufferValue.addEventListener('change', function () {
                 bufferSlider.noUiSlider.set([this.value]);
             });
+
         } catch (e) {
             console.info(e.message);
         }
@@ -906,6 +915,12 @@ module.exports = {
                 });
                 table.loadDataInTable();
             });
+
+            var po = $('.leaflet-draw-section').popover({content: __("Use the tools to the right for drawing markers, lines, areas, squares and circles"), placement: "left"});
+            po.popover("show");
+            setTimeout(function () {
+                po.popover("hide");
+            }, 2500)
 
         } else {
             // Clean up
@@ -3662,10 +3677,10 @@ module.exports = {
         komkode: "147"
     },
     extensions: {
-        browser: [{cowiDetail: ["bufferSearch"]}],
-        server: [{cowiDetail: ["bufferSearch"]}]
+        _browser: [{cowiDetail: ["bufferSearch"]}],
+        _server: [{cowiDetail: ["bufferSearch"]}]
     },
-    template: "cowiDetail.tmpl",
+    _template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],31:[function(require,module,exports){

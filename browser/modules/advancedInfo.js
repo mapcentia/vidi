@@ -151,6 +151,13 @@ module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
+
+            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
+            po.popover("show");
+            setTimeout(function(){
+                po.popover("hide");
+            }, 2500)
+
         } else {
             // Clean up
             console.log("Stoping advanced search");
@@ -190,6 +197,7 @@ module.exports = {
             bufferValue.addEventListener('change', function () {
                 bufferSlider.noUiSlider.set([this.value]);
             });
+
         } catch (e) {
             console.info(e.message);
         }
