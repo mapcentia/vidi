@@ -41,6 +41,9 @@ module.exports = module.exports = {
             print.activate();
             $("#get-print-fieldset").prop("disabled", true);
         });
+        $("#info-modal button").on("click", function () {
+            $("#info-modal").hide();
+        });
 
     }
 };

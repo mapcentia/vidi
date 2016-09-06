@@ -34,7 +34,6 @@ var lc = L.control.locate({
     strings: {
         title: "Find me"
     },
-    position: "topright",
     icon: "fa fa-location-arrow",
     iconLoading: "fa fa-circle-o-notch fa-spin"
 }).addTo(map);

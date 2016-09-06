@@ -26,12 +26,12 @@ module.exports = module.exports = {
                 customBaseLayer.id = bl.id;
                 cloud.addLayer(customBaseLayer, bl.name, true);
                 $("#base-layer-list").append(
-                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
+                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
-                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
+                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             }
         }

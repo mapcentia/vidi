@@ -9,7 +9,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function () {
-        // We don't set any state until 1 secs after the first request. This way CartoDB layers becomes ready.
+        // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
             //console.log("State push");

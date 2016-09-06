@@ -856,3 +856,10 @@ body {
 .popover.left>.arrow:after {
     border-left-color:rgba(101,101,101,0.9);
 }
+
+.baselayer-label {
+    width: 100%;
+}
+.overlay-label {
+    width: calc(100% - 50px);
+}

@@ -624,12 +624,12 @@ module.exports = module.exports = {
                 customBaseLayer.id = bl.id;
                 cloud.addLayer(customBaseLayer, bl.name, true);
                 $("#base-layer-list").append(
-                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
+                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schema) > -1) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 $("#base-layer-list").append(
-                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
+                    "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             }
         }
@@ -679,6 +679,9 @@ module.exports = module.exports = {
             print.activate();
             $("#get-print-fieldset").prop("disabled", true);
         });
+        $("#info-modal button").on("click", function () {
+            $("#info-modal").hide();
+        });
 
     }
 };
@@ -719,7 +722,6 @@ var lc = L.control.locate({
     strings: {
         title: "Find me"
     },
-    position: "topright",
     icon: "fa fa-location-arrow",
     iconLoading: "fa fa-circle-o-notch fa-spin"
 }).addTo(map);
@@ -765,8 +767,8 @@ var store = new geocloud.sqlStore({
     clickable: true
 });
 var destructFunctions = [];
-//var editPopUp;
-
+var editPopUp;
+var infoClick;
 
 var getDistance = function (e) {
     var tempLatLng = null;
@@ -789,10 +791,12 @@ var getArea = function (e) {
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        infoClick = o.infoClick;
         return this;
     },
     control: function () {
         if (!drawOn) {
+            //infoClick.reset();
             L.drawLocal = require('./drawLocales/draw.js');
 
             var editActions = [
@@ -871,7 +875,7 @@ module.exports = {
                 drawnItems.addLayer(drawLayer);
 
                 drawLayer.on('click', function (event) {
-                    window.editPopUp = new L.EditToolbar.Popup(event.latlng, {
+                    editPopUp = new L.EditToolbar.Popup(event.latlng, {
                         className: 'leaflet-draw-toolbar',
                         actions: editActions
                     }).addTo(cloud.map, drawLayer);
@@ -939,7 +943,7 @@ module.exports = {
             })
         }
     },
-    init: function (str) {
+    init: function () {
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -952,10 +956,10 @@ module.exports = {
                     height = 0;
                 }
                 table = gc2table.init({
-                    "el": "#draw-table table",
-                    "geocloud2": cloud,
-                    "store": store,
-                    "cm": [
+                    el: "#draw-table table",
+                    geocloud2: cloud,
+                    store: store,
+                    cm: [
                         {
                             header: "Type",
                             dataIndex: "type",
@@ -972,7 +976,7 @@ module.exports = {
                             sortable: true
                         }
                     ],
-                    "autoUpdate": false,
+                    autoUpdate: false,
                     loadData: false,
                     height: height,
                     setSelectedStyle: false,
@@ -1821,7 +1825,7 @@ module.exports = module.exports = {
                         var list = $('<ul class="list-group"/>'), li, classUl, title, className;
                         $.each(response, function (i, v) {
                             if (typeof v.id !== "undefined") {
-                                title = meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title ? meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title : meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_name;
+                                title = meta.getMetaDataKeys()[v.id].f_table_title ? meta.getMetaDataKeys()[v.id].f_table_title : meta.getMetaDataKeys()[v.id].f_table_name;
                             }
                             var u, showLayer = false;
                             if (typeof v === "object") {
@@ -1852,7 +1856,7 @@ module.exports = module.exports = {
                 setTimeout(function () {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
                     $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
-                        key = v.split(".")[1];
+                        key = v;
                         if (typeof key !== "undefined") {
                             legend = meta.getMetaDataKeys()[key].legend;
                             try {
@@ -1947,7 +1951,7 @@ module.exports = {
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_name] = metaData.data[i];
+                    metaDataKeys[metaData.data[i].f_table_schema + "." +metaData.data[i].f_table_name] = metaData.data[i];
                     (metaData.data[i].f_table_title) ? metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i] : null;
                 }
                 for (i = 0; i < response.data.length; ++i) {
@@ -2016,16 +2020,16 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
+                                        "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label></div></li>');
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
                             }
                         }
-                        $("#layer-panel-" + base64name + " span:eq(1)").html(l.length)
+                        $("#layer-panel-" + base64name + " span:eq(1)").html(l.length);
                         // Remove the group if empty
                         if (l.length === 0) {
                             $("#layer-panel-" + base64name).remove();
@@ -2042,6 +2046,15 @@ module.exports = {
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
                 });
+                $(".info-label").on("click", function (e) {
+                    var t = ($(this).prev().children("input").data('gc2-id'));
+                    $("#info-modal").show();
+                    console.log(metaDataKeys)
+                    console.log(t)
+                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title);
+                    e.stopPropagation();
+                });
+
                 ready = true;
 
             },
@@ -2440,7 +2453,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function () {
-        // We don't set any state until 1 secs after the first request. This way CartoDB layers becomes ready.
+        // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
             //console.log("State push");
@@ -3101,13 +3114,13 @@ module.exports = {
                 return false;
             }
             var isEmpty = true;
-            var srid = metaDataKeys[value.split(".")[1]].srid;
-            var geoType = metaDataKeys[value.split(".")[1]].type;
-            var layerTitel = (metaDataKeys[value.split(".")[1]].f_table_title !== null && metaDataKeys[value.split(".")[1]].f_table_title !== "") ? metaDataKeys[value.split(".")[1]].f_table_title : metaDataKeys[value.split(".")[1]].f_table_name;
-            var not_querable = metaDataKeys[value.split(".")[1]].not_querable;
-            var versioning = metaDataKeys[value.split(".")[1]].versioning;
-            var cartoSql = metaDataKeys[value.split(".")[1]].sql;
-            var fieldConf = $.parseJSON(metaDataKeys[value.split(".")[1]].fieldconf);
+            var srid = metaDataKeys[value].srid;
+            var geoType = metaDataKeys[value].type;
+            var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
+            var not_querable = metaDataKeys[value].not_querable;
+            var versioning = metaDataKeys[value].versioning;
+            var cartoSql = metaDataKeys[value].sql;
+            var fieldConf = $.parseJSON(metaDataKeys[value].fieldconf);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -3178,7 +3191,7 @@ module.exports = {
 
                     // If only one feature is selected, when activate it.
                     if (Object.keys(layerObj.layer._layers).length === 1) {
-                        _table.object.trigger("selected", layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                        _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
                     }
                     hit = true;
                     // Add fancy material raised style to buttons
@@ -3232,7 +3245,7 @@ module.exports = {
             });
 
             cloud.addGeoJsonStore(qstore[index]);
-            var sql, f_geometry_column = metaDataKeys[value.split(".")[1]].f_geometry_column;
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +

@@ -26,13 +26,13 @@ module.exports = {
                 return false;
             }
             var isEmpty = true;
-            var srid = metaDataKeys[value.split(".")[1]].srid;
-            var geoType = metaDataKeys[value.split(".")[1]].type;
-            var layerTitel = (metaDataKeys[value.split(".")[1]].f_table_title !== null && metaDataKeys[value.split(".")[1]].f_table_title !== "") ? metaDataKeys[value.split(".")[1]].f_table_title : metaDataKeys[value.split(".")[1]].f_table_name;
-            var not_querable = metaDataKeys[value.split(".")[1]].not_querable;
-            var versioning = metaDataKeys[value.split(".")[1]].versioning;
-            var cartoSql = metaDataKeys[value.split(".")[1]].sql;
-            var fieldConf = $.parseJSON(metaDataKeys[value.split(".")[1]].fieldconf);
+            var srid = metaDataKeys[value].srid;
+            var geoType = metaDataKeys[value].type;
+            var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
+            var not_querable = metaDataKeys[value].not_querable;
+            var versioning = metaDataKeys[value].versioning;
+            var cartoSql = metaDataKeys[value].sql;
+            var fieldConf = $.parseJSON(metaDataKeys[value].fieldconf);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -103,7 +103,7 @@ module.exports = {
 
                     // If only one feature is selected, when activate it.
                     if (Object.keys(layerObj.layer._layers).length === 1) {
-                        _table.object.trigger("selected", layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                        _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
                     }
                     hit = true;
                     // Add fancy material raised style to buttons
@@ -157,7 +157,7 @@ module.exports = {
             });
 
             cloud.addGeoJsonStore(qstore[index]);
-            var sql, f_geometry_column = metaDataKeys[value.split(".")[1]].f_geometry_column;
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +

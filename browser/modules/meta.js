@@ -32,7 +32,7 @@ module.exports = {
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_name] = metaData.data[i];
+                    metaDataKeys[metaData.data[i].f_table_schema + "." +metaData.data[i].f_table_name] = metaData.data[i];
                     (metaData.data[i].f_table_title) ? metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i] : null;
                 }
                 for (i = 0; i < response.data.length; ++i) {
@@ -101,16 +101,16 @@ module.exports = {
                                 var text = (response.data[u].f_table_title === null || response.data[u].f_table_title === "") ? response.data[u].f_table_name : response.data[u].f_table_title;
                                 if (response.data[u].baselayer) {
                                     $("#base-layer-list").append(
-                                        "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
+                                        "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + response.data[u].f_table_schema + "." + response.data[u].f_table_name + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label></div></li>');
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
                             }
                         }
-                        $("#layer-panel-" + base64name + " span:eq(1)").html(l.length)
+                        $("#layer-panel-" + base64name + " span:eq(1)").html(l.length);
                         // Remove the group if empty
                         if (l.length === 0) {
                             $("#layer-panel-" + base64name).remove();
@@ -127,6 +127,15 @@ module.exports = {
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
                 });
+                $(".info-label").on("click", function (e) {
+                    var t = ($(this).prev().children("input").data('gc2-id'));
+                    $("#info-modal").show();
+                    console.log(metaDataKeys)
+                    console.log(t)
+                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title);
+                    e.stopPropagation();
+                });
+
                 ready = true;
 
             },

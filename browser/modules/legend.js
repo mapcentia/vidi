@@ -20,7 +20,7 @@ module.exports = module.exports = {
                         var list = $('<ul class="list-group"/>'), li, classUl, title, className;
                         $.each(response, function (i, v) {
                             if (typeof v.id !== "undefined") {
-                                title = meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title ? meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_title : meta.getMetaDataKeys()[v.id.split(".")[1]].f_table_name;
+                                title = meta.getMetaDataKeys()[v.id].f_table_title ? meta.getMetaDataKeys()[v.id].f_table_title : meta.getMetaDataKeys()[v.id].f_table_name;
                             }
                             var u, showLayer = false;
                             if (typeof v === "object") {
@@ -51,7 +51,7 @@ module.exports = module.exports = {
                 setTimeout(function () {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
                     $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
-                        key = v.split(".")[1];
+                        key = v;
                         if (typeof key !== "undefined") {
                             legend = meta.getMetaDataKeys()[key].legend;
                             try {

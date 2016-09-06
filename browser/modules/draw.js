@@ -7,8 +7,8 @@ var store = new geocloud.sqlStore({
     clickable: true
 });
 var destructFunctions = [];
-//var editPopUp;
-
+var editPopUp;
+var infoClick;
 
 var getDistance = function (e) {
     var tempLatLng = null;
@@ -31,10 +31,12 @@ var getArea = function (e) {
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        infoClick = o.infoClick;
         return this;
     },
     control: function () {
         if (!drawOn) {
+            //infoClick.reset();
             L.drawLocal = require('./drawLocales/draw.js');
 
             var editActions = [
@@ -113,7 +115,7 @@ module.exports = {
                 drawnItems.addLayer(drawLayer);
 
                 drawLayer.on('click', function (event) {
-                    window.editPopUp = new L.EditToolbar.Popup(event.latlng, {
+                    editPopUp = new L.EditToolbar.Popup(event.latlng, {
                         className: 'leaflet-draw-toolbar',
                         actions: editActions
                     }).addTo(cloud.map, drawLayer);
@@ -181,7 +183,7 @@ module.exports = {
             })
         }
     },
-    init: function (str) {
+    init: function () {
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -194,10 +196,10 @@ module.exports = {
                     height = 0;
                 }
                 table = gc2table.init({
-                    "el": "#draw-table table",
-                    "geocloud2": cloud,
-                    "store": store,
-                    "cm": [
+                    el: "#draw-table table",
+                    geocloud2: cloud,
+                    store: store,
+                    cm: [
                         {
                             header: "Type",
                             dataIndex: "type",
@@ -214,7 +216,7 @@ module.exports = {
                             sortable: true
                         }
                     ],
-                    "autoUpdate": false,
+                    autoUpdate: false,
                     loadData: false,
                     height: height,
                     setSelectedStyle: false,
