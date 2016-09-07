@@ -869,7 +869,16 @@ body {
     font-size: 29px;
     font-weight: inherit;
 }
-#modal-legend {
+#info-modal-legend {
     padding: 20px;
     border-top: 1px solid #d0d3d4;
+}
+
+#info-modal .modal-body img {
+    width: 100%;
+}
+
+#info-modal-body-wrapper {
+    height: calc(100% - 50px);
+    overflow: scroll;
 }

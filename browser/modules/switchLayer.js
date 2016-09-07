@@ -41,6 +41,12 @@ module.exports = module.exports = {
         pushState = o.pushState;
         return this;
     },
+    /**
+     * Toggles a layer on/off. If visible is true, layer is toggled off and vice versa.
+     * @param name {string}
+     * @param visible {boolean}
+     * @param doNotLegend {boolean}
+     */
     init: function (name, visible, doNotLegend) {
         var el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
@@ -65,7 +71,6 @@ module.exports = module.exports = {
         pushState.init();
         if (!doNotLegend) {
             legend.init();
-
         }
     }
 };

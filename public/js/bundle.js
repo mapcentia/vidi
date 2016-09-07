@@ -886,6 +886,13 @@ var urlVars = urlparser.urlVars;
 
 /**
  *
+ * @type {showdown.Converter}
+ */
+var toHtml = new showdown.Converter();
+
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = module.exports = {
@@ -960,8 +967,8 @@ module.exports = module.exports = {
                     var t = ($(this).prev().children("input").data('gc2-id'));
                     $("#info-modal").show();
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
-                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? markdown.toHTML($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
-                    legend.init([t], "#modal-legend");
+                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
+                    legend.init([t], "#info-modal-legend");
                     e.stopPropagation();
                 });
 
