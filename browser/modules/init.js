@@ -58,5 +58,6 @@ module.exports = {
         $.material.init();
 
         touchScroll(".tab-pane");
+        touchScroll("#info-modal-body-wrapper");
     }
 };

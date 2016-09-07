@@ -890,7 +890,6 @@ var urlVars = urlparser.urlVars;
  */
 var toHtml = new showdown.Converter();
 
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -946,7 +945,6 @@ module.exports = module.exports = {
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 console.log("Bind layer");
-
                 $(this).change(function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
                     e.stopPropagation();
@@ -2203,6 +2201,7 @@ module.exports = {
         $.material.init();
 
         touchScroll(".tab-pane");
+        touchScroll("#info-modal-body-wrapper");
     }
 };
 },{}],16:[function(require,module,exports){
@@ -4431,6 +4430,12 @@ module.exports = module.exports = {
         pushState = o.pushState;
         return this;
     },
+    /**
+     * Toggles a layer on/off. If visible is true, layer is toggled off and vice versa.
+     * @param name {string}
+     * @param visible {boolean}
+     * @param doNotLegend {boolean}
+     */
     init: function (name, visible, doNotLegend) {
         var el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
@@ -4455,7 +4460,6 @@ module.exports = module.exports = {
         pushState.init();
         if (!doNotLegend) {
             legend.init();
-
         }
     }
 };
