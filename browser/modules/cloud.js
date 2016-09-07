@@ -35,8 +35,6 @@ var zoomControl = L.control.zoom({
     position: 'topright'
 });
 cloud.map.addControl(zoomControl);
-
-
 var map = cloud.map;
 
 
@@ -84,6 +82,13 @@ for (var i = 0; i < styleChoices.length; i++) {
     });
 }
 
+var localization;
+if (window._vidiLocale === "da_DK") {
+    localization = "da";
+}
+if (window._vidiLocale === "en_US") {
+    localization = "en";
+}
 /**
  *
  */
@@ -93,7 +98,7 @@ var measureControl = new L.Control.Measure({
     secondaryLengthUnit: 'meters',
     primaryAreaUnit: 'hectares',
     secondaryAreaUnit: 'sqmeters',
-    localization: 'da'
+    localization: localization
 
 });
 measureControl.addTo(map);

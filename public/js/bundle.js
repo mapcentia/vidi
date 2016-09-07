@@ -95,7 +95,14 @@ module.exports = {
         "Draw a marker": "Tegn en markør",
 
         "Close": "Luk",
-        "Show legend on print": "Vis signatur på print"
+        "Show legend on print": "Vis signatur på print",
+
+        "Use these tools for querying the overlay maps.": "Brug disse værktøjer til at lave forespørgsler i kortene.",
+        "Use these tools for creating markers, lines, areas, squares and circles.": "Brug disse værktøjer til at skabe markører, linjer, arealer, firkanter og cirkler.",
+        "Use these tools for editing existing drawings.": "Brug disse værktøjer til at ændre eksisterende tegninger.",
+        "Area": "Areal",
+        "Distance/Radius": "Distance/Radius",
+        "Type": "Type"
     }
 };
 },{}],2:[function(require,module,exports){
@@ -195,7 +202,14 @@ module.exports = {
         "Draw a marker": "Draw a marker",
 
         "Close": "Close",
-        "Show legend on print": "Show legend on print"
+        "Show legend on print": "Show legend on print",
+
+        "Use these tools for querying the overlay maps.": "Use these tools for querying the overlay maps",
+        "Use these tools for creating markers, lines, areas, squares and circles.": "Use these tools for creating markers, lines, areas, squares and circles",
+        "Use these tools for editing existing drawings.": "Use these tools for editing existing drawings.",
+        "Area": "Area",
+        "Distance/Radius": "Distance/Radius",
+        "Type": "Type"
     }
 };
 },{}],3:[function(require,module,exports){
@@ -527,7 +541,7 @@ var _makeSearch = function () {
 module.exports = {
     /**
      *
-     * @param o
+     * @param o {object}
      * @returns {exports}
      */
     set: function (o) {
@@ -615,7 +629,7 @@ module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
-            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
+            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use these tools for querying the overlay maps."), placement: "left"});
             po.popover("show");
             setTimeout(function(){
                 po.popover("hide");
@@ -1012,8 +1026,6 @@ var zoomControl = L.control.zoom({
     position: 'topright'
 });
 cloud.map.addControl(zoomControl);
-
-
 var map = cloud.map;
 
 
@@ -1061,6 +1073,13 @@ for (var i = 0; i < styleChoices.length; i++) {
     });
 }
 
+var localization;
+if (window._vidiLocale === "da_DK") {
+    localization = "da";
+}
+if (window._vidiLocale === "en_US") {
+    localization = "en";
+}
 /**
  *
  */
@@ -1070,7 +1089,7 @@ var measureControl = new L.Control.Measure({
     secondaryLengthUnit: 'meters',
     primaryAreaUnit: 'hectares',
     secondaryAreaUnit: 'sqmeters',
-    localization: 'da'
+    localization: localization
 
 });
 measureControl.addTo(map);
@@ -1083,24 +1102,64 @@ module.exports = cloud;
 
 'use strict';
 
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {boolean}
+ */
 var drawOn = false;
+
+/**
+ *
+ * @type {L.FeatureGroup}
+ */
 var drawnItems = new L.FeatureGroup();
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var drawControl;
+
+/**
+ * @type {gc2table}
+ */
 var table;
+
+/**
+ *
+ * @type {geocloud.sqlStore}
+ */
 var store = new geocloud.sqlStore({
     clickable: true
 });
+
+/**
+ *
+ * @type {Array}
+ */
 var destructFunctions = [];
+
+/**
+ * @type {L.EditToolbar.Popup}
+ */
 var editPopUp;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var infoClick;
 
 /**
- * @private
+ * Get readable distance of layer
  * @param e
  * @returns {string}
+ * @private
  */
-var getDistance = function (e) {
+var _getDistance = function (e) {
     var tempLatLng = null;
     var totalDistance = 0.00000;
     $.each(e._latlngs, function (i, latlng) {
@@ -1115,11 +1174,12 @@ var getDistance = function (e) {
 };
 
 /**
- * @private
+ * Get readable area of layer
  * @param e
  * @returns {string}
+ * @private
  */
-var getArea = function (e) {
+var _getArea = function (e) {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
 };
 
@@ -1221,11 +1281,11 @@ module.exports = {
                 });
 
                 if (type === "polygon" || type === "rectangle") {
-                    area = getArea(drawLayer);
+                    area = _getArea(drawLayer);
                     //distance = getDistance(drawLayer);
                 }
                 if (type === 'polyline') {
-                    distance = getDistance(drawLayer);
+                    distance = _getDistance(drawLayer);
                 }
                 if (type === 'circle') {
                     distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
@@ -1250,20 +1310,26 @@ module.exports = {
                     }
                     else if (typeof v._icon !== "undefined") {
                     } else if (v.feature.properties.distance !== null) {
-                        v.feature.properties.distance = getDistance(v);
+                        v.feature.properties.distance = _getDistance(v);
                     }
                     else if (v.feature.properties.area !== null) {
-                        v.feature.properties.area = getArea(v);
+                        v.feature.properties.area = _getArea(v);
                     }
                 });
                 table.loadDataInTable();
             });
 
-            var po = $('.leaflet-draw-section').popover({content: __("Use the tools to the right for drawing markers, lines, areas, squares and circles"), placement: "left"});
-            po.popover("show");
+            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+            po1.popover("show");
             setTimeout(function () {
-                po.popover("hide");
-            }, 2500)
+                po1.popover("hide");
+            }, 2500);
+
+            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+            po2.popover("show");
+            setTimeout(function () {
+                po2.popover("hide");
+            }, 2500);
 
         } else {
             // Clean up
@@ -1297,20 +1363,21 @@ module.exports = {
                 table = gc2table.init({
                     el: "#draw-table table",
                     geocloud2: cloud,
+                    locale: window._vidiLocale.replace("_","-"),
                     store: store,
                     cm: [
                         {
-                            header: "Type",
+                            header: __("Type"),
                             dataIndex: "type",
                             sortable: true
                         },
                         {
-                            header: "Area",
+                            header: __("Area"),
                             dataIndex: "area",
                             sortable: true
                         },
                         {
-                            header: "Distance/Radius",
+                            header: __("Distance/Radius"),
                             dataIndex: "distance",
                             sortable: true
                         }
@@ -1362,6 +1429,10 @@ module.exports = {
     }
 };
 
+/**
+ *
+ * @type {*|{}}
+ */
 L.Edit = L.Edit || {};
 L.Edit.Popup = L.Edit.Popup || {};
 
@@ -1392,6 +1463,10 @@ L.Edit.Popup.Edit = L._ToolbarAction.extend({
     }
 });
 
+/**
+ *
+ * @type {*|{}}
+ */
 L.Edit = L.Edit || {};
 L.Edit.Popup = L.Edit.Popup || {};
 

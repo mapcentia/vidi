@@ -152,7 +152,7 @@ var _makeSearch = function () {
 module.exports = {
     /**
      *
-     * @param o
+     * @param o {object}
      * @returns {exports}
      */
     set: function (o) {
@@ -240,7 +240,7 @@ module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
-            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
+            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use these tools for querying the overlay maps."), placement: "left"});
             po.popover("show");
             setTimeout(function(){
                 po.popover("hide");

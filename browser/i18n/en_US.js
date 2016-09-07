@@ -94,6 +94,13 @@ module.exports = {
         "Draw a marker": "Draw a marker",
 
         "Close": "Close",
-        "Show legend on print": "Show legend on print"
+        "Show legend on print": "Show legend on print",
+
+        "Use these tools for querying the overlay maps.": "Use these tools for querying the overlay maps",
+        "Use these tools for creating markers, lines, areas, squares and circles.": "Use these tools for creating markers, lines, areas, squares and circles",
+        "Use these tools for editing existing drawings.": "Use these tools for editing existing drawings.",
+        "Area": "Area",
+        "Distance/Radius": "Distance/Radius",
+        "Type": "Type"
     }
 };
