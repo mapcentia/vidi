@@ -20,7 +20,14 @@ module.exports = module.exports = {
             bl = window.setBaseLayers[i];
             if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                 customBaseLayer = new L.TileLayer(bl.url, {
-                    attribution: bl.attribution
+                    attribution: bl.attribution,
+
+                    // Set zoom levels from config, if they are there, else default
+                    // to [0-18] (native), [0-20] (interpolated)
+                    minZoom: (typeof bl.minZoom != "undefined" ? bl.minZoom : 0),
+                    maxZoom: (typeof bl.maxZoom != "undefined" ? bl.maxZoom : 20),
+                    maxNativeZoom: (typeof bl.maxNativeZoom != "undefined" ? bl.maxNativeZoom : 18)
+
                 });
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;

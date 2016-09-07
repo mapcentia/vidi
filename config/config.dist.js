@@ -12,7 +12,10 @@ module.exports = {
                 id: "my_map",
                 name: "My nice baselayer",
                 description: "Pretty awesome map",
-                attribution: ""
+                attribution: "",
+                minZoom: 0,
+                maxZoom: 18,
+                maxNativeZoom: 20
             },
             {"id": "osm", "name": "OSM"},
             {"id": "stamenToner", "name": "Stamen Toner"}
