@@ -38,7 +38,7 @@ body {
     position: relative;
 }
 
-#legend li {
+.legend li {
     list-style-type: none;
 }
 
@@ -862,4 +862,14 @@ body {
 
 .info-label {
     display: none;
+    cursor: pointer;
+}
+
+.close {
+    font-size: 29px;
+    font-weight: inherit;
+}
+#modal-legend {
+    padding: 20px;
+    border-top: 1px solid #d0d3d4;
 }

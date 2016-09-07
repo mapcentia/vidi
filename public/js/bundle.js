@@ -640,15 +640,28 @@ var draw;
 var advancedInfo;
 var cloud;
 var print;
+var switchLayer;
+var setBaseLayer;
+var legend;
+var meta;
+var metaDataKeys;
+var urlparser = require('./urlparser');
+var urlVars = urlparser.urlVars;
+
 module.exports = module.exports = {
     set: function (o) {
         draw = o.draw;
         advancedInfo = o.advancedInfo;
         cloud = o.cloud;
         print = o.print;
+        switchLayer = o.switchLayer;
+        setBaseLayer = o.setBaseLayer;
+        legend = o.legend;
+        meta = o.meta;
         return this;
     },
     init: function (str) {
+        metaDataKeys = meta.getMetaDataKeys();
         $("#draw-btn").on("click", function () {
             // Stop advancedInfo
             if (advancedInfo.getSearchOn()) {
@@ -658,7 +671,6 @@ module.exports = module.exports = {
             }
             draw.control();
         });
-
 
         $("#advanced-info-btn").on("click", function () {
             // Stop drawing
@@ -683,9 +695,44 @@ module.exports = module.exports = {
             $("#info-modal").hide();
         });
 
+
+        // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
+        if (!urlVars.px && !urlVars.py) {
+            $(document).arrive('[data-gc2-id]', function () {
+                console.log("Bind layer");
+
+                $(this).change(function (e) {
+                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
+                    e.stopPropagation();
+                });
+            });
+
+            $(document).arrive('[data-gc2-base-id]', function () {
+                console.log("Bind base");
+                $(this).on("click", function (e) {
+                    setBaseLayer.init($(this).data('gc2-base-id'));
+                    e.stopPropagation();
+                    $(this).css("background-color", "white");
+                });
+
+            });
+
+            $(document).arrive('.info-label', function () {
+                console.log("Bind info");
+                $(this).on("click", function (e) {
+                    var t = ($(this).prev().children("input").data('gc2-id'));
+                    $("#info-modal").show();
+                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
+                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? markdown.toHTML($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
+                    legend.init([t], "#modal-legend");
+                    e.stopPropagation();
+                });
+
+            });
+        }
     }
 };
-},{}],8:[function(require,module,exports){
+},{"./urlparser":28}],8:[function(require,module,exports){
 try {
     geocloud.setHost(require('../../config/config.js').gc2.host);
 } catch (e){
@@ -1388,7 +1435,8 @@ var createBufferBtn = function () {
     var MyCustomAction = L._ToolbarAction.extend({
         options: {
             toolbarIcon: {
-                className: 'fa  fa-circle-thin deactiveBtn'
+                className: 'fa fa-circle-thin deactiveBtn',
+                color: "#000"
             },
             /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
              * by definition, contained inside another toolbar, so it
@@ -1450,7 +1498,10 @@ var createBufferBtn = function () {
         options: {
             toolbarIcon: {
                 className: 'fa fa-map-o'
+
             },
+            color: "#000",
+
             /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
              * by definition, contained inside another toolbar, so it
              * doesn't need the additional styling and behavior of a
@@ -1781,6 +1832,8 @@ module.exports = {
         return this;
     },
     init: function () {
+        bindEvent.init();
+
         meta.init();
         baseLayer.init();
         setting.init();
@@ -1788,7 +1841,6 @@ module.exports = {
         infoClick.init();
         search.init();
         draw.init();
-        bindEvent.init();
         advancedInfo.init();
         print.init();
 
@@ -1803,29 +1855,55 @@ module.exports = {
     }
 };
 },{}],16:[function(require,module,exports){
+/*
+ * Copyright 2016 MapCentia ApS. All rights reserved.
+ *
+ * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.gnu.org/licenses/agpl-3.0.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
 var cloud;
 var meta;
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var BACKEND = require('../../config/config.js').backend;
+var switchLayer;
 
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        switchLayer = o.switchLayer;
         return this;
     },
-    init: function () {
+    init: function (layerArr, el) {
+        var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
             case "gc2":
-                var param = 'l=' + cloud.getVisibleLayers(true) + '&db=' + db;
+                var visibleLayers = cloud.getVisibleLayers(true), layers, checked, layerName;
+                if (layerArr) {
+                    layers = layerArr.join(";");
+                } else {
+                    layers = visibleLayers;
+                }
+                var param = 'l=' + layers + '&db=' + db;
                 $.ajax({
                     url: '/api/legend/' + db + '?' + param,
                     success: function (response) {
                         var list = $('<ul class="list-group"/>'), li, classUl, title, className;
                         $.each(response, function (i, v) {
                             if (typeof v.id !== "undefined") {
-                                title = meta.getMetaDataKeys()[v.id].f_table_title ? meta.getMetaDataKeys()[v.id].f_table_title : meta.getMetaDataKeys()[v.id].f_table_name;
+                                title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
                             }
                             var u, showLayer = false;
                             if (typeof v === "object") {
@@ -1843,12 +1921,14 @@ module.exports = module.exports = {
                                             classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
                                         }
                                     }
-                                    list.append($("<li>" + title + "</li>"));
+                                    layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
+                                    checked = ($.inArray(layerName, visibleLayers.split(";")) > -1) ? "checked" : "";
+                                    list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                     list.append(li.append(classUl));
                                 }
                             }
                         });
-                        $('#legend').html(list);
+                        $(el ? el : '#legend').html(list);
                     }
                 });
                 break;
@@ -1858,14 +1938,14 @@ module.exports = module.exports = {
                     $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
                         key = v;
                         if (typeof key !== "undefined") {
-                            legend = meta.getMetaDataKeys()[key].legend;
+                            legend = metaDataKeys[key].legend;
                             try {
-                                title = meta.getMetaDataKeys()[key].f_table_title;
+                                title = metaDataKeys[key].f_table_title;
                             }
                             catch (e) {
                             }
                             var u, showLayer = false;
-                            switch (legend.type){
+                            switch (legend.type) {
                                 case "category":
                                     for (u = 0; u < legend.items.length; u = u + 1) {
                                         if (legend.items[u].name !== "") {
@@ -1930,6 +2010,7 @@ var ready = false;
 var cartoDbLayersready = false;
 var BACKEND = require('../../config/config.js').backend;
 var host;
+var legend;
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -1940,6 +2021,7 @@ module.exports = {
         cloud = o.cloud;
         switchLayer = o.switchLayer;
         setBaseLayer = o.setBaseLayer;
+        legend = o.legend;
         return this;
     },
     init: function () {
@@ -1947,7 +2029,7 @@ module.exports = {
             url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
             scriptCharset: "utf-8",
             success: function (response) {
-                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData, layers = [];
+                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData, layers = [], displayInfo;
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
@@ -2024,7 +2106,8 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span class="info-label label label-primary">Info</span></div></li>');
+                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
                             }
@@ -2037,11 +2120,11 @@ module.exports = {
                     }
                 }
                 // Bind switch layer event
-                $(".checkbox input[type=checkbox]").change(function (e) {
+                /*$(".checkbox input[type=checkbox]").change(function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
                     e.stopPropagation();
-                });
-                $(".base-layer-item").on("click", function (e) {
+                });*/
+               /* $(".base-layer-item").on("click", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
                     $(".base-layer-item").css("background-color", "white");
@@ -2049,11 +2132,11 @@ module.exports = {
                 $(".info-label").on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id'));
                     $("#info-modal").show();
-                    console.log(metaDataKeys)
-                    console.log(t)
-                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title);
+                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
+                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? markdown.toHTML($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
+                    legend.init([t], "#modal-legend");
                     e.stopPropagation();
-                });
+                });*/
 
                 ready = true;
 
@@ -3639,9 +3722,8 @@ module.exports = {
     backend: "gc2",
     //backend: "cartodb",
     gc2: {
-        //host: "http://192.168.33.11"
-        host: "http://cowi.mapcentia.com"
-        //host: "http://127.0.0.1:8080"
+        //host: "http://cowi.mapcentia.com"
+        host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh",
@@ -3660,7 +3742,7 @@ module.exports = {
     },
     print: {
         templates: {
-            "cowiDetailPrint": {
+            "print": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],

@@ -71,7 +71,8 @@ var createBufferBtn = function () {
     var MyCustomAction = L._ToolbarAction.extend({
         options: {
             toolbarIcon: {
-                className: 'fa  fa-circle-thin deactiveBtn'
+                className: 'fa fa-circle-thin deactiveBtn',
+                color: "#000"
             },
             /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
              * by definition, contained inside another toolbar, so it
@@ -133,7 +134,10 @@ var createBufferBtn = function () {
         options: {
             toolbarIcon: {
                 className: 'fa fa-map-o'
+
             },
+            color: "#000",
+
             /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
              * by definition, contained inside another toolbar, so it
              * doesn't need the additional styling and behavior of a

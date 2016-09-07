@@ -31,6 +31,8 @@ module.exports = {
         return this;
     },
     init: function () {
+        bindEvent.init();
+
         meta.init();
         baseLayer.init();
         setting.init();
@@ -38,7 +40,6 @@ module.exports = {
         infoClick.init();
         search.init();
         draw.init();
-        bindEvent.init();
         advancedInfo.init();
         print.init();
 

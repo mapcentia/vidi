@@ -1,38 +1,118 @@
+/*
+ * Copyright 2016 MapCentia ApS. All rights reserved.
+ *
+ * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.gnu.org/licenses/agpl-3.0.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
+/**
+ * @type {string}
+ */
 var db = urlparser.db;
+/**
+ * @type {string}
+ */
 var schema = urlparser.schema;
+/**
+ * @type {string}
+ */
 var urlVars = urlparser.urlVars;
+/**
+ *
+ * @type {Array}
+ */
 var metaDataKeys = [];
+/**
+ *
+ * @type {Array}
+ */
 var metaDataKeysTitle = [];
+/**
+ * @type {object}
+ */
 var cloud;
+/**
+ * @type {object}
+ */
 var switchLayer;
+/**
+ * @type {object}
+ */
 var setBaseLayer;
+/**
+ *
+ * @type {boolean}
+ */
 var ready = false;
+/**
+ *
+ * @type {boolean}
+ */
 var cartoDbLayersready = false;
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
+/**
+ * @type {string}
+ */
 var host;
+/**
+ * @type {object}
+ */
+var legend;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
     console.info(e.message);
 }
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
+ */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         switchLayer = o.switchLayer;
         setBaseLayer = o.setBaseLayer;
+        legend = o.legend;
         return this;
     },
+    /**
+     *
+     */
     init: function () {
         $.ajax({
             url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
             scriptCharset: "utf-8",
             success: function (response) {
-                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData, layers = [];
+                var base64name, isBaseLayer, arr, groups, i, l, cv, metaData, layers = [], displayInfo;
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_schema + "." +metaData.data[i].f_table_name] = metaData.data[i];
+                    metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
                     (metaData.data[i].f_table_title) ? metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i] : null;
                 }
                 for (i = 0; i < response.data.length; ++i) {
@@ -105,7 +185,8 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span class="info-label label label-primary">Info</span></div></li>');
+                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
                             }
@@ -117,44 +198,29 @@ module.exports = {
                         }
                     }
                 }
-                // Bind switch layer event
-                $(".checkbox input[type=checkbox]").change(function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
-                    e.stopPropagation();
-                });
-                $(".base-layer-item").on("click", function (e) {
-                    setBaseLayer.init($(this).data('gc2-base-id'));
-                    e.stopPropagation();
-                    $(".base-layer-item").css("background-color", "white");
-                });
-                $(".info-label").on("click", function (e) {
-                    var t = ($(this).prev().children("input").data('gc2-id'));
-                    $("#info-modal").show();
-                    console.log(metaDataKeys)
-                    console.log(t)
-                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title);
-                    e.stopPropagation();
-                });
-
                 ready = true;
-
             },
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
         }); // Ajax call end
     },
+    /**
+     * Get the meta data in an array with schema.relation as key.
+     * @returns {Array}
+     */
     getMetaDataKeys: function () {
         return metaDataKeys;
     },
+    /**
+     * Check if metadata and layer are ready.
+     * @returns {boolean}
+     */
     ready: function () {
         if (BACKEND === "cartodb") { // If CartoDB, we wait for cartodb.createLayer to finish
-            if (ready && cartoDbLayersready) {
-                return true;
-            } else {
-                return false;
-            }
-        } else { // GC2 layers are direct tile request
+            return (ready && cartoDbLayersready);
+        }
+        else { // GC2 layers are direct tile request
             return ready;
         }
     }
