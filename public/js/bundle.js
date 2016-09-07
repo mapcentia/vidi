@@ -199,14 +199,39 @@ module.exports = {
     }
 };
 },{}],3:[function(require,module,exports){
+/*
+ * Copyright 2016 MapCentia ApS. All rights reserved.
+ *
+ * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   https://www.gnu.org/licenses/agpl-3.0.html
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 // Hack to compile Glob files. Don´t call this function!
 function ಠ_ಠ() {
     require('./i18n/da_DK.js');require('./i18n/en_US.js');
 }
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
 
+/**
+ *
+ */
 window.Vidi = function () {
-    "use strict";
 
     // Declare vars
     var config, socketId, tmpl;
@@ -348,28 +373,108 @@ window.Vidi = function () {
 };
 
 },{"../config/config.js":30,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/baseLayer":6,"./modules/bindEvent":7,"./modules/cloud":8,"./modules/draw":9,"./modules/extensions/cowiDetail/bufferSearch.js":12,"./modules/infoClick":14,"./modules/init":15,"./modules/legend":16,"./modules/meta":17,"./modules/print":18,"./modules/pushState":19,"./modules/search/danish.js":20,"./modules/search/google.js":21,"./modules/serializeLayers":22,"./modules/setBaseLayer":23,"./modules/setting":24,"./modules/sqlQuery":25,"./modules/state":26,"./modules/switchLayer":27,"./modules/urlparser":28}],4:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var sqlQuery;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var infoClick;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var reproject = require('reproject');
+
+/**
+ *
+ * @type {_|exports|module.exports}
+ * @private
+ */
 var _ = require('underscore');
+
+/**
+ *
+ * @type {exports|module.exports}
+ */
 var jsts = require('jsts');
+
+/**
+ *
+ * @type {boolean}
+ */
 var searchOn = false;
+
+/**
+ *
+ * @type {L.FeatureGroup}
+ */
 var drawnItems = new L.FeatureGroup();
+
+/**
+ *
+ * @type {L.FeatureGroup}
+ */
 var bufferItems = new L.FeatureGroup();
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var drawControl;
+
+/**
+ *
+ * @type {Array}
+ */
 var qstore = [];
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var noUiSlider = require('nouislider');
+
+/**
+ *
+ * @type {Element}
+ */
 var bufferSlider = document.getElementById('buffer-slider');
+
+/**
+ *
+ * @type {Element}
+ */
 var bufferValue = document.getElementById('buffer-value');
 
-var clearDrawItems = function () {
+/**
+ *
+ * @private
+ */
+var _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
     sqlQuery.reset(qstore);
 };
 
-var makeSearch = function () {
+/**
+ *
+ * @private
+ */
+var _makeSearch = function () {
     var primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
 
@@ -416,7 +521,16 @@ var makeSearch = function () {
     }
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getSearchOn: module.exports.getSearchOn, getDrawLayer: module.exports.getDrawLayer, getBufferLayer: module.exports.getBufferLayer}}
+ */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
@@ -425,6 +539,9 @@ module.exports = {
         cloud.map.addLayer(bufferItems);
         return this;
     },
+    /**
+     *
+     */
     control: function () {
         if (!searchOn) {
             $("#buffer").show();
@@ -477,41 +594,37 @@ module.exports = {
 
             cloud.map.addControl(drawControl);
             searchOn = true;
-
             // Unbind events
             cloud.map.off('draw:created');
             cloud.map.off('draw:drawstart');
             cloud.map.off('draw:drawstop');
             cloud.map.off('draw:editstart');
-
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
                 drawnItems.addLayer(e.layer);
             });
             cloud.map.on('draw:drawstart', function (e) {
-                clearDrawItems();
+                _clearDrawItems();
             });
             cloud.map.on('draw:drawstop', function (e) {
-                makeSearch();
+                _makeSearch();
             });
             cloud.map.on('draw:editstop', function (e) {
-                makeSearch();
+                _makeSearch();
             });
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
-
             var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
             po.popover("show");
             setTimeout(function(){
                 po.popover("hide");
             }, 2500)
-
         } else {
             // Clean up
             console.log("Stoping advanced search");
-            clearDrawItems();
+            _clearDrawItems();
 
             // Unbind events
             cloud.map.off('draw:created');
@@ -523,7 +636,10 @@ module.exports = {
             $("#buffer").hide();
         }
     },
-    init: function (str) {
+    /**
+     *
+     */
+    init: function () {
         try {
             noUiSlider.create(bufferSlider, {
                 start: 40,
@@ -534,12 +650,11 @@ module.exports = {
                     max: 500
                 }
             });
-
             bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
                 bufferValue.value = values[handle];
                 if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
                     bufferItems.clearLayers();
-                    makeSearch()
+                    _makeSearch()
                 }
             }, 300));
 
@@ -552,12 +667,24 @@ module.exports = {
             console.info(e.message);
         }
     },
+    /**
+     *
+     * @returns {boolean}
+     */
     getSearchOn: function () {
         return searchOn;
     },
+    /**
+     *
+     * @returns {L.FeatureGroup}
+     */
     getDrawLayer: function () {
         return drawnItems;
     },
+    /**
+     *
+     * @returns {L.FeatureGroup}
+     */
     getBufferLayer: function () {
         return bufferItems;
     }
@@ -565,22 +692,38 @@ module.exports = {
 
 
 },{"./drawLocales/advancedInfo.js":10,"./utmZone.js":29,"jsts":36,"nouislider":39,"reproject":108,"underscore":109}],5:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var urlparser = require('./urlparser');
 var urlVars = urlparser.urlVars;
 var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
+
+/**
+ * @private
+ * @returns {string}
+ */
 var anchor = function () {
     var p = geocloud.transformPoint(cloud.getCenter().x, cloud.getCenter().y, "EPSG:900913", "EPSG:4326");
     return "#" + cloud.getBaseLayerName() + "/" + Math.round(cloud.getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + ((cloud.getNamesOfVisibleLayers()) ? cloud.getNamesOfVisibleLayers().split(",").reverse().join(",") : "");
 };
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, getAnchor: module.exports.getAnchor}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         return this;
     },
     init: function () {
-        var param = [], paramStr;
+        var param = [], paramStr, parr;
         $.each(urlVars, function (i, v) {
             parr = v.split("#");
             if (parr.length > 1) {
@@ -591,18 +734,45 @@ module.exports = {
         paramStr = param.join("&");
         return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     },
+    /**
+     * Get the URL anchor for current state
+     * @returns {string}
+     */
     getAnchor: function(){
         return anchor();
     }
 };
 },{"./urlparser":28}],6:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         return this;
     },
-    init: function (str) {
+    /**
+     *
+     */
+    init: function () {
         var bl, customBaseLayer;
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
@@ -618,7 +788,14 @@ module.exports = module.exports = {
             bl = window.setBaseLayers[i];
             if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                 customBaseLayer = new L.TileLayer(bl.url, {
-                    attribution: bl.attribution
+                    attribution: bl.attribution,
+
+                    // Set zoom levels from config, if they are there, else default
+                    // to [0-18] (native), [0-20] (interpolated)
+                    minZoom: (typeof bl.minZoom != "undefined" ? bl.minZoom : 0),
+                    maxZoom: (typeof bl.maxZoom != "undefined" ? bl.maxZoom : 20),
+                    maxNativeZoom: (typeof bl.maxNativeZoom != "undefined" ? bl.maxNativeZoom : 18)
+
                 });
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;
@@ -636,18 +813,83 @@ module.exports = module.exports = {
     }
 };
 },{}],7:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var print;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var switchLayer;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ *
+ * @type {array}
+ */
 var metaDataKeys;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
+
+/**
+ *
+ * @type {array}
+ */
 var urlVars = urlparser.urlVars;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         draw = o.draw;
@@ -695,7 +937,6 @@ module.exports = module.exports = {
             $("#info-modal").hide();
         });
 
-
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
@@ -706,7 +947,6 @@ module.exports = module.exports = {
                     e.stopPropagation();
                 });
             });
-
             $(document).arrive('[data-gc2-base-id]', function () {
                 console.log("Bind base");
                 $(this).on("click", function (e) {
@@ -716,7 +956,6 @@ module.exports = module.exports = {
                 });
 
             });
-
             $(document).arrive('.info-label', function () {
                 console.log("Bind info");
                 $(this).on("click", function (e) {
@@ -733,12 +972,23 @@ module.exports = module.exports = {
     }
 };
 },{"./urlparser":28}],8:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 try {
     geocloud.setHost(require('../../config/config.js').gc2.host);
 } catch (e){
     console.info(e.message);
 }
 
+/**
+ *
+ * @type {geocloud.map}
+ */
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -752,6 +1002,9 @@ cloud.map.on('load', function(){ if ($(document).width() > 767 ) {
     );
 }});
 
+/**
+ *
+ */
 var zoomControl = L.control.zoom({
     position: 'topright'
 });
@@ -764,6 +1017,9 @@ var map = cloud.map;
 /*var scaleControl = L.control.scale({position: "bottomright"});
  cloud.map.addControl(scaleControl);*/
 
+/**
+ *
+ */
 var lc = L.control.locate({
     position: 'topright',
     strings: {
@@ -773,6 +1029,9 @@ var lc = L.control.locate({
     iconLoading: "fa fa-circle-o-notch fa-spin"
 }).addTo(map);
 
+/**
+ *
+ */
 var graphicScale = L.control.graphicScale({
     doubleLine: false,
     fill: 'hollow',
@@ -780,10 +1039,17 @@ var graphicScale = L.control.graphicScale({
     position: "topleft"
 }).addTo(map);
 
+/**
+ *
+ * @type {div}
+ */
 var scaleText = L.DomUtil.create('div', 'scaleText');
 graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
 //scaleText.innerHTML = '<h1>Leaflet Graphic Scale</h1><p>style: <span class="choice">hollow</span>-<span class="choice">line</span>-<span class="choice">fill</span>-<span class="choice">nofill</span></p>';
 
+/**
+ *
+ */
 var styleChoices = scaleText.querySelectorAll('.choice');
 
 for (var i = 0; i < styleChoices.length; i++) {
@@ -792,6 +1058,9 @@ for (var i = 0; i < styleChoices.length; i++) {
     });
 }
 
+/**
+ *
+ */
 var measureControl = new L.Control.Measure({
     position: 'topright',
     primaryLengthUnit: 'kilometers',
@@ -802,9 +1071,15 @@ var measureControl = new L.Control.Measure({
 
 });
 measureControl.addTo(map);
-
 module.exports = cloud;
 },{"../../config/config.js":30}],9:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var drawOn = false;
 var drawnItems = new L.FeatureGroup();
@@ -817,6 +1092,11 @@ var destructFunctions = [];
 var editPopUp;
 var infoClick;
 
+/**
+ * @private
+ * @param e
+ * @returns {string}
+ */
 var getDistance = function (e) {
     var tempLatLng = null;
     var totalDistance = 0.00000;
@@ -831,10 +1111,19 @@ var getDistance = function (e) {
     return L.GeometryUtil.readableDistance(totalDistance, true);
 };
 
+/**
+ * @private
+ * @param e
+ * @returns {string}
+ */
 var getArea = function (e) {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getDrawOn: module.exports.getDrawOn, getLayer: module.exports.getLayer, getTable: module.exports.getTable, setDestruct: module.exports.setDestruct}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -1036,15 +1325,35 @@ module.exports = {
             }
         }());
     },
+
+    /**
+     *
+     * @returns {boolean}
+     */
     getDrawOn: function () {
         return drawOn;
     },
+
+    /**
+     *
+     * @returns {L.FeatureGroup|*}
+     */
     getLayer: function () {
         return store.layer;
     },
+
+    /**
+     *
+     * @returns {gc2table}
+     */
     getTable: function () {
         return table;
     },
+
+    /**
+     *
+     * @param f {string}
+     */
     setDestruct: function (f) {
         destructFunctions.push(f);
     }
@@ -1733,6 +2042,17 @@ var createStore = function () {
 };
 
 },{"jsts":36,"reproject":108}],13:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @returns {*}
+ */
 module.exports = function () {
     try {
         var max = $(document).height() - $('.tab-pane').offset().top - 70;
@@ -1745,6 +2065,13 @@ module.exports = function () {
     }
 };
 },{}],14:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var urlparser = require('./urlparser');
 var cloud;
 var advancedInfo;
@@ -1755,6 +2082,10 @@ var sqlQuery;
 var qstore = [];
 var active = true;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset, active: module.exports.active}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -1788,9 +2119,17 @@ module.exports = {
             }
         });
     },
+    /**
+     *
+     */
     reset: function(){
         sqlQuery.reset(qstore);
     },
+
+    /**
+     *
+     * @param a {boolean}
+     */
     active: function(a){
         active = a;
     }
@@ -1799,6 +2138,13 @@ module.exports = {
 
 
 },{"./urlparser":28}],15:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var baseLayer;
 var meta;
@@ -1855,21 +2201,11 @@ module.exports = {
     }
 };
 },{}],16:[function(require,module,exports){
-/*
- * Copyright 2016 MapCentia ApS. All rights reserved.
- *
- * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.gnu.org/licenses/agpl-3.0.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
  */
+
 'use strict';
 
 var cloud;
@@ -1879,6 +2215,10 @@ var db = urlparser.db;
 var BACKEND = require('../../config/config.js').backend;
 var switchLayer;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -1937,7 +2277,7 @@ module.exports = module.exports = {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
                     $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
                         key = v;
-                        if (typeof key !== "undefined") {
+                        if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
                             legend = metaDataKeys[key].legend;
                             try {
                                 title = metaDataKeys[key].f_table_title;
@@ -1994,29 +2334,107 @@ module.exports = module.exports = {
                 break
         }
     }
-
 };
 },{"../../config/config.js":30,"./urlparser":28}],17:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
 var db = urlparser.db;
+
+/**
+ * @type {string}
+ */
 var schema = urlparser.schema;
+
+/**
+ * @type {string}
+ */
 var urlVars = urlparser.urlVars;
+
+/**
+ *
+ * @type {Array}
+ */
 var metaDataKeys = [];
+
+/**
+ *
+ * @type {Array}
+ */
 var metaDataKeysTitle = [];
+
+/**
+ * @type {Object}
+ */
 var cloud;
+
+/**
+ * @type {object}
+ */
 var switchLayer;
+
+/**
+ * @type {object}
+ */
 var setBaseLayer;
+
+/**
+ *
+ * @type {boolean}
+ */
 var ready = false;
+
+/**
+ *
+ * @type {boolean}
+ */
 var cartoDbLayersready = false;
+
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
+
+/**
+ * @type {string}
+ */
 var host;
+
+/**
+ * @type {object}
+ */
 var legend;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
     console.info(e.message);
 }
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
+ */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         switchLayer = o.switchLayer;
@@ -2024,6 +2442,9 @@ module.exports = {
         legend = o.legend;
         return this;
     },
+    /**
+     *
+     */
     init: function () {
         $.ajax({
             url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
@@ -2033,7 +2454,7 @@ module.exports = {
                 groups = [];
                 metaData = response;
                 for (i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_schema + "." +metaData.data[i].f_table_name] = metaData.data[i];
+                    metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
                     (metaData.data[i].f_table_title) ? metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i] : null;
                 }
                 for (i = 0; i < response.data.length; ++i) {
@@ -2106,7 +2527,7 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    //displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                     $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
@@ -2119,44 +2540,31 @@ module.exports = {
                         }
                     }
                 }
-                // Bind switch layer event
-                /*$(".checkbox input[type=checkbox]").change(function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
-                    e.stopPropagation();
-                });*/
-               /* $(".base-layer-item").on("click", function (e) {
-                    setBaseLayer.init($(this).data('gc2-base-id'));
-                    e.stopPropagation();
-                    $(".base-layer-item").css("background-color", "white");
-                });
-                $(".info-label").on("click", function (e) {
-                    var t = ($(this).prev().children("input").data('gc2-id'));
-                    $("#info-modal").show();
-                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
-                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? markdown.toHTML($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
-                    legend.init([t], "#modal-legend");
-                    e.stopPropagation();
-                });*/
-
                 ready = true;
-
             },
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
         }); // Ajax call end
     },
+
+    /**
+     * Get the meta data in an array with schema.relation as key.
+     * @returns {Array}
+     */
     getMetaDataKeys: function () {
         return metaDataKeys;
     },
+
+    /**
+     * Check if metadata and layer are ready.
+     * @returns {boolean}
+     */
     ready: function () {
         if (BACKEND === "cartodb") { // If CartoDB, we wait for cartodb.createLayer to finish
-            if (ready && cartoDbLayersready) {
-                return true;
-            } else {
-                return false;
-            }
-        } else { // GC2 layers are direct tile request
+            return (ready && cartoDbLayersready);
+        }
+        else { // GC2 layers are direct tile request
             return ready;
         }
     }
@@ -2165,6 +2573,13 @@ module.exports = {
 
 
 },{"../../config/config.js":30,"./urlparser":28}],18:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var printOn = false;
 var recEdit;
@@ -2179,14 +2594,16 @@ var db = urlparser.db;
 var schema = urlparser.schema;
 var scale;
 var center;
-config = require('../../config/config.js');
-
+var config = require('../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
 var tmpl;
 var pageSize;
 var orientation;
 
+/**
+ * @private
+ */
 var cleanUp = function () {
     try {
         cloud.map.removeLayer(recScale);
@@ -2196,6 +2613,10 @@ var cleanUp = function () {
     printOn = false;
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, activate: module.exports.activate, print: module.exports.print, control: module.exports.control}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -2207,6 +2628,10 @@ module.exports = {
     init: function () {
         // pass
     },
+
+    /**
+     *
+     */
     activate: function () {
         if (!printOn) {
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
@@ -2299,6 +2724,10 @@ module.exports = {
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
         }
     },
+
+    /**
+     *
+     */
     print: function () {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
         try {
@@ -2417,6 +2846,10 @@ module.exports = {
             }
         });
     },
+
+    /**
+     *
+     */
     control: function () {
         if (!printOn) {
             printOn = true;
@@ -2525,10 +2958,38 @@ module.exports = {
 };
 
 },{"../../config/config.js":30,"./urlparser":28,"./utmZone.js":29,"base64-url":32,"lz-string":37}],19:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var anchor;
+
+/**
+ *
+ * @type {boolean}
+ */
 var first = true;
+
+/**
+ * @type {int}
+ */
 var t;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         meta = o.meta;
@@ -2546,9 +3007,29 @@ module.exports = module.exports = {
     }
 };
 },{}],20:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {module.exports.searchConfig|{komkode}}
+ */
 var config = require('../../../config/config.js').searchConfig;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -2678,8 +3159,23 @@ module.exports = {
 
 
 },{"../../../config/config.js":30}],21:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -2703,7 +3199,21 @@ module.exports = {
     }
 };
 },{}],22:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, serialize: module.exports.serialize}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -2728,6 +3238,12 @@ module.exports = module.exports = {
     }
 };
 
+/**
+ *
+ * @param map
+ * @returns {Array}
+ * @private
+ */
 var _encodeLayers = function (map) {
     var enc = [],
         vectors = [],
@@ -2756,6 +3272,12 @@ var _encodeLayers = function (map) {
     }
     return enc;
 };
+
+/**
+ *
+ * @type {{layers: {httprequest: _encoders.layers.httprequest, tilelayer: _encoders.layers.tilelayer, tilelayerwms: _encoders.layers.tilelayerwms, tilelayermapbox: _encoders.layers.tilelayermapbox, image: _encoders.layers.image, vector: _encoders.layers.vector}}}
+ * @private
+ */
 var _encoders = {
     layers: {
         httprequest: function (layer) {
@@ -2971,6 +3493,12 @@ var _encoders = {
     }
 };
 
+/**
+ *
+ * @param map
+ * @returns {Array.<T>}
+ * @private
+ */
 var _getLayers = function (map) {
     var markers = [],
         vectors = [],
@@ -3038,6 +3566,12 @@ var _getLayers = function (map) {
     return tiles.concat(vectors).concat(imageOverlays).concat(markers);
 };
 
+/**
+ *
+ * @param url
+ * @returns {*}
+ * @private
+ */
 var _getAbsoluteUrl = function (url) {
     var a;
 
@@ -3054,6 +3588,12 @@ var _getAbsoluteUrl = function (url) {
     return a.href;
 };
 
+/**
+ *
+ * @param circle
+ * @returns {*}
+ * @private
+ */
 var _circleGeoJSON = function (circle) {
     var projection = circle._map.options.crs.projection;
     var earthRadius = 1, i;
@@ -3074,6 +3614,12 @@ var _circleGeoJSON = function (circle) {
     return L.polygon(points).toGeoJSON();
 };
 
+/**
+ *
+ * @param feature
+ * @returns {{color: *, stroke: (*|stroke|{color, width}|boolean), strokeColor: *, strokeWidth: *, weight: *, strokeOpacity: *, strokeLinecap: string, fill: *, fillColor: *, fillOpacity: *, dashArray: (*|string|string|string)}}
+ * @private
+ */
 var _extractFeatureStyle = function (feature) {
     var options = feature.options;
 
@@ -3092,6 +3638,13 @@ var _extractFeatureStyle = function (feature) {
     };
 };
 
+/**
+ *
+ * @param crs
+ * @param coords
+ * @returns {*}
+ * @private
+ */
 var _projectCoords = function (crs, coords) {
     var crsKey = crs.toUpperCase().replace(':', ''),
         crsClass = L.CRS[crsKey];
@@ -3104,6 +3657,13 @@ var _projectCoords = function (crs, coords) {
     return coords;
 };
 
+/**
+ *
+ * @param crsClass
+ * @param coords
+ * @returns {*}
+ * @private
+ */
 var _project = function (crsClass, coords) {
     var projected,
         pt,
@@ -3126,9 +3686,32 @@ var _project = function (crsClass, coords) {
 };
 
 },{}],23:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var anchor;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var pushState;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -3142,10 +3725,44 @@ module.exports = module.exports = {
     }
 };
 },{}],24:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
 var db = urlparser.db;
+
+/**
+ * @type {string}
+ */
 var schema = urlparser.schema;
+
+/**
+ *
+ * @type {boolean}
+ */
 var ready = false;
+
+/**
+ * @type {array}
+ */
+var extent;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, ready: module.exports.ready}}
+ */
 module.exports = {
     set: function () {
     },
@@ -3164,19 +3781,72 @@ module.exports = {
             }
         }); // Ajax call end
     },
+
+    /**
+     * Checks is settings are loaded and ready
+     * @returns {boolean}
+     */
     ready: function(){
         return ready;
+    },
+
+    /**
+     *
+     * @returns {array}
+     */
+    getExtent: function(){
+        return extent;
     }
 };
 },{"./urlparser":28}],25:[function(require,module,exports){
-var urlparser = require('./urlparser');
-var db = urlparser.db;
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
+var db = urlparser.db;
+
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -3352,6 +4022,11 @@ module.exports = {
             qstore[index].load();
         });
     },
+
+    /**
+     *
+     * @param qstore {array}
+     */
     reset: function (qstore) {
         $.each(qstore, function (index, store) {
             store.abort();
@@ -3365,21 +4040,90 @@ module.exports = {
 
 
 },{"../../config/config.js":30,"./height":13,"./urlparser":28}],26:[function(require,module,exports){
-var urlparser = require('./urlparser');
-var hash = urlparser.hash;
-var urlVars = urlparser.urlVars;
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setting;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var switchLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
+var hash = urlparser.hash;
+
+/**
+ * @type {array}
+ */
+var urlVars = urlparser.urlVars;
+
+/**
+ *
+ * @type {LZString|exports|module.exports}
+ */
 var lz = require('lz-string');
+
+/**
+ *
+ * @type {exports|module.exports}
+ */
 var base64 = require('base64-url');
+
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -3418,6 +4162,7 @@ module.exports = {
                     legend.init();
                 } else {
                     setBaseLayer.init(window.setBaseLayers[0].id);
+                    var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
                             cloud.map.fitBounds(extent);
@@ -3626,10 +4371,41 @@ module.exports = {
     }
 };
 },{"../../config/config.js":30,"./urlparser":28,"base64-url":32,"lz-string":37}],27:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var anchor;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var pushState;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -3640,8 +4416,6 @@ module.exports = module.exports = {
     },
     init: function (name, visible, doNotLegend) {
         var el = $('*[data-gc2-id="' + name + '"]');
-
-
         if (visible) {
             try {
                 cloud.showLayer(name);
@@ -3653,20 +4427,15 @@ module.exports = module.exports = {
             cloud.hideLayer(name);
             el.prop('checked', false);
         }
-
         var siblings = el.parents(".accordion-body").find("input");
-
         var c = 0;
         $.each(siblings, function (i, v) {
             if (v.checked) {
                 c = c + 1;
             }
-
         });
         el.parents(".panel").find("span:eq(0)").html(c);
-
         pushState.init();
-
         if (!doNotLegend) {
             legend.init();
 
@@ -3677,7 +4446,22 @@ module.exports = module.exports = {
 
 
 },{}],28:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {string}
+ */
 var uri = geocloud.pathName;
+
+/**
+ *
+ * @type {{hostname: *, hash: string, db: *, schema: *, urlVars: *}}
+ */
 module.exports = {
     hostname: geocloud_host,
     hash: decodeURIComponent(geocloud.urlHash),
@@ -3686,12 +4470,29 @@ module.exports = {
     urlVars: geocloud.urlVars
 }
 },{}],29:[function(require,module,exports){
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, getZone: module.exports.getZone}}
+ */
 module.exports = {
     set: function (o) {
         return this;
     },
     init: function () {
     },
+    /**
+     * Get the UTM zone from lat/lon
+     * @param lat
+     * @param lng
+     * @returns {number}
+     */
     getZone: function (lat, lng) {
         // Get the UTM zone
         var zoneNumber = Math.floor((lng + 180) / 6) + 1;
@@ -3719,8 +4520,8 @@ module.exports = {
 };
 },{}],30:[function(require,module,exports){
 module.exports = {
-    backend: "gc2",
-    //backend: "cartodb",
+    //backend: "gc2",
+    backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

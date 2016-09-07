@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var urlparser = require('./urlparser');
 var cloud;
 var advancedInfo;
@@ -8,6 +15,10 @@ var sqlQuery;
 var qstore = [];
 var active = true;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset, active: module.exports.active}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -41,9 +52,17 @@ module.exports = {
             }
         });
     },
+    /**
+     *
+     */
     reset: function(){
         sqlQuery.reset(qstore);
     },
+
+    /**
+     *
+     * @param a {boolean}
+     */
     active: function(a){
         active = a;
     }

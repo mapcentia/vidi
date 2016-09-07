@@ -1,9 +1,20 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 try {
     geocloud.setHost(require('../../config/config.js').gc2.host);
 } catch (e){
     console.info(e.message);
 }
 
+/**
+ *
+ * @type {geocloud.map}
+ */
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
@@ -17,6 +28,9 @@ cloud.map.on('load', function(){ if ($(document).width() > 767 ) {
     );
 }});
 
+/**
+ *
+ */
 var zoomControl = L.control.zoom({
     position: 'topright'
 });
@@ -29,6 +43,9 @@ var map = cloud.map;
 /*var scaleControl = L.control.scale({position: "bottomright"});
  cloud.map.addControl(scaleControl);*/
 
+/**
+ *
+ */
 var lc = L.control.locate({
     position: 'topright',
     strings: {
@@ -38,6 +55,9 @@ var lc = L.control.locate({
     iconLoading: "fa fa-circle-o-notch fa-spin"
 }).addTo(map);
 
+/**
+ *
+ */
 var graphicScale = L.control.graphicScale({
     doubleLine: false,
     fill: 'hollow',
@@ -45,10 +65,17 @@ var graphicScale = L.control.graphicScale({
     position: "topleft"
 }).addTo(map);
 
+/**
+ *
+ * @type {div}
+ */
 var scaleText = L.DomUtil.create('div', 'scaleText');
 graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
 //scaleText.innerHTML = '<h1>Leaflet Graphic Scale</h1><p>style: <span class="choice">hollow</span>-<span class="choice">line</span>-<span class="choice">fill</span>-<span class="choice">nofill</span></p>';
 
+/**
+ *
+ */
 var styleChoices = scaleText.querySelectorAll('.choice');
 
 for (var i = 0; i < styleChoices.length; i++) {
@@ -57,6 +84,9 @@ for (var i = 0; i < styleChoices.length; i++) {
     });
 }
 
+/**
+ *
+ */
 var measureControl = new L.Control.Measure({
     position: 'topright',
     primaryLengthUnit: 'kilometers',
@@ -67,5 +97,4 @@ var measureControl = new L.Control.Measure({
 
 });
 measureControl.addTo(map);
-
 module.exports = cloud;

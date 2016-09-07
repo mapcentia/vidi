@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var drawOn = false;
 var drawnItems = new L.FeatureGroup();
@@ -10,6 +17,11 @@ var destructFunctions = [];
 var editPopUp;
 var infoClick;
 
+/**
+ * @private
+ * @param e
+ * @returns {string}
+ */
 var getDistance = function (e) {
     var tempLatLng = null;
     var totalDistance = 0.00000;
@@ -24,10 +36,19 @@ var getDistance = function (e) {
     return L.GeometryUtil.readableDistance(totalDistance, true);
 };
 
+/**
+ * @private
+ * @param e
+ * @returns {string}
+ */
 var getArea = function (e) {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getDrawOn: module.exports.getDrawOn, getLayer: module.exports.getLayer, getTable: module.exports.getTable, setDestruct: module.exports.setDestruct}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -229,15 +250,35 @@ module.exports = {
             }
         }());
     },
+
+    /**
+     *
+     * @returns {boolean}
+     */
     getDrawOn: function () {
         return drawOn;
     },
+
+    /**
+     *
+     * @returns {L.FeatureGroup|*}
+     */
     getLayer: function () {
         return store.layer;
     },
+
+    /**
+     *
+     * @returns {gc2table}
+     */
     getTable: function () {
         return table;
     },
+
+    /**
+     *
+     * @param f {string}
+     */
     setDestruct: function (f) {
         destructFunctions.push(f);
     }

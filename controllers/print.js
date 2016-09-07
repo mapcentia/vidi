@@ -4,8 +4,11 @@ var http = require('http');
 var fs = require('fs');
 var wkhtmltopdf = require('wkhtmltopdf');
 
+/**
+ *
+ * @type {module.exports.print|{templates, scales}}
+ */
 var config = require('../config/config.js').print;
-
 
 router.post('/api/print', function (req, response) {
     var q = req.body;

@@ -1,25 +1,105 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var sqlQuery;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var infoClick;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var reproject = require('reproject');
+
+/**
+ *
+ * @type {_|exports|module.exports}
+ * @private
+ */
 var _ = require('underscore');
+
+/**
+ *
+ * @type {exports|module.exports}
+ */
 var jsts = require('jsts');
+
+/**
+ *
+ * @type {boolean}
+ */
 var searchOn = false;
+
+/**
+ *
+ * @type {L.FeatureGroup}
+ */
 var drawnItems = new L.FeatureGroup();
+
+/**
+ *
+ * @type {L.FeatureGroup}
+ */
 var bufferItems = new L.FeatureGroup();
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var drawControl;
+
+/**
+ *
+ * @type {Array}
+ */
 var qstore = [];
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var noUiSlider = require('nouislider');
+
+/**
+ *
+ * @type {Element}
+ */
 var bufferSlider = document.getElementById('buffer-slider');
+
+/**
+ *
+ * @type {Element}
+ */
 var bufferValue = document.getElementById('buffer-value');
 
-var clearDrawItems = function () {
+/**
+ *
+ * @private
+ */
+var _clearDrawItems = function () {
     drawnItems.clearLayers();
     bufferItems.clearLayers();
     sqlQuery.reset(qstore);
 };
 
-var makeSearch = function () {
+/**
+ *
+ * @private
+ */
+var _makeSearch = function () {
     var primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
 
@@ -36,7 +116,6 @@ var makeSearch = function () {
         }
     }
     primitive = layer.toGeoJSON();
-
     if (primitive) {
         if (typeof layer.getBounds !== "undefined") {
             coord = layer.getBounds().getSouthWest();
@@ -66,7 +145,16 @@ var makeSearch = function () {
     }
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getSearchOn: module.exports.getSearchOn, getDrawLayer: module.exports.getDrawLayer, getBufferLayer: module.exports.getBufferLayer}}
+ */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
@@ -75,6 +163,9 @@ module.exports = {
         cloud.map.addLayer(bufferItems);
         return this;
     },
+    /**
+     *
+     */
     control: function () {
         if (!searchOn) {
             $("#buffer").show();
@@ -127,42 +218,37 @@ module.exports = {
 
             cloud.map.addControl(drawControl);
             searchOn = true;
-
             // Unbind events
             cloud.map.off('draw:created');
             cloud.map.off('draw:drawstart');
             cloud.map.off('draw:drawstop');
             cloud.map.off('draw:editstart');
-
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
                 drawnItems.addLayer(e.layer);
             });
             cloud.map.on('draw:drawstart', function (e) {
-                clearDrawItems();
+                _clearDrawItems();
             });
             cloud.map.on('draw:drawstop', function (e) {
-                makeSearch();
+                _makeSearch();
             });
             cloud.map.on('draw:editstop', function (e) {
-                makeSearch();
+                _makeSearch();
             });
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
-
             var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use the tools for querying the maps"), placement: "left"});
             po.popover("show");
             setTimeout(function(){
                 po.popover("hide");
             }, 2500)
-
         } else {
             // Clean up
             console.log("Stoping advanced search");
-            clearDrawItems();
-
+            _clearDrawItems();
             // Unbind events
             cloud.map.off('draw:created');
             cloud.map.off('draw:drawstart');
@@ -173,7 +259,10 @@ module.exports = {
             $("#buffer").hide();
         }
     },
-    init: function (str) {
+    /**
+     *
+     */
+    init: function () {
         try {
             noUiSlider.create(bufferSlider, {
                 start: 40,
@@ -184,12 +273,11 @@ module.exports = {
                     max: 500
                 }
             });
-
             bufferSlider.noUiSlider.on('update', _.debounce(function (values, handle) {
                 bufferValue.value = values[handle];
                 if (typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]] !== "undefined" && typeof bufferItems._layers[Object.keys(bufferItems._layers)[0]]._leaflet_id !== "undefined") {
                     bufferItems.clearLayers();
-                    makeSearch()
+                    _makeSearch()
                 }
             }, 300));
 
@@ -202,12 +290,24 @@ module.exports = {
             console.info(e.message);
         }
     },
+    /**
+     *
+     * @returns {boolean}
+     */
     getSearchOn: function () {
         return searchOn;
     },
+    /**
+     *
+     * @returns {L.FeatureGroup}
+     */
     getDrawLayer: function () {
         return drawnItems;
     },
+    /**
+     *
+     * @returns {L.FeatureGroup}
+     */
     getBufferLayer: function () {
         return bufferItems;
     }

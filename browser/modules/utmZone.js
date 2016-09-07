@@ -1,9 +1,26 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, getZone: module.exports.getZone}}
+ */
 module.exports = {
     set: function (o) {
         return this;
     },
     init: function () {
     },
+    /**
+     * Get the UTM zone from lat/lon
+     * @param lat
+     * @param lng
+     * @returns {number}
+     */
     getZone: function (lat, lng) {
         // Get the UTM zone
         var zoneNumber = Math.floor((lng + 180) / 6) + 1;

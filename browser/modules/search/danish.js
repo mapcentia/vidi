@@ -1,6 +1,26 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {module.exports.searchConfig|{komkode}}
+ */
 var config = require('../../../config/config.js').searchConfig;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;

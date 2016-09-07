@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var baseLayer;
 var meta;

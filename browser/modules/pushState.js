@@ -1,7 +1,35 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var anchor;
+
+/**
+ *
+ * @type {boolean}
+ */
 var first = true;
+
+/**
+ * @type {int}
+ */
 var t;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         meta = o.meta;

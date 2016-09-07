@@ -1,31 +1,80 @@
-/*
- * Copyright 2016 MapCentia ApS. All rights reserved.
- *
- * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.gnu.org/licenses/agpl-3.0.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
  */
 
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var print;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var switchLayer;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ *
+ * @type {array}
+ */
 var metaDataKeys;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
+
+/**
+ *
+ * @type {array}
+ */
 var urlVars = urlparser.urlVars;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         draw = o.draw;
@@ -73,7 +122,6 @@ module.exports = module.exports = {
             $("#info-modal").hide();
         });
 
-
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
@@ -84,7 +132,6 @@ module.exports = module.exports = {
                     e.stopPropagation();
                 });
             });
-
             $(document).arrive('[data-gc2-base-id]', function () {
                 console.log("Bind base");
                 $(this).on("click", function (e) {
@@ -94,7 +141,6 @@ module.exports = module.exports = {
                 });
 
             });
-
             $(document).arrive('.info-label', function () {
                 console.log("Bind info");
                 $(this).on("click", function (e) {

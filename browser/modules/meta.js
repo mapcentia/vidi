@@ -1,18 +1,8 @@
-/*
- * Copyright 2016 MapCentia ApS. All rights reserved.
- *
- * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   https://www.gnu.org/licenses/agpl-3.0.html
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
  */
+
 'use strict';
 
 /**
@@ -20,59 +10,72 @@
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./urlparser');
+
 /**
  * @type {string}
  */
 var db = urlparser.db;
+
 /**
  * @type {string}
  */
 var schema = urlparser.schema;
+
 /**
  * @type {string}
  */
 var urlVars = urlparser.urlVars;
+
 /**
  *
  * @type {Array}
  */
 var metaDataKeys = [];
+
 /**
  *
  * @type {Array}
  */
 var metaDataKeysTitle = [];
+
 /**
- * @type {object}
+ * @type {Object}
  */
 var cloud;
+
 /**
  * @type {object}
  */
 var switchLayer;
+
 /**
  * @type {object}
  */
 var setBaseLayer;
+
 /**
  *
  * @type {boolean}
  */
 var ready = false;
+
 /**
  *
  * @type {boolean}
  */
 var cartoDbLayersready = false;
+
 /**
  *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
+
 /**
  * @type {string}
  */
 var host;
+
 /**
  * @type {object}
  */
@@ -83,6 +86,7 @@ try {
 } catch (e) {
     console.info(e.message);
 }
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
@@ -185,7 +189,7 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    //displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                     $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
@@ -205,6 +209,7 @@ module.exports = {
             }
         }); // Ajax call end
     },
+
     /**
      * Get the meta data in an array with schema.relation as key.
      * @returns {Array}
@@ -212,6 +217,7 @@ module.exports = {
     getMetaDataKeys: function () {
         return metaDataKeys;
     },
+
     /**
      * Check if metadata and layer are ready.
      * @returns {boolean}

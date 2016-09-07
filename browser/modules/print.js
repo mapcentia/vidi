@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
 var cloud;
 var printOn = false;
 var recEdit;
@@ -12,14 +19,16 @@ var db = urlparser.db;
 var schema = urlparser.schema;
 var scale;
 var center;
-config = require('../../config/config.js');
-
+var config = require('../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
 var tmpl;
 var pageSize;
 var orientation;
 
+/**
+ * @private
+ */
 var cleanUp = function () {
     try {
         cloud.map.removeLayer(recScale);
@@ -29,6 +38,10 @@ var cleanUp = function () {
     printOn = false;
 };
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, activate: module.exports.activate, print: module.exports.print, control: module.exports.control}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -40,6 +53,10 @@ module.exports = {
     init: function () {
         // pass
     },
+
+    /**
+     *
+     */
     activate: function () {
         if (!printOn) {
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
@@ -132,6 +149,10 @@ module.exports = {
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
         }
     },
+
+    /**
+     *
+     */
     print: function () {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
         try {
@@ -250,6 +271,10 @@ module.exports = {
             }
         });
     },
+
+    /**
+     *
+     */
     control: function () {
         if (!printOn) {
             printOn = true;

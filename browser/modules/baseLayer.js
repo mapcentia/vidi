@@ -1,10 +1,33 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         return this;
     },
-    init: function (str) {
+    /**
+     *
+     */
+    init: function () {
         var bl, customBaseLayer;
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [

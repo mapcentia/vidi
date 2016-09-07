@@ -1,12 +1,57 @@
-var urlparser = require('./urlparser');
-var db = urlparser.db;
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
+var db = urlparser.db;
+
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
+ */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
@@ -14,6 +59,13 @@ module.exports = {
         advancedInfo = o.advancedInfo;
         return this;
     },
+
+    /**
+     *
+     * @param qstore {array}
+     * @param wkt {string}
+     * @param proj {string}
+     */
     init: function (qstore, wkt, proj) {
         var layers, count = 0, hit = false, distance;
         var metaDataKeys = meta.getMetaDataKeys();
@@ -181,6 +233,11 @@ module.exports = {
             qstore[index].load();
         });
     },
+
+    /**
+     * Resets all stores in qstore
+     * @param qstore {array}
+     */
     reset: function (qstore) {
         $.each(qstore, function (index, store) {
             store.abort();

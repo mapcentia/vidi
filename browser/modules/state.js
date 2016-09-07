@@ -1,18 +1,87 @@
-var urlparser = require('./urlparser');
-var hash = urlparser.hash;
-var urlVars = urlparser.urlVars;
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setting;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var switchLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var draw;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
+var hash = urlparser.hash;
+
+/**
+ * @type {array}
+ */
+var urlVars = urlparser.urlVars;
+
+/**
+ *
+ * @type {LZString|exports|module.exports}
+ */
 var lz = require('lz-string');
+
+/**
+ *
+ * @type {exports|module.exports}
+ */
 var base64 = require('base64-url');
+
+/**
+ *
+ * @type {string}
+ */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -51,6 +120,7 @@ module.exports = {
                     legend.init();
                 } else {
                     setBaseLayer.init(window.setBaseLayers[0].id);
+                    var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
                             cloud.map.fitBounds(extent);

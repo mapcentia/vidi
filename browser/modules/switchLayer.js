@@ -1,7 +1,38 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var legend;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var anchor;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var pushState;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -12,8 +43,6 @@ module.exports = module.exports = {
     },
     init: function (name, visible, doNotLegend) {
         var el = $('*[data-gc2-id="' + name + '"]');
-
-
         if (visible) {
             try {
                 cloud.showLayer(name);
@@ -25,20 +54,15 @@ module.exports = module.exports = {
             cloud.hideLayer(name);
             el.prop('checked', false);
         }
-
         var siblings = el.parents(".accordion-body").find("input");
-
         var c = 0;
         $.each(siblings, function (i, v) {
             if (v.checked) {
                 c = c + 1;
             }
-
         });
         el.parents(".panel").find("span:eq(0)").html(c);
-
         pushState.init();
-
         if (!doNotLegend) {
             legend.init();
 

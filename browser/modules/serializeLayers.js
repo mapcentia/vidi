@@ -1,4 +1,18 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var cloud;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init, serialize: module.exports.serialize}}
+ */
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
@@ -23,6 +37,12 @@ module.exports = module.exports = {
     }
 };
 
+/**
+ *
+ * @param map
+ * @returns {Array}
+ * @private
+ */
 var _encodeLayers = function (map) {
     var enc = [],
         vectors = [],
@@ -51,6 +71,12 @@ var _encodeLayers = function (map) {
     }
     return enc;
 };
+
+/**
+ *
+ * @type {{layers: {httprequest: _encoders.layers.httprequest, tilelayer: _encoders.layers.tilelayer, tilelayerwms: _encoders.layers.tilelayerwms, tilelayermapbox: _encoders.layers.tilelayermapbox, image: _encoders.layers.image, vector: _encoders.layers.vector}}}
+ * @private
+ */
 var _encoders = {
     layers: {
         httprequest: function (layer) {
@@ -266,6 +292,12 @@ var _encoders = {
     }
 };
 
+/**
+ *
+ * @param map
+ * @returns {Array.<T>}
+ * @private
+ */
 var _getLayers = function (map) {
     var markers = [],
         vectors = [],
@@ -333,6 +365,12 @@ var _getLayers = function (map) {
     return tiles.concat(vectors).concat(imageOverlays).concat(markers);
 };
 
+/**
+ *
+ * @param url
+ * @returns {*}
+ * @private
+ */
 var _getAbsoluteUrl = function (url) {
     var a;
 
@@ -349,6 +387,12 @@ var _getAbsoluteUrl = function (url) {
     return a.href;
 };
 
+/**
+ *
+ * @param circle
+ * @returns {*}
+ * @private
+ */
 var _circleGeoJSON = function (circle) {
     var projection = circle._map.options.crs.projection;
     var earthRadius = 1, i;
@@ -369,6 +413,12 @@ var _circleGeoJSON = function (circle) {
     return L.polygon(points).toGeoJSON();
 };
 
+/**
+ *
+ * @param feature
+ * @returns {{color: *, stroke: (*|stroke|{color, width}|boolean), strokeColor: *, strokeWidth: *, weight: *, strokeOpacity: *, strokeLinecap: string, fill: *, fillColor: *, fillOpacity: *, dashArray: (*|string|string|string)}}
+ * @private
+ */
 var _extractFeatureStyle = function (feature) {
     var options = feature.options;
 
@@ -387,6 +437,13 @@ var _extractFeatureStyle = function (feature) {
     };
 };
 
+/**
+ *
+ * @param crs
+ * @param coords
+ * @returns {*}
+ * @private
+ */
 var _projectCoords = function (crs, coords) {
     var crsKey = crs.toUpperCase().replace(':', ''),
         crsClass = L.CRS[crsKey];
@@ -399,6 +456,13 @@ var _projectCoords = function (crs, coords) {
     return coords;
 };
 
+/**
+ *
+ * @param crsClass
+ * @param coords
+ * @returns {*}
+ * @private
+ */
 var _project = function (crsClass, coords) {
     var projected,
         pt,
