@@ -491,7 +491,6 @@ var _makeSearch = function () {
         }
     }
     primitive = layer.toGeoJSON();
-
     if (primitive) {
         if (typeof layer.getBounds !== "undefined") {
             coord = layer.getBounds().getSouthWest();
@@ -625,7 +624,6 @@ module.exports = {
             // Clean up
             console.log("Stoping advanced search");
             _clearDrawItems();
-
             // Unbind events
             cloud.map.off('draw:created');
             cloud.map.off('draw:drawstart');
@@ -2527,7 +2525,7 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    //displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                     $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
@@ -3791,7 +3789,7 @@ module.exports = {
     },
 
     /**
-     *
+     * Get the saved extent from the first schema or viz
      * @returns {array}
      */
     getExtent: function(){
@@ -3848,6 +3846,11 @@ var BACKEND = require('../../config/config.js').backend;
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
  */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
@@ -3855,6 +3858,13 @@ module.exports = {
         advancedInfo = o.advancedInfo;
         return this;
     },
+
+    /**
+     *
+     * @param qstore {array}
+     * @param wkt {string}
+     * @param proj {string}
+     */
     init: function (qstore, wkt, proj) {
         var layers, count = 0, hit = false, distance;
         var metaDataKeys = meta.getMetaDataKeys();
@@ -4024,7 +4034,7 @@ module.exports = {
     },
 
     /**
-     *
+     * Resets all stores in qstore
      * @param qstore {array}
      */
     reset: function (qstore) {
@@ -4520,8 +4530,8 @@ module.exports = {
 };
 },{}],30:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
