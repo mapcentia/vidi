@@ -63,7 +63,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
-    grunt.loadNpmTasks('grunt-npm-install');
 
     grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
     grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell']);
