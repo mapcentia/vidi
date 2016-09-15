@@ -4622,21 +4622,6 @@ module.exports = {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
-    cartodb: {
-        db: "mhoegh",
-        baseLayers: [
-            {
-                type: "XYZ",
-                url: "http://54.229.79.223/v2/Teknisk_baggrundskort/{z}/{x}/{y}.png",
-                id: "Tekniskkort",
-                name: "Tekniskkort",
-                description: "Tekniskkort FOT",
-                attribution: "Frederiksberg Kommune"
-            },
-            {"id": "osm", "name": "OSM"},
-            {"id": "stamenToner", "name": "Stamen Toner"}
-        ]
-    },
     print: {
         templates: {
             "print": {
@@ -4665,10 +4650,8 @@ module.exports = {
         scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
     searchModule: "google",
-    searchConfig: {
-        komkode: "147"
-    },
-    extensions: {
+
+    _extensions: {
         _browser: [{cowiDetail: ["bufferSearch"]}],
         _server: [{cowiDetail: ["bufferSearch"]}]
     },
