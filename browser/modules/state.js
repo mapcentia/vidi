@@ -23,6 +23,11 @@ var setting;
 /**
  * @type {*|exports|module.exports}
  */
+var baseLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
 
 /**
@@ -83,11 +88,17 @@ var BACKEND = require('../../config/config.js').backend;
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
         setting = o.setting;
         setBaseLayer = o.setBaseLayer;
+        baseLayer = o.baseLayer;
         switchLayer = o.switchLayer;
         legend = o.legend;
         draw = o.draw;
@@ -119,7 +130,8 @@ module.exports = {
                     }
                     legend.init();
                 } else {
-                    setBaseLayer.init(window.setBaseLayers[0].id);
+                    // Set base layer to the first added one.
+                    setBaseLayer.init(baseLayer.getBaseLayer()[0]);
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
@@ -151,7 +163,10 @@ module.exports = {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
-                            // Recreate print
+
+                            /**
+                             * Recreate print
+                             */
                             if (response.data.print !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.print;
@@ -184,16 +199,15 @@ module.exports = {
                                                 parr.pop();
                                             }
                                             $("#comment").html(decodeURI(parr.join()));
-                                            // Check
-                                            var mwidth = midLeft.distanceTo(midRight);
-                                            var mscale = mwidth * 1000 / 297;
                                             cloud.map.removeLayer(g);
                                         }, 300)
                                     }
                                 });
                             }
 
-                            // Recreate Drawings
+                            /**
+                             * Recreate Drawings
+                             */
                             if (response.data.draw !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.draw;
@@ -233,7 +247,9 @@ module.exports = {
                                 draw.control();
                             }
 
-                            // Recreate query draw
+                            /**
+                             * Recreate query draw
+                             */
                             if (response.data.queryDraw !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryDraw;
@@ -269,7 +285,9 @@ module.exports = {
                                 });
                             }
 
-                            // Recreate query buffer
+                            /**
+                             * Recreate query buffer
+                             */
                             if (response.data.queryBuffer !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryBuffer;
@@ -290,7 +308,9 @@ module.exports = {
                                 });
                             }
 
-                            // Recreate result
+                            /**
+                             * Recreate result
+                             */
                             if (response.data.queryResult !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryResult;

@@ -39,7 +39,6 @@ module.exports = {
     },
     init: function () {
         bindEvent.init();
-
         meta.init();
         baseLayer.init();
         setting.init();

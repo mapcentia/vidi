@@ -774,6 +774,12 @@ var cloud;
 var urlparser;
 
 /**
+ * List with base layers added to the map. Can be got through API.
+ * @type {Array}
+ */
+var baseLayers = []
+
+/**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
@@ -792,9 +798,8 @@ module.exports = module.exports = {
      *
      */
     init: function () {
-        var bl, customBaseLayer, schemas = [];
+        var bl, customBaseLayer, schemas;
         schemas = urlparser.schema.split(",");
-        console.log(schemas)
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
                 {"id": "mapQuestOSM", "name": "MapQuset OSM"},
@@ -820,16 +825,26 @@ module.exports = module.exports = {
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;
                 cloud.addLayer(customBaseLayer, bl.name, true);
+                baseLayers.push(bl.id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
-            } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.indexOf(schemas) > -1) {
+            } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.filter(function(n) {return schemas.indexOf(n) != -1;}).length > 0) {
                 cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
+                baseLayers.push(window.setBaseLayers[i].id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             }
         }
+    },
+
+    /**
+     * Get the added base layer ids.
+     * @returns {Array}
+     */
+    getBaseLayer: function(){
+        return baseLayers;
     }
 };
 },{}],7:[function(require,module,exports){
@@ -966,14 +981,12 @@ module.exports = module.exports = {
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
-                console.log("Bind layer");
                 $(this).change(function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
                     e.stopPropagation();
                 });
             });
             $(document).arrive('[data-gc2-base-id]', function () {
-                console.log("Bind base");
                 $(this).on("click", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
@@ -982,7 +995,6 @@ module.exports = module.exports = {
 
             });
             $(document).arrive('.info-label', function () {
-                console.log("Bind info");
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id'));
                     $("#info-modal").show();
@@ -2265,7 +2277,6 @@ module.exports = {
     },
     init: function () {
         bindEvent.init();
-
         meta.init();
         baseLayer.init();
         setting.init();
@@ -2589,7 +2600,7 @@ module.exports = {
                                 if (j < tmpData.length) {
                                     iter();
                                 } else {
-                                    cartoDbLayersready = true; // CartoDB layer are now created
+                                    cartoDbLayersready = true; // CartoDB layers are now created
                                     return null;
                                 }
                             });
@@ -2636,7 +2647,7 @@ module.exports = {
     },
 
     /**
-     * Get the meta data in an array with schema.relation as key.
+     * Get the meta data in an array with schema.relation as index keys.
      * @returns {Array}
      */
     getMetaDataKeys: function () {
@@ -2644,7 +2655,7 @@ module.exports = {
     },
 
     /**
-     * Check if metadata and layer are ready.
+     * Check if metadata and layers are ready.
      * @returns {boolean}
      */
     ready: function () {
@@ -4164,6 +4175,11 @@ var setting;
 /**
  * @type {*|exports|module.exports}
  */
+var baseLayer;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var setBaseLayer;
 
 /**
@@ -4224,11 +4240,17 @@ var BACKEND = require('../../config/config.js').backend;
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
         setting = o.setting;
         setBaseLayer = o.setBaseLayer;
+        baseLayer = o.baseLayer;
         switchLayer = o.switchLayer;
         legend = o.legend;
         draw = o.draw;
@@ -4260,7 +4282,8 @@ module.exports = {
                     }
                     legend.init();
                 } else {
-                    setBaseLayer.init(window.setBaseLayers[0].id);
+                    // Set base layer to the first added one.
+                    setBaseLayer.init(baseLayer.getBaseLayer()[0]);
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
@@ -4292,7 +4315,10 @@ module.exports = {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
-                            // Recreate print
+
+                            /**
+                             * Recreate print
+                             */
                             if (response.data.print !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.print;
@@ -4325,16 +4351,15 @@ module.exports = {
                                                 parr.pop();
                                             }
                                             $("#comment").html(decodeURI(parr.join()));
-                                            // Check
-                                            var mwidth = midLeft.distanceTo(midRight);
-                                            var mscale = mwidth * 1000 / 297;
                                             cloud.map.removeLayer(g);
                                         }, 300)
                                     }
                                 });
                             }
 
-                            // Recreate Drawings
+                            /**
+                             * Recreate Drawings
+                             */
                             if (response.data.draw !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.draw;
@@ -4374,7 +4399,9 @@ module.exports = {
                                 draw.control();
                             }
 
-                            // Recreate query draw
+                            /**
+                             * Recreate query draw
+                             */
                             if (response.data.queryDraw !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryDraw;
@@ -4410,7 +4437,9 @@ module.exports = {
                                 });
                             }
 
-                            // Recreate query buffer
+                            /**
+                             * Recreate query buffer
+                             */
                             if (response.data.queryBuffer !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryBuffer;
@@ -4431,7 +4460,9 @@ module.exports = {
                                 });
                             }
 
-                            // Recreate result
+                            /**
+                             * Recreate result
+                             */
                             if (response.data.queryResult !== null) {
                                 GeoJsonAdded = false;
                                 parr = response.data.queryResult;
@@ -4624,8 +4655,8 @@ module.exports = {
 };
 },{}],30:[function(require,module,exports){
 module.exports = {
-    backend: "gc2",
-    //backend: "cartodb",
+    //backend: "gc2",
+    backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

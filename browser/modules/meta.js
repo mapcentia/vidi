@@ -164,7 +164,7 @@ module.exports = {
                                 if (j < tmpData.length) {
                                     iter();
                                 } else {
-                                    cartoDbLayersready = true; // CartoDB layer are now created
+                                    cartoDbLayersready = true; // CartoDB layers are now created
                                     return null;
                                 }
                             });
@@ -211,7 +211,7 @@ module.exports = {
     },
 
     /**
-     * Get the meta data in an array with schema.relation as key.
+     * Get the meta data in an array with schema.relation as index keys.
      * @returns {Array}
      */
     getMetaDataKeys: function () {
@@ -219,7 +219,7 @@ module.exports = {
     },
 
     /**
-     * Check if metadata and layer are ready.
+     * Check if metadata and layers are ready.
      * @returns {boolean}
      */
     ready: function () {

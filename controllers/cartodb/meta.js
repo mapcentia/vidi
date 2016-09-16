@@ -52,7 +52,8 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                         cartocss: layers[i].options.cartocss,
                         layergroup: JSON.parse(jsfile).title,
                         fieldconf: null,
-                        legend: layers[i].legend
+                        legend: layers[i].legend,
+                        meta: null
 
                     })
                 }

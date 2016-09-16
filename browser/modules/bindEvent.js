@@ -131,14 +131,12 @@ module.exports = module.exports = {
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
-                console.log("Bind layer");
                 $(this).change(function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
                     e.stopPropagation();
                 });
             });
             $(document).arrive('[data-gc2-base-id]', function () {
-                console.log("Bind base");
                 $(this).on("click", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
@@ -147,7 +145,6 @@ module.exports = module.exports = {
 
             });
             $(document).arrive('.info-label', function () {
-                console.log("Bind info");
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id'));
                     $("#info-modal").show();
