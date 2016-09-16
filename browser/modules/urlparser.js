@@ -20,4 +20,4 @@ module.exports = {
     db: uri[2],
     schema: uri[3],
     urlVars: geocloud.urlVars
-}
+};

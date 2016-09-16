@@ -103,6 +103,7 @@ window.Vidi = function () {
     // Require the standard modules
     var modules = {
         init: require('./modules/init'),
+        urlparser: require('./modules/urlparser'),
         cloud: require('./modules/cloud'),
         switchLayer: require('./modules/switchLayer'),
         setBaseLayer: require('./modules/setBaseLayer'),
