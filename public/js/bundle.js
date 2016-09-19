@@ -2625,7 +2625,7 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    displayInfo = (response.data[u].meta !== null && $.parseJSON(response.data[u].meta) !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                     $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
@@ -4049,8 +4049,11 @@ module.exports = {
                         openPopUp: true,
                         setViewOnSelect: true,
                         responsive: false,
-                        height: (height > 500) ? 500 : (height < 300) ? 300 : height
+                        callCustomOnload: false,
+                        height: (height > 500) ? 500 : (height < 300) ? 300 : height,
+                        locale: window._vidiLocale.replace("_","-"),
                     });
+                    _table.loadDataInTable();
 
                     // If only one feature is selected, when activate it.
                     if (Object.keys(layerObj.layer._layers).length === 1) {
@@ -4655,8 +4658,8 @@ module.exports = {
 };
 },{}],30:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -4704,12 +4707,12 @@ module.exports = {
         scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
     searchModule: "google",
-    searchConfig: {
+    _searchConfig: {
         komkode: "147"
     },
-    extensions: {
-        _browser: [{cowiDetail: ["bufferSearch"]}],
-        _server: [{cowiDetail: ["bufferSearch"]}]
+    _extensions: {
+        browser: [{cowiDetail: ["bufferSearch"]}],
+        server: [{cowiDetail: ["bufferSearch"]}]
     },
     _template: "cowiDetail.tmpl",
     brandName: "MapCentia"

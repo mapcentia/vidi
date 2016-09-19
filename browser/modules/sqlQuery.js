@@ -150,8 +150,13 @@ module.exports = {
                         openPopUp: true,
                         setViewOnSelect: true,
                         responsive: false,
-                        height: (height > 500) ? 500 : (height < 300) ? 300 : height
+                        callCustomOnload: false,
+                        height: (height > 500) ? 500 : (height < 300) ? 300 : height,
+                        locale: window._vidiLocale.replace("_","-"),
                     });
+
+                    // Here Inside onLoad we call loadDataInTable(), so the table is populated
+                    _table.loadDataInTable();
 
                     // If only one feature is selected, when activate it.
                     if (Object.keys(layerObj.layer._layers).length === 1) {
