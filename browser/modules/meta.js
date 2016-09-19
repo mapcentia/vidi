@@ -189,7 +189,7 @@ module.exports = {
                                     );
                                 }
                                 else {
-                                    displayInfo = (response.data[u].meta !== null && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                                    displayInfo = (typeof response.data[u].meta !== "null" && typeof $.parseJSON(response.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                     $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + response.data[u].f_table_name + '" data-gc2-id="' + response.data[u].f_table_schema + "." + response.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                                     l.push({});
                                 }
