@@ -717,6 +717,7 @@ var urlVars = urlparser.urlVars;
 var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
+var insertParam;
 
 /**
  * @private
@@ -751,8 +752,11 @@ module.exports = {
      * Get the URL anchor for current state
      * @returns {string}
      */
-    getAnchor: function(){
+    getAnchor: function () {
         return anchor();
+    },
+    insertParam: function (key, value) {
+        insertParam(key, value);
     }
 };
 },{"./urlparser":28}],6:[function(require,module,exports){
@@ -840,7 +844,7 @@ module.exports = module.exports = {
     },
 
     /**
-     * Get the added base layer ids.
+     * Get the ids of the added base layer.
      * @returns {Array}
      */
     getBaseLayer: function(){
@@ -1771,6 +1775,7 @@ module.exports = {
 },{}],12:[function(require,module,exports){
 var cloud;
 var infoClick;
+var anchor;
 var draw;
 var circle1, circle2, marker;
 var jsts = require('jsts');
@@ -1781,6 +1786,8 @@ var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
+var urlVars = require('./../../urlparser').urlVars;
+var hostname = "http://127.0.0.1:3000";
 
 var reset = function (s) {
     s.abort();
@@ -1931,6 +1938,7 @@ module.exports = {
         infoClick = o.infoClick;
         draw = o.draw;
         setBaseLayer = o.setBaseLayer;
+        anchor = o.anchor;
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -1964,6 +1972,20 @@ module.exports = {
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItemsMarker);
         cloud.map.addLayer(drawnItemsPolygon);
+
+        /**
+         * Restate search point from URL
+         */
+        if (typeof urlVars.lat !== "undefined") {
+            var latLng = L.latLng(urlVars.lat, urlVars.lng);
+            var awm = L.marker(latLng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+            drawnItemsMarker.addLayer(awm);
+            buffer();
+            setTimeout(function () {
+                $(".fa-circle-thin").removeClass("deactiveBtn");
+                cloud.map.panTo(latLng);
+            }, 300);
+        }
         return this;
     },
     init: function () {
@@ -2080,7 +2102,7 @@ var polygon = function () {
      });*/
 
 };
-var upDatePrintComment = function(){
+var upDatePrintComment = function () {
     $('#main-tabs a[href="#info-content"]').tab('show');
     $("#print-comment").html($("#detail-data-r-container").html() + $("#detail-data-p-container").html());
 };
@@ -2107,6 +2129,7 @@ var createStore = function () {
                     }
                     $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "<br>B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
+
                     if (feature.properties.radius === "500") {
                         $(".r500-val").html(feature.properties.antal)
                     } else {
@@ -2114,6 +2137,8 @@ var createStore = function () {
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
+                        $("#r-url-email a").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "%26lng=" + layer._latlng.lng);
+                        $("#r-url-link a").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng);
                         upDatePrintComment();
                     });
 
@@ -2139,7 +2164,7 @@ var createStore = function () {
     });
 };
 
-},{"jsts":36,"reproject":108}],13:[function(require,module,exports){
+},{"./../../urlparser":28,"jsts":36,"reproject":108}],13:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3094,12 +3119,13 @@ module.exports = module.exports = {
         anchor = o.anchor;
         return this;
     },
-    init: function () {
+    init: function (extra) {
+       // extra = extra ? extra : "";
         // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
             //console.log("State push");
-            history.pushState(null, null, anchor.init());
+            history.pushState(null, null, anchor.init(extra));
             first = false;
         }, t);
     }
@@ -4020,6 +4046,8 @@ module.exports = {
                         });
                         if (first) {
                             $.each(out, function (name, property) {
+                                console.log(property[3]);
+
                                 cm.push({
                                     header: property[2],
                                     dataIndex: property[0],
@@ -4053,6 +4081,8 @@ module.exports = {
                         height: (height > 500) ? 500 : (height < 300) ? 300 : height,
                         locale: window._vidiLocale.replace("_","-"),
                     });
+
+                    // Here Inside onLoad we call loadDataInTable(), so the table is populated
                     _table.loadDataInTable();
 
                     // If only one feature is selected, when activate it.
@@ -4661,8 +4691,8 @@ module.exports = {
     backend: "gc2",
     //backend: "cartodb",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh",
@@ -4710,11 +4740,11 @@ module.exports = {
     _searchConfig: {
         komkode: "147"
     },
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],31:[function(require,module,exports){

@@ -82,7 +82,7 @@ module.exports = module.exports = {
     },
 
     /**
-     * Get the added base layer ids.
+     * Get the ids of the added base layer.
      * @returns {Array}
      */
     getBaseLayer: function(){

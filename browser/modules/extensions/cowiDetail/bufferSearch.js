@@ -1,5 +1,6 @@
 var cloud;
 var infoClick;
+var anchor;
 var draw;
 var circle1, circle2, marker;
 var jsts = require('jsts');
@@ -10,6 +11,8 @@ var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
+var urlVars = require('./../../urlparser').urlVars;
+var hostname = "http://127.0.0.1:3000";
 
 var reset = function (s) {
     s.abort();
@@ -160,6 +163,7 @@ module.exports = {
         infoClick = o.infoClick;
         draw = o.draw;
         setBaseLayer = o.setBaseLayer;
+        anchor = o.anchor;
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -193,6 +197,20 @@ module.exports = {
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItemsMarker);
         cloud.map.addLayer(drawnItemsPolygon);
+
+        /**
+         * Restate search point from URL
+         */
+        if (typeof urlVars.lat !== "undefined") {
+            var latLng = L.latLng(urlVars.lat, urlVars.lng);
+            var awm = L.marker(latLng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+            drawnItemsMarker.addLayer(awm);
+            buffer();
+            setTimeout(function () {
+                $(".fa-circle-thin").removeClass("deactiveBtn");
+                cloud.map.panTo(latLng);
+            }, 300);
+        }
         return this;
     },
     init: function () {
@@ -309,7 +327,7 @@ var polygon = function () {
      });*/
 
 };
-var upDatePrintComment = function(){
+var upDatePrintComment = function () {
     $('#main-tabs a[href="#info-content"]').tab('show');
     $("#print-comment").html($("#detail-data-r-container").html() + $("#detail-data-p-container").html());
 };
@@ -336,6 +354,7 @@ var createStore = function () {
                     }
                     $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "<br>B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
+
                     if (feature.properties.radius === "500") {
                         $(".r500-val").html(feature.properties.antal)
                     } else {
@@ -343,6 +362,8 @@ var createStore = function () {
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
+                        $("#r-url-email a").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "%26lng=" + layer._latlng.lng);
+                        $("#r-url-link a").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng);
                         upDatePrintComment();
                     });
 
