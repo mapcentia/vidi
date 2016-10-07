@@ -362,8 +362,8 @@ var createStore = function () {
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
-                        $("#r-url-email a").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "%26lng=" + layer._latlng.lng);
-                        $("#r-url-link a").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng);
+                        $("#r-url-email").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
+                        $("#r-url-link").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
                         upDatePrintComment();
                     });
 

@@ -717,7 +717,6 @@ var urlVars = urlparser.urlVars;
 var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
-var insertParam;
 
 /**
  * @private
@@ -752,11 +751,8 @@ module.exports = {
      * Get the URL anchor for current state
      * @returns {string}
      */
-    getAnchor: function () {
+    getAnchor: function(){
         return anchor();
-    },
-    insertParam: function (key, value) {
-        insertParam(key, value);
     }
 };
 },{"./urlparser":28}],6:[function(require,module,exports){
@@ -1787,7 +1783,7 @@ var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
-var hostname = "http://127.0.0.1:3000";
+var hostname = "http://cowi-detail.mapcentia.com";
 
 var reset = function (s) {
     s.abort();
@@ -2137,8 +2133,8 @@ var createStore = function () {
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
-                        $("#r-url-email a").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "%26lng=" + layer._latlng.lng);
-                        $("#r-url-link a").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng);
+                        $("#r-url-email").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
+                        $("#r-url-link").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
                         upDatePrintComment();
                     });
 
@@ -3119,13 +3115,12 @@ module.exports = module.exports = {
         anchor = o.anchor;
         return this;
     },
-    init: function (extra) {
-       // extra = extra ? extra : "";
+    init: function () {
         // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
             //console.log("State push");
-            history.pushState(null, null, anchor.init(extra));
+            history.pushState(null, null, anchor.init());
             first = false;
         }, t);
     }
@@ -4046,8 +4041,6 @@ module.exports = {
                         });
                         if (first) {
                             $.each(out, function (name, property) {
-                                console.log(property[3]);
-
                                 cm.push({
                                     header: property[2],
                                     dataIndex: property[0],
