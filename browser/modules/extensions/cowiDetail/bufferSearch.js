@@ -12,7 +12,7 @@ var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
-var hostname = "http://127.0.0.1:3000";
+var hostname = "http://cowi-detail.mapcentia.com";
 
 var reset = function (s) {
     s.abort();
