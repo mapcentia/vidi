@@ -27,7 +27,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        var type1, type2, gids = [], searchString,
+        var type1, type2, gids = [], searchString, dsl, should = [],
             komKode = config.komkode,
             placeStore = new geocloud.geoJsonStore({
                 host: "http://eu1.mapcentia.com",
@@ -44,6 +44,18 @@ module.exports = {
                     }
                 }
             });
+        console.log(typeof komKode);
+        if (typeof komKode === "string") {
+            komKode = [komKode];
+        }
+        $.each(komKode, function (i, v) {
+            should.push({
+                "term": {
+                    "properties.kommunekode": "0" + v
+                }
+            })
+        });
+
         $('#custom-search').typeahead({
             highlight: false
         }, {
@@ -65,9 +77,27 @@ module.exports = {
                 var names = [];
 
                 (function ca() {
+                    dsl = {
+                        "query": {
+                            "filtered": {
+                                "query": {
+                                    "query_string": {
+                                        "default_field": "string",
+                                        "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
+                                        "default_operator": "AND"
+                                    }
+                                },
+                                "filter": {
+                                    "bool": {
+                                        "should": should
+                                    }
+                                }
+                            }
+                        }
+                    };
                     $.ajax({
                         url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
-                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase().replace(",", "")) + '","default_operator":"AND"}},"filter":{"term":{"kommunekode":"0' + komKode + '"}}}}}',
+                        data: '&q=' + JSON.stringify(dsl),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
                         dataType: 'jsonp',
