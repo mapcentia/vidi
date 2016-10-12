@@ -3155,7 +3155,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        var type1, type2, gids = [], searchString, dsl, should = [],
+        var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
             komKode = config.komkode,
             placeStore = new geocloud.geoJsonStore({
                 host: "http://eu1.mapcentia.com",
@@ -3177,11 +3177,16 @@ module.exports = {
             komKode = [komKode];
         }
         $.each(komKode, function (i, v) {
-            should.push({
+            shouldA.push({
                 "term": {
                     "properties.kommunekode": "0" + v
                 }
-            })
+            });
+            shouldM.push({
+                "term": {
+                    "properties.komkode": "" + v
+                }
+            });
         });
 
         $('#custom-search').typeahead({
@@ -3205,7 +3210,7 @@ module.exports = {
                 var names = [];
 
                 (function ca() {
-                    dsl = {
+                    dslA = {
                         "query": {
                             "filtered": {
                                 "query": {
@@ -3217,7 +3222,25 @@ module.exports = {
                                 },
                                 "filter": {
                                     "bool": {
-                                        "should": should
+                                        "should": shouldA
+                                    }
+                                }
+                            }
+                        }
+                    };
+                    dslM = {
+                        "query": {
+                            "filtered": {
+                                "query": {
+                                    "query_string": {
+                                        "default_field": "string",
+                                        "query": encodeURIComponent(query.toLowerCase()),
+                                        "default_operator": "AND"
+                                    }
+                                },
+                                "filter": {
+                                    "bool": {
+                                        "should": shouldM
                                     }
                                 }
                             }
@@ -3225,7 +3248,7 @@ module.exports = {
                     };
                     $.ajax({
                         url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
-                        data: '&q=' + JSON.stringify(dsl),
+                        data: '&q=' + JSON.stringify(dslA),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
                         dataType: 'jsonp',
@@ -3260,7 +3283,7 @@ module.exports = {
                 (function ca() {
                     $.ajax({
                         url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
-                        data: '&q={"query":{"filtered":{"query":{"query_string":{"default_field":"string","query":"' + encodeURIComponent(query.toLowerCase()) + '","default_operator":"AND"}},"filter":{"term":{"komkode":"' + komKode + '"}}}}}',
+                        data: '&q=' + JSON.stringify(dslM),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
                         dataType: 'jsonp',
