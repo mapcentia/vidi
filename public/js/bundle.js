@@ -264,6 +264,14 @@ window.Vidi = function () {
     $(window).load(function () {
         window.status = "all_loaded";
     });
+
+    /**
+     * Set widow.status after 15 secs. if not loaded.
+     */
+    setTimeout(function () {
+        window.status = "all_loaded";
+    }, 15000);
+
     // Load style sheet
     $('<link/>').attr({
         rel: 'stylesheet',
@@ -306,7 +314,7 @@ window.Vidi = function () {
     $(".center").hide();
     try {
         var max = $(document).height() - $('.tab-pane').offset().top - 100;
-    } catch (e){
+    } catch (e) {
         console.info(e.message);
     }
     $('.tab-pane').not("#result-content").css('max-height', max);
@@ -343,6 +351,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/search/danish.js');require('./modules/search/danish_new.js');require('./modules/search/google.js');
     }
+
     modules.search = require('./modules/search/' + config.searchModule + '.js');
 
     // Use the setters in modules so they can interact
@@ -5226,6 +5235,16 @@ module.exports = {
                     p: {
                         mapsizePx: [1040, 1480],
                         mapsizeMm: [282, 401]
+                    }
+                },
+                A0: {
+                    l: {
+                        mapsizePx: [4440, 3120],
+                        mapsizeMm: [1189, 841]
+                    },
+                    p: {
+                        mapsizePx: [3120, 4440],
+                        mapsizeMm: [841, 1189]
                     }
                 }
             }

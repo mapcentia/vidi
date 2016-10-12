@@ -49,6 +49,14 @@ window.Vidi = function () {
     $(window).load(function () {
         window.status = "all_loaded";
     });
+
+    /**
+     * Set widow.status after 15 secs. if not loaded.
+     */
+    setTimeout(function () {
+        window.status = "all_loaded";
+    }, 15000);
+
     // Load style sheet
     $('<link/>').attr({
         rel: 'stylesheet',
@@ -91,7 +99,7 @@ window.Vidi = function () {
     $(".center").hide();
     try {
         var max = $(document).height() - $('.tab-pane').offset().top - 100;
-    } catch (e){
+    } catch (e) {
         console.info(e.message);
     }
     $('.tab-pane').not("#result-content").css('max-height', max);
@@ -128,6 +136,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/search/*.js', {glob: true});
     }
+
     modules.search = require('./modules/search/' + config.searchModule + '.js');
 
     // Use the setters in modules so they can interact

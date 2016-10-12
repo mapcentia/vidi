@@ -32,8 +32,8 @@ router.post('/api/print', function (req, response) {
             L: 0,
             R: 0,
             T: 0,
-            javascriptDelay: 8000
-            //windowStatus: "all_loaded"
+            javascriptDelay: 5000,
+            windowStatus: "all_loaded"
         }, function(err){
             console.log(err);
         }).pipe(fs.createWriteStream(__dirname + "/../public/tmp/print/pdf/" + key + '.pdf').on("finish", function () {

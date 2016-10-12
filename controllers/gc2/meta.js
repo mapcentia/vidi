@@ -3,7 +3,6 @@ var router = express.Router();
 var http = require('http');
 var config = require('../../config/config.js').gc2;
 
-
 router.get('/api/meta/:db/:schema', function (req, response) {
     var db = req.params.db, schema = req.params.schema, url, data = [], jsfile = "";
     url = config.host + "/api/v1/meta/" + db + "/" + schema;
