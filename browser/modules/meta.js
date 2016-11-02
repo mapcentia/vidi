@@ -123,7 +123,7 @@ module.exports = {
                     groups[i] = response.data[i].layergroup;
                 }
                 arr = array_unique(groups);
-
+                response.data.reverse();
                 switch (BACKEND) {
                     case "gc2":
                         for (var u = 0; u < response.data.length; ++u) {
@@ -171,8 +171,6 @@ module.exports = {
                         }());
                         break;
                 }
-
-                response.data.reverse();
                 for (i = 0; i < arr.length; ++i) {
                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                         l = [];

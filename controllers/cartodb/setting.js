@@ -5,12 +5,8 @@ var config = require('../../config/config.js').cartodb;
 
 router.get('/api/setting/:db/:schema', function (req, response) {
     var db = req.params.db, schema = req.params.schema, url, extents = {};
-
-    console.log(schema)
-
     schema = schema.split(",")[0];
     url = "http://" + db + ".cartodb.com/api/v2/viz/" + schema + "/viz.json";
-
     http.get(url, function (res) {
         var chunks = [];
         res.on('data', function (chunk) {

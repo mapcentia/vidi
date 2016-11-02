@@ -5239,12 +5239,12 @@ module.exports = {
                 },
                 A0: {
                     l: {
-                        mapsizePx: [4440, 3120],
-                        mapsizeMm: [1189, 841]
+                        mapsizePx: [4330, 3040],
+                        mapsizeMm: [1173, 825]
                     },
                     p: {
-                        mapsizePx: [3120, 4440],
-                        mapsizeMm: [841, 1189]
+                        mapsizePx: [3040, 4330],
+                        mapsizeMm: [825, 1173]
                     }
                 }
             }
