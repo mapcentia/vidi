@@ -9,6 +9,7 @@
         pointer-events: none;
         opacity: 0.3 !important;
     }
+
     .point-popup {
         width: 300px;
     }
@@ -37,17 +38,9 @@
             <div class="navbar-collapse collapse navbar-responsive-collapse">
                 <ul class="nav navbar-nav navbar-right">
                     <li><a href="#" data-toggle="modal" data-target="#about-model">{{About}}</a></li>
-                    <!--<li class="dropdown">
-                        <a href="bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
-                            <b class="caret"></b></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#" data-toggle="modal" data-target="#about-model">About</a></li>
-                            <li class="divider"></li>
-                            <li class="dropdown-header">Dropdown header</li>
-                            <li><a href="javascript:void(0)">Separated link</a></li>
-                            <li><a href="javascript:void(0)">One more separated link</a></li>
-                        </ul>
-                    </li>-->
+                    <li><a href="#" data-toggle="modal" data-target="#contact-model">{{Contact}}</a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#disclaimer-model">{{Disclaimer}}</a></li>
+
                 </ul>
             </div>
         </div>
@@ -315,7 +308,52 @@
                 <h4 class="modal-title" id="about-modelLabel">{{About}}</h4>
             </div>
             <div class="modal-body">
-                ...
+                <p><a href="http://detailhandelsportalen.dk/">Detailhandelsportalen</a> er udviklet af COWIs afdeling for <a href="http://www.cowi.dk/menu/service/oekonomimanagementogplanlaegning/fysiskplanlagningogbyudvikling/">By- og Trafikplanlægning</a> i samarbejde med <a href="http://mapcentia.com">MapCentia ApS</a>.</p>
+                <p>Med detailhandelsportalen har din organisation fået et screeningsværktøj til at nemt og hurtigt at vurdere placeringer for nye dagligvarebutikker i Danmark.</p>
+                <p>Klik dig rundt i lagene, tryk på knapperne og print dit eget oplandskort. Vi håber, at I får glæde af jeres nye værktøj.</p>
+                <p>Du er velkommen til at kontakte os, hvis du har spørgsmål til teknikken eller til dine analyser.</p>
+                <p>Læs også "Disclaimer" inden du fortsætter.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contact-model" tabindex="-1" role="dialog" aria-labelledby="contact-modelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="contact-modelLabel">{{Contact}}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Økonomi & Salg: Kristian Løbner / <a href="mailto:krlb@cowi.com">krlb@cowi.com</a></p>
+                <p>Drift & Udvikling: Dan Nissen / <a href="mailto:dann@cowi.com">dann@cowi.com</a></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Disclaimer Modal -->
+<div class="modal fade" id="disclaimer-model" tabindex="-1" role="dialog" aria-labelledby="disclaimer-modelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="disclaimer-modelLabel">{{Disclaimer}}</h4>
+            </div>
+            <div class="modal-body">
+                <p>Dit brugernavn og password er personligt og må ikke videregives til andre.</p>
+                <p>Data på Detailhandelsportalen er baseret på eksisterende data, der er købt, indhentet og viderebehandlet af COWI.</p>
+                <p>COWI står ikke til regnskab for evt. fejl i datakilder, der anvendes på Detailhandelsportalen.</p>
+                <p>Analyser, der er foretaget via Detailhandelsportalen, er alene et udtryk for brugerens vurderinger.</p>
+                <p>COWI bistår naturligvis gerne med yderligere undersøgelser, vurderinger og planlægning, hvis der er behov for det.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>

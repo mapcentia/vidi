@@ -44,7 +44,6 @@ module.exports = {
                     }
                 }
             });
-        console.log(typeof komKode);
         if (typeof komKode === "string") {
             komKode = [komKode];
         }

@@ -102,7 +102,10 @@ module.exports = {
         "Use these tools for editing existing drawings.": "Brug disse værktøjer til at ændre eksisterende tegninger.",
         "Area": "Areal",
         "Distance/Radius": "Distance/Radius",
-        "Type": "Type"
+        "Type": "Type",
+
+        "Disclaimer": "Disclaimer",
+        "Contact": "Kontakt"
     }
 };
 },{}],2:[function(require,module,exports){
@@ -3179,7 +3182,6 @@ module.exports = {
                     }
                 }
             });
-        console.log(typeof komKode);
         if (typeof komKode === "string") {
             komKode = [komKode];
         }
@@ -5194,8 +5196,8 @@ module.exports = {
     backend: "gc2",
     //backend: "cartodb",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh",
@@ -5253,11 +5255,11 @@ module.exports = {
     searchConfig: {
         komkode: ["851", "153"]
     },
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],32:[function(require,module,exports){
