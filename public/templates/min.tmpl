@@ -1,0 +1,92 @@
+<!-- map -->
+<div id="pane">
+    <div id="container">
+        <div id="map"></div>
+    </div>
+</div>
+<nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation" data-autohide="false" data-recalc="false" style="overflow: hidden">
+    <div id="info-modal" style="width: 100%; height: 100%; display: block; background-color: white; -webkit-box-sizing: border-box; box-sizing: border-box; display: none">
+        <div class="modal-header">
+            <button type="button" class="close" aria-hidden="true">×</button>
+            <h2 class="modal-title"></h2>
+        </div>
+        <div id="info-modal-body-wrapper">
+            <div class="modal-body"></div>
+            <div id="info-modal-legend" class="legend"></div>
+        </div>
+    </div>
+    <div class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="javascript:void(0)">{{brandName}}</a>
+            </div>
+            <div class="navbar-collapse collapse navbar-responsive-collapse">
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="#" data-toggle="modal" data-target="#about-model">{{About}}</a></li>
+                    <!--<li class="dropdown">
+                        <a href="bootstrap-elements.html" data-target="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown
+                            <b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-toggle="modal" data-target="#about-model">About</a></li>
+                            <li class="divider"></li>
+                            <li class="dropdown-header">Dropdown header</li>
+                            <li><a href="javascript:void(0)">Separated link</a></li>
+                            <li><a href="javascript:void(0)">One more separated link</a></li>
+                        </ul>
+                    </li>-->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="side-panel">
+        <div role="tabpanel">
+            <!-- Nav tabs -->
+            <ul class="nav nav-tabs" role="tablist" id="main-tabs">
+                <li role="presentation" class="active"><a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">{{Search}}</a></li>
+            </ul>
+            <!-- Tab panes -->
+            <div class="tab-content main-content">
+                <div role="tabpanel" class="tab-pane active" id="search-content">
+                    <div role="tabpanel" class="tab-pane active" id="place-search">
+                        <div class="alert alert-dismissible alert-info" role="alert">
+                            <button type="button" class="close" data-dismiss="alert">×</button>
+                            {{Search places}}
+                        </div>
+                        <div id="places">
+                            <input id="custom-search" class="typeahead" type="text" placeholder="{{Address}}">
+                        </div>
+                    </div>
+
+                    <div role="tabpanel" class="tab-pane" id="conflict-search"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="navbar navbar-default navbar-fixed-top" id="navbar-fixed-top">
+    <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#myNavmenu" data-canvas="body">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+    </button>
+</div>
+
+<!-- About Modal -->
+<div class="modal fade" id="about-model" tabindex="-1" role="dialog" aria-labelledby="about-modelLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="about-modelLabel">{{About}}</h4>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
