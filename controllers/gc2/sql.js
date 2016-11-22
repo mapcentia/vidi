@@ -19,6 +19,9 @@ router.post('/api/sql/:db', function (req, response) {
         }
         var chunks = [];
         response.header('content-type', 'application/json');
+        response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
+        response.header('Expires', '0');
+        response.header('X-Powered-By', 'MapCentia Vidi');
         res.on('data', function (chunk) {
             chunks.push(chunk);
         });
