@@ -2290,6 +2290,12 @@ var backboneEvents;
 var urlparser = require('./../../urlparser');
 
 /**
+ *
+ * @type {array}
+ */
+var urlVars = urlparser.urlVars;
+
+/**
  * @type {string}
  */
 var db = urlparser.db;
@@ -2313,16 +2319,18 @@ module.exports = module.exports = {
         utils.createMainTab("vectorlayers", "Vektor lag");
         $('#main-tabs a[href="#vectorlayer-content"]').tab('show');
 
-        $(document).arrive('.refresh-vector-layer', function () {
-            $(this).on("click", function (e) {
-                var id = ($(this).parent().prev().children("input").data('gc2-id'));
-                store[id].reset();
-                store[id].load();
-                $('*[data-gc2-id="' + id + '"]').parent().siblings().children().addClass("fa-spin");
-                e.stopPropagation();
-            });
+        if (!urlVars.px && !urlVars.py) {
+            $(document).arrive('.refresh-vector-layer', function () {
+                $(this).on("click", function (e) {
+                    var id = ($(this).parent().prev().children("input").data('gc2-id'));
+                    store[id].reset();
+                    store[id].load();
+                    $('*[data-gc2-id="' + id + '"]').parent().siblings().children().addClass("fa-spin");
+                    e.stopPropagation();
+                });
 
-        });
+            });
+        }
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
             for (i = 0; i < metaData.data.length; ++i) {
