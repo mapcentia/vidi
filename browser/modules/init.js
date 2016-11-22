@@ -8,6 +8,8 @@
 var cloud;
 var baseLayer;
 var meta;
+var layerTree;
+var addLayers;
 var setting;
 var state;
 var anchor;
@@ -19,11 +21,14 @@ var print;
 var advancedInfo;
 var pushState;
 var extensions;
+var backboneEvents;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         baseLayer = o.baseLayer;
         meta = o.meta;
+        layerTree = o.layerTree;
+        addLayers = o.addLayers;
         setting = o.setting;
         state = o.state;
         anchor = o.anchor;
@@ -35,6 +40,7 @@ module.exports = {
         pushState = o.pushState;
         advancedInfo = o.advancedInfo;
         extensions = o.extensions;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
@@ -49,11 +55,6 @@ module.exports = {
         advancedInfo.init();
         print.init();
 
-        var moveEndCallBack = function () {
-            pushState.init();
-        };
-        cloud.on("dragend", moveEndCallBack);
-        cloud.on("moveend", moveEndCallBack);
         $.material.init();
 
         touchScroll(".tab-pane");

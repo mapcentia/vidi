@@ -21,12 +21,6 @@ var legend;
  *
  * @type {*|exports|module.exports}
  */
-var anchor;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 var pushState;
 
 /**
@@ -37,7 +31,6 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         legend = o.legend;
-        anchor = o.anchor;
         pushState = o.pushState;
         return this;
     },
@@ -51,13 +44,13 @@ module.exports = module.exports = {
         var el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
             try {
-                cloud.showLayer(name);
+                cloud.map.addLayer(cloud.getLayersByName(name));
                 el.prop('checked', true);
             } catch (e) {
                 //Pass
             }
         } else {
-            cloud.hideLayer(name);
+            cloud.map.removeLayer(cloud.getLayersByName(name));
             el.prop('checked', false);
         }
         var siblings = el.parents(".accordion-body").find("input");

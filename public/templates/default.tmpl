@@ -50,13 +50,9 @@
                 <li role="presentation"><a href="#legend-content" aria-controls="" role="tab" data-toggle="tab">{{Legend}}</a></li>
                 <li role="presentation"><a href="#draw-content" aria-controls="" role="tab" data-toggle="tab">{{Draw}}</a></li>
                 <li role="presentation"><a href="#print-content" aria-controls="" role="tab" data-toggle="tab">{{Print}}</a></li>
-                <!--
-                                <li role="presentation"><a href="#help-content" aria-controls="" role="tab" data-toggle="tab">{{Help}}</a></li>
-                -->
             </ul>
-
             <!-- Tab panes -->
-            <div class="tab-content">
+            <div class="tab-content main-content">
                 <div role="tabpanel" class="tab-pane active" id="search-content">
                     <div role="tabpanel" class="tab-pane active" id="place-search">
                         <div class="alert alert-dismissible alert-info" role="alert">
@@ -68,13 +64,9 @@
                         </div>
                     </div>
 
-                    <div role="tabpanel" class="tab-pane" id="conflict-search">
-
-                    </div>
-
-
+                    <div role="tabpanel" class="tab-pane" id="conflict-search"></div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="info-content">
+                <div role="tabpanel" class="tab-pane fade" id="info-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{{Info text}}}
@@ -107,14 +99,14 @@
                     <table id="dtable" data-show-toggle="true"></table>
 
                 </div>
-                <div role="tabpanel" class="tab-pane" id="layer-content">
+                <div role="tabpanel" class="tab-pane fade" id="layer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text overlays}}
                     </div>
                     <div class="form-group" id="layers" role="tablist"></div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="baselayer-content">
+                <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text baselayers}}
@@ -125,7 +117,7 @@
                         </div>
                     </div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="legend-content">
+                <div role="tabpanel" class="tab-pane fade" id="legend-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text legend}}
@@ -137,7 +129,7 @@
                         </div>
                     </div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="draw-content">
+                <div role="tabpanel" class="tab-pane fade" id="draw-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text draw}}
@@ -153,7 +145,7 @@
                         </div>
                     </div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="print-content">
+                <div role="tabpanel" class="tab-pane fade" id="print-content">
                     <div class="alert alert-dismissible alert-info" role="alert">
                         <button type="button" class="close" data-dismiss="alert">×</button>
                         {{Help text print}}
@@ -239,7 +231,6 @@
                         </div>
                     </div>
                 </div>
-                <div role="tabpanel" class="tab-pane" id="help-content">...</div>
             </div>
         </div>
     </div>

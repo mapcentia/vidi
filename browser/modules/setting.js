@@ -32,12 +32,15 @@ var ready = false;
  */
 var extent;
 
+var backboneEvents;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, ready: module.exports.ready}}
  */
 module.exports = {
-    set: function () {
+    set: function (o) {
+        backboneEvents = o.backboneEvents;
     },
     init: function () {
         $.ajax({
@@ -51,6 +54,7 @@ module.exports = {
                     }
                 }
                 ready = true;
+                backboneEvents.get().trigger("ready:settings");
             }
         }); // Ajax call end
     },
@@ -59,7 +63,7 @@ module.exports = {
      * Checks is settings are loaded and ready
      * @returns {boolean}
      */
-    ready: function(){
+    ready: function () {
         return ready;
     },
 
@@ -67,7 +71,7 @@ module.exports = {
      * Get the saved extent from the first schema or viz
      * @returns {array}
      */
-    getExtent: function(){
+    getExtent: function () {
         return extent;
     }
 };

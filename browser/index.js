@@ -116,6 +116,8 @@ window.Vidi = function () {
         switchLayer: require('./modules/switchLayer'),
         setBaseLayer: require('./modules/setBaseLayer'),
         meta: require('./modules/meta'),
+        layerTree: require('./modules/layerTree'),
+        layers: require('./modules/layers'),
         setting: require('./modules/setting'),
         baseLayer: require('./modules/baseLayer'),
         legend: require('./modules/legend'),
@@ -129,10 +131,13 @@ window.Vidi = function () {
         sqlQuery: require('./modules/sqlQuery'),
         serializeLayers: require('./modules/serializeLayers'),
         pushState: require('./modules/pushState'),
+        backboneEvents: require('./modules/backboneEvents'),
+        utils: require('./modules/utils'),
         extensions: {}
     };
 
     // Require search module
+    // Hack to compile Glob files. Don´t call this function!
     function ಠ_ಠ() {
         require('./modules/search/*.js', {glob: true});
     }
@@ -142,6 +147,9 @@ window.Vidi = function () {
     // Use the setters in modules so they can interact
     modules.init.set(modules);
     modules.meta.set(modules);
+    modules.layerTree.set(modules);
+    modules.layers.set(modules);
+    modules.setting.set(modules);
     modules.switchLayer.set(modules);
     modules.setBaseLayer.set(modules);
     modules.baseLayer.set(modules);
@@ -157,9 +165,12 @@ window.Vidi = function () {
     modules.sqlQuery.set(modules);
     modules.serializeLayers.set(modules);
     modules.pushState.set(modules);
+    modules.backboneEvents.set(modules);
+    modules.utils.set(modules);
+
+    modules.backboneEvents.init();
 
     // Require extensions modules
-
     // Hack to compile Glob files. Don´t call this function!
     function ಠ_ಠ() {
         require('./modules/extensions/**/*.js', {glob: true});

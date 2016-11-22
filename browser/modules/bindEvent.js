@@ -77,6 +77,13 @@ var urlVars = urlparser.urlVars;
  */
 var toHtml = new showdown.Converter();
 
+var backboneEvents;
+
+var pushState;
+var layerTree;
+var layers;
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -91,10 +98,22 @@ module.exports = module.exports = {
         setBaseLayer = o.setBaseLayer;
         legend = o.legend;
         meta = o.meta;
+        pushState = o.pushState;
+        layerTree = o.layerTree;
+        layers = o.layers;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function (str) {
         metaDataKeys = meta.getMetaDataKeys();
+
+        cloud.on("dragend", function () {
+            pushState.init();
+        });
+        cloud.on("moveend", function () {
+            pushState.init();
+        });
+
         $("#draw-btn").on("click", function () {
             // Stop advancedInfo
             if (advancedInfo.getSearchOn()) {
@@ -127,6 +146,20 @@ module.exports = module.exports = {
         $("#info-modal button").on("click", function () {
             $("#info-modal").hide();
         });
+
+        // Set listeners for backbone events
+        backboneEvents.get().on("ready:meta", function () {
+            if ($(document).width() > 767) {
+                setTimeout(
+                    function () {
+                        $(".navbar-toggle").trigger("click");
+                    }, 50
+                );
+            }
+            layerTree.init();
+            layers.init();
+        });
+
 
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {

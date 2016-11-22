@@ -83,6 +83,8 @@ var base64 = require('base64-url');
  */
 var BACKEND = require('../../config/config.js').backend;
 
+var layers;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -102,6 +104,7 @@ module.exports = {
         switchLayer = o.switchLayer;
         legend = o.legend;
         draw = o.draw;
+        layers = o.layers;
         advancedInfo = o.advancedInfo;
         return this;
     },
@@ -114,8 +117,8 @@ module.exports = {
             cloud.zoomToExtent();
         }
         (function pollForLayers() {
-            if (meta.ready() && setting.ready()) {
-                var p, arr, i;
+            if (layers.ready() && setting.ready()) {
+                var arr, i;
                 if (hashArr[0]) {
                     $(".base-map-button").removeClass("active");
                     $("#" + hashArr[0]).addClass("active");
