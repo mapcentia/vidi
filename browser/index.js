@@ -35,11 +35,6 @@ window.Vidi = function () {
     // Declare vars
     var config, socketId, tmpl;
 
-    // Set vars
-    socketId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
 
     var urlparser = require('./modules/urlparser');
     var urlVars = urlparser.urlVars;
@@ -103,10 +98,10 @@ window.Vidi = function () {
         console.info(e.message);
     }
     $('.tab-pane').not("#result-content").css('max-height', max);
-    $('#places').css('height', max - 130);
-    $('#places').css('min-height', 400);
-    $('#places .tt-dropdown-menu').css('max-height', max - 200);
-    $('#places .tt-dropdown-menu').css('min-height', 400);
+    $('.places').css('height', max - 130);
+    $('.places').css('min-height', 400);
+    $('.places .tt-dropdown-menu').css('max-height', max - 200);
+    $('.places .tt-dropdown-menu').css('min-height', 400);
 
     // Require the standard modules
     var modules = {
@@ -133,6 +128,7 @@ window.Vidi = function () {
         pushState: require('./modules/pushState'),
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
+        socketId: require('./modules/socketId'),
         extensions: {}
     };
 
@@ -167,7 +163,7 @@ window.Vidi = function () {
     modules.pushState.set(modules);
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
-
+    modules.socketId.set(modules);
     modules.backboneEvents.init();
 
     // Require extensions modules
@@ -175,7 +171,6 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/extensions/**/*.js', {glob: true});
     }
-
     if (typeof config.extensions !== "undefined" && typeof config.extensions.browser !== "undefined") {
         $.each(config.extensions.browser, function (i, v) {
             modules.extensions[Object.keys(v)[0]] = {};

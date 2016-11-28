@@ -131,7 +131,7 @@ module.exports = {
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
-        }); // Ajax call end
+        });
     },
 
     /**

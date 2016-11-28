@@ -26,24 +26,30 @@ module.exports = {
         cloud = o.cloud;
         return this;
     },
-    init: function () {
+    init: function (onLoad, el) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
-            komKode = config.komkode,
-            placeStore = new geocloud.geoJsonStore({
-                host: "http://eu1.mapcentia.com",
-                db: "dk",
-                sql: null,
-                pointToLayer: null,
-                onLoad: function () {
-                    var resultLayer = new L.FeatureGroup();
-                    cloud.map.addLayer(resultLayer);
-                    resultLayer.addLayer(this.layer);
-                    cloud.zoomToExtentOfgeoJsonStore(this);
-                    if (cloud.map.getZoom() > 17) {
-                        cloud.map.setZoom(17);
-                    }
+            komKode = config.komkode, placeStore;
+        if (!onLoad) {
+            onLoad = function () {
+                var resultLayer = new L.FeatureGroup();
+                cloud.map.addLayer(resultLayer);
+                resultLayer.addLayer(this.layer);
+                cloud.zoomToExtentOfgeoJsonStore(this);
+                if (cloud.map.getZoom() > 17) {
+                    cloud.map.setZoom(17);
                 }
-            });
+            }
+        }
+        if (!el) {
+            el = "custom-search";
+        }
+        placeStore = new geocloud.geoJsonStore({
+            host: "http://eu1.mapcentia.com",
+            db: "dk",
+            sql: null,
+            pointToLayer: null,
+            onLoad: onLoad
+        });
         if (typeof komKode === "string") {
             komKode = [komKode];
         }
@@ -60,7 +66,7 @@ module.exports = {
             });
         });
 
-        $('#custom-search').typeahead({
+        $("#" + el).typeahead({
             highlight: false
         }, {
             name: 'adresse',
@@ -178,7 +184,7 @@ module.exports = {
                 })();
             }
         });
-        $('#custom-search').bind('typeahead:selected', function (obj, datum, name) {
+        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
                 placeStore.reset();
 
@@ -192,7 +198,7 @@ module.exports = {
                 placeStore.load();
             } else {
                 setTimeout(function () {
-                    $(".typeahead").val(datum.value + " ").trigger("paste").trigger("input");
+                    $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
                 }, 100)
             }
         });

@@ -33,8 +33,7 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.on("click", function (e) {
-            // Do not get info if drawing
-           if (draw.getDrawOn() || advancedInfo.getSearchOn() || active === false) {
+           if (active === false) {
                 return;
             }
             var event = new geocloud.clickEvent(e, cloud);

@@ -66,8 +66,8 @@ module.exports = {
      * @param wkt {string}
      * @param proj {string}
      */
-    init: function (qstore, wkt, proj) {
-        var layers, count = 0, hit = false, distance;
+    init: function (qstore, wkt, proj, callBack, num) {
+        var layers, count = {index: 0}, hit = false, distance;
         var metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
         layers = cloud.getVisibleLayers().split(";");
@@ -85,6 +85,7 @@ module.exports = {
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
             var fieldConf = $.parseJSON(metaDataKeys[value].fieldconf);
+            var onLoad;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -93,100 +94,101 @@ module.exports = {
                     1.19432856696, 0.597164283478, 0.298582141739, 0.149291];
                 distance = 5 * res[cloud.getZoom()];
             }
-            var onLoad = function () {
-                var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
-                isEmpty = layerObj.isEmpty();
-                if (!isEmpty && !not_querable) {
-                    $('#modal-info-body').show();
-                    $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                    $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
-                    $.each(layerObj.geoJSON.features, function (i, feature) {
-                        if (fieldConf === null) {
-                            $.each(feature.properties, function (name, property) {
-                                out.push([name, 0, name, property]);
-                            });
-                        }
-                        else {
-                            $.each(fieldConf, function (name, property) {
-                                if (property.querable) {
-                                    fieldLabel = (property.alias !== null && property.alias !== "") ? property.alias : name;
-                                    if (feature.properties[name] !== undefined) {
-                                        out.push([name, property.sort_id, fieldLabel, property.link]);
+            if (!callBack) {
+                onLoad = function () {
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
+                    isEmpty = layerObj.isEmpty();
+                    if (!isEmpty && !not_querable) {
+                        $('#modal-info-body').show();
+                        $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
+                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
+                        $.each(layerObj.geoJSON.features, function (i, feature) {
+                            if (fieldConf === null) {
+                                $.each(feature.properties, function (name, property) {
+                                    out.push([name, 0, name, property]);
+                                });
+                            }
+                            else {
+                                $.each(fieldConf, function (name, property) {
+                                    if (property.querable) {
+                                        fieldLabel = (property.alias !== null && property.alias !== "") ? property.alias : name;
+                                        if (feature.properties[name] !== undefined) {
+                                            out.push([name, property.sort_id, fieldLabel, property.link]);
+                                        }
                                     }
-                                }
+                                });
+                            }
+                            out.sort(function (a, b) {
+                                return a[1] - b[1];
                             });
-                        }
-                        out.sort(function (a, b) {
-                            return a[1] - b[1];
+                            if (first) {
+                                $.each(out, function (name, property) {
+                                    cm.push({
+                                        header: property[2],
+                                        dataIndex: property[0],
+                                        sortable: true,
+                                        link: property[3]
+                                    })
+                                });
+                                first = false;
+                            }
+                            $('#tab_' + storeId).tab('show');
+                            out = [];
                         });
-                        if (first) {
-                            $.each(out, function (name, property) {
-                                cm.push({
-                                    header: property[2],
-                                    dataIndex: property[0],
-                                    sortable: true,
-                                    link: property[3]
-                                })
-                            });
-                            first = false;
+                        var height;
+                        try {
+                            height = require('./height')().max - 400;
+                        } catch (e) {
+                            console.info(e.message);
+                            height = 0;
                         }
-                        $('#tab_' + storeId).tab('show');
-                        out = [];
-                    });
-                    var height;
-                    try {
-                        height = require('./height')().max - 400;
-                    } catch (e) {
-                        console.info(e.message);
-                        height = 0;
+                        var _table = gc2table.init({
+                            el: "#_" + storeId + " table",
+                            geocloud2: cloud,
+                            store: layerObj,
+                            cm: cm,
+                            autoUpdate: false,
+                            autoPan: false,
+                            openPopUp: true,
+                            setViewOnSelect: true,
+                            responsive: false,
+                            callCustomOnload: false,
+                            height: (height > 500) ? 500 : (height < 300) ? 300 : height,
+                            locale: window._vidiLocale.replace("_", "-")
+                        });
+
+                        // Here Inside onLoad we call loadDataInTable(), so the table is populated
+                        _table.loadDataInTable();
+
+                        // If only one feature is selected, when activate it.
+                        if (Object.keys(layerObj.layer._layers).length === 1) {
+                            _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                        }
+                        hit = true;
+                        // Add fancy material raised style to buttons
+                        $(".bootstrap-table .btn-default").addClass("btn-raised");
+                        // Stop the click on detail icon from bubbling up the DOM tree
+                        $(".detail-icon").click(function (event) {
+                            event.stopPropagation();
+                        })
+                    } else {
+                        layerObj.reset();
                     }
-                    var _table = gc2table.init({
-                        el: "#_" + storeId + " table",
-                        geocloud2: cloud,
-                        store: layerObj,
-                        cm: cm,
-                        autoUpdate: false,
-                        autoPan: true,
-                        openPopUp: true,
-                        setViewOnSelect: true,
-                        responsive: false,
-                        callCustomOnload: false,
-                        height: (height > 500) ? 500 : (height < 300) ? 300 : height,
-                        locale: window._vidiLocale.replace("_","-"),
-                    });
+                    count.index++;
+                    if (count.index === layers.length) {
+                        //$('#info-tab a:first').tab('show');
 
-                    // Here Inside onLoad we call loadDataInTable(), so the table is populated
-                    _table.loadDataInTable();
-
-                    // If only one feature is selected, when activate it.
-                    if (Object.keys(layerObj.layer._layers).length === 1) {
-                        _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                        if (!hit) {
+                            $('#modal-info-body').hide();
+                        }
+                        $("#info-content button").click(function (e) {
+                            //clearDrawItems();
+                            //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
+                        });
+                        $('#main-tabs a[href="#info-content"]').tab('show');
                     }
-                    hit = true;
-                    // Add fancy material raised style to buttons
-                    $(".bootstrap-table .btn-default").addClass("btn-raised");
-                    // Stop the click on detail icon from bubbling up the DOM tree
-                    $(".detail-icon").click(function (event) {
-                        event.stopPropagation();
-                    })
-                } else {
-                    layerObj.reset();
-                }
-                count++;
-                if (count === layers.length) {
-                    //$('#info-tab a:first').tab('show');
-
-                    if (!hit) {
-                        $('#modal-info-body').hide();
-                    }
-                    $("#info-content button").click(function (e) {
-                        //clearDrawItems();
-                        //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
-                    });
-                    $('#main-tabs a[href="#info-content"]').tab('show');
-                }
-            };
-
+                };
+            }
             qstore[index] = new geocloud.sqlStore({
                 jsonp: false,
                 method: "POST",
@@ -195,7 +197,6 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
-                onLoad: onLoad,
                 styleMap: {
                     weight: 5,
                     color: '#660000',
@@ -212,7 +213,6 @@ module.exports = {
                     }
                 }
             });
-
             cloud.addGeoJsonStore(qstore[index]);
             var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
             if (geoType === "RASTER") {
@@ -233,7 +233,8 @@ module.exports = {
                     }
                 }
             }
-            sql = sql + "LIMIT 500";
+            sql = sql + "LIMIT " + (num || 20);
+            qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
         });

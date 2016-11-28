@@ -95,6 +95,9 @@ var _clearDrawItems = function () {
     sqlQuery.reset(qstore);
 };
 
+var backboneEvents;
+
+
 /**
  *
  * @private
@@ -159,6 +162,7 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         infoClick = o.infoClick;
+        backboneEvents = o.backboneEvents;
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
         return this;
@@ -167,7 +171,12 @@ module.exports = {
      *
      */
     control: function () {
-        if (!searchOn) {
+        if ($("#advanced-info-btn").is(':checked')) {
+            backboneEvents.get().trigger("on:advancedInfo");
+
+            // Turn info click off
+            backboneEvents.get().trigger("off:infoClick");
+
             $("#buffer").show();
 
             // Reset layer made by clickInfo
@@ -240,23 +249,17 @@ module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
-            var po = $('.leaflet-draw-toolbar-top').popover({content:__("Use these tools for querying the overlay maps."), placement: "left"});
+            var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
             po.popover("show");
-            setTimeout(function(){
+            setTimeout(function () {
                 po.popover("hide");
-            }, 2500)
+            }, 2500);
         } else {
-            // Clean up
-            console.log("Stoping advanced search");
-            _clearDrawItems();
-            // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
-            cloud.map.removeControl(drawControl);
             searchOn = false;
-            $("#buffer").hide();
+            backboneEvents.get().trigger("off:advancedInfo");
+
+            // Turn info click on again
+            backboneEvents.get().trigger("on:infoClick");
         }
     },
     /**
@@ -289,6 +292,22 @@ module.exports = {
         } catch (e) {
             console.info(e.message);
         }
+    },
+    off: function () {
+        // Clean up
+        console.log("Stopping advanced info");
+        _clearDrawItems();
+        $("#advanced-info-btn").prop("checked", false);
+        // Unbind events
+        cloud.map.off('draw:created');
+        cloud.map.off('draw:drawstart');
+        cloud.map.off('draw:drawstop');
+        cloud.map.off('draw:editstart');
+        try {
+            cloud.map.removeControl(drawControl);
+        } catch (e) {
+        }
+        $("#buffer").hide();
     },
     /**
      *

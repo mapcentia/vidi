@@ -56,6 +56,9 @@ var editPopUp;
  */
 var infoClick;
 
+var backboneEvents;
+
+
 /**
  * Get readable distance of layer
  * @param e
@@ -94,13 +97,17 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         infoClick = o.infoClick;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     control: function () {
-        if (!drawOn) {
-            //infoClick.reset();
-            L.drawLocal = require('./drawLocales/draw.js');
+        if ($("#draw-btn").is(':checked')) {
+            backboneEvents.get().trigger("on:drawing");
 
+            // Turn info click off
+            backboneEvents.get().trigger("off:infoClick");
+
+            L.drawLocal = require('./drawLocales/draw.js');
             var editActions = [
                 //L.Edit.Popup.Edit,
                 //L.Edit.Popup.Delete,
@@ -233,22 +240,13 @@ module.exports = {
             setTimeout(function () {
                 po2.popover("hide");
             }, 2500);
-
         } else {
-            // Clean up
-            console.log("Stoping drawing");
-            cloud.map.removeControl(drawControl);
+            backboneEvents.get().trigger("off:drawing");
+
+            // Turn info click on again
+            backboneEvents.get().trigger("on:infoClick");
+
             drawOn = false;
-
-            // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:deleted');
-            cloud.map.off('draw:edited');
-
-            // Call destruct functions
-            $.each(destructFunctions, function (i, v) {
-                v();
-            })
         }
     },
     init: function () {
@@ -266,7 +264,7 @@ module.exports = {
                 table = gc2table.init({
                     el: "#draw-table table",
                     geocloud2: cloud,
-                    locale: window._vidiLocale.replace("_","-"),
+                    locale: window._vidiLocale.replace("_", "-"),
                     store: store,
                     cm: [
                         {
@@ -298,6 +296,23 @@ module.exports = {
             }
         }());
     },
+    off: function () {
+        // Clean up
+        console.log("Stopping drawing");
+        try {
+            cloud.map.removeControl(drawControl);
+        } catch (e) {
+        }
+        $("#draw-btn").prop("checked", false);
+        // Unbind events
+        cloud.map.off('draw:created');
+        cloud.map.off('draw:deleted');
+        cloud.map.off('draw:edited');
+        // Call destruct functions
+        $.each(destructFunctions, function (i, v) {
+            v();
+        });
+    },
 
     /**
      *
@@ -305,7 +320,8 @@ module.exports = {
      */
     getDrawOn: function () {
         return drawOn;
-    },
+    }
+    ,
 
     /**
      *
@@ -313,7 +329,8 @@ module.exports = {
      */
     getLayer: function () {
         return store.layer;
-    },
+    }
+    ,
 
     /**
      *
@@ -321,7 +338,8 @@ module.exports = {
      */
     getTable: function () {
         return table;
-    },
+    }
+    ,
 
     /**
      *
@@ -330,7 +348,8 @@ module.exports = {
     setDestruct: function (f) {
         destructFunctions.push(f);
     }
-};
+}
+;
 
 /**
  *

@@ -82,6 +82,8 @@ var backboneEvents;
 var pushState;
 var layerTree;
 var layers;
+var infoClick;
+var infoClick;
 
 
 /**
@@ -101,6 +103,7 @@ module.exports = module.exports = {
         pushState = o.pushState;
         layerTree = o.layerTree;
         layers = o.layers;
+        infoClick = o.infoClick;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -115,21 +118,10 @@ module.exports = module.exports = {
         });
 
         $("#draw-btn").on("click", function () {
-            // Stop advancedInfo
-            if (advancedInfo.getSearchOn()) {
-                advancedInfo.control(); // Will toggle the control off
-                $("#advanced-info-btn").prop("checked", false);
-                $("#buffer").hide();
-            }
             draw.control();
         });
 
         $("#advanced-info-btn").on("click", function () {
-            // Stop drawing
-            if (draw.getDrawOn()) {
-                draw.control(); // Will toggle the control off
-                $("#draw-btn").prop("checked", false);
-            }
             advancedInfo.control();
         });
 
@@ -158,6 +150,21 @@ module.exports = module.exports = {
             }
             layerTree.init();
             layers.init();
+        });
+
+        backboneEvents.get().on("off:advancedInfo on:drawing", function () {
+            advancedInfo.off();
+        });
+
+        backboneEvents.get().on("off:drawing on:advancedInfo", function () {
+            draw.off();
+        });
+
+        backboneEvents.get().on("on:infoClick", function () {
+            infoClick.active(true);
+        });
+        backboneEvents.get().on("off:infoClick", function () {
+            infoClick.active(false);
         });
 
 

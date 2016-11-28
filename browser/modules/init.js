@@ -21,6 +21,7 @@ var print;
 var advancedInfo;
 var pushState;
 var extensions;
+var socketId;
 var backboneEvents;
 module.exports = {
     set: function (o) {
@@ -40,6 +41,7 @@ module.exports = {
         pushState = o.pushState;
         advancedInfo = o.advancedInfo;
         extensions = o.extensions;
+        socketId = o.socketId;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -54,6 +56,7 @@ module.exports = {
         draw.init();
         advancedInfo.init();
         print.init();
+        socketId.init();
 
         $.material.init();
 

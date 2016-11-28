@@ -436,11 +436,11 @@ div.olControlZoom {
     height: auto !important;
 }
 
-#places {
+.places {
     height: 100%;
 }
 
-#places .typeahead-heading {
+.places .typeahead-heading {
     margin: 0 20px 5px 20px;
     padding: 3px 0;
     border-bottom: 1px solid #ccc;
@@ -452,7 +452,7 @@ div.olControlZoom {
     width: 100%;
 }
 
-#places .tt-dropdown-menu {
+.places .tt-dropdown-menu {
     overflow-y: auto;
 }
 
