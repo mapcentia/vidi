@@ -6606,7 +6606,7 @@ module.exports = {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    __extensions: {
+    extensions: {
         browser: [{vectorLayers: ["index"]}, {conflictSearch: ["index", "infoClick"]}],
         server: [{conflictSearch: ["index"]}]
     },

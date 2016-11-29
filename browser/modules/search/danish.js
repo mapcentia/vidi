@@ -44,7 +44,7 @@ module.exports = {
             el = "custom-search";
         }
         placeStore = new geocloud.geoJsonStore({
-            host: "http://eu1.mapcentia.com",
+            host: "//eu1.mapcentia.com",
             db: "dk",
             sql: null,
             pointToLayer: null,
@@ -124,7 +124,7 @@ module.exports = {
                         }
                     };
                     $.ajax({
-                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
+                        url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/aws4/' + type1,
                         data: '&q=' + JSON.stringify(dslA),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
@@ -159,7 +159,7 @@ module.exports = {
                 type2 = (query.match(/\d+/g) != null) ? "jordstykke" : "ejerlav";
                 (function ca() {
                     $.ajax({
-                        url: 'http://eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
+                        url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
                         data: '&q=' + JSON.stringify(dslM),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
