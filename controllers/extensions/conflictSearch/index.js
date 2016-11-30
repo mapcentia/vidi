@@ -2,7 +2,6 @@ var express = require('express');
 var request = require("request");
 var router = express.Router();
 var http = require('http');
-var pg = require('pg');
 var fs = require('fs');
 var moment = require('moment');
 var config = require('../../../config/config.js');
@@ -20,7 +19,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    var conString = "postgres://" + config.pg.user + ":" + config.pg.pw + "@" + config.pg.host + "/" + db;
     var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema;
 
     console.log(db);
@@ -29,6 +27,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
     switch (BACKEND) {
         case "gc2":
+            var pg = require('pg');
+            var conString = "postgres://" + config.pg.user + ":" + config.pg.pw + "@" + config.pg.host + "/" + db;
             pg.connect(conString, function (err, client, done) {
                 if (err) {
                     return console.error('error fetching client from pool', err);

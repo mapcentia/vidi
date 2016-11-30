@@ -6615,8 +6615,8 @@ module.exports = {
 };
 },{}],40:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -6687,7 +6687,7 @@ module.exports = {
         server: [{cowiDetail: ["bufferSearch"]}]
     },
     extensions: {
-        browser: [{vectorLayers: ["index"]}, {conflictSearch: ["index", "controller", "infoClick"]}],
+        browser: [{conflictSearch: ["index", "controller", "infoClick"]}],
         server: [{conflictSearch: ["index"]}]
     },
     _template: "cowiDetail.tmpl",
