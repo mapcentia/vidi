@@ -6615,17 +6615,13 @@ module.exports = {
 };
 },{}],40:[function(require,module,exports){
 module.exports = {
-    backend: "gc2",
-    //backend: "cartodb",
+    //backend: "gc2",
+    backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
-    pg: {
-        host: "127.0.0.1",
-        user: "gc2",
-        pw: "1234"
-    },
+
     cartodb: {
         db: "mhoegh",
         baseLayers: [

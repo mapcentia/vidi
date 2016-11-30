@@ -256,7 +256,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     // Add meta data and date/time to report before writing to file
                                     report.metaData = metaDataFinal;
                                     report.dateTime = moment().format('MMMM Do YYYY, hh:mm');
-                                    fs.writeFile(__dirname + "/tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
+                                    fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
                                         if (err) {
                                             console.log(err);
                                         } else {
