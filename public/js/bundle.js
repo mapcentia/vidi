@@ -1941,6 +1941,11 @@ module.exports = {
             window.open(e.url);
         });
 
+        backboneEvents.get().on("end:conflictSearch", function () {
+            $("#conflict-print-btn").prop("disabled", false);
+
+        });
+
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
@@ -1954,6 +1959,8 @@ module.exports = {
         $("#conflict-btn").on("click", function () {
             conflictSearch.control();
         });
+
+
     }
 };
 },{"../../../../config/config.js":40}],14:[function(require,module,exports){
@@ -2131,7 +2138,6 @@ var Terraformer = require('terraformer-wkt-parser');
 var config = require('../../../../config/config.js');
 
 
-
 var jquery = require('jquery');
 require('snackbarjs');
 
@@ -2242,7 +2248,7 @@ module.exports = module.exports = {
     },
 
     /**
-     *
+     * Initiates the module
      */
     init: function () {
         var metaData, me = this, socket = io.connect();
@@ -2263,7 +2269,8 @@ module.exports = module.exports = {
             }
         });
 
-        utils.createMainTab("conflict", "Konfliktsøgning");
+        // Create a new tab in the main tab bar
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../height')().max);
         $("#conflict").append(dom);
 
         // DOM created
@@ -2311,7 +2318,7 @@ module.exports = module.exports = {
     },
 
     /**
-     *
+     * Handle for GUI toggle button
      */
     control: function () {
         var me = this;
@@ -2331,7 +2338,8 @@ module.exports = module.exports = {
 
             // Show DOM elements
             $("#conflict-buffer").show();
-            $("#conflict .nav").show();
+            $("#conflict-main-tabs-container").show();
+            $("#conflict-places").show();
             $("#conflict .tab-content").show();
 
             // Reset layer made by clickInfo
@@ -2418,14 +2426,20 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("off:conflict");
         }
     },
+    /**
+     * Turns conflict off and resets DOM
+     */
     off: function () {
         // Clean up
         console.log("Stopping conflict");
         _clearAllItems();
         $("#conflict-buffer").hide();
-        $("#conflict .nav").hide();
+        $("#conflict-main-tabs-container").hide();
+        $("#conflict-places").hide();
         $("#conflict .tab-content").hide();
         $("#conflict-btn").prop("checked", false);
+        $("#conflict-print-btn").prop("disabled", true);
+
 
         $("#hits-content tbody").empty();
         $("#hits-data").empty();
@@ -2453,6 +2467,11 @@ module.exports = module.exports = {
         } catch (e) {
         }
     },
+
+    /**
+     * Makes a conflict search
+     * @param callBack
+     */
     makeSearch: function (callBack) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()),
@@ -2623,7 +2642,7 @@ module.exports = module.exports = {
 var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="panel-body">' +
     '<div class="togglebutton">' +
     '<label>' +
-    '<input id="conflict-btn" type="checkbox">Activate conflict search' +
+    '<input id="conflict-btn" type="checkbox">Aktiver konfliktsøgning' +
     '</label>' +
     '</div>' +
     '<div id="conflict-buffer" style="display: none">' +
@@ -2633,31 +2652,31 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<div id="conflict-buffer-slider" class="slider shor"></div>' +
     '</div>' +
     '</div>' +
-    '<ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs" style="display: none">' +
-    '<li role="presentation" class="active"><a href="#conflict-search-content" aria-controls="" role="tab" data-toggle="tab">Search</a></li>' +
-    '<li role="presentation"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Result</a></li>' +
+    '</div>' +
+    '</div>' +
+    '<div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">' +
+    '<input id="' + id + '" class="' + id + ' typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
+    '</div>' +
+    '<div id="conflict-main-tabs-container" class="panel panel-default" style="display: none"><div class="panel-body">' +
+    '<ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">' +
+    '<li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>' +
     '<li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>' +
     '<li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>' +
     '</ul>' +
     '<!-- Tab panes -->' +
     '<div class="tab-content" style="display: none">' +
-    '<div role="tabpanel" class="tab-pane active" id="conflict-search-content" style="height: 400px">' +
-    '<div class="places">' +
-    '<input id="' + id + '" class="' + id + ' typeahead" type="text" placeholder="Address">' +
-    '</div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="conflict-result-content">' +
+    '<div role="tabpanel" class="tab-pane active" id="conflict-result-content">' +
     '<div id="conflict-result">' +
     '<div id="conflict-result-origin"></div>' +
-    '<button class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class=\'fa fa-cog fa-spin fa-lg\'></i> Print report"><i class=\'fa fa-cog fa-lg\'></i> Print report</button>' +
-    '<button class="btn btn-primary btn-xs" id="conflict-geomatic-btn" disabled="true">Hent Geomatic<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>' +
+    '<button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class=\'fa fa-cog fa-spin fa-lg\'></i> Print rapport"><i class=\'fa fa-cog fa-lg\'></i> Print rapport</button>' +
+    '<!--<button class="btn btn-primary btn-xs" id="conflict-geomatic-btn" disabled="true">Hent Geomatic<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>-->' +
     '<div role="tabpanel">' +
     '<!-- Nav tabs -->' +
     '<ul class="nav nav-tabs" role="tablist">' +
-    '<li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">With conflicts<span></span></a></li>' +
-    '<li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data from conflicts<span></span></a></li>' +
-    '<li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Without conflicts<span></span></a></li>' +
-    '<li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Errors<span></span></a></li>' +
+    '<li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>' +
+    '<li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>' +
+    '<li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>' +
+    '<li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>' +
     '</ul>' +
     '<div class="tab-content">' +
     '<div role="tabpanel" class="tab-pane active" id="hits-content">' +
@@ -2709,7 +2728,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</div>' +
     '</div>' +
     '<div role="tabpanel" class="tab-pane" id="conflict-info-content">' +
-    '<div class="alert alert-info" role="alert">Info text</div>' +
+    '<div class="alert alert-info" role="alert">Når du klikker på et tændt lag, vises resultatet har. Du kan derefter søge med objektet.</div>' +
     '<div id="conflict-info-box">' +
     '<div id="conflict-modal-info-body">' +
     '<ul class="nav nav-tabs" id="conflict-info-tab"></ul>' +
@@ -2724,7 +2743,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</div>' +
     '</div>' +
     '</div>';
-},{"../../../../config/config.js":40,"./../../drawLocales/advancedInfo.js":11,"./../../search/danish":27,"./../../urlparser":37,"./../../utmZone.js":39,"jquery":80,"jsts":82,"nouislider":86,"reproject":159,"snackbarjs":160,"socket.io-client":161,"terraformer-wkt-parser":174}],15:[function(require,module,exports){
+},{"../../../../config/config.js":40,"./../../drawLocales/advancedInfo.js":11,"./../../height":18,"./../../search/danish":27,"./../../urlparser":37,"./../../utmZone.js":39,"jquery":80,"jsts":82,"nouislider":86,"reproject":159,"snackbarjs":160,"socket.io-client":161,"terraformer-wkt-parser":174}],15:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -6533,13 +6552,13 @@ module.exports = {
     init: function () {
 
     },
-    createMainTab: function (id, name) {
+    createMainTab: function (id, name, info, height) {
         $('<li role="presentation"><a href="#' + id + '-content" aria-controls role="tab" data-toggle="tab">' + name + '</a></li>').appendTo("#main-tabs");
 
-        $('<div role="tabpanel" class="tab-pane fade" id="' + id + '-content" style="max-height: 753px;">' +
+        $('<div role="tabpanel" class="tab-pane fade" id="' + id + '-content" style="max-height: ' + height + 'px; height: ' + height + 'px;">' +
             '<div class="alert alert-dismissible alert-info" role="alert">' +
             '<button type="button" class="close" data-dismiss="alert">×</button>' +
-            'Vektorlag bliver automatisk opdateret hvert 30. sekund.' +
+            info +
             '</div>' +
             '<div id="' + id + '"></div>' +
             '</div>').appendTo("#side-panel .main-content");
@@ -6661,7 +6680,7 @@ module.exports = {
     },
     searchModule: "danish",
     searchConfig: {
-        komkode: ["851", "153"]
+        komkode: "147"
     },
     _extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],

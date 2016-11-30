@@ -36,6 +36,11 @@ module.exports = {
             window.open(e.url);
         });
 
+        backboneEvents.get().on("end:conflictSearch", function () {
+            $("#conflict-print-btn").prop("disabled", false);
+
+        });
+
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
@@ -49,5 +54,7 @@ module.exports = {
         $("#conflict-btn").on("click", function () {
             conflictSearch.control();
         });
+
+
     }
 };
