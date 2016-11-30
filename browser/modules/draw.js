@@ -54,10 +54,7 @@ var editPopUp;
 /**
  * @type {*|exports|module.exports}
  */
-var infoClick;
-
 var backboneEvents;
-
 
 /**
  * Get readable distance of layer
@@ -96,7 +93,6 @@ var _getArea = function (e) {
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
-        infoClick = o.infoClick;
         backboneEvents = o.backboneEvents;
         return this;
     },

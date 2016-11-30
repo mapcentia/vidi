@@ -7,10 +7,8 @@
 
 var urlparser = require('./urlparser');
 var cloud;
-var advancedInfo;
 var clicktimer;
 var meta;
-var draw;
 var sqlQuery;
 var qstore = [];
 var active = true;
@@ -23,9 +21,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
-        draw = o.draw;
         sqlQuery = o.sqlQuery;
-        advancedInfo = o.advancedInfo;
         return this;
     },
     init: function () {
@@ -63,6 +59,9 @@ module.exports = {
      * @param a {boolean}
      */
     active: function(a){
+        if (!a) {
+            this.reset();
+        }
         active = a;
     }
 };

@@ -14,7 +14,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
     var db = req.body.db;
     var schema = req.body.schema;
     var wkt = req.body.wkt;
-    var socketId = req.body.socketid;
+    var socketId = req.body.socketId;
     var buffer = req.body.buffer;
     var fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -250,10 +250,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                 if (metaDataFinal.data.length === count) {
                                     var report = {
                                         hits: hits,
-                                        file: fileName,
-                                        geom: buffer4326 || primitive,
-                                        primitive: primitive,
-                                        text: text
+                                        file: fileName
                                     };
                                     response.send(report);
                                     // Add meta data and date/time to report before writing to file

@@ -32,6 +32,10 @@ var ready = false;
  */
 var extent;
 
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var backboneEvents;
 
 /**
@@ -56,7 +60,7 @@ module.exports = {
                 ready = true;
                 backboneEvents.get().trigger("ready:settings");
             }
-        }); // Ajax call end
+        });
     },
 
     /**

@@ -106,6 +106,7 @@ window.Vidi = function () {
     // Require the standard modules
     var modules = {
         init: require('./modules/init'),
+        socketId: require('./modules/socketId'),
         urlparser: require('./modules/urlparser'),
         cloud: require('./modules/cloud'),
         switchLayer: require('./modules/switchLayer'),
@@ -128,7 +129,6 @@ window.Vidi = function () {
         pushState: require('./modules/pushState'),
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
-        socketId: require('./modules/socketId'),
         extensions: {}
     };
 
@@ -142,6 +142,7 @@ window.Vidi = function () {
 
     // Use the setters in modules so they can interact
     modules.init.set(modules);
+    modules.socketId.set(modules);
     modules.meta.set(modules);
     modules.layerTree.set(modules);
     modules.layers.set(modules);
@@ -163,8 +164,11 @@ window.Vidi = function () {
     modules.pushState.set(modules);
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
-    modules.socketId.set(modules);
+
+    //Init modules
     modules.backboneEvents.init();
+    modules.socketId.init();
+
 
     // Require extensions modules
     // Hack to compile Glob files. Don´t call this function!

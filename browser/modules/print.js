@@ -25,11 +25,12 @@ var scales = config.print.scales;
 var tmpl;
 var pageSize;
 var orientation;
+var backboneEvents;
 
 /**
  * @private
  */
-var cleanUp = function () {
+var _cleanUp = function () {
     try {
         cloud.map.removeLayer(recScale);
         cloud.map.removeLayer(recEdit);
@@ -47,18 +48,24 @@ module.exports = {
         cloud = o.cloud;
         serializeLayers = o.serializeLayers;
         anchor = o.anchor;
-        cloud.map.addLayer(printItems);
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
-        // pass
+        cloud.map.addLayer(printItems);
+    },
+
+    off: function () {
+        _cleanUp();
+        $("#print-btn").prop("checked", false);
+        $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
     },
 
     /**
      *
      */
     activate: function () {
-        if (!printOn) {
+        if ($("#print-btn").is(':checked')) {
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
             $("#print-tmpl").empty();
             $("#print-size").empty();
@@ -75,7 +82,6 @@ module.exports = {
                 console.log(e.target.value)
                 scale = e.target.value;
                 change();
-
             });
 
             $.each(printC, function (i, v) {
@@ -135,26 +141,28 @@ module.exports = {
                 var arr = $("#print-form").serializeArray();
                 $("#get-print-fieldset").prop("disabled", true);
                 if (arr.length === 3) {
-                    cleanUp();
+                    _cleanUp();
                     tmpl = arr[0].value;
                     pageSize = arr[1].value;
                     orientation = arr[2].value;
                     me.control();
                 } else {
-                    cleanUp();
+                    _cleanUp();
                 }
             };
         } else {
-            cleanUp();
-            $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
+            this.off();
         }
     },
 
     /**
      *
      */
-    print: function () {
+    print: function (endEventName) {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
+
+        backboneEvents.get().trigger("start:print");
+
         try {
             recEdit.editing.disable();
         } catch (e) {
@@ -219,7 +227,6 @@ module.exports = {
                 layerQueryResult.push({geojson: v.geoJson})
             }
         });
-        //console.log(layerQueryResult)
 
         e = serializeLayers.serialize({
             "printHelper": true,
@@ -263,11 +270,18 @@ module.exports = {
             }),
             scriptCharset: "utf-8",
             success: function (response) {
-                $("#get-print-fieldset").prop("disabled", false);
-                $("#download-pdf, #open-pdf").attr("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
-                $("#download-pdf").attr("download", response.key);
-                $("#open-html").attr("href", response.url);
-                $("#start-print-btn").button('reset')
+                if (!endEventName) {
+                    backboneEvents.get().trigger("end:print", response);
+                } else {
+                    backboneEvents.get().trigger(endEventName, response);
+                }
+            },
+            error: function () {
+                if (!endEventName) {
+                    backboneEvents.get().trigger("end:print", response);
+                } else {
+                    backboneEvents.get().trigger(endEventName, response);
+                }
             }
         });
     },
@@ -275,9 +289,14 @@ module.exports = {
     /**
      *
      */
-    control: function () {
-        if (!printOn) {
-            printOn = true;
+    control: function (p, s, t, pa, o) {
+        if ($("#print-btn").is(':checked') || p) {
+            printC = p ? p : printC;
+            scales = s ? s : scales;
+            tmpl = t ? t : tmpl;
+            pageSize = pa ? pa : pageSize;
+            orientation = o ? o : orientation;
+
             var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
             var _getScale = function (scaleObject) {
                 var bounds = scaleObject.getBounds(),
@@ -301,8 +320,6 @@ module.exports = {
                 }
                 newScale = scale;
                 newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
-                //console.log(mscale);
-                //console.log(scale);
 
                 // Get utm zone
                 var zone = require('./utmZone.js').getZone(sw.lat, sw.lng);
@@ -317,9 +334,9 @@ module.exports = {
                 if (isFirst) {
                     var scaleIndex = scales.indexOf(scale);
                     if (scaleIndex > 1) {
-                        scaleIndex = scaleIndex-2;
+                        scaleIndex = scaleIndex - 2;
                     } else if (scaleIndex > 0) {
-                        scaleIndex = scaleIndex-1;
+                        scaleIndex = scaleIndex - 1;
                     }
                     scale = scales[scaleIndex];
                 }
@@ -376,8 +393,10 @@ module.exports = {
             );
 
         } else {
-            //clean up
-            cleanUp();
+            _cleanUp();
         }
+    },
+    cleanUp: function () {
+        _cleanUp();
     }
 };

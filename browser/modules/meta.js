@@ -41,47 +41,15 @@ var metaDataKeys = [];
 var metaDataKeysTitle = [];
 
 /**
- * @type {Object}
- */
-var cloud;
-
-/**
- * @type {object}
- */
-var switchLayer;
-
-/**
- * @type {object}
- */
-var setBaseLayer;
-
-/**
  *
  * @type {boolean}
  */
 var ready = false;
 
 /**
- *
- * @type {boolean}
- */
-var cartoDbLayersready = false;
-
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
-
-/**
  * @type {string}
  */
 var host;
-
-/**
- * @type {object}
- */
-var legend;
 
 /**
  *
@@ -105,10 +73,6 @@ module.exports = {
      * @returns {exports}
      */
     set: function (o) {
-        cloud = o.cloud;
-        switchLayer = o.switchLayer;
-        setBaseLayer = o.setBaseLayer;
-        legend = o.legend;
         backboneEvents = o.backboneEvents;
         return this;
     },

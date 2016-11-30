@@ -16,11 +16,6 @@ var cloud;
 var sqlQuery;
 
 /**
- * @type {*|exports|module.exports}
- */
-var infoClick;
-
-/**
  *
  * @type {*|exports|module.exports}
  */
@@ -161,10 +156,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
-        infoClick = o.infoClick;
         backboneEvents = o.backboneEvents;
-        cloud.map.addLayer(drawnItems);
-        cloud.map.addLayer(bufferItems);
         return this;
     },
     /**
@@ -179,8 +171,6 @@ module.exports = {
 
             $("#buffer").show();
 
-            // Reset layer made by clickInfo
-            infoClick.reset();
             L.drawLocal = require('./drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
@@ -266,6 +256,8 @@ module.exports = {
      *
      */
     init: function () {
+        cloud.map.addLayer(drawnItems);
+        cloud.map.addLayer(bufferItems);
         try {
             noUiSlider.create(bufferSlider, {
                 start: 40,

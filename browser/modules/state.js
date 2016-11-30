@@ -13,11 +13,6 @@ var cloud;
 /**
  * @type {*|exports|module.exports}
  */
-var meta;
-
-/**
- * @type {*|exports|module.exports}
- */
 var setting;
 
 /**
@@ -97,7 +92,6 @@ module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
-        meta = o.meta;
         setting = o.setting;
         setBaseLayer = o.setBaseLayer;
         baseLayer = o.baseLayer;

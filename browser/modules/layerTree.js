@@ -7,8 +7,6 @@
 
 var meta;
 
-var setting;
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -16,7 +14,6 @@ var setting;
 module.exports = module.exports = {
     set: function (o) {
         meta = o.meta;
-        setting = o.setting;
         return this;
     },
     init: function () {
@@ -32,7 +29,7 @@ module.exports = module.exports = {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                 l = [];
                 base64name = Base64.encode(arr[i]).replace(/=/g, "");
-                $("#layers").append('<div class="panel panel-default" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
+                $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
                 $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
                 for (var u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {

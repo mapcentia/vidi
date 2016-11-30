@@ -19,7 +19,7 @@ var urlparser;
  * List with base layers added to the map. Can be got through API.
  * @type {Array}
  */
-var baseLayers = []
+var baseLayers = [];
 
 /**
  *

@@ -1,0 +1,26 @@
+{
+  "name": "snackbarjs",
+  "version": "1.1.0",
+  "main": [
+    "dist/snackbar.min.js",
+    "dist/snackbar.min.css"
+  ],
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt"
+  ],
+  "dependencies": {
+    "jquery": "~2.1.1"
+  },
+  "homepage": "https://github.com/fezvrasta/snackbarjs",
+  "_release": "1.1.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "1.1.0",
+    "commit": "b44c15bb22b3fcdccf8069770a0695639644484d"
+  },
+  "_source": "https://github.com/fezvrasta/snackbarjs.git",
+  "_target": "^1.1.0",
+  "_originalSource": "snackbarjs",
+  "_direct": true
+}

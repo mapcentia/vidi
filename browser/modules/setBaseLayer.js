@@ -13,11 +13,6 @@ var cloud;
 /**
  * @type {*|exports|module.exports}
  */
-var anchor;
-
-/**
- * @type {*|exports|module.exports}
- */
 var pushState;
 
 /**
@@ -27,7 +22,6 @@ var pushState;
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
-        anchor = o.anchor;
         pushState = o.pushState;
         return this;
     },

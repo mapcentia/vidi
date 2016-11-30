@@ -23,16 +23,6 @@ var db = urlparser.db;
 var cloud;
 
 /**
- * @type {object}
- */
-var switchLayer;
-
-/**
- * @type {object}
- */
-var setBaseLayer;
-
-/**
  *
  * @type {boolean}
  */
@@ -55,10 +45,6 @@ var BACKEND = require('../../config/config.js').backend;
  */
 var host;
 
-/**
- * @type {object}
- */
-var legend;
 var meta;
 
 /**
@@ -84,9 +70,6 @@ module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
-        switchLayer = o.switchLayer;
-        setBaseLayer = o.setBaseLayer;
-        legend = o.legend;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         return this;
@@ -114,7 +97,6 @@ module.exports = {
                         type: "tms"
                     });
                 }
-                ready = true;
                 backboneEvents.get().trigger("ready:layers");
                 break;
             case "cartodb":

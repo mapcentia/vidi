@@ -8,11 +8,6 @@
 /**
  * @type {*|exports|module.exports}
  */
-var meta;
-
-/**
- * @type {*|exports|module.exports}
- */
 var anchor;
 
 /**
@@ -32,7 +27,6 @@ var t;
  */
 module.exports = module.exports = {
     set: function (o) {
-        meta = o.meta;
         anchor = o.anchor;
         return this;
     },

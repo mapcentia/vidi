@@ -125,21 +125,12 @@ module.exports = module.exports = {
             advancedInfo.control();
         });
 
-        $("#start-print-btn").on("click", function () {
-            print.print();
-            $(this).button('loading');
-            $("#get-print-fieldset").prop("disabled", true);
-        });
 
-        $("#print-btn").on("click", function () {
-            print.activate();
-            $("#get-print-fieldset").prop("disabled", true);
-        });
+
         $("#info-modal button").on("click", function () {
             $("#info-modal").hide();
         });
 
-        // Set listeners for backbone events
         backboneEvents.get().on("ready:meta", function () {
             if ($(document).width() > 767) {
                 setTimeout(
@@ -160,11 +151,37 @@ module.exports = module.exports = {
             draw.off();
         });
 
+        // Info click
         backboneEvents.get().on("on:infoClick", function () {
             infoClick.active(true);
         });
+
         backboneEvents.get().on("off:infoClick", function () {
             infoClick.active(false);
+        });
+
+        // Print
+        $("#print-btn").on("click", function () {
+            print.activate();
+            $("#get-print-fieldset").prop("disabled", true);
+        });
+
+        $("#start-print-btn").on("click", function () {
+            print.print();
+            $(this).button('loading');
+            $("#get-print-fieldset").prop("disabled", true);
+        });
+
+        backboneEvents.get().on("off:print", function () {
+            print.off();
+        });
+
+        backboneEvents.get().on("end:print", function (response) {
+            $("#get-print-fieldset").prop("disabled", false);
+            $("#download-pdf, #open-pdf").attr("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+            $("#download-pdf").attr("download", response.key);
+            $("#open-html").attr("href", response.url);
+            $("#start-print-btn").button('reset');
         });
 
 

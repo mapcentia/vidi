@@ -10,7 +10,6 @@ var meta;
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var BACKEND = require('../../config/config.js').backend;
-var switchLayer;
 
 /**
  *
@@ -20,7 +19,6 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
-        switchLayer = o.switchLayer;
         return this;
     },
     init: function (layerArr, el) {

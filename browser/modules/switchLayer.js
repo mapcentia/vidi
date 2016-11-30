@@ -60,7 +60,7 @@ module.exports = module.exports = {
                 c = c + 1;
             }
         });
-        el.parents(".panel").find("span:eq(0)").html(c);
+        el.parents(".panel-layertree").find("span:eq(0)").html(c);
         pushState.init();
         if (!doNotLegend) {
             legend.init();

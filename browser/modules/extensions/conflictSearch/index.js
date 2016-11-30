@@ -93,6 +93,11 @@ var schema = urlparser.schema;
 var noUiSlider = require('nouislider');
 
 /**
+ * @type {*|exports|module.exports}
+ */
+var io = require('socket.io-client');
+
+/**
  *
  * @type {Element}
  */
@@ -108,6 +113,11 @@ var bufferValue;
  * @type {*|exports|module.exports}
  */
 var drawControl;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var print;
 
 /**
  * @type {*|exports|module.exports}
@@ -159,6 +169,13 @@ var id = "conflict-custom-search";
  */
 var Terraformer = require('terraformer-wkt-parser');
 
+var config = require('../../../../config/config.js');
+
+
+
+var jquery = require('jquery');
+require('snackbarjs');
+
 /**
  *
  * @type {array}
@@ -187,10 +204,9 @@ var _clearDataItems = function () {
  * @private
  */
 var _clearInfoItems = function () {
-    infoItems.clearLayers();
-    $("#info-tab").empty();
-    $("#info-pane").empty();
-    $('#modal-info-body').hide();
+    $("#conflict-info-tab").empty();
+    $("#conflict-info-pane").empty();
+    $('#conflict-modal-info-body').hide();
 };
 
 /**
@@ -199,7 +215,7 @@ var _clearInfoItems = function () {
  */
 var _clearAllItems = function () {
     _clearDrawItems();
-    //_clearInfoItems();
+    _clearInfoItems();
     _clearDataItems();
 };
 
@@ -215,7 +231,6 @@ var _zoomToFeature = function (table, key, fid) {
     }
     var onLoad = function () {
         _clearDataItems();
-        //clearInfoItems();
         dataItems.addLayer(this.layer);
         cloud.zoomToExtentOfgeoJsonStore(this);
     };
@@ -247,6 +262,12 @@ var _zoomToFeature = function (table, key, fid) {
  * @type set: module.exports.set, init: module.exports.init
  */
 module.exports = module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
         setting = o.setting;
@@ -256,31 +277,42 @@ module.exports = module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
-        cloud.map.addLayer(drawnItems);
-        cloud.map.addLayer(bufferItems);
-        cloud.map.addLayer(dataItems);
+        print = o.print;
         modules = o;
         return this;
     },
-    init: function () {
-        var metaData, me = this;
 
-        // Turn off if advanced info or drawing is activated
-        backboneEvents.get().on("off:conflict on:advancedInfo on:drawing", function () {
-            me.off();
+    /**
+     *
+     */
+    init: function () {
+        var metaData, me = this, socket = io.connect();
+
+        cloud.map.addLayer(drawnItems);
+        cloud.map.addLayer(bufferItems);
+        cloud.map.addLayer(dataItems);
+
+        // Start listen to the web socket
+        socket.on(socketId.get(), function (data) {
+            if (typeof data.num !== "undefined") {
+                $("#conflict-progress").html(data.num + " " + (data.title || data.table));
+                if (data.error === null) {
+                    $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
+                } else {
+                    $("#conflict-console").append(data.table + " : " + data.error + "\n");
+                }
+            }
         });
+
         utils.createMainTab("conflict", "Konfliktsøgning");
         $("#conflict").append(dom);
 
         // DOM created
 
-        $("#conflict-btn").on("click", function () {
-            me.control();
-        });
-
+        // Init search with custom callback
         search.init(function () {
             _clearDrawItems();
-            _clearDataItems()
+            _clearDataItems();
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
             cloud.zoomToExtentOfgeoJsonStore(this);
             if (cloud.map.getZoom() > 17) {
@@ -311,31 +343,42 @@ module.exports = module.exports = {
             bufferValue.addEventListener('change', function () {
                 bufferSlider.noUiSlider.set([this.value]);
             });
-        } catch (e){}
+        } catch (e) {
+        }
 
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
         })
     },
+
+    /**
+     *
+     */
     control: function () {
         var me = this;
         if ($("#conflict-btn").is(':checked')) {
+
+            // conflictSearch.infoClick is not ready by init time. Must be in controller
             conflictInfoClick = modules.extensions.conflictSearch.infoClick;
             conflictInfoClick.active(true);
 
+            // Emit "on" event
             backboneEvents.get().trigger("on:conflict");
 
-            // Trigger off events for info, drawing and advanced info
+            // Trigger "off" events for info, drawing and advanced info
             backboneEvents.get().trigger("off:drawing");
             backboneEvents.get().trigger("off:advancedInfo");
             backboneEvents.get().trigger("off:infoClick");
 
+            // Show DOM elements
             $("#conflict-buffer").show();
             $("#conflict .nav").show();
             $("#conflict .tab-content").show();
 
             // Reset layer made by clickInfo
             infoClick.reset();
+
+            // Setup and add draw control
             L.drawLocal = require('./../../drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
@@ -379,13 +422,14 @@ module.exports = module.exports = {
                     remove: false
                 }
             });
-
             cloud.map.addControl(drawControl);
+
             // Unbind events
             cloud.map.off('draw:created');
             cloud.map.off('draw:drawstart');
             cloud.map.off('draw:drawstop');
             cloud.map.off('draw:editstart');
+
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
@@ -404,6 +448,8 @@ module.exports = module.exports = {
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
+
+            // Show tool tips for drawing tools
             var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
             po.popover("show");
             setTimeout(function () {
@@ -481,7 +527,7 @@ module.exports = module.exports = {
             }
         }
         primitive = layer.toGeoJSON();
-        if (typeof primitive.features !== "undefined"){
+        if (typeof primitive.features !== "undefined") {
             primitive = primitive.features[0];
         }
         if (primitive) {
@@ -508,6 +554,10 @@ module.exports = module.exports = {
                 "dashArray": '5,3'
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
+
+            jquery.snackbar({id: "snackbar-conflict", content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>", htmlAllowed: true, timeout: 1000000});
+
+
             xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/conflictSearch",
@@ -515,6 +565,11 @@ module.exports = module.exports = {
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
+                    setTimeout(function () {
+                        jquery("#snackbar-conflict").snackbar("hide");
+                    }, 1000);
+                    backboneEvents.get().trigger("end:conflictSearch");
+
                     $("#spinner span").hide();
                     $("#result-origin").html(response.text);
                     $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
@@ -532,7 +587,7 @@ module.exports = module.exports = {
                                 if (metaDataKeys[table].meta_url) {
                                     title = "<a target='_blank' href='" + metaDataKeys[table].meta_url + "'>" + title + "</a>";
                                 }
-                                row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></td></tr>";
+                                row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                                 if (v.hits > 0) {
                                     hitsTable.append(row);
                                     hitsCount++;
@@ -590,6 +645,9 @@ module.exports = module.exports = {
                     if (callBack) {
                         callBack();
                     }
+                },
+                error: function () {
+                    jquery("#snackbar-conflict").snackbar("hide");
                 }
             })
         }
@@ -632,7 +690,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<div role="tabpanel" class="tab-pane" id="conflict-result-content">' +
     '<div id="conflict-result">' +
     '<div id="conflict-result-origin"></div>' +
-    '<button class="btn btn-primary btn-xs" id="conflict-print-btn" disabled="true">Print report<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>' +
+    '<button class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class=\'fa fa-cog fa-spin fa-lg\'></i> Print report"><i class=\'fa fa-cog fa-lg\'></i> Print report</button>' +
     '<button class="btn btn-primary btn-xs" id="conflict-geomatic-btn" disabled="true">Hent Geomatic<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>' +
     '<div role="tabpanel">' +
     '<!-- Nav tabs -->' +

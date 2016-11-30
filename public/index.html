@@ -18,6 +18,7 @@
 
     <!-- build:css /static/css/build/all.min.css -->
     <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="bower_components/snackbarjs/dist/snackbar.min.css" rel="stylesheet">
     <link href="bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css" rel="stylesheet">
     <link href="bower_components/bootstrap-material-design/dist/css/ripples.min.css" rel="stylesheet">
     <link href="bower_components/leaflet-measure/dist/leaflet-measure.css" rel="stylesheet">
@@ -70,7 +71,7 @@
 <script src="//gc2.mapcentia.com/apps/widgets/gc2table/js/gc2table.js"></script>
 <script src="/api/baselayer"></script>
 <script>
-    function detailFormatter(index, row) {
+        function detailFormatter(index, row) {
         var html = [];
         $.each(row, function (key, value) {
             html.push('<p><b>' + key + ':</b> ' + value + '</p>');

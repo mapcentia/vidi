@@ -18,11 +18,6 @@ var meta;
 /**
  * @type {*|exports|module.exports}
  */
-var draw;
-
-/**
- * @type {*|exports|module.exports}
- */
 var advancedInfo;
 
 /**
@@ -55,7 +50,6 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
-        draw = o.draw;
         advancedInfo = o.advancedInfo;
         return this;
     },
@@ -65,10 +59,12 @@ module.exports = {
      * @param qstore {array}
      * @param wkt {string}
      * @param proj {string}
+     * @param callBack {string}
+     * @param num {int}
      */
     init: function (qstore, wkt, proj, callBack, num) {
-        var layers, count = {index: 0}, hit = false, distance;
-        var metaDataKeys = meta.getMetaDataKeys();
+        var layers, count = {index: 0}, hit = false, distance,
+            metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
         layers = cloud.getVisibleLayers().split(";");
 
