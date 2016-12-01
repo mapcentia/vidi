@@ -889,7 +889,6 @@ module.exports = module.exports = {
                     minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                     maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                     maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18
-
                 });
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;
@@ -3734,7 +3733,8 @@ module.exports = {
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: metaData.data[u].f_table_name,
-                        type: "tms"
+                        type: "tms",
+                        subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
                 backboneEvents.get().trigger("ready:layers");
@@ -6068,7 +6068,7 @@ module.exports = {
                     }
                 }
             }
-            sql = sql + "LIMIT " + (num || 20);
+            sql = sql + "LIMIT " + (num || 500);
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
@@ -6615,8 +6615,8 @@ module.exports = {
 };
 },{}],40:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

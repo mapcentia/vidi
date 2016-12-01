@@ -94,7 +94,8 @@ module.exports = {
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: metaData.data[u].f_table_name,
-                        type: "tms"
+                        type: "tms",
+                        subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
                 backboneEvents.get().trigger("ready:layers");

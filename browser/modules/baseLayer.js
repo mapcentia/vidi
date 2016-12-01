@@ -62,7 +62,6 @@ module.exports = module.exports = {
                     minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                     maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                     maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18
-
                 });
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;
