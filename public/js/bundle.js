@@ -386,7 +386,16 @@ window.Vidi = function () {
     //Init modules
     modules.backboneEvents.init();
     modules.socketId.init();
-
+    modules.bindEvent.init();
+    modules.meta.init();
+    modules.baseLayer.init();
+    modules.setting.init();
+    modules.state.init();
+    modules.infoClick.init();
+    modules.search.init();
+    modules.draw.init();
+    modules.advancedInfo.init();
+    modules.print.init();
 
     // Require extensions modules
     // Hack to compile Glob files. Don´t call this function!
@@ -1001,8 +1010,6 @@ var pushState;
 var layerTree;
 var layers;
 var infoClick;
-var infoClick;
-
 
 /**
  *
@@ -1042,8 +1049,6 @@ module.exports = module.exports = {
         $("#advanced-info-btn").on("click", function () {
             advancedInfo.control();
         });
-
-
 
         $("#info-modal button").on("click", function () {
             $("#info-modal").hide();
@@ -2889,6 +2894,7 @@ var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
 var hostname = "http://cowi-detail.mapcentia.com";
+var backboneEvents;
 
 var reset = function (s) {
     s.abort();
@@ -2982,7 +2988,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("osm");
+            setBaseLayer.init("gc2_group.dk.osm");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -3040,6 +3046,7 @@ module.exports = {
         draw = o.draw;
         setBaseLayer = o.setBaseLayer;
         anchor = o.anchor;
+        backboneEvents = o.backboneEvents;
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -3073,6 +3080,12 @@ module.exports = {
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItemsMarker);
         cloud.map.addLayer(drawnItemsPolygon);
+
+        backboneEvents.get().on("end:state", function () {
+            cloud.addBaseLayer("gc2_group.dk.osm", "osm");
+            setBaseLayer.init("gc2_group.dk.osm");
+
+        });
 
         /**
          * Restate search point from URL
@@ -3520,60 +3533,12 @@ module.exports = {
 
 'use strict';
 
-var cloud;
-var baseLayer;
-var meta;
-var layerTree;
-var addLayers;
-var setting;
-var state;
-var anchor;
-var infoClick;
-var search;
-var bindEvent;
-var draw;
-var print;
-var advancedInfo;
-var pushState;
-var extensions;
-var socketId;
-var backboneEvents;
 module.exports = {
     set: function (o) {
-        cloud = o.cloud;
-        socketId = o.socketId;
-        baseLayer = o.baseLayer;
-        meta = o.meta;
-        layerTree = o.layerTree;
-        addLayers = o.addLayers;
-        setting = o.setting;
-        state = o.state;
-        anchor = o.anchor;
-        infoClick = o.infoClick;
-        search = o.search;
-        bindEvent = o.bindEvent;
-        draw = o.draw;
-        print = o.print;
-        pushState = o.pushState;
-        advancedInfo = o.advancedInfo;
-        extensions = o.extensions;
-        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
-        bindEvent.init();
-        meta.init();
-        baseLayer.init();
-        setting.init();
-        state.init();
-        infoClick.init();
-        search.init();
-        draw.init();
-        advancedInfo.init();
-        print.init();
-
         $.material.init();
-
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
     }
@@ -6174,6 +6139,10 @@ var BACKEND = require('../../config/config.js').backend;
 
 var layers;
 
+var setBaseLayer = false;
+
+var backboneEvents;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -6194,6 +6163,7 @@ module.exports = {
         draw = o.draw;
         layers = o.layers;
         advancedInfo = o.advancedInfo;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
@@ -6433,10 +6403,14 @@ module.exports = {
 
 
                 }
+                backboneEvents.get().trigger("end:state");
             } else {
                 setTimeout(pollForLayers, 50);
             }
         }());
+    },
+    setBaseLayer: function(b) {
+        setBaseLayer = b;
     }
 };
 },{"../../config/config.js":40,"./urlparser":37,"base64-url":47,"lz-string":83}],36:[function(require,module,exports){
@@ -6618,8 +6592,8 @@ module.exports = {
     backend: "gc2",
     //backend: "cartodb",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
 
     cartodb: {
@@ -6678,15 +6652,15 @@ module.exports = {
     searchConfig: {
         komkode: "147"
     },
-    _extensions: {
+    extensions: {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    extensions: {
+    _extensions: {
         browser: [{conflictSearch: ["index", "controller", "infoClick"]}],
         server: [{conflictSearch: ["index"]}]
     },
-    _template: "cowiDetail.tmpl",
+    template: "cowiDetail.tmpl",
     brandName: "MapCentia"
 };
 },{}],41:[function(require,module,exports){

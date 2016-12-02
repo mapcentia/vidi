@@ -13,6 +13,7 @@ var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
 var hostname = "http://cowi-detail.mapcentia.com";
+var backboneEvents;
 
 var reset = function (s) {
     s.abort();
@@ -106,7 +107,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("osm");
+            setBaseLayer.init("gc2_group.dk.osm");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -164,6 +165,7 @@ module.exports = {
         draw = o.draw;
         setBaseLayer = o.setBaseLayer;
         anchor = o.anchor;
+        backboneEvents = o.backboneEvents;
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -197,6 +199,12 @@ module.exports = {
         cloud.map.addControl(drawControl);
         cloud.map.addLayer(drawnItemsMarker);
         cloud.map.addLayer(drawnItemsPolygon);
+
+        backboneEvents.get().on("end:state", function () {
+            cloud.addBaseLayer("gc2_group.dk.osm", "osm");
+            setBaseLayer.init("gc2_group.dk.osm");
+
+        });
 
         /**
          * Restate search point from URL

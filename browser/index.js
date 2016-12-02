@@ -168,7 +168,16 @@ window.Vidi = function () {
     //Init modules
     modules.backboneEvents.init();
     modules.socketId.init();
-
+    modules.bindEvent.init();
+    modules.meta.init();
+    modules.baseLayer.init();
+    modules.setting.init();
+    modules.state.init();
+    modules.infoClick.init();
+    modules.search.init();
+    modules.draw.init();
+    modules.advancedInfo.init();
+    modules.print.init();
 
     // Require extensions modules
     // Hack to compile Glob files. Don´t call this function!

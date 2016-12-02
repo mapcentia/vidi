@@ -83,8 +83,6 @@ var pushState;
 var layerTree;
 var layers;
 var infoClick;
-var infoClick;
-
 
 /**
  *
@@ -124,8 +122,6 @@ module.exports = module.exports = {
         $("#advanced-info-btn").on("click", function () {
             advancedInfo.control();
         });
-
-
 
         $("#info-modal button").on("click", function () {
             $("#info-modal").hide();

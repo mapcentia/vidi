@@ -80,6 +80,10 @@ var BACKEND = require('../../config/config.js').backend;
 
 var layers;
 
+var setBaseLayer = false;
+
+var backboneEvents;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -100,6 +104,7 @@ module.exports = {
         draw = o.draw;
         layers = o.layers;
         advancedInfo = o.advancedInfo;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
@@ -339,9 +344,13 @@ module.exports = {
 
 
                 }
+                backboneEvents.get().trigger("end:state");
             } else {
                 setTimeout(pollForLayers, 50);
             }
         }());
+    },
+    setBaseLayer: function(b) {
+        setBaseLayer = b;
     }
 };
