@@ -158,7 +158,7 @@ module.exports = {
     /**
      *
      */
-    print: function (endEventName) {
+    print: function (endEventName, customData) {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
 
         backboneEvents.get().trigger("start:print");
@@ -266,7 +266,8 @@ module.exports = {
                 orientation: orientation,
                 title: $("#print-title").val(),
                 comment: $("#print-comment").val(),
-                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none"
+                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                customData: customData || null
             }),
             scriptCharset: "utf-8",
             success: function (response) {
@@ -296,6 +297,7 @@ module.exports = {
             tmpl = t ? t : tmpl;
             pageSize = pa ? pa : pageSize;
             orientation = o ? o : orientation;
+
 
             var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
             var _getScale = function (scaleObject) {

@@ -7,6 +7,9 @@ var moment = require('moment');
 var config = require('../../../config/config.js');
 var utmZone = require('../../../browser/modules/utmZone');
 
+// Set locale for date/time string
+moment.locale("da_DK");
+
 var BACKEND = config.backend;
 
 router.post('/api/extension/conflictSearch', function (req, response) {
@@ -123,6 +126,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     var report = {
                                         hits: hits,
                                         file: fileName,
+                                        dateTime: moment().format('MMMM Do YYYY, H:mm')
                                         //geom: buffer4326 || primitive,
                                         //primitive: primitive,
                                         //text: text
@@ -232,30 +236,17 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     error: null,
                                     sql: metaDataKeys[table.split(".")[1]].sql
                                 };
-
-                                /* hit = {
-                                 table: table,
-                                 title: metaDataKeys[table.split(".")[1]].f_table_title,
-                                 group: metaDataKeys[table.split(".")[1]].layergroup,
-                                 hits: null,
-                                 num: null,
-                                 time: time,
-                                 id: socketId,
-                                 error: err.severity,
-                                 hint: err.hint
-                                 };*/
-
                                 hits[table] = hit;
                                 io.emit(socketId, hit);
                                 if (metaDataFinal.data.length === count) {
                                     var report = {
                                         hits: hits,
-                                        file: fileName
+                                        file: fileName,
+                                        dateTime: moment().format('MMMM Do YYYY, H:mm')
                                     };
                                     response.send(report);
                                     // Add meta data and date/time to report before writing to file
                                     report.metaData = metaDataFinal;
-                                    report.dateTime = moment().format('MMMM Do YYYY, hh:mm');
                                     fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
                                         if (err) {
                                             console.log(err);

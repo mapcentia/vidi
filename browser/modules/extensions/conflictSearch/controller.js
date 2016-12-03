@@ -8,6 +8,7 @@
 var print;
 var conflictSearch;
 var backboneEvents;
+var reportRender;
 var config = require('../../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
@@ -19,6 +20,7 @@ var scales = config.print.scales;
 module.exports = {
     set: function (o) {
         print = o.print;
+        reportRender = o.extensions.conflictSearch.reportRender;
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
         return this;
@@ -38,7 +40,10 @@ module.exports = {
 
         backboneEvents.get().on("end:conflictSearch", function () {
             $("#conflict-print-btn").prop("disabled", false);
+        });
 
+        backboneEvents.get().on("on:customData", function (e) {
+            reportRender.render(e);
         });
 
         $("#conflict-print-btn").on("click", function () {
@@ -46,8 +51,8 @@ module.exports = {
             backboneEvents.get().trigger("off:print");
 
             $(this).button('loading');
-            print.control(printC, scales, "print", "A4", "p");
-            print.print(endPrintEventName);
+            print.control(printC, scales, "conflictPrint", "A4", "p");
+            print.print(endPrintEventName, conflictSearch.getResult());
             print.cleanUp();
         });
 

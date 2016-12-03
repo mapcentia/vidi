@@ -155,7 +155,6 @@ module.exports = {
                         dataType: "json",
                         method: "get",
                         url: '/api/postdata/',
-                        //contentType: "application/json",
                         data: {
                             k: parr.join()
                         },
@@ -165,7 +164,9 @@ module.exports = {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
-
+                            if (response.data.customData !== null){
+                                backboneEvents.get().trigger("on:customData", response.data.customData);
+                            }
                             /**
                              * Recreate print
                              */

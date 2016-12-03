@@ -171,6 +171,8 @@ var Terraformer = require('terraformer-wkt-parser');
 
 var config = require('../../../../config/config.js');
 
+var _result;
+
 
 var jquery = require('jquery');
 require('snackbarjs');
@@ -577,6 +579,7 @@ module.exports = module.exports = {
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
+                    _result = response;
                     setTimeout(function () {
                         jquery("#snackbar-conflict").snackbar("hide");
                     }, 1000);
@@ -669,6 +672,9 @@ module.exports = module.exports = {
     },
     clearDrawing: function () {
         _clearDrawItems();
+    },
+    getResult: function () {
+        return _result;
     }
 
 };
