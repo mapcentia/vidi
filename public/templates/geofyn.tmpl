@@ -3,12 +3,16 @@
     body {
         background-color: white;
     }
+
     .leaflet-control-graphicscale {
         box-shadow: none;
         -webkit-box-shadow: none;
+        white-space: nowrap;
     }
-    #legend, #header {
-        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12); box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+
+    #legend, #header, #date-time, #scale-box {
+        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
     }
 </style>
 <!-- map -->
@@ -17,12 +21,17 @@
         <div id="map"></div>
     </div>
     <div id="header" style="position: absolute; display:block; -webkit-transform: rotate(-45deg); transform: rotate(-45deg); width: 600px; height: 300px; background-color: white; bottom: -100px; right: -210px">
-        <div style="position: absolute; top: 10px; left: 120px;"><img src="http://media.licdn.com/media/p/1/005/081/1b1/1881d37.png"></div>
-        <b id="title" style="position: absolute; top: 10px; left: 250px;"></b>
-        <p id="comment" style="position: absolute; top: 30px; left: 250px; width: 220px;"></p>
+        <div style="position: absolute; top: 140px; left: 280px;"><img style="width: 100px" src="http://media.licdn.com/media/p/1/005/081/1b1/1881d37.png"></div>
+        <b id="title" style="position: absolute; top: 10px; left: 190px;"></b>
+        <p id="comment" style="position: absolute; top: 30px; left: 190px; width: 270px;"></p>
 
     </div>
-    <div id="legend" style="position: absolute; top: 5px; left: 5px; padding: 10px; background-color: white"></div>
-    <div id="scalebar" style="position: absolute; bottom: 15px; right: -20px;"></div>
-    <div id="scale" style="position: absolute; bottom: 5px; right: 10px; font-size: 0.8em;"></div>
+    <div id="legend" style="position: absolute; top: 5px; left: 5px; padding: 10px; background-color: white; -webkit-transform: scale(0.6); -webkit-transform-origin:left top; display: {{_showLegend}}"></div>
+    <div id="scale-box" style="position: absolute; bottom: 0; left: 0; background-color: white; width: 150px; height: 40px">
+        <div id="scalebar" style="position: absolute; bottom: 1px; left: 0;"></div>
+        <div id="scale" style="position: absolute; bottom: 2px; left: 10px; font-size: 0.8em;"></div>
+    </div>
+
+    <div id="date-time" style="position: absolute; top: 0; right: 0; background-color:white;font-size: 0.8em;">{{printDataTime}}</div>
+
 </div>

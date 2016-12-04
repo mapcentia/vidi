@@ -7,11 +7,6 @@
 
 /**
  *
- */
-var moment = require('moment');
-
-/**
- *
  * @returns {*}
  */
 module.exports = {

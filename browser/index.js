@@ -79,6 +79,7 @@ window.Vidi = function () {
     if (urlVars.px && urlVars.py) {
         gc2i18n.dict.printWidth = urlVars.px + "px";
         gc2i18n.dict.printHeight = urlVars.py + "px";
+        gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
     }
 
     //

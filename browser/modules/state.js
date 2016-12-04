@@ -195,6 +195,7 @@ module.exports = {
 
                                             $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "top left");
                                             $("#scale").html("1 : " + response.data.scale);
                                             $("#title").html(decodeURI(urlVars.t));
                                             parr = urlVars.c.split("#");

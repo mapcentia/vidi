@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var http = require('http');
 var fs = require('fs');
+var moment = require('moment');
 var wkhtmltopdf = require('wkhtmltopdf');
 
 /**
@@ -23,7 +24,7 @@ router.post('/api/print', function (req, response) {
             response.send({success: true, error: err});
             return;
         }
-        var url = '/app/' + q.db + '/' + q.schema + '/?tmpl=' + q.tmpl + '.tmpl&l=' + q.legend +'&px=' + p[0] +'&py=' + p[1] +'&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
+        var url = '/app/' + q.db + '/' + q.schema + '/?tmpl=' + q.tmpl + '.tmpl&l=' + q.legend +'&px=' + p[0] +'&py=' + p[1] +'&td=' + q.dataTime + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log("http://127.0.0.1:3000" + url);
         wkhtmltopdf("http://127.0.0.1:3000" + url, {
             pageSize: q.pageSize,
@@ -32,6 +33,7 @@ router.post('/api/print', function (req, response) {
             L: 0,
             R: 0,
             T: 0,
+            encoding: "utf-8",
             javascriptDelay: 5000,
             windowStatus: "all_loaded"
         }, function(err){

@@ -11,8 +11,6 @@ var recEdit;
 var recScale;
 var serializeLayers;
 var anchor;
-var lz = require('lz-string');
-var base64 = require('base64-url');
 var printItems = new L.FeatureGroup();
 var urlparser = require('./urlparser');
 var db = urlparser.db;
@@ -27,6 +25,7 @@ var pageSize;
 var orientation;
 var backboneEvents;
 var legend;
+var moment = require('moment');
 
 /**
  * @private
@@ -54,6 +53,8 @@ module.exports = {
     },
     init: function () {
         cloud.map.addLayer(printItems);
+        // Set locale for date/time string
+        moment.locale(window._vidiLocale);
     },
 
     off: function () {
@@ -271,9 +272,10 @@ module.exports = {
                 tmpl: tmpl,
                 pageSize: pageSize,
                 orientation: orientation,
-                title: $("#print-title").val(),
-                comment: $("#print-comment").val(),
+                title: encodeURIComponent($("#print-title").val()),
+                comment: encodeURIComponent($("#print-comment").val()),
                 legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                dataTime: moment().format('MMMM Do YYYY, H:mm'),
                 customData: customData || null
             }),
             scriptCharset: "utf-8",

@@ -297,6 +297,7 @@ window.Vidi = function () {
     if (urlVars.px && urlVars.py) {
         gc2i18n.dict.printWidth = urlVars.px + "px";
         gc2i18n.dict.printHeight = urlVars.py + "px";
+        gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
     }
 
     //
@@ -2933,11 +2934,6 @@ module.exports = {
 
 /**
  *
- */
-var moment = require('moment');
-
-/**
- *
  * @returns {*}
  */
 module.exports = {
@@ -2990,7 +2986,7 @@ module.exports = {
         }
     }
 };
-},{"moment":86}],17:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var cloud;
 var infoClick;
 var anchor;
@@ -4134,8 +4130,6 @@ var recEdit;
 var recScale;
 var serializeLayers;
 var anchor;
-var lz = require('lz-string');
-var base64 = require('base64-url');
 var printItems = new L.FeatureGroup();
 var urlparser = require('./urlparser');
 var db = urlparser.db;
@@ -4150,6 +4144,7 @@ var pageSize;
 var orientation;
 var backboneEvents;
 var legend;
+var moment = require('moment');
 
 /**
  * @private
@@ -4177,6 +4172,8 @@ module.exports = {
     },
     init: function () {
         cloud.map.addLayer(printItems);
+        // Set locale for date/time string
+        moment.locale(window._vidiLocale);
     },
 
     off: function () {
@@ -4394,9 +4391,10 @@ module.exports = {
                 tmpl: tmpl,
                 pageSize: pageSize,
                 orientation: orientation,
-                title: $("#print-title").val(),
-                comment: $("#print-comment").val(),
+                title: encodeURIComponent($("#print-title").val()),
+                comment: encodeURIComponent($("#print-comment").val()),
                 legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                dataTime: moment().format('MMMM Do YYYY, H:mm'),
                 customData: customData || null
             }),
             scriptCharset: "utf-8",
@@ -4532,7 +4530,7 @@ module.exports = {
     }
 };
 
-},{"../../config/config.js":41,"./urlparser":38,"./utmZone.js":40,"base64-url":48,"lz-string":84}],27:[function(require,module,exports){
+},{"../../config/config.js":41,"./urlparser":38,"./utmZone.js":40,"moment":86}],27:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -6359,6 +6357,7 @@ module.exports = {
 
                                             $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "top left");
                                             $("#scale").html("1 : " + response.data.scale);
                                             $("#title").html(decodeURI(urlVars.t));
                                             parr = urlVars.c.split("#");
@@ -6695,8 +6694,8 @@ module.exports = {
 };
 },{}],41:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+    backend: "gc2",
+    //backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
