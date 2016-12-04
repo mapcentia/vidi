@@ -6773,7 +6773,7 @@ module.exports = {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    extensions: {
+    __extensions: {
         browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
         server: [{conflictSearch: ["index"]}]
     },
