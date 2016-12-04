@@ -1942,9 +1942,12 @@ module.exports = {
             conflictSearch.off();
         });
 
-        backboneEvents.get().on(endPrintEventName, function (e) {
+        backboneEvents.get().on(endPrintEventName, function (response) {
+            $("#conflict-get-print-fieldset").prop("disabled", false);
+            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-download-pdf").prop("download", response.key);
+            $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
-            window.open(e.url);
         });
 
         backboneEvents.get().on("end:conflictSearch", function () {
@@ -1958,9 +1961,10 @@ module.exports = {
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
+            $("#conflict-get-print-fieldset").prop("disabled", true);
 
             $(this).button('loading');
-            print.control(printC, scales, "conflictPrint", "A4", "p");
+            print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             print.print(endPrintEventName, conflictSearch.getResult());
             print.cleanUp();
         });
@@ -2135,6 +2139,18 @@ var xhr;
 
 /**
  *
+ *  * @type {string}
+ */
+var fromDrawingText = "Fra tegning";
+
+/**
+ *
+ *  * @type {string}
+ */
+var currentFromText;
+
+/**
+ *
  * @type {string}
  */
 var id = "conflict-custom-search";
@@ -2295,7 +2311,7 @@ module.exports = module.exports = {
             if (cloud.map.getZoom() > 17) {
                 cloud.map.setZoom(17);
             }
-            me.makeSearch();
+            me.makeSearch($("#conflict-custom-search").val());
         }, id);
 
         bufferSlider = document.getElementById('conflict-buffer-slider');
@@ -2418,10 +2434,10 @@ module.exports = module.exports = {
                 _clearDataItems()
             });
             cloud.map.on('draw:drawstop', function (e) {
-                me.makeSearch();
+                me.makeSearch(fromDrawingText);
             });
             cloud.map.on('draw:editstop', function (e) {
-                me.makeSearch();
+                me.makeSearch(fromDrawingText);
             });
             cloud.map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
@@ -2483,7 +2499,7 @@ module.exports = module.exports = {
      * Makes a conflict search
      * @param callBack
      */
-    makeSearch: function (callBack) {
+    makeSearch: function (text, callBack) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()),
             hitsTable = $("#hits-content tbody"),
@@ -2493,6 +2509,9 @@ module.exports = module.exports = {
             row, fileId, searchFinish, geomStr,
             metaDataKeys = meta.getMetaDataKeys(),
             visibleLayers = cloud.getVisibleLayers().split(";");
+            if (text) {
+                currentFromText = text;
+            }
 
         hitsTable.empty();
         noHitsTable.empty();
@@ -2550,7 +2569,7 @@ module.exports = module.exports = {
             xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/conflictSearch",
-                data: "db=" + db + "&schema=" + schema + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&wkt=" + Terraformer.convert(primitive.geometry),
+                data: "db=" + db + "&schema=" + schema + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
@@ -2559,7 +2578,6 @@ module.exports = module.exports = {
                         jquery("#snackbar-conflict").snackbar("hide");
                     }, 1000);
                     backboneEvents.get().trigger("end:conflictSearch");
-
                     $("#spinner span").hide();
                     $("#result-origin").html(response.text);
                     $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
@@ -2567,8 +2585,6 @@ module.exports = module.exports = {
                     $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
                     fileId = response.file;
                     searchFinish = true;
-                    //showPrintBtn();
-                    //showGeomaticBtn();
                     $.each(response.hits, function (i, v) {
                             var table = i, table1, table2, tr, td, title;
                             console.log(table)
@@ -2651,7 +2667,6 @@ module.exports = module.exports = {
     getResult: function () {
         return _result;
     }
-
 };
 
 var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="panel-body">' +
@@ -2683,7 +2698,23 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<div role="tabpanel" class="tab-pane active" id="conflict-result-content">' +
     '<div id="conflict-result">' +
     '<div id="conflict-result-origin"></div>' +
+
+    '<div class="btn-toolbar bs-component" style="margin: 0;">' +
+    '<div class="btn-group">' +
     '<button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class=\'fa fa-cog fa-spin fa-lg\'></i> Print rapport"><i class=\'fa fa-cog fa-lg\'></i> Print rapport</button>' +
+    '</div>' +
+    '<fieldset disabled id="conflict-get-print-fieldset">' +
+    '<div class="btn-group">' +
+    '<a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>' +
+    '<a href="bootstrap-elements.html" data-target="#" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>' +
+    '<ul class="dropdown-menu">' +
+    '<li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>' +
+    '<li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>' +
+    '</ul>' +
+    '</div>' +
+    '</fieldset>' +
+    '</div>' +
+
     '<!--<button class="btn btn-primary btn-xs" id="conflict-geomatic-btn" disabled="true">Hent Geomatic<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>-->' +
     '<div role="tabpanel">' +
     '<!-- Nav tabs -->' +
@@ -2779,6 +2810,12 @@ var conflictSearch;
 
 /**
  *
+ * @type {string}
+ */
+var fromObjectText = "Objekt fra ";
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset, active: module.exports.active}}
  */
 module.exports = {
@@ -2860,11 +2897,10 @@ module.exports = {
                             }
                             count.index++;
                             if (count.index === layers.length) {
-                                //$('#info-tab a:first').tab('show');
                                 $("#conflict-info-content button").click(function (e) {
                                     conflictSearch.clearDrawing();
                                     conflictSearch.addDrawing(qstore[$(this).data('gc2-store')].layer);
-                                    conflictSearch.makeSearch();
+                                    conflictSearch.makeSearch(fromObjectText + $(this).data('gc2-title'));
                                 });
                                 $('#conflict-main-tabs a[href="#conflict-info-content"]').tab('show');
                             }
@@ -2897,8 +2933,10 @@ module.exports = {
 
 'use strict';
 
+/**
+ *
+ */
 var moment = require('moment');
-
 
 /**
  *
@@ -2909,13 +2947,12 @@ module.exports = {
         return this;
     },
     init: function () {
-
-
     },
     render: function (e) {
         console.log(e);
         var table = $("#report table"), tr, td, dataTable, dataThead, dataTr, u, m, without = [];
         $("#conflict-data-time").html(e.dateTime);
+        $("#conflict-text").html(e.text);
         $.each(e.hits, function (i, v) {
             if (v.hits > 0) {
                 tr = $("<tr><td>" + (v.title || i) + " (" + v.hits + ")</td></tr>");
@@ -2944,7 +2981,6 @@ module.exports = {
                 }
             }
         });
-
         $.each(e.hits, function (i, v) {
             if (v.hits === 0) {
                 without.push((v.title || i));
@@ -4115,6 +4151,7 @@ var tmpl;
 var pageSize;
 var orientation;
 var backboneEvents;
+var legend;
 
 /**
  * @private
@@ -4155,6 +4192,7 @@ module.exports = {
      */
     activate: function () {
         if ($("#print-btn").is(':checked')) {
+            var numOfPrintTmpl = 0;
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
             $("#print-tmpl").empty();
             $("#print-size").empty();
@@ -4173,10 +4211,15 @@ module.exports = {
                 change();
             });
 
-            $.each(printC, function (i, v) {
+            $.each(printC, function (i) {
+                if (i.charAt(0) !== "_") {
+                    numOfPrintTmpl = numOfPrintTmpl + 1;
+                }
                 $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             });
-
+            if (numOfPrintTmpl > 1) {
+                $("#print-tmpl").parent("div").show();
+            }
             $(".print-tmpl").change(function (e) {
                 $("#print-size").empty();
                 $("#print-orientation").empty();
@@ -4355,7 +4398,7 @@ module.exports = {
                 orientation: orientation,
                 title: $("#print-title").val(),
                 comment: $("#print-comment").val(),
-                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
                 customData: customData || null
             }),
             scriptCharset: "utf-8",
@@ -4379,13 +4422,14 @@ module.exports = {
     /**
      *
      */
-    control: function (p, s, t, pa, o) {
+    control: function (p, s, t, pa, o, l) {
         if ($("#print-btn").is(':checked') || p) {
             printC = p ? p : printC;
             scales = s ? s : scales;
             tmpl = t ? t : tmpl;
             pageSize = pa ? pa : pageSize;
             orientation = o ? o : orientation;
+            legend = l ? l : null;
 
 
             var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
@@ -4421,7 +4465,6 @@ module.exports = {
             var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
                 scale = initScale || _getScale(scaleObject);
                 $("#select-scale").val(scale);
-
                 if (isFirst) {
                     var scaleIndex = scales.indexOf(scale);
                     if (scaleIndex > 1) {
@@ -4431,7 +4474,6 @@ module.exports = {
                     }
                     scale = scales[scaleIndex];
                 }
-
                 var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
                 var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
                 var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
@@ -6670,8 +6712,8 @@ module.exports = {
 };
 },{}],41:[function(require,module,exports){
 module.exports = {
-    backend: "gc2",
-    //backend: "cartodb",
+    //backend: "gc2",
+    backend: "cartodb",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -6730,7 +6772,7 @@ module.exports = {
                     }
                 }
             },
-            "conflictPrint": {
+            "_conflictPrint": {
                 A4: {
                     p: {
                         mapsizePx: [700, 500],

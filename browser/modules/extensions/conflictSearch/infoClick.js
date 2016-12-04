@@ -18,6 +18,12 @@ var conflictSearch;
 
 /**
  *
+ * @type {string}
+ */
+var fromObjectText = "Objekt fra ";
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset, active: module.exports.active}}
  */
 module.exports = {
@@ -99,11 +105,10 @@ module.exports = {
                             }
                             count.index++;
                             if (count.index === layers.length) {
-                                //$('#info-tab a:first').tab('show');
                                 $("#conflict-info-content button").click(function (e) {
                                     conflictSearch.clearDrawing();
                                     conflictSearch.addDrawing(qstore[$(this).data('gc2-store')].layer);
-                                    conflictSearch.makeSearch();
+                                    conflictSearch.makeSearch(fromObjectText + $(this).data('gc2-title'));
                                 });
                                 $('#conflict-main-tabs a[href="#conflict-info-content"]').tab('show');
                             }

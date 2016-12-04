@@ -163,10 +163,10 @@
                                 </div>
                                 <fieldset disabled id="get-print-fieldset">
                                     <div class="btn-group">
-                                        <a href="javascript:void(0)" class="btn btn-primary btn-raised" id="download-pdf"><i class="material-icons" style="font-size: 18px">file_download</i> {{Download}}</a>
+                                        <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="open-pdf">{{Open PDF}}</a>
                                         <a href="bootstrap-elements.html" data-target="#" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
                                         <ul class="dropdown-menu">
-                                            <li><a target="_blank" href="javascript:void(0)" id="open-pdf">{{Open PDF}}</a></li>
+                                            <li><a href="javascript:void(0)" id="download-pdf">{{Download}}</a></li>
                                             <li><a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a></li>
                                         </ul>
                                     </div>
@@ -183,7 +183,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group">
+                                        <div class="form-group" style="display: none">
                                             <label class="col-md-2 control-label">{{Template}}</label>
                                             <div class="col-md-10" id="print-tmpl"></div>
                                         </div>

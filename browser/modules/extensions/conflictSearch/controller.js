@@ -33,9 +33,12 @@ module.exports = {
             conflictSearch.off();
         });
 
-        backboneEvents.get().on(endPrintEventName, function (e) {
+        backboneEvents.get().on(endPrintEventName, function (response) {
+            $("#conflict-get-print-fieldset").prop("disabled", false);
+            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-download-pdf").prop("download", response.key);
+            $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
-            window.open(e.url);
         });
 
         backboneEvents.get().on("end:conflictSearch", function () {
@@ -49,9 +52,10 @@ module.exports = {
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
+            $("#conflict-get-print-fieldset").prop("disabled", true);
 
             $(this).button('loading');
-            print.control(printC, scales, "conflictPrint", "A4", "p");
+            print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             print.print(endPrintEventName, conflictSearch.getResult());
             print.cleanUp();
         });

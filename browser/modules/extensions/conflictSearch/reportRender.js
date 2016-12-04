@@ -21,9 +21,10 @@ module.exports = {
     init: function () {
     },
     render: function (e) {
-        //console.log(e);
+        console.log(e);
         var table = $("#report table"), tr, td, dataTable, dataThead, dataTr, u, m, without = [];
         $("#conflict-data-time").html(e.dateTime);
+        $("#conflict-text").html(e.text);
         $.each(e.hits, function (i, v) {
             if (v.hits > 0) {
                 tr = $("<tr><td>" + (v.title || i) + " (" + v.hits + ")</td></tr>");
@@ -52,7 +53,6 @@ module.exports = {
                 }
             }
         });
-
         $.each(e.hits, function (i, v) {
             if (v.hits === 0) {
                 without.push((v.title || i));

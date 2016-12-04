@@ -18,6 +18,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
     var wkt = req.body.wkt;
     var socketId = req.body.socketId;
     var buffer = req.body.buffer;
+    var text = req.body.text;
     var fileName = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -126,6 +127,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     var report = {
                                         hits: hits,
                                         file: fileName,
+                                        text: text,
                                         dateTime: moment().format('MMMM Do YYYY, H:mm')
                                         //geom: buffer4326 || primitive,
                                         //primitive: primitive,
@@ -242,6 +244,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                     var report = {
                                         hits: hits,
                                         file: fileName,
+                                        text: text,
                                         dateTime: moment().format('MMMM Do YYYY, H:mm')
                                     };
                                     response.send(report);

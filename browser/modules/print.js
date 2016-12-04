@@ -26,6 +26,7 @@ var tmpl;
 var pageSize;
 var orientation;
 var backboneEvents;
+var legend;
 
 /**
  * @private
@@ -66,6 +67,7 @@ module.exports = {
      */
     activate: function () {
         if ($("#print-btn").is(':checked')) {
+            var numOfPrintTmpl = 0;
             $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", false);
             $("#print-tmpl").empty();
             $("#print-size").empty();
@@ -84,10 +86,15 @@ module.exports = {
                 change();
             });
 
-            $.each(printC, function (i, v) {
+            $.each(printC, function (i) {
+                if (i.charAt(0) !== "_") {
+                    numOfPrintTmpl = numOfPrintTmpl + 1;
+                }
                 $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             });
-
+            if (numOfPrintTmpl > 1) {
+                $("#print-tmpl").parent("div").show();
+            }
             $(".print-tmpl").change(function (e) {
                 $("#print-size").empty();
                 $("#print-orientation").empty();
@@ -266,7 +273,7 @@ module.exports = {
                 orientation: orientation,
                 title: $("#print-title").val(),
                 comment: $("#print-comment").val(),
-                legend: $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
                 customData: customData || null
             }),
             scriptCharset: "utf-8",
@@ -290,13 +297,14 @@ module.exports = {
     /**
      *
      */
-    control: function (p, s, t, pa, o) {
+    control: function (p, s, t, pa, o, l) {
         if ($("#print-btn").is(':checked') || p) {
             printC = p ? p : printC;
             scales = s ? s : scales;
             tmpl = t ? t : tmpl;
             pageSize = pa ? pa : pageSize;
             orientation = o ? o : orientation;
+            legend = l ? l : null;
 
 
             var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
@@ -332,7 +340,6 @@ module.exports = {
             var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
                 scale = initScale || _getScale(scaleObject);
                 $("#select-scale").val(scale);
-
                 if (isFirst) {
                     var scaleIndex = scales.indexOf(scale);
                     if (scaleIndex > 1) {
@@ -342,7 +349,6 @@ module.exports = {
                     }
                     scale = scales[scaleIndex];
                 }
-
                 var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
                 var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
                 var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
