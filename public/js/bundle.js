@@ -1918,6 +1918,7 @@ var print;
 var conflictSearch;
 var backboneEvents;
 var reportRender;
+var infoClick;
 var config = require('../../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
@@ -1930,6 +1931,7 @@ module.exports = {
     set: function (o) {
         print = o.print;
         reportRender = o.extensions.conflictSearch.reportRender;
+        infoClick = o.extensions.conflictSearch.infoClick;
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
         return this;
@@ -1952,6 +1954,16 @@ module.exports = {
 
         backboneEvents.get().on("end:conflictSearch", function () {
             $("#conflict-print-btn").prop("disabled", false);
+        });
+
+        backboneEvents.get().on("on:conflictInfoClick", function () {
+            console.log("Starting conflictInfoClick");
+            infoClick.active(true);
+        });
+
+        backboneEvents.get().on("off:conflictInfoClick", function () {
+            console.log("Stopping conflictInfoClick");
+            infoClick.active(false)
         });
 
         backboneEvents.get().on("on:customData", function (e) {
@@ -2431,15 +2443,23 @@ module.exports = module.exports = {
             });
             cloud.map.on('draw:drawstart', function (e) {
                 _clearDrawItems();
-                _clearDataItems()
+                _clearDataItems();
+                // Switch info click off
+                backboneEvents.get().trigger("off:conflictInfoClick");
             });
             cloud.map.on('draw:drawstop', function (e) {
                 me.makeSearch(fromDrawingText);
+                // Switch info click on again
+                backboneEvents.get().trigger("on:conflictInfoClick");
             });
             cloud.map.on('draw:editstop', function (e) {
                 me.makeSearch(fromDrawingText);
+                // Switch info click on again
+                backboneEvents.get().trigger("on:conflictInfoClick");
             });
             cloud.map.on('draw:editstart', function (e) {
+                // Switch info click off
+                backboneEvents.get().trigger("off:conflictInfoClick");
                 bufferItems.clearLayers();
             });
 
@@ -6792,7 +6812,7 @@ module.exports = {
         server: [{cowiDetail: ["bufferSearch"]}]
     },
     extensions: {
-        browser: [{conflictSearch: ["index", "reportRender", "controller", "infoClick"]}],
+        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
         server: [{conflictSearch: ["index"]}]
     },
     _template: "cowiDetail.tmpl",

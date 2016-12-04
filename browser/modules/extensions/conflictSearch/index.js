@@ -452,15 +452,23 @@ module.exports = module.exports = {
             });
             cloud.map.on('draw:drawstart', function (e) {
                 _clearDrawItems();
-                _clearDataItems()
+                _clearDataItems();
+                // Switch info click off
+                backboneEvents.get().trigger("off:conflictInfoClick");
             });
             cloud.map.on('draw:drawstop', function (e) {
                 me.makeSearch(fromDrawingText);
+                // Switch info click on again
+                backboneEvents.get().trigger("on:conflictInfoClick");
             });
             cloud.map.on('draw:editstop', function (e) {
                 me.makeSearch(fromDrawingText);
+                // Switch info click on again
+                backboneEvents.get().trigger("on:conflictInfoClick");
             });
             cloud.map.on('draw:editstart', function (e) {
+                // Switch info click off
+                backboneEvents.get().trigger("off:conflictInfoClick");
                 bufferItems.clearLayers();
             });
 
