@@ -5609,24 +5609,9 @@ var _getLayers = function (map) {
         return a._icon.style.zIndex - b._icon.style.zIndex;
     });
 
-    var i;
-    // Layers with equal zIndexes can cause problems with mapfish print
-    for (i = 1; i < markers.length; i++) {
-        if (markers[i]._icon.style.zIndex <= markers[i - 1]._icon.style.zIndex) {
-            markers[i]._icon.style.zIndex = markers[i - 1].icons.style.zIndex + 1;
-        }
-    }
-
     tiles.sort(function (a, b) {
         return a._container.style.zIndex - b._container.style.zIndex;
     });
-
-    // Layers with equal zIndexes can cause problems with mapfish print
-    for (i = 1; i < tiles.length; i++) {
-        if (tiles[i]._container.style.zIndex <= tiles[i - 1]._container.style.zIndex) {
-            tiles[i]._container.style.zIndex = tiles[i - 1]._container.style.zIndex + 1;
-        }
-    }
 
     imageNodes = [].slice.call(this, map._panes.overlayPane.childNodes);
     imageOverlays.sort(function (a, b) {
