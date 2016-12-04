@@ -51,12 +51,18 @@ module.exports = {
 
         // Handle conflict info click events
         backboneEvents.get().on("on:conflictInfoClick", function () {
-            console.log("Starting conflictInfoClick");
+            console.info("Starting conflictInfoClick");
             infoClick.active(true);
         });
 
+        // Handle conflict info click events
+        backboneEvents.get().on("reset:conflictInfoClick", function () {
+            console.info("Resetting conflictInfoClick");
+            infoClick.reset();
+        });
+
         backboneEvents.get().on("off:conflictInfoClick", function () {
-            console.log("Stopping conflictInfoClick");
+            console.info("Stopping conflictInfoClick");
             infoClick.active(false)
         });
 

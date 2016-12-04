@@ -140,20 +140,29 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
+            console.info("Stopping advanced info");
             advancedInfo.off();
         });
 
         backboneEvents.get().on("off:drawing on:advancedInfo", function () {
+            console.info("Stopping drawing");
             draw.off();
         });
 
         // Info click
         backboneEvents.get().on("on:infoClick", function () {
+            console.info("Activating infoClick");
             infoClick.active(true);
         });
 
         backboneEvents.get().on("off:infoClick", function () {
+            console.info("Deactivating infoClick");
             infoClick.active(false);
+        });
+
+        backboneEvents.get().on("reset:infoClick", function () {
+            console.info("Resetting infoClick");
+            infoClick.reset();
         });
 
         // Print

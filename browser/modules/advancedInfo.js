@@ -287,7 +287,6 @@ module.exports = {
     },
     off: function () {
         // Clean up
-        console.log("Stopping advanced info");
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);
         // Unbind events

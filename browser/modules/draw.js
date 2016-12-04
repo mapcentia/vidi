@@ -294,7 +294,6 @@ module.exports = {
     },
     off: function () {
         // Clean up
-        console.log("Stopping drawing");
         try {
             cloud.map.removeControl(drawControl);
         } catch (e) {

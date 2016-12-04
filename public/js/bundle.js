@@ -708,7 +708,6 @@ module.exports = {
     },
     off: function () {
         // Clean up
-        console.log("Stopping advanced info");
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);
         // Unbind events
@@ -1067,20 +1066,29 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
+            console.info("Stopping advanced info");
             advancedInfo.off();
         });
 
         backboneEvents.get().on("off:drawing on:advancedInfo", function () {
+            console.info("Stopping drawing");
             draw.off();
         });
 
         // Info click
         backboneEvents.get().on("on:infoClick", function () {
+            console.info("Activating infoClick");
             infoClick.active(true);
         });
 
         backboneEvents.get().on("off:infoClick", function () {
+            console.info("Deactivating infoClick");
             infoClick.active(false);
+        });
+
+        backboneEvents.get().on("reset:infoClick", function () {
+            console.info("Resetting infoClick");
+            infoClick.reset();
         });
 
         // Print
@@ -1534,7 +1542,6 @@ module.exports = {
     },
     off: function () {
         // Clean up
-        console.log("Stopping drawing");
         try {
             cloud.map.removeControl(drawControl);
         } catch (e) {
@@ -1944,6 +1951,7 @@ module.exports = {
             conflictSearch.off();
         });
 
+        // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
             $("#conflict-get-print-fieldset").prop("disabled", false);
             $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
@@ -1952,24 +1960,34 @@ module.exports = {
             $("#conflict-print-btn").button('reset');
         });
 
+        // When conflict search is done, enable the print button
         backboneEvents.get().on("end:conflictSearch", function () {
             $("#conflict-print-btn").prop("disabled", false);
         });
 
+        // Handle conflict info click events
         backboneEvents.get().on("on:conflictInfoClick", function () {
-            console.log("Starting conflictInfoClick");
+            console.info("Starting conflictInfoClick");
             infoClick.active(true);
         });
 
+        // Handle conflict info click events
+        backboneEvents.get().on("reset:conflictInfoClick", function () {
+            console.info("Resetting conflictInfoClick");
+            infoClick.reset();
+        });
+
         backboneEvents.get().on("off:conflictInfoClick", function () {
-            console.log("Stopping conflictInfoClick");
+            console.info("Stopping conflictInfoClick");
             infoClick.active(false)
         });
 
+        // When print module emit on:customData when render the custom data
         backboneEvents.get().on("on:customData", function (e) {
             reportRender.render(e);
         });
 
+        // Click event for print button
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
@@ -1981,6 +1999,7 @@ module.exports = {
             print.cleanUp();
         });
 
+        // Click event for conflict search on/off toggle button
         $("#conflict-btn").on("click", function () {
             conflictSearch.control();
         });
@@ -2012,31 +2031,7 @@ var meta;
  *
  * @type {*|exports|module.exports}
  */
-var setting;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 var utils;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var infoClick;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var conflictInfoClick;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var switchLayer;
 
 /**
  *
@@ -2182,12 +2177,6 @@ require('snackbarjs');
 
 /**
  *
- * @type {array}
- */
-var modules;
-
-/**
- *
  * @private
  */
 var _clearDrawItems = function () {
@@ -2274,15 +2263,11 @@ module.exports = module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
-        setting = o.setting;
         utils = o.utils;
         meta = o.meta;
-        infoClick = o.infoClick;
-        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
         print = o.print;
-        modules = o;
         return this;
     },
 
@@ -2363,9 +2348,7 @@ module.exports = module.exports = {
         var me = this;
         if ($("#conflict-btn").is(':checked')) {
 
-            // conflictSearch.infoClick is not ready by init time. Must be in controller
-            conflictInfoClick = modules.extensions.conflictSearch.infoClick;
-            conflictInfoClick.active(true);
+            backboneEvents.get().trigger("on:conflictInfoClick");
 
             // Emit "on" event
             backboneEvents.get().trigger("on:conflict");
@@ -2382,7 +2365,7 @@ module.exports = module.exports = {
             $("#conflict .tab-content").show();
 
             // Reset layer made by clickInfo
-            infoClick.reset();
+            backboneEvents.get().trigger("reset:infoClick");
 
             // Setup and add draw control
             L.drawLocal = require('./../../drawLocales/advancedInfo.js');
@@ -2478,7 +2461,7 @@ module.exports = module.exports = {
      */
     off: function () {
         // Clean up
-        console.log("Stopping conflict");
+        console.info("Stopping conflict");
         _clearAllItems();
         $("#conflict-buffer").hide();
         $("#conflict-main-tabs-container").hide();
@@ -2499,11 +2482,9 @@ module.exports = module.exports = {
 
         // Turn info click on again
         backboneEvents.get().trigger("on:infoClick");
-        try {
-            conflictInfoClick.reset();
-            conflictInfoClick.active(false);
-        } catch (e) {
-        }
+        backboneEvents.get().trigger("reset:conflictInfoClick");
+        backboneEvents.get().trigger("off:conflictInfoClick");
+
         // Unbind events
         cloud.map.off('draw:created');
         cloud.map.off('draw:drawstart');
@@ -2529,9 +2510,9 @@ module.exports = module.exports = {
             row, fileId, searchFinish, geomStr,
             metaDataKeys = meta.getMetaDataKeys(),
             visibleLayers = cloud.getVisibleLayers().split(";");
-            if (text) {
-                currentFromText = text;
-            }
+        if (text) {
+            currentFromText = text;
+        }
 
         hitsTable.empty();
         noHitsTable.empty();
@@ -2607,7 +2588,6 @@ module.exports = module.exports = {
                     searchFinish = true;
                     $.each(response.hits, function (i, v) {
                             var table = i, table1, table2, tr, td, title;
-                            console.log(table)
                             title = (typeof metaDataKeys[table].f_table_title !== "undefined" && metaDataKeys[table].f_table_title !== "" && metaDataKeys[table].f_table_title !== null) ? metaDataKeys[table].f_table_title : table;
                             if (v.error === null) {
                                 if (metaDataKeys[table].meta_url) {
@@ -2819,7 +2799,6 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
 
 var urlparser = require('./../../urlparser');
 var cloud;
-var advancedInfo;
 var clicktimer;
 var meta;
 var draw;
@@ -2844,7 +2823,6 @@ module.exports = {
         meta = o.meta;
         draw = o.draw;
         sqlQuery = o.sqlQuery;
-        advancedInfo = o.advancedInfo;
         conflictSearch = o.extensions.conflictSearch.index;
         return this;
     },

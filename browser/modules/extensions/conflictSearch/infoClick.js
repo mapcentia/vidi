@@ -7,7 +7,6 @@
 
 var urlparser = require('./../../urlparser');
 var cloud;
-var advancedInfo;
 var clicktimer;
 var meta;
 var draw;
@@ -32,7 +31,6 @@ module.exports = {
         meta = o.meta;
         draw = o.draw;
         sqlQuery = o.sqlQuery;
-        advancedInfo = o.advancedInfo;
         conflictSearch = o.extensions.conflictSearch.index;
         return this;
     },

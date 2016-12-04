@@ -21,31 +21,7 @@ var meta;
  *
  * @type {*|exports|module.exports}
  */
-var setting;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
 var utils;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var infoClick;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var conflictInfoClick;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var switchLayer;
 
 /**
  *
@@ -191,12 +167,6 @@ require('snackbarjs');
 
 /**
  *
- * @type {array}
- */
-var modules;
-
-/**
- *
  * @private
  */
 var _clearDrawItems = function () {
@@ -283,15 +253,11 @@ module.exports = module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
-        setting = o.setting;
         utils = o.utils;
         meta = o.meta;
-        infoClick = o.infoClick;
-        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
         print = o.print;
-        modules = o;
         return this;
     },
 
@@ -372,9 +338,7 @@ module.exports = module.exports = {
         var me = this;
         if ($("#conflict-btn").is(':checked')) {
 
-            // conflictSearch.infoClick is not ready by init time. Must be in controller
-            conflictInfoClick = modules.extensions.conflictSearch.infoClick;
-            conflictInfoClick.active(true);
+            backboneEvents.get().trigger("on:conflictInfoClick");
 
             // Emit "on" event
             backboneEvents.get().trigger("on:conflict");
@@ -391,7 +355,7 @@ module.exports = module.exports = {
             $("#conflict .tab-content").show();
 
             // Reset layer made by clickInfo
-            infoClick.reset();
+            backboneEvents.get().trigger("reset:infoClick");
 
             // Setup and add draw control
             L.drawLocal = require('./../../drawLocales/advancedInfo.js');
@@ -487,7 +451,7 @@ module.exports = module.exports = {
      */
     off: function () {
         // Clean up
-        console.log("Stopping conflict");
+        console.info("Stopping conflict");
         _clearAllItems();
         $("#conflict-buffer").hide();
         $("#conflict-main-tabs-container").hide();
@@ -508,11 +472,9 @@ module.exports = module.exports = {
 
         // Turn info click on again
         backboneEvents.get().trigger("on:infoClick");
-        try {
-            conflictInfoClick.reset();
-            conflictInfoClick.active(false);
-        } catch (e) {
-        }
+        backboneEvents.get().trigger("reset:conflictInfoClick");
+        backboneEvents.get().trigger("off:conflictInfoClick");
+
         // Unbind events
         cloud.map.off('draw:created');
         cloud.map.off('draw:drawstart');
@@ -538,9 +500,9 @@ module.exports = module.exports = {
             row, fileId, searchFinish, geomStr,
             metaDataKeys = meta.getMetaDataKeys(),
             visibleLayers = cloud.getVisibleLayers().split(";");
-            if (text) {
-                currentFromText = text;
-            }
+        if (text) {
+            currentFromText = text;
+        }
 
         hitsTable.empty();
         noHitsTable.empty();
@@ -616,7 +578,6 @@ module.exports = module.exports = {
                     searchFinish = true;
                     $.each(response.hits, function (i, v) {
                             var table = i, table1, table2, tr, td, title;
-                            console.log(table)
                             title = (typeof metaDataKeys[table].f_table_title !== "undefined" && metaDataKeys[table].f_table_title !== "" && metaDataKeys[table].f_table_title !== null) ? metaDataKeys[table].f_table_title : table;
                             if (v.error === null) {
                                 if (metaDataKeys[table].meta_url) {
