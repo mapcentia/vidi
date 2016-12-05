@@ -53,7 +53,7 @@ var graphicScale = L.control.graphicScale({
     doubleLine: false,
     fill: 'hollow',
     showSubunits: false,
-    position: "topleft"
+    position: "bottomleft"
 }).addTo(map);
 
 /**

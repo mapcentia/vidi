@@ -1203,7 +1203,7 @@ var graphicScale = L.control.graphicScale({
     doubleLine: false,
     fill: 'hollow',
     showSubunits: false,
-    position: "topleft"
+    position: "bottomleft"
 }).addTo(map);
 
 /**
@@ -4172,6 +4172,7 @@ module.exports = {
     },
     init: function () {
         cloud.map.addLayer(printItems);
+        // Set locale for date/time string
         var lc = window._vidiLocale.split("_")[0];
         require('moment/locale/da');
         moment.locale(lc);
@@ -4196,9 +4197,6 @@ module.exports = {
             $("#select-scale").empty();
             center = null;
             scale = null;
-
-            // Set locale for date/time string
-            console.log(moment().format('MMMM Do YYYY, H:mm'))
 
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
@@ -6777,8 +6775,8 @@ module.exports = {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    __extensions: {
-        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
+    extensions: {
+        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"], "vectorLayers": ["index"]}],
         server: [{conflictSearch: ["index"]}]
     },
     _template: "cowiDetail.tmpl",
