@@ -746,7 +746,7 @@ module.exports = {
 };
 
 
-},{"./drawLocales/advancedInfo.js":11,"./utmZone.js":40,"jsts":83,"nouislider":88,"reproject":161,"underscore":179}],5:[function(require,module,exports){
+},{"./drawLocales/advancedInfo.js":11,"./utmZone.js":40,"jsts":83,"nouislider":89,"reproject":162,"underscore":180}],5:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -833,7 +833,7 @@ module.exports = {
         return object;
     }
 };
-},{"backbone":44,"underscore":179}],7:[function(require,module,exports){
+},{"backbone":44,"underscore":180}],7:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -2790,7 +2790,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</div>' +
     '</div>' +
     '</div>';
-},{"../../../../config/config.js":41,"./../../drawLocales/advancedInfo.js":11,"./../../height":19,"./../../search/danish":28,"./../../urlparser":38,"./../../utmZone.js":40,"jquery":81,"jsts":83,"nouislider":88,"reproject":161,"snackbarjs":162,"socket.io-client":163,"terraformer-wkt-parser":176}],15:[function(require,module,exports){
+},{"../../../../config/config.js":41,"./../../drawLocales/advancedInfo.js":11,"./../../height":19,"./../../search/danish":28,"./../../urlparser":38,"./../../utmZone.js":40,"jquery":81,"jsts":83,"nouislider":89,"reproject":162,"snackbarjs":163,"socket.io-client":164,"terraformer-wkt-parser":177}],15:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3386,7 +3386,7 @@ var createStore = function () {
     });
 };
 
-},{"./../../urlparser":38,"jsts":83,"reproject":161}],18:[function(require,module,exports){
+},{"./../../urlparser":38,"jsts":83,"reproject":162}],18:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -4172,8 +4172,9 @@ module.exports = {
     },
     init: function () {
         cloud.map.addLayer(printItems);
-        // Set locale for date/time string
-        moment.locale(window._vidiLocale);
+        var lc = window._vidiLocale.split("_")[0];
+        require('moment/locale/da');
+        moment.locale(lc);
     },
 
     off: function () {
@@ -4195,6 +4196,9 @@ module.exports = {
             $("#select-scale").empty();
             center = null;
             scale = null;
+
+            // Set locale for date/time string
+            console.log(moment().format('MMMM Do YYYY, H:mm'))
 
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
@@ -4530,7 +4534,7 @@ module.exports = {
     }
 };
 
-},{"../../config/config.js":41,"./urlparser":38,"./utmZone.js":40,"moment":86}],27:[function(require,module,exports){
+},{"../../config/config.js":41,"./urlparser":38,"./utmZone.js":40,"moment":87,"moment/locale/da":86}],27:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -8765,7 +8769,7 @@ module.exports = function(arraybuffer, start, end) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":81,"underscore":179}],45:[function(require,module,exports){
+},{"jquery":81,"underscore":180}],45:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -11445,7 +11449,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":87}],57:[function(require,module,exports){
+},{"ms":88}],57:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
@@ -12203,7 +12207,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":60,"./transports/index":61,"component-emitter":67,"debug":68,"engine.io-parser":71,"indexof":79,"parsejson":89,"parseqs":90,"parseuri":91}],60:[function(require,module,exports){
+},{"./transport":60,"./transports/index":61,"component-emitter":67,"debug":68,"engine.io-parser":71,"indexof":79,"parsejson":90,"parseqs":91,"parseuri":92}],60:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -13329,7 +13333,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":60,"component-inherit":54,"debug":68,"engine.io-parser":71,"parseqs":90,"xmlhttprequest-ssl":66,"yeast":181}],65:[function(require,module,exports){
+},{"../transport":60,"component-inherit":54,"debug":68,"engine.io-parser":71,"parseqs":91,"xmlhttprequest-ssl":66,"yeast":182}],65:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -13618,7 +13622,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":60,"component-inherit":54,"debug":68,"engine.io-parser":71,"parseqs":90,"ws":50,"yeast":181}],66:[function(require,module,exports){
+},{"../transport":60,"component-inherit":54,"debug":68,"engine.io-parser":71,"parseqs":91,"ws":50,"yeast":182}],66:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -14005,7 +14009,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":69,"_process":92}],69:[function(require,module,exports){
+},{"./debug":69,"_process":93}],69:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -14971,7 +14975,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":72,"after":42,"arraybuffer.slice":43,"base64-arraybuffer":46,"blob":49,"has-binary":73,"wtf-8":180}],72:[function(require,module,exports){
+},{"./keys":72,"after":42,"arraybuffer.slice":43,"base64-arraybuffer":46,"blob":49,"has-binary":73,"wtf-8":181}],72:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -27498,6 +27502,68 @@ function getMinNorthing(zoneLetter) {
 }
 
 },{}],86:[function(require,module,exports){
+//! moment.js locale configuration
+//! locale : Danish [da]
+//! author : Ulrik Nielsen : https://github.com/mrbase
+
+;(function (global, factory) {
+   typeof exports === 'object' && typeof module !== 'undefined'
+       && typeof require === 'function' ? factory(require('../moment')) :
+   typeof define === 'function' && define.amd ? define(['../moment'], factory) :
+   factory(global.moment)
+}(this, (function (moment) { 'use strict';
+
+
+var da = moment.defineLocale('da', {
+    months : 'januar_februar_marts_april_maj_juni_juli_august_september_oktober_november_december'.split('_'),
+    monthsShort : 'jan_feb_mar_apr_maj_jun_jul_aug_sep_okt_nov_dec'.split('_'),
+    weekdays : 'søndag_mandag_tirsdag_onsdag_torsdag_fredag_lørdag'.split('_'),
+    weekdaysShort : 'søn_man_tir_ons_tor_fre_lør'.split('_'),
+    weekdaysMin : 'sø_ma_ti_on_to_fr_lø'.split('_'),
+    longDateFormat : {
+        LT : 'HH:mm',
+        LTS : 'HH:mm:ss',
+        L : 'DD/MM/YYYY',
+        LL : 'D. MMMM YYYY',
+        LLL : 'D. MMMM YYYY HH:mm',
+        LLLL : 'dddd [d.] D. MMMM YYYY HH:mm'
+    },
+    calendar : {
+        sameDay : '[I dag kl.] LT',
+        nextDay : '[I morgen kl.] LT',
+        nextWeek : 'dddd [kl.] LT',
+        lastDay : '[I går kl.] LT',
+        lastWeek : '[sidste] dddd [kl] LT',
+        sameElse : 'L'
+    },
+    relativeTime : {
+        future : 'om %s',
+        past : '%s siden',
+        s : 'få sekunder',
+        m : 'et minut',
+        mm : '%d minutter',
+        h : 'en time',
+        hh : '%d timer',
+        d : 'en dag',
+        dd : '%d dage',
+        M : 'en måned',
+        MM : '%d måneder',
+        y : 'et år',
+        yy : '%d år'
+    },
+    ordinalParse: /\d{1,2}\./,
+    ordinal : '%d.',
+    week : {
+        dow : 1, // Monday is the first day of the week.
+        doy : 4  // The week that contains Jan 4th is the first week of the year.
+    }
+});
+
+return da;
+
+})));
+
+},{"../moment":87}],87:[function(require,module,exports){
 //! moment.js
 //! version : 2.17.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -31800,7 +31866,7 @@ return hooks;
 
 })));
 
-},{}],87:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -31927,7 +31993,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],88:[function(require,module,exports){
+},{}],89:[function(require,module,exports){
 /*! nouislider - 8.5.1 - 2016-04-24 16:00:29 */
 
 (function (factory) {
@@ -33887,7 +33953,7 @@ function closure ( target, options, originalOptions ){
 	};
 
 }));
-},{}],89:[function(require,module,exports){
+},{}],90:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -33922,7 +33988,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],90:[function(require,module,exports){
+},{}],91:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -33961,7 +34027,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],91:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -34002,7 +34068,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -34098,7 +34164,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 var mgrs = require('mgrs');
 
 function Point(x, y, z) {
@@ -34134,7 +34200,7 @@ Point.prototype.toMGRS = function(accuracy) {
 };
 module.exports = Point;
 
-},{"mgrs":85}],94:[function(require,module,exports){
+},{"mgrs":85}],95:[function(require,module,exports){
 var parseCode = require("./parseCode");
 var extend = require('./extend');
 var projections = require('./projections');
@@ -34169,7 +34235,7 @@ Projection.projections = projections;
 Projection.projections.start();
 module.exports = Projection;
 
-},{"./deriveConstants":125,"./extend":126,"./parseCode":130,"./projections":132}],95:[function(require,module,exports){
+},{"./deriveConstants":126,"./extend":127,"./parseCode":131,"./projections":133}],96:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
   var xin = point.x,
     yin = point.y,
@@ -34222,14 +34288,14 @@ module.exports = function(crs, denorm, point) {
   return point;
 };
 
-},{}],96:[function(require,module,exports){
+},{}],97:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var sign = require('./sign');
 
 module.exports = function(x) {
   return (Math.abs(x) < HALF_PI) ? x : (x - (sign(x) * Math.PI));
 };
-},{"./sign":113}],97:[function(require,module,exports){
+},{"./sign":114}],98:[function(require,module,exports){
 var TWO_PI = Math.PI * 2;
 // SPI is slightly greater than Math.PI, so values that exceed the -180..180
 // degree range by a tiny amount don't get wrapped. This prevents points that
@@ -34241,35 +34307,35 @@ var sign = require('./sign');
 module.exports = function(x) {
   return (Math.abs(x) <= SPI) ? x : (x - (sign(x) * TWO_PI));
 };
-},{"./sign":113}],98:[function(require,module,exports){
+},{"./sign":114}],99:[function(require,module,exports){
 module.exports = function(x) {
   if (Math.abs(x) > 1) {
     x = (x > 1) ? 1 : -1;
   }
   return Math.asin(x);
 };
-},{}],99:[function(require,module,exports){
+},{}],100:[function(require,module,exports){
 module.exports = function(x) {
   return (1 - 0.25 * x * (1 + x / 16 * (3 + 1.25 * x)));
 };
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 module.exports = function(x) {
   return (0.375 * x * (1 + 0.25 * x * (1 + 0.46875 * x)));
 };
-},{}],101:[function(require,module,exports){
+},{}],102:[function(require,module,exports){
 module.exports = function(x) {
   return (0.05859375 * x * x * (1 + 0.75 * x));
 };
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 module.exports = function(x) {
   return (x * x * x * (35 / 3072));
 };
-},{}],103:[function(require,module,exports){
+},{}],104:[function(require,module,exports){
 module.exports = function(a, e, sinphi) {
   var temp = e * sinphi;
   return a / Math.sqrt(1 - temp * temp);
 };
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 module.exports = function(ml, e0, e1, e2, e3) {
   var phi;
   var dphi;
@@ -34286,7 +34352,7 @@ module.exports = function(ml, e0, e1, e2, e3) {
   //..reportError("IMLFN-CONV:Latitude failed to converge after 15 iterations");
   return NaN;
 };
-},{}],105:[function(require,module,exports){
+},{}],106:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, q) {
@@ -34319,16 +34385,16 @@ module.exports = function(eccent, q) {
   //console.log("IQSFN-CONV:Latitude failed to converge after 30 iterations");
   return NaN;
 };
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 module.exports = function(e0, e1, e2, e3, phi) {
   return (e0 * phi - e1 * Math.sin(2 * phi) + e2 * Math.sin(4 * phi) - e3 * Math.sin(6 * phi));
 };
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 module.exports = function(eccent, sinphi, cosphi) {
   var con = eccent * sinphi;
   return cosphi / (Math.sqrt(1 - con * con));
 };
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 module.exports = function(eccent, ts) {
   var eccnth = 0.5 * eccent;
@@ -34345,7 +34411,7 @@ module.exports = function(eccent, ts) {
   //console.log("phi2z has NoConvergence");
   return -9999;
 };
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 var C00 = 1;
 var C02 = 0.25;
 var C04 = 0.046875;
@@ -34370,7 +34436,7 @@ module.exports = function(es) {
   en[4] = t * es * C88;
   return en;
 };
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 var pj_mlfn = require("./pj_mlfn");
 var EPSLN = 1.0e-10;
 var MAX_ITER = 20;
@@ -34391,13 +34457,13 @@ module.exports = function(arg, es, en) {
   //..reportError("cass:pj_inv_mlfn: Convergence error");
   return phi;
 };
-},{"./pj_mlfn":111}],111:[function(require,module,exports){
+},{"./pj_mlfn":112}],112:[function(require,module,exports){
 module.exports = function(phi, sphi, cphi, en) {
   cphi *= sphi;
   sphi *= sphi;
   return (en[0] * phi - cphi * (en[1] + sphi * (en[2] + sphi * (en[3] + sphi * en[4]))));
 };
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 module.exports = function(eccent, sinphi) {
   var con;
   if (eccent > 1.0e-7) {
@@ -34408,15 +34474,15 @@ module.exports = function(eccent, sinphi) {
     return (2 * sinphi);
   }
 };
-},{}],113:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 module.exports = function(x) {
   return x<0 ? -1 : 1;
 };
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 module.exports = function(esinp, exp) {
   return (Math.pow((1 - esinp) / (1 + esinp), exp));
 };
-},{}],115:[function(require,module,exports){
+},{}],116:[function(require,module,exports){
 module.exports = function (array){
   var out = {
     x: array[0],
@@ -34430,7 +34496,7 @@ module.exports = function (array){
   }
   return out;
 };
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, phi, sinphi) {
@@ -34439,7 +34505,7 @@ module.exports = function(eccent, phi, sinphi) {
   con = Math.pow(((1 - con) / (1 + con)), com);
   return (Math.tan(0.5 * (HALF_PI - phi)) / con);
 };
-},{}],117:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 exports.wgs84 = {
   towgs84: "0,0,0",
   ellipse: "WGS84",
@@ -34520,7 +34586,7 @@ exports.rnb72 = {
   ellipse: "intl",
   datumName: "Reseau National Belge 1972"
 };
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 exports.MERIT = {
   a: 6378137.0,
   rf: 298.257,
@@ -34736,7 +34802,7 @@ exports.sphere = {
   b: 6370997.0,
   ellipseName: "Normal Sphere (r=6370997)"
 };
-},{}],119:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 exports.greenwich = 0.0; //"0dE",
 exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
 exports.paris = 2.337229166667; //"2d20'14.025\"E",
@@ -34750,11 +34816,11 @@ exports.brussels = 4.367975; //"4d22'4.71\"E",
 exports.stockholm = 18.058277777778; //"18d3'29.8\"E",
 exports.athens = 23.7163375; //"23d42'58.815\"E",
 exports.oslo = 10.722916666667; //"10d43'22.5\"E"
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 exports.ft = {to_meter: 0.3048};
 exports['us-ft'] = {to_meter: 1200 / 3937};
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 var proj = require('./Proj');
 var transform = require('./transform');
 var wgs84 = proj('WGS84');
@@ -34819,7 +34885,7 @@ function proj4(fromProj, toProj, coord) {
   }
 }
 module.exports = proj4;
-},{"./Proj":94,"./transform":158}],122:[function(require,module,exports){
+},{"./Proj":95,"./transform":159}],123:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
@@ -35224,7 +35290,7 @@ datum.prototype = {
 */
 module.exports = datum;
 
-},{}],123:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
 var PJD_GRIDSHIFT = 3;
@@ -35325,7 +35391,7 @@ module.exports = function(source, dest, point) {
 };
 
 
-},{}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 var globals = require('./global');
 var parseProj = require('./projString');
 var wkt = require('./wkt');
@@ -35382,7 +35448,7 @@ function defs(name) {
 globals(defs);
 module.exports = defs;
 
-},{"./global":127,"./projString":131,"./wkt":159}],125:[function(require,module,exports){
+},{"./global":128,"./projString":132,"./wkt":160}],126:[function(require,module,exports){
 var Datum = require('./constants/Datum');
 var Ellipsoid = require('./constants/Ellipsoid');
 var extend = require('./extend');
@@ -35440,7 +35506,7 @@ module.exports = function(json) {
   return json;
 };
 
-},{"./constants/Datum":117,"./constants/Ellipsoid":118,"./datum":122,"./extend":126}],126:[function(require,module,exports){
+},{"./constants/Datum":118,"./constants/Ellipsoid":119,"./datum":123,"./extend":127}],127:[function(require,module,exports){
 module.exports = function(destination, source) {
   destination = destination || {};
   var value, property;
@@ -35456,7 +35522,7 @@ module.exports = function(destination, source) {
   return destination;
 };
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 module.exports = function(defs) {
   defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
   defs('EPSG:4269', "+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees");
@@ -35469,7 +35535,7 @@ module.exports = function(defs) {
   defs['EPSG:102113'] = defs['EPSG:3857'];
 };
 
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 var projs = [
   require('./projections/tmerc'),
   require('./projections/utm'),
@@ -35499,7 +35565,7 @@ module.exports = function(proj4){
     proj4.Proj.projections.add(proj);
   });
 };
-},{"./projections/aea":133,"./projections/aeqd":134,"./projections/cass":135,"./projections/cea":136,"./projections/eqc":137,"./projections/eqdc":138,"./projections/gnom":140,"./projections/krovak":141,"./projections/laea":142,"./projections/lcc":143,"./projections/mill":146,"./projections/moll":147,"./projections/nzmg":148,"./projections/omerc":149,"./projections/poly":150,"./projections/sinu":151,"./projections/somerc":152,"./projections/stere":153,"./projections/sterea":154,"./projections/tmerc":155,"./projections/utm":156,"./projections/vandg":157}],129:[function(require,module,exports){
+},{"./projections/aea":134,"./projections/aeqd":135,"./projections/cass":136,"./projections/cea":137,"./projections/eqc":138,"./projections/eqdc":139,"./projections/gnom":141,"./projections/krovak":142,"./projections/laea":143,"./projections/lcc":144,"./projections/mill":147,"./projections/moll":148,"./projections/nzmg":149,"./projections/omerc":150,"./projections/poly":151,"./projections/sinu":152,"./projections/somerc":153,"./projections/stere":154,"./projections/sterea":155,"./projections/tmerc":156,"./projections/utm":157,"./projections/vandg":158}],130:[function(require,module,exports){
 var proj4 = require('./core');
 proj4.defaultDatum = 'WGS84'; //default datum
 proj4.Proj = require('./Proj');
@@ -35512,7 +35578,7 @@ proj4.mgrs = require('mgrs');
 proj4.version = require('../package.json').version;
 require('./includedProjections')(proj4);
 module.exports = proj4;
-},{"../package.json":160,"./Point":93,"./Proj":94,"./common/toPoint":115,"./core":121,"./defs":124,"./includedProjections":128,"./transform":158,"mgrs":85}],130:[function(require,module,exports){
+},{"../package.json":161,"./Point":94,"./Proj":95,"./common/toPoint":116,"./core":122,"./defs":125,"./includedProjections":129,"./transform":159,"mgrs":85}],131:[function(require,module,exports){
 var defs = require('./defs');
 var wkt = require('./wkt');
 var projStr = require('./projString');
@@ -35549,7 +35615,7 @@ function parse(code){
 }
 
 module.exports = parse;
-},{"./defs":124,"./projString":131,"./wkt":159}],131:[function(require,module,exports){
+},{"./defs":125,"./projString":132,"./wkt":160}],132:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var PrimeMeridian = require('./constants/PrimeMeridian');
 var units = require('./constants/units');
@@ -35683,7 +35749,7 @@ module.exports = function(defData) {
   return self;
 };
 
-},{"./constants/PrimeMeridian":119,"./constants/units":120}],132:[function(require,module,exports){
+},{"./constants/PrimeMeridian":120,"./constants/units":121}],133:[function(require,module,exports){
 var projs = [
   require('./projections/merc'),
   require('./projections/longlat')
@@ -35719,7 +35785,7 @@ exports.start = function() {
   projs.forEach(add);
 };
 
-},{"./projections/longlat":144,"./projections/merc":145}],133:[function(require,module,exports){
+},{"./projections/longlat":145,"./projections/merc":146}],134:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var qsfnz = require('../common/qsfnz');
@@ -35842,7 +35908,7 @@ exports.phi1z = function(eccent, qs) {
 };
 exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
-},{"../common/adjust_lon":97,"../common/asinz":98,"../common/msfnz":107,"../common/qsfnz":112}],134:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/asinz":99,"../common/msfnz":108,"../common/qsfnz":113}],135:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -36041,7 +36107,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
-},{"../common/adjust_lon":97,"../common/asinz":98,"../common/e0fn":99,"../common/e1fn":100,"../common/e2fn":101,"../common/e3fn":102,"../common/gN":103,"../common/imlfn":104,"../common/mlfn":106}],135:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/asinz":99,"../common/e0fn":100,"../common/e1fn":101,"../common/e2fn":102,"../common/e3fn":103,"../common/gN":104,"../common/imlfn":105,"../common/mlfn":107}],136:[function(require,module,exports){
 var mlfn = require('../common/mlfn');
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
@@ -36145,7 +36211,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["Cassini", "Cassini_Soldner", "cass"];
-},{"../common/adjust_lat":96,"../common/adjust_lon":97,"../common/e0fn":99,"../common/e1fn":100,"../common/e2fn":101,"../common/e3fn":102,"../common/gN":103,"../common/imlfn":104,"../common/mlfn":106}],136:[function(require,module,exports){
+},{"../common/adjust_lat":97,"../common/adjust_lon":98,"../common/e0fn":100,"../common/e1fn":101,"../common/e2fn":102,"../common/e3fn":103,"../common/gN":104,"../common/imlfn":105,"../common/mlfn":107}],137:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var qsfnz = require('../common/qsfnz');
 var msfnz = require('../common/msfnz');
@@ -36210,7 +36276,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["cea"];
 
-},{"../common/adjust_lon":97,"../common/iqsfnz":105,"../common/msfnz":107,"../common/qsfnz":112}],137:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/iqsfnz":106,"../common/msfnz":108,"../common/qsfnz":113}],138:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 exports.init = function() {
@@ -36253,7 +36319,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
-},{"../common/adjust_lat":96,"../common/adjust_lon":97}],138:[function(require,module,exports){
+},{"../common/adjust_lat":97,"../common/adjust_lon":98}],139:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -36365,7 +36431,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equidistant_Conic", "eqdc"];
 
-},{"../common/adjust_lat":96,"../common/adjust_lon":97,"../common/e0fn":99,"../common/e1fn":100,"../common/e2fn":101,"../common/e3fn":102,"../common/imlfn":104,"../common/mlfn":106,"../common/msfnz":107}],139:[function(require,module,exports){
+},{"../common/adjust_lat":97,"../common/adjust_lon":98,"../common/e0fn":100,"../common/e1fn":101,"../common/e2fn":102,"../common/e3fn":103,"../common/imlfn":105,"../common/mlfn":107,"../common/msfnz":108}],140:[function(require,module,exports){
 var FORTPI = Math.PI/4;
 var srat = require('../common/srat');
 var HALF_PI = Math.PI/2;
@@ -36412,7 +36478,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gauss"];
 
-},{"../common/srat":114}],140:[function(require,module,exports){
+},{"../common/srat":115}],141:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 var asinz = require('../common/asinz');
@@ -36513,7 +36579,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gnom"];
 
-},{"../common/adjust_lon":97,"../common/asinz":98}],141:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/asinz":99}],142:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
   this.a = 6377397.155;
@@ -36613,7 +36679,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Krovak", "krovak"];
 
-},{"../common/adjust_lon":97}],142:[function(require,module,exports){
+},{"../common/adjust_lon":98}],143:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var FORTPI = Math.PI/4;
 var EPSLN = 1.0e-10;
@@ -36903,7 +36969,7 @@ exports.authlat = function(beta, APA) {
 };
 exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
-},{"../common/adjust_lon":97,"../common/qsfnz":112}],143:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/qsfnz":113}],144:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var tsfnz = require('../common/tsfnz');
@@ -37040,7 +37106,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
-},{"../common/adjust_lon":97,"../common/msfnz":107,"../common/phi2z":108,"../common/sign":113,"../common/tsfnz":116}],144:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/msfnz":108,"../common/phi2z":109,"../common/sign":114,"../common/tsfnz":117}],145:[function(require,module,exports){
 exports.init = function() {
   //no-op for longlat
 };
@@ -37052,7 +37118,7 @@ exports.forward = identity;
 exports.inverse = identity;
 exports.names = ["longlat", "identity"];
 
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 var msfnz = require('../common/msfnz');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -37151,7 +37217,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
-},{"../common/adjust_lon":97,"../common/msfnz":107,"../common/phi2z":108,"../common/tsfnz":116}],146:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/msfnz":108,"../common/phi2z":109,"../common/tsfnz":117}],147:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 /*
   reference
@@ -37198,7 +37264,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Miller_Cylindrical", "mill"];
 
-},{"../common/adjust_lon":97}],147:[function(require,module,exports){
+},{"../common/adjust_lon":98}],148:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 exports.init = function() {};
@@ -37277,7 +37343,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Mollweide", "moll"];
 
-},{"../common/adjust_lon":97}],148:[function(require,module,exports){
+},{"../common/adjust_lon":98}],149:[function(require,module,exports){
 var SEC_TO_RAD = 4.84813681109535993589914102357e-6;
 /*
   reference
@@ -37497,7 +37563,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["New_Zealand_Map_Grid", "nzmg"];
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 var tsfnz = require('../common/tsfnz');
 var adjust_lon = require('../common/adjust_lon');
 var phi2z = require('../common/phi2z');
@@ -37666,7 +37732,7 @@ exports.inverse = function(p) {
 };
 
 exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
-},{"../common/adjust_lon":97,"../common/phi2z":108,"../common/tsfnz":116}],150:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/phi2z":109,"../common/tsfnz":117}],151:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -37795,7 +37861,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Polyconic", "poly"];
-},{"../common/adjust_lat":96,"../common/adjust_lon":97,"../common/e0fn":99,"../common/e1fn":100,"../common/e2fn":101,"../common/e3fn":102,"../common/gN":103,"../common/mlfn":106}],151:[function(require,module,exports){
+},{"../common/adjust_lat":97,"../common/adjust_lon":98,"../common/e0fn":100,"../common/e1fn":101,"../common/e2fn":102,"../common/e3fn":103,"../common/gN":104,"../common/mlfn":107}],152:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 var pj_enfn = require('../common/pj_enfn');
@@ -37902,7 +37968,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Sinusoidal", "sinu"];
-},{"../common/adjust_lat":96,"../common/adjust_lon":97,"../common/asinz":98,"../common/pj_enfn":109,"../common/pj_inv_mlfn":110,"../common/pj_mlfn":111}],152:[function(require,module,exports){
+},{"../common/adjust_lat":97,"../common/adjust_lon":98,"../common/asinz":99,"../common/pj_enfn":110,"../common/pj_inv_mlfn":111,"../common/pj_mlfn":112}],153:[function(require,module,exports){
 /*
   references:
     Formules et constantes pour le Calcul pour la
@@ -37984,7 +38050,7 @@ exports.inverse = function(p) {
 
 exports.names = ["somerc"];
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
 var sign = require('../common/sign');
@@ -38152,7 +38218,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["stere", "Stereographic_South_Pole", "Polar Stereographic (variant B)"];
 
-},{"../common/adjust_lon":97,"../common/msfnz":107,"../common/phi2z":108,"../common/sign":113,"../common/tsfnz":116}],154:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/msfnz":108,"../common/phi2z":109,"../common/sign":114,"../common/tsfnz":117}],155:[function(require,module,exports){
 var gauss = require('./gauss');
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
@@ -38211,7 +38277,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
-},{"../common/adjust_lon":97,"./gauss":139}],155:[function(require,module,exports){
+},{"../common/adjust_lon":98,"./gauss":140}],156:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -38348,7 +38414,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
-},{"../common/adjust_lon":97,"../common/asinz":98,"../common/e0fn":99,"../common/e1fn":100,"../common/e2fn":101,"../common/e3fn":102,"../common/mlfn":106,"../common/sign":113}],156:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/asinz":99,"../common/e0fn":100,"../common/e1fn":101,"../common/e2fn":102,"../common/e3fn":103,"../common/mlfn":107,"../common/sign":114}],157:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var tmerc = require('./tmerc');
 exports.dependsOn = 'tmerc';
@@ -38368,7 +38434,7 @@ exports.init = function() {
 };
 exports.names = ["Universal Transverse Mercator System", "utm"];
 
-},{"./tmerc":155}],157:[function(require,module,exports){
+},{"./tmerc":156}],158:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -38489,7 +38555,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
-},{"../common/adjust_lon":97,"../common/asinz":98}],158:[function(require,module,exports){
+},{"../common/adjust_lon":98,"../common/asinz":99}],159:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var R2D = 57.29577951308232088;
 var PJD_3PARAM = 1;
@@ -38562,7 +38628,7 @@ module.exports = function transform(source, dest, point) {
 
   return point;
 };
-},{"./Proj":94,"./adjust_axis":95,"./common/toPoint":115,"./datum_transform":123}],159:[function(require,module,exports){
+},{"./Proj":95,"./adjust_axis":96,"./common/toPoint":116,"./datum_transform":124}],160:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var extend = require('./extend');
 
@@ -38787,7 +38853,7 @@ module.exports = function(wkt, self) {
   return extend(self, obj.output);
 };
 
-},{"./extend":126}],160:[function(require,module,exports){
+},{"./extend":127}],161:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -38921,7 +38987,7 @@ module.exports={
   "version": "2.3.14"
 }
 
-},{}],161:[function(require,module,exports){
+},{}],162:[function(require,module,exports){
 'use strict';
 
 var proj4 = require('proj4');
@@ -39058,7 +39124,7 @@ module.exports = {
     }
   };
 
-},{"proj4":129}],162:[function(require,module,exports){
+},{"proj4":130}],163:[function(require,module,exports){
 /* SnackbarJS - MIT LICENSE (https://github.com/FezVrasta/snackbarjs/blob/master/LICENSE.md) */
 
 (function (factory) {
@@ -39272,7 +39338,7 @@ module.exports = {
     };
 }));
 
-},{"jquery":81}],163:[function(require,module,exports){
+},{"jquery":81}],164:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -39383,7 +39449,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":164,"./socket":166,"./url":167,"debug":169,"socket.io-parser":173}],164:[function(require,module,exports){
+},{"./manager":165,"./socket":167,"./url":168,"debug":170,"socket.io-parser":174}],165:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -39945,7 +40011,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":165,"./socket":166,"backo2":45,"component-bind":52,"component-emitter":168,"debug":169,"engine.io-client":57,"indexof":79,"socket.io-parser":173}],165:[function(require,module,exports){
+},{"./on":166,"./socket":167,"backo2":45,"component-bind":52,"component-emitter":169,"debug":170,"engine.io-client":57,"indexof":79,"socket.io-parser":174}],166:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -39971,7 +40037,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],166:[function(require,module,exports){
+},{}],167:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -40392,7 +40458,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":165,"component-bind":52,"component-emitter":168,"debug":169,"has-binary":75,"socket.io-parser":173,"to-array":178}],167:[function(require,module,exports){
+},{"./on":166,"component-bind":52,"component-emitter":169,"debug":170,"has-binary":75,"socket.io-parser":174,"to-array":179}],168:[function(require,module,exports){
 (function (global){
 
 /**
@@ -40471,15 +40537,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":169,"parseuri":91}],168:[function(require,module,exports){
+},{"debug":170,"parseuri":92}],169:[function(require,module,exports){
 arguments[4][67][0].apply(exports,arguments)
-},{"dup":67}],169:[function(require,module,exports){
+},{"dup":67}],170:[function(require,module,exports){
 arguments[4][68][0].apply(exports,arguments)
-},{"./debug":170,"_process":92,"dup":68}],170:[function(require,module,exports){
+},{"./debug":171,"_process":93,"dup":68}],171:[function(require,module,exports){
 arguments[4][69][0].apply(exports,arguments)
-},{"dup":69,"ms":171}],171:[function(require,module,exports){
+},{"dup":69,"ms":172}],172:[function(require,module,exports){
 arguments[4][70][0].apply(exports,arguments)
-},{"dup":70}],172:[function(require,module,exports){
+},{"dup":70}],173:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -40624,7 +40690,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":174,"isarray":175}],173:[function(require,module,exports){
+},{"./is-buffer":175,"isarray":176}],174:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -41030,7 +41096,7 @@ function error(data){
   };
 }
 
-},{"./binary":172,"./is-buffer":174,"component-emitter":53,"debug":55,"json3":82}],174:[function(require,module,exports){
+},{"./binary":173,"./is-buffer":175,"component-emitter":53,"debug":55,"json3":82}],175:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -41047,9 +41113,9 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],175:[function(require,module,exports){
+},{}],176:[function(require,module,exports){
 arguments[4][74][0].apply(exports,arguments)
-},{"dup":74}],176:[function(require,module,exports){
+},{"dup":74}],177:[function(require,module,exports){
 (function (root, factory) {
 
   // Node.
@@ -41812,7 +41878,7 @@ return new Parser;
   return exports;
 }));
 
-},{"terraformer":177}],177:[function(require,module,exports){
+},{"terraformer":178}],178:[function(require,module,exports){
 (function (root, factory) {
 
   // Node.
@@ -43232,7 +43298,7 @@ return new Parser;
   return exports;
 }));
 
-},{}],178:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -43247,7 +43313,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],179:[function(require,module,exports){
+},{}],180:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -44797,7 +44863,7 @@ function toArray(list, index) {
   }
 }.call(this));
 
-},{}],180:[function(require,module,exports){
+},{}],181:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -45035,7 +45101,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],181:[function(require,module,exports){
+},{}],182:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

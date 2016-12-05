@@ -54,7 +54,9 @@ module.exports = {
     init: function () {
         cloud.map.addLayer(printItems);
         // Set locale for date/time string
-        moment.locale(window._vidiLocale);
+        var lc = window._vidiLocale.split("_")[0];
+        require('moment/locale/da');
+        moment.locale(lc);
     },
 
     off: function () {
