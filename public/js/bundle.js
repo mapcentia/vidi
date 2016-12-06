@@ -1168,7 +1168,8 @@ try {
 var cloud = new geocloud.map({
     el: "map",
     zoomControl: false,
-    numZoomLevels: 21
+    numZoomLevels: 21,
+    fadeAnimation: false
 });
 
 /**
