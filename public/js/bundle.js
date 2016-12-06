@@ -4482,7 +4482,7 @@ module.exports = {
                 var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
                     color: color,
                     fillOpacity: 0,
-                    aspectRatio: (ps[0] / ps[1])
+                   // aspectRatio: (ps[0] / ps[1])
                 });
                 center = rectangle.getBounds().getCenter();
                 return rectangle;
