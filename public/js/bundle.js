@@ -391,12 +391,13 @@ window.Vidi = function () {
     modules.meta.init();
     modules.baseLayer.init();
     modules.setting.init();
-    modules.state.init();
     modules.infoClick.init();
     modules.search.init();
     modules.draw.init();
     modules.advancedInfo.init();
     modules.print.init();
+    modules.state.init();
+
 
     // Require extensions modules
     // Hack to compile Glob files. Don´t call this function!
@@ -1406,7 +1407,6 @@ module.exports = {
                 }
             });
 
-            cloud.map.addLayer(drawnItems);
             cloud.map.addControl(drawControl);
             drawOn = true;
 
@@ -1496,6 +1496,7 @@ module.exports = {
         }
     },
     init: function () {
+        cloud.map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -3808,6 +3809,10 @@ module.exports = {
                         displayInLayerSwitcher: true,
                         name: metaData.data[u].f_table_name,
                         type: "tms",
+                        // Single tile option
+                        //type: "wms",
+                        //tileSize: 9999,
+                        format: "image/png",
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
@@ -4482,7 +4487,7 @@ module.exports = {
                 var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
                     color: color,
                     fillOpacity: 0,
-                   // aspectRatio: (ps[0] / ps[1])
+                    aspectRatio: (ps[0] / ps[1])
                 });
                 center = rectangle.getBounds().getCenter();
                 return rectangle;
@@ -6325,6 +6330,7 @@ module.exports = {
                         },
                         scriptCharset: "utf-8",
                         success: function (response) {
+                            //console.log(response);
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
                                 cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -6363,7 +6369,7 @@ module.exports = {
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
                                             $("#scale").html("1 : " + response.data.scale);
                                             $("#title").html(decodeURI(urlVars.t));
-                                            parr = urlVars.c.split("#");
+                                            if (typeof urlVars.c !== "undefined") parr = urlVars.c.split("#");
                                             if (parr.length > 1) {
                                                 parr.pop();
                                             }
@@ -6383,6 +6389,7 @@ module.exports = {
                                 v = parr;
                                 draw.control();
                                 l = draw.getLayer();
+                                console.log(l)
                                 t = draw.getTable();
                                 $.each(v[0].geojson.features, function (n, m) {
                                     if (m.type === "Feature" && GeoJsonAdded === false) {

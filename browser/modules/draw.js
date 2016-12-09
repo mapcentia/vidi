@@ -156,7 +156,6 @@ module.exports = {
                 }
             });
 
-            cloud.map.addLayer(drawnItems);
             cloud.map.addControl(drawControl);
             drawOn = true;
 
@@ -246,6 +245,7 @@ module.exports = {
         }
     },
     init: function () {
+        cloud.map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
