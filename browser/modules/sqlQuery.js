@@ -68,7 +68,12 @@ module.exports = {
         this.reset(qstore);
         layers = cloud.getVisibleLayers().split(";");
 
-        //$("#info-content .alert").hide();
+        // Remove not queryable layers from array
+        for(var i = layers.length - 1; i >= 0; i--) {
+            if(metaDataKeys[layers[i]].not_querable) {
+                layers.splice(i, 1);
+            }
+        }
         $.each(layers, function (index, value) {
             if (layers[0] === "") {
                 return false;
@@ -80,7 +85,7 @@ module.exports = {
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
-            var fieldConf = $.parseJSON(metaDataKeys[value].fieldconf);
+            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
@@ -233,6 +238,7 @@ module.exports = {
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
+
         });
     },
 
