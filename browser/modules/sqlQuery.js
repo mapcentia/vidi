@@ -85,7 +85,7 @@ module.exports = {
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
-            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {

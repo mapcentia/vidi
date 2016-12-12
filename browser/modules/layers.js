@@ -95,6 +95,10 @@ module.exports = {
                         displayInLayerSwitcher: true,
                         name: metaData.data[u].f_table_name,
                         type: "tms",
+                        // Single tile option
+                        //type: "wms",
+                        //tileSize: 9999,
+                        format: "image/png",
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }

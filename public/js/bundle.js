@@ -1132,14 +1132,17 @@ module.exports = module.exports = {
                     e.stopPropagation();
                     $(this).css("background-color", "white");
                 });
-
+            });
+            $(document).arrive('[data-toggle="tooltip"]', function () {
+                $(this).tooltip()
             });
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
-                    var t = ($(this).prev().children("input").data('gc2-id'));
+                    var t = ($(this).prev().children("input").data('gc2-id')), html;
+                    html = (metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
                     $("#info-modal").show();
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
-                    $("#info-modal .modal-body").html((metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : "");
+                    $("#info-modal .modal-body").html(html);
                     legend.init([t], "#info-modal-legend");
                     e.stopPropagation();
                 });
@@ -3673,7 +3676,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function () {
-        var base64name, arr, groups, metaData, i, l, displayInfo;
+        var base64name, arr, groups, metaData, i, l, displayInfo, tooltip;
         groups = [];
         metaData = meta.getMetaData();
         for (i = 0; i < metaData.data.length; ++i) {
@@ -3696,8 +3699,10 @@ module.exports = module.exports = {
                             );
                         }
                         else {
-                            displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
-                            $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + metaData.data[u].f_table_name + '" data-gc2-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '">' + text + '</label><span style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
+                            console.log(metaData.data[u].meta)
+                            displayInfo = ((metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined" && $.parseJSON(metaData.data[u].meta).meta_desc !== "") || metaData.data[u].f_table_abstract) ? "inline" : "none";
+                            tooltip = metaData.data[u].f_table_abstract || "";
+                            $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + metaData.data[u].f_table_name + '" data-gc2-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '"><span>' + text + '</span></label><span data-toggle="tooltip" data-placement="left" title="' + tooltip + '" style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                             l.push({});
                         }
                     }
@@ -6000,7 +6005,7 @@ module.exports = {
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
-            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
