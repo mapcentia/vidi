@@ -72,13 +72,13 @@ var noUiSlider = require('nouislider');
  *
  * @type {Element}
  */
-var bufferSlider = document.getElementById('buffer-slider');
+var bufferSlider;
 
 /**
  *
  * @type {Element}
  */
-var bufferValue = document.getElementById('buffer-value');
+var bufferValue;
 
 /**
  *
@@ -215,28 +215,28 @@ module.exports = {
                 }
             });
 
-            cloud.map.addControl(drawControl);
+            cloud.get().map.addControl(drawControl);
             searchOn = true;
             // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
             // Bind events
-            cloud.map.on('draw:created', function (e) {
+            cloud.get().map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
                 drawnItems.addLayer(e.layer);
             });
-            cloud.map.on('draw:drawstart', function (e) {
+            cloud.get().map.on('draw:drawstart', function (e) {
                 _clearDrawItems();
             });
-            cloud.map.on('draw:drawstop', function (e) {
+            cloud.get().map.on('draw:drawstop', function (e) {
                 _makeSearch();
             });
-            cloud.map.on('draw:editstop', function (e) {
+            cloud.get().map.on('draw:editstop', function (e) {
                 _makeSearch();
             });
-            cloud.map.on('draw:editstart', function (e) {
+            cloud.get().map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
             var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
@@ -256,8 +256,12 @@ module.exports = {
      *
      */
     init: function () {
-        cloud.map.addLayer(drawnItems);
-        cloud.map.addLayer(bufferItems);
+        //TEST
+        cloud.get().map.addLayer(drawnItems);
+        cloud.get().map.addLayer(bufferItems);
+
+        bufferSlider = document.getElementById('buffer-slider');
+        bufferValue = document.getElementById('buffer-value');
         try {
             noUiSlider.create(bufferSlider, {
                 start: 40,
@@ -290,12 +294,12 @@ module.exports = {
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);
         // Unbind events
-        cloud.map.off('draw:created');
-        cloud.map.off('draw:drawstart');
-        cloud.map.off('draw:drawstop');
-        cloud.map.off('draw:editstart');
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:drawstart');
+        cloud.get().map.off('draw:drawstop');
+        cloud.get().map.off('draw:editstart');
         try {
-            cloud.map.removeControl(drawControl);
+            cloud.get().map.removeControl(drawControl);
         } catch (e) {
         }
         $("#buffer").hide();

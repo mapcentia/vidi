@@ -32,8 +32,8 @@ var moment = require('moment');
  */
 var _cleanUp = function () {
     try {
-        cloud.map.removeLayer(recScale);
-        cloud.map.removeLayer(recEdit);
+        cloud.get().map.removeLayer(recScale);
+        cloud.get().map.removeLayer(recEdit);
     } catch (e) {
     }
     printOn = false;
@@ -52,7 +52,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        cloud.map.addLayer(printItems);
+        cloud.get().map.addLayer(printItems);
         // Set locale for date/time string
         var lc = window._vidiLocale.split("_")[0];
         require('moment/locale/da');
@@ -88,13 +88,15 @@ module.exports = {
                 scale = e.target.value;
                 change();
             });
-
             $.each(printC, function (i) {
-                if (i.charAt(0) !== "_") {
-                    numOfPrintTmpl = numOfPrintTmpl + 1;
+                if (window.vidiConfig.enabledPrints.indexOf(i) > -1) {
+                    if (i.charAt(0) !== "_") {
+                        numOfPrintTmpl = numOfPrintTmpl + 1;
+                    }
+                    $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
                 }
-                $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             });
+
             if (numOfPrintTmpl > 1) {
                 $("#print-tmpl").parent("div").show();
             }
@@ -369,8 +371,8 @@ module.exports = {
             };
 
             var first = center ? false : true;
-            center = center || cloud.map.getCenter(); // Init center as map center
-            recEdit = rectangle(center, cloud.map, "yellow", scale, first);
+            center = center || cloud.get().map.getCenter(); // Init center as map center
+            recEdit = rectangle(center, cloud.get().map, "yellow", scale, first);
             recEdit._vidi_type = "printHelper";
             printItems.addLayer(recEdit);
             recEdit.editing.enable();
@@ -388,7 +390,7 @@ module.exports = {
                     rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
 
                     if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-                        cloud.map.removeLayer(recScale);
+                        cloud.get().map.removeLayer(recScale);
                         recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
                         recScale._vidi_type = "print";
                         printItems.addLayer(recScale);

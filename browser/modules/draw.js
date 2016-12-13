@@ -34,7 +34,7 @@ var table;
 
 /**
  *
- * @type {geocloud.sqlStore}
+ * @type {geocloud.get().sqlStore}
  */
 var store = new geocloud.sqlStore({
     clickable: true
@@ -156,18 +156,18 @@ module.exports = {
                 }
             });
 
-            cloud.map.addControl(drawControl);
+            cloud.get().map.addControl(drawControl);
             drawOn = true;
 
             // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
-            cloud.map.off('draw:deleted');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
+            cloud.get().map.off('draw:deleted');
 
             // Bind events
-            cloud.map.on('draw:created', function (e) {
+            cloud.get().map.on('draw:created', function (e) {
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
                 if (type === 'marker') {
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
@@ -182,7 +182,7 @@ module.exports = {
                     editPopUp = new L.EditToolbar.Popup(event.latlng, {
                         className: 'leaflet-draw-toolbar',
                         actions: editActions
-                    }).addTo(cloud.map, drawLayer);
+                    }).addTo(cloud.get().map, drawLayer);
                 });
 
                 if (type === "polygon" || type === "rectangle") {
@@ -205,10 +205,10 @@ module.exports = {
                 };
                 table.loadDataInTable();
             });
-            cloud.map.on('draw:deleted', function (e) {
+            cloud.get().map.on('draw:deleted', function (e) {
                 table.loadDataInTable();
             });
-            cloud.map.on('draw:edited', function (e) {
+            cloud.get().map.on('draw:edited', function (e) {
                 $.each(e.layers._layers, function (i, v) {
                     if (typeof v._mRadius !== "undefined") {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
@@ -245,7 +245,7 @@ module.exports = {
         }
     },
     init: function () {
-        cloud.map.addLayer(drawnItems);
+        cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -259,7 +259,7 @@ module.exports = {
                 }
                 table = gc2table.init({
                     el: "#draw-table table",
-                    geocloud2: cloud,
+                    geocloud2: cloud.get(),
                     locale: window._vidiLocale.replace("_", "-"),
                     store: store,
                     cm: [
@@ -295,14 +295,14 @@ module.exports = {
     off: function () {
         // Clean up
         try {
-            cloud.map.removeControl(drawControl);
+            cloud.get().map.removeControl(drawControl);
         } catch (e) {
         }
         $("#draw-btn").prop("checked", false);
         // Unbind events
-        cloud.map.off('draw:created');
-        cloud.map.off('draw:deleted');
-        cloud.map.off('draw:edited');
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:edited');
         // Call destruct functions
         $.each(destructFunctions, function (i, v) {
             v();
@@ -461,7 +461,7 @@ L.ColorPicker = L._ToolbarAction.extend({
         this._link.appendChild(colorSwatch);
 
         L.DomEvent.on(this._link, 'click', function () {
-            cloud.map.removeLayer(this.toolbar.parentToolbar);
+            cloud.get().map.removeLayer(this.toolbar.parentToolbar);
         }, this);
     }
 });

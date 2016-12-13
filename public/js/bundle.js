@@ -244,21 +244,12 @@ function ಠ_ಠ() {
     require('./i18n/da_DK.js');require('./i18n/en_US.js');
 }
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
+window.vidiConfig = require('../config/config.js');
 
 /**
  *
  */
 window.Vidi = function () {
-
-    // Declare vars
-    var config, socketId, tmpl;
-
-
-    var urlparser = require('./modules/urlparser');
-    var urlVars = urlparser.urlVars;
-
-    config = require('../config/config.js');
-
     $(window).load(function () {
         window.status = "all_loaded";
     });
@@ -269,58 +260,6 @@ window.Vidi = function () {
     setTimeout(function () {
         window.status = "all_loaded";
     }, 15000);
-
-    // Load style sheet
-    $('<link/>').attr({
-        rel: 'stylesheet',
-        type: 'text/css',
-        href: '/static/css/styles.css'
-    }).appendTo('head');
-
-    // Render template and set some styling
-    if (typeof config.template === "undefined") {
-        tmpl = "default.tmpl";
-    } else {
-        tmpl = config.template;
-    }
-
-    // Check if template is set in URL vars
-    if (typeof urlVars.tmpl !== "undefined") {
-        var par = urlVars.tmpl.split("#");
-        if (par.length > 1) {
-            par.pop();
-        }
-        tmpl = par.join();
-    }
-
-    // If px and py is provided for print templates, add the values to the dict before rendering
-    if (urlVars.px && urlVars.py) {
-        gc2i18n.dict.printWidth = urlVars.px + "px";
-        gc2i18n.dict.printHeight = urlVars.py + "px";
-        gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
-    }
-
-    //
-    if (urlVars.l) {
-        gc2i18n.dict._showLegend = urlVars.l;
-    }
-
-    gc2i18n.dict.brandName = config.brandName;
-
-    $("body").html(Templates[tmpl].render(gc2i18n.dict));
-
-    $("[data-toggle=tooltip]").tooltip();
-    $(".center").hide();
-    try {
-        var max = $(document).height() - $('.tab-pane').offset().top - 100;
-    } catch (e) {
-        console.info(e.message);
-    }
-    $('.tab-pane').not("#result-content").css('max-height', max);
-    $('.places').css('height', max - 130);
-    $('.places').css('min-height', 400);
-    $('.places .tt-dropdown-menu').css('max-height', max - 200);
-    $('.places .tt-dropdown-menu').css('min-height', 400);
 
     // Require the standard modules
     var modules = {
@@ -356,8 +295,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/search/danish.js');require('./modules/search/danish_new.js');require('./modules/search/google.js');
     }
-
-    modules.search = require('./modules/search/' + config.searchModule + '.js');
+    modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
     modules.init.set(modules);
@@ -384,43 +322,13 @@ window.Vidi = function () {
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
 
-    //Init modules
-    modules.backboneEvents.init();
-    modules.socketId.init();
-    modules.bindEvent.init();
-    modules.meta.init();
-    modules.baseLayer.init();
-    modules.setting.init();
-    modules.infoClick.init();
-    modules.search.init();
-    modules.draw.init();
-    modules.advancedInfo.init();
-    modules.print.init();
-    modules.state.init();
-
-
-    // Require extensions modules
-    // Hack to compile Glob files. Don´t call this function!
-    function ಠ_ಠ() {
-        require('./modules/extensions/conflictSearch/controller.js');require('./modules/extensions/conflictSearch/index.js');require('./modules/extensions/conflictSearch/infoClick.js');require('./modules/extensions/conflictSearch/reportRender.js');require('./modules/extensions/cowiDetail/bufferSearch.js');require('./modules/extensions/vectorLayers/index.js');
-    }
-    if (typeof config.extensions !== "undefined" && typeof config.extensions.browser !== "undefined") {
-        $.each(config.extensions.browser, function (i, v) {
-            modules.extensions[Object.keys(v)[0]] = {};
-            $.each(v[Object.keys(v)[0]], function (n, m) {
-                modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
-                modules.extensions[Object.keys(v)[0]][m].set(modules);
-                modules.extensions[Object.keys(v)[0]][m].init();
-            })
-        });
-    }
     // Return the init module to be called in index.html
     return {
         init: modules.init
     }
 };
 
-},{"../config/config.js":41,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/extensions/conflictSearch/controller.js":13,"./modules/extensions/conflictSearch/index.js":14,"./modules/extensions/conflictSearch/infoClick.js":15,"./modules/extensions/conflictSearch/reportRender.js":16,"./modules/extensions/cowiDetail/bufferSearch.js":17,"./modules/extensions/vectorLayers/index.js":18,"./modules/infoClick":20,"./modules/init":21,"./modules/layerTree":22,"./modules/layers":23,"./modules/legend":24,"./modules/meta":25,"./modules/print":26,"./modules/pushState":27,"./modules/search/danish.js":28,"./modules/search/danish_new.js":29,"./modules/search/google.js":30,"./modules/serializeLayers":31,"./modules/setBaseLayer":32,"./modules/setting":33,"./modules/socketId":34,"./modules/sqlQuery":35,"./modules/state":36,"./modules/switchLayer":37,"./modules/urlparser":38,"./modules/utils":39}],4:[function(require,module,exports){
+},{"../config/config.js":41,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/infoClick":20,"./modules/init":21,"./modules/layerTree":22,"./modules/layers":23,"./modules/legend":24,"./modules/meta":25,"./modules/print":26,"./modules/pushState":27,"./modules/search/danish.js":28,"./modules/search/danish_new.js":29,"./modules/search/google.js":30,"./modules/serializeLayers":31,"./modules/setBaseLayer":32,"./modules/setting":33,"./modules/socketId":34,"./modules/sqlQuery":35,"./modules/state":36,"./modules/switchLayer":37,"./modules/urlparser":38,"./modules/utils":39}],4:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -495,13 +403,13 @@ var noUiSlider = require('nouislider');
  *
  * @type {Element}
  */
-var bufferSlider = document.getElementById('buffer-slider');
+var bufferSlider;
 
 /**
  *
  * @type {Element}
  */
-var bufferValue = document.getElementById('buffer-value');
+var bufferValue;
 
 /**
  *
@@ -638,28 +546,28 @@ module.exports = {
                 }
             });
 
-            cloud.map.addControl(drawControl);
+            cloud.get().map.addControl(drawControl);
             searchOn = true;
             // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
             // Bind events
-            cloud.map.on('draw:created', function (e) {
+            cloud.get().map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
                 drawnItems.addLayer(e.layer);
             });
-            cloud.map.on('draw:drawstart', function (e) {
+            cloud.get().map.on('draw:drawstart', function (e) {
                 _clearDrawItems();
             });
-            cloud.map.on('draw:drawstop', function (e) {
+            cloud.get().map.on('draw:drawstop', function (e) {
                 _makeSearch();
             });
-            cloud.map.on('draw:editstop', function (e) {
+            cloud.get().map.on('draw:editstop', function (e) {
                 _makeSearch();
             });
-            cloud.map.on('draw:editstart', function (e) {
+            cloud.get().map.on('draw:editstart', function (e) {
                 bufferItems.clearLayers();
             });
             var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
@@ -679,8 +587,12 @@ module.exports = {
      *
      */
     init: function () {
-        cloud.map.addLayer(drawnItems);
-        cloud.map.addLayer(bufferItems);
+        //TEST
+        cloud.get().map.addLayer(drawnItems);
+        cloud.get().map.addLayer(bufferItems);
+
+        bufferSlider = document.getElementById('buffer-slider');
+        bufferValue = document.getElementById('buffer-value');
         try {
             noUiSlider.create(bufferSlider, {
                 start: 40,
@@ -713,12 +625,12 @@ module.exports = {
         _clearDrawItems();
         $("#advanced-info-btn").prop("checked", false);
         // Unbind events
-        cloud.map.off('draw:created');
-        cloud.map.off('draw:drawstart');
-        cloud.map.off('draw:drawstop');
-        cloud.map.off('draw:editstart');
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:drawstart');
+        cloud.get().map.off('draw:drawstop');
+        cloud.get().map.off('draw:editstart');
         try {
-            cloud.map.removeControl(drawControl);
+            cloud.get().map.removeControl(drawControl);
         } catch (e) {
         }
         $("#buffer").hide();
@@ -766,8 +678,8 @@ var cloud;
  * @returns {string}
  */
 var anchor = function () {
-    var p = geocloud.transformPoint(cloud.getCenter().x, cloud.getCenter().y, "EPSG:900913", "EPSG:4326");
-    return "#" + cloud.getBaseLayerName() + "/" + Math.round(cloud.getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + ((cloud.getNamesOfVisibleLayers()) ? cloud.getNamesOfVisibleLayers().split(",").reverse().join(",") : "");
+    var p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
+    return "#" + cloud.get().getBaseLayerName() + "/" + Math.round(cloud.get().getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + ((cloud.get().getNamesOfVisibleLayers()) ? cloud.get().getNamesOfVisibleLayers().split(",").reverse().join(",") : "");
 };
 /**
  *
@@ -886,14 +798,16 @@ module.exports = module.exports = {
                 {"id": "stamenToner", "name": "Stamen toner"}
             ];
         }
-        cloud.bingApiKey = window.bingApiKey;
-        cloud.digitalGlobeKey = window.digitalGlobeKey;
+        if (typeof window.vidiConfig.baseLayers === "object") {
+            window.setBaseLayers = window.vidiConfig.baseLayers;
+        }
+        cloud.get().bingApiKey = window.bingApiKey;
+        cloud.get().digitalGlobeKey = window.digitalGlobeKey;
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
             bl = window.setBaseLayers[i];
             if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                 customBaseLayer = new L.TileLayer(bl.url, {
                     attribution: bl.attribution,
-
                     // Set zoom levels from config, if they are there, else default
                     // to [0-18] (native), [0-20] (interpolated)
                     minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
@@ -902,13 +816,13 @@ module.exports = module.exports = {
                 });
                 customBaseLayer.baseLayer = true;
                 customBaseLayer.id = bl.id;
-                cloud.addLayer(customBaseLayer, bl.name, true);
+                cloud.get().addLayer(customBaseLayer, bl.name, true);
                 baseLayers.push(bl.id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.filter(function(n) {return schemas.indexOf(n) != -1;}).length > 0) {
-                cloud.addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
+                cloud.get().addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
                 baseLayers.push(window.setBaseLayers[i].id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
@@ -1036,10 +950,10 @@ module.exports = module.exports = {
     init: function (str) {
         metaDataKeys = meta.getMetaDataKeys();
 
-        cloud.on("dragend", function () {
+        cloud.get().on("dragend", function () {
             pushState.init();
         });
-        cloud.on("moveend", function () {
+        cloud.get().on("moveend", function () {
             pushState.init();
         });
 
@@ -1159,99 +1073,127 @@ module.exports = module.exports = {
 
 'use strict';
 
-try {
-    geocloud.setHost(require('../../config/config.js').gc2.host);
-} catch (e){
-    console.info(e.message);
-}
-
-/**
- *
- * @type {geocloud.map}
- */
-var cloud = new geocloud.map({
-    el: "map",
-    zoomControl: false,
-    numZoomLevels: 21,
-    fadeAnimation: false
-});
-
 /**
  *
  */
-var zoomControl = L.control.zoom({
-    position: 'topright'
-});
-cloud.map.addControl(zoomControl);
-var map = cloud.map;
+var cloud;
 
+module.exports = {
 
-/*var scaleControl = L.control.scale({position: "bottomright"});
- cloud.map.addControl(scaleControl);*/
-
-/**
- *
- */
-var lc = L.control.locate({
-    position: 'topright',
-    strings: {
-        title: "Find me"
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
+    set: function (o) {
+        return this;
     },
-    icon: "fa fa-location-arrow",
-    iconLoading: "fa fa-circle-o-notch fa-spin"
-}).addTo(map);
 
-/**
- *
- */
-var graphicScale = L.control.graphicScale({
-    doubleLine: false,
-    fill: 'hollow',
-    showSubunits: false,
-    position: "bottomleft"
-}).addTo(map);
+    /**
+     *
+     */
+    init: function () {
+        try {
+            geocloud.setHost(window.vidiConfig.gc2.host);
+        } catch (e) {
+            console.info(e.message);
+        }
 
-/**
- *
- * @type {div}
- */
-var scaleText = L.DomUtil.create('div', 'scaleText');
-graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
-//scaleText.innerHTML = '<h1>Leaflet Graphic Scale</h1><p>style: <span class="choice">hollow</span>-<span class="choice">line</span>-<span class="choice">fill</span>-<span class="choice">nofill</span></p>';
+        /**
+         *
+         * @type {geocloud.map}
+         */
+        cloud = new geocloud.map({
+            el: "map",
+            zoomControl: false,
+            numZoomLevels: 21,
+            fadeAnimation: false
+        });
 
-/**
- *
- */
-var styleChoices = scaleText.querySelectorAll('.choice');
+        /**
+         *
+         */
+        var zoomControl = L.control.zoom({
+            position: 'topright'
+        });
+        cloud.map.addControl(zoomControl);
+        var map = cloud.map;
 
-for (var i = 0; i < styleChoices.length; i++) {
-    styleChoices[i].addEventListener('click', function (e) {
-        graphicScale._setStyle({fill: e.currentTarget.innerHTML});
-    });
-}
 
-var localization;
-if (window._vidiLocale === "da_DK") {
-    localization = "da";
-}
-if (window._vidiLocale === "en_US") {
-    localization = "en";
-}
-/**
- *
- */
-var measureControl = new L.Control.Measure({
-    position: 'topright',
-    primaryLengthUnit: 'kilometers',
-    secondaryLengthUnit: 'meters',
-    primaryAreaUnit: 'hectares',
-    secondaryAreaUnit: 'sqmeters',
-    localization: localization
+        /*var scaleControl = L.control.scale({position: "bottomright"});
+         cloud.map.addControl(scaleControl);*/
 
-});
-measureControl.addTo(map);
-module.exports = cloud;
-},{"../../config/config.js":41}],10:[function(require,module,exports){
+        /**
+         *
+         */
+        L.control.locate({
+            position: 'topright',
+            strings: {
+                title: "Find me"
+            },
+            icon: "fa fa-location-arrow",
+            iconLoading: "fa fa-circle-o-notch fa-spin"
+        }).addTo(map);
+
+        /**
+         *
+         */
+        var graphicScale = L.control.graphicScale({
+            doubleLine: false,
+            fill: 'hollow',
+            showSubunits: false,
+            position: "bottomleft"
+        }).addTo(map);
+
+        /**
+         *
+         * @type {div}
+         */
+        var scaleText = L.DomUtil.create('div', 'scaleText');
+        graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
+
+        /**
+         *
+         */
+        var styleChoices = scaleText.querySelectorAll('.choice');
+
+        for (var i = 0; i < styleChoices.length; i++) {
+            styleChoices[i].addEventListener('click', function (e) {
+                graphicScale._setStyle({fill: e.currentTarget.innerHTML});
+            });
+        }
+
+        var localization;
+        if (window._vidiLocale === "da_DK") {
+            localization = "da";
+        }
+        if (window._vidiLocale === "en_US") {
+            localization = "en";
+        }
+        /**
+         *
+         */
+        var measureControl = new L.Control.Measure({
+            position: 'topright',
+            primaryLengthUnit: 'kilometers',
+            secondaryLengthUnit: 'meters',
+            primaryAreaUnit: 'hectares',
+            secondaryAreaUnit: 'sqmeters',
+            localization: localization
+
+        });
+        measureControl.addTo(map);
+    },
+
+    /**
+     * Return the cloud object
+     * @returns {*}
+     */
+    get: function () {
+        return cloud;
+    }
+};
+},{}],10:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -1288,7 +1230,7 @@ var table;
 
 /**
  *
- * @type {geocloud.sqlStore}
+ * @type {geocloud.get().sqlStore}
  */
 var store = new geocloud.sqlStore({
     clickable: true
@@ -1410,18 +1352,18 @@ module.exports = {
                 }
             });
 
-            cloud.map.addControl(drawControl);
+            cloud.get().map.addControl(drawControl);
             drawOn = true;
 
             // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
-            cloud.map.off('draw:deleted');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
+            cloud.get().map.off('draw:deleted');
 
             // Bind events
-            cloud.map.on('draw:created', function (e) {
+            cloud.get().map.on('draw:created', function (e) {
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
                 if (type === 'marker') {
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
@@ -1436,7 +1378,7 @@ module.exports = {
                     editPopUp = new L.EditToolbar.Popup(event.latlng, {
                         className: 'leaflet-draw-toolbar',
                         actions: editActions
-                    }).addTo(cloud.map, drawLayer);
+                    }).addTo(cloud.get().map, drawLayer);
                 });
 
                 if (type === "polygon" || type === "rectangle") {
@@ -1459,10 +1401,10 @@ module.exports = {
                 };
                 table.loadDataInTable();
             });
-            cloud.map.on('draw:deleted', function (e) {
+            cloud.get().map.on('draw:deleted', function (e) {
                 table.loadDataInTable();
             });
-            cloud.map.on('draw:edited', function (e) {
+            cloud.get().map.on('draw:edited', function (e) {
                 $.each(e.layers._layers, function (i, v) {
                     if (typeof v._mRadius !== "undefined") {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
@@ -1499,7 +1441,7 @@ module.exports = {
         }
     },
     init: function () {
-        cloud.map.addLayer(drawnItems);
+        cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
@@ -1513,7 +1455,7 @@ module.exports = {
                 }
                 table = gc2table.init({
                     el: "#draw-table table",
-                    geocloud2: cloud,
+                    geocloud2: cloud.get(),
                     locale: window._vidiLocale.replace("_", "-"),
                     store: store,
                     cm: [
@@ -1549,14 +1491,14 @@ module.exports = {
     off: function () {
         // Clean up
         try {
-            cloud.map.removeControl(drawControl);
+            cloud.get().map.removeControl(drawControl);
         } catch (e) {
         }
         $("#draw-btn").prop("checked", false);
         // Unbind events
-        cloud.map.off('draw:created');
-        cloud.map.off('draw:deleted');
-        cloud.map.off('draw:edited');
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:edited');
         // Call destruct functions
         $.each(destructFunctions, function (i, v) {
             v();
@@ -1715,7 +1657,7 @@ L.ColorPicker = L._ToolbarAction.extend({
         this._link.appendChild(colorSwatch);
 
         L.DomEvent.on(this._link, 'click', function () {
-            cloud.map.removeLayer(this.toolbar.parentToolbar);
+            cloud.get().map.removeLayer(this.toolbar.parentToolbar);
         }, this);
     }
 });
@@ -2173,8 +2115,6 @@ var id = "conflict-custom-search";
  */
 var Terraformer = require('terraformer-wkt-parser');
 
-var config = require('../../../../config/config.js');
-
 var _result;
 
 
@@ -2268,7 +2208,7 @@ module.exports = module.exports = {
      * @returns {exports}
      */
     set: function (o) {
-        cloud = o.cloud;
+        cloud = o.cloud.get();
         utils = o.utils;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
@@ -2825,7 +2765,7 @@ var fromObjectText = "Objekt fra ";
  */
 module.exports = {
     set: function (o) {
-        cloud = o.cloud;
+        cloud = o.cloud.get();
         meta = o.meta;
         draw = o.draw;
         sqlQuery = o.sqlQuery;
@@ -3595,14 +3535,14 @@ module.exports = {
         return this;
     },
     init: function () {
-        cloud.on("dblclick", function () {
+        cloud.get().on("dblclick", function () {
             clicktimer = undefined;
         });
-        cloud.on("click", function (e) {
+        cloud.get().on("click", function (e) {
            if (active === false) {
                 return;
             }
-            var event = new geocloud.clickEvent(e, cloud);
+            var event = new geocloud.clickEvent(e, cloud.get());
 
             if (clicktimer) {
                 clearTimeout(clicktimer);
@@ -3646,17 +3586,143 @@ module.exports = {
 
 'use strict';
 
+var extensions;
+var modules;
+var tmpl;
+var urlparser = require('./../modules/urlparser');
+var urlVars = urlparser.urlVars;
+
 module.exports = {
     set: function (o) {
+        modules = o;
         return this;
     },
     init: function () {
+        var me = this;
+        if (urlVars.config) {
+            $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
+                console.log(data);
+                window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
+                window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
+                window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
+            }).fail(function () {
+                console.log("error");
+            }).always(function () {
+                me.startApp();
+            });
+        } else {
+            me.startApp();
+        }
+    },
+    startApp: function () {
+        // Load style sheet
+        $('<link/>').attr({
+            rel: 'stylesheet',
+            type: 'text/css',
+            href: '/static/css/styles.css'
+        }).appendTo('head');
+
+        // Render template and set some styling
+        if (typeof window.vidiConfig.template === "undefined") {
+            tmpl = "default.tmpl";
+        } else {
+            tmpl = window.vidiConfig.template;
+        }
+
+        // Check if template is set in URL vars
+        if (typeof urlVars.tmpl !== "undefined") {
+            var par = urlVars.tmpl.split("#");
+            if (par.length > 1) {
+                par.pop();
+            }
+            tmpl = par.join();
+        }
+
+        // If px and py is provided for print templates, add the values to the dict before rendering
+        if (urlVars.px && urlVars.py) {
+            gc2i18n.dict.printWidth = urlVars.px + "px";
+            gc2i18n.dict.printHeight = urlVars.py + "px";
+            gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
+        }
+
+        if (urlVars.l) {
+            gc2i18n.dict._showLegend = urlVars.l;
+        }
+
+        gc2i18n.dict.brandName = window.vidiConfig.brandName;
+
+        /**
+         * Render the page
+         */
+        $("body").html(Templates[tmpl].render(gc2i18n.dict));
+
+        $("[data-toggle=tooltip]").tooltip();
+        $(".center").hide();
+        try {
+            var max = $(document).height() - $('.tab-pane').offset().top - 100;
+        } catch (e) {
+            console.info(e.message);
+        }
+        $('.tab-pane').not("#result-content").css('max-height', max);
+        $('.places').css('height', max - 130);
+        $('.places').css('min-height', 400);
+        $('.places .tt-dropdown-menu').css('max-height', max - 200);
+        $('.places .tt-dropdown-menu').css('min-height', 400);
+
+        /**
+         * init the modules
+         */
+        modules.cloud.init();
+        modules.backboneEvents.init();
+        modules.socketId.init();
+        modules.bindEvent.init();
+        modules.meta.init();
+        modules.baseLayer.init();
+        modules.setting.init();
+        modules.state.init();
+        modules.infoClick.init();
+        modules.search.init();
+        modules.advancedInfo.init();
+        modules.draw.init();
+        modules.print.init();
+
+        /**
+         * Require extensions modules
+         * Hack to compile Glob files. Don´t call this function!
+         */
+        function ಠ_ಠ() {
+            require('./extensions/conflictSearch/controller.js');require('./extensions/conflictSearch/index.js');require('./extensions/conflictSearch/infoClick.js');require('./extensions/conflictSearch/reportRender.js');require('./extensions/cowiDetail/bufferSearch.js');require('./extensions/vectorLayers/index.js');
+        }
+
+        if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
+            $.each(vidiConfig.extensions.browser, function (i, v) {
+                modules.extensions[Object.keys(v)[0]] = {};
+                $.each(v[Object.keys(v)[0]], function (n, m) {
+                    modules.extensions[Object.keys(v)[0]][m] = require('./extensions/' + Object.keys(v)[0] + '/' + m + ".js");
+                    modules.extensions[Object.keys(v)[0]][m].set(modules);
+                })
+            });
+
+
+        }
+        $.each(vidiConfig.extensions.browser, function (i, v) {
+            $.each(v[Object.keys(v)[0]], function (n, m) {
+                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                    modules.extensions[Object.keys(v)[0]][m].init();
+                }
+            })
+        });
+
+        /**
+         *  Init some GUI stuff after modules are loaded
+         */
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
     }
+
 };
-},{}],22:[function(require,module,exports){
+},{"./../modules/urlparser":38,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/vectorLayers/index.js":18}],22:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3699,7 +3765,6 @@ module.exports = module.exports = {
                             );
                         }
                         else {
-                            console.log(metaData.data[u].meta)
                             displayInfo = ((metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined" && $.parseJSON(metaData.data[u].meta).meta_desc !== "") || metaData.data[u].f_table_abstract) ? "inline" : "none";
                             tooltip = metaData.data[u].f_table_abstract || "";
                             $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + metaData.data[u].f_table_name + '" data-gc2-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '"><span>' + text + '</span></label><span data-toggle="tooltip" data-placement="left" title="' + tooltip + '" style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
@@ -3803,7 +3868,7 @@ module.exports = {
             case "gc2":
                 for (var u = 0; u < metaData.data.length; ++u) {
                     isBaseLayer = metaData.data[u].baselayer ? true : false;
-                    layers[[metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name]] = cloud.addTileLayers({
+                    layers[[metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name],
                         db: db,
@@ -3826,7 +3891,7 @@ module.exports = {
             case "cartodb":
                 var j = 0, tmpData = metaData.data.slice(); // Clone the array for async adding of CartoDB layers
                 (function iter() {
-                    cartodb.createLayer(cloud.map, {
+                    cartodb.createLayer(cloud.get().map, {
                         user_name: db,
                         type: 'cartodb',
                         sublayers: [{
@@ -3836,10 +3901,10 @@ module.exports = {
                     }).on('done', function (layer) {
                         layer.baseLayer = false;
                         layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
-                        cloud.addLayer(layer, tmpData[j].f_table_name);
+                        cloud.get().addLayer(layer, tmpData[j].f_table_name);
                         // We switch the layer on/off, so they become ready for state.
-                        cloud.showLayer(layer.id);
-                        cloud.hideLayer(layer.id);
+                        cloud.get().showLayer(layer.id);
+                        cloud.get().hideLayer(layer.id);
                         j++;
                         if (j < tmpData.length) {
                             iter();
@@ -3894,7 +3959,7 @@ module.exports = module.exports = {
         var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
             case "gc2":
-                var visibleLayers = cloud.getVisibleLayers(true), layers, checked, layerName;
+                var visibleLayers = cloud.get().getVisibleLayers(true), layers, checked, layerName;
                 if (layerArr) {
                     layers = layerArr.join(";");
                 } else {
@@ -3939,7 +4004,7 @@ module.exports = module.exports = {
             case "cartodb":
                 setTimeout(function () {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
-                    $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
+                    $.each(cloud.get().getVisibleLayers(true).split(";"), function (i, v) {
                         key = v;
                         if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
                             legend = metaDataKeys[key].legend;
@@ -4162,8 +4227,8 @@ var moment = require('moment');
  */
 var _cleanUp = function () {
     try {
-        cloud.map.removeLayer(recScale);
-        cloud.map.removeLayer(recEdit);
+        cloud.get().map.removeLayer(recScale);
+        cloud.get().map.removeLayer(recEdit);
     } catch (e) {
     }
     printOn = false;
@@ -4182,7 +4247,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        cloud.map.addLayer(printItems);
+        cloud.get().map.addLayer(printItems);
         // Set locale for date/time string
         var lc = window._vidiLocale.split("_")[0];
         require('moment/locale/da');
@@ -4218,12 +4283,15 @@ module.exports = {
                 scale = e.target.value;
                 change();
             });
+            console.log(window.vidiConfig.enabledPrints)
 
             $.each(printC, function (i) {
-                if (i.charAt(0) !== "_") {
-                    numOfPrintTmpl = numOfPrintTmpl + 1;
+                if (window.vidiConfig.enabledPrints.indexOf(i) > -1) {
+                    if (i.charAt(0) !== "_") {
+                        numOfPrintTmpl = numOfPrintTmpl + 1;
+                    }
+                    $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
                 }
-                $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
             });
             if (numOfPrintTmpl > 1) {
                 $("#print-tmpl").parent("div").show();
@@ -4499,8 +4567,8 @@ module.exports = {
             };
 
             var first = center ? false : true;
-            center = center || cloud.map.getCenter(); // Init center as map center
-            recEdit = rectangle(center, cloud.map, "yellow", scale, first);
+            center = center || cloud.get().map.getCenter(); // Init center as map center
+            recEdit = rectangle(center, cloud.get().map, "yellow", scale, first);
             recEdit._vidi_type = "printHelper";
             printItems.addLayer(recEdit);
             recEdit.editing.enable();
@@ -4518,7 +4586,7 @@ module.exports = {
                     rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
 
                     if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-                        cloud.map.removeLayer(recScale);
+                        cloud.get().map.removeLayer(recScale);
                         recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
                         recScale._vidi_type = "print";
                         printItems.addLayer(recScale);
@@ -4580,7 +4648,6 @@ module.exports = module.exports = {
         // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
-            //console.log("State push");
             history.pushState(null, null, anchor.init());
             first = false;
         }, t);
@@ -4621,11 +4688,11 @@ module.exports = {
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
-                cloud.map.addLayer(resultLayer);
+                cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
-                cloud.zoomToExtentOfgeoJsonStore(this);
-                if (cloud.map.getZoom() > 17) {
-                    cloud.map.setZoom(17);
+                cloud.get().zoomToExtentOfgeoJsonStore(this);
+                if (cloud.map.get().getZoom() > 17) {
+                    cloud.map.get().setZoom(17);
                 }
             }
         }
@@ -5281,8 +5348,8 @@ module.exports = {
                 "properties": {},
                 "geometry": json
             });
-            cloud.map.addLayer(myLayer);
-            cloud.map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
+            cloud.get().map.addLayer(myLayer);
+            cloud.get().map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
         });
     }
 };
@@ -5311,7 +5378,7 @@ module.exports = module.exports = {
 
     },
     serialize: function(filters){
-        var e = _encodeLayers(cloud.map);
+        var e = _encodeLayers(cloud.get().map);
         $.each(e, function (i, v) {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
@@ -5787,7 +5854,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        cloud.setBaseLayer(str);
+        cloud.get().setBaseLayer(str);
         pushState.init();
     }
 };
@@ -5986,7 +6053,7 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
-        layers = cloud.getVisibleLayers().split(";");
+        layers = cloud.get().getVisibleLayers().split(";");
 
         // Remove not queryable layers from array
         for(var i = layers.length - 1; i >= 0; i--) {
@@ -6013,7 +6080,7 @@ module.exports = {
                     4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
                     76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
                     1.19432856696, 0.597164283478, 0.298582141739, 0.149291];
-                distance = 5 * res[cloud.getZoom()];
+                distance = 5 * res[cloud.get().getZoom()];
             }
             if (!callBack) {
                 onLoad = function () {
@@ -6065,7 +6132,7 @@ module.exports = {
                         }
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
-                            geocloud2: cloud,
+                            geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
                             autoUpdate: false,
@@ -6134,7 +6201,7 @@ module.exports = {
                     }
                 }
             });
-            cloud.addGeoJsonStore(qstore[index]);
+            cloud.get().addGeoJsonStore(qstore[index]);
             var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
@@ -6170,7 +6237,7 @@ module.exports = {
         $.each(qstore, function (index, store) {
             store.abort();
             store.reset();
-            cloud.removeGeoJsonStore(store);
+            cloud.get().removeGeoJsonStore(store);
         });
         $("#info-tab").empty();
         $("#info-pane").empty();
@@ -6292,9 +6359,9 @@ module.exports = {
         var p, hashArr = hash.replace("#", "").split("/");
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
             p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
-            cloud.zoomToPoint(p.x, p.y, hashArr[1]);
+            cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
         } else {
-            cloud.zoomToExtent();
+            cloud.get().zoomToExtent();
         }
         (function pollForLayers() {
             if (layers.ready() && setting.ready()) {
@@ -6318,12 +6385,12 @@ module.exports = {
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
-                            cloud.map.fitBounds(extent);
+                            cloud.get().map.fitBounds(extent);
                         } else {
-                            cloud.zoomToExtent(extent);
+                            cloud.get().zoomToExtent(extent);
                         }
                     } else {
-                        cloud.zoomToExtent();
+                        cloud.get().zoomToExtent();
                     }
                 }
                 if (typeof urlVars.k !== "undefined") {
@@ -6343,7 +6410,7 @@ module.exports = {
                         success: function (response) {
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
-                                cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
+                                cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
                             if (response.data.customData !== null){
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
@@ -6364,7 +6431,7 @@ module.exports = {
                                             weight: 1
                                         });
                                         g.feature = m.feature;
-                                        cloud.map.addLayer(g);
+                                        cloud.get().map.addLayer(g);
                                         setTimeout(function () {
                                             var bounds = g.getBounds(),
                                                 sw = bounds.getSouthWest(),
@@ -6372,7 +6439,7 @@ module.exports = {
                                                 halfLat = (sw.lat + ne.lat) / 2,
                                                 midLeft = L.latLng(halfLat, sw.lng),
                                                 midRight = L.latLng(halfLat, ne.lng),
-                                                scaleFactor = ($("#pane1").width() / (cloud.map.project(midRight).x - cloud.map.project(midLeft).x));
+                                                scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
 
                                             $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
@@ -6384,7 +6451,7 @@ module.exports = {
                                                 parr.pop();
                                             }
                                             $("#comment").html(decodeURI(parr.join()));
-                                            cloud.map.removeLayer(g);
+                                            cloud.get().map.removeLayer(g);
                                         }, 300)
                                     }
                                 });
@@ -6508,7 +6575,7 @@ module.exports = {
                                             }
                                         });
                                         $.each(g._layers, function (i, v) {
-                                            cloud.map.addLayer(v);
+                                            cloud.get().map.addLayer(v);
                                         });
                                         GeoJsonAdded = true;
                                     }
@@ -6516,7 +6583,7 @@ module.exports = {
                                         g = L.circleMarker(m._latlng, m.style);
                                         g.setRadius(m._radius);
                                         g.feature = m.feature;
-                                        cloud.map.addLayer(g);
+                                        cloud.get().map.addLayer(g);
                                     }
                                 });
                             }
@@ -6584,13 +6651,13 @@ module.exports = module.exports = {
         var el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
             try {
-                cloud.map.addLayer(cloud.getLayersByName(name));
+                cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 el.prop('checked', true);
             } catch (e) {
                 //Pass
             }
         } else {
-            cloud.map.removeLayer(cloud.getLayersByName(name));
+            cloud.get().map.removeLayer(cloud.get().getLayersByName(name));
             el.prop('checked', false);
         }
         var siblings = el.parents(".accordion-body").find("input");
@@ -6719,11 +6786,6 @@ module.exports = {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
-    pg: {
-        host: "127.0.0.1",
-        user: "gc2",
-        pw: "1234"
-    },
     cartodb: {
         db: "mhoegh",
         baseLayers: [
@@ -6773,6 +6835,18 @@ module.exports = {
                     }
                 }
             },
+            "print2": {
+                A4: {
+                    l: {
+                        mapsizePx: [1000, 700],
+                        mapsizeMm: [270, 190]
+                    },
+                    p: {
+                        mapsizePx: [700, 1000],
+                        mapsizeMm: [190, 270]
+                    }
+                }
+            },
             "_conflictPrint": {
                 A4: {
                     p: {
@@ -6796,8 +6870,14 @@ module.exports = {
         browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"], "vectorLayers": ["index"]}],
         server: [{conflictSearch: ["index"]}]
     },
+
+    configUrl: "http://mapcentia.github.io",
+
+    /* Run time */
     _template: "cowiDetail.tmpl",
-    brandName: "MapCentia"
+    "brandName": "MapCentia ApS",
+    "enabledExtensions": ["conflictSearch", "vectorLayers"],
+    "enabledPrints": ["print"]
 };
 },{}],42:[function(require,module,exports){
 module.exports = after

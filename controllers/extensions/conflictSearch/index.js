@@ -24,15 +24,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
         return v.toString(16);
     });
     var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema;
-
-    console.log(db);
-    console.log(schema);
-    console.log(wkt);
-
     switch (BACKEND) {
         case "gc2":
+            var configServer = require('../../../config/configServer.js');
             var pg = require('pg');
-            var conString = "postgres://" + config.pg.user + ":" + config.pg.pw + "@" + config.pg.host + "/" + db;
+            var conString = "postgres://" + configServer.pg.user + ":" + configServer.pg.pw + "@" + configServer.pg.host + "/" + db;
             pg.connect(conString, function (err, client, done) {
                 if (err) {
                     return console.error('error fetching client from pool', err);

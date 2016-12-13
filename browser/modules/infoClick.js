@@ -25,14 +25,14 @@ module.exports = {
         return this;
     },
     init: function () {
-        cloud.on("dblclick", function () {
+        cloud.get().on("dblclick", function () {
             clicktimer = undefined;
         });
-        cloud.on("click", function (e) {
+        cloud.get().on("click", function (e) {
            if (active === false) {
                 return;
             }
-            var event = new geocloud.clickEvent(e, cloud);
+            var event = new geocloud.clickEvent(e, cloud.get());
 
             if (clicktimer) {
                 clearTimeout(clicktimer);

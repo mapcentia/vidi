@@ -32,11 +32,11 @@ module.exports = {
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
-                cloud.map.addLayer(resultLayer);
+                cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
-                cloud.zoomToExtentOfgeoJsonStore(this);
-                if (cloud.map.getZoom() > 17) {
-                    cloud.map.setZoom(17);
+                cloud.get().zoomToExtentOfgeoJsonStore(this);
+                if (cloud.map.get().getZoom() > 17) {
+                    cloud.map.get().setZoom(17);
                 }
             }
         }

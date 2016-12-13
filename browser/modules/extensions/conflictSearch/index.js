@@ -157,8 +157,6 @@ var id = "conflict-custom-search";
  */
 var Terraformer = require('terraformer-wkt-parser');
 
-var config = require('../../../../config/config.js');
-
 var _result;
 
 
@@ -252,7 +250,7 @@ module.exports = module.exports = {
      * @returns {exports}
      */
     set: function (o) {
-        cloud = o.cloud;
+        cloud = o.cloud.get();
         utils = o.utils;
         meta = o.meta;
         backboneEvents = o.backboneEvents;

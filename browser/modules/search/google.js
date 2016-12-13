@@ -32,8 +32,8 @@ module.exports = {
                 "properties": {},
                 "geometry": json
             });
-            cloud.map.addLayer(myLayer);
-            cloud.map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
+            cloud.get().map.addLayer(myLayer);
+            cloud.get().map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
         });
     }
 };

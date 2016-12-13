@@ -84,7 +84,7 @@ module.exports = {
             case "gc2":
                 for (var u = 0; u < metaData.data.length; ++u) {
                     isBaseLayer = metaData.data[u].baselayer ? true : false;
-                    layers[[metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name]] = cloud.addTileLayers({
+                    layers[[metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name],
                         db: db,
@@ -107,7 +107,7 @@ module.exports = {
             case "cartodb":
                 var j = 0, tmpData = metaData.data.slice(); // Clone the array for async adding of CartoDB layers
                 (function iter() {
-                    cartodb.createLayer(cloud.map, {
+                    cartodb.createLayer(cloud.get().map, {
                         user_name: db,
                         type: 'cartodb',
                         sublayers: [{
@@ -117,10 +117,10 @@ module.exports = {
                     }).on('done', function (layer) {
                         layer.baseLayer = false;
                         layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
-                        cloud.addLayer(layer, tmpData[j].f_table_name);
+                        cloud.get().addLayer(layer, tmpData[j].f_table_name);
                         // We switch the layer on/off, so they become ready for state.
-                        cloud.showLayer(layer.id);
-                        cloud.hideLayer(layer.id);
+                        cloud.get().showLayer(layer.id);
+                        cloud.get().hideLayer(layer.id);
                         j++;
                         if (j < tmpData.length) {
                             iter();

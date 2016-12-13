@@ -44,13 +44,13 @@ module.exports = module.exports = {
         var el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
             try {
-                cloud.map.addLayer(cloud.getLayersByName(name));
+                cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 el.prop('checked', true);
             } catch (e) {
                 //Pass
             }
         } else {
-            cloud.map.removeLayer(cloud.getLayersByName(name));
+            cloud.get().map.removeLayer(cloud.get().getLayersByName(name));
             el.prop('checked', false);
         }
         var siblings = el.parents(".accordion-body").find("input");

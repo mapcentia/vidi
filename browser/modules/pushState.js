@@ -34,7 +34,6 @@ module.exports = module.exports = {
         // We don't set any state until 1 secs after the first request. This way CartoDB layers become ready.
         t = first ? 1000 : 0;
         setTimeout(function () {
-            //console.log("State push");
             history.pushState(null, null, anchor.init());
             first = false;
         }, t);

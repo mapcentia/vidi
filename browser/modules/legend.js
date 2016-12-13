@@ -25,7 +25,7 @@ module.exports = module.exports = {
         var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
             case "gc2":
-                var visibleLayers = cloud.getVisibleLayers(true), layers, checked, layerName;
+                var visibleLayers = cloud.get().getVisibleLayers(true), layers, checked, layerName;
                 if (layerArr) {
                     layers = layerArr.join(";");
                 } else {
@@ -70,7 +70,7 @@ module.exports = module.exports = {
             case "cartodb":
                 setTimeout(function () {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
-                    $.each(cloud.getVisibleLayers(true).split(";"), function (i, v) {
+                    $.each(cloud.get().getVisibleLayers(true).split(";"), function (i, v) {
                         key = v;
                         if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
                             legend = metaDataKeys[key].legend;

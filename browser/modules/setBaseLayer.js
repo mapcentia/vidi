@@ -26,7 +26,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        cloud.setBaseLayer(str);
+        cloud.get().setBaseLayer(str);
         pushState.init();
     }
 };

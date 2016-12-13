@@ -27,7 +27,7 @@ var fromObjectText = "Objekt fra ";
  */
 module.exports = {
     set: function (o) {
-        cloud = o.cloud;
+        cloud = o.cloud.get();
         meta = o.meta;
         draw = o.draw;
         sqlQuery = o.sqlQuery;

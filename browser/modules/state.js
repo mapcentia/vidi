@@ -111,9 +111,9 @@ module.exports = {
         var p, hashArr = hash.replace("#", "").split("/");
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
             p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
-            cloud.zoomToPoint(p.x, p.y, hashArr[1]);
+            cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
         } else {
-            cloud.zoomToExtent();
+            cloud.get().zoomToExtent();
         }
         (function pollForLayers() {
             if (layers.ready() && setting.ready()) {
@@ -137,12 +137,12 @@ module.exports = {
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         if (BACKEND === "cartodb") {
-                            cloud.map.fitBounds(extent);
+                            cloud.get().map.fitBounds(extent);
                         } else {
-                            cloud.zoomToExtent(extent);
+                            cloud.get().zoomToExtent(extent);
                         }
                     } else {
-                        cloud.zoomToExtent();
+                        cloud.get().zoomToExtent();
                     }
                 }
                 if (typeof urlVars.k !== "undefined") {
@@ -162,7 +162,7 @@ module.exports = {
                         success: function (response) {
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
-                                cloud.map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
+                                cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
                             if (response.data.customData !== null){
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
@@ -183,7 +183,7 @@ module.exports = {
                                             weight: 1
                                         });
                                         g.feature = m.feature;
-                                        cloud.map.addLayer(g);
+                                        cloud.get().map.addLayer(g);
                                         setTimeout(function () {
                                             var bounds = g.getBounds(),
                                                 sw = bounds.getSouthWest(),
@@ -191,7 +191,7 @@ module.exports = {
                                                 halfLat = (sw.lat + ne.lat) / 2,
                                                 midLeft = L.latLng(halfLat, sw.lng),
                                                 midRight = L.latLng(halfLat, ne.lng),
-                                                scaleFactor = ($("#pane1").width() / (cloud.map.project(midRight).x - cloud.map.project(midLeft).x));
+                                                scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
 
                                             $("#container1").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
@@ -203,7 +203,7 @@ module.exports = {
                                                 parr.pop();
                                             }
                                             $("#comment").html(decodeURI(parr.join()));
-                                            cloud.map.removeLayer(g);
+                                            cloud.get().map.removeLayer(g);
                                         }, 300)
                                     }
                                 });
@@ -327,7 +327,7 @@ module.exports = {
                                             }
                                         });
                                         $.each(g._layers, function (i, v) {
-                                            cloud.map.addLayer(v);
+                                            cloud.get().map.addLayer(v);
                                         });
                                         GeoJsonAdded = true;
                                     }
@@ -335,7 +335,7 @@ module.exports = {
                                         g = L.circleMarker(m._latlng, m.style);
                                         g.setRadius(m._radius);
                                         g.feature = m.feature;
-                                        cloud.map.addLayer(g);
+                                        cloud.get().map.addLayer(g);
                                     }
                                 });
                             }

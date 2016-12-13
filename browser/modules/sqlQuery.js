@@ -66,7 +66,7 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
-        layers = cloud.getVisibleLayers().split(";");
+        layers = cloud.get().getVisibleLayers().split(";");
 
         // Remove not queryable layers from array
         for(var i = layers.length - 1; i >= 0; i--) {
@@ -93,7 +93,7 @@ module.exports = {
                     4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
                     76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
                     1.19432856696, 0.597164283478, 0.298582141739, 0.149291];
-                distance = 5 * res[cloud.getZoom()];
+                distance = 5 * res[cloud.get().getZoom()];
             }
             if (!callBack) {
                 onLoad = function () {
@@ -145,7 +145,7 @@ module.exports = {
                         }
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
-                            geocloud2: cloud,
+                            geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
                             autoUpdate: false,
@@ -214,7 +214,7 @@ module.exports = {
                     }
                 }
             });
-            cloud.addGeoJsonStore(qstore[index]);
+            cloud.get().addGeoJsonStore(qstore[index]);
             var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
@@ -250,7 +250,7 @@ module.exports = {
         $.each(qstore, function (index, store) {
             store.abort();
             store.reset();
-            cloud.removeGeoJsonStore(store);
+            cloud.get().removeGeoJsonStore(store);
         });
         $("#info-tab").empty();
         $("#info-pane").empty();

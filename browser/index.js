@@ -26,21 +26,12 @@ function ಠ_ಠ() {
     require('./i18n/*.js', {glob: true});
 }
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
+window.vidiConfig = require('../config/config.js');
 
 /**
  *
  */
 window.Vidi = function () {
-
-    // Declare vars
-    var config, socketId, tmpl;
-
-
-    var urlparser = require('./modules/urlparser');
-    var urlVars = urlparser.urlVars;
-
-    config = require('../config/config.js');
-
     $(window).load(function () {
         window.status = "all_loaded";
     });
@@ -51,58 +42,6 @@ window.Vidi = function () {
     setTimeout(function () {
         window.status = "all_loaded";
     }, 15000);
-
-    // Load style sheet
-    $('<link/>').attr({
-        rel: 'stylesheet',
-        type: 'text/css',
-        href: '/static/css/styles.css'
-    }).appendTo('head');
-
-    // Render template and set some styling
-    if (typeof config.template === "undefined") {
-        tmpl = "default.tmpl";
-    } else {
-        tmpl = config.template;
-    }
-
-    // Check if template is set in URL vars
-    if (typeof urlVars.tmpl !== "undefined") {
-        var par = urlVars.tmpl.split("#");
-        if (par.length > 1) {
-            par.pop();
-        }
-        tmpl = par.join();
-    }
-
-    // If px and py is provided for print templates, add the values to the dict before rendering
-    if (urlVars.px && urlVars.py) {
-        gc2i18n.dict.printWidth = urlVars.px + "px";
-        gc2i18n.dict.printHeight = urlVars.py + "px";
-        gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
-    }
-
-    //
-    if (urlVars.l) {
-        gc2i18n.dict._showLegend = urlVars.l;
-    }
-
-    gc2i18n.dict.brandName = config.brandName;
-
-    $("body").html(Templates[tmpl].render(gc2i18n.dict));
-
-    $("[data-toggle=tooltip]").tooltip();
-    $(".center").hide();
-    try {
-        var max = $(document).height() - $('.tab-pane').offset().top - 100;
-    } catch (e) {
-        console.info(e.message);
-    }
-    $('.tab-pane').not("#result-content").css('max-height', max);
-    $('.places').css('height', max - 130);
-    $('.places').css('min-height', 400);
-    $('.places .tt-dropdown-menu').css('max-height', max - 200);
-    $('.places .tt-dropdown-menu').css('min-height', 400);
 
     // Require the standard modules
     var modules = {
@@ -138,8 +77,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/search/*.js', {glob: true});
     }
-
-    modules.search = require('./modules/search/' + config.searchModule + '.js');
+    modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
     modules.init.set(modules);
@@ -166,36 +104,6 @@ window.Vidi = function () {
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
 
-    //Init modules
-    modules.backboneEvents.init();
-    modules.socketId.init();
-    modules.bindEvent.init();
-    modules.meta.init();
-    modules.baseLayer.init();
-    modules.setting.init();
-    modules.infoClick.init();
-    modules.search.init();
-    modules.draw.init();
-    modules.advancedInfo.init();
-    modules.print.init();
-    modules.state.init();
-
-
-    // Require extensions modules
-    // Hack to compile Glob files. Don´t call this function!
-    function ಠ_ಠ() {
-        require('./modules/extensions/**/*.js', {glob: true});
-    }
-    if (typeof config.extensions !== "undefined" && typeof config.extensions.browser !== "undefined") {
-        $.each(config.extensions.browser, function (i, v) {
-            modules.extensions[Object.keys(v)[0]] = {};
-            $.each(v[Object.keys(v)[0]], function (n, m) {
-                modules.extensions[Object.keys(v)[0]][m] = require('./modules/extensions/' + Object.keys(v)[0] + '/' + m + ".js");
-                modules.extensions[Object.keys(v)[0]][m].set(modules);
-                modules.extensions[Object.keys(v)[0]][m].init();
-            })
-        });
-    }
     // Return the init module to be called in index.html
     return {
         init: modules.init

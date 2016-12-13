@@ -108,10 +108,10 @@ module.exports = module.exports = {
     init: function (str) {
         metaDataKeys = meta.getMetaDataKeys();
 
-        cloud.on("dragend", function () {
+        cloud.get().on("dragend", function () {
             pushState.init();
         });
-        cloud.on("moveend", function () {
+        cloud.get().on("moveend", function () {
             pushState.init();
         });
 

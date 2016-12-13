@@ -5,95 +5,123 @@
 
 'use strict';
 
-try {
-    geocloud.setHost(require('../../config/config.js').gc2.host);
-} catch (e){
-    console.info(e.message);
-}
-
-/**
- *
- * @type {geocloud.map}
- */
-var cloud = new geocloud.map({
-    el: "map",
-    zoomControl: false,
-    numZoomLevels: 21,
-    fadeAnimation: false
-});
-
 /**
  *
  */
-var zoomControl = L.control.zoom({
-    position: 'topright'
-});
-cloud.map.addControl(zoomControl);
-var map = cloud.map;
+var cloud;
 
+module.exports = {
 
-/*var scaleControl = L.control.scale({position: "bottomright"});
- cloud.map.addControl(scaleControl);*/
-
-/**
- *
- */
-var lc = L.control.locate({
-    position: 'topright',
-    strings: {
-        title: "Find me"
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
+    set: function (o) {
+        return this;
     },
-    icon: "fa fa-location-arrow",
-    iconLoading: "fa fa-circle-o-notch fa-spin"
-}).addTo(map);
 
-/**
- *
- */
-var graphicScale = L.control.graphicScale({
-    doubleLine: false,
-    fill: 'hollow',
-    showSubunits: false,
-    position: "bottomleft"
-}).addTo(map);
+    /**
+     *
+     */
+    init: function () {
+        try {
+            geocloud.setHost(window.vidiConfig.gc2.host);
+        } catch (e) {
+            console.info(e.message);
+        }
 
-/**
- *
- * @type {div}
- */
-var scaleText = L.DomUtil.create('div', 'scaleText');
-graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
-//scaleText.innerHTML = '<h1>Leaflet Graphic Scale</h1><p>style: <span class="choice">hollow</span>-<span class="choice">line</span>-<span class="choice">fill</span>-<span class="choice">nofill</span></p>';
+        /**
+         *
+         * @type {geocloud.map}
+         */
+        cloud = new geocloud.map({
+            el: "map",
+            zoomControl: false,
+            numZoomLevels: 21,
+            fadeAnimation: false
+        });
 
-/**
- *
- */
-var styleChoices = scaleText.querySelectorAll('.choice');
+        /**
+         *
+         */
+        var zoomControl = L.control.zoom({
+            position: 'topright'
+        });
+        cloud.map.addControl(zoomControl);
+        var map = cloud.map;
 
-for (var i = 0; i < styleChoices.length; i++) {
-    styleChoices[i].addEventListener('click', function (e) {
-        graphicScale._setStyle({fill: e.currentTarget.innerHTML});
-    });
-}
 
-var localization;
-if (window._vidiLocale === "da_DK") {
-    localization = "da";
-}
-if (window._vidiLocale === "en_US") {
-    localization = "en";
-}
-/**
- *
- */
-var measureControl = new L.Control.Measure({
-    position: 'topright',
-    primaryLengthUnit: 'kilometers',
-    secondaryLengthUnit: 'meters',
-    primaryAreaUnit: 'hectares',
-    secondaryAreaUnit: 'sqmeters',
-    localization: localization
+        /*var scaleControl = L.control.scale({position: "bottomright"});
+         cloud.map.addControl(scaleControl);*/
 
-});
-measureControl.addTo(map);
-module.exports = cloud;
+        /**
+         *
+         */
+        L.control.locate({
+            position: 'topright',
+            strings: {
+                title: "Find me"
+            },
+            icon: "fa fa-location-arrow",
+            iconLoading: "fa fa-circle-o-notch fa-spin"
+        }).addTo(map);
+
+        /**
+         *
+         */
+        var graphicScale = L.control.graphicScale({
+            doubleLine: false,
+            fill: 'hollow',
+            showSubunits: false,
+            position: "bottomleft"
+        }).addTo(map);
+
+        /**
+         *
+         * @type {div}
+         */
+        var scaleText = L.DomUtil.create('div', 'scaleText');
+        graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
+
+        /**
+         *
+         */
+        var styleChoices = scaleText.querySelectorAll('.choice');
+
+        for (var i = 0; i < styleChoices.length; i++) {
+            styleChoices[i].addEventListener('click', function (e) {
+                graphicScale._setStyle({fill: e.currentTarget.innerHTML});
+            });
+        }
+
+        var localization;
+        if (window._vidiLocale === "da_DK") {
+            localization = "da";
+        }
+        if (window._vidiLocale === "en_US") {
+            localization = "en";
+        }
+        /**
+         *
+         */
+        var measureControl = new L.Control.Measure({
+            position: 'topright',
+            primaryLengthUnit: 'kilometers',
+            secondaryLengthUnit: 'meters',
+            primaryAreaUnit: 'hectares',
+            secondaryAreaUnit: 'sqmeters',
+            localization: localization
+
+        });
+        measureControl.addTo(map);
+    },
+
+    /**
+     * Return the cloud object
+     * @returns {*}
+     */
+    get: function () {
+        return cloud;
+    }
+};

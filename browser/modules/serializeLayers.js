@@ -22,7 +22,7 @@ module.exports = module.exports = {
 
     },
     serialize: function(filters){
-        var e = _encodeLayers(cloud.map);
+        var e = _encodeLayers(cloud.get().map);
         $.each(e, function (i, v) {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
