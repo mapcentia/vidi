@@ -8,7 +8,6 @@ module.exports = function (grunt) {
                     'public/css/build/all.min.css': [
                         'public/bower_components/bootstrap/dist/css/bootstrap.min.css',
                         'public/bower_components/snackbarjs/dist/snackbar.min.css',
-                        'public/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css',
                         'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
                         'public/css/jasny-bootstrap.min.css',
                         'public/css/L.Control.Locate.min.css',
