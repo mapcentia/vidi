@@ -2,6 +2,24 @@ module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        cssmin: {
+            build: {
+                files: {
+                    'public/css/build/all.min.css': [
+                        'public/bower_components/bootstrap/dist/css/bootstrap.min.css',
+                        'public/bower_components/snackbarjs/dist/snackbar.min.css',
+                        'public/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.min.css',
+                        'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
+                        'public/css/jasny-bootstrap.min.css',
+                        'public/css/L.Control.Locate.min.css',
+                        'public/css/Leaflet.GraphicScale.min.css',
+                        'public/css/leaflet.toolbar.css',
+                        'public/css/styles.css',
+                        'public/css/cartodb.css'
+                    ]
+                }
+            }
+        },
         jshint: {
             options: {
                 funcscope: true,
@@ -41,6 +59,35 @@ module.exports = function (grunt) {
                 }
             }
         },
+        uglify: {
+            publish: {
+                files: {
+                    'public/js/build/all.min.js': [
+                        'public/bower_components/leaflet-measure/dist/leaflet-measure.js',
+                        'public/bower_components/jquery/dist/jquery.min.js',
+                        'public/bower_components/typeahead.js/dist/typeahead.jquery.min.js',
+                        'public/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js',
+                        'public/bower_components/bootstrap-table/dist/bootstrap-table.js',
+                        'public/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js',
+                        'public/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js',
+                        'public/bower_components/tableExport.jquery.plugin/tableExport.min.js',
+                        'public/bower_components/bootstrap-material-design/dist/js/ripples.js',
+                        'public/bower_components/bootstrap-material-design/dist/js/material.js',
+                        'public/js/jasny-bootstrap.min.js',
+                        'public/js/templates.js',
+                        'public/js/bundle.js',
+                        'public/js/vidi.js'
+                    ]
+                }
+            }
+        },
+        processhtml: {
+            publish: {
+                files: {
+                    'public/index.html': ['public/index.html']
+                }
+            }
+        },
         gitpull: {
             production: {
                 options: {}
@@ -63,9 +110,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-processhtml');
 
     grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
-    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell']);
+    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml']);
 };
 
 

@@ -75,7 +75,9 @@ var urlVars = urlparser.urlVars;
  *
  * @type {showdown.Converter}
  */
-var toHtml = new showdown.Converter();
+var toHtml = require('showdown').Converter();
+
+require('arrive');
 
 var backboneEvents;
 

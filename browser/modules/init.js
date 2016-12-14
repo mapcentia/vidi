@@ -10,6 +10,7 @@ var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
+require("bootstrap");
 
 module.exports = {
     set: function (o) {
@@ -124,13 +125,15 @@ module.exports = {
             });
 
 
-            $.each(vidiConfig.extensions.browser, function (i, v) {
-                $.each(v[Object.keys(v)[0]], function (n, m) {
-                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                        modules.extensions[Object.keys(v)[0]][m].init();
-                    }
-                })
-            });
+            if (typeof window.vidiConfig.enabledExtensions === "object") {
+                $.each(vidiConfig.extensions.browser, function (i, v) {
+                    $.each(v[Object.keys(v)[0]], function (n, m) {
+                        if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                            modules.extensions[Object.keys(v)[0]][m].init();
+                        }
+                    })
+                });
+            }
         }
 
         /**

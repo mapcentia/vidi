@@ -19,14 +19,19 @@
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-browserify": "^5.0.0",
+    "grunt-contrib-cssmin": "^1.0.2",
+    "grunt-contrib-uglify": "^2.0.0",
     "grunt-git": "^1.0.0",
+    "grunt-processhtml": "^0.4.1",
     "grunt-templates-hogan": "^0.3.0"
   },
   "dependencies": {
+    "arrive": "^2.3.1",
     "backbone": "^1.3.3",
     "base64-js": "^1.1.2",
     "base64-url": "^1.2.2",
     "body-parser": "^1.15.2",
+    "bootstrap": "^3.3.7",
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",
@@ -45,6 +50,7 @@
     "request": "^2.72.0",
     "require-globify": "^1.4.0",
     "serialijse": "0.0.17",
+    "showdown": "^1.5.1",
     "snackbarjs": "^1.1.0",
     "snapshot": "0.0.0",
     "socket.io": "^1.7.1",
