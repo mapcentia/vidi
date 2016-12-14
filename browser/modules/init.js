@@ -69,6 +69,7 @@ module.exports = {
         }
 
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
+        gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
         /**
          * Render the page
@@ -123,14 +124,14 @@ module.exports = {
             });
 
 
+            $.each(vidiConfig.extensions.browser, function (i, v) {
+                $.each(v[Object.keys(v)[0]], function (n, m) {
+                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                        modules.extensions[Object.keys(v)[0]][m].init();
+                    }
+                })
+            });
         }
-        $.each(vidiConfig.extensions.browser, function (i, v) {
-            $.each(v[Object.keys(v)[0]], function (n, m) {
-                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                    modules.extensions[Object.keys(v)[0]][m].init();
-                }
-            })
-        });
 
         /**
          *  Init some GUI stuff after modules are loaded

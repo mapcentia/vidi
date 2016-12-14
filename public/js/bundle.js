@@ -3650,6 +3650,7 @@ module.exports = {
         }
 
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
+        gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
         /**
          * Render the page
@@ -3704,14 +3705,14 @@ module.exports = {
             });
 
 
+            $.each(vidiConfig.extensions.browser, function (i, v) {
+                $.each(v[Object.keys(v)[0]], function (n, m) {
+                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                        modules.extensions[Object.keys(v)[0]][m].init();
+                    }
+                })
+            });
         }
-        $.each(vidiConfig.extensions.browser, function (i, v) {
-            $.each(v[Object.keys(v)[0]], function (n, m) {
-                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                    modules.extensions[Object.keys(v)[0]][m].init();
-                }
-            })
-        });
 
         /**
          *  Init some GUI stuff after modules are loaded
@@ -4283,8 +4284,6 @@ module.exports = {
                 scale = e.target.value;
                 change();
             });
-            console.log(window.vidiConfig.enabledPrints)
-
             $.each(printC, function (i) {
                 if (window.vidiConfig.enabledPrints.indexOf(i) > -1) {
                     if (i.charAt(0) !== "_") {
@@ -4293,6 +4292,7 @@ module.exports = {
                     $("#print-tmpl").append('<div class="radio radio-primary"><label><input type="radio" class="print print-tmpl" name="print-tmpl" id="' + i + '" value="' + i + '">' + i + '</label></div>');
                 }
             });
+
             if (numOfPrintTmpl > 1) {
                 $("#print-tmpl").parent("div").show();
             }
@@ -6875,9 +6875,10 @@ module.exports = {
 
     /* Run time */
     _template: "cowiDetail.tmpl",
-    "brandName": "MapCentia ApS",
-    "enabledExtensions": ["conflictSearch", "vectorLayers"],
-    "enabledPrints": ["print"]
+    brandName: "MapCentia ApS",
+    aboutBox: "<h3>Velkommen til Geo Fyns Webkort, som er baseret på MapCentia GC2</h3><p>Det er her muligt at se en række baggrundskort, fx topografiske kort og historiske luftfoto-serier.</p><p>Ligeledes er det muligt at se en masse korttemaer, læse informationer om disse, samt udskrive kort.</p><p>For træk af data henvises til Geo Fyns dataportal: <a target='_blank' href='http://dataportal.geofyn.dk'>dataportal.geofyn.dk</a></p><p>Med Geo Fyns Webkort og Dataportal ønsker Geo Fyn at understøtte sin Vision 2018:</p><p>»Geo Fyn vil være det fælles brændpunkt i den strategiske brug af (geo)data på tværs af sektorerne i kommunerne og udstille data til gavn for borgere, uddannelsessteder, virksomheder, myndigheder, m.fl., så der skabes optimal samfundsmæssig nytte af kommunernes data.«</p>",
+    enabledExtensions: ["conflictSearch", "vectorLayers"],
+    enabledPrints: ["print"]
 };
 },{}],42:[function(require,module,exports){
 module.exports = after
