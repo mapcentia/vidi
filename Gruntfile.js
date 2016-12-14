@@ -115,7 +115,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-processhtml');
 
     grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
-    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml']);
+    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin']);
 };
 
 
