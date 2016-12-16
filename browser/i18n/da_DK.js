@@ -104,6 +104,8 @@ module.exports = {
         "Type": "Type",
 
         "Disclaimer": "Disclaimer",
-        "Contact": "Kontakt"
+        "Contact": "Kontakt",
+        "Loading data": "Henter data"
+
     }
 };

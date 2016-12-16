@@ -101,6 +101,7 @@ module.exports = {
         "Use these tools for editing existing drawings.": "Use these tools for editing existing drawings.",
         "Area": "Area",
         "Distance/Radius": "Distance/Radius",
-        "Type": "Type"
+        "Type": "Type",
+        "Loading data": "Loading data"
     }
 };

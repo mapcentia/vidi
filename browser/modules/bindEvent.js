@@ -139,6 +139,7 @@ module.exports = module.exports = {
             }
             layerTree.init();
             layers.init();
+            $(".center").hide();
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {

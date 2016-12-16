@@ -75,10 +75,10 @@ module.exports = {
         /**
          * Render the page
          */
-        $("body").html(Templates[tmpl].render(gc2i18n.dict));
+        $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
-        $(".center").hide();
+        //$(".center").hide();
         try {
             var max = $(document).height() - $('.tab-pane').offset().top - 100;
         } catch (e) {
@@ -142,6 +142,8 @@ module.exports = {
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
+        $("#loadscreentext").html(__("Loading data") + " ⏳😀");
+
     }
 
 };

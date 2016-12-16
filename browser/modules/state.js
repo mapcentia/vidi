@@ -343,8 +343,6 @@ module.exports = {
 
                         }
                     });
-
-
                 }
                 backboneEvents.get().trigger("end:state");
             } else {

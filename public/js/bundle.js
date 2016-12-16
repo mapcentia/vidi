@@ -105,7 +105,9 @@ module.exports = {
         "Type": "Type",
 
         "Disclaimer": "Disclaimer",
-        "Contact": "Kontakt"
+        "Contact": "Kontakt",
+        "Loading data": "Henter data"
+
     }
 };
 },{}],2:[function(require,module,exports){
@@ -212,7 +214,8 @@ module.exports = {
         "Use these tools for editing existing drawings.": "Use these tools for editing existing drawings.",
         "Area": "Area",
         "Distance/Radius": "Distance/Radius",
-        "Type": "Type"
+        "Type": "Type",
+        "Loading data": "Loading data"
     }
 };
 },{}],3:[function(require,module,exports){
@@ -981,6 +984,7 @@ module.exports = module.exports = {
             }
             layerTree.init();
             layers.init();
+            $(".center").hide();
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
@@ -3658,10 +3662,10 @@ module.exports = {
         /**
          * Render the page
          */
-        $("body").html(Templates[tmpl].render(gc2i18n.dict));
+        $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
-        $(".center").hide();
+        //$(".center").hide();
         try {
             var max = $(document).height() - $('.tab-pane').offset().top - 100;
         } catch (e) {
@@ -3725,6 +3729,8 @@ module.exports = {
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
+        $("#loadscreentext").html(__("Loading data") + " ⏳😀");
+
     }
 
 };
@@ -6596,8 +6602,6 @@ module.exports = {
 
                         }
                     });
-
-
                 }
                 backboneEvents.get().trigger("end:state");
             } else {
@@ -6871,7 +6875,7 @@ module.exports = {
         browser: [{cowiDetail: ["bufferSearch"]}],
         server: [{cowiDetail: ["bufferSearch"]}]
     },
-    __extensions: {
+    extensions: {
         browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"], "vectorLayers": ["index"]}],
         server: [{conflictSearch: ["index"]}]
     },
@@ -6882,7 +6886,7 @@ module.exports = {
     _template: "cowiDetail.tmpl",
     brandName: "MapCentia ApS",
     aboutBox: "<h3>Velkommen til Geo Fyns Webkort, som er baseret på MapCentia GC2</h3><p>Det er her muligt at se en række baggrundskort, fx topografiske kort og historiske luftfoto-serier.</p><p>Ligeledes er det muligt at se en masse korttemaer, læse informationer om disse, samt udskrive kort.</p><p>For træk af data henvises til Geo Fyns dataportal: <a target='_blank' href='http://dataportal.geofyn.dk'>dataportal.geofyn.dk</a></p><p>Med Geo Fyns Webkort og Dataportal ønsker Geo Fyn at understøtte sin Vision 2018:</p><p>»Geo Fyn vil være det fælles brændpunkt i den strategiske brug af (geo)data på tværs af sektorerne i kommunerne og udstille data til gavn for borgere, uddannelsessteder, virksomheder, myndigheder, m.fl., så der skabes optimal samfundsmæssig nytte af kommunernes data.«</p>",
-    //enabledExtensions: ["conflictSearch", "vectorLayers"],
+    enabledExtensions: ["conflictSearch"],
     enabledPrints: ["print"]
 };
 },{}],42:[function(require,module,exports){
