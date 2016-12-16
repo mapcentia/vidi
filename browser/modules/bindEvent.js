@@ -214,7 +214,7 @@ module.exports = module.exports = {
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id')), html;
-                    html = (metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
+                    html = (metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
                     $("#info-modal").show();
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
                     $("#info-modal .modal-body").html(html);
