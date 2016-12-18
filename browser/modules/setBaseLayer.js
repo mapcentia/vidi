@@ -31,8 +31,8 @@ module.exports = module.exports = {
     init: function (str) {
         var u, l;
         layers.removeHidden();
-        if (typeof vidiConfig.baseLayers !== "undefined") {
-            $.each(vidiConfig.baseLayers, function (i, v) {
+        if (typeof window.setBaseLayers !== "undefined") {
+            $.each(window.setBaseLayers, function (i, v) {
                 if (v.id === str) {
                     if (typeof v.overlays === "object") {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
