@@ -219,7 +219,7 @@ module.exports = {
     }
 };
 },{}],3:[function(require,module,exports){
-/*
+/*!
  * Copyright 2016 MapCentia ApS. All rights reserved.
  *
  * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
@@ -246,25 +246,39 @@ module.exports = {
 function ಠ_ಠ() {
     require('./i18n/da_DK.js');require('./i18n/en_US.js');
 }
+
+/**
+ * Global i18n dict
+ */
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
+
+/**
+ * Global var with config object
+ */
 window.vidiConfig = require('../config/config.js');
 
 /**
  *
+ * @returns {{init: *}}
+ * @constructor
  */
 window.Vidi = function () {
+
+    // Set global var status on load
+    // =============================
+
     $(window).load(function () {
         window.status = "all_loaded";
     });
 
-    /**
-     * Set widow.status after 15 secs. if not loaded.
-     */
+    //Set widow.status after 15 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
     }, 15000);
 
     // Require the standard modules
+    // ============================
+
     var modules = {
         init: require('./modules/init'),
         socketId: require('./modules/socketId'),
@@ -294,6 +308,8 @@ window.Vidi = function () {
     };
 
     // Require search module
+    // =====================
+
     // Hack to compile Glob files. Don´t call this function!
     function ಠ_ಠ() {
         require('./modules/search/danish.js');require('./modules/search/danish_new.js');require('./modules/search/google.js');
@@ -301,6 +317,8 @@ window.Vidi = function () {
     modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
+    // ===============================================
+
     modules.init.set(modules);
     modules.socketId.set(modules);
     modules.meta.set(modules);
@@ -326,6 +344,8 @@ window.Vidi = function () {
     modules.utils.set(modules);
 
     // Return the init module to be called in index.html
+    // =================================================
+
     return {
         init: modules.init
     }
@@ -827,7 +847,7 @@ module.exports = module.exports = {
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.filter(function(n) {return schemas.indexOf(n) != -1;}).length > 0) {
-                cloud.get().addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db);
+                cloud.get().addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db, window.setBaseLayers[i].config);
                 baseLayers.push(window.setBaseLayers[i].id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"
@@ -1115,7 +1135,7 @@ module.exports = {
         cloud = new geocloud.map({
             el: "map",
             zoomControl: false,
-            numZoomLevels: 21,
+            //numZoomLevels: 21,
             fadeAnimation: false
         });
 
@@ -3625,7 +3645,10 @@ module.exports = {
         }
     },
     startApp: function () {
+
         // Load style sheet
+        //===================
+
         $('<link/>').attr({
             rel: 'stylesheet',
             type: 'text/css',
@@ -3633,6 +3656,8 @@ module.exports = {
         }).appendTo('head');
 
         // Render template and set some styling
+        // ====================================
+
         if (typeof window.vidiConfig.template === "undefined") {
             tmpl = "default.tmpl";
         } else {
@@ -3640,6 +3665,8 @@ module.exports = {
         }
 
         // Check if template is set in URL vars
+        // ====================================
+
         if (typeof urlVars.tmpl !== "undefined") {
             var par = urlVars.tmpl.split("#");
             if (par.length > 1) {
@@ -3662,9 +3689,9 @@ module.exports = {
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
-        /**
-         * Render the page
-         */
+        // Render the page
+        // ===============
+
         $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
@@ -3680,9 +3707,9 @@ module.exports = {
         $('.places .tt-dropdown-menu').css('max-height', max - 200);
         $('.places .tt-dropdown-menu').css('min-height', 400);
 
-        /**
-         * init the modules
-         */
+        // Init the modules
+        // ================
+
         modules.cloud.init();
         modules.backboneEvents.init();
         modules.socketId.init();
@@ -3697,10 +3724,10 @@ module.exports = {
         modules.draw.init();
         modules.print.init();
 
-        /**
-         * Require extensions modules
-         * Hack to compile Glob files. Don´t call this function!
-         */
+        // Require extensions modules
+        // ==========================
+
+        //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
             require('./extensions/conflictSearch/controller.js');require('./extensions/conflictSearch/index.js');require('./extensions/conflictSearch/infoClick.js');require('./extensions/conflictSearch/reportRender.js');require('./extensions/cowiDetail/bufferSearch.js');require('./extensions/vectorLayers/index.js');
         }
@@ -3714,7 +3741,6 @@ module.exports = {
                 })
             });
 
-
             if (typeof window.vidiConfig.enabledExtensions === "object") {
                 $.each(vidiConfig.extensions.browser, function (i, v) {
                     $.each(v[Object.keys(v)[0]], function (n, m) {
@@ -3726,16 +3752,14 @@ module.exports = {
             }
         }
 
-        /**
-         *  Init some GUI stuff after modules are loaded
-         */
+        // Init some GUI stuff after modules are loaded
+        // ============================================
+
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
         $("#loadscreentext").html(__("Loading data") + " ⏳😀");
-
     }
-
 };
 },{"./../modules/urlparser":38,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/vectorLayers/index.js":18,"bootstrap":51}],22:[function(require,module,exports){
 /**
@@ -5900,7 +5924,6 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        console.log("HEJ")
         var u, l;
         layers.removeHidden();
         if (typeof vidiConfig.baseLayers !== "undefined") {
@@ -5908,12 +5931,12 @@ module.exports = module.exports = {
                 if (v.id === str) {
                     if (typeof v.overlays === "object") {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
-                            console.log(v.overlays[u]);
-                            l = cloud.get().addTileLayers({
+                            l = cloud.get().addTileLayers($.extend({
                                 layers: [v.overlays[u].id],
-                                db: "mydb",
+                                db: v.overlays[u].db,
                                 type: "tms"
-                            });
+                            }, v.overlays[u].config));
+                            // Set prefix on id, so the layer will not be returned by layers.getLayers
                             l[0].id = "__hidden." + v.overlays[u].id;
                         }
                     }
@@ -6871,10 +6894,18 @@ module.exports = {
         },
         {"id": "osm", "name": "OSM"},
         {"id": "stamenToner", "name": "Stamen Toner"},
-        {"id": "public.country", "name": "public.country", "db": "mydb",
-            attribution: "Frederiksberg Kommune",
+        {
+            "id": "public.country", "name": "public.country", "db": "mydb",
+            "config": {
+                maxZoom: 18,
+                maxNativeZoom: 16,
+                attribution: "Frederiksberg Kommune"
+            },
             "overlays": [{
-                "id": "public.lp_f"
+                 "id": "public.lp_f", "db": "mydb",
+                "config": {
+                    maxNativeZoom: 16,
+                    attribution: "Frederikdefdfsberg Kommune"}
             }]
         }
     ],

@@ -35,7 +35,10 @@ module.exports = {
         }
     },
     startApp: function () {
+
         // Load style sheet
+        //===================
+
         $('<link/>').attr({
             rel: 'stylesheet',
             type: 'text/css',
@@ -43,6 +46,8 @@ module.exports = {
         }).appendTo('head');
 
         // Render template and set some styling
+        // ====================================
+
         if (typeof window.vidiConfig.template === "undefined") {
             tmpl = "default.tmpl";
         } else {
@@ -50,6 +55,8 @@ module.exports = {
         }
 
         // Check if template is set in URL vars
+        // ====================================
+
         if (typeof urlVars.tmpl !== "undefined") {
             var par = urlVars.tmpl.split("#");
             if (par.length > 1) {
@@ -72,9 +79,9 @@ module.exports = {
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
-        /**
-         * Render the page
-         */
+        // Render the page
+        // ===============
+
         $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
@@ -90,9 +97,9 @@ module.exports = {
         $('.places .tt-dropdown-menu').css('max-height', max - 200);
         $('.places .tt-dropdown-menu').css('min-height', 400);
 
-        /**
-         * init the modules
-         */
+        // Init the modules
+        // ================
+
         modules.cloud.init();
         modules.backboneEvents.init();
         modules.socketId.init();
@@ -107,10 +114,10 @@ module.exports = {
         modules.draw.init();
         modules.print.init();
 
-        /**
-         * Require extensions modules
-         * Hack to compile Glob files. Don´t call this function!
-         */
+        // Require extensions modules
+        // ==========================
+
+        //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
             require('./extensions/**/*.js', {glob: true});
         }
@@ -124,7 +131,6 @@ module.exports = {
                 })
             });
 
-
             if (typeof window.vidiConfig.enabledExtensions === "object") {
                 $.each(vidiConfig.extensions.browser, function (i, v) {
                     $.each(v[Object.keys(v)[0]], function (n, m) {
@@ -136,14 +142,12 @@ module.exports = {
             }
         }
 
-        /**
-         *  Init some GUI stuff after modules are loaded
-         */
+        // Init some GUI stuff after modules are loaded
+        // ============================================
+
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
         $("#loadscreentext").html(__("Loading data") + " ⏳😀");
-
     }
-
 };

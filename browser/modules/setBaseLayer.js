@@ -36,11 +36,11 @@ module.exports = module.exports = {
                 if (v.id === str) {
                     if (typeof v.overlays === "object") {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
-                            l = cloud.get().addTileLayers({
+                            l = cloud.get().addTileLayers($.extend({
                                 layers: [v.overlays[u].id],
                                 db: v.overlays[u].db,
                                 type: "tms"
-                            });
+                            }, v.overlays[u].config));
                             // Set prefix on id, so the layer will not be returned by layers.getLayers
                             l[0].id = "__hidden." + v.overlays[u].id;
                         }
