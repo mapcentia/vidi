@@ -38,7 +38,7 @@ module.exports = module.exports = {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
                             l = cloud.get().addTileLayers({
                                 layers: [v.overlays[u].id],
-                                db: "mydb",
+                                db: v.overlays[u].db,
                                 type: "tms"
                             });
                             // Set prefix on id, so the layer will not be returned by layers.getLayers
