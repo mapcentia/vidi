@@ -1,4 +1,4 @@
-/*
+/*!
  * Copyright 2016 MapCentia ApS. All rights reserved.
  *
  * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
@@ -25,25 +25,39 @@
 function ಠ_ಠ() {
     require('./i18n/*.js', {glob: true});
 }
+
+/**
+ * Global i18n dict
+ */
 window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
+
+/**
+ * Global var with config object
+ */
 window.vidiConfig = require('../config/config.js');
 
 /**
  *
+ * @returns {{init: *}}
+ * @constructor
  */
 window.Vidi = function () {
+
+    // Set global var status on load
+    // =============================
+
     $(window).load(function () {
         window.status = "all_loaded";
     });
 
-    /**
-     * Set widow.status after 15 secs. if not loaded.
-     */
+    //Set widow.status after 15 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
     }, 15000);
 
     // Require the standard modules
+    // ============================
+
     var modules = {
         init: require('./modules/init'),
         socketId: require('./modules/socketId'),
@@ -73,6 +87,8 @@ window.Vidi = function () {
     };
 
     // Require search module
+    // =====================
+
     // Hack to compile Glob files. Don´t call this function!
     function ಠ_ಠ() {
         require('./modules/search/*.js', {glob: true});
@@ -80,6 +96,8 @@ window.Vidi = function () {
     modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
+    // ===============================================
+
     modules.init.set(modules);
     modules.socketId.set(modules);
     modules.meta.set(modules);
@@ -105,6 +123,8 @@ window.Vidi = function () {
     modules.utils.set(modules);
 
     // Return the init module to be called in index.html
+    // =================================================
+
     return {
         init: modules.init
     }

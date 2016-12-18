@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var http = require('http');
-var config = require('../../config/config.js').cartodb;
+var config = require('../../config/config.js');
 
 router.get('/api/baselayer', function (req, response) {
     var jsfile;

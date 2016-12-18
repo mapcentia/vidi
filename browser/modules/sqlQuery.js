@@ -21,6 +21,11 @@ var meta;
 var advancedInfo;
 
 /**
+ * @type {*|exports|module.exports}
+ */
+var _layers;
+
+/**
  *
  * @type {*|exports|module.exports}
  */
@@ -51,6 +56,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         advancedInfo = o.advancedInfo;
+        _layers = o.layers;
         return this;
     },
 
@@ -66,11 +72,11 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
-        layers = cloud.get().getVisibleLayers().split(";");
+        layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Remove not queryable layers from array
         for(var i = layers.length - 1; i >= 0; i--) {
-            if(metaDataKeys[layers[i]].not_querable) {
+            if(typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
                 layers.splice(i, 1);
             }
         }

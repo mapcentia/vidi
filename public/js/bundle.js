@@ -675,6 +675,7 @@ var urlVars = urlparser.urlVars;
 var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
+var layers;
 
 /**
  * @private
@@ -682,7 +683,7 @@ var cloud;
  */
 var anchor = function () {
     var p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
-    return "#" + cloud.get().getBaseLayerName() + "/" + Math.round(cloud.get().getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + ((cloud.get().getNamesOfVisibleLayers()) ? cloud.get().getNamesOfVisibleLayers().split(",").reverse().join(",") : "");
+    return "#" + cloud.get().getBaseLayerName() + "/" + Math.round(cloud.get().getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + ((layers.getLayers()) ? layers.getLayers().split(",").reverse().join(",") : "");
 };
 /**
  *
@@ -691,6 +692,7 @@ var anchor = function () {
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        layers = o.layers;
         return this;
     },
     init: function () {
@@ -920,7 +922,8 @@ var urlVars = urlparser.urlVars;
  *
  * @type {showdown.Converter}
  */
-var toHtml = require('showdown').Converter();
+var showdown = require('showdown');
+var converter = new showdown.Converter();
 
 require('arrive');
 
@@ -1041,13 +1044,13 @@ module.exports = module.exports = {
         // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
-                $(this).change(function (e) {
+                $(this).on("change", function (e) {
                     switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
                     e.stopPropagation();
                 });
             });
             $(document).arrive('[data-gc2-base-id]', function () {
-                $(this).on("click", function (e) {
+                $(this).on("change", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
                     e.stopPropagation();
                     $(this).css("background-color", "white");
@@ -1059,7 +1062,7 @@ module.exports = module.exports = {
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id')), html;
-                    html = (metaDataKeys[t].meta !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? toHtml.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
+                    html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
                     $("#info-modal").show();
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
                     $("#info-modal .modal-body").html(html);
@@ -3938,6 +3941,35 @@ module.exports = {
         else { // GC2 layers are direct tile request
             return ready;
         }
+    },
+    getLayers: function () {
+        var layerArr = [];
+        var layers = cloud.get().map._layers;
+        for (var key in layers) {
+            if (layers.hasOwnProperty(key)) {
+                if (layers[key].baseLayer !== true && typeof layers[key]._tiles === "object") {
+                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && layers[key].id.split(".")[0] !== "__hidden")) {
+                        layerArr.push(layers[key].id);
+                    }
+                }
+            }
+        }
+        if (layerArr.length > 0) {
+            return layerArr.join(",");
+        }
+        else {
+            return false;
+        }
+    },
+    removeHidden: function () {
+        var layers = cloud.get().map._layers;
+        for (var key in layers) {
+            if (layers.hasOwnProperty(key)) {
+                if (typeof layers[key].id !== "undefined" && layers[key].id.split(".")[0] === "__hidden") {
+                    cloud.get().map.removeLayer(layers[key]);
+                }
+            }
+        }
     }
 };
 
@@ -5854,6 +5886,8 @@ var cloud;
  */
 var pushState;
 
+var layers;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -5862,9 +5896,30 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         pushState = o.pushState;
+        layers = o.layers;
         return this;
     },
     init: function (str) {
+        console.log("HEJ")
+        var u, l;
+        layers.removeHidden();
+        if (typeof vidiConfig.baseLayers !== "undefined") {
+            $.each(vidiConfig.baseLayers, function (i, v) {
+                if (v.id === str) {
+                    if (typeof v.overlays === "object") {
+                        for (u = 0; u < v.overlays.length; u = u + 1) {
+                            console.log(v.overlays[u]);
+                            l = cloud.get().addTileLayers({
+                                layers: [v.overlays[u].id],
+                                db: "mydb",
+                                type: "tms"
+                            });
+                            l[0].id = "__hidden." + v.overlays[u].id;
+                        }
+                    }
+                }
+            });
+        }
         cloud.get().setBaseLayer(str);
         pushState.init();
     }
@@ -6019,6 +6074,11 @@ var meta;
 var advancedInfo;
 
 /**
+ * @type {*|exports|module.exports}
+ */
+var _layers;
+
+/**
  *
  * @type {*|exports|module.exports}
  */
@@ -6049,6 +6109,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         advancedInfo = o.advancedInfo;
+        _layers = o.layers;
         return this;
     },
 
@@ -6064,11 +6125,11 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
         this.reset(qstore);
-        layers = cloud.get().getVisibleLayers().split(";");
+        layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Remove not queryable layers from array
         for(var i = layers.length - 1; i >= 0; i--) {
-            if(metaDataKeys[layers[i]].not_querable) {
+            if(typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
                 layers.splice(i, 1);
             }
         }
@@ -6796,20 +6857,27 @@ module.exports = {
         host: "http://127.0.0.1:8080"
     },
     cartodb: {
-        db: "mhoegh",
-        baseLayers: [
-            {
-                type: "XYZ",
-                url: "http://54.229.79.223/v2/Teknisk_baggrundskort/{z}/{x}/{y}.png",
-                id: "Tekniskkort",
-                name: "Tekniskkort",
-                description: "Tekniskkort FOT",
-                attribution: "Frederiksberg Kommune"
-            },
-            {"id": "osm", "name": "OSM"},
-            {"id": "stamenToner", "name": "Stamen Toner"}
-        ]
+        db: "mhoegh"
+
     },
+    baseLayers: [
+        {
+            type: "XYZ",
+            url: "http://54.229.79.223/v2/Teknisk_baggrundskort/{z}/{x}/{y}.png",
+            id: "Tekniskkort",
+            name: "Tekniskkort",
+            description: "Tekniskkort FOT",
+            attribution: "Frederiksberg Kommune"
+        },
+        {"id": "osm", "name": "OSM"},
+        {"id": "stamenToner", "name": "Stamen Toner"},
+        {"id": "public.country", "name": "public.country", "db": "mydb",
+            attribution: "Frederiksberg Kommune",
+            "overlays": [{
+                "id": "public.lp_f"
+            }]
+        }
+    ],
     print: {
         templates: {
             "print": {

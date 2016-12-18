@@ -142,6 +142,35 @@ module.exports = {
         else { // GC2 layers are direct tile request
             return ready;
         }
+    },
+    getLayers: function () {
+        var layerArr = [];
+        var layers = cloud.get().map._layers;
+        for (var key in layers) {
+            if (layers.hasOwnProperty(key)) {
+                if (layers[key].baseLayer !== true && typeof layers[key]._tiles === "object") {
+                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && layers[key].id.split(".")[0] !== "__hidden")) {
+                        layerArr.push(layers[key].id);
+                    }
+                }
+            }
+        }
+        if (layerArr.length > 0) {
+            return layerArr.join(",");
+        }
+        else {
+            return false;
+        }
+    },
+    removeHidden: function () {
+        var layers = cloud.get().map._layers;
+        for (var key in layers) {
+            if (layers.hasOwnProperty(key)) {
+                if (typeof layers[key].id !== "undefined" && layers[key].id.split(".")[0] === "__hidden") {
+                    cloud.get().map.removeLayer(layers[key]);
+                }
+            }
+        }
     }
 };
 
