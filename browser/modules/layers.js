@@ -143,7 +143,7 @@ module.exports = {
             return ready;
         }
     },
-    getLayers: function () {
+    getLayers: function (separator) {
         var layerArr = [];
         var layers = cloud.get().map._layers;
         for (var key in layers) {
@@ -156,7 +156,7 @@ module.exports = {
             }
         }
         if (layerArr.length > 0) {
-            return layerArr.join(",");
+            return layerArr.join(separator ? separator : ",");
         }
         else {
             return false;

@@ -27,7 +27,7 @@ module.exports = module.exports = {
         var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
             case "gc2":
-                var visibleLayers = _layers.getLayers().split(",").join(";"), layers, checked, layerName;
+                var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
                 if (layerArr) {
                     layers = layerArr.join(";");
                 } else {
