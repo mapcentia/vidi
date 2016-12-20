@@ -25,6 +25,7 @@ module.exports = {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
+                window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
             }).fail(function () {
                 console.log("error");
             }).always(function () {

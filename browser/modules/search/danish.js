@@ -13,12 +13,6 @@ var cloud;
 
 /**
  *
- * @type {module.exports.searchConfig|{komkode}}
- */
-var config = require('../../../config/config.js').searchConfig;
-
-/**
- *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
@@ -28,15 +22,15 @@ module.exports = {
     },
     init: function (onLoad, el) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
-            komKode = config.komkode, placeStore;
+            komKode = window.vidiConfig.searchConfig.komkode, placeStore;
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
                 cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
                 cloud.get().zoomToExtentOfgeoJsonStore(this);
-                if (cloud.map.get().getZoom() > 17) {
-                    cloud.map.get().setZoom(17);
+                if (cloud.get().map.getZoom() > 17) {
+                    cloud.get().map.setZoom(17);
                 }
             }
         }

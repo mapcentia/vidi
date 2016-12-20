@@ -3636,6 +3636,7 @@ module.exports = {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
+                window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
             }).fail(function () {
                 console.log("error");
             }).always(function () {
@@ -4737,12 +4738,6 @@ var cloud;
 
 /**
  *
- * @type {module.exports.searchConfig|{komkode}}
- */
-var config = require('../../../config/config.js').searchConfig;
-
-/**
- *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
@@ -4752,15 +4747,15 @@ module.exports = {
     },
     init: function (onLoad, el) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
-            komKode = config.komkode, placeStore;
+            komKode = window.vidiConfig.searchConfig.komkode, placeStore;
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
                 cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
                 cloud.get().zoomToExtentOfgeoJsonStore(this);
-                if (cloud.map.get().getZoom() > 17) {
-                    cloud.map.get().setZoom(17);
+                if (cloud.get().map.getZoom() > 17) {
+                    cloud.get().map.setZoom(17);
                 }
             }
         }
@@ -4931,7 +4926,7 @@ module.exports = {
 };
 
 
-},{"../../../config/config.js":41}],29:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -6874,16 +6869,27 @@ module.exports = {
 };
 },{}],41:[function(require,module,exports){
 module.exports = {
-    //backend: "gc2",
-    backend: "cartodb",
+
+    // Følgende settings bliver sat under build/startup.
+    // Dvs at de ikke kan ændres i runtime.
+    // Bemærk, at baselayers er flyttet ud af cartodb objektet.
+    // ========================================================
+
+    backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
+    //backend: "cartodb",
     cartodb: {
         db: "mhoegh"
 
     },
+
+    // Printskabeloner bliver IKKE længere automatisk aktiveret!
+    // Aktivering sker nu i runtime settings.
+    // =========================================================
+
     print: {
         templates: {
             "print": {
@@ -6930,6 +6936,11 @@ module.exports = {
                     }
                 }
             },
+
+            // Skjult skabelon til konflikt.
+            // Skal ikke aktiveres.
+            // =============================
+
             "_conflictPrint": {
                 A4: {
                     p: {
@@ -6941,22 +6952,33 @@ module.exports = {
         },
         scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
+
     searchModule: "danish",
-    searchConfig: {
-        komkode: "147"
-    },
-    _extensions: {
-        browser: [{cowiDetail: ["bufferSearch"]}],
-        server: [{cowiDetail: ["bufferSearch"]}]
-    },
+
+    // Extension bliver loaded i build/startup,
+    // men IKKE aktiveret automatisk som før!
+    // ========================================
+
     extensions: {
-        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"], "vectorLayers": ["index"]}],
+        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
         server: [{conflictSearch: ["index"]}]
     },
 
+    // Url hvor der kan hentes konfigurationer online for at
+    // override nedenforstående settings.
+    // Eksempel på en config:
+    // https://github.com/mapcentia/mapcentia.github.io/blob/master/vidi.json
+    // Hentes ved at angive ?config=vidi.json i Vidi URL'en
+    //=========================================================================
+
     configUrl: "http://mapcentia.github.io",
 
-    /* Run time */
+    // Settings der kan overrides i runtime.
+    // =====================================
+
+    // Baselayer settings virker nu for både Carto og GC2.
+    // ===================================================
+
     baseLayers: [
         {
             type: "XYZ",
@@ -6968,26 +6990,24 @@ module.exports = {
         },
         {"id": "osm", "name": "OSM"},
         {"id": "stamenToner", "name": "Stamen Toner"},
-        {
-            "id": "public.country", "name": "public.country", "db": "mydb",
-            "config": {
-                maxZoom: 18,
-                maxNativeZoom: 16,
-                attribution: "Frederiksberg Kommune"
-            },
-            "overlays": [{
-                "id": "public.lp_f", "db": "mydb",
-                "config": {
-                    maxNativeZoom: 16,
-                    attribution: "Frederikdefdfsberg Kommune"}
-            }]
-        }
     ],
-    _template: "cowiDetail.tmpl",
+
     brandName: "MapCentia ApS",
-    aboutBox: "<h3>Velkommen til Geo Fyns Webkort, som er baseret på MapCentia GC2</h3><p>Det er her muligt at se en række baggrundskort, fx topografiske kort og historiske luftfoto-serier.</p><p>Ligeledes er det muligt at se en masse korttemaer, læse informationer om disse, samt udskrive kort.</p><p>For træk af data henvises til Geo Fyns dataportal: <a target='_blank' href='http://dataportal.geofyn.dk'>dataportal.geofyn.dk</a></p><p>Med Geo Fyns Webkort og Dataportal ønsker Geo Fyn at understøtte sin Vision 2018:</p><p>»Geo Fyn vil være det fælles brændpunkt i den strategiske brug af (geo)data på tværs af sektorerne i kommunerne og udstille data til gavn for borgere, uddannelsessteder, virksomheder, myndigheder, m.fl., så der skabes optimal samfundsmæssig nytte af kommunernes data.«</p>",
+
+    aboutBox: "<h3>Kommunens web-gis bla bla bla</p>",
+
+    // Aktiver extensions
+    // ==================
+
     enabledExtensions: ["conflictSearch"],
-    enabledPrints: ["print"]
+
+    // Aktiver printskabeloner
+    // =======================
+    enabledPrints: ["print"],
+
+    searchConfig: {
+        komkode: "147"
+    }
 };
 },{}],42:[function(require,module,exports){
 module.exports = after
