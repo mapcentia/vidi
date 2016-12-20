@@ -78,6 +78,7 @@ var urlVars = urlparser.urlVars;
 var showdown = require('showdown');
 var converter = new showdown.Converter();
 
+require('dom-shims');
 require('arrive');
 
 var backboneEvents;
@@ -138,9 +139,9 @@ module.exports = module.exports = {
                     }, 50
                 );
             }
+            $("#loadscreen").hide();
             layerTree.init();
             layers.init();
-            $("#loadscreen").hide();
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
