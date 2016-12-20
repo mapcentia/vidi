@@ -7,6 +7,7 @@
 
 var cloud;
 var meta;
+var _layers;
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var BACKEND = require('../../config/config.js').backend;
@@ -19,13 +20,14 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        _layers = o.layers;
         return this;
     },
     init: function (layerArr, el) {
         var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
             case "gc2":
-                var visibleLayers = cloud.get().getVisibleLayers(true), layers, checked, layerName;
+                var visibleLayers = _layers.getLayers(), layers, checked, layerName;
                 if (layerArr) {
                     layers = layerArr.join(";");
                 } else {
@@ -70,7 +72,7 @@ module.exports = module.exports = {
             case "cartodb":
                 setTimeout(function () {
                     var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
-                    $.each(cloud.get().getVisibleLayers(true).split(";"), function (i, v) {
+                    $.each(_layers.getLayers().split(","), function (i, v) {
                         key = v;
                         if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
                             legend = metaDataKeys[key].legend;
