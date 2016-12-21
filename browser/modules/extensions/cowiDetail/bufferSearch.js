@@ -28,7 +28,7 @@ var createBufferBtn = function () {
     // Create buttons
     var ImmediateSubAction = L._ToolbarAction.extend({
         initialize: function (map, myAction) {
-            this.map = cloud.map;
+            this.map = cloud.get().map;
             this.myAction = myAction;
             L._ToolbarAction.prototype.initialize.call(this);
         },
@@ -43,7 +43,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            circle1.addTo(cloud.map);
+            circle1.addTo(cloud.get().map);
             ImmediateSubAction.prototype.addHooks.call(this);
         }
     });
@@ -54,7 +54,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            circle2.addTo(cloud.map);
+            circle2.addTo(cloud.get().map);
             ImmediateSubAction.prototype.addHooks.call(this);
         }
     });
@@ -67,8 +67,8 @@ var createBufferBtn = function () {
         },
         addHooks: function () {
             this.myAction.disable();
-            cloud.map.removeLayer(circle1);
-            cloud.map.removeLayer(circle2);
+            cloud.get().map.removeLayer(circle1);
+            cloud.get().map.removeLayer(circle2);
             ImmediateSubAction.prototype.addHooks.call(this);
         }
     });
@@ -92,7 +92,7 @@ var createBufferBtn = function () {
     // Create buttons
     var ImmediateSubAction2 = L._ToolbarAction.extend({
         initialize: function (map, myAction) {
-            this.map = cloud.map;
+            this.map = cloud.get().map;
             this.myAction = myAction;
             L._ToolbarAction.prototype.initialize.call(this);
         },
@@ -196,12 +196,12 @@ module.exports = {
             position: 'topright',
             edit: false
         });
-        cloud.map.addControl(drawControl);
-        cloud.map.addLayer(drawnItemsMarker);
-        cloud.map.addLayer(drawnItemsPolygon);
+        cloud.get().map.addControl(drawControl);
+        cloud.get().map.addLayer(drawnItemsMarker);
+        cloud.get().map.addLayer(drawnItemsPolygon);
 
         backboneEvents.get().on("end:state", function () {
-            cloud.addBaseLayer("gc2_group.dk.osm", "osm");
+            cloud.get().addBaseLayer("gc2_group.dk.osm", "osm");
             setBaseLayer.init("gc2_group.dk.osm");
 
         });
@@ -216,16 +216,16 @@ module.exports = {
             buffer();
             setTimeout(function () {
                 $(".fa-circle-thin").removeClass("deactiveBtn");
-                cloud.map.panTo(latLng);
+                cloud.get().map.panTo(latLng);
             }, 300);
         }
         return this;
     },
     init: function () {
-        createBufferBtn().addTo(cloud.map);
+        createBufferBtn().addTo(cloud.get().map);
 
         // Bind events
-        cloud.map.on('draw:created', function (e) {
+        cloud.get().map.on('draw:created', function (e) {
             e.layer._vidi_type = "draw";
             if (e.layerType === "marker") {
                 var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
@@ -235,7 +235,7 @@ module.exports = {
                 drawnItemsPolygon.addLayer(e.layer);
             }
         });
-        cloud.map.on('draw:drawstart', function (e) {
+        cloud.get().map.on('draw:drawstart', function (e) {
             infoClick.active(false); // Switch standard info click off
 
             if (e.layerType === "marker") {
@@ -255,7 +255,7 @@ module.exports = {
                 drawnItemsPolygon.clearLayers();
             }
         });
-        cloud.map.on('draw:drawstop', function (e) {
+        cloud.get().map.on('draw:drawstop', function (e) {
             if (e.layerType === "marker") {
                 buffer();
             } else {
