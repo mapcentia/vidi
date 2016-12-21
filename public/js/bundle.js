@@ -4063,7 +4063,7 @@ module.exports = module.exports = {
                                         }
                                     }
                                     layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
-                                    checked = ($.inArray(layerName, visibleLayers.split(";")) > -1) ? "checked" : "";
+                                    checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
                                     list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                     list.append(li.append(classUl));
                                 }
@@ -7009,7 +7009,60 @@ module.exports = {
 
     searchConfig: {
         komkode: "147"
-    }
+    },
+
+
+    "baseLayers": [
+        {
+            "id": "gc2_group._b_baggrundskort01.baggrundskort01", "name": "Topografisk kort", "db": "geofyn",
+            "config": {
+                "maxZoom": 21,
+                "maxNativeZoom": 19,
+                "attribution": "Geofyn A/S",
+                "subdomains": ["a", "b", "c"]
+            },
+            "overlays": [{
+                "id": "tekster.tekster_samlet_wms_web", "db": "geofyn",
+                "config": {
+                    "subdomains": ["a", "b", "c"]
+                }
+            }]
+        },
+        {"id": "_b_luftfotoserier.luftfoto2016", "name": "Luftfoto 2016", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2015", "name": "Luftfoto 2015", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2014", "name": "Luftfoto 2014", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2013", "name": "Luftfoto 2013", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2012", "name": "Luftfoto 2012", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2011", "name": "Luftfoto 2011", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2010", "name": "Luftfoto 2010", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2009", "name": "Luftfoto 2009", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2008", "name": "Luftfoto 2008", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2007", "name": "Luftfoto 2007", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2006", "name": "Luftfoto 2006", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2004", "name": "Luftfoto 2004", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto2002", "name": "Luftfoto 2002", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto1995", "name": "Luftfoto 1995", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto1992", "name": "Luftfoto 1992", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto1954", "name": "Luftfoto 1954", "db": "geofyn"},
+        {"id": "_b_luftfotoserier.luftfoto1945", "name": "Luftfoto 1945", "db": "geofyn"},
+        {"id": "osm", "name": "Open Street Map"},
+        {"id": "stamenToner", "name": "Stamen Toner Dark"},
+        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
+        {"id": "kortforsyningen.dtk_skaermkort", "name": "Topografisk kort (Kortforsyningens skærmkort)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_skaermkort_daempet", "name": "Topografisk kort (Kortforsyningens skærmkort, dæmpet)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_skaermkort_graa", "name": "Topografisk kort (Kortforsyningens skærmkort, gråt)", "db": "geofyn"},
+        {"id": "kortforsyningen.topo25_klassisk", "name": "Topografisk kort (Kortforsyningens 1:25.000, klassisk)", "db": "geofyn"},
+        {"id": "kortforsyningen.topo25_daempet", "name": "Topografisk kort (Kortforsyningens 1:25.000, dæmpet)", "db": "geofyn"},
+        {"id": "kortforsyningen.topo25_graa", "name": "Topografisk kort (Kortforsyningens 1:25.000, gråt)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_2cm", "name": "Topografisk kort (Kortforsyningens 1:50.000)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_1cm", "name": "Topografisk kort (Kortforsyningens 1:100.000)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_d200", "name": "Topografisk kort (Kortforsyningens 1:200.000)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_d500", "name": "Topografisk kort (Kortforsyningens 1:500.000)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_d850", "name": "Topografisk kort (Kortforsyningens 1:850.000)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_lave_maalebordsblade", "name": "Topografisk kort (Kortforsyningens lave målebordsblade, 1928-1940)", "db": "geofyn"},
+        {"id": "kortforsyningen.dtk_hoeje_maalebordsblade", "name": "Topografisk kort (Kortforsyningens høje målebordsblade, 1842-1899)", "db": "geofyn"}
+    ]
+
 };
 },{}],42:[function(require,module,exports){
 module.exports = after

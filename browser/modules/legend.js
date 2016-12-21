@@ -59,7 +59,7 @@ module.exports = module.exports = {
                                         }
                                     }
                                     layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
-                                    checked = ($.inArray(layerName, visibleLayers.split(";")) > -1) ? "checked" : "";
+                                    checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
                                     list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                     list.append(li.append(classUl));
                                 }
