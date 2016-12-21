@@ -23,7 +23,8 @@
     "grunt-contrib-uglify": "^2.0.0",
     "grunt-git": "^1.0.0",
     "grunt-processhtml": "^0.4.1",
-    "grunt-templates-hogan": "^0.3.0"
+    "grunt-templates-hogan": "^0.3.0",
+    "load-grunt-tasks": "^3.5.2"
   },
   "dependencies": {
     "arrive": "^2.3.1",
