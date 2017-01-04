@@ -901,3 +901,22 @@ body {
     height: calc(100% - 50px);
     overflow: auto;
 }
+
+#searchinput {
+    width: 200px;
+}
+#searchclear {
+    position: absolute;
+    right: 8px;
+    top: 0;
+    bottom: 0;
+    height: 14px;
+    margin: auto;
+    font-size: 24px;
+    cursor: pointer;
+    color: #ccc;
+}
+
+.places .btn-group {
+    width: 100%;
+}

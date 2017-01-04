@@ -131,6 +131,10 @@ module.exports = module.exports = {
             $("#info-modal").hide();
         });
 
+        $("#searchclear").on("click", function () {
+            backboneEvents.get().trigger("clear:search");
+        });
+
         backboneEvents.get().on("ready:meta", function () {
             if ($(document).width() > 767) {
                 setTimeout(
@@ -155,6 +159,8 @@ module.exports = module.exports = {
         });
 
         // Info click
+        // ==========
+
         backboneEvents.get().on("on:infoClick", function () {
             console.info("Activating infoClick");
             infoClick.active(true);
@@ -171,6 +177,7 @@ module.exports = module.exports = {
         });
 
         // Print
+        // =====
         $("#print-btn").on("click", function () {
             print.activate();
             $("#get-print-fieldset").prop("disabled", true);
@@ -195,7 +202,10 @@ module.exports = module.exports = {
         });
 
 
-        // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
+        // HACK. Arrive.js seems to mess up Wkhtmltopdf,
+        // so we don't bind events on print HTML page.
+        // =============================================
+
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 $(this).on("change", function (e) {

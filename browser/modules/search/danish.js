@@ -11,6 +11,8 @@
  */
 var cloud;
 
+var backboneEvents;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -18,11 +20,27 @@ var cloud;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function (onLoad, el) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
             komKode = window.vidiConfig.searchConfig.komkode, placeStore;
+
+        // Listen for clearing event
+        // =========================
+
+        backboneEvents.get().on("clear:search", function () {
+            console.info("Clearing search");
+            placeStore.reset();
+            $("#custom-search").val("");
+        });
+
+
+        // Set default onLoad function.
+        // It just zooms to feature
+        // ============================
+
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
@@ -34,16 +52,33 @@ module.exports = {
                 }
             }
         }
+
+
+        // Set default input element
+        // =========================
+
         if (!el) {
             el = "custom-search";
         }
-        placeStore = new geocloud.geoJsonStore({
+
+        // Define GC2 SQL store
+        // ====================
+
+        placeStore = new geocloud.sqlStore({
             host: "//eu1.mapcentia.com",
             db: "dk",
             sql: null,
             pointToLayer: null,
+            clickable: false,
+            styleMap: {
+                weight: 3,
+                color: '#ee0000',
+                dashArray: '',
+                fillOpacity: 0.1
+            },
             onLoad: onLoad
         });
+
         if (typeof komKode === "string") {
             komKode = [komKode];
         }

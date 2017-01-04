@@ -998,6 +998,10 @@ module.exports = module.exports = {
             $("#info-modal").hide();
         });
 
+        $("#searchclear").on("click", function () {
+            backboneEvents.get().trigger("clear:search");
+        });
+
         backboneEvents.get().on("ready:meta", function () {
             if ($(document).width() > 767) {
                 setTimeout(
@@ -1022,6 +1026,8 @@ module.exports = module.exports = {
         });
 
         // Info click
+        // ==========
+
         backboneEvents.get().on("on:infoClick", function () {
             console.info("Activating infoClick");
             infoClick.active(true);
@@ -1038,6 +1044,7 @@ module.exports = module.exports = {
         });
 
         // Print
+        // =====
         $("#print-btn").on("click", function () {
             print.activate();
             $("#get-print-fieldset").prop("disabled", true);
@@ -1062,7 +1069,10 @@ module.exports = module.exports = {
         });
 
 
-        // HACK. Arrive.js seems to mess up Wkhtmltopdf, so we don't bind events on print HTML page.
+        // HACK. Arrive.js seems to mess up Wkhtmltopdf,
+        // so we don't bind events on print HTML page.
+        // =============================================
+
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 $(this).on("change", function (e) {
@@ -3637,6 +3647,7 @@ module.exports = {
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
+                window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
             }).fail(function () {
                 console.log("error");
             }).always(function () {
@@ -4738,6 +4749,8 @@ module.exports = module.exports = {
  */
 var cloud;
 
+var backboneEvents;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -4745,11 +4758,27 @@ var cloud;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function (onLoad, el) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
             komKode = window.vidiConfig.searchConfig.komkode, placeStore;
+
+        // Listen for clearing event
+        // =========================
+
+        backboneEvents.get().on("clear:search", function () {
+            console.info("Clearing search");
+            placeStore.reset();
+            $("#custom-search").val("");
+        });
+
+
+        // Set default onLoad function.
+        // It just zooms to feature
+        // ============================
+
         if (!onLoad) {
             onLoad = function () {
                 var resultLayer = new L.FeatureGroup();
@@ -4761,16 +4790,33 @@ module.exports = {
                 }
             }
         }
+
+
+        // Set default input element
+        // =========================
+
         if (!el) {
             el = "custom-search";
         }
-        placeStore = new geocloud.geoJsonStore({
+
+        // Define GC2 SQL store
+        // ====================
+
+        placeStore = new geocloud.sqlStore({
             host: "//eu1.mapcentia.com",
             db: "dk",
             sql: null,
             pointToLayer: null,
+            clickable: false,
+            styleMap: {
+                weight: 3,
+                color: '#ee0000',
+                dashArray: '',
+                fillOpacity: 0.1
+            },
             onLoad: onLoad
         });
+
         if (typeof komKode === "string") {
             komKode = [komKode];
         }
@@ -5392,6 +5438,9 @@ module.exports = {
  */
 var cloud;
 
+var backboneEvents;
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -5399,14 +5448,15 @@ var cloud;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
-        var autocomplete = new google.maps.places.Autocomplete(document.getElementById('custom-search'));
+        var autocomplete = new google.maps.places.Autocomplete(document.getElementById('custom-search')), myLayer;
         google.maps.event.addListener(autocomplete, 'place_changed', function () {
             var place = autocomplete.getPlace(),
-                json = {"type": "Point", "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]},
-                myLayer = L.geoJson();
+                json = {"type": "Point", "coordinates": [place.geometry.location.lng(), place.geometry.location.lat()]};
+            myLayer = L.geoJson();
 
             myLayer.addData({
                 "type": "Feature",
@@ -5415,6 +5465,15 @@ module.exports = {
             });
             cloud.get().map.addLayer(myLayer);
             cloud.get().map.setView([place.geometry.location.lat(), place.geometry.location.lng()], 17)
+        });
+
+        // Listen for clearing event
+        // =========================
+
+        backboneEvents.get().on("clear:search", function () {
+            console.info("Clearing search");
+            myLayer.clearLayers();
+            $("#custom-search").val("");
         });
     }
 };
@@ -6121,8 +6180,8 @@ var BACKEND = require('../../config/config.js').backend;
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
  */
 module.exports = {
+
     /**
-     *
      * @param o
      * @returns {exports}
      */
@@ -6149,8 +6208,8 @@ module.exports = {
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Remove not queryable layers from array
-        for(var i = layers.length - 1; i >= 0; i--) {
-            if(typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
+        for (var i = layers.length - 1; i >= 0; i--) {
+            if (typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
                 layers.splice(i, 1);
             }
         }
@@ -6284,6 +6343,12 @@ module.exports = {
                     dashArray: '',
                     fillOpacity: 0.2
                 },
+
+                // Set _vidi_type on all vector layers,
+                // so they can be recreated as query layers
+                // after serialization
+                // ========================================
+
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
@@ -6538,12 +6603,12 @@ module.exports = {
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
                                             $("#scale").html("1 : " + response.data.scale);
-                                            $("#title").html(decodeURI(urlVars.t));
+                                            $("#title").html(decodeURIComponent(urlVars.t));
                                             parr = urlVars.c.split("#");
                                             if (parr.length > 1) {
                                                 parr.pop();
                                             }
-                                            $("#comment").html(decodeURI(parr.join()));
+                                            $("#comment").html(decodeURIComponent(parr.join()));
                                             cloud.get().map.removeLayer(g);
                                         }, 300)
                                     }
@@ -6879,8 +6944,8 @@ module.exports = {
 
     backend: "gc2",
     gc2: {
-        host: "http://cowi.mapcentia.com"
-        //host: "http://127.0.0.1:8080"
+        //host: "http://cowi.mapcentia.com"
+        host: "http://127.0.0.1:8080"
     },
     //backend: "cartodb",
     cartodb: {
@@ -6894,7 +6959,7 @@ module.exports = {
 
     print: {
         templates: {
-            "print": {
+            "geofyn": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -6952,7 +7017,7 @@ module.exports = {
                 }
             }
         },
-        scales: [250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
+        scales: [100, 250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
 
     searchModule: "danish",
@@ -6964,8 +7029,8 @@ module.exports = {
     extensions: {
         //browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
         //server: [{conflictSearch: ["index"]}]
-        browser: [{cowiDetail: ["bufferSearch"]}],
-        server: [{cowiDetail: ["bufferSearch"]}]
+        //browser: [{cowiDetail: ["bufferSearch"]}],
+        //server: [{cowiDetail: ["bufferSearch"]}]
     },
 
     // Url hvor der kan hentes konfigurationer online for at
@@ -6998,21 +7063,21 @@ module.exports = {
 
     brandName: "MapCentia ApS",
 
-    aboutBox: "<h3>Kommunens web-gis bla bla bla</p>",
+    aboutBox: "<p>Kommunens web-gis bla bla bla</p>",
 
     // Aktiver extensions
     // ==================
 
-    enabledExtensions: ["cowiDetail"],
+    //enabledExtensions: ["cowiDetail"],
 
     // Aktiver printskabeloner
     // =======================
-    enabledPrints: ["print"],
+    enabledPrints: ["geofyn"],
 
     // Set template
     // ============
 
-    template: "cowiDetail.tmpl",
+    template: "default.tmpl",
 
     searchConfig: {
         komkode: "147"
@@ -7020,38 +7085,6 @@ module.exports = {
 
 
     "baseLayers": [
-        {
-            "id": "gc2_group._b_baggrundskort01.baggrundskort01", "name": "Topografisk kort", "db": "geofyn",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "Geofyn A/S",
-                "subdomains": ["a", "b", "c"]
-            },
-            "overlays": [{
-                "id": "tekster.tekster_samlet_wms_web", "db": "geofyn",
-                "config": {
-                    "subdomains": ["a", "b", "c"]
-                }
-            }]
-        },
-        {"id": "_b_luftfotoserier.luftfoto2016", "name": "Luftfoto 2016", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2015", "name": "Luftfoto 2015", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2014", "name": "Luftfoto 2014", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2013", "name": "Luftfoto 2013", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2012", "name": "Luftfoto 2012", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2011", "name": "Luftfoto 2011", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2010", "name": "Luftfoto 2010", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2009", "name": "Luftfoto 2009", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2008", "name": "Luftfoto 2008", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2007", "name": "Luftfoto 2007", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2006", "name": "Luftfoto 2006", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2004", "name": "Luftfoto 2004", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto2002", "name": "Luftfoto 2002", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto1995", "name": "Luftfoto 1995", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto1992", "name": "Luftfoto 1992", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto1954", "name": "Luftfoto 1954", "db": "geofyn"},
-        {"id": "_b_luftfotoserier.luftfoto1945", "name": "Luftfoto 1945", "db": "geofyn"},
         {"id": "osm", "name": "Open Street Map"},
         {"id": "stamenToner", "name": "Stamen Toner Dark"},
         {"id": "stamenTonerLite", "name": "Stamen Toner Light"},

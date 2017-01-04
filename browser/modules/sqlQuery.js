@@ -47,8 +47,8 @@ var BACKEND = require('../../config/config.js').backend;
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
  */
 module.exports = {
+
     /**
-     *
      * @param o
      * @returns {exports}
      */
@@ -75,8 +75,8 @@ module.exports = {
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
         // Remove not queryable layers from array
-        for(var i = layers.length - 1; i >= 0; i--) {
-            if(typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
+        for (var i = layers.length - 1; i >= 0; i--) {
+            if (typeof metaDataKeys[layers[i]] !== "undefined" && metaDataKeys[layers[i]].not_querable) {
                 layers.splice(i, 1);
             }
         }
@@ -210,6 +210,12 @@ module.exports = {
                     dashArray: '',
                     fillOpacity: 0.2
                 },
+
+                // Set _vidi_type on all vector layers,
+                // so they can be recreated as query layers
+                // after serialization
+                // ========================================
+
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
