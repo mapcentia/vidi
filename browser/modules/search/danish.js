@@ -68,12 +68,23 @@ module.exports = {
             host: "//eu1.mapcentia.com",
             db: "dk",
             sql: null,
-            pointToLayer: null,
             clickable: false,
+            // Make Awesome Markers
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.AwesomeMarkers.icon({
+                            icon: 'star',
+                            markerColor: '#C31919',
+                            prefix: 'fa'
+                        }
+                    )
+                });
+            },
             styleMap: {
                 weight: 3,
-                color: '#ee0000',
+                color: '#C31919',
                 dashArray: '',
+                Opacity: 1,
                 fillOpacity: 0
             },
             onLoad: onLoad
