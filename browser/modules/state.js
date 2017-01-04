@@ -197,12 +197,12 @@ module.exports = {
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
                                             $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
                                             $("#scale").html("1 : " + response.data.scale);
-                                            $("#title").html(decodeURI(urlVars.t));
+                                            $("#title").html(decodeURIComponent(urlVars.t));
                                             parr = urlVars.c.split("#");
                                             if (parr.length > 1) {
                                                 parr.pop();
                                             }
-                                            $("#comment").html(decodeURI(parr.join()));
+                                            $("#comment").html(decodeURIComponent(parr.join()));
                                             cloud.get().map.removeLayer(g);
                                         }, 300)
                                     }
