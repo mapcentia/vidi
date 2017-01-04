@@ -74,7 +74,7 @@ module.exports = {
                 weight: 3,
                 color: '#ee0000',
                 dashArray: '',
-                fillOpacity: 0.1
+                fillOpacity: 0
             },
             onLoad: onLoad
         });

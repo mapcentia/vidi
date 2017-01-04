@@ -277,16 +277,19 @@ div.olControlZoom {
     background-color: white;
     z-index: 1000;
 }
+
 .center {
     position: absolute;
     top: 50%;
     left: 50%;
 }
+
 .bounce {
     transform: translate(-50%, -50%);
     -webkit-transform: translate(-50%, -50%);
 
 }
+
 .text {
     transform: translate(-50%, -100px);
     -webkit-transform: translate(-50%, -100px);
@@ -295,7 +298,6 @@ div.olControlZoom {
     font-size: 16px;
     color: rgba(150, 160, 180, 1);;
 }
-
 
 .bouncywrap {
     position: relative;
@@ -888,6 +890,7 @@ body {
     font-size: 29px;
     font-weight: inherit;
 }
+
 #info-modal-legend {
     padding: 20px;
     border-top: 1px solid #d0d3d4;
@@ -905,6 +908,7 @@ body {
 #searchinput {
     width: 200px;
 }
+
 #searchclear {
     position: absolute;
     right: 8px;
@@ -919,4 +923,9 @@ body {
 
 .places .btn-group {
     width: 100%;
+}
+
+input[type=text]::-ms-clear {
+    width: 0;
+    height: 0;
 }
