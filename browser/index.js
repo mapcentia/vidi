@@ -50,10 +50,10 @@ window.Vidi = function () {
         window.status = "all_loaded";
     });
 
-    //Set widow.status after 25 secs. if not loaded.
+    //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 25000);
+    }, 30000);
 
     // Require the standard modules
     // ============================
