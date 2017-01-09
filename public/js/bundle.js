@@ -271,10 +271,10 @@ window.Vidi = function () {
         window.status = "all_loaded";
     });
 
-    //Set widow.status after 15 secs. if not loaded.
+    //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 15000);
+    }, 30000);
 
     // Require the standard modules
     // ============================
@@ -3081,7 +3081,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("gc2_group.dk.osm");
+            setBaseLayer.init("stamenTonerLite");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -3175,8 +3175,8 @@ module.exports = {
         cloud.get().map.addLayer(drawnItemsPolygon);
 
         backboneEvents.get().on("end:state", function () {
-            cloud.get().addBaseLayer("gc2_group.dk.osm", "osm");
-            setBaseLayer.init("gc2_group.dk.osm");
+            cloud.get().addBaseLayer("stamenTonerLite", "osm");
+            setBaseLayer.init("stamenTonerLite");
 
         });
 
@@ -4806,13 +4806,24 @@ module.exports = {
             host: "//eu1.mapcentia.com",
             db: "dk",
             sql: null,
-            pointToLayer: null,
             clickable: false,
+            // Make Awesome Markers
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.AwesomeMarkers.icon({
+                            icon: 'star',
+                            markerColor: '#C31919',
+                            prefix: 'fa'
+                        }
+                    )
+                });
+            },
             styleMap: {
                 weight: 3,
-                color: '#ee0000',
+                color: '#C31919',
                 dashArray: '',
-                fillOpacity: 0.1
+                Opacity: 1,
+                fillOpacity: 0
             },
             onLoad: onLoad
         });
@@ -6944,8 +6955,8 @@ module.exports = {
 
     backend: "gc2",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     //backend: "cartodb",
     cartodb: {
@@ -7029,8 +7040,8 @@ module.exports = {
     extensions: {
         //browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
         //server: [{conflictSearch: ["index"]}]
-        //browser: [{cowiDetail: ["bufferSearch"]}],
-        //server: [{cowiDetail: ["bufferSearch"]}]
+        browser: [{cowiDetail: ["bufferSearch"]}],
+        server: [{cowiDetail: ["bufferSearch"]}]
     },
 
     // Url hvor der kan hentes konfigurationer online for at
@@ -7068,7 +7079,7 @@ module.exports = {
     // Aktiver extensions
     // ==================
 
-    //enabledExtensions: ["cowiDetail"],
+    enabledExtensions: ["cowiDetail"],
 
     // Aktiver printskabeloner
     // =======================
@@ -7077,7 +7088,7 @@ module.exports = {
     // Set template
     // ============
 
-    template: "default.tmpl",
+    template: "cowiDetail.tmpl",
 
     searchConfig: {
         komkode: "147"

@@ -107,7 +107,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("gc2_group.dk.osm");
+            setBaseLayer.init("stamenTonerLite");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -201,8 +201,8 @@ module.exports = {
         cloud.get().map.addLayer(drawnItemsPolygon);
 
         backboneEvents.get().on("end:state", function () {
-            cloud.get().addBaseLayer("gc2_group.dk.osm", "osm");
-            setBaseLayer.init("gc2_group.dk.osm");
+            cloud.get().addBaseLayer("stamenTonerLite", "osm");
+            setBaseLayer.init("stamenTonerLite");
 
         });
 
