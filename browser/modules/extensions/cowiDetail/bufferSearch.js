@@ -12,7 +12,7 @@ var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
-var hostname = "http://cowi-detail.mapcentia.com";
+var hostname = "https://kort.detailhandelsportalen.dk";
 var backboneEvents;
 
 var reset = function (s) {
