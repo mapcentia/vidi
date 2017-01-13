@@ -3180,9 +3180,8 @@ module.exports = {
 
         });
 
-        /**
-         * Restate search point from URL
-         */
+        // Restate search point from URL
+        // =============================
         if (typeof urlVars.lat !== "undefined") {
             var latLng = L.latLng(urlVars.lat, urlVars.lng);
             var awm = L.marker(latLng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
@@ -3237,6 +3236,8 @@ module.exports = {
             }
             infoClick.active(true); // Switch standard info click on again
         });
+        $("#r-url-link").on("click", createLink)
+        $("#r-url-email").on("click", createMailLink)
     }
 };
 
@@ -3314,6 +3315,27 @@ var upDatePrintComment = function () {
     $("#print-comment").html($("#detail-data-r-container").html() + $("#detail-data-p-container").html());
 };
 
+var createLink = function(){
+    var layer, link;
+    for (var prop in drawnItemsMarker._layers) {
+        layer = drawnItemsMarker._layers[prop];
+        break;
+    }
+    link = "/app/test/detail?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng + anchor.getAnchor();
+    window.location.href = link;
+};
+
+var createMailLink = function(){
+    var layer, link;
+    for (var prop in drawnItemsMarker._layers) {
+        layer = drawnItemsMarker._layers[prop];
+        break;
+    }
+    link = "mailto:?subject=Link til " + $(".r-adr-val").html() + "&body=" + hostname + encodeURIComponent("/app/test/detail?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng + anchor.getAnchor());
+    console.log(link);
+    window.location.href = link;
+};
+
 var createStore = function () {
     var hit = false, isEmpty = true;
     return new geocloud.sqlStore({
@@ -3344,8 +3366,8 @@ var createStore = function () {
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
-                        $("#r-url-email").attr("href", "mailto:?subject=Link til " + data.results[0].formatted_address + "&body=" + hostname + anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
-                        $("#r-url-link").attr("href", anchor.init() + "?lat=" + layer._latlng.lat + "&lng=" + layer._latlng.lng).removeClass("disabled");
+                        $("#r-url-email").removeClass("disabled");
+                        $("#r-url-link").removeClass("disabled");
                         upDatePrintComment();
                     });
 
@@ -7089,6 +7111,7 @@ module.exports = {
     // ============
 
     template: "cowiDetail.tmpl",
+    //template: "min.tmpl",
 
     searchConfig: {
         komkode: "147"
@@ -7096,7 +7119,28 @@ module.exports = {
 
 
     "baseLayers": [
-        {"id": "osm", "name": "Open Street Map"},
+        {
+            "id": "public.ne_50m_admin_0_countries_lakes", "name": "Countries", "db": "mydb",
+            "config": {
+                "maxZoom": 21,
+                "maxNativeZoom": 19,
+                "attribution": "Geofyn A/S"
+                //"subdomains": ["a", "b", "c"]
+            },
+            "overlays": [
+                {
+                    "id": "tekster.tekster_samlet_wms_web", "db": "geofyn",
+                    "config": {
+                        "subdomains": ["a", "b", "c"]
+                    }
+                },
+                {
+                    "id": "tekster.adgangsadresseinfo", "db": "geofyn",
+                    "config": {
+                        "subdomains": ["a", "b", "c"]
+                    }
+                }]
+        },
         {"id": "stamenToner", "name": "Stamen Toner Dark"},
         {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
         {"id": "kortforsyningen.dtk_skaermkort", "name": "Topografisk kort (Kortforsyningens skærmkort)", "db": "geofyn"},
