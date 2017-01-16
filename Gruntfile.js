@@ -2,6 +2,17 @@ module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        less: {
+            publish: {
+                options: {
+                    compress: false,
+                    optimization: 2
+                },
+                files: {
+                    "public/css/styles.css": "public/less/styles.less" // destination file and source file
+                }
+            }
+        },
         cssmin: {
             build: {
                 files: {
@@ -109,6 +120,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');

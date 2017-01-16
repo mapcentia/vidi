@@ -83,6 +83,7 @@ window.Vidi = function () {
         pushState: require('./modules/pushState'),
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
+        loading: require('./modules/loading'),
         extensions: {}
     };
 

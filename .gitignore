@@ -82,3 +82,8 @@ config/_variables.less
 
 
 
+/public/css/build/all.min.css
+/public/js/bundle.js
+/public/js/build/all.min.js
+/config/_styles.less
+/config/configServer.js

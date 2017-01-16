@@ -102,6 +102,7 @@ module.exports = {
         // Init the modules
         // ================
 
+        modules.loading.init();
         modules.cloud.init();
         modules.backboneEvents.init();
         modules.socketId.init();

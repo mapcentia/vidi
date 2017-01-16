@@ -1,0 +1,264 @@
+/*
+ * L.Control.Loading is a control that shows a loading indicator when tiles are
+ * loading or when map-related AJAX requests are taking place.
+ */
+module.exports = {
+    init: function () {
+        function defineLeafletLoading(L) {
+            L.Control.Loading = L.Control.extend({
+                options: {},
+
+                initialize: function (options) {
+                    L.setOptions(this, options);
+                    this._dataLoaders = {};
+
+                    // Try to set the zoom control this control is attached to from the
+                    // options
+                    if (this.options.zoomControl !== null) {
+                        this.zoomControl = this.options.zoomControl;
+                    }
+                },
+
+                onAdd: function (map) {
+                    if (this.options.spinjs && (typeof Spinner !== 'function')) {
+                        return console.error("Leaflet.loading cannot load because you didn't load spin.js (http://fgnass.github.io/spin.js/), even though you set it in options.");
+                    }
+                    this._addLayerListeners(map);
+                    this._addMapListeners(map);
+
+                    // Try to set the zoom control this control is attached to from the map
+                    // the control is being added to
+                    if (!this.options.separate && !this.zoomControl) {
+                        if (map.zoomControl) {
+                            this.zoomControl = map.zoomControl;
+                        } else if (map.zoomsliderControl) {
+                            this.zoomControl = map.zoomsliderControl;
+                        }
+                    }
+                    // Otherwise, create a container for the indicator
+                    var container = L.DomUtil.create('div');
+
+                    return container;
+                },
+
+                onRemove: function (map) {
+                    this._removeLayerListeners(map);
+                    this._removeMapListeners(map);
+                },
+
+                removeFrom: function (map) {
+                    if (this.zoomControl && !this.options.separate) {
+                        // Override Control.removeFrom() to avoid clobbering the entire
+                        // _container, which is the same as zoomControl's
+                        this._container.removeChild(this._indicator);
+                        this._map = null;
+                        this.onRemove(map);
+                        return this;
+                    }
+                    else {
+                        // If this control is separate from the zoomControl, call the
+                        // parent method so we don't leave behind an empty container
+                        return L.Control.prototype.removeFrom.call(this, map);
+                    }
+                },
+
+                addLoader: function (id) {
+                    this._dataLoaders[id] = true;
+                    if (this.options.delayIndicator && !this.delayIndicatorTimeout) {
+                        // If we are delaying showing the indicator and we're not
+                        // already waiting for that delay, set up a timeout.
+                        var that = this;
+                        this.delayIndicatorTimeout = setTimeout(function () {
+                            that.updateIndicator();
+                            that.delayIndicatorTimeout = null;
+                        }, this.options.delayIndicator);
+                    }
+                    else {
+                        // Otherwise show the indicator immediately
+                        this.updateIndicator();
+                    }
+                },
+
+                removeLoader: function (id) {
+                    delete this._dataLoaders[id];
+                    this.updateIndicator();
+
+                    // If removing this loader means we're in no danger of loading,
+                    // clear the timeout. This prevents old delays from instantly
+                    // triggering the indicator.
+                    if (this.options.delayIndicator && this.delayIndicatorTimeout && !this.isLoading()) {
+                        clearTimeout(this.delayIndicatorTimeout);
+                        this.delayIndicatorTimeout = null;
+                    }
+                },
+
+                updateIndicator: function () {
+                    if (this.isLoading()) {
+                        this._showIndicator();
+                    }
+                    else {
+                        this._hideIndicator();
+                    }
+                },
+
+                isLoading: function () {
+                    return this._countLoaders() > 0;
+                },
+
+                _countLoaders: function () {
+                    var size = 0, key;
+                    for (key in this._dataLoaders) {
+                        if (this._dataLoaders.hasOwnProperty(key)) size++;
+                    }
+                    return size;
+                },
+
+                _showIndicator: function () {
+                    $(".loadingIndicator").show();
+
+
+                },
+                _hideIndicator: function () {
+                    $(".loadingIndicator").hide();
+                },
+
+
+                _handleLoading: function (e) {
+                    this.addLoader(this.getEventId(e));
+                },
+
+                _handleBaseLayerChange: function (e) {
+                    var that = this;
+
+                    // Check for a target 'layer' that contains multiple layers, such as
+                    // L.LayerGroup. This will happen if you have an L.LayerGroup in an
+                    // L.Control.Layers.
+                    if (e.layer && e.layer.eachLayer && typeof e.layer.eachLayer === 'function') {
+                        e.layer.eachLayer(function (layer) {
+                            that._handleBaseLayerChange({layer: layer});
+                        });
+                    }
+                    else {
+                        // If we're changing to a canvas layer, don't handle loading
+                        // as canvas layers will not fire load events.
+                        if (!(L.TileLayer.Canvas && e.layer instanceof L.TileLayer.Canvas)) {
+                            that._handleLoading(e);
+                        }
+                    }
+                },
+
+                _handleLoad: function (e) {
+                    this.removeLoader(this.getEventId(e));
+                },
+
+                getEventId: function (e) {
+                    if (e.id) {
+                        return e.id;
+                    }
+                    else if (e.layer) {
+                        return e.layer._leaflet_id;
+                    }
+                    return e.target._leaflet_id;
+                },
+
+                _layerAdd: function (e) {
+                    // Show indicator, because the loading event is not yet added
+                    this._showIndicator();
+                    if (!e.layer || !e.layer.on) return;
+                    try {
+                        e.layer.on({
+                            loading: this._handleLoading,
+                            load: this._handleLoad
+                        }, this);
+                    }
+                    catch (exception) {
+                        console.warn('L.Control.Loading: Tried and failed to add ' +
+                            ' event handlers to layer', e.layer);
+                        console.warn('L.Control.Loading: Full details', exception);
+                    }
+                },
+
+                _layerRemove: function (e) {
+                    if (!e.layer || !e.layer.off) return;
+                    try {
+                        e.layer.off({
+                            loading: this._handleLoading,
+                            load: this._handleLoad
+                        }, this);
+                    }
+                    catch (exception) {
+                        console.warn('L.Control.Loading: Tried and failed to remove ' +
+                            'event handlers from layer', e.layer);
+                        console.warn('L.Control.Loading: Full details', exception);
+                    }
+                },
+
+                _addLayerListeners: function (map) {
+                    // Add listeners for begin and end of load to any layers already on the
+                    // map
+                    console.log(map);
+                    map.eachLayer(function (layer) {
+                        if (!layer.on) return;
+                        layer.on({
+                            loading: this._handleLoading,
+                            load: this._handleLoad
+                        }, this);
+                    });
+
+                    // When a layer is added to the map, add listeners for begin and end
+                    // of load
+                    map.on('layeradd', this._layerAdd, this);
+                    map.on('layerremove', this._layerRemove, this);
+                },
+
+                _removeLayerListeners: function (map) {
+                    // Remove listeners for begin and end of load from all layers
+                    map.eachLayer(function (layer) {
+                        if (!layer.off) return;
+                        layer.off({
+                            loading: this._handleLoading,
+                            load: this._handleLoad
+                        }, this);
+                    }, this);
+
+                    // Remove layeradd/layerremove listener from map
+                    map.off('layeradd', this._layerAdd, this);
+                    map.off('layerremove', this._layerRemove, this);
+                },
+
+                _addMapListeners: function (map) {
+                    // Add listeners to the map for (custom) dataloading and dataload
+                    // events, eg, for AJAX calls that affect the map but will not be
+                    // reflected in the above layer events.
+                    map.on({
+                        baselayerchange: this._handleBaseLayerChange,
+                        dataloading: this._handleLoading,
+                        dataload: this._handleLoad,
+                        layerremove: this._handleLoad
+                    }, this);
+                },
+
+                _removeMapListeners: function (map) {
+                    map.off({
+                        baselayerchange: this._handleBaseLayerChange,
+                        dataloading: this._handleLoading,
+                        dataload: this._handleLoad,
+                        layerremove: this._handleLoad
+                    }, this);
+                }
+            });
+
+            L.Map.addInitHook(function () {
+                if (this.options.loadingControl) {
+                    this.loadingControl = new L.Control.Loading();
+                    this.addControl(this.loadingControl);
+                }
+            });
+
+            L.Control.loading = function (options) {
+                return new L.Control.Loading(options);
+            };
+        }
+        defineLeafletLoading(L);
+    }
+};

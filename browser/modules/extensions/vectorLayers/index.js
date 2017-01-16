@@ -132,7 +132,7 @@ module.exports = module.exports = {
                                     }
                                 });
                                 // Add the geojson layer to the layercontrol
-                                cloud.layerControl.addOverlay(store[id].layer, id);
+                                cloud.get().layerControl.addOverlay(store[id].layer, id);
                                 store[id].load();
                                 displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
                                 $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id="' + id + '">' + text + '</label><span><i class="refresh-vector-layer fa fa-refresh fa-lg" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
