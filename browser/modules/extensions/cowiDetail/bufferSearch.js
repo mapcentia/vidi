@@ -386,9 +386,11 @@ var createStore = function () {
 
 
                     if (feature.properties.radius === "500") {
-                        $(".r500-val").html(feature.properties.antal)
+                        $(".r500-val").html(feature.properties.antal);
+                        $(".r500-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
                     } else {
-                        $(".r1000-val").html(feature.properties.antal)
+                        $(".r1000-val").html(feature.properties.antal);
+                        $(".r1000-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
@@ -398,7 +400,8 @@ var createStore = function () {
                     });
 
                 } else {
-                    $("#polygon-val").html(feature.properties.antal)
+                    $("#polygon-val").html(feature.properties.antal);
+                    $("#polygon-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
                 }
             });
             upDatePrintComment();
