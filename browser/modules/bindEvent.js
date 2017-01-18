@@ -195,7 +195,7 @@ module.exports = module.exports = {
 
         backboneEvents.get().on("end:print", function (response) {
             $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');

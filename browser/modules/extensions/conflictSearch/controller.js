@@ -38,7 +38,7 @@ module.exports = {
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
         backboneEvents.get().on(endPrintEventName, function (response) {
             $("#conflict-get-print-fieldset").prop("disabled", false);
-            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/static/tmp/print/pdf/" + response.key + ".pdf");
+            $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
             $("#conflict-download-pdf").prop("download", response.key);
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');

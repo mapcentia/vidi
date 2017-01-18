@@ -114,6 +114,26 @@ module.exports = function (grunt) {
             default: {
                 command: 'cp ./config/_variables.less ./public/bower_components/bootstrap-material-design/less'
             }
+        },
+        cacheBust: {
+            options: {
+                encoding: 'utf8',
+                algorithm: 'md5',
+                length: 16,
+                rename: false,
+                enableUrlFragmentHint: true,
+                baseDir: "public/"
+            },
+            assets: {
+                files: [{
+                    src: [
+
+                        'public/index.html',
+                        'public/index.html'
+
+                    ]
+                }]
+            }
         }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
@@ -124,9 +144,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
+    grunt.loadNpmTasks('grunt-cache-bust');
+
 
     grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
-    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin']);
+    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
 };
 
 

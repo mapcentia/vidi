@@ -44,7 +44,7 @@ module.exports = {
         $('<link/>').attr({
             rel: 'stylesheet',
             type: 'text/css',
-            href: '/static/css/styles.css'
+            href: '/css/styles.css'
         }).appendTo('head');
 
         // Render template and set some styling

@@ -71,8 +71,12 @@ module.exports = module.exports = {
                 break;
             case "cartodb":
                 setTimeout(function () {
-                    var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel;
-                    $.each(_layers.getLayers().split(","), function (i, v) {
+                    var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel,
+                        visibleLayers = _layers.getLayers();
+                    if (!visibleLayers) {
+                        visibleLayers = "";
+                    }
+                    $.each(visibleLayers.split(","), function (i, v) {
                         key = v;
                         if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
                             legend = metaDataKeys[key].legend;
