@@ -147,8 +147,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-cache-bust');
 
 
-    grunt.registerTask('default', ['browserify', 'hogan', 'shell']);
-    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
+    grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
+    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
 };
 
 

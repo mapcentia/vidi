@@ -78,6 +78,7 @@ module.exports = {
         browser: [],
         server: []
     },
+    enabledPrints: ["print"],
     template: "default.tmpl",
     brandName: "MapCentia"
 };

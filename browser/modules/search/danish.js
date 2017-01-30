@@ -73,7 +73,7 @@ module.exports = {
             pointToLayer: function (feature, latlng) {
                 return L.marker(latlng, {
                     icon: L.AwesomeMarkers.icon({
-                            icon: 'star',
+                            icon: 'home',
                             markerColor: '#C31919',
                             prefix: 'fa'
                         }

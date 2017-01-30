@@ -220,7 +220,7 @@ module.exports = {
 };
 },{}],3:[function(require,module,exports){
 /*!
- * Copyright 2016 MapCentia ApS. All rights reserved.
+ * Copyright 2017 MapCentia ApS. All rights reserved.
  *
  * Licensed under the GNU AFFERO GENERAL PUBLIC LICENSE, Version 3 (the "License");
  * you may not use this file except in compliance with the License.
@@ -263,6 +263,32 @@ window.vidiConfig = require('../config/config.js');
  * @constructor
  */
 window.Vidi = function () {
+
+    // Avoid 'console' errors in browsers that lack a console.
+    // ========================================================
+
+    (function () {
+        var method;
+        var noop = function () {
+        };
+        var methods = [
+            'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+            'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+            'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+            'timeStamp', 'trace', 'warn'
+        ];
+        var length = methods.length;
+        var console = (window.console = window.console || {});
+
+        while (length--) {
+            method = methods[length];
+
+            // Only stub undefined methods.
+            if (!console[method]) {
+                console[method] = noop;
+            }
+        }
+    }());
 
     // Set global var status on load
     // =============================
@@ -315,6 +341,7 @@ window.Vidi = function () {
     function ಠ_ಠ() {
         require('./modules/search/danish.js');require('./modules/search/danish_new.js');require('./modules/search/google.js');
     }
+
     modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
@@ -2444,6 +2471,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("off:conflict");
         }
     },
+
     /**
      * Turns conflict off and resets DOM
      */
@@ -3406,10 +3434,15 @@ var createStore = function () {
 
 'use strict';
 
+/**
+ *
+ */
 var findNearest;
 
+/**
+ *
+ */
 var backboneEvents;
-
 
 /**
  *
@@ -3422,20 +3455,41 @@ module.exports = {
         return this;
     },
     init: function () {
+
         // Click event for conflict search on/off toggle button
+        // ====================================================
+
         $("#findnearest-btn").on("click", function () {
             findNearest.control();
         });
 
-        backboneEvents.get().on("off:findNearest", function () {
-            console.info("Stopping findNearest");
-        });
+        // Listen to on event
+        // ==================
 
         backboneEvents.get().on("on:findNearest", function () {
+            findNearest.addPointLayer();
+            $("#findnearest-places").show();
+            $("#findnearest-result-panel").show();
+
+            // Turn info click off
+            backboneEvents.get().trigger("off:infoClick");
             console.info("Starting findNearest");
         });
 
+        // Listen to off event
+        // ==================
 
+        backboneEvents.get().on("off:findNearest", function () {
+            findNearest.off();
+            findNearest.removePointLayer();
+            $("#findnearest-places").hide();
+            $("#findnearest-result-panel").hide();
+            backboneEvents.get().trigger("clear:search");
+
+            // Turn info click on again
+            backboneEvents.get().trigger("on:infoClick");
+            console.info("Stopping findNearest");
+        });
     }
 };
 },{}],19:[function(require,module,exports){
@@ -3452,17 +3506,6 @@ module.exports = {
  */
 var cloud;
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var meta;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var setting;
 
 /**
  *
@@ -3495,28 +3538,83 @@ var db = urlparser.db;
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var search = require('./../../search/danish');
+
+/**
+ *
+ */
+var proccess;
+
+var clearRoutes;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var switchLayer;
+
+/**
+ *
+ */
+var startMarker = L.geoJson(null, {});
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
+
+/**
+ *
+ */
+var store;
+
+var routeLayers = [];
+
 module.exports = module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         cloud = o.cloud;
-        setting = o.setting;
         utils = o.utils;
-        meta = o.meta;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
     },
 
+    /**
+     *
+     */
     init: function () {
 
         utils.createMainTab("findnearest", "Find nærmest", "sdsd", require('./../../height')().max);
         $('#main-tabs a[href="#findnearest-content"]').tab('show');
 
+        // Append to DOM
+        //==============
+
         $("#findnearest").append(dom);
 
-        // DOM created
+        // Init search with custom callback
+        // ================================
+
+        search.init(function () {
+            console.log(this.layer.toGeoJSON().features["0"].geometry.coordinates);
+            cloud.get().map.addLayer(this.layer);
+            proccess(this.layer.toGeoJSON().features["0"].geometry.coordinates);
+
+        }, "findnearest-custom-search");
 
     },
+
+    /**
+     *
+     */
     control: function () {
         var me = this;
         if ($("#findnearest-btn").is(':checked')) {
@@ -3528,25 +3626,154 @@ module.exports = module.exports = {
 
         } else {
 
+            store.reset();
+
             // Emit "off" event
-            //================
+            //=================
 
             backboneEvents.get().trigger("off:findNearest");
         }
+    },
+
+    addPointLayer: function () {
+        var id = "_findNearestPoints";
+        store = new geocloud.sqlStore({
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: db,
+            uri: "/api/sql",
+            clickable: true,
+            id: id,
+            name: id,
+            lifetime: 0,
+            sql: "SELECT * FROM fot_test.punkter",
+            pointToLayer: function (feature, latlng) {
+                return L.marker(latlng, {
+                    icon: L.AwesomeMarkers.icon({
+                            icon: 'fa-graduation-cap',
+                            markerColor: 'green',
+                            prefix: 'fa'
+                        }
+                    )
+                });
+            },
+            onLoad: function () {
+                var me = this;
+            }
+        });
+        // Add the geojson layer to the layercontrol
+        cloud.get().addGeoJsonStore(store);
+        store.load();
+    },
+
+    removePointLayer: function () {
+        store.reset();
+    },
+
+    /**
+     * Turns conflict off and resets DOM
+     */
+    off: function () {
+        // Clean up
+        clearRoutes();
+        $("#findnearest-result").empty();
+        cloud.get().layerControl.removeLayer("_findNearestPoints");
+        $("#findnearest-custom-search").val("");
     }
 };
+
+/**
+ *
+ * @param p
+ */
+proccess = function (p) {
+    var xhr = $.ajax({
+        method: "POST",
+        url: "/api/extension/findNearest",
+        data: JSON.stringify(p),
+        dataType: "json",
+        scriptCharset: "utf-8",
+        contentType: "application/json; charset=utf-8",
+
+        success: function (response) {
+            var lg, id;
+            $("#findnearest-result").empty();
+
+            for (var i = 0; i < response.length; i++) {
+                lg = L.geoJson(response[i], {
+                    style: function (feature) {
+                        return {
+                            color: (function getColor(d) {
+                                return d === 'Sti' ? '#00ff00' : '#ff0000';
+                            }(feature.properties.name)),
+                            weight: 5,
+                            dashArray: '',
+                            opacity: 0.8
+                        };
+                    },
+                    onEachFeature: function (feature, layer) {
+                        layer.on({
+                            mouseover: function () {
+                                console.log("HEJ")
+                            },
+                            mouseout: function () {
+
+                            }
+                        });
+                    },
+                    clickable: true
+                });
+                id = "_route_" + i;
+                lg.id = id;
+                routeLayers.push(cloud.get().layerControl.addOverlay(lg, id));
+                $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + id + ' ' + Math.round(response[i].length) + ' m</span></label><span data-toggle="tooltip" data-placement="left" title="' + "hej" + '" style="display: inline" class="info-label label label-primary">Info</span></div>')
+            }
+            console.log(routeLayers);
+
+        },
+        error: function () {
+            //jquery("#snackbar-conflict").snackbar("hide");
+        }
+    })
+};
+
+clearRoutes = function () {
+    var i, layer;
+    for (i = 0; i < routeLayers.length; i++) {
+        layer = cloud.get().getLayersByName("_route_" + i);
+        cloud.get().map.removeLayer(layer);
+        cloud.get().layerControl.removeLayer(layer);
+    }
+    routeLayers = [];
+};
+
+
+/**
+ *
+ * @type {string}
+ */
 var dom =
-    '<div role="tabpanel"><div class="panel panel-default"><div class="panel-body">' +
+    '<div role="tabpanel">' +
+    '<div class="panel panel-default"><div class="panel-body">' +
     '<div class="togglebutton">' +
     '<label><input id="findnearest-btn" type="checkbox">Aktiver find</label>' +
+    '</div>' +
     '</div>' +
     '</div>' +
 
     '<div id="findnearest-places" class="places" style="margin-bottom: 20px; display: none">' +
     '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
+    '</div>' +
+
+    '<div id="findnearest-result-panel" role="tabpanel" style="display: none">' +
+    '<div class="panel panel-default"><div class="panel-body">' +
+    '<div id="findnearest-result">' +
+    '</div>' +
+    '</div>' +
     '</div>';
 
-},{"./../../height":21,"./../../urlparser":41}],20:[function(require,module,exports){
+},{"./../../height":21,"./../../search/danish":31,"./../../urlparser":41}],20:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -5257,7 +5484,7 @@ module.exports = {
             pointToLayer: function (feature, latlng) {
                 return L.marker(latlng, {
                     icon: L.AwesomeMarkers.icon({
-                            icon: 'star',
+                            icon: 'home',
                             markerColor: '#C31919',
                             prefix: 'fa'
                         }
@@ -7399,8 +7626,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -7485,15 +7712,20 @@ module.exports = {
     // ========================================
 
     extensions: {
-        browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
-        server: [{conflictSearch: ["index"]}],
+        //browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
+        //server: [{conflictSearch: ["index"]}],
         //browser: [{cowiDetail: ["bufferSearch"]}],
         //browser: [{vectorLayers: ["index"]}]
         //server: [{cowiDetail: ["bufferSearch"]}]
 
 
-        //browser: [{findNearest: ["index"]}]
-        //server: [{cowiDetail: ["bufferSearch"]}]
+        browser: [
+            {findNearest: ["index", "controller"]},
+            {conflictSearch: ["index", "reportRender", "infoClick", "controller"]}
+        ],
+        server: [
+            {findNearest: ["index"]},
+            {conflictSearch: ["index"]}]
     },
 
     // Url hvor der kan hentes konfigurationer online for at
@@ -7533,8 +7765,10 @@ module.exports = {
 
     //enabledExtensions: ["cowiDetail"],
     //enabledExtensions: ["vectorLayers"],
-    //enabledExtensions: ["findNearest"],
-    enabledExtensions: ["conflictSearch"],
+    enabledExtensions: [
+        "findNearest",
+        "conflictSearch"
+    ],
 
     // Aktiver printskabeloner
     // =======================
@@ -7547,7 +7781,7 @@ module.exports = {
     template: "default.tmpl",
 
     searchConfig: {
-        komkode: "147"
+        komkode: "190"
     },
 
 
@@ -7575,20 +7809,7 @@ module.exports = {
                 }]
         },
         {"id": "stamenToner", "name": "Stamen Toner Dark"},
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
-        {"id": "kortforsyningen.dtk_skaermkort", "name": "Topografisk kort (Kortforsyningens skærmkort)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_skaermkort_daempet", "name": "Topografisk kort (Kortforsyningens skærmkort, dæmpet)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_skaermkort_graa", "name": "Topografisk kort (Kortforsyningens skærmkort, gråt)", "db": "geofyn"},
-        {"id": "kortforsyningen.topo25_klassisk", "name": "Topografisk kort (Kortforsyningens 1:25.000, klassisk)", "db": "geofyn"},
-        {"id": "kortforsyningen.topo25_daempet", "name": "Topografisk kort (Kortforsyningens 1:25.000, dæmpet)", "db": "geofyn"},
-        {"id": "kortforsyningen.topo25_graa", "name": "Topografisk kort (Kortforsyningens 1:25.000, gråt)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_2cm", "name": "Topografisk kort (Kortforsyningens 1:50.000)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_1cm", "name": "Topografisk kort (Kortforsyningens 1:100.000)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_d200", "name": "Topografisk kort (Kortforsyningens 1:200.000)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_d500", "name": "Topografisk kort (Kortforsyningens 1:500.000)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_d850", "name": "Topografisk kort (Kortforsyningens 1:850.000)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_lave_maalebordsblade", "name": "Topografisk kort (Kortforsyningens lave målebordsblade, 1928-1940)", "db": "geofyn"},
-        {"id": "kortforsyningen.dtk_hoeje_maalebordsblade", "name": "Topografisk kort (Kortforsyningens høje målebordsblade, 1842-1899)", "db": "geofyn"}
+        {"id": "stamenTonerLite", "name": "Stamen Toner Light"}
     ]
 
 };
