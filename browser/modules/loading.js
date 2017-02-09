@@ -196,7 +196,6 @@ module.exports = {
                 _addLayerListeners: function (map) {
                     // Add listeners for begin and end of load to any layers already on the
                     // map
-                    console.log(map);
                     map.eachLayer(function (layer) {
                         if (!layer.on) return;
                         layer.on({

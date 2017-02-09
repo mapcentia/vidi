@@ -21,7 +21,7 @@ module.exports = {
         var me = this;
         if (urlVars.config) {
             $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
-                console.log(data);
+                console.info(data);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -29,7 +29,7 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
             }).fail(function () {
-                console.log("error");
+                console.info("Error loading config json");
             }).always(function () {
                 me.startApp();
             });

@@ -300,7 +300,7 @@ window.Vidi = function () {
     //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 30000);
+    }, 15000);
 
     // Require the standard modules
     // ============================
@@ -4041,7 +4041,7 @@ module.exports = {
         var me = this;
         if (urlVars.config) {
             $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
-                console.log(data);
+                console.info(data);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -4049,7 +4049,7 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
             }).fail(function () {
-                console.log("error");
+                console.info("Error loading config json");
             }).always(function () {
                 me.startApp();
             });
@@ -4768,7 +4768,6 @@ module.exports = {
                 _addLayerListeners: function (map) {
                     // Add listeners for begin and end of load to any layers already on the
                     // map
-                    console.log(map);
                     map.eachLayer(function (layer) {
                         if (!layer.on) return;
                         layer.on({
