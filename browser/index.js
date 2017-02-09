@@ -79,7 +79,7 @@ window.Vidi = function () {
     //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 30000);
+    }, 15000);
 
     // Require the standard modules
     // ============================
@@ -110,18 +110,9 @@ window.Vidi = function () {
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
         loading: require('./modules/loading'),
-        extensions: {}
+        extensions: {},
+        search: {}
     };
-
-    // Require search module
-    // =====================
-
-    // Hack to compile Glob files. Don´t call this function!
-    function ಠ_ಠ() {
-        require('./modules/search/*.js', {glob: true});
-    }
-
-    modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
     // ===============================================
@@ -139,7 +130,6 @@ window.Vidi = function () {
     modules.state.set(modules);
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
-    modules.search.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
     modules.print.set(modules);

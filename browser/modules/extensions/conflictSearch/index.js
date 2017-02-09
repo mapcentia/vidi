@@ -444,6 +444,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("off:conflict");
         }
     },
+
     /**
      * Turns conflict off and resets DOM
      */

@@ -331,18 +331,9 @@ window.Vidi = function () {
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
         loading: require('./modules/loading'),
-        extensions: {}
+        extensions: {},
+        search: {}
     };
-
-    // Require search module
-    // =====================
-
-    // Hack to compile Glob files. Don´t call this function!
-    function ಠ_ಠ() {
-        require('./modules/search/danish.js');require('./modules/search/danish_new.js');require('./modules/search/google.js');
-    }
-
-    modules.search = require('./modules/search/' + window.vidiConfig.searchModule + '.js');
 
     // Use the setters in modules so they can interact
     // ===============================================
@@ -360,7 +351,6 @@ window.Vidi = function () {
     modules.state.set(modules);
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
-    modules.search.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
     modules.print.set(modules);
@@ -379,7 +369,7 @@ window.Vidi = function () {
     }
 };
 
-},{"../config/config.js":44,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/infoClick":22,"./modules/init":23,"./modules/layerTree":24,"./modules/layers":25,"./modules/legend":26,"./modules/loading":27,"./modules/meta":28,"./modules/print":29,"./modules/pushState":30,"./modules/search/danish.js":31,"./modules/search/danish_new.js":32,"./modules/search/google.js":33,"./modules/serializeLayers":34,"./modules/setBaseLayer":35,"./modules/setting":36,"./modules/socketId":37,"./modules/sqlQuery":38,"./modules/state":39,"./modules/switchLayer":40,"./modules/urlparser":41,"./modules/utils":42}],4:[function(require,module,exports){
+},{"../config/config.js":44,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/infoClick":22,"./modules/init":23,"./modules/layerTree":24,"./modules/layers":25,"./modules/legend":26,"./modules/loading":27,"./modules/meta":28,"./modules/print":29,"./modules/pushState":30,"./modules/serializeLayers":34,"./modules/setBaseLayer":35,"./modules/setting":36,"./modules/socketId":37,"./modules/sqlQuery":38,"./modules/state":39,"./modules/switchLayer":40,"./modules/urlparser":41,"./modules/utils":42}],4:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3549,6 +3539,8 @@ var proccess;
 
 var clearRoutes;
 
+var cleanUp;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -3677,10 +3669,15 @@ module.exports = module.exports = {
     off: function () {
         // Clean up
         clearRoutes();
-        $("#findnearest-result").empty();
         cloud.get().layerControl.removeLayer("_findNearestPoints");
-        $("#findnearest-custom-search").val("");
+        cleanUp();
     }
+
+};
+
+cleanUp = function () {
+    clearRoutes();
+    $("#findnearest-result").empty();
 };
 
 /**
@@ -3688,6 +3685,7 @@ module.exports = module.exports = {
  * @param p
  */
 proccess = function (p) {
+    cleanUp();
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
@@ -3695,7 +3693,6 @@ proccess = function (p) {
         dataType: "json",
         scriptCharset: "utf-8",
         contentType: "application/json; charset=utf-8",
-
         success: function (response) {
             var lg, id;
             $("#findnearest-result").empty();
@@ -3727,7 +3724,7 @@ proccess = function (p) {
                 id = "_route_" + i;
                 lg.id = id;
                 routeLayers.push(cloud.get().layerControl.addOverlay(lg, id));
-                $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + id + ' ' + Math.round(response[i].length) + ' m</span></label><span data-toggle="tooltip" data-placement="left" title="' + "hej" + '" style="display: inline" class="info-label label label-primary">Info</span></div>')
+                $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + response[i].name + ' (' + Math.round(response[i].length) + ' m)</span></label></div>')
             }
             console.log(routeLayers);
 
@@ -4050,6 +4047,7 @@ module.exports = {
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
+                window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
             }).fail(function () {
                 console.log("error");
             }).always(function () {
@@ -4090,7 +4088,10 @@ module.exports = {
             tmpl = par.join();
         }
 
-        // If px and py is provided for print templates, add the values to the dict before rendering
+        // If px and py is provided for print templates,
+        // add the values to the dict before rendering
+        // =============================================
+
         if (urlVars.px && urlVars.py) {
             gc2i18n.dict.printWidth = urlVars.px + "px";
             gc2i18n.dict.printHeight = urlVars.py + "px";
@@ -4110,7 +4111,6 @@ module.exports = {
         $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
-        //$(".center").hide();
         try {
             var max = $(document).height() - $('.tab-pane').offset().top - 100;
         } catch (e) {
@@ -4135,10 +4135,25 @@ module.exports = {
         modules.setting.init();
         modules.state.init();
         modules.infoClick.init();
-        modules.search.init();
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
+
+        // Require search module
+        // =====================
+
+        // Hack to compile Glob files. Don´t call this function!
+        function ಠ_ಠ() {
+            require('./search/danish.js');require('./search/danish_new.js');require('./search/google.js');
+        }
+
+        if (typeof vidiConfig.searchModules !== "undefined") {
+            $.each(vidiConfig.searchModules, function (i, v) {
+                modules.search[v] = require('./search/' + v + '.js');
+                modules.search[v].set(modules);
+            });
+            modules.search[window.vidiConfig.enabledSearch].init();
+        }
 
         // Require extensions modules
         // ==========================
@@ -4177,7 +4192,7 @@ module.exports = {
         $("#loadscreentext").html(__("Loading data"));
     }
 };
-},{"./../modules/urlparser":41,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/vectorLayers/index.js":20,"bootstrap":54}],24:[function(require,module,exports){
+},{"./../modules/urlparser":41,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/vectorLayers/index.js":20,"./search/danish.js":31,"./search/danish_new.js":32,"./search/google.js":33,"bootstrap":54}],24:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -7632,7 +7647,6 @@ module.exports = {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
-    //backend: "cartodb",
     cartodb: {
         db: "mhoegh"
 
@@ -7705,7 +7719,7 @@ module.exports = {
         scales: [100, 250, 500, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 50000, 100000]
     },
 
-    searchModule: "danish",
+    searchModules: ["google", "danish"],
 
     // Extension bliver loaded i build/startup,
     // men IKKE aktiveret automatisk som før!
@@ -7735,7 +7749,7 @@ module.exports = {
     // Hentes ved at angive ?config=vidi.json i Vidi URL'en
     //=========================================================================
 
-    configUrl: "http://mapcentia.github.io",
+    configUrl: "https://dl.dropboxusercontent.com/u/3584335/vidi",
 
     // Settings der kan overrides i runtime.
     // =====================================
@@ -7780,6 +7794,7 @@ module.exports = {
     //template: "cowiDetail.tmpl",
     template: "default.tmpl",
 
+    enabledSearch: "google",
     searchConfig: {
         komkode: "190"
     },

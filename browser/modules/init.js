@@ -27,6 +27,7 @@ module.exports = {
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
+                window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
             }).fail(function () {
                 console.log("error");
             }).always(function () {
@@ -67,7 +68,10 @@ module.exports = {
             tmpl = par.join();
         }
 
-        // If px and py is provided for print templates, add the values to the dict before rendering
+        // If px and py is provided for print templates,
+        // add the values to the dict before rendering
+        // =============================================
+
         if (urlVars.px && urlVars.py) {
             gc2i18n.dict.printWidth = urlVars.px + "px";
             gc2i18n.dict.printHeight = urlVars.py + "px";
@@ -87,7 +91,6 @@ module.exports = {
         $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
 
         $("[data-toggle=tooltip]").tooltip();
-        //$(".center").hide();
         try {
             var max = $(document).height() - $('.tab-pane').offset().top - 100;
         } catch (e) {
@@ -112,10 +115,25 @@ module.exports = {
         modules.setting.init();
         modules.state.init();
         modules.infoClick.init();
-        modules.search.init();
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
+
+        // Require search module
+        // =====================
+
+        // Hack to compile Glob files. Don´t call this function!
+        function ಠ_ಠ() {
+            require('./search/*.js', {glob: true});
+        }
+
+        if (typeof vidiConfig.searchModules !== "undefined") {
+            $.each(vidiConfig.searchModules, function (i, v) {
+                modules.search[v] = require('./search/' + v + '.js');
+                modules.search[v].set(modules);
+            });
+            modules.search[window.vidiConfig.enabledSearch].init();
+        }
 
         // Require extensions modules
         // ==========================

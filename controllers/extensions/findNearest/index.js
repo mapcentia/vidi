@@ -80,7 +80,9 @@ router.post('/api/extension/findNearest', function (req, response) {
                                 length = length + parseFloat(json.features[i].properties.length);
                             }
                             json.length = length;
+                            json.name = points[count].properties.name;
                             routes.push(json);
+                            io.emit(socketId, {"count": count, "name": json.name});
                             count++;
                             iter();
                         });

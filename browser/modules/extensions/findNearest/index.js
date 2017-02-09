@@ -54,6 +54,8 @@ var proccess;
 
 var clearRoutes;
 
+var cleanUp;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -182,10 +184,15 @@ module.exports = module.exports = {
     off: function () {
         // Clean up
         clearRoutes();
-        $("#findnearest-result").empty();
         cloud.get().layerControl.removeLayer("_findNearestPoints");
-        $("#findnearest-custom-search").val("");
+        cleanUp();
     }
+
+};
+
+cleanUp = function () {
+    clearRoutes();
+    $("#findnearest-result").empty();
 };
 
 /**
@@ -193,6 +200,7 @@ module.exports = module.exports = {
  * @param p
  */
 proccess = function (p) {
+    cleanUp();
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
@@ -200,7 +208,6 @@ proccess = function (p) {
         dataType: "json",
         scriptCharset: "utf-8",
         contentType: "application/json; charset=utf-8",
-
         success: function (response) {
             var lg, id;
             $("#findnearest-result").empty();
@@ -232,7 +239,7 @@ proccess = function (p) {
                 id = "_route_" + i;
                 lg.id = id;
                 routeLayers.push(cloud.get().layerControl.addOverlay(lg, id));
-                $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + id + ' ' + Math.round(response[i].length) + ' m</span></label><span data-toggle="tooltip" data-placement="left" title="' + "hej" + '" style="display: inline" class="info-label label label-primary">Info</span></div>')
+                $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + response[i].name + ' (' + Math.round(response[i].length) + ' m)</span></label></div>')
             }
             console.log(routeLayers);
 
