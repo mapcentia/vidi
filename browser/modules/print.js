@@ -14,6 +14,7 @@ var anchor;
 var printItems = new L.FeatureGroup();
 var urlparser = require('./urlparser');
 var db = urlparser.db;
+var urlVars = urlparser.urlVars;
 var schema = urlparser.schema;
 var scale;
 var center;
@@ -171,7 +172,7 @@ module.exports = {
      *
      */
     print: function (endEventName, customData) {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e;
+        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null;
 
         backboneEvents.get().trigger("start:print");
 
@@ -257,31 +258,42 @@ module.exports = {
 
         recEdit.editing.enable();
 
+        data = {
+            db: db,
+            schema: schema,
+            draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
+            queryDraw: (typeof  layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
+            queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
+            queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
+            print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
+            anchor: anchor.getAnchor(),
+            bounds: recScale.getBounds(),
+            scale: scale,
+            tmpl: tmpl,
+            pageSize: pageSize,
+            orientation: orientation,
+            title: encodeURIComponent($("#print-title").val()),
+            comment: encodeURIComponent($("#print-comment").val()),
+            legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
+            dataTime: moment().format('MMMM Do YYYY, H:mm'),
+            customData: customData || null
+        };
+
+        if (urlVars.config) {
+            parr = urlVars.config.split("#");
+            if (parr.length > 1) {
+                parr.pop();
+            }
+            data.config = parr.join();
+        }
+
+
         $.ajax({
             dataType: "json",
             method: "post",
             url: '/api/print/',
             contentType: "application/json",
-            data: JSON.stringify({
-                db: db,
-                schema: schema,
-                draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
-                queryDraw: (typeof  layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
-                queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
-                queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
-                print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-                anchor: anchor.getAnchor(),
-                bounds: recScale.getBounds(),
-                scale: scale,
-                tmpl: tmpl,
-                pageSize: pageSize,
-                orientation: orientation,
-                title: encodeURIComponent($("#print-title").val()),
-                comment: encodeURIComponent($("#print-comment").val()),
-                legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
-                dataTime: moment().format('MMMM Do YYYY, H:mm'),
-                customData: customData || null
-            }),
+            data: JSON.stringify(data),
             scriptCharset: "utf-8",
             success: function (response) {
                 if (!endEventName) {
