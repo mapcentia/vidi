@@ -45,9 +45,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     case "gc2":
                         geomField = metaDataFinal.data[count].f_geometry_column;
                         if (buffer > 0) {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(ST_MakeValid(" + geomField + "),25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
+                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
                         } else {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(ST_MakeValid(" + geomField + "),25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
+                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
                         }
                         queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                         break;
