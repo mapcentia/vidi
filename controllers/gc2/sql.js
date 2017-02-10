@@ -9,14 +9,6 @@ router.post('/api/sql/:db', function (req, response) {
     url = config.host + "/api/v1/sql/" + db + "?q=" + q + "&srs=" + srs +  "&lifetime=" + lifetime + "&client_encoding=" + client_encoding;
     console.log(url);
     http.get(url, function (res) {
-        if (res.statusCode != 200) {
-            response.header('content-type', 'application/json');
-            response.status(res.statusCode).send({
-                success: false,
-                message: "Could not get the sql data."
-            });
-            return;
-        }
         var chunks = [];
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
@@ -27,6 +19,13 @@ router.post('/api/sql/:db', function (req, response) {
         });
         res.on("end", function () {
             jsfile = new Buffer.concat(chunks);
+            if (res.statusCode != 200) {
+                response.status(res.statusCode).send({
+                    success: false,
+                    message: JSON.parse(jsfile.toString()).message
+                });
+                return;
+            }
             response.send(jsfile);
         });
     }).on("error", function (err) {

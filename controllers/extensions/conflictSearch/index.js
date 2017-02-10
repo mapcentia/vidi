@@ -46,7 +46,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         if (buffer > 0) {
                             sql = "SELECT geography(ST_transform(" + geomField + ",4326)) as _gc2_geom, * FROM " + table + " WHERE ST_DWithin(ST_GeogFromText('" + wkt + "'), geography(ST_transform(" + geomField + ",4326)), " + buffer + ")";
                         } else {
-                            sql = "SELECT * FROM " + table + " WHERE ST_transform(" + geomField + ",900913) && ST_transform(ST_geomfromtext($1,4326),900913) AND ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
+                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
                         }
                         queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                         break;
@@ -55,7 +55,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         if (buffer > 0) {
                             sql = "SELECT geography(ST_transform(" + geomField + ",4326)) as _gc2_geom, * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_DWithin(ST_GeogFromText('" + wkt + "'), geography(ST_transform(" + geomField + ",4326)), " + buffer + ")";
                         } else {
-                            sql = "SELECT * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_transform(" + geomField + ",900913) && ST_transform(ST_geomfromtext($1,4326),900913) AND ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
+                            sql = "SELECT * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
                         }
                         break;
                 }
@@ -71,7 +71,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         }
                     };
                 var req = http.request(options, function (res) {
-                    var chunks = [];
+                    var chunks = [], error = false, message = null;
                     res.on('data', function (chunk) {
                         chunks.push(chunk);
                     });
@@ -82,6 +82,11 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         var jsfile = new Buffer.concat(chunks);
                         var result = JSON.parse(jsfile);
                         var time = new Date().getTime() - startTime, data = [], tmp = [];
+                        if (res.statusCode !== 200) {
+                            console.log(result.message);
+                            error = true;
+                            message = result.message;
+                        }
                         count++;
                         if (result.features) {
                             for (var i = 0; i < result.features.length; i++) {
@@ -129,12 +134,13 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             table: table,
                             title: metaDataKeys[table.split(".")[1]].f_table_title,
                             group: metaDataKeys[table.split(".")[1]].layergroup,
-                            hits: result.features !== null ? result.features.length : 0,
+                            hits: (typeof result.features !=="undefined" && result.features !== null)? result.features.length : 0,
                             data: data,
                             num: count + "/" + metaDataFinal.data.length,
                             time: time,
                             id: socketId,
-                            error: null,
+                            error: error || null,
+                            message: message,
                             sql: metaDataKeys[table.split(".")[1]].sql
                         };
                         hits[table] = hit;
@@ -163,8 +169,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 });
                 req.write(postData);
                 req.end();
-
-
             })();
             //winston.log('info', resultsObj.message, resultsObj);
         } else {
