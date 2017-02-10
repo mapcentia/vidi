@@ -12,6 +12,7 @@ moment.locale("da_DK");
 var BACKEND = config.backend;
 
 router.post('/api/extension/conflictSearch', function (req, response) {
+    req.setTimeout(0) // no timeout
     var db = req.body.db;
     var schema = req.body.schema;
     var wkt = req.body.wkt;
@@ -44,9 +45,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     case "gc2":
                         geomField = metaDataFinal.data[count].f_geometry_column;
                         if (buffer > 0) {
-                            sql = "SELECT geography(ST_transform(" + geomField + ",4326)) as _gc2_geom, * FROM " + table + " WHERE ST_DWithin(ST_GeogFromText('" + wkt + "'), geography(ST_transform(ST_MakeValid(" + geomField + "),4326)), " + buffer + ")";
+                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_MakeValid(ST_geomfromtext('" + wkt + "',4326)),25832)," + buffer + "))";
                         } else {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_MakeValid(ST_geomfromtext('" + wkt + "',4326)),900913))";
+                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_MakeValid(ST_geomfromtext('" + wkt + "',4326)),25832))";
                         }
                         queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                         break;
