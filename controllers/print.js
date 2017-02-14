@@ -34,7 +34,7 @@ router.post('/api/print', function (req, response) {
             R: 0,
             T: 0,
             encoding: "utf-8",
-            javascriptDelay: 5000,
+            javascriptDelay: 1000,
             windowStatus: "all_loaded"
         }, function (err) {
             console.log(err);
