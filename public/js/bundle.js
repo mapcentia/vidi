@@ -290,18 +290,13 @@ window.Vidi = function () {
         }
     }());
 
-    // Set global var status on load
-    // =============================
+    // Set widow.status after 120 secs. if not loaded
+    // =============================================
 
-    $(window).load(function () {
-        window.status = "all_loaded";
-        console.info("all_loaded");
-    });
-
-    //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 10000);
+        console.info("load_timeout");
+    }, 120000);
 
     // Require the standard modules
     // ============================
@@ -4718,6 +4713,8 @@ module.exports = {
 
                 },
                 _hideIndicator: function () {
+                    window.status = "all_loaded";
+                    console.info("Layers loaded");
                     $(".loadingIndicator").hide();
                 },
 
@@ -7699,8 +7696,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

@@ -119,6 +119,8 @@ module.exports = {
 
                 },
                 _hideIndicator: function () {
+                    window.status = "all_loaded";
+                    console.info("Layers loaded");
                     $(".loadingIndicator").hide();
                 },
 

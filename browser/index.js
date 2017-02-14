@@ -69,18 +69,15 @@ window.Vidi = function () {
         }
     }());
 
-    // Set global var status on load
-    // =============================
+    // Set widow.status after 120 secs.
+    // This should be set in "loading.js"
+    // when all layers are loaded. Used in print.
+    // ==========================================
 
-    $(window).load(function () {
-        window.status = "all_loaded";
-        console.info("all_loaded");
-    });
-
-    //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 10000);
+        console.info("load_timeout");
+    }, 120000);
 
     // Require the standard modules
     // ============================
