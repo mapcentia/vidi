@@ -23,7 +23,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
-    init: function (onLoad, el) {
+    init: function (onLoad, el, onlyAddress) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
             komKode = window.vidiConfig.searchConfig.komkode, placeStore;
 
@@ -197,6 +197,7 @@ module.exports = {
             source: function (query, cb) {
                 var names = [];
                 type2 = (query.match(/\d+/g) != null) ? "jordstykke" : "ejerlav";
+                if (!onlyAddress) {
                 (function ca() {
                     $.ajax({
                         url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
@@ -221,7 +222,7 @@ module.exports = {
                             }
                         }
                     })
-                })();
+                })();}
             }
         });
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {

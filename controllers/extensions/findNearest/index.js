@@ -14,7 +14,7 @@ var BACKEND = config.backend;
 router.post('/api/extension/findNearest', function (req, response) {
     var db = "mydb", sql, url, jsfile;
     var point = req.body;
-    sql = "SELECT * FROM fot_test.punkter";
+    sql = "SELECT * FROM fot_test.skoler";
     url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=4326";
     http.get(url, function (res) {
         if (res.statusCode != 200) {
@@ -80,9 +80,9 @@ router.post('/api/extension/findNearest', function (req, response) {
                                 length = length + parseFloat(json.features[i].properties.length);
                             }
                             json.length = length;
-                            json.name = points[count].properties.name;
+                            json.name = points[count].properties.navn;
                             routes.push(json);
-                            io.emit(socketId, {"count": count, "name": json.name});
+                            //io.emit(socketId, {"count": count, "name": json.name});
                             count++;
                             iter();
                         });

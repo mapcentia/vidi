@@ -61,5 +61,18 @@ module.exports = {
             backboneEvents.get().trigger("on:infoClick");
             console.info("Stopping findNearest");
         });
+
+        // Listen to process events
+        // ========================
+
+        backboneEvents.get().on("start:findNearestProcess", function () {
+            $("#findnearest-places i").show();
+            console.info("Starting findNearestProcess");
+        });
+
+        backboneEvents.get().on("stop:findNearestProcess", function () {
+            $("#findnearest-places i").hide();
+            console.info("Stopping findNearestProcess");
+        });
     }
 };

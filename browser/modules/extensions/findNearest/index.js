@@ -50,7 +50,7 @@ var search = require('./../../search/danish');
 /**
  *
  */
-var proccess;
+var process;
 
 var clearRoutes;
 
@@ -99,7 +99,7 @@ module.exports = module.exports = {
      */
     init: function () {
 
-        utils.createMainTab("findnearest", "Find nærmest", "sdsd", require('./../../height')().max);
+        utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../height')().max);
         $('#main-tabs a[href="#findnearest-content"]').tab('show');
 
         // Append to DOM
@@ -113,9 +113,8 @@ module.exports = module.exports = {
         search.init(function () {
             console.log(this.layer.toGeoJSON().features["0"].geometry.coordinates);
             cloud.get().map.addLayer(this.layer);
-            proccess(this.layer.toGeoJSON().features["0"].geometry.coordinates);
-
-        }, "findnearest-custom-search");
+            process(this.layer.toGeoJSON().features["0"].geometry.coordinates);
+        }, "findnearest-custom-search", true);
 
     },
 
@@ -154,7 +153,7 @@ module.exports = module.exports = {
             id: id,
             name: id,
             lifetime: 0,
-            sql: "SELECT * FROM fot_test.punkter",
+            sql: "SELECT * FROM fot_test.skoler",
             pointToLayer: function (feature, latlng) {
                 return L.marker(latlng, {
                     icon: L.AwesomeMarkers.icon({
@@ -164,6 +163,9 @@ module.exports = module.exports = {
                         }
                     )
                 });
+            },
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(feature.properties['navn']);
             },
             onLoad: function () {
                 var me = this;
@@ -199,8 +201,10 @@ cleanUp = function () {
  *
  * @param p
  */
-proccess = function (p) {
+process = function (p) {
     cleanUp();
+    backboneEvents.get().trigger("start:findNearestProcess");
+
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
@@ -211,7 +215,7 @@ proccess = function (p) {
         success: function (response) {
             var lg, id;
             $("#findnearest-result").empty();
-
+            backboneEvents.get().trigger("stop:findNearestProcess");
             for (var i = 0; i < response.length; i++) {
                 lg = L.geoJson(response[i], {
                     style: function (feature) {
@@ -245,6 +249,7 @@ proccess = function (p) {
 
         },
         error: function () {
+            backboneEvents.get().trigger("stop:findNearestProcess");
             //jquery("#snackbar-conflict").snackbar("hide");
         }
     })
@@ -269,13 +274,14 @@ var dom =
     '<div role="tabpanel">' +
     '<div class="panel panel-default"><div class="panel-body">' +
     '<div class="togglebutton">' +
-    '<label><input id="findnearest-btn" type="checkbox">Aktiver find</label>' +
+    '<label><input id="findnearest-btn" type="checkbox">Aktiver find skolevej</label>' +
     '</div>' +
     '</div>' +
     '</div>' +
 
-    '<div id="findnearest-places" class="places" style="margin-bottom: 20px; display: none">' +
+    '<div id="findnearest-places" class="places" style="position: relative; margin-bottom: 20px; display: none">' +
     '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
+    '<i style="position:absolute;right:8px;top:10px;bottom:0;height:14px;margin:auto;font-size:24px;color:#ccc;display: none" class="fa fa-cog fa-spin fa-lg"></i>' +
     '</div>' +
 
     '<div id="findnearest-result-panel" role="tabpanel" style="display: none">' +

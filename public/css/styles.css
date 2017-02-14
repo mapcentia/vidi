@@ -802,9 +802,9 @@ input[type=text]::-ms-clear {
   display: block;
   -webkit-animation: animate-loading-indcator 2s linear infinite;
   animation: animate-loading-indcator 2s linear infinite;
-  background-color: #009688;
-  background-image: -webkit-linear-gradient(left, #009688 0, #ffffff 50%, #ffffff 50%, #009688 100%);
-  background-image: linear-gradient(to right, #009688 0, #ffffff 50%, #ffffff 50%, #009688 100%);
+  background-color: #f47920;
+  background-image: -webkit-linear-gradient(left, #f47920 0, #ffffff 50%, #ffffff 50%, #f47920 100%);
+  background-image: linear-gradient(to right, #f47920 0, #ffffff 50%, #ffffff 50%, #f47920 100%);
   background-repeat: repeat-x;
   background-size: 25pc 25pc;
   width: 200%;
