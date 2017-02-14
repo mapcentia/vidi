@@ -40,7 +40,7 @@ module.exports = {
             param.push(i + "=" + parr.join());
         });
         paramStr = param.join("&");
-        return "/app/" + db + "/" + schema + "/" + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "")  + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     },
     /**
      * Get the URL anchor for current state
