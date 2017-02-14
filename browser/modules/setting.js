@@ -19,7 +19,7 @@ var db = urlparser.db;
 /**
  * @type {string}
  */
-var schema = urlparser.schema;
+var schemataStr = urlparser.schema;
 
 /**
  *
@@ -47,12 +47,21 @@ module.exports = {
         backboneEvents = o.backboneEvents;
     },
     init: function () {
+        var schemata;
+        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+            if (schemataStr !== "") {
+                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+            } else {
+                schemata = window.vidiConfig.schemata;
+            }
+            schemataStr = schemata.join(",");
+        }
         $.ajax({
-            url: '/api/setting/' + db + '/' + schema,
+            url: '/api/setting/' + db + '/' + schemataStr,
             scriptCharset: "utf-8",
             success: function (response) {
                 if (typeof response.data.extents === "object") {
-                    var firstSchema = schema.split(",").length > 1 ? schema.split(",")[0] : schema;
+                    var firstSchema = schemataStr.split(",").length > 1 ? schemataStr.split(",")[0] : schemataStr;
                     if (typeof response.data.extents[firstSchema] === "object") {
                         extent = response.data.extents[firstSchema];
                     }

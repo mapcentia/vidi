@@ -3778,7 +3778,7 @@ var dom =
     '</div>' +
 
     '<div id="findnearest-places" class="places" style="position: relative; margin-bottom: 20px; display: none">' +
-    '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
+    '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse">' +
     '<i style="position:absolute;right:8px;top:10px;bottom:0;height:14px;margin:auto;font-size:24px;color:#ccc;display: none" class="fa fa-cog fa-spin fa-lg"></i>' +
     '</div>' +
 
@@ -4067,6 +4067,7 @@ module.exports = {
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
+                window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
             }).fail(function () {
                 console.info("Error loading config json");
             }).always(function () {
@@ -4875,7 +4876,7 @@ var db = urlparser.db;
 /**
  * @type {string}
  */
-var schema = urlparser.schema;
+var schemataStr = urlparser.schema;
 
 /**
  * @type {string}
@@ -4936,8 +4937,18 @@ module.exports = {
      *
      */
     init: function () {
+        var schemata;
+        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+            if (schemataStr !== "") {
+                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+            } else {
+                schemata = window.vidiConfig.schemata;
+            }
+            schemataStr = schemata.join(",")
+        }
         $.ajax({
-            url: '/api/meta/' + db + '/' + (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schema,
+            url: '/api/meta/' + db + '/' + schemataStr,
             scriptCharset: "utf-8",
             success: function (response) {
                 metaData = response;
@@ -6756,7 +6767,7 @@ var db = urlparser.db;
 /**
  * @type {string}
  */
-var schema = urlparser.schema;
+var schemataStr = urlparser.schema;
 
 /**
  *
@@ -6784,12 +6795,21 @@ module.exports = {
         backboneEvents = o.backboneEvents;
     },
     init: function () {
+        var schemata;
+        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+            if (schemataStr !== "") {
+                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+            } else {
+                schemata = window.vidiConfig.schemata;
+            }
+            schemataStr = schemata.join(",");
+        }
         $.ajax({
-            url: '/api/setting/' + db + '/' + schema,
+            url: '/api/setting/' + db + '/' + schemataStr,
             scriptCharset: "utf-8",
             success: function (response) {
                 if (typeof response.data.extents === "object") {
-                    var firstSchema = schema.split(",").length > 1 ? schema.split(",")[0] : schema;
+                    var firstSchema = schemataStr.split(",").length > 1 ? schemataStr.split(",")[0] : schemataStr;
                     if (typeof response.data.extents[firstSchema] === "object") {
                         extent = response.data.extents[firstSchema];
                     }
@@ -7672,14 +7692,14 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
     },
     cartodb: {
-        db: "mhoegh"
+        db: "frederiksberg"
 
     },
 
@@ -7785,22 +7805,6 @@ module.exports = {
     // Settings der kan overrides i runtime.
     // =====================================
 
-    // Baselayer settings virker nu for både Carto og GC2.
-    // ===================================================
-
-    baseLayers: [
-        {
-            type: "XYZ",
-            url: "http://54.229.79.223/v2/Teknisk_baggrundskort/{z}/{x}/{y}.png",
-            id: "Tekniskkort",
-            name: "Tekniskkort",
-            description: "Tekniskkort FOT",
-            attribution: "Frederiksberg Kommune"
-        },
-        {"id": "osm", "name": "OSM"},
-        {"id": "stamenToner", "name": "Stamen Toner"},
-    ],
-
     brandName: "MapCentia ApS",
 
     aboutBox: "<p>Kommunens web-gis bla bla bla</p>",
@@ -7830,6 +7834,8 @@ module.exports = {
         komkode: "190"
     },
 
+    // Baselayer settings virker nu for både Carto og GC2.
+    // ===================================================
 
     "baseLayers": [
         {

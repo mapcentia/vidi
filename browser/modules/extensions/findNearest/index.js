@@ -280,7 +280,7 @@ var dom =
     '</div>' +
 
     '<div id="findnearest-places" class="places" style="position: relative; margin-bottom: 20px; display: none">' +
-    '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
+    '<input id="findnearest-custom-search" class="findnearest-custom-search typeahead" type="text" placeholder="Adresse">' +
     '<i style="position:absolute;right:8px;top:10px;bottom:0;height:14px;margin:auto;font-size:24px;color:#ccc;display: none" class="fa fa-cog fa-spin fa-lg"></i>' +
     '</div>' +
 

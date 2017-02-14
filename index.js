@@ -15,7 +15,7 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 }));
 //app.use(bodyParser({limit: '50mb'}));
 
-app.use('/app/:db/:schema', express.static(path.join(__dirname, 'public'), { maxage: '100d' }));
+app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), { maxage: '100d' }));
 app.use('/', express.static(path.join(__dirname, 'public'), { maxage: '100d' }));
 
 
