@@ -2077,11 +2077,6 @@ var reproject = require('reproject');
 var db = urlparser.db;
 
 /**
- * @type {string}
- */
-var schemataStr = urlparser.schema;
-
-/**
  * @type {*|exports|module.exports}
  */
 var noUiSlider = require('nouislider');
@@ -2573,7 +2568,9 @@ module.exports = module.exports = {
 
             jquery.snackbar({id: "snackbar-conflict", content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>", htmlAllowed: true, timeout: 1000000});
 
-            var schemata;
+            var schemata = [];
+            var schemataStr = urlparser.schema;
+
             if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
                 if (schemataStr !== "") {
                     schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
