@@ -295,12 +295,13 @@ window.Vidi = function () {
 
     $(window).load(function () {
         window.status = "all_loaded";
+        console.info("all_loaded");
     });
 
     //Set widow.status after 30 secs. if not loaded.
     setTimeout(function () {
         window.status = "all_loaded";
-    }, 15000);
+    }, 10000);
 
     // Require the standard modules
     // ============================
@@ -2078,7 +2079,7 @@ var db = urlparser.db;
 /**
  * @type {string}
  */
-var schema = urlparser.schema;
+var schemataStr = urlparser.schema;
 
 /**
  * @type {*|exports|module.exports}
@@ -2572,11 +2573,20 @@ module.exports = module.exports = {
 
             jquery.snackbar({id: "snackbar-conflict", content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>", htmlAllowed: true, timeout: 1000000});
 
+            var schemata;
+            if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                if (schemataStr !== "") {
+                    schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                } else {
+                    schemata = window.vidiConfig.schemata;
+                }
+                schemataStr = schemata.join(",");
+            }
 
             xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/conflictSearch",
-                data: "db=" + db + "&schema=" + schema + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                data: "db=" + db + "&schema=" + schemataStr + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
