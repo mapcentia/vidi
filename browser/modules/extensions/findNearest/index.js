@@ -208,7 +208,7 @@ process = function (p) {
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
-        data: JSON.stringify(p),
+        data: JSON.stringify({"db": db, "p":p}),
         dataType: "json",
         scriptCharset: "utf-8",
         contentType: "application/json; charset=utf-8",

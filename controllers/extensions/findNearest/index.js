@@ -12,8 +12,8 @@ moment.locale("da_DK");
 var BACKEND = config.backend;
 
 router.post('/api/extension/findNearest', function (req, response) {
-    var db = "mydb", sql, url, jsfile;
-    var point = req.body;
+    var db = req.body.db, sql, url, jsfile;
+    var point = req.body.p;
     sql = "SELECT * FROM fot_test.skoler";
     url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=4326";
     http.get(url, function (res) {
