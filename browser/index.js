@@ -74,6 +74,7 @@ window.Vidi = function () {
 
     $(window).load(function () {
         window.status = "all_loaded";
+        console.info("all_loaded");
     });
 
     //Set widow.status after 30 secs. if not loaded.
