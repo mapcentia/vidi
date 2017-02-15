@@ -137,6 +137,7 @@ window.Vidi = function () {
     modules.pushState.set(modules);
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
+    modules.loading.set(modules);
 
     // Return the init module to be called in index.html
     // =================================================

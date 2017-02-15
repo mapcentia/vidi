@@ -290,8 +290,10 @@ window.Vidi = function () {
         }
     }());
 
-    // Set widow.status after 120 secs. if not loaded
-    // =============================================
+    // Set widow.status after 120 secs.
+    // This should be set in "loading.js"
+    // when all layers are loaded. Used in print.
+    // ==========================================
 
     setTimeout(function () {
         window.status = "all_loaded";
@@ -356,6 +358,7 @@ window.Vidi = function () {
     modules.pushState.set(modules);
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
+    modules.loading.set(modules);
 
     // Return the init module to be called in index.html
     // =================================================
@@ -991,6 +994,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
+        var doneL, doneB;
         metaDataKeys = meta.getMetaDataKeys();
 
         cloud.get().on("dragend", function () {
@@ -1055,6 +1059,28 @@ module.exports = module.exports = {
         backboneEvents.get().on("reset:infoClick", function () {
             console.info("Resetting infoClick");
             infoClick.reset();
+        });
+
+        // TODO
+        backboneEvents.get().on("doneLoading:layers", function (e) {
+            if (layers.ready() === true && layers.getLayers() !== false && layers.getLayers().split(",").length  === e) {
+                layers.resetCount();
+                doneL = true;
+                if (doneL && doneB) {
+                    window.status = "all_loaded";
+                    console.info("Layers all loaded L");
+                    doneB = doneL = false;
+                }
+            }
+        });
+
+        backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
+            doneB = true;
+            if (doneL && doneB) {
+                window.status = "all_loaded";
+                console.info("Layers all loaded B");
+                doneB = doneL = false;
+            }
         });
 
         // Print
@@ -1161,8 +1187,7 @@ module.exports = {
             el: "map",
             zoomControl: false,
             numZoomLevels: 21,
-            fadeAnimation: false,
-            loadingControl: true
+            fadeAnimation: false
         });
 
         /**
@@ -4147,7 +4172,7 @@ module.exports = {
         // Init the modules
         // ================
 
-        modules.loading.init();
+        //modules.loading.init();
         modules.cloud.init();
         modules.backboneEvents.init();
         modules.socketId.init();
@@ -4328,6 +4353,8 @@ var meta;
  */
 var backboneEvents;
 
+var countLoaded = 0;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -4354,7 +4381,7 @@ module.exports = {
      *
      */
     init: function () {
-        var isBaseLayer, layers = [],
+        var isBaseLayer, layers = [], lastLayer,
             metaData = meta.getMetaData();
         switch (BACKEND) {
             case "gc2":
@@ -4375,9 +4402,14 @@ module.exports = {
                         //type: "wms",
                         //tileSize: 9999,
                         format: "image/png",
+                        loadEvent: function () {
+                            countLoaded++;
+                            backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                        },
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
+
                 backboneEvents.get().trigger("ready:layers");
                 break;
             case "cartodb":
@@ -4393,6 +4425,10 @@ module.exports = {
                     }).on('done', function (layer) {
                         layer.baseLayer = false;
                         layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
+                        layer.on("load", function () {
+                            countLoaded++;
+                            backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                        });
                         cloud.get().addLayer(layer, tmpData[j].f_table_name);
                         // We switch the layer on/off, so they become ready for state.
                         cloud.get().showLayer(layer.id);
@@ -4401,7 +4437,8 @@ module.exports = {
                         if (j < tmpData.length) {
                             iter();
                         } else {
-                            cartoDbLayersready = true; // CartoDB layers are now created
+                            // CartoDB layers are now created
+                            cartoDbLayersready = true;
                             backboneEvents.get().trigger("ready:layers");
                             return null;
                         }
@@ -4412,10 +4449,12 @@ module.exports = {
         ready = true;
     },
     ready: function () {
-        if (BACKEND === "cartodb") { // If CartoDB, we wait for cartodb.createLayer to finish
+        // If CartoDB, we wait for cartodb.createLayer to finish
+        if (BACKEND === "cartodb") {
             return (ready && cartoDbLayersready);
         }
-        else { // GC2 layers are direct tile request
+        // GC2 layers are direct tile request
+        else {
             return ready;
         }
     },
@@ -4447,11 +4486,11 @@ module.exports = {
                 }
             }
         }
+    },
+    resetCount: function () {
+        countLoaded = 0;
     }
 };
-
-
-
 },{"../../config/config.js":44,"./urlparser":41}],26:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
@@ -4596,8 +4635,15 @@ module.exports = module.exports = {
  * L.Control.Loading is a control that shows a loading indicator when tiles are
  * loading or when map-related AJAX requests are taking place.
  */
+var backboneEvents;
 module.exports = {
+    set: function (o) {
+        backboneEvents = o.backboneEvents;
+        return this;
+    },
     init: function () {
+        var count = 0;
+
         function defineLeafletLoading(L) {
             L.Control.Loading = L.Control.extend({
                 options: {},
@@ -4618,7 +4664,7 @@ module.exports = {
                         return console.error("Leaflet.loading cannot load because you didn't load spin.js (http://fgnass.github.io/spin.js/), even though you set it in options.");
                     }
                     this._addLayerListeners(map);
-                    this._addMapListeners(map);
+                    //this._addMapListeners(map);
 
                     // Try to set the zoom control this control is attached to from the map
                     // the control is being added to
@@ -4637,7 +4683,7 @@ module.exports = {
 
                 onRemove: function (map) {
                     this._removeLayerListeners(map);
-                    this._removeMapListeners(map);
+                    //this._removeMapListeners(map);
                 },
 
                 removeFrom: function (map) {
@@ -4696,6 +4742,7 @@ module.exports = {
                 },
 
                 isLoading: function () {
+                    console.info(this._countLoaders())
                     return this._countLoaders() > 0;
                 },
 
@@ -4709,17 +4756,15 @@ module.exports = {
 
                 _showIndicator: function () {
                     $(".loadingIndicator").show();
-
-
                 },
                 _hideIndicator: function () {
-                    window.status = "all_loaded";
-                    console.info("Layers loaded");
+                    count++;
+                    backboneEvents.get().trigger("done:loading",count);
                     $(".loadingIndicator").hide();
                 },
 
-
                 _handleLoading: function (e) {
+                    console.log(e)
                     this.addLoader(this.getEventId(e));
                 },
 
@@ -4758,9 +4803,23 @@ module.exports = {
                 },
 
                 _layerAdd: function (e) {
+
+                    if (!e.layer || !e.layer.on) return;
+
+
+
+                    if (typeof e.layer._tiles === "object" || typeof e.layer.stat_tag !== "undefined") {
+
+                    } else {
+                        return;
+                    }
+                    console.log(e.layer);
+
+
+
                     // Show indicator, because the loading event is not yet added
                     this._showIndicator();
-                    if (!e.layer || !e.layer.on) return;
+
                     try {
                         e.layer.on({
                             loading: this._handleLoading,
@@ -4776,6 +4835,13 @@ module.exports = {
 
                 _layerRemove: function (e) {
                     if (!e.layer || !e.layer.off) return;
+
+                    if (typeof e.layer._tiles === "object" || typeof e.layer.stat_tag !== "undefined") {
+
+                    } else {
+                        return;
+                    }
+
                     try {
                         e.layer.off({
                             loading: this._handleLoading,
@@ -4798,6 +4864,14 @@ module.exports = {
                             loading: this._handleLoading,
                             load: this._handleLoad
                         }, this);
+
+                        if (typeof layer._tiles === "object" || typeof layer.stat_tag !== "undefined") {
+
+                        } else {
+                            return;
+                        }
+
+
                     });
 
                     // When a layer is added to the map, add listeners for begin and end
@@ -4814,6 +4888,12 @@ module.exports = {
                             loading: this._handleLoading,
                             load: this._handleLoad
                         }, this);
+
+                        if (typeof layer._tiles === "object" || typeof layer.stat_tag !== "undefined") {
+
+                        } else {
+                            return;
+                        }
                     }, this);
 
                     // Remove layeradd/layerremove listener from map
@@ -4854,6 +4934,7 @@ module.exports = {
                 return new L.Control.Loading(options);
             };
         }
+
         defineLeafletLoading(L);
     }
 };
@@ -6714,6 +6795,9 @@ var pushState;
 
 var layers;
 
+var backboneEvents;
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -6723,6 +6807,8 @@ module.exports = module.exports = {
         cloud = o.cloud;
         pushState = o.pushState;
         layers = o.layers;
+        backboneEvents = o.backboneEvents;
+
         return this;
     },
     init: function (str) {
@@ -6745,7 +6831,9 @@ module.exports = module.exports = {
                 }
             });
         }
-        cloud.get().setBaseLayer(str);
+        cloud.get().setBaseLayer(str, function () {
+            backboneEvents.get().trigger("doneLoading:setBaselayer");
+        });
         pushState.init();
     }
 };
@@ -7696,8 +7784,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -7849,20 +7937,7 @@ module.exports = {
                 "maxNativeZoom": 19,
                 "attribution": "Geofyn A/S"
                 //"subdomains": ["a", "b", "c"]
-            },
-            "overlays": [
-                {
-                    "id": "tekster.tekster_samlet_wms_web", "db": "geofyn",
-                    "config": {
-                        "subdomains": ["a", "b", "c"]
-                    }
-                },
-                {
-                    "id": "tekster.adgangsadresseinfo", "db": "geofyn",
-                    "config": {
-                        "subdomains": ["a", "b", "c"]
-                    }
-                }]
+            }
         },
         {"id": "stamenToner", "name": "Stamen Toner Dark"},
         {"id": "stamenTonerLite", "name": "Stamen Toner Light"}

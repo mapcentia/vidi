@@ -39,8 +39,7 @@ module.exports = {
             el: "map",
             zoomControl: false,
             numZoomLevels: 21,
-            fadeAnimation: false,
-            loadingControl: true
+            fadeAnimation: false
         });
 
         /**

@@ -2,8 +2,15 @@
  * L.Control.Loading is a control that shows a loading indicator when tiles are
  * loading or when map-related AJAX requests are taking place.
  */
+var backboneEvents;
 module.exports = {
+    set: function (o) {
+        backboneEvents = o.backboneEvents;
+        return this;
+    },
     init: function () {
+        var count = 0;
+
         function defineLeafletLoading(L) {
             L.Control.Loading = L.Control.extend({
                 options: {},
@@ -24,7 +31,7 @@ module.exports = {
                         return console.error("Leaflet.loading cannot load because you didn't load spin.js (http://fgnass.github.io/spin.js/), even though you set it in options.");
                     }
                     this._addLayerListeners(map);
-                    this._addMapListeners(map);
+                    //this._addMapListeners(map);
 
                     // Try to set the zoom control this control is attached to from the map
                     // the control is being added to
@@ -43,7 +50,7 @@ module.exports = {
 
                 onRemove: function (map) {
                     this._removeLayerListeners(map);
-                    this._removeMapListeners(map);
+                    //this._removeMapListeners(map);
                 },
 
                 removeFrom: function (map) {
@@ -102,6 +109,7 @@ module.exports = {
                 },
 
                 isLoading: function () {
+                    console.info(this._countLoaders())
                     return this._countLoaders() > 0;
                 },
 
@@ -115,17 +123,15 @@ module.exports = {
 
                 _showIndicator: function () {
                     $(".loadingIndicator").show();
-
-
                 },
                 _hideIndicator: function () {
-                    window.status = "all_loaded";
-                    console.info("Layers loaded");
+                    count++;
+                    backboneEvents.get().trigger("done:loading",count);
                     $(".loadingIndicator").hide();
                 },
 
-
                 _handleLoading: function (e) {
+                    console.log(e)
                     this.addLoader(this.getEventId(e));
                 },
 
@@ -164,9 +170,23 @@ module.exports = {
                 },
 
                 _layerAdd: function (e) {
+
+                    if (!e.layer || !e.layer.on) return;
+
+
+
+                    if (typeof e.layer._tiles === "object" || typeof e.layer.stat_tag !== "undefined") {
+
+                    } else {
+                        return;
+                    }
+                    console.log(e.layer);
+
+
+
                     // Show indicator, because the loading event is not yet added
                     this._showIndicator();
-                    if (!e.layer || !e.layer.on) return;
+
                     try {
                         e.layer.on({
                             loading: this._handleLoading,
@@ -182,6 +202,13 @@ module.exports = {
 
                 _layerRemove: function (e) {
                     if (!e.layer || !e.layer.off) return;
+
+                    if (typeof e.layer._tiles === "object" || typeof e.layer.stat_tag !== "undefined") {
+
+                    } else {
+                        return;
+                    }
+
                     try {
                         e.layer.off({
                             loading: this._handleLoading,
@@ -204,6 +231,14 @@ module.exports = {
                             loading: this._handleLoading,
                             load: this._handleLoad
                         }, this);
+
+                        if (typeof layer._tiles === "object" || typeof layer.stat_tag !== "undefined") {
+
+                        } else {
+                            return;
+                        }
+
+
                     });
 
                     // When a layer is added to the map, add listeners for begin and end
@@ -220,6 +255,12 @@ module.exports = {
                             loading: this._handleLoading,
                             load: this._handleLoad
                         }, this);
+
+                        if (typeof layer._tiles === "object" || typeof layer.stat_tag !== "undefined") {
+
+                        } else {
+                            return;
+                        }
                     }, this);
 
                     // Remove layeradd/layerremove listener from map
@@ -260,6 +301,7 @@ module.exports = {
                 return new L.Control.Loading(options);
             };
         }
+
         defineLeafletLoading(L);
     }
 };

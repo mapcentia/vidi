@@ -17,6 +17,9 @@ var pushState;
 
 var layers;
 
+var backboneEvents;
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -26,6 +29,8 @@ module.exports = module.exports = {
         cloud = o.cloud;
         pushState = o.pushState;
         layers = o.layers;
+        backboneEvents = o.backboneEvents;
+
         return this;
     },
     init: function (str) {
@@ -48,7 +53,9 @@ module.exports = module.exports = {
                 }
             });
         }
-        cloud.get().setBaseLayer(str);
+        cloud.get().setBaseLayer(str, function () {
+            backboneEvents.get().trigger("doneLoading:setBaselayer");
+        });
         pushState.init();
     }
 };

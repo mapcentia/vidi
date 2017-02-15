@@ -52,6 +52,8 @@ var meta;
  */
 var backboneEvents;
 
+var countLoaded = 0;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -78,7 +80,7 @@ module.exports = {
      *
      */
     init: function () {
-        var isBaseLayer, layers = [],
+        var isBaseLayer, layers = [], lastLayer,
             metaData = meta.getMetaData();
         switch (BACKEND) {
             case "gc2":
@@ -99,9 +101,14 @@ module.exports = {
                         //type: "wms",
                         //tileSize: 9999,
                         format: "image/png",
+                        loadEvent: function () {
+                            countLoaded++;
+                            backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                        },
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
+
                 backboneEvents.get().trigger("ready:layers");
                 break;
             case "cartodb":
@@ -117,6 +124,10 @@ module.exports = {
                     }).on('done', function (layer) {
                         layer.baseLayer = false;
                         layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
+                        layer.on("load", function () {
+                            countLoaded++;
+                            backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                        });
                         cloud.get().addLayer(layer, tmpData[j].f_table_name);
                         // We switch the layer on/off, so they become ready for state.
                         cloud.get().showLayer(layer.id);
@@ -125,7 +136,8 @@ module.exports = {
                         if (j < tmpData.length) {
                             iter();
                         } else {
-                            cartoDbLayersready = true; // CartoDB layers are now created
+                            // CartoDB layers are now created
+                            cartoDbLayersready = true;
                             backboneEvents.get().trigger("ready:layers");
                             return null;
                         }
@@ -136,10 +148,12 @@ module.exports = {
         ready = true;
     },
     ready: function () {
-        if (BACKEND === "cartodb") { // If CartoDB, we wait for cartodb.createLayer to finish
+        // If CartoDB, we wait for cartodb.createLayer to finish
+        if (BACKEND === "cartodb") {
             return (ready && cartoDbLayersready);
         }
-        else { // GC2 layers are direct tile request
+        // GC2 layers are direct tile request
+        else {
             return ready;
         }
     },
@@ -171,7 +185,8 @@ module.exports = {
                 }
             }
         }
+    },
+    resetCount: function () {
+        countLoaded = 0;
     }
 };
-
-

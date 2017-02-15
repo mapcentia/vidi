@@ -110,6 +110,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
+        var doneL, doneB;
         metaDataKeys = meta.getMetaDataKeys();
 
         cloud.get().on("dragend", function () {
@@ -174,6 +175,28 @@ module.exports = module.exports = {
         backboneEvents.get().on("reset:infoClick", function () {
             console.info("Resetting infoClick");
             infoClick.reset();
+        });
+
+        // TODO
+        backboneEvents.get().on("doneLoading:layers", function (e) {
+            if (layers.ready() === true && layers.getLayers() !== false && layers.getLayers().split(",").length  === e) {
+                layers.resetCount();
+                doneL = true;
+                if (doneL && doneB) {
+                    window.status = "all_loaded";
+                    console.info("Layers all loaded L");
+                    doneB = doneL = false;
+                }
+            }
+        });
+
+        backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
+            doneB = true;
+            if (doneL && doneB) {
+                window.status = "all_loaded";
+                console.info("Layers all loaded B");
+                doneB = doneL = false;
+            }
         });
 
         // Print
