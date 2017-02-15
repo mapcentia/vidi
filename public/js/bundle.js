@@ -3733,7 +3733,7 @@ process = function (p) {
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
-        data: JSON.stringify({"db": db, "p":p}),
+        data: JSON.stringify({"db": db, "p": p}),
         dataType: "json",
         scriptCharset: "utf-8",
         contentType: "application/json; charset=utf-8",
@@ -3810,7 +3810,12 @@ var dom =
     '</div>' +
 
     '<div id="findnearest-result-panel" role="tabpanel" style="display: none">' +
-    '<div class="panel panel-default"><div class="panel-body">' +
+    '<div class="panel panel-default">' +
+    '<div class="panel-body">' +
+    '<div style="margin-bottom: 10px">' +
+    '<span style="display: inline-block; background-color: #00ff00; width: 20px; height: 5px; margin: 2px 5px 2px 2px"></span><span>På sti</span>' +
+    '<span style="display: inline-block; background-color: #ff0000; width: 20px; height: 5px; margin: 2px 5px 2px 20px"></span><span>På vej</span>' +
+    '</div>' +
     '<div id="findnearest-result">' +
     '</div>' +
     '</div>' +
@@ -7784,8 +7789,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
