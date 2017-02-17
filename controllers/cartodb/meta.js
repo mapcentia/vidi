@@ -54,7 +54,6 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                         fieldconf: null,
                         legend: layers[i].legend,
                         meta: null
-
                     })
                 }
                 u++;
@@ -64,7 +63,6 @@ router.get('/api/meta/:db/:schema', function (req, response) {
             callback(null);
         });
     }());
-
 });
 module.exports = router;
 

@@ -7789,8 +7789,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
