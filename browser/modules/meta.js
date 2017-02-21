@@ -79,9 +79,13 @@ module.exports = {
     /**
      *
      */
-    init: function () {
+    init: function (str) {
         var schemata;
-        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+        if (str) {
+            schemataStr = str;
+        } else {
+            schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+        }
         if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
             if (schemataStr !== "") {
                 schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);

@@ -60,6 +60,8 @@ try {
     console.info(e.message);
 }
 
+var switchLayer
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
@@ -74,6 +76,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
+        switchLayer = o.switchLayer;
         return this;
     },
     /**
@@ -189,4 +192,8 @@ module.exports = {
     resetCount: function () {
         countLoaded = 0;
     }
+};
+window.addLayerTest = function () {
+    var layerName = "test.sogn";
+    meta.init(layerName);
 };

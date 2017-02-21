@@ -1076,7 +1076,7 @@ module.exports = module.exports = {
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
-            if (doneL && doneB) {
+            if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "") ) {
                 window.status = "all_loaded";
                 console.info("Layers all loaded B");
                 doneB = doneL = false;
@@ -4303,6 +4303,7 @@ module.exports = module.exports = {
         }
     }
 };
+
 },{}],25:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
@@ -4366,6 +4367,8 @@ try {
     console.info(e.message);
 }
 
+var switchLayer
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
@@ -4380,6 +4383,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
+        switchLayer = o.switchLayer;
         return this;
     },
     /**
@@ -4495,6 +4499,10 @@ module.exports = {
     resetCount: function () {
         countLoaded = 0;
     }
+};
+window.addLayerTest = function () {
+    var layerName = "test.sogn";
+    meta.init(layerName);
 };
 },{"../../config/config.js":44,"./urlparser":41}],26:[function(require,module,exports){
 /**
@@ -5026,9 +5034,13 @@ module.exports = {
     /**
      *
      */
-    init: function () {
+    init: function (str) {
         var schemata;
-        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+        if (str) {
+            schemataStr = str;
+        } else {
+            schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+        }
         if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
             if (schemataStr !== "") {
                 schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
