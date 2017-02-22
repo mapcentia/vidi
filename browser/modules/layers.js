@@ -111,7 +111,6 @@ module.exports = {
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
                 }
-
                 backboneEvents.get().trigger("ready:layers");
                 break;
             case "cartodb":

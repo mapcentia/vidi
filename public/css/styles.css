@@ -513,6 +513,11 @@ div.olControlZoom {
 .panel-title:hover {
   text-decoration: none !important;
 }
+.panel {
+/*  -webkit-box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,.14), 0 3px 1px -2px rgba(0,0,0,.2), 0 1px 5px 0 rgba(0,0,0,.12);*/
+  margin-bottom: 10px;
+}
 .form-group {
   margin: 0 !important;
 }
@@ -745,13 +750,15 @@ body {
 }
 #info-modal-legend {
   padding: 20px;
-  border-top: 1px solid #d0d3d4;
+  /*border-top: 1px solid #d0d3d4;*/
 }
 #info-modal .modal-body img {
   width: 100%;
 }
 #info-modal-body-wrapper {
+  /*
   height: calc(50%);
+  */
   overflow: auto;
 }
 #searchinput {
@@ -828,4 +835,11 @@ input[type=text]::-ms-clear {
     -webkit-transform: translateX(-400px);
     transform: translateX(-400px);
   }
+}
+
+.highlighted {
+  background-color: yellow;
+  font-size: 1em;
+  font-weight: bold;
+  font-style: normal;
 }

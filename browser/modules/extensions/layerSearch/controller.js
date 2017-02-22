@@ -1,0 +1,43 @@
+/**
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
+ */
+
+'use strict';
+
+
+
+/**
+ *
+ */
+var backboneEvents;
+
+var layerSearch;
+
+/**
+ *
+ * @returns {*}
+ */
+module.exports = {
+    set: function (o) {
+        backboneEvents = o.backboneEvents;
+        layerSearch = o.extensions.layerSearch.index;
+        return this;
+    },
+    init: function () {
+        $("#layer-search-btn").on("click", function (e) {
+            $("#info-modal .modal-title").html("Søg lag");
+            $("#info-modal .modal-body").html('<div id="search-container">' +
+                '<div id="placfes">' +
+                '<input name="layer-search" id="layer-search" type="search" class="form-control" placeholder="Søg efter data">' +
+                '</div>' +
+                '<div id="layer-search-list"></div>' +
+
+                '</div>');
+            $("#info-modal").show();
+            $("input[name=layer-search]").on('input', _.debounce(function (e) {
+                layerSearch.search(e.target.value)
+            }, 300));
+        });
+    }
+}
