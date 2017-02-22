@@ -972,6 +972,8 @@ var layerTree;
 var layers;
 var infoClick;
 
+var isStarted = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -1021,12 +1023,13 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
-            if ($(document).width() > 767) {
+            if ($(document).width() > 767 && isStarted === false) {
                 setTimeout(
                     function () {
                         $(".navbar-toggle").trigger("click");
                     }, 50
                 );
+                isStarted = true;
             }
             $("#loadscreen").hide();
             layerTree.init();
@@ -4264,7 +4267,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function () {
-        var base64name, arr, groups, metaData, i, l, displayInfo, tooltip;
+        var base64name, arr, groups, metaData, i, l, count, displayInfo, tooltip;
         groups = [];
         metaData = meta.getMetaData();
         for (i = 0; i < metaData.data.length; ++i) {
@@ -4276,8 +4279,20 @@ module.exports = module.exports = {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                 l = [];
                 base64name = Base64.encode(arr[i]).replace(/=/g, "");
-                $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
-                $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
+
+                // Add group container
+                // Only if container doesn't exist
+                // ===============================
+                if ($("#layer-panel-" + base64name).length === 0) {
+                    $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
+
+                    // Append to inner group container
+                    // ===============================
+                    $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
+                }
+
+                // Add layers
+                // ==========
                 for (var u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
                         var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title;
@@ -4294,7 +4309,13 @@ module.exports = module.exports = {
                         }
                     }
                 }
-                $("#layer-panel-" + base64name + " span:eq(1)").html(l.length);
+                if (!isNaN(parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()))) {
+                    count = parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()) + l.length;
+                } else {
+                    count = l.length;
+                }
+
+                $("#layer-panel-" + base64name + " span:eq(1)").html(count);
                 // Remove the group if empty
                 if (l.length === 0) {
                     $("#layer-panel-" + base64name).remove();
@@ -4303,7 +4324,6 @@ module.exports = module.exports = {
         }
     }
 };
-
 },{}],25:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
@@ -4500,9 +4520,9 @@ module.exports = {
         countLoaded = 0;
     }
 };
-window.addLayerTest = function () {
-    var layerName = "test.sogn";
-    meta.init(layerName);
+window.addLayerTest = function (data) {
+    //meta.init(obj);
+    meta.addMetaData(data);
 };
 },{"../../config/config.js":44,"./urlparser":41}],26:[function(require,module,exports){
 /**
@@ -5035,7 +5055,7 @@ module.exports = {
      *
      */
     init: function (str) {
-        var schemata;
+        var schemata, me = this;
         if (str) {
             schemataStr = str;
         } else {
@@ -5054,17 +5074,22 @@ module.exports = {
             scriptCharset: "utf-8",
             success: function (response) {
                 metaData = response;
-                for (var i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
-                    metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
-                }
-                backboneEvents.get().trigger("ready:meta");
+                me.addMetaData(metaData);
                 ready = true;
             },
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
         });
+    },
+
+    addMetaData: function(data) {
+        metaData = data;
+        for (var i = 0; i < metaData.data.length; i++) {
+            metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
+            metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
+        }
+        backboneEvents.get().trigger("ready:meta");
     },
 
     /**

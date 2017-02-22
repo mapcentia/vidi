@@ -80,7 +80,7 @@ module.exports = {
      *
      */
     init: function (str) {
-        var schemata;
+        var schemata, me = this;
         if (str) {
             schemataStr = str;
         } else {
@@ -99,17 +99,22 @@ module.exports = {
             scriptCharset: "utf-8",
             success: function (response) {
                 metaData = response;
-                for (var i = 0; i < metaData.data.length; i++) {
-                    metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
-                    metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
-                }
-                backboneEvents.get().trigger("ready:meta");
+                me.addMetaData(metaData);
                 ready = true;
             },
             error: function (response) {
                 alert(JSON.parse(response.responseText).message);
             }
         });
+    },
+
+    addMetaData: function(data) {
+        metaData = data;
+        for (var i = 0; i < metaData.data.length; i++) {
+            metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
+            metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
+        }
+        backboneEvents.get().trigger("ready:meta");
     },
 
     /**

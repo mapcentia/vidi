@@ -17,7 +17,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function () {
-        var base64name, arr, groups, metaData, i, l, displayInfo, tooltip;
+        var base64name, arr, groups, metaData, i, l, count, displayInfo, tooltip;
         groups = [];
         metaData = meta.getMetaData();
         for (i = 0; i < metaData.data.length; ++i) {
@@ -29,8 +29,20 @@ module.exports = module.exports = {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                 l = [];
                 base64name = Base64.encode(arr[i]).replace(/=/g, "");
-                $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
-                $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
+
+                // Add group container
+                // Only if container doesn't exist
+                // ===============================
+                if ($("#layer-panel-" + base64name).length === 0) {
+                    $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
+
+                    // Append to inner group container
+                    // ===============================
+                    $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
+                }
+
+                // Add layers
+                // ==========
                 for (var u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
                         var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title;
@@ -47,7 +59,13 @@ module.exports = module.exports = {
                         }
                     }
                 }
-                $("#layer-panel-" + base64name + " span:eq(1)").html(l.length);
+                if (!isNaN(parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()))) {
+                    count = parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()) + l.length;
+                } else {
+                    count = l.length;
+                }
+
+                $("#layer-panel-" + base64name + " span:eq(1)").html(count);
                 // Remove the group if empty
                 if (l.length === 0) {
                     $("#layer-panel-" + base64name).remove();

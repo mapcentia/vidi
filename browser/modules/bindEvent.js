@@ -88,6 +88,8 @@ var layerTree;
 var layers;
 var infoClick;
 
+var isStarted = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -137,12 +139,13 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
-            if ($(document).width() > 767) {
+            if ($(document).width() > 767 && isStarted === false) {
                 setTimeout(
                     function () {
                         $(".navbar-toggle").trigger("click");
                     }, 50
                 );
+                isStarted = true;
             }
             $("#loadscreen").hide();
             layerTree.init();
