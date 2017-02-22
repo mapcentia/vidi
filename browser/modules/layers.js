@@ -193,7 +193,7 @@ module.exports = {
         countLoaded = 0;
     }
 };
-window.addLayerTest = function () {
-    var layerName = "test.sogn";
-    meta.init(layerName);
+window.addLayerTest = function (data) {
+    //meta.init(obj);
+    meta.addMetaData(data);
 };
