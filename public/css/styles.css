@@ -756,9 +756,6 @@ body {
   width: 100%;
 }
 #info-modal-body-wrapper {
-  /*
-  height: calc(50%);
-  */
   overflow: auto;
 }
 #searchinput {
