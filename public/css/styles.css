@@ -757,6 +757,7 @@ body {
 }
 #info-modal-body-wrapper {
   overflow: auto;
+  
 }
 #searchinput {
   width: 200px;
