@@ -3883,7 +3883,9 @@ module.exports = {
 
             $( "#info-modal").animate({
                 right: "0"
-            }, 200);
+            }, 200, function() {
+                $("input[name=layer-search]").focus();
+            });
 
             $("input[name=layer-search]").on('input', _.debounce(function (e) {
                 layerSearch.search(e.target.value)
