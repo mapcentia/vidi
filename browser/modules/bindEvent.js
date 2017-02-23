@@ -131,7 +131,9 @@ module.exports = module.exports = {
         });
 
         $("#info-modal button").on("click", function () {
-            $("#info-modal").hide();
+            $( "#info-modal" ).animate({
+                right: "-" + $("#myNavmenu").width() + "px"
+            }, 200)
         });
 
         $("#searchclear").on("click", function () {
@@ -253,7 +255,7 @@ module.exports = module.exports = {
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id')), html;
                     html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
-                    $("#info-modal").show();
+                    $("#info-modal").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
                     $("#info-modal .modal-body").html(html);
                     legend.init([t], "#info-modal-legend");

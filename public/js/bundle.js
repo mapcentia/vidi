@@ -1015,7 +1015,9 @@ module.exports = module.exports = {
         });
 
         $("#info-modal button").on("click", function () {
-            $("#info-modal").hide();
+            $( "#info-modal" ).animate({
+                right: "-" + $("#myNavmenu").width() + "px"
+            }, 200)
         });
 
         $("#searchclear").on("click", function () {
@@ -1137,7 +1139,7 @@ module.exports = module.exports = {
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id')), html;
                     html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
-                    $("#info-modal").show();
+                    $("#info-modal").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
                     $("#info-modal .modal-body").html(html);
                     legend.init([t], "#info-modal-legend");
@@ -3871,15 +3873,18 @@ module.exports = {
     },
     init: function () {
         $("#layer-search-btn").on("click", function (e) {
-            $("#info-modal .modal-title").html("Søg lag");
+            $("#info-modal .modal-title").html("<i class='material-icons'>&#xE8B6;</i>");
             $("#info-modal .modal-body").html('<div id="search-container">' +
                 '<div id="placfes">' +
                 '<input name="layer-search" id="layer-search" type="search" class="form-control" placeholder="Søg efter data">' +
                 '</div>' +
                 '<div id="layer-search-list"></div>' +
-
                 '</div>');
-            $("#info-modal").show();
+
+            $( "#info-modal").animate({
+                right: "0"
+            }, 200);
+
             $("input[name=layer-search]").on('input', _.debounce(function (e) {
                 layerSearch.search(e.target.value)
             }, 300));
@@ -3907,6 +3912,10 @@ var meta;
 var jquery = require('jquery');
 require('snackbarjs');
 
+var urlparser = require('./../../urlparser');
+
+var db = urlparser.db;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -3922,12 +3931,7 @@ module.exports = {
     },
 
     search: function (query) {
-        var searchLayers = [], searchStyle = {
-            color: '#ff0000',
-            fillColor: '#ff0000',
-            fillOpacity: 0.5,
-            opacity: 0.5
-        }, highlighter = function (value, item) {
+        var highlighter = function (value, item) {
             _($.trim(value).split(' ')).each(
                 function (s) {
                     var regex = new RegExp('(\\b' + s + ')', 'gi');
@@ -3937,8 +3941,7 @@ module.exports = {
             return item;
         };
 
-        console.info("Søg")
-        var more = [], fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
+        var fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
             qJson = {
                 "query": {
                     "bool": {
@@ -3971,8 +3974,9 @@ module.exports = {
         });
         qJson.query.bool.should = med;
         q = JSON.stringify(qJson);
+        console.log(q);
         $.ajax({
-            url: '/api/extension/es',
+            url: '/api/extension/es/' + db,
             data: q,
             dataType: "json",
             scriptCharset: "utf-8",
@@ -3992,13 +3996,27 @@ module.exports = {
 
                 });
                 $('a.list-group-item').on("click", function (e) {
-                    var clickedLayer = $(this).data('gc2-layer-search-key');
+                    var clickedLayer = $(this).data('gc2-layer-search-key'), currentLayers, alreadyThere;
+                    e.stopPropagation();
+                    response[clickedLayer]._source.layergroup = "Tilføjede lag";
+                    currentLayers = meta.getMetaData().data;
+
+                    console.log(currentLayers);
+
+                    $.each(currentLayers, function (i, v) {
+                        if (v.f_table_name === response[clickedLayer]._source.f_table_name && v.f_table_schema === response[clickedLayer]._source.f_table_schema) {
+                            jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' er allerede tilføjet</span>", htmlAllowed: true, timeout: 2500});
+                            alreadyThere = true;
+                        }
+                    });
+                    if (alreadyThere) {
+                        $(this).parent("section").fadeOut(100).fadeIn(100);
+
+                        return;
+                    }
                     $(this).parent("section").fadeOut(200);
-                    response[clickedLayer]._source.layergroup = "MARTIN";
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>", htmlAllowed: true, timeout: 2500});
-
-                    e.stopPropagation();
                 });
             }
         });
@@ -4006,7 +4024,7 @@ module.exports = {
 };
 
 
-},{"jquery":108,"snackbarjs":191}],22:[function(require,module,exports){
+},{"./../../urlparser":43,"jquery":108,"snackbarjs":191}],22:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -4451,7 +4469,7 @@ module.exports = module.exports = {
     init: function () {
         var base64name, arr, groups, metaData, i, l, count, displayInfo, tooltip;
         groups = [];
-        metaData = meta.getMetaData();
+        metaData = meta.getMetaDataLatestLoaded();
         for (i = 0; i < metaData.data.length; ++i) {
             groups[i] = metaData.data[i].layergroup;
         }
@@ -5182,7 +5200,17 @@ var schemataStr = urlparser.schema;
  */
 var urlVars = urlparser.urlVars;
 
-var metaData;
+/**
+ * The full meta dat object
+ * @type {{data: Array}}
+ */
+var metaData = {data:[]};
+
+/**
+ * Object that holds the latest loaded meta data
+ * @type {{data: Array}}
+ */
+var metaDataLatestLoaded;
 
 /**
  *
@@ -5254,8 +5282,7 @@ module.exports = {
             url: '/api/meta/' + db + '/' + schemataStr,
             scriptCharset: "utf-8",
             success: function (response) {
-                metaData = response;
-                me.addMetaData(metaData);
+                me.addMetaData(response);
                 ready = true;
             },
             error: function (response) {
@@ -5265,10 +5292,11 @@ module.exports = {
     },
 
     addMetaData: function(data) {
-        metaData = data;
-        for (var i = 0; i < metaData.data.length; i++) {
-            metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
-            metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
+        metaDataLatestLoaded = data;
+        metaData.data = metaData.data.concat(data.data);
+        for (var i = 0; i < data.data.length; i++) {
+            metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
+            metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
         backboneEvents.get().trigger("ready:meta");
     },
@@ -5290,11 +5318,19 @@ module.exports = {
     },
 
     /**
-     * Get the raw meta data
-     * @returns {Array}
+     * Get the raw full meta data object
+     * @returns {Object}
      */
     getMetaData: function () {
         return $.extend(true, [], metaData);
+    },
+
+    /**
+     * Get the raw meta data from latest loaded
+     * @returns {Object}
+     */
+    getMetaDataLatestLoaded: function () {
+        return $.extend(true, [], metaDataLatestLoaded);
     }
 };
 
@@ -8018,6 +8054,8 @@ module.exports = {
 
     },
 
+
+
     // Printskabeloner bliver IKKE længere automatisk aktiveret!
     // Aktivering sker nu i runtime settings.
     // =========================================================
@@ -8107,7 +8145,7 @@ module.exports = {
         server: [
             {findNearest: ["index"]},
             {conflictSearch: ["index"]},
-            {layerSearch: ["index"]}
+            {layerSearch: ["index", "indexInEs"]}
 
         ]
     },

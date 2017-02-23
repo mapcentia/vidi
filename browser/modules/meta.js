@@ -26,7 +26,17 @@ var schemataStr = urlparser.schema;
  */
 var urlVars = urlparser.urlVars;
 
-var metaData;
+/**
+ * The full meta dat object
+ * @type {{data: Array}}
+ */
+var metaData = {data:[]};
+
+/**
+ * Object that holds the latest loaded meta data
+ * @type {{data: Array}}
+ */
+var metaDataLatestLoaded;
 
 /**
  *
@@ -98,8 +108,7 @@ module.exports = {
             url: '/api/meta/' + db + '/' + schemataStr,
             scriptCharset: "utf-8",
             success: function (response) {
-                metaData = response;
-                me.addMetaData(metaData);
+                me.addMetaData(response);
                 ready = true;
             },
             error: function (response) {
@@ -109,10 +118,11 @@ module.exports = {
     },
 
     addMetaData: function(data) {
-        metaData = data;
-        for (var i = 0; i < metaData.data.length; i++) {
-            metaDataKeys[metaData.data[i].f_table_schema + "." + metaData.data[i].f_table_name] = metaData.data[i];
-            metaDataKeysTitle[metaData.data[i].f_table_title] = metaData.data[i].f_table_title ? metaData.data[i] : null;
+        metaDataLatestLoaded = data;
+        metaData.data = metaData.data.concat(data.data);
+        for (var i = 0; i < data.data.length; i++) {
+            metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
+            metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
         backboneEvents.get().trigger("ready:meta");
     },
@@ -134,11 +144,19 @@ module.exports = {
     },
 
     /**
-     * Get the raw meta data
-     * @returns {Array}
+     * Get the raw full meta data object
+     * @returns {Object}
      */
     getMetaData: function () {
         return $.extend(true, [], metaData);
+    },
+
+    /**
+     * Get the raw meta data from latest loaded
+     * @returns {Object}
+     */
+    getMetaDataLatestLoaded: function () {
+        return $.extend(true, [], metaDataLatestLoaded);
     }
 };
 

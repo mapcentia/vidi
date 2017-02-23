@@ -156,6 +156,24 @@ module.exports = {
                 }
             });
 
+            drawControl.setDrawingOptions({
+                polyline: {
+                    icon: new L.DivIcon({
+                        iconSize: new L.Point(30, 30),
+                        className: 'leaflet-div-icon leaflet-editing-icon my-own-class'
+                    })
+                }
+            });
+
+            L.Edit.Poly = L.Edit.Poly.extend({
+                options : {
+                    icon: new L.DivIcon({
+                        iconSize: new L.Point(20, 20),
+                        className: 'leaflet-div-icon leaflet-editing-icon my-own-icon'
+                    })
+                }
+            });
+
             cloud.get().map.addControl(drawControl);
             drawOn = true;
 

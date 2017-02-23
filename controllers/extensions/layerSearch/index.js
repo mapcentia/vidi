@@ -7,9 +7,10 @@ var client = new elasticsearch.Client({
     log: 'trace'
 });
 
-router.post('/api/extension/es', function (req, response) {
+router.post('/api/extension/es/:db', function (req, response) {
+    var indexName = "vidi_" + req.params.db;
     client.search({
-        index: 'vidi',
+        index: indexName,
         type: 'meta',
         body: req.body
     }).then(function (resp) {
@@ -19,7 +20,6 @@ router.post('/api/extension/es', function (req, response) {
     }, function (err) {
         console.trace(err.message);
     });
-
 });
 module.exports = router;
 

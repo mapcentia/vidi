@@ -19,7 +19,7 @@ module.exports = module.exports = {
     init: function () {
         var base64name, arr, groups, metaData, i, l, count, displayInfo, tooltip;
         groups = [];
-        metaData = meta.getMetaData();
+        metaData = meta.getMetaDataLatestLoaded();
         for (i = 0; i < metaData.data.length; ++i) {
             groups[i] = metaData.data[i].layergroup;
         }

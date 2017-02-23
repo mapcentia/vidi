@@ -18,6 +18,10 @@ var meta;
 var jquery = require('jquery');
 require('snackbarjs');
 
+var urlparser = require('./../../urlparser');
+
+var db = urlparser.db;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -33,12 +37,7 @@ module.exports = {
     },
 
     search: function (query) {
-        var searchLayers = [], searchStyle = {
-            color: '#ff0000',
-            fillColor: '#ff0000',
-            fillOpacity: 0.5,
-            opacity: 0.5
-        }, highlighter = function (value, item) {
+        var highlighter = function (value, item) {
             _($.trim(value).split(' ')).each(
                 function (s) {
                     var regex = new RegExp('(\\b' + s + ')', 'gi');
@@ -48,8 +47,7 @@ module.exports = {
             return item;
         };
 
-        console.info("Søg")
-        var more = [], fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
+        var fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
             qJson = {
                 "query": {
                     "bool": {
@@ -82,8 +80,9 @@ module.exports = {
         });
         qJson.query.bool.should = med;
         q = JSON.stringify(qJson);
+        console.log(q);
         $.ajax({
-            url: '/api/extension/es',
+            url: '/api/extension/es/' + db,
             data: q,
             dataType: "json",
             scriptCharset: "utf-8",
@@ -103,13 +102,27 @@ module.exports = {
 
                 });
                 $('a.list-group-item').on("click", function (e) {
-                    var clickedLayer = $(this).data('gc2-layer-search-key');
+                    var clickedLayer = $(this).data('gc2-layer-search-key'), currentLayers, alreadyThere;
+                    e.stopPropagation();
+                    response[clickedLayer]._source.layergroup = "Tilføjede lag";
+                    currentLayers = meta.getMetaData().data;
+
+                    console.log(currentLayers);
+
+                    $.each(currentLayers, function (i, v) {
+                        if (v.f_table_name === response[clickedLayer]._source.f_table_name && v.f_table_schema === response[clickedLayer]._source.f_table_schema) {
+                            jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' er allerede tilføjet</span>", htmlAllowed: true, timeout: 2500});
+                            alreadyThere = true;
+                        }
+                    });
+                    if (alreadyThere) {
+                        $(this).parent("section").fadeOut(100).fadeIn(100);
+
+                        return;
+                    }
                     $(this).parent("section").fadeOut(200);
-                    response[clickedLayer]._source.layergroup = "MARTIN";
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>", htmlAllowed: true, timeout: 2500});
-
-                    e.stopPropagation();
                 });
             }
         });
