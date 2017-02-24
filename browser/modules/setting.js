@@ -47,29 +47,32 @@ module.exports = {
         backboneEvents = o.backboneEvents;
     },
     init: function () {
-        var schemata;
-        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-            if (schemataStr !== "") {
-                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
-            } else {
-                schemata = window.vidiConfig.schemata;
-            }
-            schemataStr = schemata.join(",");
-        }
-        $.ajax({
-            url: '/api/setting/' + db + '/' + schemataStr,
-            scriptCharset: "utf-8",
-            success: function (response) {
-                if (typeof response.data.extents === "object") {
-                    var firstSchema = schemataStr.split(",").length > 1 ? schemataStr.split(",")[0] : schemataStr;
-                    if (typeof response.data.extents[firstSchema] === "object") {
-                        extent = response.data.extents[firstSchema];
-                    }
+        return new Promise(function(resolve, reject) {
+            var schemata;
+            if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                if (schemataStr !== "") {
+                    schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                } else {
+                    schemata = window.vidiConfig.schemata;
                 }
-                ready = true;
-                backboneEvents.get().trigger("ready:settings");
+                schemataStr = schemata.join(",");
             }
-        });
+            $.ajax({
+                url: '/api/setting/' + db + '/' + schemataStr,
+                scriptCharset: "utf-8",
+                success: function (response) {
+                    if (typeof response.data.extents === "object") {
+                        var firstSchema = schemataStr.split(",").length > 1 ? schemataStr.split(",")[0] : schemataStr;
+                        if (typeof response.data.extents[firstSchema] === "object") {
+                            extent = response.data.extents[firstSchema];
+                        }
+                    }
+                    ready = true;
+                    backboneEvents.get().trigger("ready:settings");
+                    resolve();
+                }
+            });
+        })
     },
 
     /**

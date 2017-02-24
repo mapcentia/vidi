@@ -15,6 +15,10 @@ var backboneEvents;
 
 var meta;
 
+var layers;
+var layerTree;
+var switchLayer;
+
 var jquery = require('jquery');
 require('snackbarjs');
 
@@ -30,6 +34,9 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        layers = o.layers;
+        switchLayer = o.switchLayer;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -41,7 +48,7 @@ module.exports = {
             _($.trim(value).split(' ')).each(
                 function (s) {
                     var regex = new RegExp('(\\b' + s + ')', 'gi');
-                    item = item.replace(regex, "<i class=\"highlighted\">$1</i>");
+                    item = item.replace(regex, "<mark>$1</mark>");
                 }
             );
             return item;
@@ -95,7 +102,7 @@ module.exports = {
                     html = html + "<a href='javascript:void(0)' class='list-group-item' data-gc2-sf-title='" + hit._source.f_table_title + "' data-gc2-layer-search-key='" + i + "'>";
                     html = html + "<div>";
                     $.each(fieldsObj, function (u, v) {
-                        html = html + "<div><span>" + v + " </span><span>" + highlighter(query, _.unescape(hit._source[u])) + "</span></div>";
+                        html = html + "<div><small class='layer-search-item'>" + v + " </small><span>" + highlighter(query, _.unescape(hit._source[u])) + "</span></div>";
                     });
                     html = html + "</div></a></section>";
                     $("#layer-search-list").append(html);
@@ -106,9 +113,6 @@ module.exports = {
                     e.stopPropagation();
                     response[clickedLayer]._source.layergroup = "Tilføjede lag";
                     currentLayers = meta.getMetaData().data;
-
-                    console.log(currentLayers);
-
                     $.each(currentLayers, function (i, v) {
                         if (v.f_table_name === response[clickedLayer]._source.f_table_name && v.f_table_schema === response[clickedLayer]._source.f_table_schema) {
                             jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' er allerede tilføjet</span>", htmlAllowed: true, timeout: 2500});
@@ -117,11 +121,16 @@ module.exports = {
                     });
                     if (alreadyThere) {
                         $(this).parent("section").fadeOut(100).fadeIn(100);
-
                         return;
                     }
                     $(this).parent("section").fadeOut(200);
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
+                    layerTree.init();
+                    layers.init().then(function () {
+                        console.log(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name)
+                        switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
+                    });
+
                     jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>", htmlAllowed: true, timeout: 2500});
                 });
             }

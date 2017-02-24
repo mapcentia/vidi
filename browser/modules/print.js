@@ -27,6 +27,7 @@ var orientation;
 var backboneEvents;
 var legend;
 var moment = require('moment');
+var meta;
 
 /**
  * @private
@@ -49,6 +50,7 @@ module.exports = {
         cloud = o.cloud;
         serializeLayers = o.serializeLayers;
         anchor = o.anchor;
+        meta = o.meta;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -276,7 +278,8 @@ module.exports = {
             comment: encodeURIComponent($("#print-comment").val()),
             legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
             dataTime: moment().format('MMMM Do YYYY, H:mm'),
-            customData: customData || null
+            customData: customData || null,
+            metaData: meta.getMetaData()
         };
 
         if (urlVars.config) {

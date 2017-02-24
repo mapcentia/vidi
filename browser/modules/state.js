@@ -48,6 +48,11 @@ var advancedInfo;
 /**
  * @type {*|exports|module.exports}
  */
+var meta;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
 
 /**
@@ -84,6 +89,8 @@ var setBaseLayer = false;
 
 var backboneEvents;
 
+var layerTree;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -104,6 +111,8 @@ module.exports = {
         draw = o.draw;
         layers = o.layers;
         advancedInfo = o.advancedInfo;
+        meta = o.meta;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -164,7 +173,7 @@ module.exports = {
                                 var bounds = response.data.bounds;
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
-                            if (response.data.customData !== null){
+                            if (response.data.customData !== null) {
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
                             }
                             /**
@@ -340,6 +349,39 @@ module.exports = {
                                 });
                             }
 
+                            // Recreate added layers
+                            // =====================
+
+                            var currentLayers = meta.getMetaData();
+                            var flag;
+                            var addedLayers = [];
+
+                            // Get array with the added layers
+                            $.each(response.data.metaData.data, function (i, v) {
+                                flag = false;
+                                $.each(currentLayers.data, function (u, m) {
+                                    if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
+                                        flag = true;
+                                    }
+                                });
+                                if (!flag) {
+                                    addedLayers.push(v);
+                                }
+                            });
+
+                            // If any added layers, then add them
+                            if (addedLayers.length > 0) {
+                                meta.addMetaData({data: addedLayers});
+                                layerTree.init();
+                                // Use promise to switch layers on
+                                layers.init().then(function () {
+                                    if (arr) {
+                                        for (i = 0; i < arr.length; i++) {
+                                            switchLayer.init(arr[i], true, true);
+                                        }
+                                    }
+                                })
+                            }
 
                         }
                     });
@@ -350,7 +392,7 @@ module.exports = {
             }
         }());
     },
-    setBaseLayer: function(b) {
+    setBaseLayer: function (b) {
         setBaseLayer = b;
     }
 };

@@ -150,8 +150,6 @@ module.exports = module.exports = {
                 isStarted = true;
             }
             $("#loadscreen").hide();
-            layerTree.init();
-            layers.init();
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
@@ -188,9 +186,11 @@ module.exports = module.exports = {
                 layers.resetCount();
                 doneL = true;
                 if (doneL && doneB) {
-                    window.status = "all_loaded";
-                    console.info("Layers all loaded L");
-                    doneB = doneL = false;
+                    setTimeout(function(){
+                        window.status = "all_loaded";
+                        console.info("Layers all loaded L");
+                        doneB = doneL = false;
+                    }, 300)
                 }
             }
         });
@@ -198,9 +198,11 @@ module.exports = module.exports = {
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
             if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "") ) {
-                window.status = "all_loaded";
-                console.info("Layers all loaded B");
-                doneB = doneL = false;
+                setTimeout(function(){
+                    window.status = "all_loaded";
+                    console.info("Layers all loaded B");
+                    doneB = doneL = false;
+                }, 300)
             }
         });
 

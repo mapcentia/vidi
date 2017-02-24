@@ -36,6 +36,9 @@ window.gc2i18n = require('./i18n/' + window._vidiLocale + '.js');
  */
 window.vidiConfig = require('../config/config.js');
 
+window.Promise = require('es6-promise').Promise;
+
+
 /**
  *
  * @returns {{init: *}}
@@ -77,7 +80,7 @@ window.Vidi = function () {
     setTimeout(function () {
         window.status = "all_loaded";
         console.info("load_timeout");
-    }, 120000);
+    }, 20000);
 
     // Require the standard modules
     // ============================

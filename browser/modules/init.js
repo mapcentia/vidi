@@ -111,10 +111,13 @@ module.exports = {
         modules.backboneEvents.init();
         modules.socketId.init();
         modules.bindEvent.init();
-        modules.meta.init();
-        modules.baseLayer.init();
+        modules.meta.init().then(function () {
+            modules.layerTree.init();
+            modules.layers.init();
+        });
         modules.setting.init();
         modules.state.init();
+        modules.baseLayer.init();
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();

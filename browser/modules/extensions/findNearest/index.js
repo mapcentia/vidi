@@ -246,7 +246,6 @@ process = function (p) {
                 $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + response[i].name + ' (' + Math.round(response[i].length) + ' m)</span></label></div>')
             }
             console.log(routeLayers);
-
         },
         error: function () {
             backboneEvents.get().trigger("stop:findNearestProcess");

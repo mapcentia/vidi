@@ -30,7 +30,7 @@ var urlVars = urlparser.urlVars;
  * The full meta dat object
  * @type {{data: Array}}
  */
-var metaData = {data:[]};
+var metaData = {data: []};
 
 /**
  * Object that holds the latest loaded meta data
@@ -72,11 +72,14 @@ try {
     console.info(e.message);
 }
 
+var layersPromise;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
  */
 module.exports = {
+
     /**
      *
      * @param o
@@ -86,38 +89,48 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
+
     /**
      *
      */
     init: function (str) {
-        var schemata, me = this;
-        if (str) {
-            schemataStr = str;
-        } else {
-            schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-        }
-        if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-            if (schemataStr !== "") {
-                schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+        var me = this;
+        return new Promise(function (resolve, reject) {
+            var schemata;
+            if (str) {
+                schemataStr = str;
             } else {
-                schemata = window.vidiConfig.schemata;
+                schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
             }
-            schemataStr = schemata.join(",")
-        }
-        $.ajax({
-            url: '/api/meta/' + db + '/' + schemataStr,
-            scriptCharset: "utf-8",
-            success: function (response) {
-                me.addMetaData(response);
-                ready = true;
-            },
-            error: function (response) {
-                alert(JSON.parse(response.responseText).message);
+            if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                if (schemataStr !== "") {
+                    schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                } else {
+                    schemata = window.vidiConfig.schemata;
+                }
+                schemataStr = schemata.join(",")
             }
-        });
+            $.ajax({
+                url: '/api/meta/' + db + '/' + schemataStr,
+                scriptCharset: "utf-8",
+                success: function (response) {
+                    me.addMetaData(response);
+                    ready = true;
+                    resolve()
+                },
+                error: function (response) {
+                    reject();
+                    alert(JSON.parse(response.responseText).message);
+                }
+            });
+        })
     },
 
-    addMetaData: function(data) {
+    /**
+     *
+     * @param data
+     */
+    addMetaData: function (data) {
         metaDataLatestLoaded = data;
         metaData.data = metaData.data.concat(data.data);
         for (var i = 0; i < data.data.length; i++) {
@@ -148,7 +161,7 @@ module.exports = {
      * @returns {Object}
      */
     getMetaData: function () {
-        return $.extend(true, [], metaData);
+        return $.extend(true, {}, metaData);
     },
 
     /**
@@ -156,7 +169,7 @@ module.exports = {
      * @returns {Object}
      */
     getMetaDataLatestLoaded: function () {
-        return $.extend(true, [], metaDataLatestLoaded);
+        return $.extend(true, {}, metaDataLatestLoaded);
     }
 };
 
