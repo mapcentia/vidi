@@ -1,4 +1,4 @@
-/**
+ /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
  */

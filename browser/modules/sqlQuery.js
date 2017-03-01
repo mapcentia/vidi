@@ -36,11 +36,27 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
+var mustache = require('Mustache');
+
 /**
  *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
+
+var template =
+    '<div class="cartodb-popup-content">' +
+    '   {{#content.fields}}' +
+    '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
+    '       {{#value}}' +
+    '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
+    '       {{/value}}' +
+    '       {{^value}}' +
+    '           <p class="empty">null</p>' +
+    '       {{/value}}' +
+    '   {{/content.fields}}' +
+    '</div>';
+
 
 /**
  *
@@ -92,7 +108,11 @@ module.exports = {
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            var fields = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.fields !== "" ) ? metaDataKeys[value].infowindow.fields : null;
+            var aliases = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.alternative_names !== "" ) ? metaDataKeys[value].infowindow.alternative_names : null;
             var onLoad;
+            var popupHtml;
+            template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -103,7 +123,7 @@ module.exports = {
             }
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, fi = [];
                     isEmpty = layerObj.isEmpty();
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -112,22 +132,37 @@ module.exports = {
                         $.each(layerObj.geoJSON.features, function (i, feature) {
                             if (fieldConf === null) {
                                 $.each(feature.properties, function (name, property) {
-                                    out.push([name, 0, name, property]);
+                                    fi.push({
+                                        title: name,
+                                        value: feature.properties[name]
+                                    });
+                                    out.push([name, 0, name, false]);
                                 });
                             }
                             else {
-                                $.each(fieldConf, function (name, property) {
-                                    if (property.querable) {
-                                        fieldLabel = (property.alias !== null && property.alias !== "") ? property.alias : name;
-                                        if (feature.properties[name] !== undefined) {
-                                            out.push([name, property.sort_id, fieldLabel, property.link]);
+                                $.each(sortObject(fieldConf), function (name, property) {
+                                    if (property.value.querable) {
+                                        fi.push({
+                                            title: property.value.alias || property.key,
+                                            value: property.value.link ?  "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" : feature.properties[property.key]
+                                        });
+
+                                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                                        if (feature.properties[property.key] !== undefined) {
+                                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                                         }
                                     }
                                 });
+                                out.sort(function (a, b) {
+                                    return a[1] - b[1];
+                                });
                             }
-                            out.sort(function (a, b) {
-                                return a[1] - b[1];
-                            });
+                            feature.properties.content = {};
+                            feature.properties.content.fields = fi;
+                            popupHtml = Mustache.render(template, feature.properties);
+                            if (BACKEND === "cartodb") {
+                                popupHtml = $.parseHTML(popupHtml)[0].children[1].innerHTML
+                            }
                             if (first) {
                                 $.each(out, function (name, property) {
                                     cm.push({
@@ -140,7 +175,6 @@ module.exports = {
                                 first = false;
                             }
                             $('#tab_' + storeId).tab('show');
-                            out = [];
                         });
                         var height;
                         try {
@@ -161,7 +195,8 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             height: (height > 500) ? 500 : (height < 300) ? 300 : height,
-                            locale: window._vidiLocale.replace("_", "-")
+                            locale: window._vidiLocale.replace("_", "-"),
+                            popupHtml: popupHtml
                         });
 
                         // Here Inside onLoad we call loadDataInTable(), so the table is populated
@@ -268,4 +303,22 @@ module.exports = {
         $("#info-pane").empty();
     }
 };
+
+var sortObject = function (obj) {
+    var arr = [];
+    var prop;
+    for (prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            arr.push({
+                'key': prop,
+                'value': obj[prop],
+                'sort_id' : obj[prop].sort_id
+            });
+        }
+    }
+    arr.sort(function(a, b) {
+        return a.sort_id - b.sort_id;
+    });
+    return arr; // returns array
+}
 

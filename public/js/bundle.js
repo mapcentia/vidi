@@ -371,7 +371,7 @@ window.Vidi = function () {
     }
 };
 
-},{"../config/config.js":46,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/infoClick":24,"./modules/init":25,"./modules/layerTree":26,"./modules/layers":27,"./modules/legend":28,"./modules/loading":29,"./modules/meta":30,"./modules/print":31,"./modules/pushState":32,"./modules/serializeLayers":36,"./modules/setBaseLayer":37,"./modules/setting":38,"./modules/socketId":39,"./modules/sqlQuery":40,"./modules/state":41,"./modules/switchLayer":42,"./modules/urlparser":43,"./modules/utils":44,"es6-promise":102}],4:[function(require,module,exports){
+},{"../config/config.js":46,"./i18n/da_DK.js":1,"./i18n/en_US.js":2,"./modules/advancedInfo":4,"./modules/anchor":5,"./modules/backboneEvents":6,"./modules/baseLayer":7,"./modules/bindEvent":8,"./modules/cloud":9,"./modules/draw":10,"./modules/infoClick":24,"./modules/init":25,"./modules/layerTree":26,"./modules/layers":27,"./modules/legend":28,"./modules/loading":29,"./modules/meta":30,"./modules/print":31,"./modules/pushState":32,"./modules/serializeLayers":36,"./modules/setBaseLayer":37,"./modules/setting":38,"./modules/socketId":39,"./modules/sqlQuery":40,"./modules/state":41,"./modules/switchLayer":42,"./modules/urlparser":43,"./modules/utils":44,"es6-promise":103}],4:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -702,7 +702,7 @@ module.exports = {
 };
 
 
-},{"./drawLocales/advancedInfo.js":11,"./utmZone.js":45,"jsts":111,"nouislider":117,"reproject":190,"underscore":209}],5:[function(require,module,exports){
+},{"./drawLocales/advancedInfo.js":11,"./utmZone.js":45,"jsts":112,"nouislider":118,"reproject":191,"underscore":210}],5:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -791,7 +791,7 @@ module.exports = {
         return object;
     }
 };
-},{"backbone":50,"underscore":209}],7:[function(require,module,exports){
+},{"backbone":51,"underscore":210}],7:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -1090,7 +1090,6 @@ module.exports = module.exports = {
                     console.info("Layers all loaded B");
                     doneB = doneL = false;
                 }, 300)
-
             }
         });
 
@@ -1156,7 +1155,7 @@ module.exports = module.exports = {
         }
     }
 };
-},{"./urlparser":43,"arrive":49,"dom-shims":76,"showdown":191}],9:[function(require,module,exports){
+},{"./urlparser":43,"arrive":50,"dom-shims":77,"showdown":192}],9:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -2851,7 +2850,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</div>' +
     '</div>' +
     '</div>';
-},{"../../../../config/config.js":46,"./../../drawLocales/advancedInfo.js":11,"./../../height":23,"./../../search/danish":33,"./../../urlparser":43,"./../../utmZone.js":45,"jquery":109,"jsts":111,"nouislider":117,"reproject":190,"snackbarjs":192,"socket.io-client":193,"terraformer-wkt-parser":206}],15:[function(require,module,exports){
+},{"../../../../config/config.js":46,"./../../drawLocales/advancedInfo.js":11,"./../../height":23,"./../../search/danish":33,"./../../urlparser":43,"./../../utmZone.js":45,"jquery":110,"jsts":112,"nouislider":118,"reproject":191,"snackbarjs":193,"socket.io-client":194,"terraformer-wkt-parser":207}],15:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3472,7 +3471,7 @@ var createStore = function () {
     });
 };
 
-},{"./../../urlparser":43,"jsts":111,"reproject":190}],18:[function(require,module,exports){
+},{"./../../urlparser":43,"jsts":112,"reproject":191}],18:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -3800,7 +3799,6 @@ process = function (p) {
                 $("#findnearest-result").append('<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + id + '" data-gc2-id="' + id + '"><span>' + response[i].name + ' (' + Math.round(response[i].length) + ' m)</span></label></div>')
             }
             console.log(routeLayers);
-
         },
         error: function () {
             backboneEvents.get().trigger("stop:findNearestProcess");
@@ -4041,7 +4039,7 @@ module.exports = {
 };
 
 
-},{"./../../urlparser":43,"jquery":109,"snackbarjs":192}],22:[function(require,module,exports){
+},{"./../../urlparser":43,"jquery":110,"snackbarjs":193}],22:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -4218,7 +4216,7 @@ module.exports = function () {
     }
 };
 },{}],24:[function(require,module,exports){
-/**
+ /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
  */
@@ -4467,7 +4465,7 @@ module.exports = {
         $("#loadscreentext").html(__("Loading data"));
     }
 };
-},{"./../modules/urlparser":43,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/layerSearch/controller.js":20,"./extensions/layerSearch/index.js":21,"./extensions/vectorLayers/index.js":22,"./search/danish.js":33,"./search/danish_new.js":34,"./search/google.js":35,"bootstrap":56}],26:[function(require,module,exports){
+},{"./../modules/urlparser":43,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/layerSearch/controller.js":20,"./extensions/layerSearch/index.js":21,"./extensions/vectorLayers/index.js":22,"./search/danish.js":33,"./search/danish_new.js":34,"./search/google.js":35,"bootstrap":57}],26:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -4655,12 +4653,12 @@ module.exports = {
                             loadEvent: function () {
                                 countLoaded++;
                                 backboneEvents.get().trigger("doneLoading:layers", countLoaded);
-                                resolve();
                             },
                             subdomains: window.gc2Options.subDomainsForTiles
                         });
                     }
                     backboneEvents.get().trigger("ready:layers");
+                    resolve();
                     break;
                 case "cartodb":
                     var j = 0, tmpData = metaData.data.slice(); // Clone the array for async adding of CartoDB layers
@@ -5274,6 +5272,7 @@ var layersPromise;
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}
  */
 module.exports = {
+
     /**
      *
      * @param o
@@ -5283,6 +5282,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
+
     /**
      *
      */
@@ -5319,6 +5319,10 @@ module.exports = {
         })
     },
 
+    /**
+     *
+     * @param data
+     */
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
         metaData.data = metaData.data.concat(data.data);
@@ -5797,7 +5801,7 @@ module.exports = {
     }
 };
 
-},{"../../config/config.js":46,"./urlparser":43,"./utmZone.js":45,"moment":115,"moment/locale/da":114}],32:[function(require,module,exports){
+},{"../../config/config.js":46,"./urlparser":43,"./utmZone.js":45,"moment":116,"moment/locale/da":115}],32:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -7304,11 +7308,27 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
+var mustache = require('Mustache');
+
 /**
  *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
+
+var template =
+    '<div class="cartodb-popup-content">' +
+    '   {{#content.fields}}' +
+    '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
+    '       {{#value}}' +
+    '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
+    '       {{/value}}' +
+    '       {{^value}}' +
+    '           <p class="empty">null</p>' +
+    '       {{/value}}' +
+    '   {{/content.fields}}' +
+    '</div>';
+
 
 /**
  *
@@ -7360,7 +7380,11 @@ module.exports = {
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            var fields = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.fields !== "" ) ? metaDataKeys[value].infowindow.fields : null;
+            var aliases = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.alternative_names !== "" ) ? metaDataKeys[value].infowindow.alternative_names : null;
             var onLoad;
+            var popupHtml;
+            template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -7371,7 +7395,7 @@ module.exports = {
             }
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, fi = [];
                     isEmpty = layerObj.isEmpty();
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -7380,22 +7404,37 @@ module.exports = {
                         $.each(layerObj.geoJSON.features, function (i, feature) {
                             if (fieldConf === null) {
                                 $.each(feature.properties, function (name, property) {
-                                    out.push([name, 0, name, property]);
+                                    fi.push({
+                                        title: name,
+                                        value: feature.properties[name]
+                                    });
+                                    out.push([name, 0, name, false]);
                                 });
                             }
                             else {
-                                $.each(fieldConf, function (name, property) {
-                                    if (property.querable) {
-                                        fieldLabel = (property.alias !== null && property.alias !== "") ? property.alias : name;
-                                        if (feature.properties[name] !== undefined) {
-                                            out.push([name, property.sort_id, fieldLabel, property.link]);
+                                $.each(sortObject(fieldConf), function (name, property) {
+                                    if (property.value.querable) {
+                                        fi.push({
+                                            title: property.value.alias || property.key,
+                                            value: property.value.link ?  "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" : feature.properties[property.key]
+                                        });
+
+                                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                                        if (feature.properties[property.key] !== undefined) {
+                                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                                         }
                                     }
                                 });
+                                out.sort(function (a, b) {
+                                    return a[1] - b[1];
+                                });
                             }
-                            out.sort(function (a, b) {
-                                return a[1] - b[1];
-                            });
+                            feature.properties.content = {};
+                            feature.properties.content.fields = fi;
+                            popupHtml = Mustache.render(template, feature.properties);
+                            if (BACKEND === "cartodb") {
+                                popupHtml = $.parseHTML(popupHtml)[0].children[1].innerHTML
+                            }
                             if (first) {
                                 $.each(out, function (name, property) {
                                     cm.push({
@@ -7408,7 +7447,6 @@ module.exports = {
                                 first = false;
                             }
                             $('#tab_' + storeId).tab('show');
-                            out = [];
                         });
                         var height;
                         try {
@@ -7429,7 +7467,8 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             height: (height > 500) ? 500 : (height < 300) ? 300 : height,
-                            locale: window._vidiLocale.replace("_", "-")
+                            locale: window._vidiLocale.replace("_", "-"),
+                            popupHtml: popupHtml
                         });
 
                         // Here Inside onLoad we call loadDataInTable(), so the table is populated
@@ -7537,8 +7576,26 @@ module.exports = {
     }
 };
 
+var sortObject = function (obj) {
+    var arr = [];
+    var prop;
+    for (prop in obj) {
+        if (obj.hasOwnProperty(prop)) {
+            arr.push({
+                'key': prop,
+                'value': obj[prop],
+                'sort_id' : obj[prop].sort_id
+            });
+        }
+    }
+    arr.sort(function(a, b) {
+        return a.sort_id - b.sort_id;
+    });
+    return arr; // returns array
+}
 
-},{"../../config/config.js":46,"./height":23,"./urlparser":43}],41:[function(require,module,exports){
+
+},{"../../config/config.js":46,"./height":23,"./urlparser":43,"Mustache":47}],41:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -7937,7 +7994,7 @@ module.exports = {
         setBaseLayer = b;
     }
 };
-},{"../../config/config.js":46,"./urlparser":43,"base64-url":54,"lz-string":112}],42:[function(require,module,exports){
+},{"../../config/config.js":46,"./urlparser":43,"base64-url":55,"lz-string":113}],42:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -8126,7 +8183,7 @@ module.exports = {
         host: "http://127.0.0.1:8080"
     },
     cartodb: {
-        db: "frederiksberg"
+        db: "mhoegh"
 
     },
 
@@ -8287,6 +8344,638 @@ module.exports = {
 
 };
 },{}],47:[function(require,module,exports){
+/*!
+ * mustache.js - Logic-less {{mustache}} templates with JavaScript
+ * http://github.com/janl/mustache.js
+ */
+
+/*global define: false Mustache: true*/
+
+(function defineMustache (global, factory) {
+  if (typeof exports === 'object' && exports && typeof exports.nodeName !== 'string') {
+    factory(exports); // CommonJS
+  } else if (typeof define === 'function' && define.amd) {
+    define(['exports'], factory); // AMD
+  } else {
+    global.Mustache = {};
+    factory(global.Mustache); // script, wsh, asp
+  }
+}(this, function mustacheFactory (mustache) {
+
+  var objectToString = Object.prototype.toString;
+  var isArray = Array.isArray || function isArrayPolyfill (object) {
+    return objectToString.call(object) === '[object Array]';
+  };
+
+  function isFunction (object) {
+    return typeof object === 'function';
+  }
+
+  /**
+   * More correct typeof string handling array
+   * which normally returns typeof 'object'
+   */
+  function typeStr (obj) {
+    return isArray(obj) ? 'array' : typeof obj;
+  }
+
+  function escapeRegExp (string) {
+    return string.replace(/[\-\[\]{}()*+?.,\\\^$|#\s]/g, '\\$&');
+  }
+
+  /**
+   * Null safe way of checking whether or not an object,
+   * including its prototype, has a given property
+   */
+  function hasProperty (obj, propName) {
+    return obj != null && typeof obj === 'object' && (propName in obj);
+  }
+
+  // Workaround for https://issues.apache.org/jira/browse/COUCHDB-577
+  // See https://github.com/janl/mustache.js/issues/189
+  var regExpTest = RegExp.prototype.test;
+  function testRegExp (re, string) {
+    return regExpTest.call(re, string);
+  }
+
+  var nonSpaceRe = /\S/;
+  function isWhitespace (string) {
+    return !testRegExp(nonSpaceRe, string);
+  }
+
+  var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  function escapeHtml (string) {
+    return String(string).replace(/[&<>"'`=\/]/g, function fromEntityMap (s) {
+      return entityMap[s];
+    });
+  }
+
+  var whiteRe = /\s*/;
+  var spaceRe = /\s+/;
+  var equalsRe = /\s*=/;
+  var curlyRe = /\s*\}/;
+  var tagRe = /#|\^|\/|>|\{|&|=|!/;
+
+  /**
+   * Breaks up the given `template` string into a tree of tokens. If the `tags`
+   * argument is given here it must be an array with two string values: the
+   * opening and closing tags used in the template (e.g. [ "<%", "%>" ]). Of
+   * course, the default is to use mustaches (i.e. mustache.tags).
+   *
+   * A token is an array with at least 4 elements. The first element is the
+   * mustache symbol that was used inside the tag, e.g. "#" or "&". If the tag
+   * did not contain a symbol (i.e. {{myValue}}) this element is "name". For
+   * all text that appears outside a symbol this element is "text".
+   *
+   * The second element of a token is its "value". For mustache tags this is
+   * whatever else was inside the tag besides the opening symbol. For text tokens
+   * this is the text itself.
+   *
+   * The third and fourth elements of the token are the start and end indices,
+   * respectively, of the token in the original template.
+   *
+   * Tokens that are the root node of a subtree contain two more elements: 1) an
+   * array of tokens in the subtree and 2) the index in the original template at
+   * which the closing tag for that section begins.
+   */
+  function parseTemplate (template, tags) {
+    if (!template)
+      return [];
+
+    var sections = [];     // Stack to hold section tokens
+    var tokens = [];       // Buffer to hold the tokens
+    var spaces = [];       // Indices of whitespace tokens on the current line
+    var hasTag = false;    // Is there a {{tag}} on the current line?
+    var nonSpace = false;  // Is there a non-space char on the current line?
+
+    // Strips all whitespace tokens array for the current line
+    // if there was a {{#tag}} on it and otherwise only space.
+    function stripSpace () {
+      if (hasTag && !nonSpace) {
+        while (spaces.length)
+          delete tokens[spaces.pop()];
+      } else {
+        spaces = [];
+      }
+
+      hasTag = false;
+      nonSpace = false;
+    }
+
+    var openingTagRe, closingTagRe, closingCurlyRe;
+    function compileTags (tagsToCompile) {
+      if (typeof tagsToCompile === 'string')
+        tagsToCompile = tagsToCompile.split(spaceRe, 2);
+
+      if (!isArray(tagsToCompile) || tagsToCompile.length !== 2)
+        throw new Error('Invalid tags: ' + tagsToCompile);
+
+      openingTagRe = new RegExp(escapeRegExp(tagsToCompile[0]) + '\\s*');
+      closingTagRe = new RegExp('\\s*' + escapeRegExp(tagsToCompile[1]));
+      closingCurlyRe = new RegExp('\\s*' + escapeRegExp('}' + tagsToCompile[1]));
+    }
+
+    compileTags(tags || mustache.tags);
+
+    var scanner = new Scanner(template);
+
+    var start, type, value, chr, token, openSection;
+    while (!scanner.eos()) {
+      start = scanner.pos;
+
+      // Match any text between tags.
+      value = scanner.scanUntil(openingTagRe);
+
+      if (value) {
+        for (var i = 0, valueLength = value.length; i < valueLength; ++i) {
+          chr = value.charAt(i);
+
+          if (isWhitespace(chr)) {
+            spaces.push(tokens.length);
+          } else {
+            nonSpace = true;
+          }
+
+          tokens.push([ 'text', chr, start, start + 1 ]);
+          start += 1;
+
+          // Check for whitespace on the current line.
+          if (chr === '\n')
+            stripSpace();
+        }
+      }
+
+      // Match the opening tag.
+      if (!scanner.scan(openingTagRe))
+        break;
+
+      hasTag = true;
+
+      // Get the tag type.
+      type = scanner.scan(tagRe) || 'name';
+      scanner.scan(whiteRe);
+
+      // Get the tag value.
+      if (type === '=') {
+        value = scanner.scanUntil(equalsRe);
+        scanner.scan(equalsRe);
+        scanner.scanUntil(closingTagRe);
+      } else if (type === '{') {
+        value = scanner.scanUntil(closingCurlyRe);
+        scanner.scan(curlyRe);
+        scanner.scanUntil(closingTagRe);
+        type = '&';
+      } else {
+        value = scanner.scanUntil(closingTagRe);
+      }
+
+      // Match the closing tag.
+      if (!scanner.scan(closingTagRe))
+        throw new Error('Unclosed tag at ' + scanner.pos);
+
+      token = [ type, value, start, scanner.pos ];
+      tokens.push(token);
+
+      if (type === '#' || type === '^') {
+        sections.push(token);
+      } else if (type === '/') {
+        // Check section nesting.
+        openSection = sections.pop();
+
+        if (!openSection)
+          throw new Error('Unopened section "' + value + '" at ' + start);
+
+        if (openSection[1] !== value)
+          throw new Error('Unclosed section "' + openSection[1] + '" at ' + start);
+      } else if (type === 'name' || type === '{' || type === '&') {
+        nonSpace = true;
+      } else if (type === '=') {
+        // Set the tags for the next time around.
+        compileTags(value);
+      }
+    }
+
+    // Make sure there are no open sections when we're done.
+    openSection = sections.pop();
+
+    if (openSection)
+      throw new Error('Unclosed section "' + openSection[1] + '" at ' + scanner.pos);
+
+    return nestTokens(squashTokens(tokens));
+  }
+
+  /**
+   * Combines the values of consecutive text tokens in the given `tokens` array
+   * to a single token.
+   */
+  function squashTokens (tokens) {
+    var squashedTokens = [];
+
+    var token, lastToken;
+    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
+      token = tokens[i];
+
+      if (token) {
+        if (token[0] === 'text' && lastToken && lastToken[0] === 'text') {
+          lastToken[1] += token[1];
+          lastToken[3] = token[3];
+        } else {
+          squashedTokens.push(token);
+          lastToken = token;
+        }
+      }
+    }
+
+    return squashedTokens;
+  }
+
+  /**
+   * Forms the given array of `tokens` into a nested tree structure where
+   * tokens that represent a section have two additional items: 1) an array of
+   * all tokens that appear in that section and 2) the index in the original
+   * template that represents the end of that section.
+   */
+  function nestTokens (tokens) {
+    var nestedTokens = [];
+    var collector = nestedTokens;
+    var sections = [];
+
+    var token, section;
+    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
+      token = tokens[i];
+
+      switch (token[0]) {
+        case '#':
+        case '^':
+          collector.push(token);
+          sections.push(token);
+          collector = token[4] = [];
+          break;
+        case '/':
+          section = sections.pop();
+          section[5] = token[2];
+          collector = sections.length > 0 ? sections[sections.length - 1][4] : nestedTokens;
+          break;
+        default:
+          collector.push(token);
+      }
+    }
+
+    return nestedTokens;
+  }
+
+  /**
+   * A simple string scanner that is used by the template parser to find
+   * tokens in template strings.
+   */
+  function Scanner (string) {
+    this.string = string;
+    this.tail = string;
+    this.pos = 0;
+  }
+
+  /**
+   * Returns `true` if the tail is empty (end of string).
+   */
+  Scanner.prototype.eos = function eos () {
+    return this.tail === '';
+  };
+
+  /**
+   * Tries to match the given regular expression at the current position.
+   * Returns the matched text if it can match, the empty string otherwise.
+   */
+  Scanner.prototype.scan = function scan (re) {
+    var match = this.tail.match(re);
+
+    if (!match || match.index !== 0)
+      return '';
+
+    var string = match[0];
+
+    this.tail = this.tail.substring(string.length);
+    this.pos += string.length;
+
+    return string;
+  };
+
+  /**
+   * Skips all text until the given regular expression can be matched. Returns
+   * the skipped string, which is the entire tail if no match can be made.
+   */
+  Scanner.prototype.scanUntil = function scanUntil (re) {
+    var index = this.tail.search(re), match;
+
+    switch (index) {
+      case -1:
+        match = this.tail;
+        this.tail = '';
+        break;
+      case 0:
+        match = '';
+        break;
+      default:
+        match = this.tail.substring(0, index);
+        this.tail = this.tail.substring(index);
+    }
+
+    this.pos += match.length;
+
+    return match;
+  };
+
+  /**
+   * Represents a rendering context by wrapping a view object and
+   * maintaining a reference to the parent context.
+   */
+  function Context (view, parentContext) {
+    this.view = view;
+    this.cache = { '.': this.view };
+    this.parent = parentContext;
+  }
+
+  /**
+   * Creates a new context using the given view with this context
+   * as the parent.
+   */
+  Context.prototype.push = function push (view) {
+    return new Context(view, this);
+  };
+
+  /**
+   * Returns the value of the given name in this context, traversing
+   * up the context hierarchy if the value is absent in this context's view.
+   */
+  Context.prototype.lookup = function lookup (name) {
+    var cache = this.cache;
+
+    var value;
+    if (cache.hasOwnProperty(name)) {
+      value = cache[name];
+    } else {
+      var context = this, names, index, lookupHit = false;
+
+      while (context) {
+        if (name.indexOf('.') > 0) {
+          value = context.view;
+          names = name.split('.');
+          index = 0;
+
+          /**
+           * Using the dot notion path in `name`, we descend through the
+           * nested objects.
+           *
+           * To be certain that the lookup has been successful, we have to
+           * check if the last object in the path actually has the property
+           * we are looking for. We store the result in `lookupHit`.
+           *
+           * This is specially necessary for when the value has been set to
+           * `undefined` and we want to avoid looking up parent contexts.
+           **/
+          while (value != null && index < names.length) {
+            if (index === names.length - 1)
+              lookupHit = hasProperty(value, names[index]);
+
+            value = value[names[index++]];
+          }
+        } else {
+          value = context.view[name];
+          lookupHit = hasProperty(context.view, name);
+        }
+
+        if (lookupHit)
+          break;
+
+        context = context.parent;
+      }
+
+      cache[name] = value;
+    }
+
+    if (isFunction(value))
+      value = value.call(this.view);
+
+    return value;
+  };
+
+  /**
+   * A Writer knows how to take a stream of tokens and render them to a
+   * string, given a context. It also maintains a cache of templates to
+   * avoid the need to parse the same template twice.
+   */
+  function Writer () {
+    this.cache = {};
+  }
+
+  /**
+   * Clears all cached templates in this writer.
+   */
+  Writer.prototype.clearCache = function clearCache () {
+    this.cache = {};
+  };
+
+  /**
+   * Parses and caches the given `template` and returns the array of tokens
+   * that is generated from the parse.
+   */
+  Writer.prototype.parse = function parse (template, tags) {
+    var cache = this.cache;
+    var tokens = cache[template];
+
+    if (tokens == null)
+      tokens = cache[template] = parseTemplate(template, tags);
+
+    return tokens;
+  };
+
+  /**
+   * High-level method that is used to render the given `template` with
+   * the given `view`.
+   *
+   * The optional `partials` argument may be an object that contains the
+   * names and templates of partials that are used in the template. It may
+   * also be a function that is used to load partial templates on the fly
+   * that takes a single argument: the name of the partial.
+   */
+  Writer.prototype.render = function render (template, view, partials) {
+    var tokens = this.parse(template);
+    var context = (view instanceof Context) ? view : new Context(view);
+    return this.renderTokens(tokens, context, partials, template);
+  };
+
+  /**
+   * Low-level method that renders the given array of `tokens` using
+   * the given `context` and `partials`.
+   *
+   * Note: The `originalTemplate` is only ever used to extract the portion
+   * of the original template that was contained in a higher-order section.
+   * If the template doesn't use higher-order sections, this argument may
+   * be omitted.
+   */
+  Writer.prototype.renderTokens = function renderTokens (tokens, context, partials, originalTemplate) {
+    var buffer = '';
+
+    var token, symbol, value;
+    for (var i = 0, numTokens = tokens.length; i < numTokens; ++i) {
+      value = undefined;
+      token = tokens[i];
+      symbol = token[0];
+
+      if (symbol === '#') value = this.renderSection(token, context, partials, originalTemplate);
+      else if (symbol === '^') value = this.renderInverted(token, context, partials, originalTemplate);
+      else if (symbol === '>') value = this.renderPartial(token, context, partials, originalTemplate);
+      else if (symbol === '&') value = this.unescapedValue(token, context);
+      else if (symbol === 'name') value = this.escapedValue(token, context);
+      else if (symbol === 'text') value = this.rawValue(token);
+
+      if (value !== undefined)
+        buffer += value;
+    }
+
+    return buffer;
+  };
+
+  Writer.prototype.renderSection = function renderSection (token, context, partials, originalTemplate) {
+    var self = this;
+    var buffer = '';
+    var value = context.lookup(token[1]);
+
+    // This function is used to render an arbitrary template
+    // in the current context by higher-order sections.
+    function subRender (template) {
+      return self.render(template, context, partials);
+    }
+
+    if (!value) return;
+
+    if (isArray(value)) {
+      for (var j = 0, valueLength = value.length; j < valueLength; ++j) {
+        buffer += this.renderTokens(token[4], context.push(value[j]), partials, originalTemplate);
+      }
+    } else if (typeof value === 'object' || typeof value === 'string' || typeof value === 'number') {
+      buffer += this.renderTokens(token[4], context.push(value), partials, originalTemplate);
+    } else if (isFunction(value)) {
+      if (typeof originalTemplate !== 'string')
+        throw new Error('Cannot use higher-order sections without the original template');
+
+      // Extract the portion of the original template that the section contains.
+      value = value.call(context.view, originalTemplate.slice(token[3], token[5]), subRender);
+
+      if (value != null)
+        buffer += value;
+    } else {
+      buffer += this.renderTokens(token[4], context, partials, originalTemplate);
+    }
+    return buffer;
+  };
+
+  Writer.prototype.renderInverted = function renderInverted (token, context, partials, originalTemplate) {
+    var value = context.lookup(token[1]);
+
+    // Use JavaScript's definition of falsy. Include empty arrays.
+    // See https://github.com/janl/mustache.js/issues/186
+    if (!value || (isArray(value) && value.length === 0))
+      return this.renderTokens(token[4], context, partials, originalTemplate);
+  };
+
+  Writer.prototype.renderPartial = function renderPartial (token, context, partials) {
+    if (!partials) return;
+
+    var value = isFunction(partials) ? partials(token[1]) : partials[token[1]];
+    if (value != null)
+      return this.renderTokens(this.parse(value), context, partials, value);
+  };
+
+  Writer.prototype.unescapedValue = function unescapedValue (token, context) {
+    var value = context.lookup(token[1]);
+    if (value != null)
+      return value;
+  };
+
+  Writer.prototype.escapedValue = function escapedValue (token, context) {
+    var value = context.lookup(token[1]);
+    if (value != null)
+      return mustache.escape(value);
+  };
+
+  Writer.prototype.rawValue = function rawValue (token) {
+    return token[1];
+  };
+
+  mustache.name = 'mustache.js';
+  mustache.version = '2.3.0';
+  mustache.tags = [ '{{', '}}' ];
+
+  // All high-level mustache.* functions use this writer.
+  var defaultWriter = new Writer();
+
+  /**
+   * Clears all cached templates in the default writer.
+   */
+  mustache.clearCache = function clearCache () {
+    return defaultWriter.clearCache();
+  };
+
+  /**
+   * Parses and caches the given template in the default writer and returns the
+   * array of tokens it contains. Doing this ahead of time avoids the need to
+   * parse templates on the fly as they are rendered.
+   */
+  mustache.parse = function parse (template, tags) {
+    return defaultWriter.parse(template, tags);
+  };
+
+  /**
+   * Renders the `template` with the given `view` and `partials` using the
+   * default writer.
+   */
+  mustache.render = function render (template, view, partials) {
+    if (typeof template !== 'string') {
+      throw new TypeError('Invalid template! Template should be a "string" ' +
+                          'but "' + typeStr(template) + '" was given as the first ' +
+                          'argument for mustache#render(template, view, partials)');
+    }
+
+    return defaultWriter.render(template, view, partials);
+  };
+
+  // This is here for backwards compatibility with 0.4.x.,
+  /*eslint-disable */ // eslint wants camel cased function name
+  mustache.to_html = function to_html (template, view, partials, send) {
+    /*eslint-enable*/
+
+    var result = mustache.render(template, view, partials);
+
+    if (isFunction(send)) {
+      send(result);
+    } else {
+      return result;
+    }
+  };
+
+  // Export the escaping function so that the user may override it.
+  // See https://github.com/janl/mustache.js/issues/244
+  mustache.escape = escapeHtml;
+
+  // Export these mainly for testing, but also for advanced usage.
+  mustache.Scanner = Scanner;
+  mustache.Context = Context;
+  mustache.Writer = Writer;
+
+  return mustache;
+}));
+
+},{}],48:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -8316,7 +9005,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -8347,7 +9036,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 /*
  * arrive.js
  * v2.3.1
@@ -8799,7 +9488,7 @@ var Arrive = (function(window, $, undefined) {
 
 })(window, typeof jQuery === 'undefined' ? null : jQuery, undefined);
 
-},{}],50:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 (function (global){
 //     Backbone.js 1.3.3
 
@@ -10723,7 +11412,7 @@ var Arrive = (function(window, $, undefined) {
 });
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"jquery":109,"underscore":209}],51:[function(require,module,exports){
+},{"jquery":110,"underscore":210}],52:[function(require,module,exports){
 
 /**
  * Expose `Backoff`.
@@ -10810,7 +11499,7 @@ Backoff.prototype.setJitter = function(jitter){
 };
 
 
-},{}],52:[function(require,module,exports){
+},{}],53:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -10879,7 +11568,7 @@ Backoff.prototype.setJitter = function(jitter){
   };
 })();
 
-},{}],53:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict'
 
 exports.toByteArray = toByteArray
@@ -10990,7 +11679,7 @@ function fromByteArray (uint8) {
   return parts.join('')
 }
 
-},{}],54:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -11018,7 +11707,7 @@ base64url.decode = function decode (str) {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":70}],55:[function(require,module,exports){
+},{"buffer":71}],56:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -11118,7 +11807,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // This file is autogenerated via the `commonjs` Grunt task. You can require() this file in a CommonJS environment.
 require('../../js/transition.js')
 require('../../js/alert.js')
@@ -11132,7 +11821,7 @@ require('../../js/popover.js')
 require('../../js/scrollspy.js')
 require('../../js/tab.js')
 require('../../js/affix.js')
-},{"../../js/affix.js":57,"../../js/alert.js":58,"../../js/button.js":59,"../../js/carousel.js":60,"../../js/collapse.js":61,"../../js/dropdown.js":62,"../../js/modal.js":63,"../../js/popover.js":64,"../../js/scrollspy.js":65,"../../js/tab.js":66,"../../js/tooltip.js":67,"../../js/transition.js":68}],57:[function(require,module,exports){
+},{"../../js/affix.js":58,"../../js/alert.js":59,"../../js/button.js":60,"../../js/carousel.js":61,"../../js/collapse.js":62,"../../js/dropdown.js":63,"../../js/modal.js":64,"../../js/popover.js":65,"../../js/scrollspy.js":66,"../../js/tab.js":67,"../../js/tooltip.js":68,"../../js/transition.js":69}],58:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: affix.js v3.3.7
  * http://getbootstrap.com/javascript/#affix
@@ -11296,7 +11985,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: alert.js v3.3.7
  * http://getbootstrap.com/javascript/#alerts
@@ -11392,7 +12081,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],59:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: button.js v3.3.7
  * http://getbootstrap.com/javascript/#buttons
@@ -11519,7 +12208,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],60:[function(require,module,exports){
+},{}],61:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: carousel.js v3.3.7
  * http://getbootstrap.com/javascript/#carousel
@@ -11758,7 +12447,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: collapse.js v3.3.7
  * http://getbootstrap.com/javascript/#collapse
@@ -11972,7 +12661,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: dropdown.js v3.3.7
  * http://getbootstrap.com/javascript/#dropdowns
@@ -12139,7 +12828,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: modal.js v3.3.7
  * http://getbootstrap.com/javascript/#modals
@@ -12480,7 +13169,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: popover.js v3.3.7
  * http://getbootstrap.com/javascript/#popovers
@@ -12590,7 +13279,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: scrollspy.js v3.3.7
  * http://getbootstrap.com/javascript/#scrollspy
@@ -12764,7 +13453,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tab.js v3.3.7
  * http://getbootstrap.com/javascript/#tabs
@@ -12921,7 +13610,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: tooltip.js v3.3.7
  * http://getbootstrap.com/javascript/#tooltip
@@ -13443,7 +14132,7 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],68:[function(require,module,exports){
+},{}],69:[function(require,module,exports){
 /* ========================================================================
  * Bootstrap: transition.js v3.3.7
  * http://getbootstrap.com/javascript/#transitions
@@ -13504,9 +14193,9 @@ require('../../js/affix.js')
 
 }(jQuery);
 
-},{}],69:[function(require,module,exports){
-
 },{}],70:[function(require,module,exports){
+
+},{}],71:[function(require,module,exports){
 (function (global){
 /*!
  * The buffer module from node.js, for the browser.
@@ -15221,7 +15910,7 @@ function isnan (val) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"base64-js":53,"ieee754":106,"isarray":108}],71:[function(require,module,exports){
+},{"base64-js":54,"ieee754":107,"isarray":109}],72:[function(require,module,exports){
 /**
  * Slice reference.
  */
@@ -15246,7 +15935,7 @@ module.exports = function(obj, fn){
   }
 };
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -15412,7 +16101,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -15420,7 +16109,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -15590,7 +16279,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":75}],75:[function(require,module,exports){
+},{"./debug":76}],76:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -15789,7 +16478,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":116}],76:[function(require,module,exports){
+},{"ms":117}],77:[function(require,module,exports){
 // constructor shims
 require('./shim/HTMLDocument');
 require('./shim/CustomEvent');
@@ -15800,7 +16489,7 @@ require('./shim/Element.closest');
 require('./shim/Element.mutation');
 require('./shim/Element.classList');
 
-},{"./shim/CustomEvent":78,"./shim/Element.classList":79,"./shim/Element.closest":80,"./shim/Element.matches":81,"./shim/Element.mutation":82,"./shim/HTMLDocument":83}],77:[function(require,module,exports){
+},{"./shim/CustomEvent":79,"./shim/Element.classList":80,"./shim/Element.closest":81,"./shim/Element.matches":82,"./shim/Element.mutation":83,"./shim/HTMLDocument":84}],78:[function(require,module,exports){
 'use strict';
 
 /**
@@ -15970,7 +16659,7 @@ function validateToken(token) {
 
 module.exports = DOMTokenList;
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -16019,7 +16708,7 @@ module.exports = DOMTokenList;
   window.CustomEvent = CustomEvent;
 }());
 
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -16093,7 +16782,7 @@ module.exports = DOMTokenList;
   }
 }());
 
-},{"../lib/DOMTokenList":77}],80:[function(require,module,exports){
+},{"../lib/DOMTokenList":78}],81:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -16124,7 +16813,7 @@ module.exports = DOMTokenList;
   };
 }());
 
-},{}],81:[function(require,module,exports){
+},{}],82:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -16169,7 +16858,7 @@ module.exports = DOMTokenList;
   };
 }());
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 (function () {
   'use strict';
 
@@ -16256,17 +16945,17 @@ module.exports = DOMTokenList;
   };
 }());
 
-},{}],83:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 // https://developer.mozilla.org/en-US/docs/Web/API/document
 if (!('HTMLDocument' in window)) {
   window.HTMLDocument = window.Document;
 }
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 
 module.exports = require('./lib/index');
 
-},{"./lib/index":85}],85:[function(require,module,exports){
+},{"./lib/index":86}],86:[function(require,module,exports){
 
 module.exports = require('./socket');
 
@@ -16278,7 +16967,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":86,"engine.io-parser":98}],86:[function(require,module,exports){
+},{"./socket":87,"engine.io-parser":99}],87:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -17020,7 +17709,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":87,"./transports/index":88,"component-emitter":94,"debug":95,"engine.io-parser":98,"indexof":107,"parsejson":118,"parseqs":119,"parseuri":120}],87:[function(require,module,exports){
+},{"./transport":88,"./transports/index":89,"component-emitter":95,"debug":96,"engine.io-parser":99,"indexof":108,"parsejson":119,"parseqs":120,"parseuri":121}],88:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -17179,7 +17868,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":94,"engine.io-parser":98}],88:[function(require,module,exports){
+},{"component-emitter":95,"engine.io-parser":99}],89:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -17236,7 +17925,7 @@ function polling (opts) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":89,"./polling-xhr":90,"./websocket":92,"xmlhttprequest-ssl":93}],89:[function(require,module,exports){
+},{"./polling-jsonp":90,"./polling-xhr":91,"./websocket":93,"xmlhttprequest-ssl":94}],90:[function(require,module,exports){
 (function (global){
 
 /**
@@ -17471,7 +18160,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":91,"component-inherit":73}],90:[function(require,module,exports){
+},{"./polling":92,"component-inherit":74}],91:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -17899,7 +18588,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":91,"component-emitter":94,"component-inherit":73,"debug":95,"xmlhttprequest-ssl":93}],91:[function(require,module,exports){
+},{"./polling":92,"component-emitter":95,"component-inherit":74,"debug":96,"xmlhttprequest-ssl":94}],92:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -18146,7 +18835,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":87,"component-inherit":73,"debug":95,"engine.io-parser":98,"parseqs":119,"xmlhttprequest-ssl":93,"yeast":211}],92:[function(require,module,exports){
+},{"../transport":88,"component-inherit":74,"debug":96,"engine.io-parser":99,"parseqs":120,"xmlhttprequest-ssl":94,"yeast":212}],93:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -18435,7 +19124,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":87,"component-inherit":73,"debug":95,"engine.io-parser":98,"parseqs":119,"ws":69,"yeast":211}],93:[function(require,module,exports){
+},{"../transport":88,"component-inherit":74,"debug":96,"engine.io-parser":99,"parseqs":120,"ws":70,"yeast":212}],94:[function(require,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -18476,7 +19165,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":105}],94:[function(require,module,exports){
+},{"has-cors":106}],95:[function(require,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -18641,7 +19330,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],95:[function(require,module,exports){
+},{}],96:[function(require,module,exports){
 (function (process){
 
 /**
@@ -18822,7 +19511,7 @@ function localstorage(){
 }
 
 }).call(this,require('_process'))
-},{"./debug":96,"_process":121}],96:[function(require,module,exports){
+},{"./debug":97,"_process":122}],97:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -19024,7 +19713,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":97}],97:[function(require,module,exports){
+},{"ms":98}],98:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -19175,7 +19864,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's'
 }
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -19788,7 +20477,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":99,"after":47,"arraybuffer.slice":48,"base64-arraybuffer":52,"blob":55,"has-binary":100,"wtf-8":210}],99:[function(require,module,exports){
+},{"./keys":100,"after":48,"arraybuffer.slice":49,"base64-arraybuffer":53,"blob":56,"has-binary":101,"wtf-8":211}],100:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -19809,7 +20498,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 (function (global){
 
 /*
@@ -19871,12 +20560,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":101}],101:[function(require,module,exports){
+},{"isarray":102}],102:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 (function (process,global){
 /*!
  * @overview es6-promise - a tiny implementation of Promises/A+.
@@ -21036,7 +21725,7 @@ return Promise;
 })));
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"_process":121}],103:[function(require,module,exports){
+},{"_process":122}],104:[function(require,module,exports){
 (function (global){
 
 /*
@@ -21099,9 +21788,9 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":104}],104:[function(require,module,exports){
-arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],105:[function(require,module,exports){
+},{"isarray":105}],105:[function(require,module,exports){
+arguments[4][102][0].apply(exports,arguments)
+},{"dup":102}],106:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -21120,7 +21809,7 @@ try {
   module.exports = false;
 }
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 exports.read = function (buffer, offset, isLE, mLen, nBytes) {
   var e, m
   var eLen = nBytes * 8 - mLen - 1
@@ -21206,7 +21895,7 @@ exports.write = function (buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128
 }
 
-},{}],107:[function(require,module,exports){
+},{}],108:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -21217,14 +21906,14 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],108:[function(require,module,exports){
+},{}],109:[function(require,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],109:[function(require,module,exports){
+},{}],110:[function(require,module,exports){
 /*eslint-disable no-unused-vars*/
 /*!
  * jQuery JavaScript Library v3.1.0
@@ -31300,7 +31989,7 @@ if ( !noGlobal ) {
 return jQuery;
 } );
 
-},{}],110:[function(require,module,exports){
+},{}],111:[function(require,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -32206,7 +32895,7 @@ return jQuery;
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],111:[function(require,module,exports){
+},{}],112:[function(require,module,exports){
 // JSTS. See https://github.com/bjornharrtell/jsts
 // Licenses:
 // https://github.com/bjornharrtell/jsts/blob/master/LICENSE_EDLv1.txt
@@ -32227,7 +32916,7 @@ var i=n.next();this.add(i)}}else if(arguments[0]instanceof St){var r=arguments[0
 !r.isVisited())return this.disconnectedRingcoord=r.getCoordinate(),!0}}return!1},isInteriorsConnected:function(){var t=new I;this.geomGraph.computeSplitEdges(t);var e=new Cn(new On);e.addEdges(t),this.setInteriorEdgesInResult(e),e.linkResultDirectedEdges();var n=this.buildEdgeRings(e.getEdgeEnds());return this.visitShellInteriors(this.geomGraph.getGeometry(),e),!this.hasUnvisitedShellEdge(n)},interfaces_:function(){return[]},getClass:function(){return Kr}}),Kr.findDifferentPoint=function(t,e){for(var n=0;n<t.length;n++)if(!t[n].equals(e))return t[n];return null},e(Zr.prototype,{hasChildren:function(){for(var t=0;2>t;t++)if(null!==this.subnode[t])return!0;return!1},isPrunable:function(){return!(this.hasChildren()||this.hasItems())},addAllItems:function(t){t.addAll(this.items);for(var e=0;2>e;e++)null!==this.subnode[e]&&this.subnode[e].addAllItems(t);return t},size:function(){for(var t=0,e=0;2>e;e++)null!==this.subnode[e]&&(t+=this.subnode[e].size());return t+this.items.size()},addAllItemsFromOverlapping:function(t,e){return null===t||this.isSearchMatch(t)?(e.addAll(this.items),null!==this.subnode[0]&&this.subnode[0].addAllItemsFromOverlapping(t,e),void(null!==this.subnode[1]&&this.subnode[1].addAllItemsFromOverlapping(t,e))):null},hasItems:function(){return!this.items.isEmpty()},remove:function(t,e){if(!this.isSearchMatch(t))return!1;for(var n=!1,i=0;2>i;i++)if(null!==this.subnode[i]&&(n=this.subnode[i].remove(t,e))){this.subnode[i].isPrunable()&&(this.subnode[i]=null);break}return n?n:n=this.items.remove(e)},getItems:function(){return this.items},depth:function(){for(var t=0,e=0;2>e;e++)if(null!==this.subnode[e]){var n=this.subnode[e].depth();n>t&&(t=n)}return t+1},nodeSize:function(){for(var t=0,e=0;2>e;e++)null!==this.subnode[e]&&(t+=this.subnode[e].nodeSize());return t+1},add:function(t){this.items.add(t)},interfaces_:function(){return[]},getClass:function(){return Zr}}),Zr.getSubnodeIndex=function(t,e){var n=-1;return t.min>=e&&(n=1),t.max<=e&&(n=0),n},e(Qr.prototype,{expandToInclude:function(t){t.max>this.max&&(this.max=t.max),t.min<this.min&&(this.min=t.min)},getWidth:function(){return this.max-this.min},overlaps:function(){if(1===arguments.length){var t=arguments[0];return this.overlaps(t.min,t.max)}if(2===arguments.length){var e=arguments[0],n=arguments[1];return!(this.min>n||this.max<e)}},getMin:function(){return this.min},toString:function(){return"["+this.min+", "+this.max+"]"},contains:function(){if(1===arguments.length){if(arguments[0]instanceof Qr){var t=arguments[0];return this.contains(t.min,t.max)}if("number"==typeof arguments[0]){var e=arguments[0];return e>=this.min&&e<=this.max}}else if(2===arguments.length){var n=arguments[0],i=arguments[1];return n>=this.min&&i<=this.max}},init:function(t,e){this.min=t,this.max=e,t>e&&(this.min=e,this.max=t)},getMax:function(){return this.max},interfaces_:function(){return[]},getClass:function(){return Qr}}),e(Jr.prototype,{getInterval:function(){return this.interval},getLevel:function(){return this.level},computeKey:function(t){for(this.level=Jr.computeLevel(t),this.interval=new Qr,this.computeInterval(this.level,t);!this.interval.contains(t);)this.level+=1,this.computeInterval(this.level,t)},computeInterval:function(t,e){var n=Ci.powerOf2(t);this.pt=Math.floor(e.getMin()/n)*n,this.interval.init(this.pt,this.pt+n)},getPoint:function(){return this.pt},interfaces_:function(){return[]},getClass:function(){return Jr}}),Jr.computeLevel=function(t){var e=t.getWidth(),n=Ci.exponent(e)+1;return n},h($r,Zr),e($r.prototype,{getInterval:function(){return this.interval},find:function(t){var e=Zr.getSubnodeIndex(t,this.centre);if(-1===e)return this;if(null!==this.subnode[e]){var n=this.subnode[e];return n.find(t)}return this},insert:function(t){f.isTrue(null===this.interval||this.interval.contains(t.interval));var e=Zr.getSubnodeIndex(t.interval,this.centre);if(t.level===this.level-1)this.subnode[e]=t;else{var n=this.createSubnode(e);n.insert(t),this.subnode[e]=n}},isSearchMatch:function(t){return t.overlaps(this.interval)},getSubnode:function(t){return null===this.subnode[t]&&(this.subnode[t]=this.createSubnode(t)),this.subnode[t]},getNode:function(t){var e=Zr.getSubnodeIndex(t,this.centre);if(-1!==e){var n=this.getSubnode(e);return n.getNode(t)}return this},createSubnode:function(t){var e=0,n=0;switch(t){case 0:e=this.interval.getMin(),n=this.centre;break;case 1:e=this.centre,n=this.interval.getMax()}var i=new Qr(e,n),r=new $r(i,this.level-1);return r},interfaces_:function(){return[]},getClass:function(){return $r}}),$r.createNode=function(t){var e=new Jr(t),n=new $r(e.getInterval(),e.getLevel());return n},$r.createExpanded=function(t,e){var n=new Qr(e);null!==t&&n.expandToInclude(t.interval);var i=$r.createNode(n);return null!==t&&i.insert(t),i},h(ts,Zr),e(ts.prototype,{insert:function(t,e){var n=Zr.getSubnodeIndex(t,ts.origin);if(-1===n)return this.add(e),null;var i=this.subnode[n];if(null===i||!i.getInterval().contains(t)){var r=$r.createExpanded(i,t);this.subnode[n]=r}this.insertContained(this.subnode[n],t,e)},isSearchMatch:function(t){return!0},insertContained:function(t,e,n){f.isTrue(t.getInterval().contains(e));var i=Ri.isZeroWidth(e.getMin(),e.getMax()),r=null;r=i?t.find(e):t.getNode(e),r.add(n)},interfaces_:function(){return[]},getClass:function(){return ts}}),ts.origin=0,e(es.prototype,{size:function(){return null!==this.root?this.root.size():0},insert:function(t,e){this.collectStats(t);var n=es.ensureExtent(t,this.minExtent);this.root.insert(n,e)},query:function(){if(1===arguments.length){if("number"==typeof arguments[0]){var t=arguments[0];return this.query(new Qr(t,t))}if(arguments[0]instanceof Qr){var e=arguments[0],n=new I;return this.query(e,n),n}}else if(2===arguments.length){var i=arguments[0],r=arguments[1];this.root.addAllItemsFromOverlapping(i,r)}},iterator:function(){var t=new I;return this.root.addAllItems(t),t.iterator()},remove:function(t,e){var n=es.ensureExtent(t,this.minExtent);return this.root.remove(n,e)},collectStats:function(t){var e=t.getWidth();e<this.minExtent&&e>0&&(this.minExtent=e)},depth:function(){return null!==this.root?this.root.depth():0},nodeSize:function(){return null!==this.root?this.root.nodeSize():0},interfaces_:function(){return[]},getClass:function(){return es}}),es.ensureExtent=function(t,e){var n=t.getMin(),i=t.getMax();return n!==i?t:(n===i&&(n-=e/2,i=n+e/2),new Qr(n,i))},e(ns.prototype,{isInside:function(t){},interfaces_:function(){return[]},getClass:function(){return ns}}),e(is.prototype,{testLineSegment:function(t,e){var n=null,i=null,r=null,s=null,o=null,a=e.p0,u=e.p1;i=a.x-t.x,r=a.y-t.y,s=u.x-t.x,o=u.y-t.y,(r>0&&0>=o||o>0&&0>=r)&&(n=ue.signOfDet2x2(i,r,s,o)/(o-r),n>0&&this.crossings++)},buildIndex:function(){this.tree=new es;for(var t=H.removeRepeatedPoints(this.ring.getCoordinates()),e=$e.getChains(t),n=0;n<e.size();n++){var i=e.get(n),r=i.getEnvelope();this.interval.min=r.getMinY(),this.interval.max=r.getMaxY(),this.tree.insert(this.interval,i)}},testMonotoneChain:function(t,e,n){n.select(t,e)},isInside:function(t){this.crossings=0;var e=new C(r.NEGATIVE_INFINITY,r.POSITIVE_INFINITY,t.y,t.y);this.interval.min=t.y,this.interval.max=t.y;for(var n=this.tree.query(this.interval),i=new rs(this,t),s=n.iterator();s.hasNext();){var o=s.next();this.testMonotoneChain(e,i,o)}return this.crossings%2===1},interfaces_:function(){return[ns]},getClass:function(){return is}}),h(rs,tr),e(rs.prototype,{select:function(){if(1!==arguments.length)return tr.prototype.select.apply(this,arguments);var t=arguments[0];this.mcp.testLineSegment(this.p,t)},interfaces_:function(){return[]},getClass:function(){return rs}}),is.MCSelecter=rs,e(ss.prototype,{insertEdgeEnds:function(t){for(var e=t.iterator();e.hasNext();){var n=e.next();this.nodes.add(n)}},getNodeIterator:function(){return this.nodes.iterator()},copyNodesAndLabels:function(t,e){for(var n=t.getNodeIterator();n.hasNext();){var i=n.next(),r=this.nodes.addNode(i.getCoordinate());r.setLabel(e,i.getLabel().getLocation(e))}},build:function(t){this.computeIntersectionNodes(t,0),this.copyNodesAndLabels(t,0);var e=new br,n=e.computeEdgeEnds(t.getEdgeIterator());this.insertEdgeEnds(n)},computeIntersectionNodes:function(t,e){for(var n=t.getEdgeIterator();n.hasNext();)for(var i=n.next(),r=i.getLabel().getLocation(e),s=i.getEdgeIntersectionList().iterator();s.hasNext();){var o=s.next(),a=this.nodes.addNode(o.coord);r===L.BOUNDARY?a.setLabelBoundary(e):a.getLabel().isNull(e)&&a.setLabel(e,L.INTERIOR)}},interfaces_:function(){return[]},getClass:function(){return ss}}),e(os.prototype,{isNodeEdgeAreaLabelsConsistent:function(){for(var t=this.nodeGraph.getNodeIterator();t.hasNext();){var e=t.next();if(!e.getEdges().isAreaLabelsConsistent(this.geomGraph))return this.invalidPoint=e.getCoordinate().copy(),!1}return!0},getInvalidPoint:function(){return this.invalidPoint},hasDuplicateRings:function(){for(var t=this.nodeGraph.getNodeIterator();t.hasNext();)for(var e=t.next(),n=e.getEdges().iterator();n.hasNext();){var i=n.next();if(i.getEdgeEnds().size()>1)return this.invalidPoint=i.getEdge().getCoordinate(0),!0}return!1},isNodeConsistentArea:function(){var t=this.geomGraph.computeSelfNodes(this.li,!0,!0);return t.hasProperIntersection()?(this.invalidPoint=t.getProperIntersectionPoint(),!1):(this.nodeGraph.build(this.geomGraph),this.isNodeEdgeAreaLabelsConsistent())},interfaces_:function(){return[]},getClass:function(){return os}}),e(as.prototype,{buildIndex:function(){this.index=new ke;for(var t=0;t<this.rings.size();t++){var e=this.rings.get(t),n=e.getEnvelopeInternal();this.index.insert(n,e)}},getNestedPoint:function(){return this.nestedPt},isNonNested:function(){this.buildIndex();for(var t=0;t<this.rings.size();t++)for(var e=this.rings.get(t),n=e.getCoordinates(),i=this.index.query(e.getEnvelopeInternal()),r=0;r<i.size();r++){var s=i.get(r),o=s.getCoordinates();if(e!==s&&e.getEnvelopeInternal().intersects(s.getEnvelopeInternal())){var a=ls.findPtNotNode(n,s,this.graph);if(null!==a){var u=he.isPointInRing(a,o);if(u)return this.nestedPt=a,!1}}}return!0},add:function(t){this.rings.add(t),this.totalEnv.expandToInclude(t.getEnvelopeInternal())},interfaces_:function(){return[]},getClass:function(){return as}}),e(us.prototype,{getErrorType:function(){return this.errorType},getMessage:function(){return us.errMsg[this.errorType]},getCoordinate:function(){return this.pt},toString:function(){var t="";return null!==this.pt&&(t=" at or near point "+this.pt),this.getMessage()+t},interfaces_:function(){return[]},getClass:function(){return us}}),us.ERROR=0,us.REPEATED_POINT=1,us.HOLE_OUTSIDE_SHELL=2,us.NESTED_HOLES=3,us.DISCONNECTED_INTERIOR=4,us.SELF_INTERSECTION=5,us.RING_SELF_INTERSECTION=6,us.NESTED_SHELLS=7,us.DUPLICATE_RINGS=8,us.TOO_FEW_POINTS=9,us.INVALID_COORDINATE=10,us.RING_NOT_CLOSED=11,us.errMsg=["Topology Validation Error","Repeated Point","Hole lies outside shell","Holes are nested","Interior is disconnected","Self-intersection","Ring Self-intersection","Nested shells","Duplicate Rings","Too few distinct points in geometry component","Invalid Coordinate","Ring is not closed"],e(ls.prototype,{checkInvalidCoordinates:function(){if(arguments[0]instanceof Array){for(var t=arguments[0],e=0;e<t.length;e++)if(!ls.isValid(t[e]))return this.validErr=new us(us.INVALID_COORDINATE,t[e]),null}else if(arguments[0]instanceof Tt){var n=arguments[0];if(this.checkInvalidCoordinates(n.getExteriorRing().getCoordinates()),null!==this.validErr)return null;for(var e=0;e<n.getNumInteriorRing();e++)if(this.checkInvalidCoordinates(n.getInteriorRingN(e).getCoordinates()),null!==this.validErr)return null}},checkHolesNotNested:function(t,e){for(var n=new as(e),i=0;i<t.getNumInteriorRing();i++){var r=t.getInteriorRingN(i);n.add(r)}var s=n.isNonNested();s||(this.validErr=new us(us.NESTED_HOLES,n.getNestedPoint()))},checkConsistentArea:function(t){var e=new os(t),n=e.isNodeConsistentArea();return n?void(e.hasDuplicateRings()&&(this.validErr=new us(us.DUPLICATE_RINGS,e.getInvalidPoint()))):(this.validErr=new us(us.SELF_INTERSECTION,e.getInvalidPoint()),null)},isValid:function(){return this.checkValid(this.parentGeometry),null===this.validErr},checkShellInsideHole:function(t,e,n){var i=t.getCoordinates(),r=e.getCoordinates(),s=ls.findPtNotNode(i,e,n);if(null!==s){var o=he.isPointInRing(s,r);if(!o)return s}var a=ls.findPtNotNode(r,t,n);if(null!==a){var u=he.isPointInRing(a,i);return u?a:null}return f.shouldNeverReachHere("points in shell and hole appear to be equal"),null},checkNoSelfIntersectingRings:function(t){for(var e=t.getEdgeIterator();e.hasNext();){var n=e.next();if(this.checkNoSelfIntersectingRing(n.getEdgeIntersectionList()),null!==this.validErr)return null}},checkConnectedInteriors:function(t){var e=new Kr(t);e.isInteriorsConnected()||(this.validErr=new us(us.DISCONNECTED_INTERIOR,e.getCoordinate()))},checkNoSelfIntersectingRing:function(t){for(var e=new at,n=!0,i=t.iterator();i.hasNext();){var r=i.next();if(n)n=!1;else{if(e.contains(r.coord))return this.validErr=new us(us.RING_SELF_INTERSECTION,r.coord),null;e.add(r.coord)}}},checkHolesInShell:function(t,e){for(var n=t.getExteriorRing(),i=new is(n),r=0;r<t.getNumInteriorRing();r++){var s=t.getInteriorRingN(r),o=ls.findPtNotNode(s.getCoordinates(),n,e);if(null===o)return null;var a=!i.isInside(o);if(a)return this.validErr=new us(us.HOLE_OUTSIDE_SHELL,o),null}},checkTooFewPoints:function(t){return t.hasTooFewPoints()?(this.validErr=new us(us.TOO_FEW_POINTS,t.getInvalidPoint()),null):void 0},getValidationError:function(){return this.checkValid(this.parentGeometry),this.validErr},checkValid:function(){if(arguments[0]instanceof Lt){var t=arguments[0];this.checkInvalidCoordinates(t.getCoordinates())}else if(arguments[0]instanceof Pt){var e=arguments[0];this.checkInvalidCoordinates(e.getCoordinates())}else if(arguments[0]instanceof bt){var n=arguments[0];if(this.checkInvalidCoordinates(n.getCoordinates()),null!==this.validErr)return null;if(this.checkClosedRing(n),null!==this.validErr)return null;var i=new $n(0,n);if(this.checkTooFewPoints(i),null!==this.validErr)return null;var r=new ae;i.computeSelfNodes(r,!0,!0),this.checkNoSelfIntersectingRings(i)}else if(arguments[0]instanceof St){var s=arguments[0];if(this.checkInvalidCoordinates(s.getCoordinates()),null!==this.validErr)return null;var i=new $n(0,s);this.checkTooFewPoints(i)}else if(arguments[0]instanceof Tt){var o=arguments[0];if(this.checkInvalidCoordinates(o),null!==this.validErr)return null;if(this.checkClosedRings(o),null!==this.validErr)return null;var i=new $n(0,o);if(this.checkTooFewPoints(i),null!==this.validErr)return null;if(this.checkConsistentArea(i),null!==this.validErr)return null;if(!this.isSelfTouchingRingFormingHoleValid&&(this.checkNoSelfIntersectingRings(i),null!==this.validErr))return null;if(this.checkHolesInShell(o,i),null!==this.validErr)return null;if(this.checkHolesNotNested(o,i),null!==this.validErr)return null;this.checkConnectedInteriors(i)}else if(arguments[0]instanceof Ot){for(var a=arguments[0],u=0;u<a.getNumGeometries();u++){var l=a.getGeometryN(u);if(this.checkInvalidCoordinates(l),null!==this.validErr)return null;if(this.checkClosedRings(l),null!==this.validErr)return null}var i=new $n(0,a);if(this.checkTooFewPoints(i),null!==this.validErr)return null;if(this.checkConsistentArea(i),null!==this.validErr)return null;if(!this.isSelfTouchingRingFormingHoleValid&&(this.checkNoSelfIntersectingRings(i),null!==this.validErr))return null;for(var u=0;u<a.getNumGeometries();u++){var l=a.getGeometryN(u);if(this.checkHolesInShell(l,i),null!==this.validErr)return null}for(var u=0;u<a.getNumGeometries();u++){var l=a.getGeometryN(u);if(this.checkHolesNotNested(l,i),null!==this.validErr)return null}if(this.checkShellsNotNested(a,i),null!==this.validErr)return null;this.checkConnectedInteriors(i)}else if(arguments[0]instanceof ft)for(var h=arguments[0],u=0;u<h.getNumGeometries();u++){var c=h.getGeometryN(u);if(this.checkValid(c),null!==this.validErr)return null}else if(arguments[0]instanceof B){var f=arguments[0];if(this.validErr=null,f.isEmpty())return null;if(f instanceof Lt)this.checkValid(f);else if(f instanceof Pt)this.checkValid(f);else if(f instanceof bt)this.checkValid(f);else if(f instanceof St)this.checkValid(f);else if(f instanceof Tt)this.checkValid(f);else if(f instanceof Ot)this.checkValid(f);else{if(!(f instanceof ft))throw new UnsupportedOperationException(f.getClass().getName());this.checkValid(f)}}},setSelfTouchingRingFormingHoleValid:function(t){this.isSelfTouchingRingFormingHoleValid=t},checkShellNotNested:function(t,e,n){var i=t.getCoordinates(),r=e.getExteriorRing(),s=r.getCoordinates(),o=ls.findPtNotNode(i,r,n);if(null===o)return null;var a=he.isPointInRing(o,s);if(!a)return null;if(e.getNumInteriorRing()<=0)return this.validErr=new us(us.NESTED_SHELLS,o),null;for(var u=null,l=0;l<e.getNumInteriorRing();l++){var h=e.getInteriorRingN(l);if(u=this.checkShellInsideHole(t,h,n),null===u)return null}this.validErr=new us(us.NESTED_SHELLS,u)},checkClosedRings:function(t){if(this.checkClosedRing(t.getExteriorRing()),null!==this.validErr)return null;for(var e=0;e<t.getNumInteriorRing();e++)if(this.checkClosedRing(t.getInteriorRingN(e)),null!==this.validErr)return null},checkClosedRing:function(t){if(!t.isClosed()){var e=null;t.getNumPoints()>=1&&(e=t.getCoordinateN(0)),this.validErr=new us(us.RING_NOT_CLOSED,e)}},checkShellsNotNested:function(t,e){for(var n=0;n<t.getNumGeometries();n++)for(var i=t.getGeometryN(n),r=i.getExteriorRing(),s=0;s<t.getNumGeometries();s++)if(n!==s){var o=t.getGeometryN(s);if(this.checkShellNotNested(r,o,e),null!==this.validErr)return null}},interfaces_:function(){return[]},getClass:function(){return ls}}),ls.findPtNotNode=function(t,e,n){for(var i=n.findEdge(e),r=i.getEdgeIntersectionList(),s=0;s<t.length;s++){var o=t[s];if(!r.isIntersection(o))return o}return null},ls.isValid=function(){if(arguments[0]instanceof B){var t=arguments[0],e=new ls(t);return e.isValid()}if(arguments[0]instanceof g){var n=arguments[0];return r.isNaN(n.x)?!1:r.isInfinite(n.x)?!1:r.isNaN(n.y)?!1:!r.isInfinite(n.y)}};var bo=Object.freeze({IsValidOp:ls}),Oo=Object.freeze({BoundaryOp:dt,IsSimpleOp:Gi,buffer:Co,distance:So,linemerge:wo,overlay:Lo,polygonize:Ro,relate:To,union:Po,valid:bo});h(hs,_t.CoordinateOperation),e(hs.prototype,{editCoordinates:function(t,e){if(0===t.length)return null;for(var n=new Array(t.length).fill(null),i=0;i<t.length;i++){var r=new g(t[i]);this.targetPM.makePrecise(r),n[i]=r}var s=new N(n,!1),o=s.toCoordinateArray(),a=0;e instanceof St&&(a=2),e instanceof bt&&(a=4);var u=n;return this.removeCollapsed&&(u=null),o.length<a?u:o},interfaces_:function(){return[]},getClass:function(){return hs}}),e(cs.prototype,{fixPolygonalTopology:function(t){var e=t;this.changePrecisionModel||(e=this.changePM(t,this.targetPM));var n=e.buffer(0),i=n;return this.changePrecisionModel||(i=t.getFactory().createGeometry(n)),i},reducePointwise:function(t){var e=null;if(this.changePrecisionModel){var n=this.createFactory(t.getFactory(),this.targetPM);e=new _t(n)}else e=new _t;var i=this.removeCollapsed;t.getDimension()>=2&&(i=!0);var r=e.edit(t,new hs(this.targetPM,i));return r},changePM:function(t,e){var n=this.createEditor(t.getFactory(),e);return n.edit(t,new _t.NoOpGeometryOperation)},setRemoveCollapsedComponents:function(t){this.removeCollapsed=t},createFactory:function(t,e){var n=new ie(e,t.getSRID(),t.getCoordinateSequenceFactory());return n},setChangePrecisionModel:function(t){this.changePrecisionModel=t},reduce:function(t){var e=this.reducePointwise(t);return this.isPointwise?e:R(e,Rt)?e.isValid()?e:this.fixPolygonalTopology(e):e},setPointwise:function(t){this.isPointwise=t},createEditor:function(t,e){if(t.getPrecisionModel()===e)return new _t;var n=this.createFactory(t,e),i=new _t(n);return i},interfaces_:function(){return[]},getClass:function(){return cs}}),cs.reduce=function(t,e){var n=new cs(e);return n.reduce(t)},cs.reducePointwise=function(t,e){var n=new cs(e);return n.setPointwise(!0),n.reduce(t)};var _o=Object.freeze({GeometryPrecisionReducer:cs});e(fs.prototype,{simplifySection:function(t,e){if(t+1===e)return null;this.seg.p0=this.pts[t],this.seg.p1=this.pts[e];for(var n=-1,i=t,r=t+1;e>r;r++){var s=this.seg.distance(this.pts[r]);s>n&&(n=s,i=r)}if(n<=this.distanceTolerance)for(var r=t+1;e>r;r++)this.usePt[r]=!1;else this.simplifySection(t,i),this.simplifySection(i,e)},setDistanceTolerance:function(t){this.distanceTolerance=t},simplify:function(){this.usePt=new Array(this.pts.length).fill(null);for(var t=0;t<this.pts.length;t++)this.usePt[t]=!0;this.simplifySection(0,this.pts.length-1);for(var e=new N,t=0;t<this.pts.length;t++)this.usePt[t]&&e.add(new g(this.pts[t]));return e.toCoordinateArray()},interfaces_:function(){return[]},getClass:function(){return fs}}),fs.simplify=function(t,e){var n=new fs(t);return n.setDistanceTolerance(e),n.simplify()},e(gs.prototype,{setEnsureValid:function(t){this.isEnsureValidTopology=t},getResultGeometry:function(){return this.inputGeom.isEmpty()?this.inputGeom.copy():new ds(this.isEnsureValidTopology,this.distanceTolerance).transform(this.inputGeom)},setDistanceTolerance:function(t){if(0>t)throw new i("Tolerance must be non-negative");this.distanceTolerance=t},interfaces_:function(){return[]},getClass:function(){return gs}}),gs.simplify=function(t,e){var n=new gs(t);return n.setDistanceTolerance(e),n.getResultGeometry()},h(ds,xe),e(ds.prototype,{transformPolygon:function(t,e){if(t.isEmpty())return null;var n=xe.prototype.transformPolygon.call(this,t,e);return e instanceof Ot?n:this.createValidArea(n)},createValidArea:function(t){return this.isEnsureValidTopology?t.buffer(0):t},transformCoordinates:function(t,e){var n=t.toCoordinateArray(),i=null;return i=0===n.length?new Array(0).fill(null):fs.simplify(n,this.distanceTolerance),this.factory.getCoordinateSequenceFactory().create(i)},transformMultiPolygon:function(t,e){var n=xe.prototype.transformMultiPolygon.call(this,t,e);return this.createValidArea(n)},transformLinearRing:function(t,e){var n=e instanceof Tt,i=xe.prototype.transformLinearRing.call(this,t,e);return!n||i instanceof bt?i:null},interfaces_:function(){return[]},getClass:function(){return ds}}),gs.DPTransformer=ds,h(ps,ce),e(ps.prototype,{getIndex:function(){return this.index},getParent:function(){return this.parent},interfaces_:function(){return[]},getClass:function(){return ps}}),e(vs.prototype,{addToResult:function(t){this.resultSegs.add(t)},asLineString:function(){return this.parentLine.getFactory().createLineString(vs.extractCoordinates(this.resultSegs))},getResultSize:function(){var t=this.resultSegs.size();return 0===t?0:t+1},getParent:function(){return this.parentLine},getSegment:function(t){return this.segs[t]},getParentCoordinates:function(){return this.parentLine.getCoordinates()},getMinimumSize:function(){return this.minimumSize},asLinearRing:function(){return this.parentLine.getFactory().createLinearRing(vs.extractCoordinates(this.resultSegs))},getSegments:function(){return this.segs},init:function(){var t=this.parentLine.getCoordinates();this.segs=new Array(t.length-1).fill(null);for(var e=0;e<t.length-1;e++){var n=new ps(t[e],t[e+1],this.parentLine,e);this.segs[e]=n}},getResultCoordinates:function(){return vs.extractCoordinates(this.resultSegs)},interfaces_:function(){return[]},getClass:function(){return vs}}),vs.extractCoordinates=function(t){for(var e=new Array(t.size()+1).fill(null),n=null,i=0;i<t.size();i++)n=t.get(i),e[i]=n.p0;return e[e.length-1]=n.p1,e},e(ms.prototype,{remove:function(t){this.index.remove(new C(t.p0,t.p1),t)},add:function(){if(arguments[0]instanceof vs)for(var t=arguments[0],e=t.getSegments(),n=0;n<e.length;n++){var i=e[n];this.add(i)}else if(arguments[0]instanceof ce){var r=arguments[0];this.index.insert(new C(r.p0,r.p1),r)}},query:function(t){var e=new C(t.p0,t.p1),n=new ys(t);this.index.query(e,n);var i=n.getItems();return i},interfaces_:function(){return[]},getClass:function(){return ms}}),e(ys.prototype,{visitItem:function(t){var e=t;C.intersects(e.p0,e.p1,this.querySeg.p0,this.querySeg.p1)&&this.items.add(t)},getItems:function(){return this.items},interfaces_:function(){return[Ae]},getClass:function(){return ys}}),e(xs.prototype,{flatten:function(t,e){var n=this.linePts[t],i=this.linePts[e],r=new ce(n,i);return this.remove(this.line,t,e),this.outputIndex.add(r),r},hasBadIntersection:function(t,e,n){return this.hasBadOutputIntersection(n)?!0:!!this.hasBadInputIntersection(t,e,n)},setDistanceTolerance:function(t){this.distanceTolerance=t},simplifySection:function(t,e,n){n+=1;var i=new Array(2).fill(null);if(t+1===e){var r=this.line.getSegment(t);return this.line.addToResult(r),null}var s=!0;if(this.line.getResultSize()<this.line.getMinimumSize()){var o=n+1;o<this.line.getMinimumSize()&&(s=!1)}var a=new Array(1).fill(null),u=this.findFurthestPoint(this.linePts,t,e,a);a[0]>this.distanceTolerance&&(s=!1);var l=new ce;if(l.p0=this.linePts[t],l.p1=this.linePts[e],i[0]=t,i[1]=e,this.hasBadIntersection(this.line,i,l)&&(s=!1),s){var r=this.flatten(t,e);return this.line.addToResult(r),null}this.simplifySection(t,u,n),this.simplifySection(u,e,n)},hasBadOutputIntersection:function(t){for(var e=this.outputIndex.query(t),n=e.iterator();n.hasNext();){var i=n.next();if(this.hasInteriorIntersection(i,t))return!0}return!1},findFurthestPoint:function(t,e,n,i){var r=new ce;r.p0=t[e],r.p1=t[n];for(var s=-1,o=e,a=e+1;n>a;a++){var u=t[a],l=r.distance(u);l>s&&(s=l,o=a)}return i[0]=s,o},simplify:function(t){this.line=t,this.linePts=t.getParentCoordinates(),this.simplifySection(0,this.linePts.length-1,0)},remove:function(t,e,n){for(var i=e;n>i;i++){var r=t.getSegment(i);this.inputIndex.remove(r)}},hasInteriorIntersection:function(t,e){return this.li.computeIntersection(t.p0,t.p1,e.p0,e.p1),this.li.isInteriorIntersection()},hasBadInputIntersection:function(t,e,n){for(var i=this.inputIndex.query(n),r=i.iterator();r.hasNext();){var s=r.next();if(this.hasInteriorIntersection(s,n)){if(xs.isInLineSection(t,e,s))continue;return!0}}return!1},interfaces_:function(){return[]},getClass:function(){return xs}}),xs.isInLineSection=function(t,e,n){if(n.getParent()!==t.getParent())return!1;var i=n.getIndex();return i>=e[0]&&i<e[1]},e(Es.prototype,{setDistanceTolerance:function(t){this.distanceTolerance=t},simplify:function(t){for(var e=t.iterator();e.hasNext();)this.inputIndex.add(e.next());for(var e=t.iterator();e.hasNext();){var n=new xs(this.inputIndex,this.outputIndex);n.setDistanceTolerance(this.distanceTolerance),n.simplify(e.next())}},interfaces_:function(){return[]},getClass:function(){return Es}}),e(Is.prototype,{getResultGeometry:function(){if(this.inputGeom.isEmpty())return this.inputGeom.copy();this.linestringMap=new te,this.inputGeom.apply(new Cs(this)),this.lineSimplifier.simplify(this.linestringMap.values());var t=new Ns(this.linestringMap).transform(this.inputGeom);return t},setDistanceTolerance:function(t){if(0>t)throw new i("Tolerance must be non-negative");this.lineSimplifier.setDistanceTolerance(t)},interfaces_:function(){return[]},getClass:function(){return Is}}),Is.simplify=function(t,e){var n=new Is(t);return n.setDistanceTolerance(e),n.getResultGeometry()},h(Ns,xe),e(Ns.prototype,{transformCoordinates:function(t,e){if(0===t.size())return null;if(e instanceof St){var n=this.linestringMap.get(e);return this.createCoordinateSequence(n.getResultCoordinates())}return xe.prototype.transformCoordinates.call(this,t,e)},interfaces_:function(){return[]},getClass:function(){return Ns}}),e(Cs.prototype,{filter:function(t){if(t instanceof St){var e=t;if(e.isEmpty())return null;var n=e.isClosed()?4:2,i=new vs(e,n);this.tps.linestringMap.put(e,i)}},interfaces_:function(){return[q]},getClass:function(){return Cs}}),Is.LineStringTransformer=Ns,Is.LineStringMapBuilderFilter=Cs;var Mo=Object.freeze({DouglasPeuckerSimplifier:gs,TopologyPreservingSimplifier:Is});e(Ss.prototype,{splitAt:function(){if(1===arguments.length){var t=arguments[0],e=this.minimumLen/this.segLen;if(t.distance(this.seg.p0)<this.minimumLen)return this.splitPt=this.seg.pointAlong(e),null;if(t.distance(this.seg.p1)<this.minimumLen)return this.splitPt=Ss.pointAlongReverse(this.seg,e),null;this.splitPt=t}else if(2===arguments.length){var n=arguments[0],i=arguments[1],r=this.getConstrainedLength(n),s=r/this.segLen;i.equals2D(this.seg.p0)?this.splitPt=this.seg.pointAlong(s):this.splitPt=Ss.pointAlongReverse(this.seg,s)}},setMinimumLength:function(t){this.minimumLen=t},getConstrainedLength:function(t){return t<this.minimumLen?this.minimumLen:t},getSplitPoint:function(){return this.splitPt},interfaces_:function(){return[]},getClass:function(){return Ss}}),Ss.pointAlongReverse=function(t,e){var n=new g;return n.x=t.p1.x-e*(t.p1.x-t.p0.x),n.y=t.p1.y-e*(t.p1.y-t.p0.y),n},e(ws.prototype,{findSplitPoint:function(t,e){},interfaces_:function(){return[]},getClass:function(){return ws}}),e(Ls.prototype,{findSplitPoint:function(t,e){var n=t.getLineSegment(),i=n.getLength(),r=i/2,s=new Ss(n),o=Ls.projectedSplitPoint(t,e),a=2*o.distance(e)*.8,u=a;return u>r&&(u=r),s.setMinimumLength(u),s.splitAt(o),s.getSplitPoint()},interfaces_:function(){return[ws]},getClass:function(){return Ls}}),Ls.projectedSplitPoint=function(t,e){var n=t.getLineSegment(),i=n.project(e);return i},e(Rs.prototype,{interfaces_:function(){return[]},getClass:function(){return Rs}}),Rs.triArea=function(t,e,n){return(e.x-t.x)*(n.y-t.y)-(e.y-t.y)*(n.x-t.x)},Rs.isInCircleDDNormalized=function(t,e,n,i){var r=_.valueOf(t.x).selfSubtract(i.x),s=_.valueOf(t.y).selfSubtract(i.y),o=_.valueOf(e.x).selfSubtract(i.x),a=_.valueOf(e.y).selfSubtract(i.y),u=_.valueOf(n.x).selfSubtract(i.x),l=_.valueOf(n.y).selfSubtract(i.y),h=r.multiply(a).selfSubtract(o.multiply(s)),c=o.multiply(l).selfSubtract(u.multiply(a)),f=u.multiply(s).selfSubtract(r.multiply(l)),g=r.multiply(r).selfAdd(s.multiply(s)),d=o.multiply(o).selfAdd(a.multiply(a)),p=u.multiply(u).selfAdd(l.multiply(l)),v=g.selfMultiply(c).selfAdd(d.selfMultiply(f)).selfAdd(p.selfMultiply(h)),m=v.doubleValue()>0;return m},Rs.checkRobustInCircle=function(t,e,n,i){var r=Rs.isInCircleNonRobust(t,e,n,i),s=Rs.isInCircleDDSlow(t,e,n,i),o=Rs.isInCircleCC(t,e,n,i),a=ci.circumcentre(t,e,n);A.out.println("p radius diff a = "+Math.abs(i.distance(a)-t.distance(a))/t.distance(a)),r===s&&r===o||(A.out.println("inCircle robustness failure (double result = "+r+", DD result = "+s+", CC result = "+o+")"),A.out.println(se.toLineString(new Gt([t,e,n,i]))),A.out.println("Circumcentre = "+se.toPoint(a)+" radius = "+t.distance(a)),A.out.println("p radius diff a = "+Math.abs(i.distance(a)/t.distance(a)-1)),A.out.println("p radius diff b = "+Math.abs(i.distance(a)/e.distance(a)-1)),A.out.println("p radius diff c = "+Math.abs(i.distance(a)/n.distance(a)-1)),A.out.println())},Rs.isInCircleDDFast=function(t,e,n,i){var r=_.sqr(t.x).selfAdd(_.sqr(t.y)).selfMultiply(Rs.triAreaDDFast(e,n,i)),s=_.sqr(e.x).selfAdd(_.sqr(e.y)).selfMultiply(Rs.triAreaDDFast(t,n,i)),o=_.sqr(n.x).selfAdd(_.sqr(n.y)).selfMultiply(Rs.triAreaDDFast(t,e,i)),a=_.sqr(i.x).selfAdd(_.sqr(i.y)).selfMultiply(Rs.triAreaDDFast(t,e,n)),u=r.selfSubtract(s).selfAdd(o).selfSubtract(a),l=u.doubleValue()>0;return l},Rs.isInCircleCC=function(t,e,n,i){var r=ci.circumcentre(t,e,n),s=t.distance(r),o=i.distance(r)-s;return 0>=o},Rs.isInCircleNormalized=function(t,e,n,i){var r=t.x-i.x,s=t.y-i.y,o=e.x-i.x,a=e.y-i.y,u=n.x-i.x,l=n.y-i.y,h=r*a-o*s,c=o*l-u*a,f=u*s-r*l,g=r*r+s*s,d=o*o+a*a,p=u*u+l*l,v=g*c+d*f+p*h;return v>0},Rs.isInCircleDDSlow=function(t,e,n,i){var r=_.valueOf(i.x),s=_.valueOf(i.y),o=_.valueOf(t.x),a=_.valueOf(t.y),u=_.valueOf(e.x),l=_.valueOf(e.y),h=_.valueOf(n.x),c=_.valueOf(n.y),f=o.multiply(o).add(a.multiply(a)).multiply(Rs.triAreaDDSlow(u,l,h,c,r,s)),g=u.multiply(u).add(l.multiply(l)).multiply(Rs.triAreaDDSlow(o,a,h,c,r,s)),d=h.multiply(h).add(c.multiply(c)).multiply(Rs.triAreaDDSlow(o,a,u,l,r,s)),p=r.multiply(r).add(s.multiply(s)).multiply(Rs.triAreaDDSlow(o,a,u,l,h,c)),v=f.subtract(g).add(d).subtract(p),m=v.doubleValue()>0;
 return m},Rs.isInCircleNonRobust=function(t,e,n,i){var r=(t.x*t.x+t.y*t.y)*Rs.triArea(e,n,i)-(e.x*e.x+e.y*e.y)*Rs.triArea(t,n,i)+(n.x*n.x+n.y*n.y)*Rs.triArea(t,e,i)-(i.x*i.x+i.y*i.y)*Rs.triArea(t,e,n)>0;return r},Rs.isInCircleRobust=function(t,e,n,i){return Rs.isInCircleNormalized(t,e,n,i)},Rs.triAreaDDSlow=function(t,e,n,i,r,s){return n.subtract(t).multiply(s.subtract(e)).subtract(i.subtract(e).multiply(r.subtract(t)))},Rs.triAreaDDFast=function(t,e,n){var i=_.valueOf(e.x).selfSubtract(t.x).selfMultiply(_.valueOf(n.y).selfSubtract(t.y)),r=_.valueOf(e.y).selfSubtract(t.y).selfMultiply(_.valueOf(n.x).selfSubtract(t.x));return i.selfSubtract(r)},e(Ts.prototype,{circleCenter:function(t,e){var n=new Ts(this.getX(),this.getY()),i=this.bisector(n,t),r=this.bisector(t,e),s=new F(i,r),o=null;try{o=new Ts(s.getX(),s.getY())}catch(i){if(!(i instanceof w))throw i;A.err.println("a: "+n+"  b: "+t+"  c: "+e),A.err.println(i)}finally{}return o},dot:function(t){return this.p.x*t.getX()+this.p.y*t.getY()},magn:function(){return Math.sqrt(this.p.x*this.p.x+this.p.y*this.p.y)},getZ:function(){return this.p.z},bisector:function(t,e){var n=e.getX()-t.getX(),i=e.getY()-t.getY(),r=new F(t.getX()+n/2,t.getY()+i/2,1),s=new F(t.getX()-i+n/2,t.getY()+n+i/2,1);return new F(r,s)},equals:function(){if(1===arguments.length){var t=arguments[0];return this.p.x===t.getX()&&this.p.y===t.getY()}if(2===arguments.length){var e=arguments[0],n=arguments[1];return this.p.distance(e.getCoordinate())<n}},getCoordinate:function(){return this.p},isInCircle:function(t,e,n){return Rs.isInCircleRobust(t.p,e.p,n.p,this.p)},interpolateZValue:function(t,e,n){var i=t.getX(),r=t.getY(),s=e.getX()-i,o=n.getX()-i,a=e.getY()-r,u=n.getY()-r,l=s*u-o*a,h=this.getX()-i,c=this.getY()-r,f=(u*h-o*c)/l,g=(-a*h+s*c)/l,d=t.getZ()+f*(e.getZ()-t.getZ())+g*(n.getZ()-t.getZ());return d},midPoint:function(t){var e=(this.p.x+t.getX())/2,n=(this.p.y+t.getY())/2,i=(this.p.z+t.getZ())/2;return new Ts(e,n,i)},rightOf:function(t){return this.isCCW(t.dest(),t.orig())},isCCW:function(t,e){return(t.p.x-this.p.x)*(e.p.y-this.p.y)-(t.p.y-this.p.y)*(e.p.x-this.p.x)>0},getX:function(){return this.p.x},crossProduct:function(t){return this.p.x*t.getY()-this.p.y*t.getX()},setZ:function(t){this.p.z=t},times:function(t){return new Ts(t*this.p.x,t*this.p.y)},cross:function(){return new Ts(this.p.y,-this.p.x)},leftOf:function(t){return this.isCCW(t.orig(),t.dest())},toString:function(){return"POINT ("+this.p.x+" "+this.p.y+")"},sub:function(t){return new Ts(this.p.x-t.getX(),this.p.y-t.getY())},getY:function(){return this.p.y},classify:function(t,e){var n=this,i=e.sub(t),r=n.sub(t),s=i.crossProduct(r);return s>0?Ts.LEFT:0>s?Ts.RIGHT:i.getX()*r.getX()<0||i.getY()*r.getY()<0?Ts.BEHIND:i.magn()<r.magn()?Ts.BEYOND:t.equals(n)?Ts.ORIGIN:e.equals(n)?Ts.DESTINATION:Ts.BETWEEN},sum:function(t){return new Ts(this.p.x+t.getX(),this.p.y+t.getY())},distance:function(t,e){return Math.sqrt(Math.pow(e.getX()-t.getX(),2)+Math.pow(e.getY()-t.getY(),2))},circumRadiusRatio:function(t,e){var n=this.circleCenter(t,e),i=this.distance(n,t),r=this.distance(this,t),s=this.distance(t,e);return r>s&&(r=s),s=this.distance(e,this),r>s&&(r=s),i/r},interfaces_:function(){return[]},getClass:function(){return Ts}}),Ts.interpolateZ=function(){if(3===arguments.length){var t=arguments[0],e=arguments[1],n=arguments[2],i=e.distance(n),r=t.distance(e),s=n.z-e.z,o=e.z+s*(r/i);return o}if(4===arguments.length){var a=arguments[0],u=arguments[1],l=arguments[2],h=arguments[3],c=u.x,f=u.y,g=l.x-c,d=h.x-c,p=l.y-f,v=h.y-f,m=g*v-d*p,y=a.x-c,x=a.y-f,E=(v*y-d*x)/m,I=(-p*y+g*x)/m,N=u.z+E*(l.z-u.z)+I*(h.z-u.z);return N}},Ts.LEFT=0,Ts.RIGHT=1,Ts.BEYOND=2,Ts.BEHIND=3,Ts.BETWEEN=4,Ts.ORIGIN=5,Ts.DESTINATION=6,h(Ps,Ts),e(Ps.prototype,{getConstraint:function(){return this.constraint},setOnConstraint:function(t){this._isOnConstraint=t},merge:function(t){t._isOnConstraint&&(this._isOnConstraint=!0,this.constraint=t.constraint)},isOnConstraint:function(){return this._isOnConstraint},setConstraint:function(t){this._isOnConstraint=!0,this.constraint=t},interfaces_:function(){return[]},getClass:function(){return Ps}}),e(bs.prototype,{equalsNonOriented:function(t){return this.equalsOriented(t)?!0:!!this.equalsOriented(t.sym())},toLineSegment:function(){return new ce(this.vertex.getCoordinate(),this.dest().getCoordinate())},dest:function(){return this.sym().orig()},oNext:function(){return this.next},equalsOriented:function(t){return!(!this.orig().getCoordinate().equals2D(t.orig().getCoordinate())||!this.dest().getCoordinate().equals2D(t.dest().getCoordinate()))},dNext:function(){return this.sym().oNext().sym()},lPrev:function(){return this.next.sym()},rPrev:function(){return this.sym().oNext()},rot:function(){return this._rot},oPrev:function(){return this._rot.next._rot},sym:function(){return this._rot._rot},setOrig:function(t){this.vertex=t},lNext:function(){return this.invRot().oNext().rot()},getLength:function(){return this.orig().getCoordinate().distance(this.dest().getCoordinate())},invRot:function(){return this._rot.sym()},setDest:function(t){this.sym().setOrig(t)},setData:function(t){this.data=t},getData:function(){return this.data},delete:function(){this._rot=null},orig:function(){return this.vertex},rNext:function(){return this._rot.next.invRot()},toString:function(){var t=this.vertex.getCoordinate(),e=this.dest().getCoordinate();return se.toLineString(t,e)},isLive:function(){return null!==this._rot},getPrimary:function(){return this.orig().getCoordinate().compareTo(this.dest().getCoordinate())<=0?this:this.sym()},dPrev:function(){return this.invRot().oNext().invRot()},setNext:function(t){this.next=t},interfaces_:function(){return[]},getClass:function(){return bs}}),bs.makeEdge=function(t,e){var n=new bs,i=new bs,r=new bs,s=new bs;n._rot=i,i._rot=r,r._rot=s,s._rot=n,n.setNext(n),i.setNext(s),r.setNext(r),s.setNext(i);var o=n;return o.setOrig(t),o.setDest(e),o},bs.swap=function(t){var e=t.oPrev(),n=t.sym().oPrev();bs.splice(t,e),bs.splice(t.sym(),n),bs.splice(t,e.lNext()),bs.splice(t.sym(),n.lNext()),t.setOrig(e.dest()),t.setDest(n.dest())},bs.splice=function(t,e){var n=t.oNext().rot(),i=e.oNext().rot(),r=e.oNext(),s=t.oNext(),o=i.oNext(),a=n.oNext();t.setNext(r),e.setNext(s),n.setNext(o),i.setNext(a)},bs.connect=function(t,e){var n=bs.makeEdge(t.dest(),e.orig());return bs.splice(n,t.lNext()),bs.splice(n.sym(),e),n},e(Os.prototype,{insertSite:function(t){var e=this.subdiv.locate(t);if(this.subdiv.isVertexOfEdge(e,t))return e;this.subdiv.isOnEdge(e,t.getCoordinate())&&(e=e.oPrev(),this.subdiv.delete(e.oNext()));var n=this.subdiv.makeEdge(e.orig(),t);bs.splice(n,e);var i=n;do n=this.subdiv.connect(e,n.sym()),e=n.oPrev();while(e.lNext()!==i);for(;;){var r=e.oPrev();if(r.dest().rightOf(e)&&t.isInCircle(e.orig(),r.dest(),e.dest()))bs.swap(e),e=e.oPrev();else{if(e.oNext()===i)return n;e=e.oNext().lPrev()}}},insertSites:function(t){for(var e=t.iterator();e.hasNext();){var n=e.next();this.insertSite(n)}},interfaces_:function(){return[]},getClass:function(){return Os}}),e(_s.prototype,{locate:function(t){},interfaces_:function(){return[]},getClass:function(){return _s}}),e(Ms.prototype,{init:function(){this.lastEdge=this.findEdge()},locate:function(t){this.lastEdge.isLive()||this.init();var e=this.subdiv.locateFromEdge(t,this.lastEdge);return this.lastEdge=e,e},findEdge:function(){var t=this.subdiv.getEdges();return t.iterator().next()},interfaces_:function(){return[_s]},getClass:function(){return Ms}}),h(Ds,l),e(Ds.prototype,{getSegment:function(){return this.seg},interfaces_:function(){return[]},getClass:function(){return Ds}}),Ds.msgWithSpatial=function(t,e){return null!==e?t+" [ "+e+" ]":t},e(As.prototype,{visit:function(t){},interfaces_:function(){return[]},getClass:function(){return As}}),e(Fs.prototype,{getTriangleVertices:function(t){var e=new Bs;return this.visitTriangles(e,t),e.getTriangleVertices()},isFrameVertex:function(t){return t.equals(this.frameVertex[0])?!0:t.equals(this.frameVertex[1])?!0:!!t.equals(this.frameVertex[2])},isVertexOfEdge:function(t,e){return!(!e.equals(t.orig(),this.tolerance)&&!e.equals(t.dest(),this.tolerance))},connect:function(t,e){var n=bs.connect(t,e);return this.quadEdges.add(n),n},getVoronoiCellPolygon:function(t,e){var n=new I,i=t;do{var r=t.rot().orig().getCoordinate();n.add(r),t=t.oPrev()}while(t!==i);var s=new N;s.addAll(n,!1),s.closeRing(),s.size()<4&&(A.out.println(s),s.add(s.get(s.size()-1),!0));var o=s.toCoordinateArray(),a=e.createPolygon(e.createLinearRing(o),null),u=i.orig();return a.setUserData(u.getCoordinate()),a},setLocator:function(t){this.locator=t},initSubdiv:function(){var t=this.makeEdge(this.frameVertex[0],this.frameVertex[1]),e=this.makeEdge(this.frameVertex[1],this.frameVertex[2]);bs.splice(t.sym(),e);var n=this.makeEdge(this.frameVertex[2],this.frameVertex[0]);return bs.splice(e.sym(),n),bs.splice(n.sym(),t),t},isFrameBorderEdge:function(t){var e=new Array(3).fill(null);Fs.getTriangleEdges(t,e);var n=new Array(3).fill(null);Fs.getTriangleEdges(t.sym(),n);var i=t.lNext().dest();if(this.isFrameVertex(i))return!0;var r=t.sym().lNext().dest();return!!this.isFrameVertex(r)},makeEdge:function(t,e){var n=bs.makeEdge(t,e);return this.quadEdges.add(n),n},visitTriangles:function(t,e){this.visitedKey++;var n=new pe;n.push(this.startingEdge);for(var i=new J;!n.empty();){var r=n.pop();if(!i.contains(r)){var s=this.fetchTriangleToVisit(r,n,e,i);null!==s&&t.visit(s)}}},isFrameEdge:function(t){return!(!this.isFrameVertex(t.orig())&&!this.isFrameVertex(t.dest()))},isOnEdge:function(t,e){this.seg.setCoordinates(t.orig().getCoordinate(),t.dest().getCoordinate());var n=this.seg.distance(e);return n<this.edgeCoincidenceTolerance},getEnvelope:function(){return new C(this.frameEnv)},createFrame:function(t){var e=t.getWidth(),n=t.getHeight(),i=0;i=e>n?10*e:10*n,this.frameVertex[0]=new Ts((t.getMaxX()+t.getMinX())/2,t.getMaxY()+i),this.frameVertex[1]=new Ts(t.getMinX()-i,t.getMinY()-i),this.frameVertex[2]=new Ts(t.getMaxX()+i,t.getMinY()-i),this.frameEnv=new C(this.frameVertex[0].getCoordinate(),this.frameVertex[1].getCoordinate()),this.frameEnv.expandToInclude(this.frameVertex[2].getCoordinate())},getTriangleCoordinates:function(t){var e=new zs;return this.visitTriangles(e,t),e.getTriangles()},getVertices:function(t){for(var e=new J,n=this.quadEdges.iterator();n.hasNext();){var i=n.next(),r=i.orig();!t&&this.isFrameVertex(r)||e.add(r);var s=i.dest();!t&&this.isFrameVertex(s)||e.add(s)}return e},fetchTriangleToVisit:function(t,e,n,i){var r=t,s=0,o=!1;do{this.triEdges[s]=r,this.isFrameEdge(r)&&(o=!0);var a=r.sym();i.contains(a)||e.push(a),i.add(r),s++,r=r.lNext()}while(r!==t);return o&&!n?null:this.triEdges},getEdges:function(){if(0===arguments.length)return this.quadEdges;if(1===arguments.length){for(var t=arguments[0],e=this.getPrimaryEdges(!1),n=new Array(e.size()).fill(null),i=0,r=e.iterator();r.hasNext();){var s=r.next();n[i++]=t.createLineString([s.orig().getCoordinate(),s.dest().getCoordinate()])}return t.createMultiLineString(n)}},getVertexUniqueEdges:function(t){for(var e=new I,n=new J,i=this.quadEdges.iterator();i.hasNext();){var r=i.next(),s=r.orig();n.contains(s)||(n.add(s),!t&&this.isFrameVertex(s)||e.add(r));var o=r.sym(),a=o.orig();n.contains(a)||(n.add(a),!t&&this.isFrameVertex(a)||e.add(o))}return e},getTriangleEdges:function(t){var e=new qs;return this.visitTriangles(e,t),e.getTriangleEdges()},getPrimaryEdges:function(t){this.visitedKey++;var e=new I,n=new pe;n.push(this.startingEdge);for(var i=new J;!n.empty();){var r=n.pop();if(!i.contains(r)){var s=r.getPrimary();!t&&this.isFrameEdge(s)||e.add(s),n.push(r.oNext()),n.push(r.sym().oNext()),i.add(r),i.add(r.sym())}}return e},delete:function(t){bs.splice(t,t.oPrev()),bs.splice(t.sym(),t.sym().oPrev());var e=t.sym(),n=t.rot(),i=t.rot().sym();this.quadEdges.remove(t),this.quadEdges.remove(e),this.quadEdges.remove(n),this.quadEdges.remove(i),t.delete(),e.delete(),n.delete(),i.delete()},locateFromEdge:function(t,e){for(var n=0,i=this.quadEdges.size(),r=e;;){if(n++,n>i)throw new Ds(r.toLineSegment());if(t.equals(r.orig())||t.equals(r.dest()))break;if(t.rightOf(r))r=r.sym();else if(t.rightOf(r.oNext())){if(t.rightOf(r.dPrev()))break;r=r.dPrev()}else r=r.oNext()}return r},getTolerance:function(){return this.tolerance},getVoronoiCellPolygons:function(t){this.visitTriangles(new Gs,!0);for(var e=new I,n=this.getVertexUniqueEdges(!1),i=n.iterator();i.hasNext();){var r=i.next();e.add(this.getVoronoiCellPolygon(r,t))}return e},getVoronoiDiagram:function(t){var e=this.getVoronoiCellPolygons(t);return t.createGeometryCollection(ie.toGeometryArray(e))},getTriangles:function(t){for(var e=this.getTriangleCoordinates(!1),n=new Array(e.size()).fill(null),i=0,r=e.iterator();r.hasNext();){var s=r.next();n[i++]=t.createPolygon(t.createLinearRing(s),null)}return t.createGeometryCollection(n)},insertSite:function(t){var e=this.locate(t);if(t.equals(e.orig(),this.tolerance)||t.equals(e.dest(),this.tolerance))return e;var n=this.makeEdge(e.orig(),t);bs.splice(n,e);var i=n;do n=this.connect(e,n.sym()),e=n.oPrev();while(e.lNext()!==i);return i},locate:function(){if(1===arguments.length){if(arguments[0]instanceof Ts){var t=arguments[0];return this.locator.locate(t)}if(arguments[0]instanceof g){var e=arguments[0];return this.locator.locate(new Ts(e))}}else if(2===arguments.length){var n=arguments[0],i=arguments[1],r=this.locator.locate(new Ts(n));if(null===r)return null;var s=r;r.dest().getCoordinate().equals2D(n)&&(s=r.sym());var o=s;do{if(o.dest().getCoordinate().equals2D(i))return o;o=o.oNext()}while(o!==s);return null}},interfaces_:function(){return[]},getClass:function(){return Fs}}),Fs.getTriangleEdges=function(t,e){if(e[0]=t,e[1]=e[0].lNext(),e[2]=e[1].lNext(),e[2].lNext()!==e[0])throw new i("Edges do not form a triangle")},e(Gs.prototype,{visit:function(t){for(var e=t[0].orig().getCoordinate(),n=t[1].orig().getCoordinate(),i=t[2].orig().getCoordinate(),r=ci.circumcentre(e,n,i),s=new Ts(r),o=0;3>o;o++)t[o].rot().setOrig(s)},interfaces_:function(){return[As]},getClass:function(){return Gs}}),e(qs.prototype,{getTriangleEdges:function(){return this.triList},visit:function(t){this.triList.add(t.clone())},interfaces_:function(){return[As]},getClass:function(){return qs}}),e(Bs.prototype,{visit:function(t){this.triList.add([t[0].orig(),t[1].orig(),t[2].orig()])},getTriangleVertices:function(){return this.triList},interfaces_:function(){return[As]},getClass:function(){return Bs}}),e(zs.prototype,{checkTriangleSize:function(t){var e="";t.length>=2?e=se.toLineString(t[0],t[1]):t.length>=1&&(e=se.toPoint(t[0]))},visit:function(t){this.coordList.clear();for(var e=0;3>e;e++){var n=t[e].orig();this.coordList.add(n.getCoordinate())}if(this.coordList.size()>0){this.coordList.closeRing();var i=this.coordList.toCoordinateArray();if(4!==i.length)return null;this.triCoords.add(i)}},getTriangles:function(){return this.triCoords},interfaces_:function(){return[As]},getClass:function(){return zs}}),Fs.TriangleCircumcentreVisitor=Gs,Fs.TriangleEdgesListVisitor=qs,Fs.TriangleVertexListVisitor=Bs,Fs.TriangleCoordinatesVisitor=zs,Fs.EDGE_COINCIDENCE_TOL_FACTOR=1e3,e(Vs.prototype,{getLineSegment:function(){return this.ls},getEndZ:function(){var t=this.ls.getCoordinate(1);return t.z},getStartZ:function(){var t=this.ls.getCoordinate(0);return t.z},intersection:function(t){return this.ls.intersection(t.getLineSegment())},getStart:function(){return this.ls.getCoordinate(0)},getEnd:function(){return this.ls.getCoordinate(1)},getEndY:function(){var t=this.ls.getCoordinate(1);return t.y},getStartX:function(){var t=this.ls.getCoordinate(0);return t.x},equalsTopo:function(t){return this.ls.equalsTopo(t.getLineSegment())},getStartY:function(){var t=this.ls.getCoordinate(0);return t.y},setData:function(t){this.data=t},getData:function(){return this.data},getEndX:function(){var t=this.ls.getCoordinate(1);return t.x},toString:function(){return this.ls.toString()},interfaces_:function(){return[]},getClass:function(){return Vs}}),e(ks.prototype,{visit:function(t){},interfaces_:function(){return[]},getClass:function(){return ks}}),e(Ys.prototype,{isRepeated:function(){return this.count>1},getRight:function(){return this.right},getCoordinate:function(){return this.p},setLeft:function(t){this.left=t},getX:function(){return this.p.x},getData:function(){return this.data},getCount:function(){return this.count},getLeft:function(){return this.left},getY:function(){return this.p.y},increment:function(){this.count=this.count+1},setRight:function(t){this.right=t},interfaces_:function(){return[]},getClass:function(){return Ys}}),e(Us.prototype,{insert:function(){if(1===arguments.length){var t=arguments[0];return this.insert(t,null)}if(2===arguments.length){var e=arguments[0],n=arguments[1];if(null===this.root)return this.root=new Ys(e,n),this.root;if(this.tolerance>0){var i=this.findBestMatchNode(e);if(null!==i)return i.increment(),i}return this.insertExact(e,n)}},query:function(){var t=arguments,e=this;if(1===arguments.length){var n=arguments[0],i=new I;return this.query(n,i),i}if(2===arguments.length)if(arguments[0]instanceof C&&R(arguments[1],y))!function(){var n=t[0],i=t[1];e.queryNode(e.root,n,!0,{interfaces_:function(){return[ks]},visit:function(t){i.add(t)}})}();else if(arguments[0]instanceof C&&R(arguments[1],ks)){var r=arguments[0],s=arguments[1];this.queryNode(this.root,r,!0,s)}},queryNode:function(t,e,n,i){if(null===t)return null;var r=null,s=null,o=null;n?(r=e.getMinX(),s=e.getMaxX(),o=t.getX()):(r=e.getMinY(),s=e.getMaxY(),o=t.getY());var a=o>r,u=s>=o;a&&this.queryNode(t.getLeft(),e,!n,i),e.contains(t.getCoordinate())&&i.visit(t),u&&this.queryNode(t.getRight(),e,!n,i)},findBestMatchNode:function(t){var e=new Xs(t,this.tolerance);return this.query(e.queryEnvelope(),e),e.getNode()},isEmpty:function(){return null===this.root},insertExact:function(t,e){for(var n=this.root,i=this.root,r=!0,s=!0;null!==n;){if(null!==n){var o=t.distance(n.getCoordinate())<=this.tolerance;if(o)return n.increment(),n}s=r?t.x<n.getX():t.y<n.getY(),i=n,n=s?n.getLeft():n.getRight(),r=!r}this.numberOfNodes=this.numberOfNodes+1;var a=new Ys(t,e);return s?i.setLeft(a):i.setRight(a),a},interfaces_:function(){return[]},getClass:function(){return Us}}),Us.toCoordinates=function(){if(1===arguments.length){var t=arguments[0];return Us.toCoordinates(t,!1)}if(2===arguments.length){for(var e=arguments[0],n=arguments[1],i=new N,r=e.iterator();r.hasNext();)for(var s=r.next(),o=n?s.getCount():1,a=0;o>a;a++)i.add(s.getCoordinate(),!0);return i.toCoordinateArray()}},e(Xs.prototype,{visit:function(t){var e=this.p.distance(t.getCoordinate()),n=e<=this.tolerance;if(!n)return null;var i=!1;(null===this.matchNode||e<this.matchDist||null!==this.matchNode&&e===this.matchDist&&t.getCoordinate().compareTo(this.matchNode.getCoordinate())<1)&&(i=!0),i&&(this.matchNode=t,this.matchDist=e)},queryEnvelope:function(){var t=new C(this.p);return t.expandBy(this.tolerance),t},getNode:function(){return this.matchNode},interfaces_:function(){return[ks]},getClass:function(){return Xs}}),Us.BestMatchVisitor=Xs,e(Hs.prototype,{getInitialVertices:function(){return this.initialVertices},getKDT:function(){return this.kdt},enforceConstraints:function(){this.addConstraintVertices();var t=0,e=0;do e=this.enforceGabriel(this.segments),t++;while(e>0&&t<Hs.MAX_SPLIT_ITER)},insertSites:function(t){for(var e=t.iterator();e.hasNext();){var n=e.next();this.insertSite(n)}},getVertexFactory:function(){return this.vertexFactory},getPointArray:function(){for(var t=new Array(this.initialVertices.size()+this.segVertices.size()).fill(null),e=0,n=this.initialVertices.iterator();n.hasNext();){var i=n.next();t[e++]=i.getCoordinate()}for(var r=this.segVertices.iterator();r.hasNext();){var i=r.next();t[e++]=i.getCoordinate()}return t},setConstraints:function(t,e){this.segments=t,this.segVertices=e},computeConvexHull:function(){var t=new ie,e=this.getPointArray(),n=new me(e,t);this.convexHull=n.getConvexHull()},addConstraintVertices:function(){this.computeConvexHull(),this.insertSites(this.segVertices)},findNonGabrielPoint:function(t){var e=t.getStart(),n=t.getEnd(),i=new g((e.x+n.x)/2,(e.y+n.y)/2),s=e.distance(i),o=new C(i);o.expandBy(s);for(var a=this.kdt.query(o),u=null,l=r.MAX_VALUE,h=a.iterator();h.hasNext();){var c=h.next(),f=c.getCoordinate();if(!f.equals2D(e)&&!f.equals2D(n)){var d=i.distance(f);if(s>d){var p=d;(null===u||l>p)&&(u=f,l=p)}}}return u},getConstraintSegments:function(){return this.segments},setSplitPointFinder:function(t){this.splitFinder=t},getConvexHull:function(){return this.convexHull},getTolerance:function(){return this.tolerance},enforceGabriel:function(t){for(var e=new I,n=0,i=new I,r=t.iterator();r.hasNext();){var s=r.next(),o=this.findNonGabrielPoint(s);if(null!==o){this.splitPt=this.splitFinder.findSplitPoint(s,o);var a=this.createVertex(this.splitPt,s),u=(this.insertSite(a),new Vs(s.getStartX(),s.getStartY(),s.getStartZ(),a.getX(),a.getY(),a.getZ(),s.getData())),l=new Vs(a.getX(),a.getY(),a.getZ(),s.getEndX(),s.getEndY(),s.getEndZ(),s.getData());e.add(u),e.add(l),i.add(s),n+=1}}return t.removeAll(i),t.addAll(e),n},createVertex:function(){if(1===arguments.length){var t=arguments[0],e=null;return e=null!==this.vertexFactory?this.vertexFactory.createVertex(t,null):new Ps(t)}if(2===arguments.length){var n=arguments[0],i=arguments[1],e=null;return e=null!==this.vertexFactory?this.vertexFactory.createVertex(n,i):new Ps(n),e.setOnConstraint(!0),e}},getSubdivision:function(){return this.subdiv},computeBoundingBox:function(){var t=Hs.computeVertexEnvelope(this.initialVertices),e=Hs.computeVertexEnvelope(this.segVertices),n=new C(t);n.expandToInclude(e);var i=.2*n.getWidth(),r=.2*n.getHeight(),s=Math.max(i,r);this.computeAreaEnv=new C(n),this.computeAreaEnv.expandBy(s)},setVertexFactory:function(t){this.vertexFactory=t},formInitialDelaunay:function(){this.computeBoundingBox(),this.subdiv=new Fs(this.computeAreaEnv,this.tolerance),this.subdiv.setLocator(new Ms(this.subdiv)),this.incDel=new Os(this.subdiv),this.insertSites(this.initialVertices)},insertSite:function(){if(arguments[0]instanceof Ps){var t=arguments[0],e=this.kdt.insert(t.getCoordinate(),t);if(e.isRepeated()){var n=e.getData();return n.merge(t),n}return this.incDel.insertSite(t),t}if(arguments[0]instanceof g){var i=arguments[0];this.insertSite(this.createVertex(i))}},interfaces_:function(){return[]},getClass:function(){return Hs}}),Hs.computeVertexEnvelope=function(t){for(var e=new C,n=t.iterator();n.hasNext();){var i=n.next();e.expandToInclude(i.getCoordinate())}return e},Hs.MAX_SPLIT_ITER=99,e(Ws.prototype,{create:function(){if(null!==this.subdiv)return null;var t=Ws.envelope(this.siteCoords),e=Ws.toVertices(this.siteCoords);this.subdiv=new Fs(t,this.tolerance);var n=new Os(this.subdiv);n.insertSites(e)},setTolerance:function(t){this.tolerance=t},setSites:function(){if(arguments[0]instanceof B){var t=arguments[0];this.siteCoords=Ws.extractUniqueCoordinates(t)}else if(R(arguments[0],v)){var e=arguments[0];this.siteCoords=Ws.unique(H.toCoordinateArray(e))}},getEdges:function(t){return this.create(),this.subdiv.getEdges(t)},getSubdivision:function(){return this.create(),this.subdiv},getTriangles:function(t){return this.create(),this.subdiv.getTriangles(t)},interfaces_:function(){return[]},getClass:function(){return Ws}}),Ws.extractUniqueCoordinates=function(t){if(null===t)return new N;var e=t.getCoordinates();return Ws.unique(e)},Ws.envelope=function(t){for(var e=new C,n=t.iterator();n.hasNext();){var i=n.next();e.expandToInclude(i)}return e},Ws.unique=function(t){var e=H.copyDeep(t);ut.sort(e);var n=new N(e,!1);return n},Ws.toVertices=function(t){for(var e=new I,n=t.iterator();n.hasNext();){var i=n.next();e.add(new Ts(i))}return e},e(js.prototype,{createSiteVertices:function(t){for(var e=new I,n=t.iterator();n.hasNext();){var i=n.next();this.constraintVertexMap.containsKey(i)||e.add(new Ps(i))}return e},create:function(){if(null!==this.subdiv)return null;var t=Ws.envelope(this.siteCoords),e=new I;null!==this.constraintLines&&(t.expandToInclude(this.constraintLines.getEnvelopeInternal()),this.createVertices(this.constraintLines),e=js.createConstraintSegments(this.constraintLines));var n=this.createSiteVertices(this.siteCoords),i=new Hs(n,this.tolerance);i.setConstraints(e,new I(this.constraintVertexMap.values())),i.formInitialDelaunay(),i.enforceConstraints(),this.subdiv=i.getSubdivision()},setTolerance:function(t){this.tolerance=t},setConstraints:function(t){this.constraintLines=t},setSites:function(t){this.siteCoords=Ws.extractUniqueCoordinates(t)},getEdges:function(t){return this.create(),this.subdiv.getEdges(t)},getSubdivision:function(){return this.create(),this.subdiv},getTriangles:function(t){return this.create(),this.subdiv.getTriangles(t)},createVertices:function(t){for(var e=t.getCoordinates(),n=0;n<e.length;n++){var i=new Ps(e[n]);this.constraintVertexMap.put(e[n],i)}},interfaces_:function(){return[]},getClass:function(){return js}}),js.createConstraintSegments=function(){if(1===arguments.length){for(var t=arguments[0],e=kn.getLines(t),n=new I,i=e.iterator();i.hasNext();){var r=i.next();js.createConstraintSegments(r,n)}return n}if(2===arguments.length)for(var s=arguments[0],o=arguments[1],a=s.getCoordinates(),i=1;i<a.length;i++)o.add(new Vs(a[i-1],a[i]))},e(Ks.prototype,{create:function(){if(null!==this.subdiv)return null;var t=Ws.envelope(this.siteCoords);this.diagramEnv=t;var e=Math.max(this.diagramEnv.getWidth(),this.diagramEnv.getHeight());this.diagramEnv.expandBy(e),null!==this.clipEnv&&this.diagramEnv.expandToInclude(this.clipEnv);var n=Ws.toVertices(this.siteCoords);this.subdiv=new Fs(t,this.tolerance);var i=new Os(this.subdiv);i.insertSites(n)},getDiagram:function(t){this.create();var e=this.subdiv.getVoronoiDiagram(t);return Ks.clipGeometryCollection(e,this.diagramEnv)},setTolerance:function(t){this.tolerance=t},setSites:function(){if(arguments[0]instanceof B){var t=arguments[0];this.siteCoords=Ws.extractUniqueCoordinates(t)}else if(R(arguments[0],v)){var e=arguments[0];this.siteCoords=Ws.unique(H.toCoordinateArray(e))}},setClipEnvelope:function(t){this.clipEnv=t},getSubdivision:function(){return this.create(),this.subdiv},interfaces_:function(){return[]},getClass:function(){return Ks}}),Ks.clipGeometryCollection=function(t,e){for(var n=t.getFactory().toGeometry(e),i=new I,r=0;r<t.getNumGeometries();r++){var s=t.getGeometryN(r),o=null;e.contains(s.getEnvelopeInternal())?o=s:e.intersects(s.getEnvelopeInternal())&&(o=n.intersection(s),o.setUserData(s.getUserData())),null===o||o.isEmpty()||i.add(o)}return t.getFactory().createGeometryCollection(ie.toGeometryArray(i))};var Do=Object.freeze({ConformingDelaunayTriangulationBuilder:js,DelaunayTriangulationBuilder:Ws,VoronoiDiagramBuilder:Ks});e(Zs.prototype,{interfaces_:function(){return[]},getClass:function(){return Zs}}),Zs.union=function(t,e){if(t.isEmpty()||e.isEmpty()){if(t.isEmpty()&&e.isEmpty())return ii.createEmptyResult(ii.UNION,t,e,t.getFactory());if(t.isEmpty())return e.copy();if(e.isEmpty())return t.copy()}return t.checkNotGeometryCollection(t),t.checkNotGeometryCollection(e),si.overlayOp(t,e,ii.UNION)},e(B.prototype,{equalsTopo:function(t){return this.getEnvelopeInternal().equals(t.getEnvelopeInternal())?Yr.relate(this,t).isEquals(this.getDimension(),t.getDimension()):!1},union:function(){if(0===arguments.length)return jr.union(this);if(1===arguments.length){var t=arguments[0];return Zs.union(this,t)}},isValid:function(){return ls.isValid(this)},intersection:function(t){if(this.isEmpty()||t.isEmpty())return ii.createEmptyResult(ii.INTERSECTION,this,t,this.factory);if(this.isGeometryCollection()){var e=t;return hn.map(this,{interfaces_:function(){return[MapOp]},map:function(t){return t.intersection(e)}})}return this.checkNotGeometryCollection(this),this.checkNotGeometryCollection(t),si.overlayOp(this,t,ii.INTERSECTION)},covers:function(t){return Yr.covers(this,t)},coveredBy:function(t){return Yr.coveredBy(this,t)},touches:function(t){return Yr.touches(this,t)},intersects:function(t){return Yr.intersects(this,t)},within:function(t){return Yr.within(this,t)},overlaps:function(t){return Yr.overlaps(this,t)},disjoint:function(t){return Yr.disjoint(this,t)},crosses:function(t){return Yr.crosses(this,t)},buffer:function(){if(1===arguments.length){var t=arguments[0];return sr.bufferOp(this,t)}if(2===arguments.length){var e=arguments[0],n=arguments[1];return sr.bufferOp(this,e,n)}if(3===arguments.length){var i=arguments[0],r=arguments[1],s=arguments[2];return sr.bufferOp(this,i,r,s)}},convexHull:function(){return new me(this).getConvexHull()},relate:function(){for(var t=arguments.length,e=Array(t),n=0;t>n;n++)e[n]=arguments[n];return Yr.relate.apply(Yr,[this].concat(e))},getCentroid:function(){if(this.isEmpty())return this.factory.createPoint();var t=ge.getCentroid(this);return this.createPointFromInternalCoord(t,this)},getInteriorPoint:function(){if(this.isEmpty())return this.factory.createPoint();var t=null,e=this.getDimension();if(0===e){var n=new li(this);t=n.getInteriorPoint()}else if(1===e){var n=new ui(this);t=n.getInteriorPoint()}else{var n=new oi(this);t=n.getInteriorPoint()}return this.createPointFromInternalCoord(t,this)},symDifference:function(t){if(this.isEmpty()||t.isEmpty()){if(this.isEmpty()&&t.isEmpty())return ii.createEmptyResult(ii.SYMDIFFERENCE,this,t,this.factory);if(this.isEmpty())return t.copy();if(t.isEmpty())return this.copy()}return this.checkNotGeometryCollection(this),this.checkNotGeometryCollection(t),si.overlayOp(this,t,ii.SYMDIFFERENCE)},createPointFromInternalCoord:function(t,e){return e.getPrecisionModel().makePrecise(t),e.getFactory().createPoint(t)},toText:function(){var t=new se;return t.write(this)},toString:function(){this.toText()},contains:function(t){return Yr.contains(this,t)},difference:function(t){return this.isEmpty()?ii.createEmptyResult(ii.DIFFERENCE,this,t,this.factory):t.isEmpty()?this.copy():(this.checkNotGeometryCollection(this),this.checkNotGeometryCollection(t),si.overlayOp(this,t,ii.DIFFERENCE))},isSimple:function(){var t=new Gi(this);return t.isSimple()},isWithinDistance:function(t,e){var n=this.getEnvelopeInternal().distance(t.getEnvelopeInternal());return n>e?!1:hr.isWithinDistance(this,t,e)},distance:function(t){return hr.distance(this,t)},isEquivalentClass:function(t){return this.getClass()===t.getClass()}});var Ao="1.1.2 (248dab8)";t.version=Ao,t.algorithm=co,t.densify=fo,t.dissolve=go,t.geom=lo,t.index=mo,t.io=Io,t.noding=No,t.operation=Oo,t.precision=_o,t.simplify=Mo,t.triangulate=Do});
 
-},{}],112:[function(require,module,exports){
+},{}],113:[function(require,module,exports){
 // Copyright (c) 2013 Pieroxy <pieroxy@pieroxy.net>
 // This work is free. You can redistribute it and/or modify it
 // under the terms of the WTFPL, Version 2
@@ -32730,7 +33419,7 @@ if (typeof define === 'function' && define.amd) {
   module.exports = LZString
 }
 
-},{}],113:[function(require,module,exports){
+},{}],114:[function(require,module,exports){
 
 
 
@@ -33474,7 +34163,7 @@ function getMinNorthing(zoneLetter) {
 
 }
 
-},{}],114:[function(require,module,exports){
+},{}],115:[function(require,module,exports){
 //! moment.js locale configuration
 //! locale : Danish [da]
 //! author : Ulrik Nielsen : https://github.com/mrbase
@@ -33536,7 +34225,7 @@ return da;
 
 })));
 
-},{"../moment":115}],115:[function(require,module,exports){
+},{"../moment":116}],116:[function(require,module,exports){
 //! moment.js
 //! version : 2.17.0
 //! authors : Tim Wood, Iskren Chernev, Moment.js contributors
@@ -37839,7 +38528,7 @@ return hooks;
 
 })));
 
-},{}],116:[function(require,module,exports){
+},{}],117:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -37966,7 +38655,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],117:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 /*! nouislider - 8.5.1 - 2016-04-24 16:00:29 */
 
 (function (factory) {
@@ -39926,7 +40615,7 @@ function closure ( target, options, originalOptions ){
 	};
 
 }));
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -39961,7 +40650,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],119:[function(require,module,exports){
+},{}],120:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -40000,7 +40689,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],120:[function(require,module,exports){
+},{}],121:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -40041,7 +40730,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -40137,7 +40826,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 var mgrs = require('mgrs');
 
 function Point(x, y, z) {
@@ -40173,7 +40862,7 @@ Point.prototype.toMGRS = function(accuracy) {
 };
 module.exports = Point;
 
-},{"mgrs":113}],123:[function(require,module,exports){
+},{"mgrs":114}],124:[function(require,module,exports){
 var parseCode = require("./parseCode");
 var extend = require('./extend');
 var projections = require('./projections');
@@ -40208,7 +40897,7 @@ Projection.projections = projections;
 Projection.projections.start();
 module.exports = Projection;
 
-},{"./deriveConstants":154,"./extend":155,"./parseCode":159,"./projections":161}],124:[function(require,module,exports){
+},{"./deriveConstants":155,"./extend":156,"./parseCode":160,"./projections":162}],125:[function(require,module,exports){
 module.exports = function(crs, denorm, point) {
   var xin = point.x,
     yin = point.y,
@@ -40261,14 +40950,14 @@ module.exports = function(crs, denorm, point) {
   return point;
 };
 
-},{}],125:[function(require,module,exports){
+},{}],126:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var sign = require('./sign');
 
 module.exports = function(x) {
   return (Math.abs(x) < HALF_PI) ? x : (x - (sign(x) * Math.PI));
 };
-},{"./sign":142}],126:[function(require,module,exports){
+},{"./sign":143}],127:[function(require,module,exports){
 var TWO_PI = Math.PI * 2;
 // SPI is slightly greater than Math.PI, so values that exceed the -180..180
 // degree range by a tiny amount don't get wrapped. This prevents points that
@@ -40280,35 +40969,35 @@ var sign = require('./sign');
 module.exports = function(x) {
   return (Math.abs(x) <= SPI) ? x : (x - (sign(x) * TWO_PI));
 };
-},{"./sign":142}],127:[function(require,module,exports){
+},{"./sign":143}],128:[function(require,module,exports){
 module.exports = function(x) {
   if (Math.abs(x) > 1) {
     x = (x > 1) ? 1 : -1;
   }
   return Math.asin(x);
 };
-},{}],128:[function(require,module,exports){
+},{}],129:[function(require,module,exports){
 module.exports = function(x) {
   return (1 - 0.25 * x * (1 + x / 16 * (3 + 1.25 * x)));
 };
-},{}],129:[function(require,module,exports){
+},{}],130:[function(require,module,exports){
 module.exports = function(x) {
   return (0.375 * x * (1 + 0.25 * x * (1 + 0.46875 * x)));
 };
-},{}],130:[function(require,module,exports){
+},{}],131:[function(require,module,exports){
 module.exports = function(x) {
   return (0.05859375 * x * x * (1 + 0.75 * x));
 };
-},{}],131:[function(require,module,exports){
+},{}],132:[function(require,module,exports){
 module.exports = function(x) {
   return (x * x * x * (35 / 3072));
 };
-},{}],132:[function(require,module,exports){
+},{}],133:[function(require,module,exports){
 module.exports = function(a, e, sinphi) {
   var temp = e * sinphi;
   return a / Math.sqrt(1 - temp * temp);
 };
-},{}],133:[function(require,module,exports){
+},{}],134:[function(require,module,exports){
 module.exports = function(ml, e0, e1, e2, e3) {
   var phi;
   var dphi;
@@ -40325,7 +41014,7 @@ module.exports = function(ml, e0, e1, e2, e3) {
   //..reportError("IMLFN-CONV:Latitude failed to converge after 15 iterations");
   return NaN;
 };
-},{}],134:[function(require,module,exports){
+},{}],135:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, q) {
@@ -40358,16 +41047,16 @@ module.exports = function(eccent, q) {
   //console.log("IQSFN-CONV:Latitude failed to converge after 30 iterations");
   return NaN;
 };
-},{}],135:[function(require,module,exports){
+},{}],136:[function(require,module,exports){
 module.exports = function(e0, e1, e2, e3, phi) {
   return (e0 * phi - e1 * Math.sin(2 * phi) + e2 * Math.sin(4 * phi) - e3 * Math.sin(6 * phi));
 };
-},{}],136:[function(require,module,exports){
+},{}],137:[function(require,module,exports){
 module.exports = function(eccent, sinphi, cosphi) {
   var con = eccent * sinphi;
   return cosphi / (Math.sqrt(1 - con * con));
 };
-},{}],137:[function(require,module,exports){
+},{}],138:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 module.exports = function(eccent, ts) {
   var eccnth = 0.5 * eccent;
@@ -40384,7 +41073,7 @@ module.exports = function(eccent, ts) {
   //console.log("phi2z has NoConvergence");
   return -9999;
 };
-},{}],138:[function(require,module,exports){
+},{}],139:[function(require,module,exports){
 var C00 = 1;
 var C02 = 0.25;
 var C04 = 0.046875;
@@ -40409,7 +41098,7 @@ module.exports = function(es) {
   en[4] = t * es * C88;
   return en;
 };
-},{}],139:[function(require,module,exports){
+},{}],140:[function(require,module,exports){
 var pj_mlfn = require("./pj_mlfn");
 var EPSLN = 1.0e-10;
 var MAX_ITER = 20;
@@ -40430,13 +41119,13 @@ module.exports = function(arg, es, en) {
   //..reportError("cass:pj_inv_mlfn: Convergence error");
   return phi;
 };
-},{"./pj_mlfn":140}],140:[function(require,module,exports){
+},{"./pj_mlfn":141}],141:[function(require,module,exports){
 module.exports = function(phi, sphi, cphi, en) {
   cphi *= sphi;
   sphi *= sphi;
   return (en[0] * phi - cphi * (en[1] + sphi * (en[2] + sphi * (en[3] + sphi * en[4]))));
 };
-},{}],141:[function(require,module,exports){
+},{}],142:[function(require,module,exports){
 module.exports = function(eccent, sinphi) {
   var con;
   if (eccent > 1.0e-7) {
@@ -40447,15 +41136,15 @@ module.exports = function(eccent, sinphi) {
     return (2 * sinphi);
   }
 };
-},{}],142:[function(require,module,exports){
+},{}],143:[function(require,module,exports){
 module.exports = function(x) {
   return x<0 ? -1 : 1;
 };
-},{}],143:[function(require,module,exports){
+},{}],144:[function(require,module,exports){
 module.exports = function(esinp, exp) {
   return (Math.pow((1 - esinp) / (1 + esinp), exp));
 };
-},{}],144:[function(require,module,exports){
+},{}],145:[function(require,module,exports){
 module.exports = function (array){
   var out = {
     x: array[0],
@@ -40469,7 +41158,7 @@ module.exports = function (array){
   }
   return out;
 };
-},{}],145:[function(require,module,exports){
+},{}],146:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 
 module.exports = function(eccent, phi, sinphi) {
@@ -40478,7 +41167,7 @@ module.exports = function(eccent, phi, sinphi) {
   con = Math.pow(((1 - con) / (1 + con)), com);
   return (Math.tan(0.5 * (HALF_PI - phi)) / con);
 };
-},{}],146:[function(require,module,exports){
+},{}],147:[function(require,module,exports){
 exports.wgs84 = {
   towgs84: "0,0,0",
   ellipse: "WGS84",
@@ -40559,7 +41248,7 @@ exports.rnb72 = {
   ellipse: "intl",
   datumName: "Reseau National Belge 1972"
 };
-},{}],147:[function(require,module,exports){
+},{}],148:[function(require,module,exports){
 exports.MERIT = {
   a: 6378137.0,
   rf: 298.257,
@@ -40775,7 +41464,7 @@ exports.sphere = {
   b: 6370997.0,
   ellipseName: "Normal Sphere (r=6370997)"
 };
-},{}],148:[function(require,module,exports){
+},{}],149:[function(require,module,exports){
 exports.greenwich = 0.0; //"0dE",
 exports.lisbon = -9.131906111111; //"9d07'54.862\"W",
 exports.paris = 2.337229166667; //"2d20'14.025\"E",
@@ -40789,11 +41478,11 @@ exports.brussels = 4.367975; //"4d22'4.71\"E",
 exports.stockholm = 18.058277777778; //"18d3'29.8\"E",
 exports.athens = 23.7163375; //"23d42'58.815\"E",
 exports.oslo = 10.722916666667; //"10d43'22.5\"E"
-},{}],149:[function(require,module,exports){
+},{}],150:[function(require,module,exports){
 exports.ft = {to_meter: 0.3048};
 exports['us-ft'] = {to_meter: 1200 / 3937};
 
-},{}],150:[function(require,module,exports){
+},{}],151:[function(require,module,exports){
 var proj = require('./Proj');
 var transform = require('./transform');
 var wgs84 = proj('WGS84');
@@ -40858,7 +41547,7 @@ function proj4(fromProj, toProj, coord) {
   }
 }
 module.exports = proj4;
-},{"./Proj":123,"./transform":187}],151:[function(require,module,exports){
+},{"./Proj":124,"./transform":188}],152:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
@@ -41263,7 +41952,7 @@ datum.prototype = {
 */
 module.exports = datum;
 
-},{}],152:[function(require,module,exports){
+},{}],153:[function(require,module,exports){
 var PJD_3PARAM = 1;
 var PJD_7PARAM = 2;
 var PJD_GRIDSHIFT = 3;
@@ -41364,7 +42053,7 @@ module.exports = function(source, dest, point) {
 };
 
 
-},{}],153:[function(require,module,exports){
+},{}],154:[function(require,module,exports){
 var globals = require('./global');
 var parseProj = require('./projString');
 var wkt = require('./wkt');
@@ -41421,7 +42110,7 @@ function defs(name) {
 globals(defs);
 module.exports = defs;
 
-},{"./global":156,"./projString":160,"./wkt":188}],154:[function(require,module,exports){
+},{"./global":157,"./projString":161,"./wkt":189}],155:[function(require,module,exports){
 var Datum = require('./constants/Datum');
 var Ellipsoid = require('./constants/Ellipsoid');
 var extend = require('./extend');
@@ -41479,7 +42168,7 @@ module.exports = function(json) {
   return json;
 };
 
-},{"./constants/Datum":146,"./constants/Ellipsoid":147,"./datum":151,"./extend":155}],155:[function(require,module,exports){
+},{"./constants/Datum":147,"./constants/Ellipsoid":148,"./datum":152,"./extend":156}],156:[function(require,module,exports){
 module.exports = function(destination, source) {
   destination = destination || {};
   var value, property;
@@ -41495,7 +42184,7 @@ module.exports = function(destination, source) {
   return destination;
 };
 
-},{}],156:[function(require,module,exports){
+},{}],157:[function(require,module,exports){
 module.exports = function(defs) {
   defs('EPSG:4326', "+title=WGS 84 (long/lat) +proj=longlat +ellps=WGS84 +datum=WGS84 +units=degrees");
   defs('EPSG:4269', "+title=NAD83 (long/lat) +proj=longlat +a=6378137.0 +b=6356752.31414036 +ellps=GRS80 +datum=NAD83 +units=degrees");
@@ -41508,7 +42197,7 @@ module.exports = function(defs) {
   defs['EPSG:102113'] = defs['EPSG:3857'];
 };
 
-},{}],157:[function(require,module,exports){
+},{}],158:[function(require,module,exports){
 var projs = [
   require('./projections/tmerc'),
   require('./projections/utm'),
@@ -41538,7 +42227,7 @@ module.exports = function(proj4){
     proj4.Proj.projections.add(proj);
   });
 };
-},{"./projections/aea":162,"./projections/aeqd":163,"./projections/cass":164,"./projections/cea":165,"./projections/eqc":166,"./projections/eqdc":167,"./projections/gnom":169,"./projections/krovak":170,"./projections/laea":171,"./projections/lcc":172,"./projections/mill":175,"./projections/moll":176,"./projections/nzmg":177,"./projections/omerc":178,"./projections/poly":179,"./projections/sinu":180,"./projections/somerc":181,"./projections/stere":182,"./projections/sterea":183,"./projections/tmerc":184,"./projections/utm":185,"./projections/vandg":186}],158:[function(require,module,exports){
+},{"./projections/aea":163,"./projections/aeqd":164,"./projections/cass":165,"./projections/cea":166,"./projections/eqc":167,"./projections/eqdc":168,"./projections/gnom":170,"./projections/krovak":171,"./projections/laea":172,"./projections/lcc":173,"./projections/mill":176,"./projections/moll":177,"./projections/nzmg":178,"./projections/omerc":179,"./projections/poly":180,"./projections/sinu":181,"./projections/somerc":182,"./projections/stere":183,"./projections/sterea":184,"./projections/tmerc":185,"./projections/utm":186,"./projections/vandg":187}],159:[function(require,module,exports){
 var proj4 = require('./core');
 proj4.defaultDatum = 'WGS84'; //default datum
 proj4.Proj = require('./Proj');
@@ -41551,7 +42240,7 @@ proj4.mgrs = require('mgrs');
 proj4.version = require('../package.json').version;
 require('./includedProjections')(proj4);
 module.exports = proj4;
-},{"../package.json":189,"./Point":122,"./Proj":123,"./common/toPoint":144,"./core":150,"./defs":153,"./includedProjections":157,"./transform":187,"mgrs":113}],159:[function(require,module,exports){
+},{"../package.json":190,"./Point":123,"./Proj":124,"./common/toPoint":145,"./core":151,"./defs":154,"./includedProjections":158,"./transform":188,"mgrs":114}],160:[function(require,module,exports){
 var defs = require('./defs');
 var wkt = require('./wkt');
 var projStr = require('./projString');
@@ -41588,7 +42277,7 @@ function parse(code){
 }
 
 module.exports = parse;
-},{"./defs":153,"./projString":160,"./wkt":188}],160:[function(require,module,exports){
+},{"./defs":154,"./projString":161,"./wkt":189}],161:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var PrimeMeridian = require('./constants/PrimeMeridian');
 var units = require('./constants/units');
@@ -41722,7 +42411,7 @@ module.exports = function(defData) {
   return self;
 };
 
-},{"./constants/PrimeMeridian":148,"./constants/units":149}],161:[function(require,module,exports){
+},{"./constants/PrimeMeridian":149,"./constants/units":150}],162:[function(require,module,exports){
 var projs = [
   require('./projections/merc'),
   require('./projections/longlat')
@@ -41758,7 +42447,7 @@ exports.start = function() {
   projs.forEach(add);
 };
 
-},{"./projections/longlat":173,"./projections/merc":174}],162:[function(require,module,exports){
+},{"./projections/longlat":174,"./projections/merc":175}],163:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var qsfnz = require('../common/qsfnz');
@@ -41881,7 +42570,7 @@ exports.phi1z = function(eccent, qs) {
 };
 exports.names = ["Albers_Conic_Equal_Area", "Albers", "aea"];
 
-},{"../common/adjust_lon":126,"../common/asinz":127,"../common/msfnz":136,"../common/qsfnz":141}],163:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/asinz":128,"../common/msfnz":137,"../common/qsfnz":142}],164:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -42080,7 +42769,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Azimuthal_Equidistant", "aeqd"];
 
-},{"../common/adjust_lon":126,"../common/asinz":127,"../common/e0fn":128,"../common/e1fn":129,"../common/e2fn":130,"../common/e3fn":131,"../common/gN":132,"../common/imlfn":133,"../common/mlfn":135}],164:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/asinz":128,"../common/e0fn":129,"../common/e1fn":130,"../common/e2fn":131,"../common/e3fn":132,"../common/gN":133,"../common/imlfn":134,"../common/mlfn":136}],165:[function(require,module,exports){
 var mlfn = require('../common/mlfn');
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
@@ -42184,7 +42873,7 @@ exports.inverse = function(p) {
 
 };
 exports.names = ["Cassini", "Cassini_Soldner", "cass"];
-},{"../common/adjust_lat":125,"../common/adjust_lon":126,"../common/e0fn":128,"../common/e1fn":129,"../common/e2fn":130,"../common/e3fn":131,"../common/gN":132,"../common/imlfn":133,"../common/mlfn":135}],165:[function(require,module,exports){
+},{"../common/adjust_lat":126,"../common/adjust_lon":127,"../common/e0fn":129,"../common/e1fn":130,"../common/e2fn":131,"../common/e3fn":132,"../common/gN":133,"../common/imlfn":134,"../common/mlfn":136}],166:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var qsfnz = require('../common/qsfnz');
 var msfnz = require('../common/msfnz');
@@ -42249,7 +42938,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["cea"];
 
-},{"../common/adjust_lon":126,"../common/iqsfnz":134,"../common/msfnz":136,"../common/qsfnz":141}],166:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/iqsfnz":135,"../common/msfnz":137,"../common/qsfnz":142}],167:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 exports.init = function() {
@@ -42292,7 +42981,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equirectangular", "Equidistant_Cylindrical", "eqc"];
 
-},{"../common/adjust_lat":125,"../common/adjust_lon":126}],167:[function(require,module,exports){
+},{"../common/adjust_lat":126,"../common/adjust_lon":127}],168:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -42404,7 +43093,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Equidistant_Conic", "eqdc"];
 
-},{"../common/adjust_lat":125,"../common/adjust_lon":126,"../common/e0fn":128,"../common/e1fn":129,"../common/e2fn":130,"../common/e3fn":131,"../common/imlfn":133,"../common/mlfn":135,"../common/msfnz":136}],168:[function(require,module,exports){
+},{"../common/adjust_lat":126,"../common/adjust_lon":127,"../common/e0fn":129,"../common/e1fn":130,"../common/e2fn":131,"../common/e3fn":132,"../common/imlfn":134,"../common/mlfn":136,"../common/msfnz":137}],169:[function(require,module,exports){
 var FORTPI = Math.PI/4;
 var srat = require('../common/srat');
 var HALF_PI = Math.PI/2;
@@ -42451,7 +43140,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gauss"];
 
-},{"../common/srat":143}],169:[function(require,module,exports){
+},{"../common/srat":144}],170:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 var asinz = require('../common/asinz');
@@ -42552,7 +43241,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["gnom"];
 
-},{"../common/adjust_lon":126,"../common/asinz":127}],170:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/asinz":128}],171:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
   this.a = 6377397.155;
@@ -42652,7 +43341,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Krovak", "krovak"];
 
-},{"../common/adjust_lon":126}],171:[function(require,module,exports){
+},{"../common/adjust_lon":127}],172:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var FORTPI = Math.PI/4;
 var EPSLN = 1.0e-10;
@@ -42942,7 +43631,7 @@ exports.authlat = function(beta, APA) {
 };
 exports.names = ["Lambert Azimuthal Equal Area", "Lambert_Azimuthal_Equal_Area", "laea"];
 
-},{"../common/adjust_lon":126,"../common/qsfnz":141}],172:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/qsfnz":142}],173:[function(require,module,exports){
 var EPSLN = 1.0e-10;
 var msfnz = require('../common/msfnz');
 var tsfnz = require('../common/tsfnz');
@@ -43079,7 +43768,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Lambert Tangential Conformal Conic Projection", "Lambert_Conformal_Conic", "Lambert_Conformal_Conic_2SP", "lcc"];
 
-},{"../common/adjust_lon":126,"../common/msfnz":136,"../common/phi2z":137,"../common/sign":142,"../common/tsfnz":145}],173:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/msfnz":137,"../common/phi2z":138,"../common/sign":143,"../common/tsfnz":146}],174:[function(require,module,exports){
 exports.init = function() {
   //no-op for longlat
 };
@@ -43091,7 +43780,7 @@ exports.forward = identity;
 exports.inverse = identity;
 exports.names = ["longlat", "identity"];
 
-},{}],174:[function(require,module,exports){
+},{}],175:[function(require,module,exports){
 var msfnz = require('../common/msfnz');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -43190,7 +43879,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Mercator", "Popular Visualisation Pseudo Mercator", "Mercator_1SP", "Mercator_Auxiliary_Sphere", "merc"];
 
-},{"../common/adjust_lon":126,"../common/msfnz":136,"../common/phi2z":137,"../common/tsfnz":145}],175:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/msfnz":137,"../common/phi2z":138,"../common/tsfnz":146}],176:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 /*
   reference
@@ -43237,7 +43926,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Miller_Cylindrical", "mill"];
 
-},{"../common/adjust_lon":126}],176:[function(require,module,exports){
+},{"../common/adjust_lon":127}],177:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var EPSLN = 1.0e-10;
 exports.init = function() {};
@@ -43316,7 +44005,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Mollweide", "moll"];
 
-},{"../common/adjust_lon":126}],177:[function(require,module,exports){
+},{"../common/adjust_lon":127}],178:[function(require,module,exports){
 var SEC_TO_RAD = 4.84813681109535993589914102357e-6;
 /*
   reference
@@ -43536,7 +44225,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["New_Zealand_Map_Grid", "nzmg"];
-},{}],178:[function(require,module,exports){
+},{}],179:[function(require,module,exports){
 var tsfnz = require('../common/tsfnz');
 var adjust_lon = require('../common/adjust_lon');
 var phi2z = require('../common/phi2z');
@@ -43705,7 +44394,7 @@ exports.inverse = function(p) {
 };
 
 exports.names = ["Hotine_Oblique_Mercator", "Hotine Oblique Mercator", "Hotine_Oblique_Mercator_Azimuth_Natural_Origin", "Hotine_Oblique_Mercator_Azimuth_Center", "omerc"];
-},{"../common/adjust_lon":126,"../common/phi2z":137,"../common/tsfnz":145}],179:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/phi2z":138,"../common/tsfnz":146}],180:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -43834,7 +44523,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Polyconic", "poly"];
-},{"../common/adjust_lat":125,"../common/adjust_lon":126,"../common/e0fn":128,"../common/e1fn":129,"../common/e2fn":130,"../common/e3fn":131,"../common/gN":132,"../common/mlfn":135}],180:[function(require,module,exports){
+},{"../common/adjust_lat":126,"../common/adjust_lon":127,"../common/e0fn":129,"../common/e1fn":130,"../common/e2fn":131,"../common/e3fn":132,"../common/gN":133,"../common/mlfn":136}],181:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var adjust_lat = require('../common/adjust_lat');
 var pj_enfn = require('../common/pj_enfn');
@@ -43941,7 +44630,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Sinusoidal", "sinu"];
-},{"../common/adjust_lat":125,"../common/adjust_lon":126,"../common/asinz":127,"../common/pj_enfn":138,"../common/pj_inv_mlfn":139,"../common/pj_mlfn":140}],181:[function(require,module,exports){
+},{"../common/adjust_lat":126,"../common/adjust_lon":127,"../common/asinz":128,"../common/pj_enfn":139,"../common/pj_inv_mlfn":140,"../common/pj_mlfn":141}],182:[function(require,module,exports){
 /*
   references:
     Formules et constantes pour le Calcul pour la
@@ -44023,7 +44712,7 @@ exports.inverse = function(p) {
 
 exports.names = ["somerc"];
 
-},{}],182:[function(require,module,exports){
+},{}],183:[function(require,module,exports){
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
 var sign = require('../common/sign');
@@ -44191,7 +44880,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["stere", "Stereographic_South_Pole", "Polar Stereographic (variant B)"];
 
-},{"../common/adjust_lon":126,"../common/msfnz":136,"../common/phi2z":137,"../common/sign":142,"../common/tsfnz":145}],183:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/msfnz":137,"../common/phi2z":138,"../common/sign":143,"../common/tsfnz":146}],184:[function(require,module,exports){
 var gauss = require('./gauss');
 var adjust_lon = require('../common/adjust_lon');
 exports.init = function() {
@@ -44250,7 +44939,7 @@ exports.inverse = function(p) {
 
 exports.names = ["Stereographic_North_Pole", "Oblique_Stereographic", "Polar_Stereographic", "sterea","Oblique Stereographic Alternative"];
 
-},{"../common/adjust_lon":126,"./gauss":168}],184:[function(require,module,exports){
+},{"../common/adjust_lon":127,"./gauss":169}],185:[function(require,module,exports){
 var e0fn = require('../common/e0fn');
 var e1fn = require('../common/e1fn');
 var e2fn = require('../common/e2fn');
@@ -44387,7 +45076,7 @@ exports.inverse = function(p) {
 };
 exports.names = ["Transverse_Mercator", "Transverse Mercator", "tmerc"];
 
-},{"../common/adjust_lon":126,"../common/asinz":127,"../common/e0fn":128,"../common/e1fn":129,"../common/e2fn":130,"../common/e3fn":131,"../common/mlfn":135,"../common/sign":142}],185:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/asinz":128,"../common/e0fn":129,"../common/e1fn":130,"../common/e2fn":131,"../common/e3fn":132,"../common/mlfn":136,"../common/sign":143}],186:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var tmerc = require('./tmerc');
 exports.dependsOn = 'tmerc';
@@ -44407,7 +45096,7 @@ exports.init = function() {
 };
 exports.names = ["Universal Transverse Mercator System", "utm"];
 
-},{"./tmerc":184}],186:[function(require,module,exports){
+},{"./tmerc":185}],187:[function(require,module,exports){
 var adjust_lon = require('../common/adjust_lon');
 var HALF_PI = Math.PI/2;
 var EPSLN = 1.0e-10;
@@ -44528,7 +45217,7 @@ exports.inverse = function(p) {
   return p;
 };
 exports.names = ["Van_der_Grinten_I", "VanDerGrinten", "vandg"];
-},{"../common/adjust_lon":126,"../common/asinz":127}],187:[function(require,module,exports){
+},{"../common/adjust_lon":127,"../common/asinz":128}],188:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var R2D = 57.29577951308232088;
 var PJD_3PARAM = 1;
@@ -44601,7 +45290,7 @@ module.exports = function transform(source, dest, point) {
 
   return point;
 };
-},{"./Proj":123,"./adjust_axis":124,"./common/toPoint":144,"./datum_transform":152}],188:[function(require,module,exports){
+},{"./Proj":124,"./adjust_axis":125,"./common/toPoint":145,"./datum_transform":153}],189:[function(require,module,exports){
 var D2R = 0.01745329251994329577;
 var extend = require('./extend');
 
@@ -44826,7 +45515,7 @@ module.exports = function(wkt, self) {
   return extend(self, obj.output);
 };
 
-},{"./extend":155}],189:[function(require,module,exports){
+},{"./extend":156}],190:[function(require,module,exports){
 module.exports={
   "_args": [
     [
@@ -44960,7 +45649,7 @@ module.exports={
   "version": "2.3.14"
 }
 
-},{}],190:[function(require,module,exports){
+},{}],191:[function(require,module,exports){
 'use strict';
 
 var proj4 = require('proj4');
@@ -45097,7 +45786,7 @@ module.exports = {
     }
   };
 
-},{"proj4":158}],191:[function(require,module,exports){
+},{"proj4":159}],192:[function(require,module,exports){
 ;/*! showdown 01-12-2016 */
 (function(){
 /**
@@ -47577,7 +48266,7 @@ if (typeof module !== 'undefined' && module.exports) {
 
 
 
-},{}],192:[function(require,module,exports){
+},{}],193:[function(require,module,exports){
 /* SnackbarJS - MIT LICENSE (https://github.com/FezVrasta/snackbarjs/blob/master/LICENSE.md) */
 
 (function (factory) {
@@ -47791,7 +48480,7 @@ if (typeof module !== 'undefined' && module.exports) {
     };
 }));
 
-},{"jquery":109}],193:[function(require,module,exports){
+},{"jquery":110}],194:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -47902,7 +48591,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":194,"./socket":196,"./url":197,"debug":199,"socket.io-parser":203}],194:[function(require,module,exports){
+},{"./manager":195,"./socket":197,"./url":198,"debug":200,"socket.io-parser":204}],195:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -48464,7 +49153,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":195,"./socket":196,"backo2":51,"component-bind":71,"component-emitter":198,"debug":199,"engine.io-client":84,"indexof":107,"socket.io-parser":203}],195:[function(require,module,exports){
+},{"./on":196,"./socket":197,"backo2":52,"component-bind":72,"component-emitter":199,"debug":200,"engine.io-client":85,"indexof":108,"socket.io-parser":204}],196:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -48490,7 +49179,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],196:[function(require,module,exports){
+},{}],197:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -48911,7 +49600,7 @@ Socket.prototype.compress = function (compress) {
   return this;
 };
 
-},{"./on":195,"component-bind":71,"component-emitter":198,"debug":199,"has-binary":103,"socket.io-parser":203,"to-array":208}],197:[function(require,module,exports){
+},{"./on":196,"component-bind":72,"component-emitter":199,"debug":200,"has-binary":104,"socket.io-parser":204,"to-array":209}],198:[function(require,module,exports){
 (function (global){
 
 /**
@@ -48990,15 +49679,15 @@ function url (uri, loc) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"debug":199,"parseuri":120}],198:[function(require,module,exports){
-arguments[4][94][0].apply(exports,arguments)
-},{"dup":94}],199:[function(require,module,exports){
+},{"debug":200,"parseuri":121}],199:[function(require,module,exports){
 arguments[4][95][0].apply(exports,arguments)
-},{"./debug":200,"_process":121,"dup":95}],200:[function(require,module,exports){
+},{"dup":95}],200:[function(require,module,exports){
 arguments[4][96][0].apply(exports,arguments)
-},{"dup":96,"ms":201}],201:[function(require,module,exports){
+},{"./debug":201,"_process":122,"dup":96}],201:[function(require,module,exports){
 arguments[4][97][0].apply(exports,arguments)
-},{"dup":97}],202:[function(require,module,exports){
+},{"dup":97,"ms":202}],202:[function(require,module,exports){
+arguments[4][98][0].apply(exports,arguments)
+},{"dup":98}],203:[function(require,module,exports){
 (function (global){
 /*global Blob,File*/
 
@@ -49143,7 +49832,7 @@ exports.removeBlobs = function(data, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./is-buffer":204,"isarray":205}],203:[function(require,module,exports){
+},{"./is-buffer":205,"isarray":206}],204:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -49549,7 +50238,7 @@ function error(data){
   };
 }
 
-},{"./binary":202,"./is-buffer":204,"component-emitter":72,"debug":74,"json3":110}],204:[function(require,module,exports){
+},{"./binary":203,"./is-buffer":205,"component-emitter":73,"debug":75,"json3":111}],205:[function(require,module,exports){
 (function (global){
 
 module.exports = isBuf;
@@ -49566,9 +50255,9 @@ function isBuf(obj) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],205:[function(require,module,exports){
-arguments[4][101][0].apply(exports,arguments)
-},{"dup":101}],206:[function(require,module,exports){
+},{}],206:[function(require,module,exports){
+arguments[4][102][0].apply(exports,arguments)
+},{"dup":102}],207:[function(require,module,exports){
 (function (root, factory) {
 
   // Node.
@@ -50331,7 +51020,7 @@ return new Parser;
   return exports;
 }));
 
-},{"terraformer":207}],207:[function(require,module,exports){
+},{"terraformer":208}],208:[function(require,module,exports){
 (function (root, factory) {
 
   // Node.
@@ -51751,7 +52440,7 @@ return new Parser;
   return exports;
 }));
 
-},{}],208:[function(require,module,exports){
+},{}],209:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -51766,7 +52455,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],209:[function(require,module,exports){
+},{}],210:[function(require,module,exports){
 //     Underscore.js 1.8.3
 //     http://underscorejs.org
 //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
@@ -53316,7 +54005,7 @@ function toArray(list, index) {
   }
 }.call(this));
 
-},{}],210:[function(require,module,exports){
+},{}],211:[function(require,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -53554,7 +54243,7 @@ function toArray(list, index) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],211:[function(require,module,exports){
+},{}],212:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')

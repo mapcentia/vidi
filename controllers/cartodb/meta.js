@@ -33,15 +33,20 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                 chunks.push(chunk);
             });
             res.on("end", function () {
-                var layerObj;
+                var layerObj, fieldConf = {};
                 jsfile = new Buffer.concat(chunks);
                 try {
                     layers = JSON.parse(jsfile).layers[1].options.layer_definition.layers;
                 } catch (e) {
                     console.log(e);
                 }
-                //console.log(layers);
                 for (var i = 0; i < layers.length; i++) {
+                    for (var m = 0; m < layers[i].infowindow.fields.length; m++) {
+                        fieldConf[layers[i].infowindow.fields[m].name] = {
+                            sort_id: m,
+                            querable: true,
+                            alias: layers[i].infowindow.alternative_names[layers[i].infowindow.fields[m].name] || layers[i].infowindow.fields[m].name}
+                    }
                     layers[i].legend.template = layers[i].legend.template.replace(/"/g,"'");
                     layerObj = {
                         f_table_schema: schemas[u],
@@ -53,9 +58,10 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                         sql: layers[i].options.sql,
                         cartocss: layers[i].options.cartocss,
                         layergroup: JSON.parse(jsfile).title,
-                        fieldconf: null,
+                        fieldconf: JSON.stringify(fieldConf),
                         legend: layers[i].legend,
-                        meta: null
+                        meta: null,
+                        infowindow:layers[i].infowindow
                     };
                     data.push(layerObj)
                 }
@@ -68,4 +74,5 @@ router.get('/api/meta/:db/:schema', function (req, response) {
     }());
 });
 module.exports = router;
+
 
