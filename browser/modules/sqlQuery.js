@@ -36,7 +36,7 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
-var mustache = require('Mustache');
+var mustache = require('mustache');
 
 /**
  *
