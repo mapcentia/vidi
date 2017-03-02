@@ -80,7 +80,7 @@ window.Vidi = function () {
     setTimeout(function () {
         window.status = "all_loaded";
         console.info("load_timeout");
-    }, 20000);
+    }, 120000);
 
     // Require the standard modules
     // ============================
