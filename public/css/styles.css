@@ -526,7 +526,6 @@ div.olControlZoom {
 }
 .custom-popup .leaflet-popup-content-wrapper {
   background: #fff !important;
-  dcolor: #fff !important;
   font-size: 12px !important;
   line-height: 20px !important;
   border-radius: 5px !important;
@@ -535,7 +534,6 @@ div.olControlZoom {
   margin-top: 0 !important;
   margin-bottom: 10px !important;
 }
-
 .leaflet-popup-content-wrapper h4 {
   margin-top: 0 !important;
   color: #a8a8a8;
@@ -549,9 +547,6 @@ div.olControlZoom {
 .custom-popup .leaflet-popup-tip-container {
   width: 30px !important;
   height: 15px !important;
-}
-.custom-popup .leaflet-popup-tip {
-  background: #2c3e50 !important;
 }
 .custom-popup td {
   padding-right: 10px;

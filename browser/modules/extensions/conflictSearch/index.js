@@ -615,8 +615,6 @@ module.exports = module.exports = {
                                         });
                                         hitsData.append(table1);
 
-                                    } else {
-                                        //Pass
                                     }
                                 } else {
                                     noHitsTable.append(row);

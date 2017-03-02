@@ -49,7 +49,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         } else {
                             sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
                         }
-                        queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
                         break;
                     case "cartodb":
                         geomField = "the_geom_webmercator";
@@ -60,6 +59,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         }
                         break;
                 }
+                queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
+
                 var postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql,
                     options = {
                         method: 'POST',
@@ -91,33 +92,21 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         count++;
                         if (result.features) {
                             for (var i = 0; i < result.features.length; i++) {
-                                if (BACKEND === "gc2") {
-                                    for (var prop in queryables) {
-                                        if (queryables.hasOwnProperty(prop)) {
-                                            if (queryables[prop].conflict) {
-                                                tmp.push({
-                                                    name: prop,
-                                                    alias: queryables[prop].alias || prop,
-                                                    value: result.features[i].properties[prop],
-                                                    sort_id: queryables[prop].sort_id,
-                                                    key: false
-                                                })
-                                            }
-                                        }
-                                    }
-                                } else {
-                                    for (var prop in result.features[i].properties) {
-                                        if (result.features[i].properties.hasOwnProperty(prop)) {
+
+                                for (var prop in queryables) {
+                                    if (queryables.hasOwnProperty(prop)) {
+                                        if (queryables[prop].conflict || (BACKEND === "cartodb" && queryables[prop].querable)) {
                                             tmp.push({
                                                 name: prop,
-                                                alias: prop,
+                                                alias: queryables[prop].alias || prop,
                                                 value: result.features[i].properties[prop],
-                                                sort_id: 1,
+                                                sort_id: queryables[prop].sort_id,
                                                 key: false
                                             })
                                         }
                                     }
                                 }
+
                                 if (tmp.length > 0) {
                                     tmp.push({
                                         name: metaDataKeys[table.split(".")[1]].pkey,
@@ -135,7 +124,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             table: table,
                             title: metaDataKeys[table.split(".")[1]].f_table_title,
                             group: metaDataKeys[table.split(".")[1]].layergroup,
-                            hits: (typeof result.features !=="undefined" && result.features !== null)? result.features.length : 0,
+                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
                             data: data,
                             num: count + "/" + metaDataFinal.data.length,
                             time: time,
