@@ -3945,7 +3945,7 @@ module.exports = {
         var highlighter = function (value, item) {
             _($.trim(value).split(' ')).each(
                 function (s) {
-                    var regex = new RegExp('(\\b' + s + ')', 'gi');
+                    var regex = new RegExp('(' + s + ')', 'gi');
                     item = item.replace(regex, "<mark>$1</mark>");
                 }
             );
@@ -7314,6 +7314,10 @@ var mustache = require('mustache');
  */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
 var template =
     '<div class="cartodb-popup-content">' +
     '   {{#content.fields}}' +
@@ -7428,7 +7432,7 @@ module.exports = {
                                 });
                             }
                             feature.properties.content = {};
-                            feature.properties.content.fields = fi;
+                            feature.properties.content.fields = fi; // Used in a "loop" template
                             popupHtml = Mustache.render(template, feature.properties);
                             if (BACKEND === "cartodb") {
                                 popupHtml = $.parseHTML(popupHtml)[0].children[1].innerHTML
@@ -8174,11 +8178,11 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh"
@@ -8261,23 +8265,17 @@ module.exports = {
     // ========================================
 
     extensions: {
-        //browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
-        //server: [{conflictSearch: ["index"]}],
-        //browser: [{cowiDetail: ["bufferSearch"]}],
-        //browser: [{vectorLayers: ["index"]}]
-        //server: [{cowiDetail: ["bufferSearch"]}]
-
-
         browser: [
             {findNearest: ["index", "controller"]},
             {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},
-            {layerSearch: ["index", "controller"]}
+            {layerSearch: ["index", "controller"]},
+            {cowiDetail: ["bufferSearch"]}
         ],
         server: [
             {findNearest: ["index"]},
             {conflictSearch: ["index"]},
-            {layerSearch: ["index", "indexInEs"]}
-
+            {layerSearch: ["index", "indexInEs"]},
+            {cowiDetail: ["bufferSearch"]}
         ]
     },
 
@@ -8306,6 +8304,7 @@ module.exports = {
         "findNearest",
         "conflictSearch",
         "layerSearch"
+       /* "cowiDetail"*/
     ],
 
     // Aktiver printskabeloner

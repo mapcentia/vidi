@@ -28,28 +28,23 @@ router.get('/api/extension/es/:db', function (req, response) {
                 "number_of_shards": 4,
                 "number_of_replicas": 0,
                 "analysis": {
-                    "analyzer": {
-                        "str_search_analyzer": {
-                            "type": "custom",
-                            "tokenizer": "whitespace",
-                            "filter": [
-                                "lowercase"
-                            ]
-                        },
-                        "str_index_analyzer": {
-                            "type": "custom",
-                            "tokenizer": "whitespace",
-                            "filter": [
-                                "lowercase",
-                                "substring"
-                            ]
+                    "filter": {
+                        "desc_ngram": {
+                            "type": "ngram",
+                            "min_gram": 3,
+                            "max_gram": 8
                         }
                     },
-                    "filter": {
-                        "substring": {
-                            "type": "edgeNGram",
-                            "min_gram": 1,
-                            "max_gram": 255
+                    "analyzer": {
+                        "index_ngram": {
+                            "type": "custom",
+                            "tokenizer": "keyword",
+                            "filter": [ "desc_ngram", "lowercase" ]
+                        },
+                        "search_ngram": {
+                            "type": "custom",
+                            "tokenizer": "keyword",
+                            "filter": "lowercase"
                         }
                     }
                 }
@@ -60,12 +55,12 @@ router.get('/api/extension/es/:db', function (req, response) {
                     "properties": {
                         "f_table_title": {
                             "type": "text",
-                            "search_analyzer": "str_search_analyzer",
-                            "analyzer": "str_index_analyzer"
+                            "search_analyzer": "search_ngram",
+                            "analyzer": "index_ngram"
                         }, "layergroup": {
                             "type": "text",
-                            "search_analyzer": "str_search_analyzer",
-                            "analyzer": "str_index_analyzer"
+                            "search_analyzer": "search_ngram",
+                            "analyzer": "index_ngram"
                         },
                         "legend": {
                             "type": "object",

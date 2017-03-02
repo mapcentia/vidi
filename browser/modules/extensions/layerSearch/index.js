@@ -47,7 +47,7 @@ module.exports = {
         var highlighter = function (value, item) {
             _($.trim(value).split(' ')).each(
                 function (s) {
-                    var regex = new RegExp('(\\b' + s + ')', 'gi');
+                    var regex = new RegExp('(' + s + ')', 'gi');
                     item = item.replace(regex, "<mark>$1</mark>");
                 }
             );
