@@ -3263,11 +3263,11 @@ module.exports = {
                 $(".fa-circle-thin").addClass("deactiveBtn");
 
                 // Recreate buttons, so subtool bar is closed
-                createBufferBtn().addTo(cloud.map);
+                createBufferBtn().addTo(cloud.get().map);
 
                 try {
-                    cloud.map.removeLayer(circle1);
-                    cloud.map.removeLayer(circle2);
+                    cloud.get().map.removeLayer(circle1);
+                    cloud.get().map.removeLayer(circle2);
                 } catch (e) {
                     console.log(e.message)
                 }
@@ -7789,16 +7789,18 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     cartodb: {
-        db: "frederiksberg"
+        db: "mhoegh"
 
     },
+
+
 
     // Printskabeloner bliver IKKE længere automatisk aktiveret!
     // Aktivering sker nu i runtime settings.
@@ -7882,12 +7884,17 @@ module.exports = {
 
 
         browser: [
-            {findNearest: ["index", "controller"]},
-            {conflictSearch: ["index", "reportRender", "infoClick", "controller"]}
+           /* {findNearest: ["index", "controller"]},*/
+           /* {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},*/
+           /* {layerSearch: ["index", "controller"]},*/
+            {cowiDetail: ["bufferSearch"]}
         ],
         server: [
             {findNearest: ["index"]},
-            {conflictSearch: ["index"]}]
+            {conflictSearch: ["index"]},
+           /* {layerSearch: ["index", "indexInEs"]},*/
+            {cowiDetail: ["bufferSearch"]}
+        ]
     },
 
     // Url hvor der kan hentes konfigurationer online for at
@@ -7913,7 +7920,9 @@ module.exports = {
     //enabledExtensions: ["vectorLayers"],
     enabledExtensions: [
         "findNearest",
-        "conflictSearch"
+        "conflictSearch",
+        "layerSearch",
+        "cowiDetail"
     ],
 
     // Aktiver printskabeloner
@@ -7923,8 +7932,8 @@ module.exports = {
     // Set template
     // ============
 
-    //template: "cowiDetail.tmpl",
-    template: "default.tmpl",
+    template: "cowiDetail.tmpl",
+    //template: "default.tmpl",
 
     enabledSearch: "danish",
     searchConfig: {

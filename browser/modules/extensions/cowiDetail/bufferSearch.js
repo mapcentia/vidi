@@ -242,11 +242,11 @@ module.exports = {
                 $(".fa-circle-thin").addClass("deactiveBtn");
 
                 // Recreate buttons, so subtool bar is closed
-                createBufferBtn().addTo(cloud.map);
+                createBufferBtn().addTo(cloud.get().map);
 
                 try {
-                    cloud.map.removeLayer(circle1);
-                    cloud.map.removeLayer(circle2);
+                    cloud.get().map.removeLayer(circle1);
+                    cloud.get().map.removeLayer(circle2);
                 } catch (e) {
                     console.log(e.message)
                 }
