@@ -117,21 +117,16 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                encoding: 'utf8',
-                algorithm: 'md5',
-                length: 16,
-                rename: false,
-                enableUrlFragmentHint: true,
-                baseDir: "public/"
+                assets: ['js/**/*','css/**/*'],
+                queryString: true,
+                baseDir: './public/',
+                jsonOutput: false
             },
-            assets: {
+            production: {
                 files: [{
-                    src: [
-
-                        'public/index.html',
-                        'public/index.html'
-
-                    ]
+                    expand: true,
+                    cwd: 'public/',
+                    src: ['index.html']
                 }]
             }
         }
