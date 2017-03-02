@@ -44,6 +44,10 @@ var mustache = require('mustache');
  */
 var BACKEND = require('../../config/config.js').backend;
 
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
 var template =
     '<div class="cartodb-popup-content">' +
     '   {{#content.fields}}' +
@@ -158,7 +162,7 @@ module.exports = {
                                 });
                             }
                             feature.properties.content = {};
-                            feature.properties.content.fields = fi;
+                            feature.properties.content.fields = fi; // Used in a "loop" template
                             popupHtml = Mustache.render(template, feature.properties);
                             if (BACKEND === "cartodb") {
                                 popupHtml = $.parseHTML(popupHtml)[0].children[1].innerHTML
