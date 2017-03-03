@@ -11,18 +11,20 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var mustache = require('mustache');
+var backboneEvents;
 
 require("bootstrap");
 
 module.exports = {
 
     /**
-     * 
+     *
      * @param o
      * @returns {exports}
      */
     set: function (o) {
         modules = o;
+        backboneEvents = o.backboneEvents;
         return this;
     },
 
@@ -131,10 +133,6 @@ module.exports = {
         }).appendTo('head');
 
 
-
-
-
-
         $("[data-toggle=tooltip]").tooltip();
         try {
             var max = $(document).height() - $('.tab-pane').offset().top - 100;
@@ -150,22 +148,37 @@ module.exports = {
         // Init the modules
         // ================
 
-        //modules.loading.init();
         modules.cloud.init();
+        modules.state.setExtent();
         modules.backboneEvents.init();
         modules.socketId.init();
         modules.bindEvent.init();
-        modules.meta.init().then(function () {
-            modules.layerTree.init();
-            modules.layers.init();
-        });
-        modules.setting.init();
-        modules.state.init();
         modules.baseLayer.init();
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
+
+        modules.meta.init().then(function () {
+                return modules.setting.init();
+            },
+
+            function (error) {
+                console.log(error); // Stacktrace
+                alert("Vidi is loaded without schema. Can't set extent or add layers");
+                backboneEvents.get().trigger("ready:meta");
+                modules.state.init();
+
+            })
+
+            .then(function () {
+                return modules.layers.init();
+            })
+
+            .then(function () {
+                modules.layerTree.init();
+                modules.state.init();
+            });
 
         // Require search module
         // =====================

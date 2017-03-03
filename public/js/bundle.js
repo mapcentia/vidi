@@ -4298,14 +4298,27 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var mustache = require('mustache');
+var backboneEvents;
+
 
 require("bootstrap");
 
 module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         modules = o;
+        backboneEvents = o.backboneEvents;
         return this;
     },
+
+    /**
+     *
+     */
     init: function () {
         var me = this;
         if (urlVars.config) {
@@ -4329,6 +4342,10 @@ module.exports = {
             me.render();
         }
     },
+
+    /**
+     *
+     */
     render: function () {
         var me = this;
 
@@ -4388,6 +4405,10 @@ module.exports = {
             })
         }
     },
+
+    /**
+     *
+     */
     startApp: function () {
 
         // Load style sheet
@@ -4398,10 +4419,6 @@ module.exports = {
             type: 'text/css',
             href: '/css/styles.css'
         }).appendTo('head');
-
-
-
-
 
 
         $("[data-toggle=tooltip]").tooltip();
@@ -4419,22 +4436,37 @@ module.exports = {
         // Init the modules
         // ================
 
-        //modules.loading.init();
         modules.cloud.init();
+        modules.state.setExtent();
         modules.backboneEvents.init();
         modules.socketId.init();
         modules.bindEvent.init();
-        modules.meta.init().then(function () {
-            modules.layerTree.init();
-            modules.layers.init();
-        });
-        modules.setting.init();
-        modules.state.init();
         modules.baseLayer.init();
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
+
+        modules.meta.init().then(function () {
+                return modules.setting.init();
+            },
+
+            function (error) {
+                console.log(error); // Stacktrace
+                alert("Vidi is loaded without schema. Can't set extent or add layers");
+                backboneEvents.get().trigger("ready:meta");
+                modules.state.init();
+
+            })
+
+            .then(function () {
+                return modules.layers.init();
+            })
+
+            .then(function () {
+                modules.layerTree.init();
+                modules.state.init();
+            });
 
         // Require search module
         // =====================
@@ -5326,6 +5358,10 @@ module.exports = {
                     schemata = window.vidiConfig.schemata;
                 }
                 schemataStr = schemata.join(",")
+            }
+            if (!schemataStr) {
+                reject(new Error('No schemata'));
+                return;
             }
             $.ajax({
                 url: '/api/meta/' + db + '/' + schemataStr,
@@ -7217,6 +7253,10 @@ module.exports = {
                 }
                 schemataStr = schemata.join(",");
             }
+            if (!schemataStr) {
+                reject(new Error('No schemata'));
+                return;
+            }
             $.ajax({
                 url: '/api/setting/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",
@@ -7719,6 +7759,9 @@ var backboneEvents;
 
 var layerTree;
 
+var p, hashArr = hash.replace("#", "").split("/");
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -7744,281 +7787,276 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
-    init: function () {
-        var p, hashArr = hash.replace("#", "").split("/");
+    setExtent: function () {
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
             p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
             cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
         } else {
             cloud.get().zoomToExtent();
         }
-        (function pollForLayers() {
-            if (layers.ready() && setting.ready()) {
-                var arr, i;
-                if (hashArr[0]) {
-                    $(".base-map-button").removeClass("active");
-                    $("#" + hashArr[0]).addClass("active");
-                    if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                        setBaseLayer.init(hashArr[0]);
-                        if (hashArr[4]) {
-                            arr = hashArr[4].split(",");
-                            for (i = 0; i < arr.length; i++) {
-                                switchLayer.init(arr[i], true, true);
-                            }
-                        }
-                    }
-                    legend.init();
-                } else {
-                    // Set base layer to the first added one.
-                    setBaseLayer.init(baseLayer.getBaseLayer()[0]);
-                    var extent = setting.getExtent();
-                    if (extent !== null) {
-                        if (BACKEND === "cartodb") {
-                            cloud.get().map.fitBounds(extent);
-                        } else {
-                            cloud.get().zoomToExtent(extent);
-                        }
-                    } else {
-                        cloud.get().zoomToExtent();
+    },
+    init: function () {
+        var arr, i;
+        if (hashArr[0]) {
+            $(".base-map-button").removeClass("active");
+            $("#" + hashArr[0]).addClass("active");
+            if (hashArr[1] && hashArr[2] && hashArr[3]) {
+                setBaseLayer.init(hashArr[0]);
+                if (hashArr[4]) {
+                    arr = hashArr[4].split(",");
+                    for (i = 0; i < arr.length; i++) {
+                        switchLayer.init(arr[i], true, true);
                     }
                 }
-                if (typeof urlVars.k !== "undefined") {
-                    var parr, v, l, t, GeoJsonAdded = false;
-                    parr = urlVars.k.split("#");
-                    if (parr.length > 1) {
-                        parr.pop();
+            }
+            legend.init();
+        } else {
+            // Set base layer to the first added one.
+            setBaseLayer.init(baseLayer.getBaseLayer()[0]);
+            var extent = setting.getExtent();
+            if (extent !== null) {
+                if (BACKEND === "cartodb") {
+                    cloud.get().map.fitBounds(extent);
+                } else {
+                    cloud.get().zoomToExtent(extent);
+                }
+            } else {
+                cloud.get().zoomToExtent();
+            }
+        }
+        if (typeof urlVars.k !== "undefined") {
+            var parr, v, l, t, GeoJsonAdded = false;
+            parr = urlVars.k.split("#");
+            if (parr.length > 1) {
+                parr.pop();
+            }
+            $.ajax({
+                dataType: "json",
+                method: "get",
+                url: '/api/postdata/',
+                data: {
+                    k: parr.join()
+                },
+                scriptCharset: "utf-8",
+                success: function (response) {
+                    if (response.data.bounds !== null) {
+                        var bounds = response.data.bounds;
+                        cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                     }
-                    $.ajax({
-                        dataType: "json",
-                        method: "get",
-                        url: '/api/postdata/',
-                        data: {
-                            k: parr.join()
-                        },
-                        scriptCharset: "utf-8",
-                        success: function (response) {
-                            if (response.data.bounds !== null) {
-                                var bounds = response.data.bounds;
-                                cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
-                            }
-                            if (response.data.customData !== null) {
-                                backboneEvents.get().trigger("on:customData", response.data.customData);
-                            }
-                            /**
-                             * Recreate print
-                             */
-                            if (response.data.print !== null) {
-                                GeoJsonAdded = false;
-                                parr = response.data.print;
-                                v = parr;
-                                $.each(v[0].geojson.features, function (n, m) {
-                                    if (m.type === "Rectangle") {
-                                        var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
-                                            fillOpacity: 0,
-                                            opacity: 1,
-                                            color: 'red',
-                                            weight: 1
-                                        });
-                                        g.feature = m.feature;
-                                        cloud.get().map.addLayer(g);
-                                        setTimeout(function () {
-                                            var bounds = g.getBounds(),
-                                                sw = bounds.getSouthWest(),
-                                                ne = bounds.getNorthEast(),
-                                                halfLat = (sw.lat + ne.lat) / 2,
-                                                midLeft = L.latLng(halfLat, sw.lng),
-                                                midRight = L.latLng(halfLat, ne.lng),
-                                                scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
+                    if (response.data.customData !== null) {
+                        backboneEvents.get().trigger("on:customData", response.data.customData);
+                    }
+                    /**
+                     * Recreate print
+                     */
+                    if (response.data.print !== null) {
+                        GeoJsonAdded = false;
+                        parr = response.data.print;
+                        v = parr;
+                        $.each(v[0].geojson.features, function (n, m) {
+                            if (m.type === "Rectangle") {
+                                var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                    fillOpacity: 0,
+                                    opacity: 1,
+                                    color: 'red',
+                                    weight: 1
+                                });
+                                g.feature = m.feature;
+                                cloud.get().map.addLayer(g);
+                                setTimeout(function () {
+                                    var bounds = g.getBounds(),
+                                        sw = bounds.getSouthWest(),
+                                        ne = bounds.getNorthEast(),
+                                        halfLat = (sw.lat + ne.lat) / 2,
+                                        midLeft = L.latLng(halfLat, sw.lng),
+                                        midRight = L.latLng(halfLat, ne.lng),
+                                        scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
 
-                                            $("#container1").css("transform", "scale(" + scaleFactor + ")");
-                                            $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
-                                            $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
-                                            $("#scale").html("1 : " + response.data.scale);
-                                            $("#title").html(decodeURIComponent(urlVars.t));
-                                            parr = urlVars.c.split("#");
-                                            if (parr.length > 1) {
-                                                parr.pop();
-                                            }
-                                            $("#comment").html(decodeURIComponent(parr.join()));
-                                            cloud.get().map.removeLayer(g);
-                                        }, 300)
+                                    $("#container1").css("transform", "scale(" + scaleFactor + ")");
+                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
+                                    $("#scale").html("1 : " + response.data.scale);
+                                    $("#title").html(decodeURIComponent(urlVars.t));
+                                    parr = urlVars.c.split("#");
+                                    if (parr.length > 1) {
+                                        parr.pop();
+                                    }
+                                    $("#comment").html(decodeURIComponent(parr.join()));
+                                    cloud.get().map.removeLayer(g);
+                                }, 300)
+                            }
+                        });
+                    }
+
+                    /**
+                     * Recreate Drawings
+                     */
+                    if (response.data.draw !== null) {
+                        GeoJsonAdded = false;
+                        parr = response.data.draw;
+                        v = parr;
+                        draw.control();
+                        l = draw.getLayer();
+                        t = draw.getTable();
+                        $.each(v[0].geojson.features, function (n, m) {
+                            if (m.type === "Feature" && GeoJsonAdded === false) {
+                                var g = L.geoJson(v[0].geojson, {
+                                    style: function (f) {
+                                        return f.style;
                                     }
                                 });
+                                $.each(g._layers, function (i, v) {
+                                    l.addLayer(v);
+                                });
+                                GeoJsonAdded = true;
                             }
+                            if (m.type === "Circle") {
+                                g = L.circle(m._latlng, m._mRadius, m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                            if (m.type === "Rectangle") {
+                                g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                            if (m.type === "Marker") {
+                                g = L.marker(m._latlng, m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                        });
+                        t.loadDataInTable();
+                        draw.control();
+                    }
 
-                            /**
-                             * Recreate Drawings
-                             */
-                            if (response.data.draw !== null) {
-                                GeoJsonAdded = false;
-                                parr = response.data.draw;
-                                v = parr;
-                                draw.control();
-                                l = draw.getLayer();
-                                t = draw.getTable();
-                                $.each(v[0].geojson.features, function (n, m) {
-                                    if (m.type === "Feature" && GeoJsonAdded === false) {
-                                        var g = L.geoJson(v[0].geojson, {
-                                            style: function (f) {
-                                                return f.style;
-                                            }
-                                        });
-                                        $.each(g._layers, function (i, v) {
-                                            l.addLayer(v);
-                                        });
-                                        GeoJsonAdded = true;
-                                    }
-                                    if (m.type === "Circle") {
-                                        g = L.circle(m._latlng, m._mRadius, m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
-                                    }
-                                    if (m.type === "Rectangle") {
-                                        g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
-                                    }
-                                    if (m.type === "Marker") {
-                                        g = L.marker(m._latlng, m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
+                    /**
+                     * Recreate query draw
+                     */
+                    if (response.data.queryDraw !== null) {
+                        GeoJsonAdded = false;
+                        parr = response.data.queryDraw;
+                        v = parr;
+                        l = advancedInfo.getDrawLayer();
+                        $.each(v[0].geojson.features, function (n, m) {
+                            if (m.type === "Feature" && GeoJsonAdded === false) {
+                                var g = L.geoJson(v[0].geojson, {
+                                    style: function (f) {
+                                        return f.style;
                                     }
                                 });
-                                t.loadDataInTable();
-                                draw.control();
+                                $.each(g._layers, function (i, v) {
+                                    l.addLayer(v);
+                                });
+                                GeoJsonAdded = true;
                             }
+                            if (m.type === "Circle") {
+                                g = L.circle(m._latlng, m._mRadius, m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                            if (m.type === "Rectangle") {
+                                g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                            if (m.type === "Marker") {
+                                g = L.marker(m._latlng, m.style);
+                                g.feature = m.feature;
+                                l.addLayer(g);
+                            }
+                        });
+                    }
 
-                            /**
-                             * Recreate query draw
-                             */
-                            if (response.data.queryDraw !== null) {
-                                GeoJsonAdded = false;
-                                parr = response.data.queryDraw;
-                                v = parr;
-                                l = advancedInfo.getDrawLayer();
-                                $.each(v[0].geojson.features, function (n, m) {
-                                    if (m.type === "Feature" && GeoJsonAdded === false) {
-                                        var g = L.geoJson(v[0].geojson, {
-                                            style: function (f) {
-                                                return f.style;
-                                            }
-                                        });
-                                        $.each(g._layers, function (i, v) {
-                                            l.addLayer(v);
-                                        });
-                                        GeoJsonAdded = true;
-                                    }
-                                    if (m.type === "Circle") {
-                                        g = L.circle(m._latlng, m._mRadius, m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
-                                    }
-                                    if (m.type === "Rectangle") {
-                                        g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
-                                    }
-                                    if (m.type === "Marker") {
-                                        g = L.marker(m._latlng, m.style);
-                                        g.feature = m.feature;
-                                        l.addLayer(g);
+                    /**
+                     * Recreate query buffer
+                     */
+                    if (response.data.queryBuffer !== null) {
+                        GeoJsonAdded = false;
+                        parr = response.data.queryBuffer;
+                        v = parr;
+                        l = advancedInfo.getDrawLayer();
+                        $.each(v[0].geojson.features, function (n, m) {
+                            if (m.type === "Feature" && GeoJsonAdded === false) {
+                                var g = L.geoJson(v[0].geojson, {
+                                    style: function (f) {
+                                        return f.style;
                                     }
                                 });
+                                $.each(g._layers, function (i, v) {
+                                    l.addLayer(v);
+                                });
+                                GeoJsonAdded = true;
                             }
+                        });
+                    }
 
-                            /**
-                             * Recreate query buffer
-                             */
-                            if (response.data.queryBuffer !== null) {
-                                GeoJsonAdded = false;
-                                parr = response.data.queryBuffer;
-                                v = parr;
-                                l = advancedInfo.getDrawLayer();
-                                $.each(v[0].geojson.features, function (n, m) {
-                                    if (m.type === "Feature" && GeoJsonAdded === false) {
-                                        var g = L.geoJson(v[0].geojson, {
-                                            style: function (f) {
-                                                return f.style;
-                                            }
-                                        });
-                                        $.each(g._layers, function (i, v) {
-                                            l.addLayer(v);
-                                        });
-                                        GeoJsonAdded = true;
+                    /**
+                     * Recreate result
+                     */
+                    if (response.data.queryResult !== null) {
+                        GeoJsonAdded = false;
+                        parr = response.data.queryResult;
+                        v = parr;
+                        $.each(v[0].geojson.features, function (n, m) {
+                            if (m.type === "Feature" && GeoJsonAdded === false) {
+                                var g = L.geoJson(v[0].geojson, {
+                                    style: function (f) {
+                                        return f.style;
                                     }
                                 });
-                            }
-
-                            /**
-                             * Recreate result
-                             */
-                            if (response.data.queryResult !== null) {
-                                GeoJsonAdded = false;
-                                parr = response.data.queryResult;
-                                v = parr;
-                                $.each(v[0].geojson.features, function (n, m) {
-                                    if (m.type === "Feature" && GeoJsonAdded === false) {
-                                        var g = L.geoJson(v[0].geojson, {
-                                            style: function (f) {
-                                                return f.style;
-                                            }
-                                        });
-                                        $.each(g._layers, function (i, v) {
-                                            cloud.get().map.addLayer(v);
-                                        });
-                                        GeoJsonAdded = true;
-                                    }
-                                    if (m.type === "Circle") {
-                                        g = L.circleMarker(m._latlng, m.style);
-                                        g.setRadius(m._radius);
-                                        g.feature = m.feature;
-                                        cloud.get().map.addLayer(g);
-                                    }
+                                $.each(g._layers, function (i, v) {
+                                    cloud.get().map.addLayer(v);
                                 });
+                                GeoJsonAdded = true;
                             }
-
-                            // Recreate added layers
-                            // =====================
-
-                            var currentLayers = meta.getMetaData();
-                            var flag;
-                            var addedLayers = [];
-
-                            // Get array with the added layers
-                            $.each(response.data.metaData.data, function (i, v) {
-                                flag = false;
-                                $.each(currentLayers.data, function (u, m) {
-                                    if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
-                                        flag = true;
-                                    }
-                                });
-                                if (!flag) {
-                                    addedLayers.push(v);
-                                }
-                            });
-
-                            // If any added layers, then add them
-                            if (addedLayers.length > 0) {
-                                meta.addMetaData({data: addedLayers});
-                                layerTree.init();
-                                // Use promise to switch layers on
-                                layers.init().then(function () {
-                                    if (arr) {
-                                        for (i = 0; i < arr.length; i++) {
-                                            switchLayer.init(arr[i], true, true);
-                                        }
-                                    }
-                                })
+                            if (m.type === "Circle") {
+                                g = L.circleMarker(m._latlng, m.style);
+                                g.setRadius(m._radius);
+                                g.feature = m.feature;
+                                cloud.get().map.addLayer(g);
                             }
+                        });
+                    }
 
+                    // Recreate added layers
+                    // =====================
+
+                    var currentLayers = meta.getMetaData();
+                    var flag;
+                    var addedLayers = [];
+
+                    // Get array with the added layers
+                    $.each(response.data.metaData.data, function (i, v) {
+                        flag = false;
+                        $.each(currentLayers.data, function (u, m) {
+                            if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
+                                flag = true;
+                            }
+                        });
+                        if (!flag) {
+                            addedLayers.push(v);
                         }
                     });
+
+                    // If any added layers, then add them
+                    if (addedLayers.length > 0) {
+                        meta.addMetaData({data: addedLayers});
+                        layerTree.init();
+                        // Use promise to switch layers on
+                        layers.init().then(function () {
+                            if (arr) {
+                                for (i = 0; i < arr.length; i++) {
+                                    switchLayer.init(arr[i], true, true);
+                                }
+                            }
+                        })
+                    }
+
                 }
-                backboneEvents.get().trigger("end:state");
-            } else {
-                setTimeout(pollForLayers, 50);
-            }
-        }());
+            });
+        }
+        backboneEvents.get().trigger("end:state");
     },
     setBaseLayer: function (b) {
         setBaseLayer = b;
@@ -8206,11 +8244,11 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
-        host: "http://cowi.mapcentia.com"
-        //host: "http://127.0.0.1:8080"
+        //host: "http://cowi.mapcentia.com"
+        host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh"
@@ -8296,8 +8334,8 @@ module.exports = {
         browser: [
             {findNearest: ["index", "controller"]},
             {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},
-            {layerSearch: ["index", "controller"]},
-            {cowiDetail: ["bufferSearch"]}
+            {layerSearch: ["index", "controller"]}
+         /*   {cowiDetail: ["bufferSearch"]}*/
         ],
         server: [
             {findNearest: ["index"]},

@@ -110,6 +110,10 @@ module.exports = {
                 }
                 schemataStr = schemata.join(",")
             }
+            if (!schemataStr) {
+                reject(new Error('No schemata'));
+                return;
+            }
             $.ajax({
                 url: '/api/meta/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",
