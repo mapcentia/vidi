@@ -301,7 +301,7 @@ window.Vidi = function () {
     setTimeout(function () {
         window.status = "all_loaded";
         console.info("load_timeout");
-    }, 20000);
+    }, 120000);
 
     // Require the standard modules
     // ============================
@@ -4297,6 +4297,8 @@ var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
+var mustache = require('mustache');
+
 require("bootstrap");
 
 module.exports = {
@@ -4308,7 +4310,7 @@ module.exports = {
         var me = this;
         if (urlVars.config) {
             $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
-                console.info(data);
+                console.info("Started with config: " + urlVars.config);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -4316,25 +4318,19 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
+                window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
+                window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
             }).fail(function () {
                 console.info("Error loading config json");
             }).always(function () {
-                me.startApp();
+                me.render();
             });
         } else {
-            me.startApp();
+            me.render();
         }
     },
-    startApp: function () {
-
-        // Load style sheet
-        //===================
-
-        $('<link/>').attr({
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: '/css/styles.css'
-        }).appendTo('head');
+    render: function () {
+        var me = this;
 
         // Render template and set some styling
         // ====================================
@@ -4376,7 +4372,37 @@ module.exports = {
         // Render the page
         // ===============
 
-        $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
+
+        if (typeof Templates[tmpl] !== "undefined") {
+            $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
+            console.info("Using pre-processed template: " + tmpl);
+            me.startApp();
+        } else {
+            $.get(window.vidiConfig.configUrl + "/templates/" + tmpl, function (template) {
+                var rendered = Mustache.render(template, gc2i18n.dict);
+                $("#main-container").html(rendered);
+                console.info("Loaded external template: " + tmpl);
+                me.startApp();
+            }).fail(function () {
+                alert("Could not load template: " + tmpl);
+            })
+        }
+    },
+    startApp: function () {
+
+        // Load style sheet
+        //===================
+
+        $('<link/>').attr({
+            rel: 'stylesheet',
+            type: 'text/css',
+            href: '/css/styles.css'
+        }).appendTo('head');
+
+
+
+
+
 
         $("[data-toggle=tooltip]").tooltip();
         try {
@@ -4463,7 +4489,7 @@ module.exports = {
         $("#loadscreentext").html(__("Loading data"));
     }
 };
-},{"./../modules/urlparser":43,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/layerSearch/controller.js":20,"./extensions/layerSearch/index.js":21,"./extensions/vectorLayers/index.js":22,"./search/danish.js":33,"./search/danish_new.js":34,"./search/google.js":35,"bootstrap":56}],26:[function(require,module,exports){
+},{"./../modules/urlparser":43,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/layerSearch/controller.js":20,"./extensions/layerSearch/index.js":21,"./extensions/vectorLayers/index.js":22,"./search/danish.js":33,"./search/danish_new.js":34,"./search/google.js":35,"bootstrap":56,"mustache":117}],26:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -5648,7 +5674,9 @@ module.exports = {
             legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
             dataTime: moment().format('MMMM Do YYYY, H:mm'),
             customData: customData || null,
-            metaData: meta.getMetaData()
+            metaData: meta.getMetaData(),
+            px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
+            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1]
         };
 
         if (urlVars.config) {
@@ -8229,7 +8257,7 @@ module.exports = {
                     }
                 }
             },
-            "print2": {
+            "print_test": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],

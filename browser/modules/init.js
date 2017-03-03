@@ -10,6 +10,8 @@ var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
+var mustache = require('mustache');
+
 require("bootstrap");
 
 module.exports = {
@@ -21,7 +23,7 @@ module.exports = {
         var me = this;
         if (urlVars.config) {
             $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
-                console.info(data);
+                console.info("Started with config: " + urlVars.config);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -29,25 +31,19 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
+                window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
+                window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
             }).fail(function () {
                 console.info("Error loading config json");
             }).always(function () {
-                me.startApp();
+                me.render();
             });
         } else {
-            me.startApp();
+            me.render();
         }
     },
-    startApp: function () {
-
-        // Load style sheet
-        //===================
-
-        $('<link/>').attr({
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: '/css/styles.css'
-        }).appendTo('head');
+    render: function () {
+        var me = this;
 
         // Render template and set some styling
         // ====================================
@@ -89,7 +85,37 @@ module.exports = {
         // Render the page
         // ===============
 
-        $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
+
+        if (typeof Templates[tmpl] !== "undefined") {
+            $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
+            console.info("Using pre-processed template: " + tmpl);
+            me.startApp();
+        } else {
+            $.get(window.vidiConfig.configUrl + "/templates/" + tmpl, function (template) {
+                var rendered = Mustache.render(template, gc2i18n.dict);
+                $("#main-container").html(rendered);
+                console.info("Loaded external template: " + tmpl);
+                me.startApp();
+            }).fail(function () {
+                alert("Could not load template: " + tmpl);
+            })
+        }
+    },
+    startApp: function () {
+
+        // Load style sheet
+        //===================
+
+        $('<link/>').attr({
+            rel: 'stylesheet',
+            type: 'text/css',
+            href: '/css/styles.css'
+        }).appendTo('head');
+
+
+
+
+
 
         $("[data-toggle=tooltip]").tooltip();
         try {

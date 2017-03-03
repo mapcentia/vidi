@@ -55,7 +55,7 @@ module.exports = function (grunt) {
                     }
                 },
                 files: {
-                    "public/js/templates.js": ["public/templates/*"]
+                    "public/js/templates.js": ["public/templates/**/*.tmpl"]
                 }
             }
         },

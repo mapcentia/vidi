@@ -279,7 +279,9 @@ module.exports = {
             legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
             dataTime: moment().format('MMMM Do YYYY, H:mm'),
             customData: customData || null,
-            metaData: meta.getMetaData()
+            metaData: meta.getMetaData(),
+            px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
+            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1]
         };
 
         if (urlVars.config) {
