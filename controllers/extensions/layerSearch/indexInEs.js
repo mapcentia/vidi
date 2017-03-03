@@ -88,7 +88,8 @@ router.get('/api/extension/es/:db', function (req, response) {
                 response.header('content-type', 'application/json');
                 response.status(res.statusCode).send({
                     success: false,
-                    message: "Could not get the Viz. Please check CartoDB viz id."
+                    message: "Could not get the Viz. Please check CartoDB viz id.",
+                    url: url
                 });
                 return;
             }
@@ -125,7 +126,8 @@ router.get('/api/extension/es/:db', function (req, response) {
                             response.header('content-type', 'application/json');
                             response.status(res.statusCode).send({
                                 success: false,
-                                message: "Could not get the Viz. Please check CartoDB viz id."
+                                message: "Could not get the Viz. Please check CartoDB viz id.",
+                                url: url
                             });
                             return;
                         }
