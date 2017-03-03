@@ -100,9 +100,7 @@ router.get('/api/extension/es/:db', function (req, response) {
             });
             res.on("end", function () {
                 jsfile = new Buffer.concat(chunks);
-                //console.log(JSON.parse(jsfile));
                 schemas = JSON.parse(jsfile).indexInEs;
-
                 (function iter() {
                     if (u === schemas.length) {
                         jsfile = {
@@ -120,7 +118,6 @@ router.get('/api/extension/es/:db', function (req, response) {
                         return;
                     }
                     url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schemas[u];
-                    //console.log(url);
                     http.get(url, function (res) {
                         var statusCode = res.statusCode;
                         if (statusCode != 200) {
@@ -144,7 +141,6 @@ router.get('/api/extension/es/:db', function (req, response) {
                             } catch (e) {
                                 console.log(e);
                             }
-                            //console.log(layers);
                             for (var i = 0; i < layers.length; i++) {
                                 layerObj = layers[i];
                                 bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
