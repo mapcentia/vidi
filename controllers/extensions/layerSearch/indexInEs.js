@@ -31,8 +31,8 @@ router.get('/api/extension/es/:db', function (req, response) {
                     "filter": {
                         "desc_ngram": {
                             "type": "ngram",
-                            "min_gram": 3,
-                            "max_gram": 8
+                            "min_gram": 1,
+                            "max_gram": 255
                         }
                     },
                     "analyzer": {
