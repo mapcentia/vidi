@@ -4300,7 +4300,6 @@ var urlVars = urlparser.urlVars;
 var mustache = require('mustache');
 var backboneEvents;
 
-
 require("bootstrap");
 
 module.exports = {
@@ -4322,7 +4321,7 @@ module.exports = {
     init: function () {
         var me = this;
         if (urlVars.config) {
-            $.getJSON(window.vidiConfig.configUrl + "/config/" + urlVars.config, function (data) {
+            $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
                 console.info("Started with config: " + urlVars.config);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
@@ -4395,7 +4394,7 @@ module.exports = {
             console.info("Using pre-processed template: " + tmpl);
             me.startApp();
         } else {
-            $.get(window.vidiConfig.configUrl + "/template/" + tmpl, function (template) {
+            $.get(window.vidiConfig.configUrl + "/" + tmpl, function (template) {
                 var rendered = Mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
@@ -8031,7 +8030,7 @@ module.exports = {
                         flag = false;
                         $.each(currentLayers.data, function (u, m) {
                             if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
-                                flag = true;
+                                flag = true; // Flag layers from loaded schemata
                             }
                         });
                         if (!flag) {
@@ -8244,8 +8243,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

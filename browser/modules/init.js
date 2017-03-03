@@ -34,7 +34,7 @@ module.exports = {
     init: function () {
         var me = this;
         if (urlVars.config) {
-            $.getJSON(window.vidiConfig.configUrl + "/config/" + urlVars.config, function (data) {
+            $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
                 console.info("Started with config: " + urlVars.config);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
@@ -107,7 +107,7 @@ module.exports = {
             console.info("Using pre-processed template: " + tmpl);
             me.startApp();
         } else {
-            $.get(window.vidiConfig.configUrl + "/template/" + tmpl, function (template) {
+            $.get(window.vidiConfig.configUrl + "/" + tmpl, function (template) {
                 var rendered = Mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
