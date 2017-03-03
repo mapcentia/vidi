@@ -33,7 +33,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                 chunks.push(chunk);
             });
             res.on("end", function () {
-                var layerObj, fieldConf = {};
+                var layerObj, fieldConf;
                 jsfile = new Buffer.concat(chunks);
                 try {
                     layers = JSON.parse(jsfile).layers[1].options.layer_definition.layers;
@@ -41,6 +41,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                     console.log(e);
                 }
                 for (var i = 0; i < layers.length; i++) {
+                    fieldConf = {};
                     for (var m = 0; m < layers[i].infowindow.fields.length; m++) {
                         fieldConf[layers[i].infowindow.fields[m].name] = {
                             sort_id: m,

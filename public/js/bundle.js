@@ -4333,7 +4333,7 @@ module.exports = {
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
             }).fail(function () {
-                console.info("Error loading config json");
+                console.error("Error loading config json");
             }).always(function () {
                 me.render();
             });
@@ -7381,22 +7381,8 @@ var mustache = require('mustache');
  */
 var BACKEND = require('../../config/config.js').backend;
 
-/**
- * A default template for GC2, with a loop
- * @type {string}
- */
-var template =
-    '<div class="cartodb-popup-content">' +
-    '   {{#content.fields}}' +
-    '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
-    '       {{#value}}' +
-    '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
-    '       {{/value}}' +
-    '       {{^value}}' +
-    '           <p class="empty">null</p>' +
-    '       {{/value}}' +
-    '   {{/content.fields}}' +
-    '</div>';
+
+
 
 
 /**
@@ -7441,6 +7427,25 @@ module.exports = {
             if (layers[0] === "") {
                 return false;
             }
+            /**
+             * A default template for GC2, with a loop
+             * @type {string}
+             */
+
+            var template =
+                '<div class="cartodb-popup-content">' +
+                '   {{#content.fields}}' +
+                '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
+                '       {{#value}}' +
+                '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
+                '       {{/value}}' +
+                '       {{^value}}' +
+                '           <p class="empty">null</p>' +
+                '       {{/value}}' +
+                '   {{/content.fields}}' +
+                '</div>';
+            template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
+
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
             var geoType = metaDataKeys[value].type;
@@ -7449,11 +7454,8 @@ module.exports = {
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
-            var fields = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.fields !== "" ) ? metaDataKeys[value].infowindow.fields : null;
-            var aliases = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.alternative_names !== "" ) ? metaDataKeys[value].infowindow.alternative_names : null;
             var onLoad;
             var popupHtml;
-            template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,

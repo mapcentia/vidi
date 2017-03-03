@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var https = require('https');
+var http = require('http');
 var config = require('../../../config/config.js').cartodb;
 var configUrl = require('../../../config/config.js').configUrl;
 var elasticsearch = require('elasticsearch');
@@ -99,7 +100,7 @@ router.get('/api/extension/es/:db', function (req, response) {
             });
             res.on("end", function () {
                 jsfile = new Buffer.concat(chunks);
-                console.log(JSON.parse(jsfile));
+                //console.log(JSON.parse(jsfile));
                 schemas = JSON.parse(jsfile).indexInEs;
 
                 (function iter() {
@@ -118,9 +119,9 @@ router.get('/api/extension/es/:db', function (req, response) {
                         response.send(jsfile);
                         return;
                     }
-                    url = "https://" + db + ".cartodb.com/api/v2/viz/" + schemas[u] + "/viz.json";
-                    console.log(url);
-                    https.get(url, function (res) {
+                    url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schemas[u];
+                    //console.log(url);
+                    http.get(url, function (res) {
                         var statusCode = res.statusCode;
                         if (statusCode != 200) {
                             response.header('content-type', 'application/json');
@@ -139,27 +140,13 @@ router.get('/api/extension/es/:db', function (req, response) {
                             var layerObj;
                             jsfile = new Buffer.concat(chunks);
                             try {
-                                layers = JSON.parse(jsfile).layers[1].options.layer_definition.layers;
+                                layers = JSON.parse(jsfile).data;
                             } catch (e) {
                                 console.log(e);
                             }
                             //console.log(layers);
                             for (var i = 0; i < layers.length; i++) {
-                                layers[i].legend.template = layers[i].legend.template.replace(/"/g,"'");
-                                layerObj = {
-                                    f_table_schema: schemas[u],
-                                    f_table_name: layers[i].options.layer_name,
-                                    f_table_title: layers[i].options.layer_name,
-                                    f_geometry_column: "the_geom_webmercator",
-                                    pkey: "cartodb_id",
-                                    srid: "3857",
-                                    sql: layers[i].options.sql,
-                                    cartocss: layers[i].options.cartocss,
-                                    layergroup: JSON.parse(jsfile).title,
-                                    fieldconf: null,
-                                    legend: layers[i].legend,
-                                    meta: null
-                                };
+                                layerObj = layers[i];
                                 bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                 bulkArr.push(layerObj);
                                 data.push(layerObj)

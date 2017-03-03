@@ -46,7 +46,7 @@ module.exports = {
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
             }).fail(function () {
-                console.info("Error loading config json");
+                console.error("Error loading config json");
             }).always(function () {
                 me.render();
             });
