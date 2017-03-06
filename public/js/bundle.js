@@ -1146,7 +1146,7 @@ module.exports = module.exports = {
                     html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
                     $("#info-modal").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
-                    $("#info-modal .modal-body").html(html);
+                    $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
                     legend.init([t], "#info-modal-legend");
                     e.stopPropagation();
                 });
@@ -3939,7 +3939,6 @@ module.exports = {
         return this;
     },
     init: function () {
-
     },
 
     search: function (query) {
@@ -3988,12 +3987,11 @@ module.exports = {
         q = JSON.stringify(qJson);
         console.log(q);
         $.ajax({
-            url: '/api/extension/es/' + db,
-            data: q,
+            url: '/api/extension/layersearch/' + db + "?q=" + q,
             dataType: "json",
             scriptCharset: "utf-8",
             contentType: "application/json; charset=utf-8",
-            method: "POST",
+            method: "GET",
             success: function (response) {
                 var html, fieldsObj = {"f_table_title": "Title", "layergroup": "Gruppe"};
                 $.each(response, function (i, hit) {
@@ -8244,8 +8242,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"

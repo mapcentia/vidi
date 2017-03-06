@@ -10,8 +10,8 @@ var client = new elasticsearch.Client({
     log: 'trace'
 });
 
-router.get('/api/extension/es/:db', function (req, response) {
-    req.setTimeout(0) // no timeout
+router.get('/api/extension/layersearch/index/:db', function (req, response) {
+    req.setTimeout(0); // no timeout
     var db = req.params.db, schemas, url, layers, data = [], u = 0, jsfile = "", bulkArr = [],
         indexName = "vidi_" + db;
     url = configUrl + "/index_in_es.json";
@@ -143,6 +143,9 @@ router.get('/api/extension/es/:db', function (req, response) {
                             }
                             for (var i = 0; i < layers.length; i++) {
                                 layerObj = layers[i];
+                                if (!layerObj.f_table_title) {
+                                    layerObj.f_table_title = layerObj.f_table_name;
+                                }
                                 bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                 bulkArr.push(layerObj);
                                 data.push(layerObj)

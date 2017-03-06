@@ -89,12 +89,11 @@ module.exports = {
         q = JSON.stringify(qJson);
         console.log(q);
         $.ajax({
-            url: '/api/extension/es/' + db,
-            data: q,
+            url: '/api/extension/layersearch/' + db + "?q=" + q,
             dataType: "json",
             scriptCharset: "utf-8",
             contentType: "application/json; charset=utf-8",
-            method: "POST",
+            method: "GET",
             success: function (response) {
                 var html, fieldsObj = {"f_table_title": "Title", "layergroup": "Gruppe"};
                 $.each(response, function (i, hit) {

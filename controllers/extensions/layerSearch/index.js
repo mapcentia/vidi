@@ -7,12 +7,12 @@ var client = new elasticsearch.Client({
     log: 'trace'
 });
 
-router.post('/api/extension/es/:db', function (req, response) {
+router.get('/api/extension/layersearch/:db', function (req, response) {
     var indexName = "vidi_" + req.params.db;
     client.search({
         index: indexName,
         type: 'meta',
-        body: req.body
+        body: req.query.q
     }).then(function (resp) {
         var hits = resp.hits.hits;
         response.send(hits);
@@ -22,4 +22,3 @@ router.post('/api/extension/es/:db', function (req, response) {
     });
 });
 module.exports = router;
-
