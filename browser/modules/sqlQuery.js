@@ -94,7 +94,6 @@ module.exports = {
              * A default template for GC2, with a loop
              * @type {string}
              */
-
             var template =
                 '<div class="cartodb-popup-content">' +
                 '   {{#content.fields}}' +

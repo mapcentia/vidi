@@ -168,7 +168,6 @@ module.exports = {
                 alert("Vidi is loaded without schema. Can't set extent or add layers");
                 backboneEvents.get().trigger("ready:meta");
                 modules.state.init();
-
             })
 
             .then(function () {

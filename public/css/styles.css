@@ -67,6 +67,7 @@ img {
 }
 .modal-body {
   overflow: auto;
+  height: calc(100% - 52px);
 }
 input[type="radio"],
 input[type="checkbox"] {
@@ -742,7 +743,7 @@ body {
   width: 100%;
 }
 .overlay-label {
-  width: calc(50%);
+  width: calc(100% - 50px);
 }
 .info-label {
   display: none;
@@ -761,6 +762,7 @@ body {
 }
 #info-modal-body-wrapper {
   overflow: auto;
+  height: 100%;
 }
 #searchinput {
   width: 200px;

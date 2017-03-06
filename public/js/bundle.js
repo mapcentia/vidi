@@ -3876,11 +3876,11 @@ module.exports = {
     init: function () {
         $("#layer-search-btn").on("click", function (e) {
             $("#info-modal .modal-title").html("<i class='material-icons'>&#xE8B6;</i>");
-            $("#info-modal .modal-body").html('<div id="search-container">' +
+            $("#info-modal .modal-body").html('<div id="search-container" style="height: 100%">' +
                 '<div id="placfes">' +
                 '<input name="layer-search" id="layer-search" type="search" class="form-control" placeholder="Søg efter data">' +
                 '</div>' +
-                '<div id="layer-search-list"></div>' +
+                '<div id="layer-search-list" style="height: calc(100% - 38px); overflow: auto"></div>' +
                 '</div>');
 
             $( "#info-modal").animate({
@@ -3894,7 +3894,7 @@ module.exports = {
             }, 300));
         });
     }
-}
+};
 },{}],21:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
@@ -3939,6 +3939,7 @@ module.exports = {
         return this;
     },
     init: function () {
+
     },
 
     search: function (query) {
@@ -4455,7 +4456,6 @@ module.exports = {
                 alert("Vidi is loaded without schema. Can't set extent or add layers");
                 backboneEvents.get().trigger("ready:meta");
                 modules.state.init();
-
             })
 
             .then(function () {
@@ -7431,7 +7431,6 @@ module.exports = {
              * A default template for GC2, with a loop
              * @type {string}
              */
-
             var template =
                 '<div class="cartodb-popup-content">' +
                 '   {{#content.fields}}' +
