@@ -3651,7 +3651,6 @@ module.exports = module.exports = {
     init: function () {
 
         utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../height')().max);
-        $('#main-tabs a[href="#findnearest-content"]').tab('show');
 
         // Append to DOM
         //==============
@@ -4331,6 +4330,7 @@ module.exports = {
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
+                window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
             }).fail(function () {
                 console.error("Error loading config json");
             }).always(function () {
@@ -4386,7 +4386,6 @@ module.exports = {
 
         // Render the page
         // ===============
-
 
         if (typeof Templates[tmpl] !== "undefined") {
             $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
@@ -4516,6 +4515,11 @@ module.exports = {
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
         $("#loadscreentext").html(__("Loading data"));
+
+        if (window.vidiConfig.activateMainTab) {
+            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab +'-content"]').tab('show');
+
+        }
     }
 };
 },{"./../modules/urlparser":43,"./extensions/conflictSearch/controller.js":13,"./extensions/conflictSearch/index.js":14,"./extensions/conflictSearch/infoClick.js":15,"./extensions/conflictSearch/reportRender.js":16,"./extensions/cowiDetail/bufferSearch.js":17,"./extensions/findNearest/controller.js":18,"./extensions/findNearest/index.js":19,"./extensions/layerSearch/controller.js":20,"./extensions/layerSearch/index.js":21,"./extensions/vectorLayers/index.js":22,"./search/danish.js":33,"./search/danish_new.js":34,"./search/google.js":35,"bootstrap":56,"mustache":117}],26:[function(require,module,exports){
@@ -8365,7 +8369,7 @@ module.exports = {
     //enabledExtensions: ["cowiDetail"],
     //enabledExtensions: ["vectorLayers"],
     enabledExtensions: [
-        "findNearest",
+      /*  "findNearest",*/
         "conflictSearch",
         "layerSearch"
        /* "cowiDetail"*/

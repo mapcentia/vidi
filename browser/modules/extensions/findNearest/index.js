@@ -100,7 +100,6 @@ module.exports = module.exports = {
     init: function () {
 
         utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../height')().max);
-        $('#main-tabs a[href="#findnearest-content"]').tab('show');
 
         // Append to DOM
         //==============

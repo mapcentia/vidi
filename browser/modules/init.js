@@ -45,6 +45,7 @@ module.exports = {
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
+                window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
             }).fail(function () {
                 console.error("Error loading config json");
             }).always(function () {
@@ -100,7 +101,6 @@ module.exports = {
 
         // Render the page
         // ===============
-
 
         if (typeof Templates[tmpl] !== "undefined") {
             $("#main-container").html(Templates[tmpl].render(gc2i18n.dict));
@@ -230,5 +230,10 @@ module.exports = {
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
         $("#loadscreentext").html(__("Loading data"));
+
+        if (window.vidiConfig.activateMainTab) {
+            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab +'-content"]').tab('show');
+
+        }
     }
 };
