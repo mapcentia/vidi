@@ -41,6 +41,11 @@ module.exports = {
         return this;
     },
     init: function () {
+        
+        // Create a button and insert into DOM
+        // ===================================
+
+        $('<button id="layer-search-btn" class="btn btn-raised" style="width: 100%"><i class="material-icons">&#xE8B6;</i>Søg i lag</button>').insertBefore("#layers");
     },
 
     search: function (query) {
