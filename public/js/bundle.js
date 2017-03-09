@@ -3128,7 +3128,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("stamenTonerLite");
+            setBaseLayer.init("dk");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -3222,8 +3222,13 @@ module.exports = {
         cloud.get().map.addLayer(drawnItemsPolygon);
 
         backboneEvents.get().on("end:state", function () {
-            cloud.get().addBaseLayer("stamenTonerLite", "osm");
-            setBaseLayer.init("stamenTonerLite");
+            cloud.get().addBaseLayer("dk", "osm", {
+                "maxZoom": 19,
+                "maxNativeZoom": 18,
+                "attribution": "Geofyn A/S"
+                //"subdomains": ["a", "b", "c"]
+            }, "http://ec2-54-171-155-220.eu-west-1.compute.amazonaws.com");
+            setBaseLayer.init("dk");
 
         });
 
@@ -7840,7 +7845,7 @@ module.exports = {
                     }
                 }
             },
-            "print2": {
+            "print_test": {
                 A4: {
                     l: {
                         mapsizePx: [1000, 700],
@@ -7876,23 +7881,16 @@ module.exports = {
     // ========================================
 
     extensions: {
-        //browser: [{conflictSearch: ["index", "reportRender", "infoClick", "controller"]}],
-        //server: [{conflictSearch: ["index"]}],
-        //browser: [{cowiDetail: ["bufferSearch"]}],
-        //browser: [{vectorLayers: ["index"]}]
-        //server: [{cowiDetail: ["bufferSearch"]}]
-
-
         browser: [
-           /* {findNearest: ["index", "controller"]},*/
-           /* {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},*/
-           /* {layerSearch: ["index", "controller"]},*/
+            {findNearest: ["index", "controller"]},
+            {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},
+            /*{layerSearch: ["index", "controller"]},*/
             {cowiDetail: ["bufferSearch"]}
         ],
         server: [
             {findNearest: ["index"]},
             {conflictSearch: ["index"]},
-           /* {layerSearch: ["index", "indexInEs"]},*/
+            /*{layerSearch: ["index", "indexInEs"]},*/
             {cowiDetail: ["bufferSearch"]}
         ]
     },
@@ -7919,9 +7917,9 @@ module.exports = {
     //enabledExtensions: ["cowiDetail"],
     //enabledExtensions: ["vectorLayers"],
     enabledExtensions: [
-        "findNearest",
-        "conflictSearch",
-        "layerSearch",
+      /*  "findNearest",*/
+       /* "conflictSearch",*/
+       /* "layerSearch",*/
         "cowiDetail"
     ],
 
@@ -7935,7 +7933,7 @@ module.exports = {
     template: "cowiDetail.tmpl",
     //template: "default.tmpl",
 
-    enabledSearch: "danish",
+    enabledSearch: "google",
     searchConfig: {
         komkode: "190"
     },

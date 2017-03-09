@@ -107,7 +107,7 @@ var createBufferBtn = function () {
             }
         },
         addHooks: function () {
-            setBaseLayer.init("stamenTonerLite");
+            setBaseLayer.init("dk");
             ImmediateSubAction2.prototype.addHooks.call(this);
         }
     });
@@ -201,8 +201,13 @@ module.exports = {
         cloud.get().map.addLayer(drawnItemsPolygon);
 
         backboneEvents.get().on("end:state", function () {
-            cloud.get().addBaseLayer("stamenTonerLite", "osm");
-            setBaseLayer.init("stamenTonerLite");
+            cloud.get().addBaseLayer("dk", "osm", {
+                "maxZoom": 19,
+                "maxNativeZoom": 18,
+                "attribution": "Geofyn A/S"
+                //"subdomains": ["a", "b", "c"]
+            }, "http://ec2-54-171-155-220.eu-west-1.compute.amazonaws.com");
+            setBaseLayer.init("dk");
 
         });
 
