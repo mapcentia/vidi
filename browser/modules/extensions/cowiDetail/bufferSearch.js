@@ -204,7 +204,7 @@ module.exports = {
             cloud.get().addBaseLayer("dk", "osm", {
                 "maxZoom": 18,
                 "maxNativeZoom": 18,
-                "attribution": "Geofyn A/S"
+                "attribution": "Tiles by <a href='http://cowi.dk' target='_blank'>COWI</a> | Data by <a href='http://www.openstreetmap.org/' target='_blank'>OpenStreetMap</a>"
                 //"subdomains": ["a", "b", "c"]
             }, "http://ec2-54-171-155-220.eu-west-1.compute.amazonaws.com");
             setBaseLayer.init("dk");
