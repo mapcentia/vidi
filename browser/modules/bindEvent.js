@@ -206,6 +206,13 @@ module.exports = module.exports = {
             }
         });
 
+        $(document).bind('mousemove', function (e) {
+            $('#tail').css({
+                left: e.pageX + 20,
+                top: e.pageY
+            });
+        });
+
         // Print
         // =====
         $("#print-btn").on("click", function () {

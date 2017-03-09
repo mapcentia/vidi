@@ -43,12 +43,21 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                 for (var i = 0; i < layers.length; i++) {
                     fieldConf = {};
                     for (var m = 0; m < layers[i].infowindow.fields.length; m++) {
-                        fieldConf[layers[i].infowindow.fields[m].name] = {
-                            sort_id: m,
-                            querable: true,
-                            alias: layers[i].infowindow.alternative_names[layers[i].infowindow.fields[m].name] || layers[i].infowindow.fields[m].name}
+                        fieldConf[layers[i].infowindow.fields[m].name] = {};
+                        fieldConf[layers[i].infowindow.fields[m].name].sort_id = m;
+                        fieldConf[layers[i].infowindow.fields[m].name].querable = true;
+                        fieldConf[layers[i].infowindow.fields[m].name].alias = layers[i].infowindow.alternative_names[layers[i].infowindow.fields[m].name] || layers[i].infowindow.fields[m].name;
                     }
-                    layers[i].legend.template = layers[i].legend.template.replace(/"/g,"'");
+
+                    for (var m = 0; m < layers[i].tooltip.fields.length; m++) {
+                        if (typeof fieldConf[layers[i].tooltip.fields[m].name] === "undefined") {
+                            fieldConf[layers[i].tooltip.fields[m].name] = {};
+                        }
+                        fieldConf[layers[i].tooltip.fields[m].name].utfgrid = true;
+                        fieldConf[layers[i].tooltip.fields[m].name].alias_tooltip = layers[i].tooltip.alternative_names[layers[i].tooltip.fields[m].name] || layers[i].tooltip.fields[m].name;
+                    }
+
+                    layers[i].legend.template = layers[i].legend.template.replace(/"/g, "'");
                     layerObj = {
                         f_table_schema: schemas[u],
                         f_table_name: layers[i].options.layer_name,
@@ -62,7 +71,8 @@ router.get('/api/meta/:db/:schema', function (req, response) {
                         fieldconf: JSON.stringify(fieldConf),
                         legend: layers[i].legend,
                         meta: null,
-                        infowindow:layers[i].infowindow
+                        infowindow: layers[i].infowindow,
+                        tooltip: layers[i].tooltip
                     };
                     data.push(layerObj)
                 }

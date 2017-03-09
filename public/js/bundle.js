@@ -1093,6 +1093,13 @@ module.exports = module.exports = {
             }
         });
 
+        $(document).bind('mousemove', function (e) {
+            $('#tail').css({
+                left: e.pageX + 20,
+                top: e.pageY
+            });
+        });
+
         // Print
         // =====
         $("#print-btn").on("click", function () {
@@ -2631,7 +2638,7 @@ module.exports = module.exports = {
             xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/conflictSearch",
-                data: "db=" + db + "&schema=" + schemataStr + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                data: "db=" + db + "&schema=" + "test" + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
@@ -4430,6 +4437,12 @@ module.exports = {
         $('.places .tt-dropdown-menu').css('max-height', max - 200);
         $('.places .tt-dropdown-menu').css('min-height', 400);
 
+        // Add the tooltip div
+        // ===================
+
+        $("body").append('<div id="tail" style="position: absolute; float: left; display: none"></div>');
+
+
         // Init the modules
         // ================
 
@@ -4656,6 +4669,9 @@ var backboneEvents;
 
 var countLoaded = 0;
 
+var mustache = require('mustache');
+
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -4685,7 +4701,7 @@ module.exports = {
      *
      */
     init: function () {
-        return new Promise(function(resolve, reject) {
+        return new Promise(function (resolve, reject) {
             var isBaseLayer, layers = [],
                 metaData = meta.getMetaDataLatestLoaded();
             switch (BACKEND) {
@@ -4717,17 +4733,29 @@ module.exports = {
                     backboneEvents.get().trigger("ready:layers");
                     resolve();
                     break;
+
                 case "cartodb":
-                    var j = 0, tmpData = metaData.data.slice(); // Clone the array for async adding of CartoDB layers
+                    var j = 0, k = 0, tmpData = metaData.data.slice(), tooltipHtml; // Clone the array for async adding of CartoDB layers
                     (function iter() {
+                        var fieldconf = JSON.parse(tmpData[j].fieldconf), interactivity = [], template;
+
+                        template = (typeof tmpData[j].tooltip !== "undefined" && tmpData[j].tooltip.template !== "" ) ? tmpData[j].tooltip.template : null;
+                        $.each(fieldconf, function (name, property) {
+                            if (typeof property.utfgrid !== "undefined" && property.utfgrid === true) {
+                                interactivity.push(name)
+                            }
+                        });
+
                         cartodb.createLayer(cloud.get().map, {
                             user_name: db,
                             type: 'cartodb',
                             sublayers: [{
                                 sql: tmpData[j].sql,
-                                cartocss: tmpData[j].cartocss
+                                cartocss: tmpData[j].cartocss,
+                                interactivity: interactivity.length > 0 ? 'cartodb_id,' + interactivity.join(",") : null
                             }]
                         }).on('done', function (layer) {
+
                             layer.baseLayer = false;
                             layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
                             layer.on("load", function () {
@@ -4735,17 +4763,73 @@ module.exports = {
                                 backboneEvents.get().trigger("doneLoading:layers", countLoaded);
                             });
                             cloud.get().addLayer(layer, tmpData[j].f_table_name);
+
                             // We switch the layer on/off, so they become ready for state.
                             cloud.get().showLayer(layer.id);
                             cloud.get().hideLayer(layer.id);
+
                             j++;
+
+                            // Carto layer object is not complete, so we poll
+                            if (interactivity.length > 0) {
+                                (function poll1() {
+                                    if (typeof layer._url !== "undefined") {
+                                        var utfGrid = new L.UtfGrid(layer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
+                                        utfGrid.id = layer.id + "_vidi_utfgrid";
+                                        cloud.get().addLayer(utfGrid);
+                                        utfGrid.on('mouseover', _.debounce(function (e) {
+                                            var tmp = $.extend(true, {}, e.data), fi = [];
+                                            flag = true;
+                                            $.each(tmp, function (name, property) {
+                                                if (name !== "cartodb_id") {
+                                                    fi.push({
+                                                        title: fieldconf[name].alias_tooltip || name,
+                                                        value: property
+                                                    });
+                                                }
+                                            });
+                                            tmp.fields = fi; // Used in a "loop" template
+                                            tooltipHtml = Mustache.render(template, tmp);
+                                            $("#tail").fadeIn(100);
+                                            $("#tail").html(tooltipHtml);
+                                        }, 0));
+                                        utfGrid.on('mouseout', function (e) {
+                                            flag = false;
+                                            setTimeout(function () {
+                                                if (!flag) {
+                                                    $("#tail").fadeOut(100);
+                                                }
+                                            }, 200)
+
+                                        });
+                                        k++;
+                                    } else {
+                                        setTimeout(function () {
+                                            poll1()
+                                        }, 50);
+                                    }
+                                }());
+                            } else {
+                                k++;
+                            }
+
                             if (j < tmpData.length) {
                                 iter();
                             } else {
                                 // CartoDB layers are now created
                                 cartoDbLayersready = true;
                                 backboneEvents.get().trigger("ready:layers");
-                                resolve();
+
+                                // Only resolve when all layer are complete
+                                (function poll2() {
+                                    if (k === tmpData.length) {
+                                        resolve();
+                                    } else {
+                                        setTimeout(function () {
+                                            poll2()
+                                        }, 50);
+                                    }
+                                }());
                                 return null;
                             }
                         });
@@ -4799,7 +4883,7 @@ module.exports = {
         countLoaded = 0;
     }
 };
-},{"../../config/config.js":46,"./urlparser":43}],28:[function(require,module,exports){
+},{"../../config/config.js":46,"./urlparser":43,"mustache":117}],28:[function(require,module,exports){
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
@@ -8116,8 +8200,23 @@ module.exports = module.exports = {
             } catch (e) {
                 //Pass
             }
+
+            try {
+                cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+                el.prop('checked', true);
+            } catch (e) {
+                //Pass
+            }
+
         } else {
+
             cloud.get().map.removeLayer(cloud.get().getLayersByName(name));
+
+            try {
+                cloud.get().map.removeLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+            } catch (e) {
+                //Pass
+            }
             el.prop('checked', false);
         }
         var siblings = el.parents(".accordion-body").find("input");
@@ -8246,8 +8345,8 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    //backend: "cartodb",
-    backend: "gc2",
+    backend: "cartodb",
+    //backend: "gc2",
     gc2: {
         //host: "http://cowi.mapcentia.com"
         host: "http://127.0.0.1:8080"
@@ -8370,7 +8469,9 @@ module.exports = {
     //enabledExtensions: ["vectorLayers"],
     enabledExtensions: [
       /*  "findNearest",*/
+/*
         "conflictSearch",
+*/
         "layerSearch"
        /* "cowiDetail"*/
     ],

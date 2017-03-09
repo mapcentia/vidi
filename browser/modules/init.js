@@ -145,6 +145,12 @@ module.exports = {
         $('.places .tt-dropdown-menu').css('max-height', max - 200);
         $('.places .tt-dropdown-menu').css('min-height', 400);
 
+        // Add the tooltip div
+        // ===================
+
+        $("body").append('<div id="tail" style="position: absolute; float: left; display: none"></div>');
+
+
         // Init the modules
         // ================
 

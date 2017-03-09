@@ -49,8 +49,23 @@ module.exports = module.exports = {
             } catch (e) {
                 //Pass
             }
+
+            try {
+                cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+                el.prop('checked', true);
+            } catch (e) {
+                //Pass
+            }
+
         } else {
+
             cloud.get().map.removeLayer(cloud.get().getLayersByName(name));
+
+            try {
+                cloud.get().map.removeLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+            } catch (e) {
+                //Pass
+            }
             el.prop('checked', false);
         }
         var siblings = el.parents(".accordion-body").find("input");
