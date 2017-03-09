@@ -58,7 +58,7 @@ var mustache = require('mustache');
 
 
 try {
-    host = require('../../config/config.js').gc2.host;
+    host = require('../../config/config.js').gc2.host.replace("https:","").replace("http:","");
 } catch (e) {
     console.info(e.message);
 }
