@@ -87,8 +87,7 @@ module.exports = {
      */
     init: function () {
         return new Promise(function (resolve, reject) {
-            var isBaseLayer, layers = [],
-                metaData = meta.getMetaDataLatestLoaded();
+            var isBaseLayer, layers = [], metaData = meta.getMetaDataLatestLoaded();
             switch (BACKEND) {
                 case "gc2":
                     for (var u = 0; u < metaData.data.length; ++u) {

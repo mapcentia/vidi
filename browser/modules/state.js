@@ -352,6 +352,7 @@ module.exports = {
                     }
 
                     // Recreate added layers
+                    // from layerSearch
                     // =====================
 
                     var currentLayers = meta.getMetaData();

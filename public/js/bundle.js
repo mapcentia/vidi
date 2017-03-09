@@ -4030,7 +4030,6 @@ module.exports = {
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     layerTree.init();
                     layers.init().then(function () {
-                        console.log(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name)
                         switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
                     });
 
@@ -4702,8 +4701,7 @@ module.exports = {
      */
     init: function () {
         return new Promise(function (resolve, reject) {
-            var isBaseLayer, layers = [],
-                metaData = meta.getMetaDataLatestLoaded();
+            var isBaseLayer, layers = [], metaData = meta.getMetaDataLatestLoaded();
             switch (BACKEND) {
                 case "gc2":
                     for (var u = 0; u < metaData.data.length; ++u) {
@@ -8110,6 +8108,7 @@ module.exports = {
                     }
 
                     // Recreate added layers
+                    // from layerSearch
                     // =====================
 
                     var currentLayers = meta.getMetaData();
@@ -8349,11 +8348,11 @@ module.exports = {
     // Bemærk, at baselayers er flyttet ud af cartodb objektet.
     // ========================================================
 
-    backend: "cartodb",
-    //backend: "gc2",
+    //backend: "cartodb",
+    backend: "gc2",
     gc2: {
-        //host: "http://cowi.mapcentia.com"
-        host: "http://127.0.0.1:8080"
+        host: "http://cowi.mapcentia.com"
+        //host: "http://127.0.0.1:8080"
     },
     cartodb: {
         db: "mhoegh"
@@ -8439,8 +8438,8 @@ module.exports = {
         browser: [
             {findNearest: ["index", "controller"]},
             {conflictSearch: ["index", "reportRender", "infoClick", "controller"]},
-            {layerSearch: ["index", "controller"]}
-         /*   {cowiDetail: ["bufferSearch"]}*/
+            {layerSearch: ["index", "controller"]},
+            {cowiDetail: ["bufferSearch"]}
         ],
         server: [
             {findNearest: ["index"]},
@@ -8473,11 +8472,9 @@ module.exports = {
     //enabledExtensions: ["vectorLayers"],
     enabledExtensions: [
       /*  "findNearest",*/
-/*
-        "conflictSearch",
-*/
-        "layerSearch"
-       /* "cowiDetail"*/
+       /* "conflictSearch",*/
+        "layerSearch",
+        "cowiDetail"
     ],
 
     // Aktiver printskabeloner
@@ -8487,8 +8484,8 @@ module.exports = {
     // Set template
     // ============
 
-    //template: "cowiDetail.tmpl",
-    template: "default.tmpl",
+    template: "cowiDetail.tmpl",
+    //template: "default.tmpl",
 
     enabledSearch: "danish",
     searchConfig: {

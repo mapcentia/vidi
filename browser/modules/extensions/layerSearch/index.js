@@ -126,7 +126,6 @@ module.exports = {
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     layerTree.init();
                     layers.init().then(function () {
-                        console.log(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name)
                         switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
                     });
 
