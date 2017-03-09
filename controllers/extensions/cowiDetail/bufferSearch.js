@@ -10,8 +10,6 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
     //console.log(wkt)
 
     if (wkt.length > 1) {
-        sql = "SELECT '500' as radius, sum(pers_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.dkn_befolkning_og_arbejdspladser WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[0] + "',4326),25832))" +
-            "UNION SELECT '1000' as radius, sum(pers_2016)::INTEGER AS antal, ST_ConvexHull(ST_Collect(the_geom)) AS the_geom FROM detail.dkn_befolkning_og_arbejdspladser WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext('" + wkt[1] + "',4326),25832))";
 
         sql = "SELECT " +
             "'500'                      AS radius, " +
@@ -21,7 +19,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
             "WHERE komkode = (SELECT komkode " +
             "FROM detail.kommune " +
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
-            "'" + wkt[0] + "', 4326), 25832))) " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
             "LIMIT 1):: INTEGER AS fb " +
             "FROM detail.dkn_befolkning_og_arbejdspladser " +
             " WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
@@ -37,7 +35,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
             "WHERE komkode = (SELECT komkode " +
             "FROM detail.kommune " +
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
-            "'" + wkt[1] + "', 4326), 25832))) " +
+            "'" + wkt[1] + "', 4326), 25832)) LIMIT 1) " +
             "LIMIT 1):: INTEGER AS fb " +
             "FROM detail.dkn_befolkning_og_arbejdspladser " +
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
@@ -51,7 +49,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
             "WHERE komkode = (SELECT komkode " +
             "FROM detail.kommune " +
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
-            "'" + wkt[0] + "', 4326), 25832))) " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
 
             "LIMIT 1) AS fb " +
             "FROM detail.dkn_befolkning_og_arbejdspladser " +
@@ -60,7 +58,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
     }
 
     url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=ce5ab76892183d8b68c0486f724b011d";
-    console.log(sql);
+    console.log(url);
     http.get(url, function (res) {
         if (res.statusCode != 200) {
             response.header('content-type', 'application/json');
