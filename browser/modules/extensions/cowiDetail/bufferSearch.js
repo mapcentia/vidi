@@ -202,7 +202,7 @@ module.exports = {
 
         backboneEvents.get().on("end:state", function () {
             cloud.get().addBaseLayer("dk", "osm", {
-                "maxZoom": 19,
+                "maxZoom": 18,
                 "maxNativeZoom": 18,
                 "attribution": "Geofyn A/S"
                 //"subdomains": ["a", "b", "c"]
