@@ -2638,7 +2638,7 @@ module.exports = module.exports = {
             xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/conflictSearch",
-                data: "db=" + db + "&schema=" + "test" + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                data: "db=" + db + "&schema=" + schemataStr + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
                 scriptCharset: "utf-8",
                 success: function (response) {
                     var hitsCount = 0, noHitsCount = 0, errorCount = 0;
@@ -4737,7 +4737,7 @@ module.exports = {
                 case "cartodb":
                     var j = 0, k = 0, tmpData = metaData.data.slice(), tooltipHtml; // Clone the array for async adding of CartoDB layers
                     (function iter() {
-                        var fieldconf = JSON.parse(tmpData[j].fieldconf), interactivity = [], template;
+                        var fieldconf = JSON.parse(tmpData[j].fieldconf), interactivity = ["cartodb_id"], template;
 
                         template = (typeof tmpData[j].tooltip !== "undefined" && tmpData[j].tooltip.template !== "" ) ? tmpData[j].tooltip.template : null;
                         $.each(fieldconf, function (name, property) {
@@ -4752,87 +4752,91 @@ module.exports = {
                             sublayers: [{
                                 sql: tmpData[j].sql,
                                 cartocss: tmpData[j].cartocss,
-                                interactivity: interactivity.length > 0 ? 'cartodb_id,' + interactivity.join(",") : null
+                                interactivity: interactivity.join(",")
                             }]
-                        }).on('done', function (layer) {
+                        })
+                            .on('done', function (layer) {
 
-                            layer.baseLayer = false;
-                            layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
-                            layer.on("load", function () {
-                                countLoaded++;
-                                backboneEvents.get().trigger("doneLoading:layers", countLoaded);
-                            });
-                            cloud.get().addLayer(layer, tmpData[j].f_table_name);
+                                layer.baseLayer = false;
+                                layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
+                                layer.on("load", function () {
+                                    countLoaded++;
+                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                                });
+                                cloud.get().addLayer(layer, tmpData[j].f_table_name);
 
-                            // We switch the layer on/off, so they become ready for state.
-                            cloud.get().showLayer(layer.id);
-                            cloud.get().hideLayer(layer.id);
+                                // We switch the layer on/off, so they become ready for state.
+                                cloud.get().showLayer(layer.id);
+                                cloud.get().hideLayer(layer.id);
 
-                            j++;
+                                j++;
 
-                            // Carto layer object is not complete, so we poll
-                            if (interactivity.length > 0) {
-                                (function poll1() {
-                                    if (typeof layer._url !== "undefined") {
-                                        var utfGrid = new L.UtfGrid(layer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
-                                        utfGrid.id = layer.id + "_vidi_utfgrid";
-                                        cloud.get().addLayer(utfGrid);
-                                        utfGrid.on('mouseover', _.debounce(function (e) {
-                                            var tmp = $.extend(true, {}, e.data), fi = [];
-                                            flag = true;
-                                            $.each(tmp, function (name, property) {
-                                                if (name !== "cartodb_id") {
-                                                    fi.push({
-                                                        title: fieldconf[name].alias_tooltip || name,
-                                                        value: property
-                                                    });
+                                // Carto layer object is not complete, so we poll
+                                if (interactivity.length > 0) {
+                                    (function poll1() {
+                                        if (typeof layer._url !== "undefined") {
+                                            var utfGrid = new L.UtfGrid(layer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
+                                            utfGrid.id = layer.id + "_vidi_utfgrid";
+                                            cloud.get().addLayer(utfGrid);
+                                            utfGrid.on('mouseover', _.debounce(function (e) {
+                                                var tmp = $.extend(true, {}, e.data), fi = [];
+                                                flag = true;
+                                                $.each(tmp, function (name, property) {
+                                                    if (name !== "cartodb_id") {
+                                                        fi.push({
+                                                            title: fieldconf[name].alias_tooltip || name,
+                                                            value: property
+                                                        });
+                                                    }
+                                                });
+                                                tmp.fields = fi; // Used in a "loop" template
+                                                tooltipHtml = Mustache.render(template, tmp);
+                                                if (fi.length > 0) {
+                                                    $("#tail").fadeIn(100);
+                                                    $("#tail").html(tooltipHtml);
                                                 }
+
+                                            }, 0));
+                                            utfGrid.on('mouseout', function (e) {
+                                                flag = false;
+                                                setTimeout(function () {
+                                                    if (!flag) {
+                                                        $("#tail").fadeOut(100);
+                                                    }
+                                                }, 200)
+
                                             });
-                                            tmp.fields = fi; // Used in a "loop" template
-                                            tooltipHtml = Mustache.render(template, tmp);
-                                            $("#tail").fadeIn(100);
-                                            $("#tail").html(tooltipHtml);
-                                        }, 0));
-                                        utfGrid.on('mouseout', function (e) {
-                                            flag = false;
+                                            k++;
+                                        } else {
                                             setTimeout(function () {
-                                                if (!flag) {
-                                                    $("#tail").fadeOut(100);
-                                                }
-                                            }, 200)
+                                                poll1()
+                                            }, 50);
+                                        }
+                                    }());
+                                } else {
+                                    k++;
+                                }
 
-                                        });
-                                        k++;
-                                    } else {
-                                        setTimeout(function () {
-                                            poll1()
-                                        }, 50);
-                                    }
-                                }());
-                            } else {
-                                k++;
-                            }
+                                if (j < tmpData.length) {
+                                    iter();
+                                } else {
+                                    // CartoDB layers are now created
+                                    cartoDbLayersready = true;
+                                    backboneEvents.get().trigger("ready:layers");
 
-                            if (j < tmpData.length) {
-                                iter();
-                            } else {
-                                // CartoDB layers are now created
-                                cartoDbLayersready = true;
-                                backboneEvents.get().trigger("ready:layers");
-
-                                // Only resolve when all layer are complete
-                                (function poll2() {
-                                    if (k === tmpData.length) {
-                                        resolve();
-                                    } else {
-                                        setTimeout(function () {
-                                            poll2()
-                                        }, 50);
-                                    }
-                                }());
-                                return null;
-                            }
-                        });
+                                    // Only resolve when all layer are complete
+                                    (function poll2() {
+                                        if (k === tmpData.length) {
+                                            resolve();
+                                        } else {
+                                            setTimeout(function () {
+                                                poll2()
+                                            }, 50);
+                                        }
+                                    }());
+                                    return null;
+                                }
+                            });
                     }());
                     break;
             }
