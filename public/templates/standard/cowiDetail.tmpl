@@ -110,22 +110,73 @@
 
                     <div class="panel panel-default">
                         <div id="detail-data-p-container" class="panel-body">
-                            <table id="detail-data-p" class="table">
-                                <caption>Befolkningsinformation</caption>
+                            <table class="table">
+                                <caption>500 m buffer</caption>
                                 <tr>
-                                    <td>500 m buffer</td>
+                                    <td>Personer</td>
                                     <td class="r500-val">-</td>
-                                    <td class="r500-val-fb">-</td>
                                 </tr>
                                 <tr>
-                                    <td>1000 m buffer</td>
+                                    <td>Dagligvare</td>
+                                    <td class="r500-val-fb_dagligv">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Beklædning</td>
+                                    <td class="r500-val-fb_beklaed">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Øvrige</td>
+                                    <td class="r500-val-fb_oevrige">-</td>
+                                </tr>
+                                <tr>
+                                    <td>I alt</td>
+                                    <td class="r500-val-fb_total">-</td>
+                                </tr>
+                            </table>
+                            <table class="table">
+                                <caption>1000 m buffer</caption>
+                                <tr>
+                                    <td>Personer</td>
                                     <td class="r1000-val">-</td>
-                                    <td class="r1000-val-fb">-</td>
                                 </tr>
                                 <tr>
-                                    <td>Tegnet opland</td>
-                                    <td id="polygon-val">-</td>
-                                    <td id="polygon-val-fb">-</td>
+                                    <td>Dagligvare</td>
+                                    <td class="r1000-val-fb_dagligv">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Beklædning</td>
+                                    <td class="r1000-val-fb_beklaed">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Øvrige</td>
+                                    <td class="r1000-val-fb_oevrige">-</td>
+                                </tr>
+                                <tr>
+                                    <td>I alt</td>
+                                    <td class="r1000-val-fb_total">-</td>
+                                </tr>
+                            </table>
+                            <table class="table">
+                                <caption>Tegnet opland</caption>
+                                <tr>
+                                    <td>Personer</td>
+                                    <td class="polygon-val">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Dagligvare</td>
+                                    <td class="polygon-val-fb_dagligv">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Beklædning</td>
+                                    <td class="polygon-val-fb_beklaed">-</td>
+                                </tr>
+                                <tr>
+                                    <td>Øvrige</td>
+                                    <td class="polygon-val-fb_oevrige">-</td>
+                                </tr>
+                                <tr>
+                                    <td>I alt</td>
+                                    <td class="polygon-val-fb_total">-</td>
                                 </tr>
                             </table>
                         </div>
@@ -264,7 +315,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group" style="display: none">
+                                        <div class="form-group" style="display: inline">
                                             <label for="print-comment" class="col-md-2 control-label">Comment</label>
                                             <div class="col-md-10">
                                                 <textarea class="form-control" rows="30" id="print-comment" disabled></textarea>
@@ -311,7 +362,8 @@
                 <h4 class="modal-title" id="about-modelLabel">{{About}}</h4>
             </div>
             <div class="modal-body">
-                <p><a href="http://detailhandelsportalen.dk/">Detailhandelsportalen</a> er udviklet af COWIs afdeling for <a href="http://www.cowi.dk/menu/service/oekonomimanagementogplanlaegning/fysiskplanlagningogbyudvikling/">By- og Trafikplanlægning</a> i samarbejde med <a href="http://mapcentia.com">MapCentia ApS</a>.</p>
+                <p><a href="http://detailhandelsportalen.dk/">Detailhandelsportalen</a> er udviklet af COWIs afdeling for <a href="http://www.cowi.dk/menu/service/oekonomimanagementogplanlaegning/fysiskplanlagningogbyudvikling/">By- og Trafikplanlægning</a> i samarbejde med <a
+                        href="http://mapcentia.com">MapCentia ApS</a>.</p>
                 <p>Med detailhandelsportalen har din organisation fået et screeningsværktøj til at nemt og hurtigt at vurdere placeringer for nye dagligvarebutikker i Danmark.</p>
                 <p>Klik dig rundt i lagene, tryk på knapperne og print dit eget oplandskort. Vi håber, at I får glæde af jeres nye værktøj.</p>
                 <p>Du er velkommen til at kontakte os, hvis du har spørgsmål til teknikken eller til dine analyser.</p>

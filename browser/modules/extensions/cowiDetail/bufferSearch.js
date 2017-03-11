@@ -267,8 +267,8 @@ module.exports = {
             }
             infoClick.active(true); // Switch standard info click on again
         });
-        $("#r-url-link").on("click", createLink)
-        $("#r-url-email").on("click", createMailLink)
+        $("#r-url-link").on("click", createLink);
+        $("#r-url-email").on("click", createMailLink);
     }
 };
 
@@ -343,7 +343,7 @@ var polygon = function () {
 };
 var upDatePrintComment = function () {
     $('#main-tabs a[href="#info-content"]').tab('show');
-    $("#print-comment").html($("#detail-data-r-container").html() + $("#detail-data-p-container").html());
+    $("#print-comment").html(($("#detail-data-r-container").html().replace(/> *</g, '><') + $("#detail-data-p-container").html().replace(/> *</g, '><')).replace(/\n|\t/g, ' ').replace(/> *</g, '><').trim());
 };
 
 var createLink = function(){
@@ -392,10 +392,16 @@ var createStore = function () {
 
                     if (feature.properties.radius === "500") {
                         $(".r500-val").html(feature.properties.antal);
-                        $(".r500-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
                     } else {
                         $(".r1000-val").html(feature.properties.antal);
-                        $(".r1000-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
                     }
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
@@ -405,8 +411,11 @@ var createStore = function () {
                     });
 
                 } else {
-                    $("#polygon-val").html(feature.properties.antal);
-                    $("#polygon-val-fb").html(parseInt(feature.properties.fb).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val").html(feature.properties.antal);
+                    $(".polygon-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
                 }
             });
             upDatePrintComment();

@@ -157,10 +157,12 @@ module.exports = {
 
                                 j++;
 
-                                // Carto layer object is not complete, so we poll
+                                // Carto layer object is not complete(!?), so we poll until _url prop is set
                                 if (interactivity.length > 0) {
                                     (function poll1() {
                                         if (typeof layer._url !== "undefined") {
+
+                                            // A bit hackery way to set UTFgrid url
                                             var utfGrid = new L.UtfGrid(layer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
                                             utfGrid.id = layer.id + "_vidi_utfgrid";
                                             cloud.get().addLayer(utfGrid);
@@ -185,6 +187,7 @@ module.exports = {
                                             }, 0));
                                             utfGrid.on('mouseout', function (e) {
                                                 flag = false;
+                                                // Wait 200 ms before closing tooltip, so its not blinking between close features
                                                 setTimeout(function () {
                                                     if (!flag) {
                                                         $("#tail").fadeOut(100);
@@ -210,7 +213,7 @@ module.exports = {
                                     cartoDbLayersready = true;
                                     backboneEvents.get().trigger("ready:layers");
 
-                                    // Only resolve when all layer are complete
+                                    // Only resolve promise when all layerd are completed
                                     (function poll2() {
                                         if (k === tmpData.length) {
                                             resolve();
