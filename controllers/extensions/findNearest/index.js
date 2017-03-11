@@ -43,20 +43,32 @@ router.post('/api/extension/findNearest', function (req, response) {
 
                     // Send response
                     // =============
-                    routes.sort(function(a,b) {return (a.length > b.length) ? 1 : ((b.length > a.length) ? -1 : 0);} );
+                    routes.sort(function (a, b) {
+                        return (a.length > b.length) ? 1 : ((b.length > a.length) ? -1 : 0);
+                    });
 
                     response.send(routes);
 
                 } else {
-                    sql = "SELECT seq,gid,name,heading,cost,length,geom::GEOMETRY(Linestring,25832) from pgr_fromAtoB('fot_test.vejmidte_brudt'," +
+                    var sql = "SELECT seq,gid,name,heading,cost,length,geom::GEOMETRY(Linestring,25832) from pgr_fromAtoB('fot_test.vejmidte_brudt'," +
                         point[0] + "," +
                         point[1] + "," +
                         points[count].geometry.coordinates[0] + "," +
                         points[count].geometry.coordinates[1] +
-                        ")";
-                    var url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=4326";
-                    console.log(url);
-                    http.get(url, function (res) {
+                        ")",
+                        postData = "q=" + sql + "&srs=4326&lifetime=0&client_encoding=UTF8",
+                        options = {
+                            method: 'POST',
+                            host: "127.0.0.1",
+                            port: "3000",
+                            path: '/api/sql/' + db,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded ',
+                                'Content-Length': postData.length
+                            }
+                        };
+                    console.log(postData);
+                    var req = http.request(options, function (res) {
                         if (res.statusCode != 200) {
                             response.header('content-type', 'application/json');
                             response.status(res.statusCode).send({
@@ -67,6 +79,9 @@ router.post('/api/extension/findNearest', function (req, response) {
                         }
                         var chunks = [];
                         response.header('content-type', 'application/json');
+                        res.on('error', function (e) {
+                            console.log(e);
+                        });
                         res.on('data', function (chunk) {
                             chunks.push(chunk);
                         });
@@ -86,11 +101,10 @@ router.post('/api/extension/findNearest', function (req, response) {
                             count++;
                             iter();
                         });
-                    }).on("error", function (err) {
-                        console.log(err);
                     });
+                    req.write(postData);
+                    req.end();
                 }
-
             }());
         });
     }).on("error", function (err) {

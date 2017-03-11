@@ -136,8 +136,6 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
     }
 
 
-    //url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=ce5ab76892183d8b68c0486f724b011d";
-
     var postData = "q=" + sql + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=ce5ab76892183d8b68c0486f724b011d",
         options = {
             method: 'POST',
@@ -154,7 +152,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
         var chunks = [];
         response.header('content-type', 'application/json');
         res.on('error', function (e) {
-            //console.log(e);
+            console.log(e);
         });
         res.on('data', function (chunk) {
             chunks.push(chunk);
