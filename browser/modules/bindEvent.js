@@ -140,7 +140,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("clear:search");
         });
 
-        backboneEvents.get().on("ready:meta", function () {
+        backboneEvents.get().on("ready:layers", function () {
             if ($(document).width() > 767 && isStarted === false) {
                 setTimeout(
                     function () {
