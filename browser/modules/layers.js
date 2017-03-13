@@ -61,7 +61,7 @@ var mustache = require('mustache');
 try {
     host = require('../../config/config.js').gc2.host;
     // Strip protocol
-    host = host.replace("https:","").replace("http:","");
+    //host = host.replace("https:","").replace("http:","");
 } catch (e) {
     console.info(e.message);
 }
@@ -103,7 +103,7 @@ module.exports = {
                             layers: [layer],
                             db: db,
                             isBaseLayer: isBaseLayer,
-                            tileCached: true,
+                            tileCached: singleTiled.indexOf(layer) === -1,
                             visibility: false,
                             wrapDateLine: false,
                             displayInLayerSwitcher: true,
