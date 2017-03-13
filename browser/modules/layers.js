@@ -40,6 +40,8 @@ var cartoDbLayersready = false;
  */
 var BACKEND = require('../../config/config.js').backend;
 
+
+
 /**
  * @type {string}
  */
@@ -56,7 +58,6 @@ var countLoaded = 0;
 
 var mustache = require('mustache');
 
-
 try {
     host = require('../../config/config.js').gc2.host;
     // Strip protocol
@@ -65,7 +66,9 @@ try {
     console.info(e.message);
 }
 
-var switchLayer
+var switchLayer;
+
+var singleTiled = require('../../config/config.js').singleTiled || [];
 
 /**
  *
@@ -94,9 +97,10 @@ module.exports = {
                 case "gc2":
                     for (var u = 0; u < metaData.data.length; ++u) {
                         isBaseLayer = metaData.data[u].baselayer ? true : false;
-                        layers[[metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name]] = cloud.get().addTileLayers({
+                        var layer = metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
+                        layers[[layer]] = cloud.get().addTileLayers({
                             host: host,
-                            layers: [metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name],
+                            layers: [layer],
                             db: db,
                             isBaseLayer: isBaseLayer,
                             tileCached: true,
@@ -104,10 +108,9 @@ module.exports = {
                             wrapDateLine: false,
                             displayInLayerSwitcher: true,
                             name: metaData.data[u].f_table_name,
-                            type: "tms",
                             // Single tile option
-                            //type: "wms",
-                            //tileSize: 9999,
+                            type: singleTiled.indexOf(layer) === -1 ? "tms" : "wms",
+                            tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
                             format: "image/png",
                             loadEvent: function () {
                                 countLoaded++;
