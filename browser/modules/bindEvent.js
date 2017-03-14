@@ -190,7 +190,7 @@ module.exports = module.exports = {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
                         doneB = doneL = false;
-                    }, 300)
+                    }, 1000)
                 }
             }
         });
@@ -198,10 +198,11 @@ module.exports = module.exports = {
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
             if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "") ) {
-
-                window.status = "all_loaded";
-                console.info("Layers all loaded B");
-                doneB = doneL = false;
+                setTimeout(function() {
+                    window.status = "all_loaded";
+                    console.info("Layers all loaded B");
+                    doneB = doneL = false;
+                }, 1000)
             }
         });
 
