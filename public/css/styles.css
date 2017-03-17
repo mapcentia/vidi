@@ -590,11 +590,28 @@ body {
   font-style: normal;
   color: white !important;
 }
+#info-modal {
+  position: fixed;
+  max-width: 650px;
+  z-index: 3000;
+  min-width: 350px;
+  width: 30%;
+  height: 100%;
+  right: -100%;
+  background-color: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
+}
 @media (max-width: 450px) {
   .navmenu,
-  .navbar-offcanvas {
+  .navbar-offcanvas,
+  #info-modal {
     width: 75%;
     min-width: 250px;
+  }
+  #info-modal {
+    right: -75%;
   }
   .export {
     display: none !important;

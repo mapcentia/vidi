@@ -5,6 +5,10 @@ var fs = require('fs');
 var moment = require('moment');
 var wkhtmltopdf = require('wkhtmltopdf');
 
+
+
+wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
+
 /**
  *
  * @type {module.exports.print|{templates, scales}}
@@ -34,15 +38,17 @@ router.post('/api/print', function (req, response) {
             R: 0,
             T: 0,
             encoding: "utf-8",
+            disableSmartShrinking: true,
             //javascriptDelay: 2000,
             windowStatus: "all_loaded",
+            //runScript: 'window.setTimeout(function(){window.status="all_loaded";},1);',
             debug: true,
             debugJavascript: true
         }, function (err) {
             console.log(err);
         }).pipe(fs.createWriteStream(__dirname + "/../public/tmp/print/pdf/" + key + '.pdf').on("finish", function () {
             console.log("done");
-            response.send({success: true, key: key, url: url});
+            response.send({success: true, key: key, url: url, cmd: wkhtmltopdf.command});
         }));
 
     });

@@ -65,7 +65,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: ['require-globify']
+                    transform: ["reactify", 'require-globify']
                 }
             }
         },
@@ -128,6 +128,17 @@ module.exports = function (grunt) {
                     cwd: 'public/',
                     src: ['index.html']
                 }]
+            }
+        },
+        babel: {
+            options: {
+                sourceMap: true,
+                compact: false
+            },
+            dist: {
+                files: {
+                    "public/js/bundle.babelified.js": "public/js/bundle.js"
+                }
             }
         }
     });

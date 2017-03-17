@@ -25,6 +25,7 @@ module.exports = {
      *
      */
     init: function () {
+        var me = this;
         try {
             geocloud.setHost(window.vidiConfig.gc2.host);
         } catch (e) {
@@ -115,6 +116,24 @@ module.exports = {
 
         });
         measureControl.addTo(map);
+
+        L.Edit.Poly = L.Edit.Poly.extend({
+            options: {
+                icon: me.iconMedium
+            }
+        });
+        L.Edit.Rectangle = L.Edit.Rectangle.extend({
+            options: {
+                moveIcon: me.iconBig,
+                resizeIcon: me.iconMedium
+            }
+        });
+        L.Edit.Circle = L.Edit.Circle.extend({
+            options: {
+                moveIcon: me.iconBig,
+                resizeIcon: me.iconMedium
+            }
+        });
     },
 
     /**
@@ -123,5 +142,20 @@ module.exports = {
      */
     get: function () {
         return cloud;
-    }
+    },
+
+    iconSmall: new L.DivIcon({
+        iconSize: new L.Point(10, 10),
+        className: 'leaflet-div-icon leaflet-editing-icon my-own-class'
+    }),
+
+    iconMedium: new L.DivIcon({
+        iconSize: new L.Point(15, 15),
+        className: 'leaflet-div-icon leaflet-editing-icon my-own-class'
+    }),
+
+    iconBig: new L.DivIcon({
+        iconSize: new L.Point(20, 20),
+        className: 'leaflet-div-icon leaflet-editing-icon my-own-class'
+    })
 };
