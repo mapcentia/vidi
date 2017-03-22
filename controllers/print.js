@@ -16,6 +16,7 @@ var wkhtmltopdf = require('wkhtmltopdf');
 var config = require('../config/config.js').print;
 
 router.post('/api/print', function (req, response) {
+    req.setTimeout(0); // no timeout
     var q = req.body;
     console.log(q);
     var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
