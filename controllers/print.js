@@ -7,7 +7,7 @@ var wkhtmltopdf = require('wkhtmltopdf');
 
 
 
-wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
+//wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
 
 /**
  *
