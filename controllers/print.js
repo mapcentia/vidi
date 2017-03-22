@@ -38,7 +38,7 @@ router.post('/api/print', function (req, response) {
             R: 0,
             T: 0,
             encoding: "utf-8",
-            disableSmartShrinking: true,
+            //disableSmartShrinking: true,
             //javascriptDelay: 2000,
             windowStatus: "all_loaded",
             //runScript: 'window.setTimeout(function(){window.status="all_loaded";},1);',
