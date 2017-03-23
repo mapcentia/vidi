@@ -18,7 +18,7 @@ module.exports = {
     render: function (e) {
         console.log(e);
         var table = $("#report table"), tr, td, dataTable, dataThead, dataTr, u, m, without = [];
-        $("#conflict-data-time").html(e.dateTime);
+        //$("#conflict-data-time").html(e.dateTime);
         $("#conflict-text").html(e.text);
         $.each(e.hits, function (i, v) {
             if (v.hits > 0) {

@@ -245,13 +245,13 @@ module.exports = {
             return ready;
         }
     },
-    getLayers: function (separator) {
+    getLayers: function (separator, includeHidden) {
         var layerArr = [];
         var layers = cloud.get().map._layers;
         for (var key in layers) {
             if (layers.hasOwnProperty(key)) {
                 if (layers[key].baseLayer !== true && typeof layers[key]._tiles === "object") {
-                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && layers[key].id.split(".")[0] !== "__hidden")) {
+                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
                         layerArr.push(layers[key].id);
                     }
                 }
@@ -277,5 +277,9 @@ module.exports = {
     resetCount: function () {
         ready = cartoDbLayersready = false;
         countLoaded = 0;
+    },
+    incrementCount: function () {
+        countLoaded++;
+        return countLoaded
     }
 };

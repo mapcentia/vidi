@@ -182,7 +182,7 @@ module.exports = module.exports = {
 
         // TODO
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            if (layers.ready() === true && layers.getLayers() !== false && layers.getLayers().split(",").length  === e) {
+            if (layers.ready() === true && layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length  === e) {
                 layers.resetCount();
                 doneL = true;
                 if (doneL && doneB) {

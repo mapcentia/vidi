@@ -73,7 +73,7 @@ module.exports = module.exports = {
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + bl.id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + bl.name + "</label></div></div><div class='list-group-separator'></div>"
                 );
             } else if (typeof window.setBaseLayers[i].restrictTo === "undefined" || window.setBaseLayers[i].restrictTo.filter(function(n) {return schemas.indexOf(n) != -1;}).length > 0) {
-                cloud.get().addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db, window.setBaseLayers[i].config);
+                cloud.get().addBaseLayer(window.setBaseLayers[i].id, window.setBaseLayers[i].db, window.setBaseLayers[i].config, window.setBaseLayers[i].host || null);
                 baseLayers.push(window.setBaseLayers[i].id);
                 $("#base-layer-list").append(
                     "<div class='list-group-item'><div class='radio radio-primary base-layer-item' data-gc2-base-id='" + window.setBaseLayers[i].id + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + window.setBaseLayers[i].name + "</label></div></div><div class='list-group-separator'></div>"

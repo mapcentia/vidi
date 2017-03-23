@@ -44,7 +44,11 @@ module.exports = module.exports = {
                             l = cloud.get().addTileLayers($.extend({
                                 layers: [v.overlays[u].id],
                                 db: v.overlays[u].db,
-                                type: "tms"
+                                host: v.overlays[u].host || null,
+                                type: "tms",
+                                loadEvent: function () {
+                                    backboneEvents.get().trigger("doneLoading:layers", layers.incrementCount());
+                                }
                             }, v.overlays[u].config));
                             // Set prefix on id, so the layer will not be returned by layers.getLayers
                             l[0].id = "__hidden." + v.overlays[u].id;
