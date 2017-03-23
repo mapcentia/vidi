@@ -11,6 +11,9 @@
  */
 var cloud;
 
+/**
+ *
+ */
 var backboneEvents;
 
 /**
@@ -25,7 +28,12 @@ module.exports = {
     },
     init: function (onLoad, el, onlyAddress) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [],
-            komKode = window.vidiConfig.searchConfig.komkode, placeStore;
+            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom;
+
+        // Set max zoom then zooming on target
+        // ===================================
+
+        maxZoom = 18;
 
         // Listen for clearing event
         // =========================
@@ -47,8 +55,8 @@ module.exports = {
                 cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
                 cloud.get().zoomToExtentOfgeoJsonStore(this);
-                if (cloud.get().map.getZoom() > 17) {
-                    cloud.get().map.setZoom(17);
+                if (cloud.get().map.getZoom() > maxZoom) {
+                    cloud.get().map.setZoom(maxZoom);
                 }
             }
         }
