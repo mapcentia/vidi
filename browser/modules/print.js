@@ -26,7 +26,6 @@ var pageSize;
 var orientation;
 var backboneEvents;
 var legend;
-var header;
 var moment = require('moment');
 var meta;
 
@@ -40,6 +39,7 @@ var _cleanUp = function () {
     } catch (e) {
     }
     printOn = false;
+    center = null;
 };
 
 /**
