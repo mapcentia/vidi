@@ -59,7 +59,7 @@ module.exports = {
         "No drawings to delete.": "Ingen tegning at slette.",
         "Drag handles, or marker to edit drawing.": "Træk håndtag, eller markør for at ændre tegning.",
         "Click cancel to undo changes.": "Klik afbryd for at omgøre ændring.",
-        "Click on a drawing to remove": " Klik tegning for at slette.",
+        "Click on a drawing to remove": " Klik på en tegning for at slette.",
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",

@@ -88,7 +88,7 @@ module.exports = {
             },
             remove: {
                 tooltip: {
-                    text: __('Click on a feature to remove')
+                    text: __('Click on a drawing to remove')
                 }
             }
         }
