@@ -132,19 +132,6 @@ module.exports = {
             href: '/css/styles.css'
         }).appendTo('head');
 
-
-        $("[data-toggle=tooltip]").tooltip();
-        try {
-            var max = $(document).height() - $('.tab-pane').offset().top - 100;
-        } catch (e) {
-            console.info(e.message);
-        }
-        $('.tab-pane').not("#result-content").css('max-height', max);
-        $('.places').css('height', max - 130);
-        $('.places').css('min-height', 400);
-        $('.places .tt-dropdown-menu').css('max-height', max - 200);
-        $('.places .tt-dropdown-menu').css('min-height', 400);
-
         // Add the tooltip div
         // ===================
 
@@ -231,6 +218,15 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
+        $("[data-toggle=tooltip]").tooltip();
+        try {
+            var max = $(document).height() - $('.tab-pane').offset().top - 100;
+        } catch (e) {
+            console.info(e.message);
+        }
+        $('.main-content > .tab-pane').not("#result-content").css('max-height', max);
+        $('#place-search .places').css('height', max - 130).css('min-height', 400);
+        $('.places .tt-dropdown-menu').css('max-height', max - 200).css('min-height', 400);
 
         $.material.init();
         touchScroll(".tab-pane");
