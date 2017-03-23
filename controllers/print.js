@@ -2,10 +2,7 @@ var express = require('express');
 var router = express.Router();
 var http = require('http');
 var fs = require('fs');
-var moment = require('moment');
 var wkhtmltopdf = require('wkhtmltopdf');
-
-
 
 //wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
 
@@ -29,7 +26,7 @@ router.post('/api/print', function (req, response) {
             response.send({success: true, error: err});
             return;
         }
-        var url = '/app/' + q.db + '/' + q.schema + '/?tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dataTime + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + (q.config ? "&config=" + q.config : "") + q.anchor;
+        var url = '/app/' + q.db + '/' + q.schema + '/?tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dataTime + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + (q.config ? "&config=" + q.config : "") + q.anchor;
         console.log("http://127.0.0.1:3000" + url);
         wkhtmltopdf("http://127.0.0.1:3000" + url, {
             pageSize: q.pageSize,

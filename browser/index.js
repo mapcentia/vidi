@@ -47,7 +47,7 @@ window.Promise = require('es6-promise').Promise;
 window.Vidi = function () {
 
     // Avoid 'console' errors in browsers that lack a console.
-    // ========================================================
+    // =======================================================
 
     (function () {
         var method;
@@ -72,7 +72,7 @@ window.Vidi = function () {
         }
     }());
 
-    // Set widow.status after 120 secs.
+    // Set widow.status after 300 secs.
     // This should be set in "loading.js"
     // when all layers are loaded. Used in print.
     // ==========================================

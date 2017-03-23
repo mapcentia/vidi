@@ -26,6 +26,7 @@ var pageSize;
 var orientation;
 var backboneEvents;
 var legend;
+var header;
 var moment = require('moment');
 var meta;
 
@@ -277,7 +278,8 @@ module.exports = {
             title: encodeURIComponent($("#print-title").val()),
             comment: encodeURIComponent($("#print-comment").val()),
             legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
-            dataTime: moment().format('MMMM Do YYYY, H:mm'),
+            header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
+            dataTime: moment().format('Do MMMM YYYY, H:mm'),
             customData: customData || null,
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],

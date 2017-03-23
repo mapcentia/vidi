@@ -12,7 +12,7 @@ moment.locale("da_DK");
 var BACKEND = config.backend;
 
 router.post('/api/extension/conflictSearch', function (req, response) {
-    req.setTimeout(0) // no timeout
+    req.setTimeout(0); // no timeout
     var db = req.body.db;
     var schema = req.body.schema;
     var wkt = req.body.wkt;

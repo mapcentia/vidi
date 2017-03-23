@@ -95,7 +95,7 @@ module.exports = {
         if (urlVars.l) {
             gc2i18n.dict._showLegend = urlVars.l;
         }
-
+        gc2i18n.dict._showHeader = urlVars.h || "inline";
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
 
@@ -238,7 +238,7 @@ module.exports = {
         $("#loadscreentext").html(__("Loading data"));
 
         if (window.vidiConfig.activateMainTab) {
-            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab +'-content"]').tab('show');
+            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
 
         }
     }
