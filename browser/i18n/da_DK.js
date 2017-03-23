@@ -100,7 +100,7 @@ module.exports = {
         "Use these tools for creating markers, lines, areas, squares and circles.": "Brug disse værktøjer til at skabe markører, linjer, arealer, firkanter og cirkler.",
         "Use these tools for editing existing drawings.": "Brug disse værktøjer til at ændre eksisterende tegninger.",
         "Area": "Areal",
-        "Distance/Radius": "Distance/Radius",
+        "Distance/Radius": "Afstand/Radius",
         "Type": "Type",
 
         "Disclaimer": "Disclaimer",
