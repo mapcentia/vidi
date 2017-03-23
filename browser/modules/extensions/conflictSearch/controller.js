@@ -79,7 +79,7 @@ module.exports = {
             $(this).button('loading');
             print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             print.print(endPrintEventName, conflictSearch.getResult());
-            print.cleanUp();
+            print.cleanUp(true);
         });
 
         // Click event for conflict search on/off toggle button

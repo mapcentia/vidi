@@ -32,20 +32,22 @@ var meta;
 /**
  * @private
  */
-var _cleanUp = function () {
+var _cleanUp = function (hard) {
     try {
         cloud.get().map.removeLayer(recScale);
         cloud.get().map.removeLayer(recEdit);
     } catch (e) {
     }
     printOn = false;
-    center = null;
-    printC = config.print.templates;
-    scales = config.print.scales;
-    scale = null;
-    pageSize = null;
-    orientation = null;
-    tmpl = null;
+    if (hard) {
+        center = null;
+        printC = config.print.templates;
+        scales = config.print.scales;
+        scale = null;
+        pageSize = null;
+        orientation = null;
+        tmpl = null;
+    }
 };
 
 /**
@@ -435,7 +437,7 @@ module.exports = {
             _cleanUp();
         }
     },
-    cleanUp: function () {
-        _cleanUp();
+    cleanUp: function (hard) {
+        _cleanUp(hard);
     }
 };
