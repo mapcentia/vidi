@@ -76,7 +76,6 @@ module.exports = {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
             $("#conflict-get-print-fieldset").prop("disabled", true);
-
             $(this).button('loading');
             print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             print.print(endPrintEventName, conflictSearch.getResult());

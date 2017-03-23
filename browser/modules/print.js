@@ -40,6 +40,12 @@ var _cleanUp = function () {
     }
     printOn = false;
     center = null;
+    printC = config.print.templates;
+    scales = config.print.scales;
+    scale = null;
+    pageSize = null;
+    orientation = null;
+    tmpl = null;
 };
 
 /**
