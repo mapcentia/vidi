@@ -149,6 +149,7 @@ module.exports = {
                                 layer.baseLayer = false;
                                 layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
                                 layer.on("load", function () {
+                                    console.log("Layer loaded");
                                     countLoaded++;
                                     backboneEvents.get().trigger("doneLoading:layers", countLoaded);
                                 });
@@ -213,11 +214,12 @@ module.exports = {
                                     iter();
                                 } else {
                                     // CartoDB layers are now created
+                                    cartoDbLayersready = true;
+                                    backboneEvents.get().trigger("ready:layers");
+
                                     // Only resolve promise when all layers are completed
                                     (function poll2() {
                                         if (k === tmpData.length) {
-                                            cartoDbLayersready = true;
-                                            backboneEvents.get().trigger("ready:layers");
                                             resolve();
                                         } else {
                                             setTimeout(function () {
