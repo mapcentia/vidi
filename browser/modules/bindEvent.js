@@ -190,7 +190,7 @@ module.exports = module.exports = {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
                         doneB = doneL = false;
-                    }, 5000)
+                    }, 10000)
                 }
             }
         });
@@ -202,7 +202,7 @@ module.exports = module.exports = {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");
                     doneB = doneL = false;
-                }, 5000)
+                }, 10000)
             }
         });
 
