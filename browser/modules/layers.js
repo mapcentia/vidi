@@ -148,21 +148,15 @@ module.exports = {
 
                                 layer.baseLayer = false;
                                 layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
-
+                                layer.on("load", function () {
+                                    countLoaded++;
+                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                                });
                                 cloud.get().addLayer(layer, tmpData[j].f_table_name);
 
                                 // We switch the layer on/off, so they become ready for state.
                                 cloud.get().showLayer(layer.id);
                                 cloud.get().hideLayer(layer.id);
-
-                                layer.on("load", function () {
-                                    countLoaded++;
-                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
-                                });
-                                layer.on('tileerror', function(error, tile) {
-                                    console.log(error);
-                                    console.log(tile);
-                                });
 
                                 j++;
 
@@ -219,12 +213,11 @@ module.exports = {
                                     iter();
                                 } else {
                                     // CartoDB layers are now created
-                                    cartoDbLayersready = true;
-                                    backboneEvents.get().trigger("ready:layers");
-
-                                    // Only resolve promise when all layerd are completed
+                                    // Only resolve promise when all layers are completed
                                     (function poll2() {
                                         if (k === tmpData.length) {
+                                            cartoDbLayersready = true;
+                                            backboneEvents.get().trigger("ready:layers");
                                             resolve();
                                         } else {
                                             setTimeout(function () {
