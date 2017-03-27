@@ -159,6 +159,10 @@ module.exports = {
                                     countLoaded++;
                                     backboneEvents.get().trigger("doneLoading:layers", countLoaded);
                                 });
+                                layer.on('tileerror', function(error, tile) {
+                                    console.log(error);
+                                    console.log(tile);
+                                });
 
                                 j++;
 
