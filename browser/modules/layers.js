@@ -148,15 +148,17 @@ module.exports = {
 
                                 layer.baseLayer = false;
                                 layer.id = tmpData[j].f_table_schema + "." + tmpData[j].f_table_name;
-                                layer.on("load", function () {
-                                    countLoaded++;
-                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
-                                });
+
                                 cloud.get().addLayer(layer, tmpData[j].f_table_name);
 
                                 // We switch the layer on/off, so they become ready for state.
                                 cloud.get().showLayer(layer.id);
                                 cloud.get().hideLayer(layer.id);
+
+                                layer.on("load", function () {
+                                    countLoaded++;
+                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                                });
 
                                 j++;
 
