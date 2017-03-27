@@ -41,6 +41,7 @@ router.post('/api/print', function (req, response) {
             windowStatus: "all_loaded",
             //runScript: 'window.setTimeout(function(){window.status="all_loaded";},1);',
             debug: true,
+            noStopSlowScripts: true,
             debugJavascript: true
         }, function (err) {
             console.log(err);
