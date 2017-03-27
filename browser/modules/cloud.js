@@ -65,7 +65,9 @@ module.exports = {
                 title: "Find me"
             },
             icon: "fa fa-location-arrow",
-            iconLoading: "fa fa-circle-o-notch fa-spin"
+            iconLoading: "fa fa-circle-o-notch fa-spin",
+            keepCurrentZoomLevel: true,
+            drawCircle: false
         }).addTo(map);
 
         /**

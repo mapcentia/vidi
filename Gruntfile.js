@@ -117,10 +117,11 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/**/*','css/**/*'],
-                queryString: true,
+                assets: ['js/build/all.min.js','css/build/all.min.css'],
+                queryString: false,
                 baseDir: './public/',
-                jsonOutput: false
+                jsonOutput: false,
+                deleteOriginals: false
             },
             production: {
                 files: [{

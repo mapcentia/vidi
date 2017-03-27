@@ -204,7 +204,7 @@ module.exports = {
                             popupHtml: popupHtml
                         });
 
-                        // Here Inside onLoad we call loadDataInTable(), so the table is populated
+                        // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable();
 
                         // If only one feature is selected, when activate it.
