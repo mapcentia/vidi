@@ -21,12 +21,12 @@ module.exports = module.exports = {
     init: function (str) {
 
     },
-    serialize: function(filters){
+    serialize: function (filters) {
         var e = _encodeLayers(cloud.get().map);
         $.each(e, function (i, v) {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
-                for (var key = v.geoJson.features.length -1 ; key > -1 ; key--) {
+                for (var key = v.geoJson.features.length - 1; key > -1; key--) {
                     if (filters[v.geoJson.features[key]._vidi_type]) {
                         v.geoJson.features.splice(key, 1);
                     }
@@ -248,7 +248,7 @@ var _encoders = {
                     encStyles[styleName] = style;
                 }
 
-                if (feature instanceof L.Circle){
+                if (feature instanceof L.Circle) {
                     featureGeoJson = {_latlng: feature._latlng, _mRadius: feature._mRadius, _radius: feature._radius};
                     featureGeoJson.type = "Circle";
                     featureGeoJson.feature = feature.feature;
@@ -260,8 +260,7 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
-                } else
-                {
+                } else {
                     featureGeoJson = feature.toGeoJSON();
                     featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
@@ -335,16 +334,23 @@ var _getLayers = function (map) {
         return a._container.style.zIndex - b._container.style.zIndex;
     });
 
-    imageNodes = [].slice.call(this, map._panes.overlayPane.childNodes);
-    imageOverlays.sort(function (a, b) {
-        return imageNodes.indexOf(a._image) - imageNodes.indexOf(b._image);
-    });
-
-    if (map._pathRoot) {
-        pathNodes = [].slice.call(this, map._pathRoot.childNodes);
-        vectors.sort(function (a, b) {
-            return pathNodes.indexOf(a._container) - pathNodes.indexOf(b._container);
+    try {
+        imageNodes = [].slice.call(this, map._panes.overlayPane.childNodes);
+        imageOverlays.sort(function (a, b) {
+            return imageNodes.indexOf(a._image) - imageNodes.indexOf(b._image);
         });
+    } catch (e) {
+        //console.error(e.message);
+    }
+    try {
+        if (map._pathRoot) {
+            pathNodes = [].slice.call(this, map._pathRoot.childNodes);
+            vectors.sort(function (a, b) {
+                return pathNodes.indexOf(a._container) - pathNodes.indexOf(b._container);
+            });
+        }
+    } catch (e) {
+        //console.error(e.message);
     }
 
     return tiles.concat(vectors).concat(imageOverlays).concat(markers);

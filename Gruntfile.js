@@ -65,7 +65,9 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: ["reactify", 'require-globify']
+                    //transform: [['reactify', {'es6module': true}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+
                 }
             }
         },
@@ -117,7 +119,7 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js','css/build/all.min.css'],
+                assets: ['js/build/all.min.js', 'css/build/all.min.css'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,
