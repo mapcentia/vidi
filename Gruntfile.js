@@ -65,7 +65,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    //transform: [['reactify', {'es6module': true}], 'require-globify']
+                    //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
 
                 }
