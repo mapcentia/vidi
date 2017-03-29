@@ -87,3 +87,4 @@ config/_variables.less
 /public/js/build/all.min.js
 /config/_styles.less
 /config/configServer.js
+/public/js/templates.js
