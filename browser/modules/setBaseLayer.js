@@ -44,8 +44,7 @@ module.exports = module.exports = {
                             l = cloud.get().addTileLayers($.extend({
                                 layers: [v.overlays[u].id],
                                 db: v.overlays[u].db,
-                                // TODO Set host
-                                //host: v.overlays[u].host || null,
+                                host: v.overlays[u].host || "",
                                 type: "tms",
                                 loadEvent: function () {
                                     backboneEvents.get().trigger("doneLoading:layers", layers.incrementCount());
