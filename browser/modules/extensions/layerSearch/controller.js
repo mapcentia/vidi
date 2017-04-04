@@ -44,7 +44,13 @@ module.exports = {
             });
 
             $("input[name=layer-search]").on('input', _.debounce(function (e) {
-                layerSearch.search(e.target.value)
+                if (e.target.value === "") {
+                    layerSearch.matchAll();
+
+                } else {
+                    layerSearch.search(e.target.value);
+                }
+
             }, 300));
         });
     }
