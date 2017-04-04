@@ -46,7 +46,6 @@ module.exports = {
             $("input[name=layer-search]").on('input', _.debounce(function (e) {
                 if (e.target.value === "") {
                     layerSearch.matchAll();
-
                 } else {
                     layerSearch.search(e.target.value);
                 }

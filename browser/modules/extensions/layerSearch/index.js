@@ -59,7 +59,6 @@ module.exports = {
                 }
             };
 
-        $("#layer-search-list").empty();
 
         if (!query || query === "") {
             return false;
@@ -96,6 +95,9 @@ module.exports = {
     },
 
     run: function (dsl, query) {
+
+        $("#layer-search-list").empty();
+
 
         var highlighter = function (value, item) {
             _($.trim(value).split(' ')).each(
