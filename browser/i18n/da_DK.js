@@ -105,7 +105,9 @@ module.exports = {
 
         "Disclaimer": "Disclaimer",
         "Contact": "Kontakt",
-        "Loading data": "Henter data"
+        "Loading data": "Henter data",
+        "Reset": "Nulstil",
+        "Do you really want to reset the map?": "Er du sikker på, at du vil nulstille kortet?"
 
     }
 };

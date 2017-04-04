@@ -61,6 +61,12 @@ var metaDataKeys;
 
 /**
  *
+ * @type {array}
+ */
+var reset;
+
+/**
+ *
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./urlparser');
@@ -109,6 +115,7 @@ module.exports = module.exports = {
         layers = o.layers;
         infoClick = o.infoClick;
         backboneEvents = o.backboneEvents;
+        reset = o.reset;
         return this;
     },
     init: function (str) {
@@ -130,8 +137,12 @@ module.exports = module.exports = {
             advancedInfo.control();
         });
 
+        $("#btn-reset").on("click", function () {
+            reset.init();
+        });
+
         $("#info-modal button").on("click", function () {
-            $( "#info-modal" ).animate({
+            $("#info-modal").animate({
                 right: "-" + $("#myNavmenu").width() + "px"
             }, 200)
         });
@@ -182,11 +193,11 @@ module.exports = module.exports = {
 
         // TODO
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            if (layers.ready() === true && layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length  === e) {
+            if (layers.ready() === true && layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length === e) {
                 layers.resetCount();
                 doneL = true;
                 if (doneL && doneB) {
-                    setTimeout(function(){
+                    setTimeout(function () {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
                         doneB = doneL = false;
@@ -197,8 +208,8 @@ module.exports = module.exports = {
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
-            if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "") ) {
-                setTimeout(function() {
+            if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "")) {
+                setTimeout(function () {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");
                     doneB = doneL = false;

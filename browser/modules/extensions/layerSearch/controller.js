@@ -38,6 +38,9 @@ module.exports = {
                 right: "0"
             }, 200, function() {
                 $("input[name=layer-search]").focus();
+
+                layerSearch.matchAll();
+
             });
 
             $("input[name=layer-search]").on('input', _.debounce(function (e) {

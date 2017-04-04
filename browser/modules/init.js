@@ -89,7 +89,9 @@ module.exports = {
         if (urlVars.px && urlVars.py) {
             gc2i18n.dict.printWidth = urlVars.px + "px";
             gc2i18n.dict.printHeight = urlVars.py + "px";
-            gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td);
+            gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td); // TODO typo
+            gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
+            gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
         }
 
         if (urlVars.l) {

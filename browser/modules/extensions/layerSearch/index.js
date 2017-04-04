@@ -41,7 +41,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        
+
         // Create a button and insert into DOM
         // ===================================
 
@@ -49,15 +49,6 @@ module.exports = {
     },
 
     search: function (query) {
-        var highlighter = function (value, item) {
-            _($.trim(value).split(' ')).each(
-                function (s) {
-                    var regex = new RegExp('(' + s + ')', 'gi');
-                    item = item.replace(regex, "<mark>$1</mark>");
-                }
-            );
-            return item;
-        };
 
         var fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
             qJson = {
@@ -91,10 +82,33 @@ module.exports = {
             terms = []
         });
         qJson.query.bool.should = med;
-        q = JSON.stringify(qJson);
-        console.log(q);
+        console.log(qJson);
+        this.run(qJson, query);
+    },
+
+    matchAll: function () {
+        var dsl = {
+            "query": {
+                "match_all": {}
+            }
+        };
+        this.run(dsl);
+    },
+
+    run: function (dsl, query) {
+
+        var highlighter = function (value, item) {
+            _($.trim(value).split(' ')).each(
+                function (s) {
+                    var regex = new RegExp('(' + s + ')', 'gi');
+                    item = item.replace(regex, "<mark>$1</mark>");
+                }
+            );
+            return item;
+        };
+
         $.ajax({
-            url: '/api/extension/layersearch/' + db + "?q=" + q,
+            url: '/api/extension/layersearch/' + db + "?q=" + JSON.stringify(dsl),
             dataType: "json",
             scriptCharset: "utf-8",
             contentType: "application/json; charset=utf-8",
@@ -106,7 +120,7 @@ module.exports = {
                     html = html + "<a href='javascript:void(0)' class='list-group-item' data-gc2-sf-title='" + hit._source.f_table_title + "' data-gc2-layer-search-key='" + i + "'>";
                     html = html + "<div>";
                     $.each(fieldsObj, function (u, v) {
-                        html = html + "<div><small class='layer-search-item'>" + v + " </small><span>" + highlighter(query, _.unescape(hit._source[u])) + "</span></div>";
+                        html = html + "<div><small class='layer-search-item'>" + v + " </small><span>" + (query ? highlighter(query, _.unescape(hit._source[u])) : _.unescape(hit._source[u])) + "</span></div>";
                     });
                     html = html + "</div></a></section>";
                     $("#layer-search-list").append(html);
@@ -138,6 +152,7 @@ module.exports = {
                 });
             }
         });
+
     }
 };
 

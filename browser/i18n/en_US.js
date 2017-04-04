@@ -102,6 +102,8 @@ module.exports = {
         "Area": "Area",
         "Distance/Radius": "Distance/Radius",
         "Type": "Type",
-        "Loading data": "Loading data"
+        "Loading data": "Loading data",
+        "Reset": "Reset",
+        "Do you really want to reset the map?": "Do you really want to reset the map?"
     }
 };
