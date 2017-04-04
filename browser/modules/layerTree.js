@@ -72,5 +72,10 @@ module.exports = module.exports = {
                 }
             }
         }
+
+        // Open the first panel
+        // ====================
+
+        $("#layers div:first").find("a").trigger("click");
     }
 };
