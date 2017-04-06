@@ -57,11 +57,13 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                         "f_table_title": {
                             "type": "text",
                             "search_analyzer": "search_ngram",
-                            "analyzer": "index_ngram"
+                            "analyzer": "index_ngram",
+                            "fielddata": true
                         }, "layergroup": {
                             "type": "text",
                             "search_analyzer": "search_ngram",
-                            "analyzer": "index_ngram"
+                            "analyzer": "index_ngram",
+                            "fielddata": true
                         },
                         "legend": {
                             "type": "object",
