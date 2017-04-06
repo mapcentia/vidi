@@ -3,7 +3,7 @@ var router = express.Router();
 var http = require('http');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-    host: 'localhost:9200',
+    host: 'elasticsearch:9200',
     log: 'trace'
 });
 
@@ -13,7 +13,8 @@ router.get('/api/extension/layersearch/:db', function (req, response) {
         index: indexName,
         type: 'meta',
         body: req.query.q,
-        size: 1000
+        size: 1000,
+        sort : "f_table_title:asc"
     }).then(function (resp) {
         var hits = resp.hits.hits;
         response.send(hits);
