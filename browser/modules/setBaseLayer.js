@@ -60,6 +60,7 @@ module.exports = module.exports = {
         cloud.get().setBaseLayer(str, function () {
             backboneEvents.get().trigger("doneLoading:setBaselayer");
         });
+        $('*[data-gc2-base-id="' + str + '"] input').prop('checked', true);
         pushState.init();
     }
 };
