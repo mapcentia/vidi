@@ -191,6 +191,8 @@ module.exports = {
                                 subdomains: window.gc2Options.subDomainsForTiles
                             });
 
+                            layers[[layer]][0].setZIndex(v.sort_id + 10000);
+
                             resolve();
 
                             break;
