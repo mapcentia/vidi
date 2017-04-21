@@ -137,7 +137,7 @@ module.exports = {
                 if (hashArr[4]) {
                     arr = hashArr[4].split(",");
                     for (i = 0; i < arr.length; i++) {
-                        switchLayer.init(arr[i], true, true);
+                        switchLayer.init(arr[i], true, false);
                     }
                 }
             }
@@ -376,14 +376,11 @@ module.exports = {
                     if (addedLayers.length > 0) {
                         meta.addMetaData({data: addedLayers});
                         layerTree.init();
-                        // Use promise to switch layers on
-                        layers.init().then(function () {
-                            if (arr) {
-                                for (i = 0; i < arr.length; i++) {
-                                    switchLayer.init(arr[i], true, true);
-                                }
+                        if (arr) {
+                            for (i = 0; i < arr.length; i++) {
+                                switchLayer.init(arr[i], true, true);
                             }
-                        })
+                        }
                     }
 
                 }

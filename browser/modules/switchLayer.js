@@ -48,11 +48,12 @@ module.exports = module.exports = {
      * @param doNotLegend {boolean}
      */
     init: function (name, visible, doNotLegend) {
-        var el = $('*[data-gc2-id="' + name + '"]');
+        var me = this, el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
             try {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 el.prop('checked', true);
+                me.update(doNotLegend, el);
             } catch (e) {
 
                 layers.addLayer(name)
@@ -60,6 +61,7 @@ module.exports = module.exports = {
                     .then(function () {
                         cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                         el.prop('checked', true);
+                        me.update(doNotLegend, el);
                 });
 
             }
@@ -81,16 +83,26 @@ module.exports = module.exports = {
                 //Pass
             }
             el.prop('checked', false);
+
+            me.update(doNotLegend, el);
         }
-        var siblings = el.parents(".accordion-body").find("input");
-        var c = 0;
+
+
+    },
+
+    update: function (doNotLegend, el) {
+        var siblings = el.parents(".accordion-body").find("input"), c = 0;
+
         $.each(siblings, function (i, v) {
             if (v.checked) {
                 c = c + 1;
             }
         });
+
         el.parents(".panel-layertree").find("span:eq(0)").html(c);
+
         pushState.init();
+
         if (!doNotLegend) {
             legend.init();
         }

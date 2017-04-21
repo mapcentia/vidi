@@ -146,9 +146,8 @@ module.exports = {
                     $(this).parent("section").fadeOut(200);
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     layerTree.init();
-                    layers.init().then(function () {
-                        switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
-                    });
+
+                    switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
 
                     jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>", htmlAllowed: true, timeout: 2500});
                 });
