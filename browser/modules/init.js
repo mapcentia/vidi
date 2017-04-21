@@ -154,7 +154,9 @@ module.exports = {
         modules.draw.init();
         modules.print.init();
 
-        modules.meta.init().then(function () {
+        modules.meta.init()
+
+            .then(function () {
                 return modules.setting.init();
             },
 
@@ -163,10 +165,6 @@ module.exports = {
                 alert("Vidi is loaded without schema. Can't set extent or add layers");
                 backboneEvents.get().trigger("ready:meta");
                 modules.state.init();
-            })
-
-            .then(function () {
-                return modules.layers.init();
             })
 
             .then(function () {

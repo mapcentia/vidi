@@ -151,7 +151,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("clear:search");
         });
 
-        backboneEvents.get().on("ready:layers", function () {
+        backboneEvents.get().on("ready:meta", function () {
             if ($(document).width() > 767 && isStarted === false) {
                 setTimeout(
                     function () {
@@ -193,7 +193,7 @@ module.exports = module.exports = {
 
         // TODO
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            if (layers.ready() === true && layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length === e) {
+            if (layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length === e) {
                 layers.resetCount();
                 doneL = true;
                 if (doneL && doneB) {
@@ -201,7 +201,7 @@ module.exports = module.exports = {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
                         doneB = doneL = false;
-                    }, 10000)
+                    }, 1)
                 }
             }
         });
@@ -213,7 +213,7 @@ module.exports = module.exports = {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");
                     doneB = doneL = false;
-                }, 10000)
+                }, 1)
             }
         });
 

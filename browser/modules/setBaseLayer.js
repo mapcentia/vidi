@@ -17,6 +17,8 @@ var pushState;
 
 var layers;
 
+var baseLayer;
+
 var backboneEvents;
 
 
@@ -29,14 +31,23 @@ module.exports = module.exports = {
         cloud = o.cloud;
         pushState = o.pushState;
         layers = o.layers;
+        baseLayer = o.baseLayer;
         backboneEvents = o.backboneEvents;
 
         return this;
     },
     init: function (str) {
         var u, l;
+
         layers.removeHidden();
+
+        if (!cloud.get().getLayersByName(str)) {
+            baseLayer.addBaseLayer(str);
+            console.info(str + " is added as base layer.");
+        }
+
         if (typeof window.setBaseLayers !== "undefined") {
+
             $.each(window.setBaseLayers, function (i, v) {
                 if (v.id === str) {
                     if (typeof v.overlays === "object") {
@@ -57,10 +68,15 @@ module.exports = module.exports = {
                 }
             });
         }
+
+
+
         cloud.get().setBaseLayer(str, function () {
             backboneEvents.get().trigger("doneLoading:setBaselayer");
         });
+
         $('*[data-gc2-base-id="' + str + '"] input').prop('checked', true);
+
         pushState.init();
     }
 };

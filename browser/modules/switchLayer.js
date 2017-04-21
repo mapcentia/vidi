@@ -21,6 +21,12 @@ var legend;
  *
  * @type {*|exports|module.exports}
  */
+var layers;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var pushState;
 
 /**
@@ -31,6 +37,7 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         legend = o.legend;
+        layers = o.layers;
         pushState = o.pushState;
         return this;
     },
@@ -47,7 +54,14 @@ module.exports = module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 el.prop('checked', true);
             } catch (e) {
-                //Pass
+
+                layers.addLayer(name)
+
+                    .then(function () {
+                        cloud.get().map.addLayer(cloud.get().getLayersByName(name));
+                        el.prop('checked', true);
+                });
+
             }
 
             try {
