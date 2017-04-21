@@ -156,7 +156,7 @@ module.exports = {
     addLayer: function (l) {
         return new Promise(function (resolve, reject) {
 
-            var isBaseLayer, layers = [], metaData = meta.getMetaDataLatestLoaded();
+            var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             $.each(metaData.data, function (i, v) {
 
