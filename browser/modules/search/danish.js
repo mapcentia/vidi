@@ -154,6 +154,7 @@ module.exports = {
                         }
                     };
                     dslM = {
+                        "sort": [{"properties.sort_string": "asc"}],
                         "query": {
                             "filtered": {
                                 "query": {
@@ -206,31 +207,32 @@ module.exports = {
                 var names = [];
                 type2 = (query.match(/\d+/g) != null) ? "jordstykke" : "ejerlav";
                 if (!onlyAddress) {
-                (function ca() {
-                    $.ajax({
-                        url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
-                        data: '&q=' + JSON.stringify(dslM),
-                        contentType: "application/json; charset=utf-8",
-                        scriptCharset: "utf-8",
-                        dataType: 'jsonp',
-                        jsonp: 'jsonp_callback',
-                        success: function (response) {
-                            $.each(response.hits.hits, function (i, hit) {
-                                var str = hit._source.properties.string;
-                                gids[str] = hit._source.properties.gid;
-                                names.push({value: str});
-                            });
-                            if (names.length === 1 && (type2 === "ejerlav")) {
-                                type2 = "jordstykke";
-                                names = [];
-                                gids = [];
-                                ca();
-                            } else {
-                                cb(names);
+                    (function ca() {
+                        $.ajax({
+                            url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
+                            data: '&q=' + JSON.stringify(dslM),
+                            contentType: "application/json; charset=utf-8",
+                            scriptCharset: "utf-8",
+                            dataType: 'jsonp',
+                            jsonp: 'jsonp_callback',
+                            success: function (response) {
+                                $.each(response.hits.hits, function (i, hit) {
+                                    var str = hit._source.properties.string;
+                                    gids[str] = hit._source.properties.gid;
+                                    names.push({value: str});
+                                });
+                                if (names.length === 1 && (type2 === "ejerlav")) {
+                                    type2 = "jordstykke";
+                                    names = [];
+                                    gids = [];
+                                    ca();
+                                } else {
+                                    cb(names);
+                                }
                             }
-                        }
-                    })
-                })();}
+                        })
+                    })();
+                }
             }
         });
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {

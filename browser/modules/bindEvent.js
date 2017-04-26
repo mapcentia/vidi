@@ -209,6 +209,7 @@ module.exports = module.exports = {
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
             if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "")) {
+                console.info("Starting timeout....");
                 setTimeout(function () {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");

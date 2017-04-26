@@ -241,16 +241,16 @@ div.olControlZoom {
   background-color: white;
   z-index: 1000;
 }
-.center {
+#loadscreen .center {
   position: absolute;
   top: 50%;
   left: 50%;
 }
-.bounce {
+#loadscreen .bounce {
   transform: translate(-50%, -50%);
   -webkit-transform: translate(-50%, -50%);
 }
-.text {
+#loadscreen .text {
   transform: translate(-50%, -100px);
   -webkit-transform: translate(-50%, -100px);
   font-family: 'Open Sans';
@@ -258,31 +258,31 @@ div.olControlZoom {
   font-size: 16px;
   color: #96a0b4;
 }
-.bouncywrap {
+#loadscreen .bouncywrap {
   position: relative;
 }
-.dotcon {
+#loadscreen .dotcon {
   display: block;
   float: left;
   width: 50px;
   position: absolute;
 }
-.dc1 {
+#loadscreen .dc1 {
   -webkit-animation: bouncy1 1.5s infinite;
   left: -40px;
   animation: bouncy1 1.5s infinite;
 }
-.dc2 {
+#loadscreen .dc2 {
   -webkit-animation: bouncy2 1.5s infinite;
   animation: bouncy2 1.5s infinite;
   left: 0;
 }
-.dc3 {
+#loadscreen .dc3 {
   -webkit-animation: bouncy3 1.5s infinite;
   animation: bouncy3 1.5s infinite;
   left: 40px;
 }
-.dot {
+#loadscreen .dot {
   height: 10px;
   width: 10px;
   border-radius: 50%;
@@ -868,4 +868,7 @@ input[type=text]::-ms-clear {
 }
 .legend-img {
   width: inherit !important;
+}
+.form-control-wrapper {
+  margin: 10px 0;
 }
