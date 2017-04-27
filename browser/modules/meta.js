@@ -72,8 +72,6 @@ try {
     console.info(e.message);
 }
 
-var layersPromise;
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getMetaDataKeys: module.exports.getMetaDataKeys, ready: module.exports.ready}}

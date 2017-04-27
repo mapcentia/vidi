@@ -32,10 +32,17 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this;
+        var me = this, configFile;
+
         if (urlVars.config) {
-            $.getJSON(window.vidiConfig.configUrl + "/" + urlVars.config, function (data) {
-                console.info("Started with config: " + urlVars.config);
+            configFile = urlVars.config;
+        } else if (window.vidiConfig.autoLoadingConfig) {
+            configFile = urlparser.db + ".json";
+        }
+
+        if (configFile) {
+            $.getJSON(window.vidiConfig.configUrl + "/" + configFile, function (data) {
+                console.info("Started with config: " + configFile);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -47,7 +54,7 @@ module.exports = {
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
                 window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
             }).fail(function () {
-                console.error("Error loading config json");
+                console.error("Error loading: " + configFile);
             }).always(function () {
                 me.render();
             });
@@ -157,15 +164,15 @@ module.exports = {
         modules.meta.init()
 
             .then(function () {
-                return modules.setting.init();
-            },
+                    return modules.setting.init();
+                },
 
-            function (error) {
-                console.log(error); // Stacktrace
-                alert("Vidi is loaded without schema. Can't set extent or add layers");
-                backboneEvents.get().trigger("ready:meta");
-                modules.state.init();
-            })
+                function (error) {
+                    console.log(error); // Stacktrace
+                    alert("Vidi is loaded without schema. Can't set extent or add layers");
+                    backboneEvents.get().trigger("ready:meta");
+                    modules.state.init();
+                })
 
             .then(function () {
                 modules.layerTree.init();
