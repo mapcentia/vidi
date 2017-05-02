@@ -32,15 +32,9 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this, configFile;
+        var me = this, configFile, stop = false;
 
-        if (urlVars.config) {
-            configFile = urlVars.config;
-        } else if (window.vidiConfig.autoLoadingConfig) {
-            configFile = urlparser.db + ".json";
-        }
-
-        if (configFile) {
+        var loadConfig = function () {
             $.getJSON(window.vidiConfig.configUrl + "/" + configFile, function (data) {
                 console.info("Started with config: " + configFile);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
@@ -55,13 +49,41 @@ module.exports = {
                 window.vidiConfig.activateMainTab = data.activateMainTab ? data.activateMainTab : window.vidiConfig.activateMainTab;
                 window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
             }).fail(function () {
-                console.error("Error loading: " + configFile);
-            }).always(function () {
+                console.log("Could not load: " + configFile);
+
+                if (stop) {
+                    me.render();
+                    return;
+                }
+
+                if (window.vidiConfig.defaultConfig) {
+                    configFile = window.vidiConfig.defaultConfig;
+                    stop = true;
+                    loadConfig();
+                } else {
+                    me.render();
+                }
+
+            }).done(function () {
                 me.render();
             });
+        };
+
+        if (urlVars.config) {
+            configFile = urlVars.config;
+        } else if (window.vidiConfig.autoLoadingConfig) {
+            configFile = urlparser.db + ".json";
+        } else if (window.vidiConfig.defaultConfig) {
+            configFile = window.vidiConfig.defaultConfig;
+        }
+
+        if (configFile) {
+            loadConfig();
         } else {
             me.render();
         }
+
+
     },
 
     /**
