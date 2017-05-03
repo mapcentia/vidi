@@ -64,7 +64,7 @@
     "react": "^15.4.2",
     "react-dom": "^15.4.2",
     "reproject": "^1.1.1",
-    "request": "^2.72.0",
+    "request": "^2.81.0",
     "require-globify": "^1.4.0",
     "serialijse": "0.0.17",
     "showdown": "^1.5.1",

@@ -7,13 +7,17 @@ var request = require('request');
 router.post('/api/sql/:db', function (req, response) {
     var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, url, data = [], jsfile = "";
 
-    var postData = "q=" + encodeURIComponent(q) + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding,
+    var postData = "q=" + encodeURIComponent(q) + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding, options;
 
-        options = {
-            method: 'POST',
-            uri: config.host + "/api/v1/sql/" + db,
-            form: postData
-        };
+    if (req.body.key) {
+        postData = postData + "&key=" + req.body.key;
+    }
+
+    options = {
+        method: 'POST',
+        uri: config.host + "/api/v1/sql/" + db,
+        form: postData
+    };
 
     request(options, function (err, res, body) {
 

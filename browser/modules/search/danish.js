@@ -136,6 +136,7 @@ module.exports = {
 
                 (function ca() {
                     dslA = {
+                        "sort": [{"properties.sort_string": "asc"}],
                         "query": {
                             "filtered": {
                                 "query": {
