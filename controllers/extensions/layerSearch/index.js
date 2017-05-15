@@ -3,7 +3,7 @@ var router = express.Router();
 var http = require('http');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-    host: 'elasticsearch:9200',
+    host: 'localhost:9200',
     log: 'trace'
 });
 

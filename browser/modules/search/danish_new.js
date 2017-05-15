@@ -70,7 +70,7 @@ module.exports = {
                         case "vejnavn,bynavn":
                             dsl1 = {
                                 "from": 0,
-                                "size": 0,
+                                "size": 20,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -97,12 +97,12 @@ module.exports = {
                                     "includes": ["properties.postnrnavn", "properties.postnr", "properties.kommunekode", "properties.regionskode"],
                                     "excludes": []
                                 },
-                                "fields": ["properties.postnrnavn", "properties.postnr", "properties.kommunekode", "properties.regionskode"],
+                                "stored_fields": ["properties.postnrnavn", "properties.postnr", "properties.kommunekode", "properties.regionskode"],
                                 "aggregations": {
                                     "properties.postnrnavn": {
                                         "terms": {
                                             "field": "properties.postnrnavn",
-                                            "size": 10,
+                                            "size": 20,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -111,19 +111,19 @@ module.exports = {
                                             "properties.postnr": {
                                                 "terms": {
                                                     "field": "properties.postnr",
-                                                    "size": 0
+                                                    "size": 20
                                                 },
                                                 "aggregations": {
                                                     "properties.kommunekode": {
                                                         "terms": {
                                                             "field": "properties.kommunekode",
-                                                            "size": 0
+                                                            "size": 20
                                                         },
                                                         "aggregations": {
                                                             "properties.regionskode": {
                                                                 "terms": {
                                                                     "field": "properties.regionskode",
-                                                                    "size": 0
+                                                                    "size": 20
                                                                 }
                                                             }
                                                         }
@@ -136,7 +136,7 @@ module.exports = {
                             };
                             dsl2 = {
                                 "from": 0,
-                                "size": 0,
+                                "size": 20,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -163,12 +163,12 @@ module.exports = {
                                     "includes": ["properties.vejnavn", "properties.kommunekode", "properties.regionskode"],
                                     "excludes": []
                                 },
-                                "fields": ["properties.vejnavn", "properties.kommunekode", "properties.regionskode"],
+                                "stored_fields": ["properties.vejnavn", "properties.kommunekode", "properties.regionskode"],
                                 "aggregations": {
                                     "properties.vejnavn": {
                                         "terms": {
                                             "field": "properties.vejnavn",
-                                            "size": 10,
+                                            "size": 20,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -177,13 +177,13 @@ module.exports = {
                                             "properties.kommunekode": {
                                                 "terms": {
                                                     "field": "properties.kommunekode",
-                                                    "size": 0
+                                                    "size": 20
                                                 },
                                                 "aggregations": {
                                                     "properties.regionskode": {
                                                         "terms": {
                                                             "field": "properties.regionskode",
-                                                            "size": 0
+                                                            "size": 20
                                                         }
                                                     }
                                                 }
@@ -196,7 +196,7 @@ module.exports = {
                         case "vejnavn_bynavn":
                             dsl1 = {
                                 "from": 0,
-                                "size": 0,
+                                "size": 20,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -223,12 +223,12 @@ module.exports = {
                                     "includes": ["properties.vejnavn", "properties.postnrnavn", "properties.kommunekode", "properties.regionskode"],
                                     "excludes": []
                                 },
-                                "fields": ["properties.vejnavn", "properties.postnrnavn", "properties.kommunekode", "properties.regionskode"],
+                                "stored_fields": ["properties.vejnavn", "properties.postnrnavn", "properties.kommunekode", "properties.regionskode"],
                                 "aggregations": {
                                     "properties.vejnavn": {
                                         "terms": {
                                             "field": "properties.vejnavn",
-                                            "size": 10,
+                                            "size": 20,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -237,19 +237,19 @@ module.exports = {
                                             "properties.postnrnavn": {
                                                 "terms": {
                                                     "field": "properties.postnrnavn",
-                                                    "size": 0
+                                                    "size": 20
                                                 },
                                                 "aggregations": {
                                                     "properties.kommunekode": {
                                                         "terms": {
                                                             "field": "properties.kommunekode",
-                                                            "size": 0
+                                                            "size": 20
                                                         },
                                                         "aggregations": {
                                                             "properties.regionskode": {
                                                                 "terms": {
                                                                     "field": "properties.regionskode",
-                                                                    "size": 0
+                                                                    "size":10
                                                                 }
                                                             }
                                                         }
@@ -264,7 +264,7 @@ module.exports = {
                         case "adresse":
                             dsl1 = {
                                 "from": 0,
-                                "size": 10,
+                                "size": 20,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -421,11 +421,11 @@ module.exports = {
                 console.log(source[datum.value]);
 
                 var l = L.geoJson(source[datum.value]);
-                l.addTo(cloud.map)
+                l.addTo(cloud.get().map)
 
-                cloud.map.fitBounds(l.getBounds());
-                if (cloud.map.getZoom() > 17) {
-                    cloud.map.setZoom(17);
+                cloud.get().map.fitBounds(l.getBounds());
+                if (cloud.get().map.getZoom() > 17) {
+                    cloud.get().map.setZoom(17);
                 }
 
                 /*if (name === "matrikel") {
