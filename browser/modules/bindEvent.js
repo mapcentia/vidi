@@ -284,6 +284,11 @@ module.exports = module.exports = {
                 });
 
             });
+            $(document).arrive('[data-scale-ul]', function () {
+                $(this).on("click", function (e) {
+                    $("#select-scale").val($(this).data('scale-ul')).trigger("change");
+                });
+            });
         }
     }
 };
