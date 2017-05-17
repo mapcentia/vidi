@@ -91,13 +91,20 @@ module.exports = {
             center = null;
             scale = null;
 
+            hyperform(document.getElementById("print-form"));
+
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
-                $("#select-scale").append("<option value='" + scales[i] + "'>1:" + scales[i] + "</option>");
+                $("#ul-scale").append("<li><a data-scale-ul='" + scales[i] + "' href='#'>" + scales[i] + "</a></li>");
             }
             $("#select-scale").change(function (e) {
-                console.log(e.target.value)
-                scale = e.target.value;
+                var s = e.target.value;
+                if (isNaN(s) || s < 1) {
+                    alert(__("Not a valid scale"));
+                }
+                console.log(s);
+                scale = s;
+                scales.push(s);
                 change();
             });
             $.each(printC, function (i) {
@@ -418,6 +425,10 @@ module.exports = {
                     rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
 
                     if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
+
+                        scales = config.print.scales;
+                        console.log(scales)
+
                         cloud.get().map.removeLayer(recScale);
                         recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
                         recScale._vidi_type = "print";

@@ -178,13 +178,18 @@
                                 </fieldset>
                             </div>
                             <div>
-                                <form class="form-horizontal" id="print-form">
+                                <form class="form-horizontal" id="print-form" role="form" data-toggle="validator">
                                     <fieldset>
                                         <div class="form-group">
                                             <label for="select-scale" class="col-md-2 control-label">{{Scale}}</label>
-
                                             <div class="col-md-10">
-                                                <select id="select-scale" class="form-control" disabled></select>
+                                                <div class="input-group">
+                                                    <div class="input-group-btn">
+                                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>1: <span class="caret"></span></button>
+                                                        <ul id="ul-scale" class="dropdown-menu dropdown-menu-right"></ul>
+                                                    </div>
+                                                    <input type="number" id="select-scale" type="text" class="form-control" disabled>
+                                                </div>
                                             </div>
                                         </div>
 

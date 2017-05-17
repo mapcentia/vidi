@@ -265,7 +265,6 @@ module.exports = {
 
         if (window.vidiConfig.activateMainTab) {
             $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-
         }
     }
 };

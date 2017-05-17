@@ -20,6 +20,8 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap/dist/css/bootstrap.min.css',
                         'public/bower_components/snackbarjs/dist/snackbar.min.css',
                         'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
+                        'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
+                        'public/bower_components/hyperform/css/hyperform.css',
                         'public/css/jasny-bootstrap.min.css',
                         'public/css/L.Control.Locate.min.css',
                         'public/css/Leaflet.GraphicScale.min.css',
@@ -79,6 +81,7 @@ module.exports = function (grunt) {
                 files: {
                     'public/js/build/all.min.js': [
                         'public/bower_components/leaflet-measure/dist/leaflet-measure.js',
+                        'public/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid.js',
                         'public/bower_components/jquery/dist/jquery.min.js',
                         'public/bower_components/typeahead.js/dist/typeahead.jquery.min.js',
                         'public/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js',
@@ -88,6 +91,9 @@ module.exports = function (grunt) {
                         'public/bower_components/tableExport.jquery.plugin/tableExport.min.js',
                         'public/bower_components/bootstrap-material-design/dist/js/ripples.js',
                         'public/bower_components/bootstrap-material-design/dist/js/material.js',
+                        'public/bower_components/momentjs/min/moment-with-locales.js',
+                        'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
+                        'public/bower_components/hyperform/dist/hyperform.min.js',
                         'public/js/jasny-bootstrap.min.js',
                         'public/js/templates.js',
                         'public/js/bundle.js',
