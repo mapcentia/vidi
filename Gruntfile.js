@@ -2,6 +2,11 @@ module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        env: {
+            prod: {
+                NODE_ENV: 'production'
+            }
+        },
         less: {
             publish: {
                 options: {
@@ -21,7 +26,7 @@ module.exports = function (grunt) {
                         'public/bower_components/snackbarjs/dist/snackbar.min.css',
                         'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
                         'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
-                        'public/bower_components/hyperform/css/hyperform.css',
+                        //'public/bower_components/hyperform/css/hyperform.css',
                         'public/css/jasny-bootstrap.min.css',
                         'public/css/L.Control.Locate.min.css',
                         'public/css/Leaflet.GraphicScale.min.css',
@@ -93,7 +98,7 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap-material-design/dist/js/material.js',
                         'public/bower_components/momentjs/min/moment-with-locales.js',
                         'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
-                        'public/bower_components/hyperform/dist/hyperform.min.js',
+                        //'public/bower_components/hyperform/dist/hyperform.min.js',
                         'public/js/jasny-bootstrap.min.js',
                         'public/js/templates.js',
                         'public/js/bundle.js',
@@ -141,17 +146,6 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
-        },
-        babel: {
-            options: {
-                sourceMap: true,
-                compact: false
-            },
-            dist: {
-                files: {
-                    "public/js/bundle.babelified.js": "public/js/bundle.js"
-                }
-            }
         }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
@@ -163,10 +157,11 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
+    grunt.loadNpmTasks('grunt-env');
 
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
-    grunt.registerTask('production', ['gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
+    grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
 };
 
 
