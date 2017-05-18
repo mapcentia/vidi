@@ -91,7 +91,7 @@ module.exports = {
             center = null;
             scale = null;
 
-            hyperform(document.getElementById("print-form"));
+            //hyperform(document.getElementById("print-form"));
 
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
