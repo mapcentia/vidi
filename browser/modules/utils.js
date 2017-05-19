@@ -57,5 +57,19 @@ module.exports = {
             "status=no,height=" + height + ",width=" + width + ",resizable=yes,left="
             + leftPosition + ",top=" + topPosition + ",screenX=" + leftPosition + ",screenY="
             + topPosition + ",toolbar=no,menubar=no,scrollbars=no,location=no,directories=no");
+    },
+
+    cursorStyle: function () {
+
+        return {
+            crosshair: function () {
+                document.getElementById('map').style.cursor = 'crosshair'
+            },
+
+            reset: function () {
+                document.getElementById('map').style.cursor = ''
+            }
+        }
+
     }
 };
