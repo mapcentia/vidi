@@ -27,6 +27,7 @@
     "grunt-contrib-cssmin": "^1.0.2",
     "grunt-contrib-less": "^1.4.0",
     "grunt-contrib-uglify": "^2.0.0",
+    "grunt-env": "^0.4.4",
     "grunt-git": "^1.0.0",
     "grunt-processhtml": "^0.4.1",
     "grunt-templates-hogan": "^0.3.0",
