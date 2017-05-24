@@ -135,7 +135,7 @@ module.exports = module.exports = {
         // Create React component
         //=======================
 
-        class Infodialog extends React.Component {
+        class Coordinates extends React.Component {
 
             constructor(props) {
                 super(props);
@@ -184,7 +184,7 @@ module.exports = module.exports = {
 
                     me.setState({
                         lat: me.coordinatesSystem === "dd" ? utils.__("Lat", dict) + ": " + e.latlng.lat.toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lat, false) : "X: " + coords[0].toFixed(2),
-                        lng: me.coordinatesSystem === "dd" ? utils.__("Lng", dict) + ": " + e.latlng.lng.toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lng, true) : "Y:" + coords[1].toFixed(2),
+                        lng: me.coordinatesSystem === "dd" ? utils.__("Lng", dict) + ": " + e.latlng.lng.toFixed(5) : me.coordinatesSystem === "dms" ? me.convertDDToDMS(e.latlng.lng, true) : "Y: " + coords[1].toFixed(2),
                         zone: me.coordinatesSystem === "dd" ? "" : me.coordinatesSystem === "dms" ? "" : "Zone: " + z,
                     });
 
@@ -313,47 +313,11 @@ module.exports = module.exports = {
         }
 
         ReactDOM.render(
-            <Infodialog />,
+            <Coordinates />,
             document.getElementById(exId)
         );
 
-
-    },
-
-    /**
-     *
-     */
-    control: function () {
-        if ($("#" + exId + "-btn").is(':checked')) {
-
-            // Emit "on" event
-            //================
-
-            backboneEvents.get().trigger("on:" + exId);
-
-        } else {
-
-            // Emit "off" event
-            //=================
-
-            backboneEvents.get().trigger("off:" + exId);
-        }
-    },
-
-    click: function (event) {
-        var coords = event.getCoordinate(), p,
-            url = "http://kbhkort.kk.dk/modules/oblique/html";
-        p = utils.transform("EPSG:3857", "EPSG:25832", coords);
-        utils.popupCenter(url + "?x=" + p.x + "&y=" + p.y, (utils.screen().width - 100), (utils.screen().height - 100), exId);
-    },
-
-    /**
-     * Turns conflict off and resets DOM
-     */
-    off: function () {
-        // Clean up
     }
-
 };
 
 
