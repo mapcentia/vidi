@@ -28,6 +28,11 @@ module.exports = {
             '<div id="' + id + '"></div>' +
             '</div>').appendTo("#side-panel .main-content");
     },
+
+    injectCSS: function (css) {
+        $("head").append("<style>" + css + "</style>");
+    },
+
     viewport: function () {
         return {
             width: $(document).width(),
@@ -69,6 +74,16 @@ module.exports = {
             reset: function () {
                 document.getElementById('map').style.cursor = ''
             }
+        }
+
+    },
+
+    __: function (txt, dict) {
+
+        if ((dict[txt]) && (dict[txt][window._vidiLocale])) {
+            return dict[txt][window._vidiLocale];
+        } else {
+            return txt;
         }
 
     }
