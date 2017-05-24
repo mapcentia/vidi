@@ -66,11 +66,6 @@ module.exports = {
 
             active = true;
 
-            // TODO HACK
-            if (!$("input:radio[name='streetview-service']:checked").val()) {
-                $('#streetview-service-google').prop('checked', true);
-            }
-
             // Turn info click off
             backboneEvents.get().trigger("off:infoClick");
             console.info("Starting Street View");

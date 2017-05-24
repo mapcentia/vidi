@@ -122,7 +122,7 @@ module.exports = module.exports = {
                                         <h3>{__("Choose service")}</h3>
                                         <div className="radio">
                                             <label>
-                                                <input type="radio" id="streetview-service-google" name="streetview-service" value="google" />
+                                                <input type="radio" id="streetview-service-google" name="streetview-service" value="google" defaultChecked="1"/>
                                                 Google Street View
                                             </label>
                                         </div>
