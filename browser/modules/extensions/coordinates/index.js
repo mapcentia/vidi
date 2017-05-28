@@ -113,9 +113,9 @@ module.exports = module.exports = {
                 "en_US": "Latitude/Longitude, decimal degrees"
             },
 
-            "Latitude/Longitude, degrees and time": {
-                "da_DK": "Bredde/længde, grader og tid",
-                "en_US": " Latitude/Longitude, degrees and time"
+            "Latitude/Longitude, degrees, minutes and seconds": {
+                "da_DK": "Bredde/længde, grader, minutter og sekunder",
+                "en_US": " Latitude/Longitude, degrees, minutes and seconds"
             },
 
             "Lat": {
@@ -244,7 +244,7 @@ module.exports = module.exports = {
                                 <div className="radio">
                                     <label>
                                         <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dms" name="coordinates-system" value="dms"/>
-                                        {utils.__("Latitude/Longitude, degrees and time", dict)}
+                                        {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
                                     </label>
                                 </div>
 
