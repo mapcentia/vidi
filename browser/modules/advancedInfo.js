@@ -24,7 +24,6 @@ var reproject = require('reproject');
 /**
  *
  * @type {_|exports|module.exports}
- * @private
  */
 var _ = require('underscore');
 

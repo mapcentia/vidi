@@ -36,16 +36,11 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
-var mustache = require('mustache');
-
 /**
  *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
-
-
-
 
 
 /**
@@ -86,26 +81,29 @@ module.exports = {
                 layers.splice(i, 1);
             }
         }
+
+        /**
+         * A default template for GC2, with a loop
+         * @type {string}
+         */
+        var template =
+            '<div class="cartodb-popup-content">' +
+            '   {{#content.fields}}' +
+            '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
+            '       {{#value}}' +
+            '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
+            '       {{/value}}' +
+            '       {{^value}}' +
+            '           <p class="empty">null</p>' +
+            '       {{/value}}' +
+            '   {{/content.fields}}' +
+            '</div>';
+
         $.each(layers, function (index, value) {
             if (layers[0] === "") {
                 return false;
             }
-            /**
-             * A default template for GC2, with a loop
-             * @type {string}
-             */
-            var template =
-                '<div class="cartodb-popup-content">' +
-                '   {{#content.fields}}' +
-                '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
-                '       {{#value}}' +
-                '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
-                '       {{/value}}' +
-                '       {{^value}}' +
-                '           <p class="empty">null</p>' +
-                '       {{/value}}' +
-                '   {{/content.fields}}' +
-                '</div>';
+
             template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
 
             var isEmpty = true;
@@ -128,13 +126,14 @@ module.exports = {
             }
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, fi = [];
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
                     isEmpty = layerObj.isEmpty();
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
                         $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
                         $.each(layerObj.geoJSON.features, function (i, feature) {
+                            var fi = [];
                             if (fieldConf === null) {
                                 $.each(feature.properties, function (name, property) {
                                     fi.push({
@@ -149,7 +148,7 @@ module.exports = {
                                     if (property.value.querable) {
                                         fi.push({
                                             title: property.value.alias || property.key,
-                                            value: property.value.link ?  "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" : feature.properties[property.key]
+                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" : feature.properties[property.key]
                                         });
 
                                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
@@ -162,12 +161,10 @@ module.exports = {
                                     return a[1] - b[1];
                                 });
                             }
+
                             feature.properties.content = {};
                             feature.properties.content.fields = fi; // Used in a "loop" template
-                            popupHtml = Mustache.render(template, feature.properties);
-                            if (BACKEND === "cartodb") {
-                                popupHtml = $.parseHTML(popupHtml)[0].children[1].innerHTML
-                            }
+
                             if (first) {
                                 $.each(out, function (name, property) {
                                     cm.push({
@@ -201,7 +198,8 @@ module.exports = {
                             callCustomOnload: false,
                             height: (height > 500) ? 500 : (height < 300) ? 300 : height,
                             locale: window._vidiLocale.replace("_", "-"),
-                            popupHtml: popupHtml
+                            template: template,
+                            usingCartodb: BACKEND === "cartodb"
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
@@ -317,11 +315,11 @@ var sortObject = function (obj) {
             arr.push({
                 'key': prop,
                 'value': obj[prop],
-                'sort_id' : obj[prop].sort_id
+                'sort_id': obj[prop].sort_id
             });
         }
     }
-    arr.sort(function(a, b) {
+    arr.sort(function (a, b) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array

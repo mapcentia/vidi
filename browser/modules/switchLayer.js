@@ -70,7 +70,7 @@ module.exports = module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
                 el.prop('checked', true);
             } catch (e) {
-                //Pass
+                //console.error(e.message);
             }
 
         } else {
