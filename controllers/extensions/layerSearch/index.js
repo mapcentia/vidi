@@ -1,9 +1,10 @@
 var express = require('express');
 var router = express.Router();
 var http = require('http');
+var config = require('../../../config/config.js');
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-    host: 'localhost:9200',
+    host: config.extensionConfig.layerSearch.host,
     log: 'trace'
 });
 
