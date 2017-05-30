@@ -11,18 +11,47 @@
  */
 var cloud;
 
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var backboneEvents;
-
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var meta;
 
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var layers;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var layerTree;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var switchLayer;
 
-var jquery = require('jquery');
-require('snackbarjs');
-
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./../../urlparser');
+
+/**
+ *
+ */
+var jquery = require('jquery');
+
+require('snackbarjs');
 
 var db = urlparser.db;
 
@@ -48,10 +77,20 @@ module.exports = {
         $('<button id="layer-search-btn" class="btn btn-raised" style="width: 100%"><i class="material-icons">&#xE8B6;</i>Søg i lag</button>').insertBefore("#layers");
     },
 
+    /**
+     *
+     * @param query
+     * @returns {boolean}
+     */
     search: function (query) {
 
         var fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
             qJson = {
+                "sort": [
+                    {
+                        "f_table_title.raw": "asc"
+                    }
+                ],
                 "query": {
                     "bool": {
                         "should": {}
@@ -65,7 +104,6 @@ module.exports = {
         }
         // Trim and delete multiple spaces
         query = query.toLowerCase().replace(/\s\s+/g, ' ').trim();
-
 
         // Create terms and fields
         $.each(query.split(" "), function (x, n) {
@@ -85,15 +123,30 @@ module.exports = {
         this.run(qJson, query);
     },
 
+    /**
+     *
+     */
     matchAll: function () {
+
         var dsl = {
+            "sort": [
+                {
+                    "f_table_title.raw": "asc"
+                }
+            ],
             "query": {
                 "match_all": {}
             }
         };
+
         this.run(dsl);
     },
 
+    /**
+     *
+     * @param dsl
+     * @param query
+     */
     run: function (dsl, query) {
 
         $("#layer-search-list").empty();

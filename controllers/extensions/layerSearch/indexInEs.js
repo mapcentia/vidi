@@ -2,11 +2,11 @@ var express = require('express');
 var router = express.Router();
 var https = require('https');
 var http = require('http');
-var config = require('../../../config/config.js').cartodb;
-var configUrl = require('../../../config/config.js').configUrl;
+var config = require('../../../config/config.js');
+var configUrl = config.configUrl;
 var elasticsearch = require('elasticsearch');
 var client = new elasticsearch.Client({
-    host: 'localhost:9200',
+    host: config.extensionConfig.layerSearch.host,
     log: 'trace'
 });
 
@@ -25,6 +25,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
 
     var createIndex = function () {
         var payload = {
+
             "settings": {
                 "number_of_shards": 4,
                 "number_of_replicas": 0,
@@ -58,13 +59,27 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             "type": "text",
                             "search_analyzer": "search_ngram",
                             "analyzer": "index_ngram",
-                            "fielddata": true
+                            "fielddata": true,
+                            "fields": {
+                                "raw": {
+                                    "type":  "string",
+                                    "index": "not_analyzed"
+                                }
+                            }
+
                         }, "layergroup": {
                             "type": "text",
                             "search_analyzer": "search_ngram",
                             "analyzer": "index_ngram",
-                            "fielddata": true
+                            "fielddata": true,
+                            "fields": {
+                                "raw": {
+                                    "type":  "string",
+                                    "index": "not_analyzed"
+                                }
+                            }
                         },
+
                         "legend": {
                             "type": "object",
                             "enabled": false
@@ -104,11 +119,14 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                 jsfile = new Buffer.concat(chunks);
                 schemas = JSON.parse(jsfile).indexInEs;
                 (function iter() {
+
                     if (u === schemas.length) {
+
                         jsfile = {
                             data: data,
                             success: true
                         };
+                        
                         client.bulk({
                             body: bulkArr
                         }, function (err, resp) {
@@ -117,8 +135,10 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
 
                         response.header('content-type', 'application/json');
                         response.send(jsfile);
+
                         return;
                     }
+
                     url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schemas[u];
                     http.get(url, function (res) {
                         var statusCode = res.statusCode;
@@ -144,12 +164,16 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                                 console.log(e);
                             }
                             for (var i = 0; i < layers.length; i++) {
+
                                 layerObj = layers[i];
+
                                 if (!layerObj.f_table_title) {
                                     layerObj.f_table_title = layerObj.f_table_name;
                                 }
+
                                 bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                 bulkArr.push(layerObj);
+
                                 data.push(layerObj)
                             }
                             u++;
@@ -159,11 +183,8 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                         callback(null);
                     });
                 }());
-
-
             })
         });
-
     }
 
 });
