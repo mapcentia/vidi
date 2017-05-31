@@ -10,6 +10,9 @@ var client = new elasticsearch.Client({
     log: 'trace'
 });
 
+var BACKEND = config.backend;
+
+
 router.get('/api/extension/layersearch/index/:db', function (req, response) {
     req.setTimeout(0); // no timeout
     var db = req.params.db, schemas, url, layers, data = [], u = 0, jsfile = "", bulkArr = [],
@@ -41,7 +44,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                         "index_ngram": {
                             "type": "custom",
                             "tokenizer": "keyword",
-                            "filter": [ "desc_ngram", "lowercase" ]
+                            "filter": ["desc_ngram", "lowercase"]
                         },
                         "search_ngram": {
                             "type": "custom",
@@ -62,7 +65,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             "fielddata": true,
                             "fields": {
                                 "raw": {
-                                    "type":  "string",
+                                    "type": "string",
                                     "index": "not_analyzed"
                                 }
                             }
@@ -74,7 +77,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             "fielddata": true,
                             "fields": {
                                 "raw": {
-                                    "type":  "string",
+                                    "type": "string",
                                     "index": "not_analyzed"
                                 }
                             }
@@ -90,7 +93,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
         };
 
         var params = {
-            "index":indexName,
+            "index": indexName,
             "body": payload
         };
 
@@ -126,7 +129,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             data: data,
                             success: true
                         };
-                        
+
                         client.bulk({
                             body: bulkArr
                         }, function (err, resp) {
@@ -171,10 +174,12 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                                     layerObj.f_table_title = layerObj.f_table_name;
                                 }
 
-                                bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
-                                bulkArr.push(layerObj);
-
-                                data.push(layerObj)
+                                // If GC2, when only index layers, which are flagged
+                                if (BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta).layer_search_include) {
+                                    bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
+                                    bulkArr.push(layerObj);
+                                    data.push(layerObj)
+                                }
                             }
                             u++;
                             iter();
