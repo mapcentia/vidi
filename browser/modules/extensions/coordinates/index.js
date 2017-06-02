@@ -312,10 +312,14 @@ module.exports = module.exports = {
             }
         }
 
-        ReactDOM.render(
-            <Coordinates />,
-            document.getElementById(exId)
-        );
+        try {
+            ReactDOM.render(
+                <Coordinates />,
+                document.getElementById(exId)
+            );
+        } catch (e) {
+
+        }
 
     }
 };
