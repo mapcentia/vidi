@@ -85,8 +85,6 @@ var BACKEND = require('../../config/config.js').backend;
 
 var layers;
 
-var setBaseLayer = false;
-
 var backboneEvents;
 
 var layerTree;
@@ -230,47 +228,69 @@ module.exports = {
                         draw.control();
                         l = draw.getLayer();
                         t = draw.getTable();
+
                         $.each(v[0].geojson.features, function (n, m) {
+
+                            // If polyline or polygon
+                            // ======================
                             if (m.type === "Feature" && GeoJsonAdded === false) {
-                                var g = L.geoJson(v[0].geojson, {
+                                var json = L.geoJson(m, {
                                     style: function (f) {
                                         return f.style;
                                     }
                                 });
-                                $.each(g._layers, function (i, v) {
-                                    console.log(m);
-                                    l.addLayer(v);
-                                    v.showMeasurements(m._vidi_measurementOptions);
-                                    v.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
 
-                                });
-                                GeoJsonAdded = true;
+                                var g = json._layers[Object.keys(json._layers)[0]];
+                                l.addLayer(g);
                             }
+
+                            // If circle
+                            // =========
                             if (m.type === "Circle") {
                                 g = L.circle(m._latlng, m._mRadius, m.style);
                                 g.feature = m.feature;
                                 l.addLayer(g);
-
-                                g.showMeasurements(m._vidi_measurementOptions);
-
                             }
+
+                            // If rectangle
+                            // ============
                             if (m.type === "Rectangle") {
                                 g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
                                 g.feature = m.feature;
                                 l.addLayer(g);
-
-                                g.showMeasurements(m._vidi_measurementOptions);
-
                             }
+
+                            // If marker
+                            // =========
                             if (m.type === "Marker") {
                                 g = L.marker(m._latlng, m.style);
                                 g.feature = m.feature;
+
+                                // Add label
                                 if (m._vidi_marker_text) {
                                     g.bindLabel(m._vidi_marker_text, {noHide: true}).on("click", function () {
                                     }).showLabel();
                                 }
                                 l.addLayer(g);
 
+                            } else {
+
+                                // Add measure
+                                if (m._vidi_measurementLayer) {
+                                    g.showMeasurements(m._vidi_measurementOptions);
+                                }
+
+                                // Add extremities
+                                if (m._vidi_extremities) {
+                                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+                                }
+
+                                // Bind popup
+                                g.on('click', function (event) {
+
+                                    draw.bindPopup(event);
+
+                                });
                             }
                         });
                         t.loadDataInTable();

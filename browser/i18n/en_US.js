@@ -140,6 +140,9 @@ module.exports = {
         "Both": "Both",
         "Total distance": "Total distance",
         "Color": "Color",
-        "Enter a text for the marker or cancel to add without text": "Enter a text for the marker or cancel to add without text"
+        "Enter a text for the marker or cancel to add without text": "Enter a text for the marker or cancel to add without text",
+        "Cancel": "Cancel",
+        "Ok": "Ok",
+        "Apply default style settings for this drawing?": "Apply default style settings for this drawing?"
     }
 };

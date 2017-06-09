@@ -98,6 +98,7 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap-material-design/dist/js/material.js',
                         'public/bower_components/momentjs/min/moment-with-locales.js',
                         'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
+                        'public/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
                         //'public/bower_components/hyperform/dist/hyperform.min.js',
                         'public/js/jasny-bootstrap.min.js',
                         'public/js/templates.js',

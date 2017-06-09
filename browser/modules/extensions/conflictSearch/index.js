@@ -405,6 +405,10 @@ module.exports = module.exports = {
             // Bind events
             cloud.map.on('draw:created', function (e) {
                 e.layer._vidi_type = "query_draw";
+                if (e.layerType === 'marker') {
+
+                    e.layer._vidi_marker = true;
+                }
                 drawnItems.addLayer(e.layer);
             });
             cloud.map.on('draw:drawstart', function (e) {

@@ -189,14 +189,7 @@ module.exports = {
 
                 drawLayer.on('click', function (event) {
 
-                    console.log(event);
-
-                    me.setStyle(event.target, event.target.feature.properties.type);
-
-                    var popup = L.popup()
-                    popup.setLatLng(event.latlng)
-                        .setContent("You clicked the map at " + event.latlng.toString())
-                        .openOn(cloud.get().map);
+                   me.bindPopup(event);
 
                 });
 
@@ -211,7 +204,6 @@ module.exports = {
                 if (type === 'circle') {
                     distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
                 }
-
 
                 drawLayer._vidi_type = "draw";
 
@@ -267,6 +259,25 @@ module.exports = {
         }
     },
 
+    bindPopup: function (event) {
+
+        var popup = L.popup(), me = this;
+
+        popup.setLatLng(event.latlng)
+            .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><a href="javascript:void(0)" id="btn-draw-apply-style-cancel" class="btn btn-raised btn-default btn-xs">' + __("Cancel") + '</a><a href="javascript:void(0)" id="btn-draw-apply-style-ok" class="btn btn-raised btn-primary btn-xs">' + __("Ok") + '</a>')
+            .openOn(cloud.get().map);
+
+        $("#btn-draw-apply-style-ok").on("click", function () {
+            me.setStyle(event.target, event.target.feature.properties.type);
+            cloud.get().map.closePopup(popup);
+        });
+
+        $("#btn-draw-apply-style-cancel").on("click", function () {
+            cloud.get().map.closePopup(popup);
+
+        });
+    },
+
     /**
      * Set style on layer
      * @param l
@@ -280,7 +291,7 @@ module.exports = {
                 showTotal: $("#draw-line-total-dist").is(":checked")
             });
         } else {
-            if (type !== 'marker'){
+            if (type !== 'marker') {
                 l.hideMeasurements();
             }
         }
@@ -312,7 +323,6 @@ module.exports = {
             }
 
         }
-
 
 
     },
