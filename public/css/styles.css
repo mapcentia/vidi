@@ -872,3 +872,11 @@ input[type=text]::-ms-clear {
 .form-control-wrapper {
   margin: 10px 0;
 }
+/* Make edit marker stay on top of dimension markers*/
+.my-own-class {
+  z-index: 10000 !important;
+}
+
+.control-label {
+  white-space: nowrap;
+}

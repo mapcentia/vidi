@@ -129,17 +129,39 @@ module.exports = module.exports = {
             pushState.init();
         });
 
+        // Draw
+        // ====
+
         $("#draw-btn").on("click", function () {
             draw.control();
         });
+
+        $("#draw-line-extremity").on("change", function () {
+            var b = $("#draw-line-extremity").val() === "none";
+            $("#draw-line-extremity-size").prop("disabled", b);
+            $("#draw-line-extremity-where").prop("disabled", b);
+
+        });
+
+        $("#draw-measure").on("change", function () {
+            var b = $("#draw-measure").is(":checked");
+            $("#draw-line-total-dist").prop("disabled", !b);
+        });
+
+        // Advanced info
+        // =============
 
         $("#advanced-info-btn").on("click", function () {
             advancedInfo.control();
         });
 
+        // Reset
+        // =====
+
         $("#btn-reset").on("click", function () {
             reset.init();
         });
+
 
         $("#info-modal button").on("click", function () {
             $("#info-modal").animate({

@@ -221,12 +221,16 @@ var _encoders = {
             for (i = 0, l = features.length; i < l; i++) {
                 feature = features[i];
 
+                if (feature instanceof L.Marker && (!feature._vidi_marker)) {
+                    continue;
+                }
+
                 if (feature instanceof L.Marker) {
                     var icon = feature.options.icon,
                         iconUrl = icon.options.iconUrl || L.Icon.Default.imagePath + '/marker-icon.png',
                         iconSize = L.Util.isArray(icon.options.iconSize) ? new L.Point(icon.options.iconSize[0], icon.options.iconSize[1]) : icon.options.iconSize,
                         iconAnchor = L.Util.isArray(icon.options.iconAnchor) ? new L.Point(icon.options.iconAnchor[0], icon.options.iconAnchor[1]) : icon.options.iconAnchor,
-                        scaleFactor = (72 / L.print.Provider.DPI); // TODO set dpi
+                        scaleFactor = 1;
 
                     style = {
                         externalGraphic: _getAbsoluteUrl(iconUrl),
@@ -260,6 +264,7 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
+                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else {
                     featureGeoJson = feature.toGeoJSON();
                     featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
@@ -269,6 +274,9 @@ var _encoders = {
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;
+                featureGeoJson._vidi_extremities = feature._extremities;
+                featureGeoJson._vidi_measurementLayer = feature._measurementLayer ? true : false;
+                featureGeoJson._vidi_measurementOptions = feature._measurementOptions;
 
                 // All markers will use the same opacity as the first marker found
                 if (opacity === null) {
@@ -423,8 +431,10 @@ var _extractFeatureStyle = function (feature) {
         strokeLinecap: 'round',
         fill: options.fill,
         fillColor: options.fillColor || options.color,
+        opacity: options.opacity,
         fillOpacity: options.fillOpacity,
-        dashArray: options.dashArray
+        dashArray: options.dashArray,
+        lineCap: options.lineCap
     };
 };
 

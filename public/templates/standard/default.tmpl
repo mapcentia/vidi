@@ -144,6 +144,177 @@
                                     <input id="draw-btn" type="checkbox"> {{Activate drawing tools}}
                                 </label>
                             </div>
+
+
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab"><h4 class="panel-title"><a style="display: block" class="accordion-toggle" data-toggle="collapse" href="#draw-collapse">{{Line style}}</a></h4></div>
+                                <div id="draw-collapse" class="accordion-body collapse">
+
+                                    <form id="draw-settings" name="draw-settings" role="form">
+
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div style="margin: 15px 0 0 10px "><h4>{{Settings for all new drawings}}</h4></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+
+                                                <label for="draw-colorpicker-input" class="col-md-3 control-label">{{Color}}</label>
+
+                                                <div id="draw-colorpicker" class="input-group colorpicker-component col-md-10">
+                                                    <input id="draw-colorpicker-input" name="draw-colorpicker-input" type="text" value="#ff0000" class="form-control" style="margin-left: 15px;"/>
+                                                    <span class="input-group-addon"><i style="margin-left: 10px;"></i></span>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-type" class="col-md-3 control-label">{{Type}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-type" name="draw-line-type" class="form-control">
+                                                            <option value="0">{{Solid}}</option>
+                                                            <option value="7, 7">{{Dashed, short}}</option>
+                                                            <option value="12, 7">{{Dashed, medium}}</option>
+                                                            <option value="17, 7">{{Dashed, long}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-weight" class="col-md-3 control-label">{{Weight}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-weight" name="draw-line-weight" class="form-control">
+                                                            <option value="2">{{X-thin}}</option>
+                                                            <option value="3">{{Thin}}</option>
+                                                            <option value="4" selected>{{Medium}}</option>
+                                                            <option value="5">{{Thick}}</option>
+                                                            <option value="6">{{X-Thick}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-type" class="col-md-3 control-label">{{Cap}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-cap" name="draw-line-cap" class="form-control">
+                                                            <option value="butt">{{Butt}}</option>
+                                                            <option value="round">{{Round}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-measure" class="col-md-3 control-label">{{Measure}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <div class="checkbox">
+                                                            <label style="margin-top: 5px">
+                                                                <input id="draw-measure" name="draw-measure" type="checkbox">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div style="margin: 15px 0 0 10px "><h4>{{Settings for new lines only}}</h4></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity" class="col-md-3 control-label">{{Extremities}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity" name="draw-line-extremity" class="form-control">
+                                                            <option value="none">{{None}}</option>
+                                                            <option value="arrowM">{{Arrow}}</option>
+                                                            <option value="stopM">{{Stop}}</option>
+                                                            <option value="squareM">{{Square}}</option>
+                                                            <option value="dotM">{{Dot}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity-size" class="col-md-3 control-label">{{Extremity size}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity-size" name="draw-line-extremity-size" class="form-control" disabled>
+                                                            <option value="2">{{X-Small}}</option>
+                                                            <option value="3">{{Small}}</option>
+                                                            <option value="4" selected>{{Medium}}</option>
+                                                            <option value="5">{{Large}}</option>
+                                                            <option value="6">{{X-Large}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity-where" class="col-md-3 control-label">{{Extremity ends}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity-where" name="draw-line-extremity-where" class="form-control" disabled>
+                                                            <option value="1">{{End}}</option>
+                                                            <option value="2">{{Start}}</option>
+                                                            <option value="3">{{Both}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-total-dist" class="col-md-3 control-label">{{Total distance}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <div class="checkbox">
+                                                            <label style="margin-top: 5px">
+                                                                <input id="draw-line-total-dist" name="draw-line-total-dist" type="checkbox" disabled>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
+
+                                </div>
+                            </div>
+
+
                             <div id="draw-table"></div>
                         </div>
                     </div>

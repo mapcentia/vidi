@@ -238,7 +238,11 @@ module.exports = {
                                     }
                                 });
                                 $.each(g._layers, function (i, v) {
+                                    console.log(m);
                                     l.addLayer(v);
+                                    v.showMeasurements(m._vidi_measurementOptions);
+                                    v.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+
                                 });
                                 GeoJsonAdded = true;
                             }
@@ -246,16 +250,27 @@ module.exports = {
                                 g = L.circle(m._latlng, m._mRadius, m.style);
                                 g.feature = m.feature;
                                 l.addLayer(g);
+
+                                g.showMeasurements(m._vidi_measurementOptions);
+
                             }
                             if (m.type === "Rectangle") {
                                 g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
                                 g.feature = m.feature;
                                 l.addLayer(g);
+
+                                g.showMeasurements(m._vidi_measurementOptions);
+
                             }
                             if (m.type === "Marker") {
                                 g = L.marker(m._latlng, m.style);
                                 g.feature = m.feature;
+                                if (m._vidi_marker_text) {
+                                    g.bindLabel(m._vidi_marker_text, {noHide: true}).on("click", function () {
+                                    }).showLabel();
+                                }
                                 l.addLayer(g);
+
                             }
                         });
                         t.loadDataInTable();
