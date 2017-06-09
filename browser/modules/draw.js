@@ -51,6 +51,8 @@ var destructFunctions = [];
  */
 var backboneEvents;
 
+var editing = false;
+
 /**
  * Get readable distance of layer
  * @param e
@@ -159,9 +161,28 @@ module.exports = {
             cloud.get().map.off('draw:drawstart');
             cloud.get().map.off('draw:drawstop');
             cloud.get().map.off('draw:editstart');
+            cloud.get().map.off('draw:editstop');
+            cloud.get().map.off('draw:deletestart');
+            cloud.get().map.off('draw:deletestop');
             cloud.get().map.off('draw:deleted');
 
             // Bind events
+            cloud.get().map.on('draw:editstart', function (e) {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:editstop', function (e) {
+                editing = false;
+            });
+
+            cloud.get().map.on('draw:deletestart', function (e) {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:deletestop', function (e) {
+                editing = false;
+            });
+
             cloud.get().map.on('draw:created', function (e) {
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
                 if (type === 'marker') {
@@ -260,6 +281,10 @@ module.exports = {
     },
 
     bindPopup: function (event) {
+
+        if (editing) {
+            return;
+        }
 
         var popup = L.popup(), me = this;
 
