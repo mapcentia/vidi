@@ -210,7 +210,7 @@ module.exports = {
 
                 drawLayer.on('click', function (event) {
 
-                   me.bindPopup(event);
+                    me.bindPopup(event);
 
                 });
 
@@ -323,9 +323,8 @@ module.exports = {
 
 
         if (type !== 'marker') {
-            if ($("#draw-line-type").val() !== "0") {
-                l.setStyle({dashArray: $("#draw-line-type").val()});
-            }
+            l.setStyle({dashArray: $("#draw-line-type").val()});
+
         }
 
         if (type !== 'marker') {
