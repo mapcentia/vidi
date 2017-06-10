@@ -109,7 +109,7 @@ module.exports = {
         "Reset": "Nulstil",
         "Do you really want to reset the map?": "Er du sikker på, at du vil nulstille kortet?",
 
-        "Line style": "Standard Stilart for tegninger",
+        "Line style": "Standard stilart for tegninger",
         "Settings for all new drawings": "Indstillinger for alle nye tegninger",
         "Solid": "Solid",
         "Dashed, short": "Stiplet, kort",
