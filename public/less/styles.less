@@ -1042,3 +1042,28 @@ input[type=text]::-ms-clear {
 .form-control-wrapper {
   margin: 10px 0;
 }
+
+/* Make edit marker stay on top of dimension markers*/
+.my-own-class {
+  z-index: 10000 !important;
+}
+
+.control-label {
+  white-space: nowrap;
+}
+
+.leaflet-measure-path-measurement {
+  font-size: 10px;
+  padding: 2px;
+  border-radius: 2px;
+  text-align: center;
+  color: black;
+  text-shadow: -1px 0 0 white,
+    -1px -1px 0 white,
+    0 -1px 0 white,
+    1px -1px 0 white,
+  1px 0 0 white,
+  1px 1px 0 white,
+  0 1px 0 white,
+  -1px 1px 0 white;
+}
