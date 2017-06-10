@@ -71,7 +71,7 @@ module.exports = {
         "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
         "Help text baselayers": "Vælg baggrundskort.",
         "Help text legend": "Signatur for tændte overlejringskort",
-        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Du kan redigere og skifte farve på et allerede tegnet element.",
+        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under 'Standard stilart for tegninger' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
