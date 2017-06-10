@@ -323,7 +323,9 @@ module.exports = {
 
 
         if (type !== 'marker') {
-            l.setStyle({dashArray: $("#draw-line-type").val()});
+            if ($("#draw-line-type").val() !== "0") {
+                l.setStyle({dashArray: $("#draw-line-type").val()});
+            }
         }
 
         if (type !== 'marker') {
