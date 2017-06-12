@@ -114,7 +114,20 @@ module.exports = {
             secondaryLengthUnit: 'meters',
             primaryAreaUnit: 'hectares',
             secondaryAreaUnit: 'sqmeters',
-            localization: localization
+            localization: localization,
+            units: {
+                meters: {
+                    factor: 1,
+                    display: 'meters',
+                    decimals: 1
+                },
+                sqmeters: {
+                    factor: 1,
+                    display: 'sqmeters',
+                    decimals: 1
+                }
+            }
+
 
         });
         measureControl.addTo(map);

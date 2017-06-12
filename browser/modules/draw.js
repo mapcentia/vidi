@@ -356,7 +356,9 @@ module.exports = {
     init: function () {
         cloud.get().map.addLayer(drawnItems);
         store.layer = drawnItems;
-        $("#draw-colorpicker").colorpicker();
+        $("#draw-colorpicker").colorpicker({
+            container: $("#draw-colorpicker")
+        });
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
