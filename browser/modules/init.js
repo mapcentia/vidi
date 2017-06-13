@@ -266,5 +266,13 @@ module.exports = {
         if (window.vidiConfig.activateMainTab) {
             $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
         }
+
+        $(window).resize(_.debounce(function(){
+            $("#myNavmenu").offcanvas('hide');
+            setTimeout(function () {
+                modules.cloud.get().map.invalidateSize()
+            },100)
+
+        },0));
     }
 };
