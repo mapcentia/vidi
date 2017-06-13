@@ -47,7 +47,7 @@ body {
   right: 0px;
   width: 100%;
   z-index: 0;
-  transition: 300ms linear;
+/*  transition: 300ms linear;*/
 }
 #menu {
   z-index: 2 !important;
