@@ -1,3 +1,4 @@
+/*@import "../../config/_styles.less";*/
 body {
   margin: 0px;
   padding: 0px;
@@ -47,7 +48,7 @@ body {
   right: 0px;
   width: 100%;
   z-index: 0;
-/*  transition: 300ms linear;*/
+  /*  transition: 300ms linear;*/
 }
 #menu {
   z-index: 2 !important;
@@ -829,9 +830,9 @@ input[type=text]::-ms-clear {
   display: block;
   -webkit-animation: animate-loading-indcator 2s linear infinite;
   animation: animate-loading-indcator 2s linear infinite;
-  background-color: #f47920;
-  background-image: -webkit-linear-gradient(left, #f47920 0, #ffffff 50%, #ffffff 50%, #f47920 100%);
-  background-image: linear-gradient(to right, #f47920 0, #ffffff 50%, #ffffff 50%, #f47920 100%);
+  /*  background-color: @loading-indicator-color-1;
+  background-image: -webkit-linear-gradient(left, @loading-indicator-color-1 0, @loading-indicator-color-2 50%, @loading-indicator-color-2 50%, @loading-indicator-color-1 100%);
+  background-image: linear-gradient(to right,@loading-indicator-color-1 0, @loading-indicator-color-2 50%, @loading-indicator-color-2 50%, @loading-indicator-color-1 100%);*/
   background-repeat: repeat-x;
   background-size: 25pc 25pc;
   width: 200%;
