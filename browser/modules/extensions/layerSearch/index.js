@@ -55,6 +55,11 @@ require('snackbarjs');
 
 var db = urlparser.db;
 
+var sort = [
+    {"layergroup.raw": "asc"},
+    {"f_table_title.raw": "asc"}
+];
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -86,11 +91,7 @@ module.exports = {
 
         var fields = ["f_table_title", "layergroup"], q, terms = [], qFields = [], med = [],
             qJson = {
-                "sort": [
-                    {
-                        "f_table_title.raw": "asc"
-                    }
-                ],
+                "sort": sort,
                 "query": {
                     "bool": {
                         "should": {}
@@ -129,11 +130,7 @@ module.exports = {
     matchAll: function () {
 
         var dsl = {
-            "sort": [
-                {
-                    "f_table_title.raw": "asc"
-                }
-            ],
+            "sort": sort,
             "query": {
                 "match_all": {}
             }
@@ -188,7 +185,11 @@ module.exports = {
                     currentLayers = meta.getMetaData().data;
                     $.each(currentLayers, function (i, v) {
                         if (v.f_table_name === response[clickedLayer]._source.f_table_name && v.f_table_schema === response[clickedLayer]._source.f_table_schema) {
-                            jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' er allerede tilføjet</span>", htmlAllowed: true, timeout: 2500});
+                            jquery.snackbar({
+                                content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' er allerede tilføjet</span>",
+                                htmlAllowed: true,
+                                timeout: 2500
+                            });
                             alreadyThere = true;
                         }
                     });
@@ -202,7 +203,11 @@ module.exports = {
 
                     switchLayer.init(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name, true);
 
-                    jquery.snackbar({content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>", htmlAllowed: true, timeout: 2500});
+                    jquery.snackbar({
+                        content: "<span>Laget '" + response[clickedLayer]._source.f_table_title + "' tilføjet</span>",
+                        htmlAllowed: true,
+                        timeout: 2500
+                    });
                 });
             }
         });

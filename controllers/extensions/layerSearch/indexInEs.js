@@ -65,8 +65,8 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             "fielddata": true,
                             "fields": {
                                 "raw": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
+                                    "type": "keyword",
+                                    //"index": "not_analyzed"
                                 }
                             }
 
@@ -77,8 +77,8 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             "fielddata": true,
                             "fields": {
                                 "raw": {
-                                    "type": "string",
-                                    "index": "not_analyzed"
+                                    "type": "keyword",
+                                    //"index": "not_analyzed"
                                 }
                             }
                         },
@@ -175,7 +175,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                                 }
 
                                 // If GC2, when only index layers, which are flagged
-                                if (BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta).layer_search_include) {
+                                if ((BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta).layer_search_include) || BACKEND === "cartodb") {
                                     bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                     bulkArr.push(layerObj);
                                     data.push(layerObj)
