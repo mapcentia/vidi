@@ -249,14 +249,20 @@ module.exports = {
         // Init some GUI stuff after modules are loaded
         // ============================================
         $("[data-toggle=tooltip]").tooltip();
-        try {
-            var max = $(document).height() - $('.tab-pane').offset().top - 100;
-        } catch (e) {
-            console.info(e.message);
+
+        function setHeight() {
+            try {
+                var max = $(document).height() - $('.tab-pane').offset().top - 120;
+            } catch (e) {
+                console.info(e.message);
+            }
+            $('.main-content > .tab-pane').not("#result-content").css('max-height', max);
+            $('#place-search .places').css('height', max - 130).css('min-height', 400);
+            $('.places .tt-dropdown-menu').css('max-height', max - 200).css('min-height', 400);
         }
-        $('.main-content > .tab-pane').not("#result-content").css('max-height', max);
-        $('#place-search .places').css('height', max - 130).css('min-height', 400);
-        $('.places .tt-dropdown-menu').css('max-height', max - 200).css('min-height', 400);
+
+        setHeight();
+
 
         $.material.init();
         touchScroll(".tab-pane");
@@ -271,7 +277,9 @@ module.exports = {
             $("#myNavmenu").offcanvas('hide');
             setTimeout(function () {
                 modules.cloud.get().map.invalidateSize()
-            },100)
+            },100);
+
+            setHeight();
 
         },0));
     }

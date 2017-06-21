@@ -7,7 +7,7 @@ module.exports = {
 
 
     // ====================================
-    // Which back-end is used. GC2 or Carto
+    // Which back-end is used. "gc2" or "carto"
     // ====================================
 
     "backend": "WHAT_BACKEND",
@@ -15,6 +15,7 @@ module.exports = {
 
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
+    // Carto is hardcoded to carto.com
     // ==========================================
 
     "gc2": {
@@ -23,10 +24,10 @@ module.exports = {
 
 
     // ===============================================================
-    // Configuration of print templates
-    // Print templates must be enabled - look futher down
+    // Configuration of print templates.
+    // Print templates must be enabled - look futher down.
     // mapsizePx ~ is the pixel dimension of the map view
-    // mapsizeNm ~ is actual size of the map view on the resulting PDF
+    // mapsizeMm ~ is actual size of the map view on the resulting PDF
     // ===============================================================
 
     "print": {
@@ -88,7 +89,7 @@ module.exports = {
 
     // =======================================================
     // Extensions are required in build-time, but not enabled.
-    // Look further down about enabling of extension
+    // Look further down about enabling of extensions
     // Extensions can be required both browser and server side
     // =======================================================
 
@@ -114,7 +115,7 @@ module.exports = {
 
 
     //=============================================================================
-    // A URL where configurations can be downloaded online for
+    // An URL where configurations can be downloaded online for
     // overriding run-time configurations. Any HTTP(S) server can host config files
     // Example of a config:
     // https://github.com/mapcentia/mapcentia.github.io/blob/master/vidi.json
@@ -242,7 +243,10 @@ module.exports = {
 
         // Base layer from GC2
         {
-            "id": "gc2_group._b_baggrundskort01.baggrundskort01", "name": "Topografisk kort", "db": "geofyn", "host": "https://kort.geofyn.dk",
+            "id": "gc2_group._b_baggrundskort01.baggrundskort01",
+            "name": "Topografisk kort",
+            "db": "geofyn",
+            "host": "https://kort.geofyn.dk",
             "config": {
                 "maxZoom": 21,
                 "maxNativeZoom": 19,
@@ -252,13 +256,17 @@ module.exports = {
             // A base layer can comprise one or more overlays
             "overlays": [
                 {
-                    "id": "tekster.tekster_samlet_wms_web", "db": "geofyn", "host": "https://kort.geofyn.dk",
+                    "id": "tekster.tekster_samlet_wms_web",
+                    "db": "geofyn",
+                    "host": "https://kort.geofyn.dk",
                     "config": {
                         "attribution": "Geofyn A/S"
                     }
                 },
                 {
-                    "id": "tekster.adgangsadresseinfo", "db": "geofyn", "host": "https://kort.geofyn.dk",
+                    "id": "tekster.adgangsadresseinfo",
+                    "db": "geofyn",
+                    "host": "https://kort.geofyn.dk",
                     "config": {
                         "attribution": "Geofyn A/S"
                     }

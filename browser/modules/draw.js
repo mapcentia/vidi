@@ -362,13 +362,6 @@ module.exports = {
         $("#draw-table").append("<table class='table'></table>");
         (function poll() {
             if (gc2table.isLoaded()) {
-                var height;
-                try {
-                    height = require('./height')().max - 350;
-                } catch (e) {
-                    console.info(e.message);
-                    height = 0;
-                }
                 table = gc2table.init({
                     el: "#draw-table table",
                     geocloud2: cloud.get(),
@@ -393,7 +386,7 @@ module.exports = {
                     ],
                     autoUpdate: false,
                     loadData: false,
-                    height: height,
+                    height: 400,
                     setSelectedStyle: false,
                     responsive: false,
                     openPopUp: false

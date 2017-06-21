@@ -178,13 +178,6 @@ module.exports = {
                             }
                             $('#tab_' + storeId).tab('show');
                         });
-                        var height;
-                        try {
-                            height = require('./height')().max - 400;
-                        } catch (e) {
-                            console.info(e.message);
-                            height = 0;
-                        }
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             geocloud2: cloud.get(),
@@ -196,7 +189,7 @@ module.exports = {
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
-                            height: (height > 500) ? 500 : (height < 300) ? 300 : height,
+                            height: 400,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             usingCartodb: BACKEND === "cartodb"
