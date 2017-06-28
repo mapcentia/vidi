@@ -148,7 +148,9 @@ module.exports = {
                                     if (property.value.querable) {
                                         fi.push({
                                             title: property.value.alias || property.key,
-                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" : feature.properties[property.key]
+                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" :
+                                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
+                                                    feature.properties[property.key]
                                         });
 
                                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
@@ -258,20 +260,35 @@ module.exports = {
                 }
             });
             cloud.get().addGeoJsonStore(qstore[index]);
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column;
+
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fields = [], fieldStr;
+
+            if (fieldConf) {
+                $.each(fieldConf, function (i, v) {
+                    if (v.type === "bytea") {
+                        fields.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
+                    } else if (i !== f_geometry_column) {
+                        fields.push("\"" + i + "\"");
+                    }
+                });
+                fieldStr = fields.join(",") + ",\"" + f_geometry_column + "\"";
+            } else {
+                fieldStr = "*";
+            }
+
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
             } else {
                 if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT * FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                    sql = "SELECT " + fieldStr + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
                     sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT * FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                    sql = "SELECT " + fieldStr + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
