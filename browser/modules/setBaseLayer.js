@@ -43,6 +43,11 @@ module.exports = module.exports = {
 
         if (!cloud.get().getLayersByName(str)) {
             baseLayer.addBaseLayer(str);
+
+            // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
+            if (str.split(".")[1]) {
+                layers.addLayer(str);
+            }
             console.info(str + " is added as base layer.");
         }
 
@@ -68,8 +73,6 @@ module.exports = module.exports = {
                 }
             });
         }
-
-
 
         cloud.get().setBaseLayer(str, function () {
             backboneEvents.get().trigger("doneLoading:setBaselayer");
