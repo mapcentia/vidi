@@ -86,6 +86,16 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                         "legend": {
                             "type": "object",
                             "enabled": false
+                        },
+
+                        "infowindow": {
+                            "type": "object",
+                            "enabled": false
+                        },
+
+                        "tooltip": {
+                            "type": "object",
+                            "enabled": false
                         }
                     }
                 }
@@ -133,11 +143,11 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                         client.bulk({
                             body: bulkArr
                         }, function (err, resp) {
-                            // ...
+                           console.log(err)
                         });
 
                         response.header('content-type', 'application/json');
-                        response.send(jsfile);
+                        response.send(bulkArr);
 
                         return;
                     }
@@ -164,7 +174,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                             try {
                                 layers = JSON.parse(jsfile).data;
                             } catch (e) {
-                                console.log(e);
+                               // console.log(e);
                             }
                             for (var i = 0; i < layers.length; i++) {
 
@@ -176,9 +186,17 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
 
                                 // If GC2, when only index layers, which are flagged
                                 if ((BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta).layer_search_include) || BACKEND === "cartodb") {
+                                    //layerObj.infowindow = null;
                                     bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                     bulkArr.push(layerObj);
-                                    data.push(layerObj)
+                                    data.push(layerObj);
+                                    /*bulkArr.push({
+                                        f_table_title: layerObj.f_table_title,
+                                        f_table_name: layerObj.f_table_name,
+                                        f_table_schema: layerObj.f_table_schema,
+                                        layergroup: layerObj.layergroup,
+                                        meta: layerObj.meta
+                                    });*/
                                 }
                             }
                             u++;

@@ -282,13 +282,13 @@ module.exports = {
                     "WHERE ST_Intersects(rast,the_geom) ";
             } else {
                 if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + fieldStr + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
                     sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT " + fieldStr + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
