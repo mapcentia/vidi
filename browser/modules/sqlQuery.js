@@ -86,7 +86,7 @@ module.exports = {
          * A default template for GC2, with a loop
          * @type {string}
          */
-        var template =
+        var defaultTemplate =
             '<div class="cartodb-popup-content">' +
             '   {{#content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
@@ -104,7 +104,7 @@ module.exports = {
                 return false;
             }
 
-            template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : template;
+
 
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
@@ -126,8 +126,12 @@ module.exports = {
             }
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
+
                     isEmpty = layerObj.isEmpty();
+
+                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : defaultTemplate;
+
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
