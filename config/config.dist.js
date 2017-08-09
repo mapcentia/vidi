@@ -116,7 +116,7 @@ module.exports = {
 
     //=============================================================================
     // An URL where configurations can be downloaded online for
-    // overriding run-time configurations. Any HTTP(S) server can host config files
+    // overriding build-time configurations. Any HTTP(S) server can host config files
     // Example of a config:
     // https://github.com/mapcentia/mapcentia.github.io/blob/master/vidi.json
     // Can be used by adding ?config=vidi.json to the Vidi URL'en
