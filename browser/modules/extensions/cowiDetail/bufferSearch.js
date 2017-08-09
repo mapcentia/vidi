@@ -166,6 +166,11 @@ module.exports = {
         setBaseLayer = o.setBaseLayer;
         anchor = o.anchor;
         backboneEvents = o.backboneEvents;
+
+        return this;
+    },
+    init: function () {
+
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
                 return [
@@ -223,9 +228,7 @@ module.exports = {
                 cloud.get().map.panTo(latLng);
             }, 300);
         }
-        return this;
-    },
-    init: function () {
+
         createBufferBtn().addTo(cloud.get().map);
 
         // Bind events
