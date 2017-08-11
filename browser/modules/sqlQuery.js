@@ -113,7 +113,7 @@ module.exports = {
 
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
-            var key = metaDataKeys[value]._key_;
+            var key = "_vidi_sql_" + index;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             var not_querable = metaDataKeys[value].not_querable;
@@ -137,7 +137,7 @@ module.exports = {
                 onLoad = function () {
                     var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
 
-                    _layers.decrementCountLoading(key);
+                    _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers");
 
 

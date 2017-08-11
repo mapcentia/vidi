@@ -223,7 +223,7 @@ module.exports = module.exports = {
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
             doneB = doneL = false;
             loadingB = true;
-            $(".loadingIndicator").fadeIn(300);
+            $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {

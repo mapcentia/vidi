@@ -26,7 +26,7 @@ module.exports = module.exports = {
     init: function (layerArr, el) {
         var metaDataKeys = meta.getMetaDataKeys();
         switch (BACKEND) {
-            case "gc2":
+            case "gc2_":
                 var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
                 if (layerArr) {
                     layers = layerArr.join(";");
