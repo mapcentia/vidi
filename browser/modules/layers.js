@@ -160,8 +160,12 @@ module.exports = {
         return array.length;
     },
 
-    getCountLoading() {
+    getCountLoading: function() {
       return  array.length;
+    },
+
+    getArray: function() {
+      return  array;
     },
 
     /**

@@ -227,11 +227,12 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {
-
+            window.loadingArray = layers.getArray();
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
                 if ((doneL && doneB) || loadingB === false) {
+                    console.log("Setting timeout to " + window.vidiTimeout + "ms");
                     setTimeout(function () {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
@@ -243,9 +244,10 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
+            window.loadingArray = layers.getArray();
             doneB = true;
             if ((doneL && doneB) || loadingL === false) {
-                console.info("Starting timeout for " + window.vidiTimeout + " ms");
+                console.log("Setting timeout to " + window.vidiTimeout + "ms");
                 setTimeout(function () {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");
