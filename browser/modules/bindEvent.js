@@ -119,7 +119,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        var doneL, doneB;
+        var doneL, doneB, loadingL = false, loadingB = false;
         metaDataKeys = meta.getMetaDataKeys();
 
         cloud.get().on("dragend", function () {
@@ -213,30 +213,45 @@ module.exports = module.exports = {
             infoClick.reset();
         });
 
-        // TODO
+
+        backboneEvents.get().on("startLoading:layers", function (e) {
+            doneB = doneL = false;
+            loadingL = true;
+            $(".loadingIndicator").fadeIn(200);
+        });
+
+        backboneEvents.get().on("startLoading:setBaselayer", function (e) {
+            doneB = doneL = false;
+            loadingB = true;
+            $(".loadingIndicator").fadeIn(300);
+        });
+
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            if (layers.getLayers(",", true) !== false && layers.getLayers(",", true).split(",").length === e) {
+
+            if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
-                if (doneL && doneB) {
+                if ((doneL && doneB) || loadingB === false) {
                     setTimeout(function () {
                         window.status = "all_loaded";
                         console.info("Layers all loaded L");
-                        doneB = doneL = false;
-                    }, 1000)
+                        doneB = doneL = loadingL = loadingB = false;
+                        $(".loadingIndicator").fadeOut(200);
+                    },  window.vidiTimeout)
                 }
             }
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
             doneB = true;
-            if ((doneL && doneB) || (doneB && cloud.get().getVisibleLayers() === "")) {
-                console.info("Starting timeout....");
+            if ((doneL && doneB) || loadingL === false) {
+                console.info("Starting timeout for " + window.vidiTimeout + " ms");
                 setTimeout(function () {
                     window.status = "all_loaded";
                     console.info("Layers all loaded B");
-                    doneB = doneL = false;
-                }, 1000)
+                    doneB = doneL = loadingL = loadingB = false;
+                    $(".loadingIndicator").fadeOut(200);
+                },  window.vidiTimeout)
             }
         });
 

@@ -57,6 +57,7 @@ var meta;
 var backboneEvents;
 
 var countLoaded = 0;
+var countLoading = 0;
 
 var mustache = require('mustache');
 
@@ -71,6 +72,8 @@ try {
 var switchLayer;
 
 var singleTiled = require('../../config/config.js').singleTiled || [];
+
+var array =[];
 
 /**
  *
@@ -138,14 +141,27 @@ module.exports = {
             }
         }
     },
-    resetCount: function () {
+    resetCount: function (i) {
         ready = cartoDbLayersready = false;
-        countLoaded = 0;
     },
 
-    incrementCount: function () {
-        countLoaded++;
-        return countLoaded
+
+
+    incrementCountLoading: function (i) {
+        if (array.indexOf(i) === -1) {
+            array.push(i)
+        }
+        return array.length;
+    },
+
+    decrementCountLoading: function (i) {
+        var index = array.indexOf(i);
+        array.splice(index, 1);
+        return array.length;
+    },
+
+    getCountLoading() {
+      return  array.length;
     },
 
     /**
@@ -154,6 +170,7 @@ module.exports = {
      * @returns {Promise}
      */
     addLayer: function (l) {
+        var me = this;
         return new Promise(function (resolve, reject) {
 
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -185,8 +202,12 @@ module.exports = {
                                 tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
                                 format: "image/png",
                                 loadEvent: function () {
-                                    countLoaded++;
-                                    backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                                    me.decrementCountLoading(layer);
+                                    backboneEvents.get().trigger("doneLoading:layers");
+                                },
+                                loadingEvent: function () {
+                                    me.incrementCountLoading(layer);
+                                    backboneEvents.get().trigger("startLoading:layers");
                                 },
                                 subdomains: window.gc2Options.subDomainsForTiles
                             });

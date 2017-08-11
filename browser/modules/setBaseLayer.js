@@ -37,7 +37,7 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        var u, l;
+        var u, l, str;
 
         layers.removeHidden();
 
@@ -63,7 +63,10 @@ module.exports = module.exports = {
                                 host: v.overlays[u].host || "",
                                 type: "tms",
                                 loadEvent: function () {
-                                    backboneEvents.get().trigger("doneLoading:layers", layers.incrementCount());
+
+                                },
+                                loadingEvent: function () {
+
                                 }
                             }, v.overlays[u].config));
                             // Set prefix on id, so the layer will not be returned by layers.getLayers
@@ -74,9 +77,14 @@ module.exports = module.exports = {
             });
         }
 
-        cloud.get().setBaseLayer(str, function () {
-            backboneEvents.get().trigger("doneLoading:setBaselayer");
-        });
+        cloud.get().setBaseLayer(str,
+            function () {
+                backboneEvents.get().trigger("doneLoading:setBaselayer");
+            },
+            function () {
+                backboneEvents.get().trigger("startLoading:setBaselayer");
+            }
+        );
 
         $('*[data-gc2-base-id="' + str + '"] input').prop('checked', true);
 

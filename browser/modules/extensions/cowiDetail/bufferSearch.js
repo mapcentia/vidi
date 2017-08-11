@@ -186,7 +186,7 @@ module.exports = {
                                 color: '#662d91',
                                 fillOpacity: 0
                             },
-                            allowIntersection: false,
+                            allowIntersection: true,
                             drawError: {
                                 color: '#b00b00',
                                 timeout: 1000
@@ -211,7 +211,7 @@ module.exports = {
                 "maxNativeZoom": 18,
                 "attribution": "Tiles by <a href='http://cowi.dk' target='_blank'>COWI</a> | Data by <a href='http://www.openstreetmap.org/' target='_blank'>OpenStreetMap</a>"
                 //"subdomains": ["a", "b", "c"]
-            }, "http://ec2-54-171-155-220.eu-west-1.compute.amazonaws.com");
+            }, "https://gc2.io");
             setBaseLayer.init("dk");
 
         });

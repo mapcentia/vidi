@@ -357,7 +357,7 @@ module.exports = module.exports = {
                 draw: {
                     polygon: {
                         title: 'Draw a polygon!',
-                        allowIntersection: false,
+                        allowIntersection: true,
                         drawError: {
                             color: '#b00b00',
                             timeout: 1000

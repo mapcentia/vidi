@@ -60,7 +60,7 @@ body {
   right: 0px;
   width: 100%;
   z-index: 0;
-/*  transition: 300ms linear;*/
+  /*  transition: 300ms linear;*/
 }
 
 #menu {
@@ -279,6 +279,7 @@ div.olControlZoom {
   background-color: white;
   z-index: 1000;
 }
+
 #loadscreen {
 
   .center {
@@ -659,7 +660,6 @@ div.olControlZoom {
   height: 15px !important;
 }
 
-
 .custom-popup td {
   padding-right: 10px;
   vertical-align: top;
@@ -727,6 +727,7 @@ body {
     width: 75%;
     min-width: 250px;
   }
+
   #info-modal {
     right: -75%;
 
@@ -970,7 +971,7 @@ input[type=text]::-ms-clear {
   right: 0;
   z-index: 1000000;
   overflow: hidden;
-  height: 2px;
+  height: 4px;
   display: none;
 }
 
@@ -992,9 +993,9 @@ input[type=text]::-ms-clear {
   display: block;
   -webkit-animation: animate-loading-indcator 2s linear infinite;
   animation: animate-loading-indcator 2s linear infinite;
-/*  background-color: @loading-indicator-color-1;
-  background-image: -webkit-linear-gradient(left, @loading-indicator-color-1 0, @loading-indicator-color-2 50%, @loading-indicator-color-2 50%, @loading-indicator-color-1 100%);
-  background-image: linear-gradient(to right,@loading-indicator-color-1 0, @loading-indicator-color-2 50%, @loading-indicator-color-2 50%, @loading-indicator-color-1 100%);*/
+  background-color: rgba(0, 0, 0, 0);
+  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.5) 0, yellow rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.5) 100%);
   background-repeat: repeat-x;
   background-size: 25pc 25pc;
   width: 200%
@@ -1023,7 +1024,8 @@ input[type=text]::-ms-clear {
     transform: translateX(-400px)
   }
 }
-.layer-search-item{
+
+.layer-search-item {
   width: 60px;
   display: inline-block;
 }

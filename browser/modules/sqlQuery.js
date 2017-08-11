@@ -13,6 +13,11 @@ var cloud;
 /**
  * @type {*|exports|module.exports}
  */
+var backboneEvents;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var meta;
 
 /**
@@ -57,6 +62,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         advancedInfo = o.advancedInfo;
+        backboneEvents = o.backboneEvents;
         _layers = o.layers;
         return this;
     },
@@ -105,9 +111,9 @@ module.exports = {
             }
 
 
-
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
+            var key = metaDataKeys[value]._key_;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             var not_querable = metaDataKeys[value].not_querable;
@@ -115,7 +121,10 @@ module.exports = {
             var cartoSql = metaDataKeys[value].sql;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
-            var popupHtml;
+
+            _layers.incrementCountLoading(key);
+            backboneEvents.get().trigger("startLoading:layers");
+
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -127,6 +136,10 @@ module.exports = {
             if (!callBack) {
                 onLoad = function () {
                     var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
+
+                    _layers.decrementCountLoading(key);
+                    backboneEvents.get().trigger("doneLoading:layers");
+
 
                     isEmpty = layerObj.isEmpty();
 

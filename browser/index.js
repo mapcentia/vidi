@@ -110,7 +110,7 @@ window.Vidi = function () {
         pushState: require('./modules/pushState'),
         backboneEvents: require('./modules/backboneEvents'),
         utils: require('./modules/utils'),
-        loading: require('./modules/loading'),
+        //loading: require('./modules/loading'),
         reset: require('./modules/reset'),
         extensions: {},
         search: {}
@@ -141,7 +141,7 @@ window.Vidi = function () {
     modules.pushState.set(modules);
     modules.backboneEvents.set(modules);
     modules.utils.set(modules);
-    modules.loading.set(modules);
+    //modules.loading.set(modules);
     modules.reset.set(modules);
 
     // Return the init module to be called in index.html

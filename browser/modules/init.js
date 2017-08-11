@@ -83,7 +83,6 @@ module.exports = {
             me.render();
         }
 
-
     },
 
     /**
@@ -122,6 +121,9 @@ module.exports = {
             gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td); // TODO typo
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
+            window.vidiTimeout = parseInt(urlVars.px) * 3;
+        } else {
+            window.vidiTimeout = 500;
         }
 
         if (urlVars.l) {
@@ -272,14 +274,14 @@ module.exports = {
             $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
         }
 
-        $(window).resize(_.debounce(function(){
+        $(window).resize(_.debounce(function () {
             $("#myNavmenu").offcanvas('hide');
             setTimeout(function () {
                 modules.cloud.get().map.invalidateSize()
-            },100);
+            }, 100);
 
             setHeight();
 
-        },0));
+        }, 0));
     }
 };
