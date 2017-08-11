@@ -12,9 +12,33 @@
 var cloud;
 
 /**
- *
+ * @type {*|exports|module.exports}
  */
 var backboneEvents;
+
+/**
+ *
+ * @type {string}
+ */
+var AHOST = "//gc2.mapcentia.com";
+
+/**
+ *
+ * @type {string}
+ */
+var ADB = "dk";
+
+/**
+ *
+ * @type {string}
+ */
+var MHOST = "//127.0.0.1";
+
+/**
+ *
+ * @type {string}
+ */
+var MDB = "mydb";
 
 /**
  *
@@ -27,7 +51,7 @@ module.exports = {
         return this;
     },
     init: function (onLoad, el, onlyAddress) {
-        var type1, type2, gids = [], source = [], searchString, dslA, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
+        var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom;
 
         // Set max zoom then zooming on target
@@ -73,7 +97,6 @@ module.exports = {
         // ====================
 
         placeStore = new geocloud.sqlStore({
-            db: "dk",
             sql: null,
             clickable: false,
             // Make Awesome Markers
@@ -108,7 +131,7 @@ module.exports = {
             });
             shouldM.push({
                 "term": {
-                    "properties.komkode": "" + v
+                    "properties.kommunekode": "" + v
                 }
             });
         });
@@ -132,9 +155,7 @@ module.exports = {
                     type1 = "adresse";
                 }
                 var names = [];
-
                 (function ca() {
-
                     switch (type1) {
                         case "vejnavn,bynavn":
                             dsl1 = {
@@ -335,7 +356,7 @@ module.exports = {
                     }
 
                     $.ajax({
-                        url: '//gc2.mapcentia.com/api/v1/elasticsearch/search/dk/dawa/adgangsadresser_view',
+                        url: AHOST + '/api/v1/elasticsearch/search/' + ADB + '/dawa/adgangsadresser_view',
                         data: '&q=' + JSON.stringify(dsl1),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
@@ -348,7 +369,7 @@ module.exports = {
                                     names.push({value: str});
                                 });
                                 $.ajax({
-                                    url: '//gc2.mapcentia.com/api/v1/elasticsearch/search/dk/dawa/adgangsadresser_view',
+                                    url: AHOST + '/api/v1/elasticsearch/search/' + ADB + '/dawa/adgangsadresser_view',
                                     data: '&q=' + JSON.stringify(dsl2),
                                     contentType: "application/json; charset=utf-8",
                                     scriptCharset: "utf-8",
@@ -394,7 +415,6 @@ module.exports = {
                                 $.each(response.hits.hits, function (i, hit) {
                                     var str = hit._source.properties.string4;
                                     gids[str] = hit._source.properties.gid;
-                                    source[str] = hit._source;
                                     names.push({value: str});
                                 });
                                 if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
@@ -422,39 +442,92 @@ module.exports = {
                 if (!onlyAddress) {
                     (function ca() {
 
-                        dslM = {
-                            "sort": [{"properties.sort_string": "asc"}],
-                            "query": {
-                                "filtered": {
+                        switch (type2) {
+                            case "jordstykke":
+                                dslM = {
+                                    "from": 0,
+                                    "size": 20,
                                     "query": {
-                                        "query_string": {
-                                            "default_field": "string",
-                                            "query": encodeURIComponent(query.toLowerCase()),
-                                            "default_operator": "AND"
-                                        }
-                                    },
-                                    "filter": {
                                         "bool": {
-                                            "should": shouldM
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string1",
+                                                    "query": encodeURIComponent(query.toLowerCase()),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldM
+                                                }
+                                            }
                                         }
                                     }
-                                }
-                            }
-                        };
+                                };
+                                break;
+                            case "ejerlav":
+                                dslM = {
+                                    "from": 0,
+                                    "size": 20,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties.string1",
+                                                    "query": encodeURIComponent(query.toLowerCase()),
+                                                    "default_operator": "AND"
+                                                }
+                                            },
+                                            "filter": {
+                                                "bool": {
+                                                    "should": shouldM
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "aggregations": {
+                                        "properties.ejerlavsnavn": {
+                                            "terms": {
+                                                "field": "properties.ejerlavsnavn",
+                                                "order": {
+                                                    "_term": "asc"
+                                                },
+                                                "size": 20
+                                            },
+                                            "aggregations": {
+                                                "properties.kommunekode": {
+                                                    "terms": {
+                                                        "field": "properties.kommunekode",
+                                                        "size": 20
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                break;
+                        }
 
                         $.ajax({
-                            url: '//eu1.mapcentia.com/api/v1/elasticsearch/search/dk/matrikel/' + type2,
+                            url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
                             data: '&q=' + JSON.stringify(dslM),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
                             dataType: 'jsonp',
                             jsonp: 'jsonp_callback',
                             success: function (response) {
-                                $.each(response.hits.hits, function (i, hit) {
-                                    var str = hit._source.properties.string;
-                                    gids[str] = hit._source.properties.gid;
-                                    names.push({value: str});
-                                });
+                                if (type2 === "ejerlav") {
+                                    $.each(response.aggregations["properties.ejerlavsnavn"].buckets, function (i, hit) {
+                                        var str = hit.key;
+                                        names.push({value: str});
+                                    });
+                                } else {
+                                    $.each(response.hits.hits, function (i, hit) {
+                                        var str = hit._source.properties.string1;
+                                        gids[str] = hit._source.properties.gid;
+                                        names.push({value: str});
+                                    });
+                                }
                                 if (names.length === 1 && (type2 === "ejerlav")) {
                                     type2 = "jordstykke";
                                     names = [];
@@ -472,13 +545,14 @@ module.exports = {
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
                 placeStore.reset();
-
                 if (name === "matrikel") {
-                    placeStore.host = "//eu1.mapcentia.com";
-                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid=" + gids[datum.value];
+                    placeStore.db = MDB;
+                    placeStore.host = MHOST;
+                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
                 }
                 if (name === "adresse") {
-                    placeStore.host = "//gc2.mapcentia.com";
+                    placeStore.db = ADB;
+                    placeStore.host = AHOST;
                     placeStore.sql = "SELECT id,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dawa.adgangsadresser WHERE id='" + gids[datum.value] + "'";
                 }
                 searchString = datum.value;
