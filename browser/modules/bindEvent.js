@@ -230,6 +230,10 @@ module.exports = module.exports = {
         backboneEvents.get().on("doneLoading:layers", function (e) {
             console.log("doneLoading:layers triggered");
             window.loadingArray = layers.getArray();
+
+            console.log(layers.getCountLoading());
+            console.log(loadingB);
+
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
