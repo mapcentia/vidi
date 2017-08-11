@@ -215,6 +215,7 @@ module.exports = module.exports = {
 
 
         backboneEvents.get().on("startLoading:layers", function (e) {
+            console.log("startLoading:layers triggered");
             doneB = doneL = false;
             loadingL = true;
             $(".loadingIndicator").fadeIn(200);
@@ -227,6 +228,7 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {
+            console.log("doneLoading:layers triggered");
             window.loadingArray = layers.getArray();
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
