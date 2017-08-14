@@ -9,11 +9,18 @@ var store;
 var db = "test";
 var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
+var drawnItemsIsoMarker = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
 var hostname = "https://kort.detailhandelsportalen.dk";
 var backboneEvents;
+var isochrone;
+var isoActive = false;
+var mapObj;
+var clicktimer;
+var utils;
+var layers;
 
 var reset = function (s) {
     s.abort();
@@ -22,6 +29,30 @@ var reset = function (s) {
 
     $("#info-tab").empty();
     $("#info-pane").empty();
+};
+
+var profiles = {
+    car: {
+        radius: 70,
+        cellSize: 0.8,
+        concavity: 2,
+        lengthThreshold: 0,
+        endpoint: "https://gc2.io/galton/car"
+    },
+    bicycle: {
+        radius: 15,
+        cellSize: 0.2,
+        concavity: 2,
+        lengthThreshold: 0,
+        endpoint: "https://gc2.io/galton/bicycle"
+    },
+    foot: {
+        radius: 6,
+        cellSize: 0.07,
+        concavity: 2,
+        lengthThreshold: 0,
+        endpoint: "https://gc2.io/galton/foot"
+    }
 };
 
 var createBufferBtn = function () {
@@ -36,6 +67,7 @@ var createBufferBtn = function () {
             //this.myAction.disable();
         }
     });
+
     var circle1Btn = ImmediateSubAction.extend({
         options: {
             toolbarIcon: {
@@ -72,6 +104,8 @@ var createBufferBtn = function () {
             ImmediateSubAction.prototype.addHooks.call(this);
         }
     });
+
+
     var MyCustomAction = L._ToolbarAction.extend({
         options: {
             toolbarIcon: {
@@ -165,11 +199,29 @@ module.exports = {
         draw = o.draw;
         setBaseLayer = o.setBaseLayer;
         anchor = o.anchor;
+        utils = o.utils;
+        layers = o.layers;
         backboneEvents = o.backboneEvents;
+        isochrone = o.extensions.isochrone.index;
 
         return this;
     },
     init: function () {
+
+        var me = this;
+
+        mapObj = cloud.get().map;
+
+        L.Draw.IsochroneMarker = L.Draw.Marker.extend({
+            options: {
+
+            },
+            initialize: function (map, options) {
+                this.type = 'isochroneMarker';
+                this.featureTypeCode = 'isochroneMarker';
+                L.Draw.Feature.prototype.initialize.call(this, map, options);
+            }
+        });
 
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
@@ -178,6 +230,11 @@ module.exports = {
                         enabled: true,
                         handler: new L.Draw.Marker(map, {icon: new L.Icon.Default()}),
                         title: 'Sæt en markør'
+                    },
+                    {
+                        enabled: true,
+                        handler: new L.Draw.IsochroneMarker(map, {icon: new L.Icon.Default()}),
+                        title: 'Skabe isokroner med 15 og 30 minutters køretid'
                     },
                     {
                         enabled: true,
@@ -204,6 +261,7 @@ module.exports = {
         cloud.get().map.addControl(drawControl);
         cloud.get().map.addLayer(drawnItemsMarker);
         cloud.get().map.addLayer(drawnItemsPolygon);
+        cloud.get().map.addLayer(drawnItemsIsoMarker);
 
         backboneEvents.get().on("end:state", function () {
             cloud.get().addBaseLayer("dk", "osm", {
@@ -220,7 +278,13 @@ module.exports = {
         // =============================
         if (typeof urlVars.lat !== "undefined") {
             var latLng = L.latLng(urlVars.lat, urlVars.lng);
-            var awm = L.marker(latLng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+            var awm = L.marker(latLng, {
+                icon: L.AwesomeMarkers.icon({
+                    icon: 'fa-shopping-cart',
+                    markerColor: 'blue',
+                    prefix: 'fa'
+                })
+            });//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
             drawnItemsMarker.addLayer(awm);
             buffer();
             setTimeout(function () {
@@ -235,9 +299,18 @@ module.exports = {
         cloud.get().map.on('draw:created', function (e) {
             e.layer._vidi_type = "draw";
             if (e.layerType === "marker") {
-                var awm = L.marker(e.layer._latlng, {icon: L.AwesomeMarkers.icon({icon: 'fa-shopping-cart', markerColor: 'blue', prefix: 'fa'})});//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+                var awm = L.marker(e.layer._latlng, {
+                    icon: L.AwesomeMarkers.icon({
+                        icon: 'fa-shopping-cart',
+                        markerColor: 'blue',
+                        prefix: 'fa'
+                    })
+                });//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
                 drawnItemsMarker.addLayer(awm);//.openPopup();
                 $(".fa-circle-thin").removeClass("deactiveBtn");
+            } else if (e.layerType === "isochroneMarker") {
+                drawnItemsIsoMarker.addLayer(e.layer);
+
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
             }
@@ -258,6 +331,16 @@ module.exports = {
                 } catch (e) {
                     console.log(e.message)
                 }
+            } else if (e.layerType === "isochroneMarker") {
+                drawnItemsIsoMarker.clearLayers();
+
+                try {
+                    isochrone.clear();
+                } catch (e) {
+                    console.error(e.message)
+                }
+
+
             } else {
                 drawnItemsPolygon.clearLayers();
             }
@@ -265,6 +348,8 @@ module.exports = {
         cloud.get().map.on('draw:drawstop', function (e) {
             if (e.layerType === "marker") {
                 buffer();
+            } else if (e.layerType === "isochroneMarker") {
+                iso();
             } else {
                 polygon();
             }
@@ -311,7 +396,7 @@ var buffer = function () {
         "dashArray": '5,3'
     });
 
-    store = createStore();
+    store = createStore("buffer");
     store.sql = JSON.stringify([reader.read(c1).toText(), reader.read(c2).toText()]);
     //cloud.addGeoJsonStore(store);
     store.load();
@@ -330,26 +415,82 @@ var polygon = function () {
     var reader = new jsts.io.GeoJSONReader();
     var geom = reader.read(layer.toGeoJSON());
 
-    store = createStore();
+    store = createStore("polygon");
     store.sql = JSON.stringify([geom.geometry.toText()]);
     //cloud.addGeoJsonStore(store);
     store.load();
 
-    // Create a clean up click event
-    /*cloud.on("click", function (e) {
-     try {
-     drawnItemsPolygon.clearLayers();
-     } catch (e) {
-     }
-     });*/
+};
+
+var iso = function () {
+    var layer, p = {};
+    for (var prop in drawnItemsIsoMarker._layers) {
+        layer = drawnItemsIsoMarker._layers[prop];
+        break;
+    }
+    if (typeof layer === "undefined") {
+        return;
+    }
+
+    p.x = layer._latlng.lng;
+    p.y = layer._latlng.lat;
+
+    var params = {
+        lng: p.x,
+        lat: p.y,
+        radius: profiles.car.radius,
+        deintersect: false,
+        cellSize: profiles.car.cellSize,
+        concavity: profiles.car.concavity,
+        lengthThreshold: profiles.car.lengthThreshold,
+        units: "kilometers"
+    };
+
+    layers.incrementCountLoading("_vidi_isochrone");
+    backboneEvents.get().trigger("startLoading:layers");
+
+    mapObj.addLayer(isochrone.gridSource);
+ /*   mapObj.addLayer(isochrone.pointLayer);
+    isochrone.pointLayer.addLayer(
+        L.circleMarker([p.y, p.x], {
+            color: '#ffffff',
+            fillColor: '#000000',
+            opacity: 1,
+            fillOpacity: 1,
+            weight: 3,
+            radius: 12,
+            clickable: false
+        })
+    );*/
+
+    var url = new URL(profiles.car.endpoint);
+
+    Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+
+    ([15, 30]).forEach(interval => url.searchParams.append('intervals', interval));
+
+    isochrone.request(url.toString()).then(
+        function (data) {
+            var reader = new jsts.io.GeoJSONReader();
+            var geom1 = reader.read(data.features[0]);
+            var geom2 = reader.read(data.features[1]);
+
+            store = createStore("isochrone");
+            store.sql = JSON.stringify([geom1.geometry.toText(), geom2.geometry.toText()]);
+
+            store.load();
+        }
+    );
 
 };
+
+
 var upDatePrintComment = function () {
     $('#main-tabs a[href="#info-content"]').tab('show');
     $("#print-comment").html(($("#detail-data-r-container").html().replace(/> *</g, '><') + $("#detail-data-p-container").html().replace(/> *</g, '><')).replace(/\n|\t/g, ' ').replace(/> *</g, '><').trim());
 };
 
-var createLink = function(){
+var createLink = function () {
     var layer, link;
     for (var prop in drawnItemsMarker._layers) {
         layer = drawnItemsMarker._layers[prop];
@@ -359,7 +500,7 @@ var createLink = function(){
     window.location.href = link;
 };
 
-var createMailLink = function(){
+var createMailLink = function () {
     var layer, link;
     for (var prop in drawnItemsMarker._layers) {
         layer = drawnItemsMarker._layers[prop];
@@ -370,14 +511,14 @@ var createMailLink = function(){
     window.location.href = link;
 };
 
-var createStore = function () {
+var createStore = function (type) {
     var hit = false, isEmpty = true;
     return new geocloud.sqlStore({
         jsonp: false,
         method: "POST",
         host: "",
         db: db,
-        uri: "/api/extension/cowiDetail",
+        uri: "/api/extension/cowiDetail/" + type,
         clickable: true,
         id: 1,
         onLoad: function () {
@@ -406,6 +547,7 @@ var createStore = function () {
                         $(".r1000-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
                         $(".r1000-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
                     }
+
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
                         $(".r-adr-val").html(data.results[0].formatted_address);
                         $("#r-url-email").removeClass("disabled");
@@ -413,7 +555,25 @@ var createStore = function () {
                         upDatePrintComment();
                     });
 
-                } else {
+                }
+
+                else if (feature.properties.minutter) {
+                    if (feature.properties.minutter === "15") {
+                        $(".ik15-val").html(feature.properties.antal);
+                        $(".ik15-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                    } else {
+                        $(".ik30-val").html(feature.properties.antal);
+                        $(".ik30-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                    }
+                }
+
+                else {
                     $(".polygon-val").html(feature.properties.antal);
                     $(".polygon-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
                     $(".polygon-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");

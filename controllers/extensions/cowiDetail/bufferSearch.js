@@ -1,15 +1,15 @@
-var express = require('express');
+    var express = require('express');
 var router = express.Router();
 var http = require('http');
 var config = require('../../../config/config.js').gc2;
 
 
-router.post('/api/extension/cowiDetail/:db', function (req, response) {
-    var db = req.params.db, wkt = JSON.parse(req.body.q), srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, url, data = [], jsfile = "", sql;
+router.post('/api/extension/cowiDetail/:type/:db', function (req, response) {
+    var  db = req.params.db, type = req.params.type, wkt = JSON.parse(req.body.q), srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, url, data = [], jsfile = "", sql;
 
-    //console.log(wkt)
+    console.log(type)
 
-    if (wkt.length > 1) {
+    if (type === "buffer") {
 
         sql = "SELECT " +
             "'500'                      AS radius, " +
@@ -93,7 +93,7 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
             "'" + wkt[1] + "', 4326), 25832))";
 
-    } else {
+    } else if (type === "polygon") {
         sql = "SELECT " +
             "sum(pers_2016) :: INTEGER  AS antal, " +
 
@@ -133,6 +133,90 @@ router.post('/api/extension/cowiDetail/:db', function (req, response) {
             "FROM detail.dkn_befolkning_og_arbejdspladser " +
             "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
             "'" + wkt[0] + "', 4326), 25832))";
+
+    } else if (type === "isochrone") {
+
+        sql = "SELECT " +
+            "'15'                      AS minutter, " +
+            "sum(pers_2016) :: INTEGER  AS antal, " +
+
+            "sum(pers_2016) * (SELECT fb_total " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_total, " +
+
+            "sum(pers_2016) * (SELECT fb_dagligv " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_dagligv, " +
+
+            "sum(pers_2016) * (SELECT fb_beklaed " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_beklaed, " +
+
+            "sum(pers_2016) * (SELECT fb_oevrige " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[0] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_oevrige " +
+
+            "FROM detail.dkn_befolkning_og_arbejdspladser " +
+            " WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[0] + "', 4326), 25832)) " +
+
+            "UNION " +
+
+            "SELECT " +
+            "'30'                     AS minutter, " +
+            "sum(pers_2016) :: INTEGER  AS antal, " +
+
+            "sum(pers_2016) * (SELECT fb_total " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[1] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_total, " +
+
+            "sum(pers_2016) * (SELECT fb_dagligv " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[1] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_dagligv, " +
+
+            "sum(pers_2016) * (SELECT fb_beklaed " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[1] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_beklaed, " +
+
+            "sum(pers_2016) * (SELECT fb_oevrige " +
+            "FROM detail.forbrugstal_kommuner " +
+            "WHERE komkode = (SELECT komkode " +
+            "FROM detail.kommune " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[1] + "', 4326), 25832)) LIMIT 1) " +
+            "LIMIT 1):: INTEGER AS fb_oevrige " +
+
+            "FROM detail.dkn_befolkning_og_arbejdspladser " +
+            "WHERE ST_intersects(the_geom, ST_transform(ST_geomfromtext( " +
+            "'" + wkt[1] + "', 4326), 25832))";
     }
 
 
