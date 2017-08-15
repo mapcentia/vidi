@@ -210,6 +210,8 @@ module.exports = {
 
         var me = this;
 
+        $('a[href="#isochrone-content"]').hide();
+
         mapObj = cloud.get().map;
 
         L.Draw.IsochroneMarker = L.Draw.Marker.extend({
@@ -229,12 +231,12 @@ module.exports = {
                     {
                         enabled: true,
                         handler: new L.Draw.Marker(map, {icon: new L.Icon.Default()}),
-                        title: 'Sæt en markør'
+                        title: 'Beregn indenfor 500m og 1000m radius'
                     },
                     {
                         enabled: true,
                         handler: new L.Draw.IsochroneMarker(map, {icon: new L.Icon.Default()}),
-                        title: 'Skabe isokroner med 15 og 30 minutters køretid'
+                        title: 'Beregn indenfor 15 og 30 minutters køretid'
                     },
                     {
                         enabled: true,
@@ -249,7 +251,7 @@ module.exports = {
                                 timeout: 1000
                             }
                         }),
-                        title: 'Tegn en polygon'
+                        title: 'Beregn indenfor tegnet en polygon'
                     }
                 ];
             }
@@ -449,7 +451,7 @@ var iso = function () {
     layers.incrementCountLoading("_vidi_isochrone");
     backboneEvents.get().trigger("startLoading:layers");
 
-    mapObj.addLayer(isochrone.gridSource);
+    //mapObj.addLayer(isochrone.gridSource);
  /*   mapObj.addLayer(isochrone.pointLayer);
     isochrone.pointLayer.addLayer(
         L.circleMarker([p.y, p.x], {
