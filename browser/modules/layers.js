@@ -71,7 +71,9 @@ try {
 
 var switchLayer;
 
-var singleTiled = require('../../config/config.js').singleTiled || [];
+var singleTiled = [];
+
+
 
 var array =[];
 
@@ -97,6 +99,8 @@ module.exports = {
      *
      */
     init: function () {
+
+
 
     },
 
@@ -175,6 +179,11 @@ module.exports = {
      */
     addLayer: function (l) {
         var me = this;
+
+        if (typeof window.vidiConfig.singleTiled === "object" && window.vidiConfig.singleTiled.length > 0) {
+            singleTiled = window.vidiConfig.singleTiled
+        }
+
         return new Promise(function (resolve, reject) {
 
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
