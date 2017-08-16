@@ -57,6 +57,62 @@ var profiles = {
 
 var createBufferBtn = function () {
     // Create buttons
+    var isochroneSubAction = L._ToolbarAction.extend({
+        initialize: function (map, myAction) {
+            this.map = cloud.get().map;
+            this.myAction = myAction;
+            L._ToolbarAction.prototype.initialize.call(this);
+        },
+        addHooks: function () {
+            // this.myAction.disable();
+        }
+    });
+    var showIso = isochroneSubAction.extend({
+        options: {
+            toolbarIcon: {
+                html: 'Vis isokroner'
+            }
+        },
+        addHooks: function () {
+            mapObj.addLayer(isochrone.gridSource);
+            isochroneSubAction.prototype.addHooks.call(this);
+        }
+    });
+    var Cancel = isochroneSubAction.extend({
+        options: {
+            toolbarIcon: {
+                html: '<i class="fa fa-times"></i>',
+                tooltip: 'Cancel'
+            }
+        },
+        addHooks: function () {
+            this.myAction.disable();
+            mapObj.removeLayer(isochrone.gridSource);
+            isochroneSubAction.prototype.addHooks.call(this);
+        }
+    });
+    var isochroneAction = L._ToolbarAction.extend({
+        options: {
+            toolbarIcon: {
+                className: 'fa fa-map-o showIsoBtn deactiveBtn'
+
+            },
+            color: "#000",
+
+            /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
+             * by definition, contained inside another toolbar, so it
+             * doesn't need the additional styling and behavior of a
+             * L.Toolbar.Control or L.Toolbar.Popup.
+             */
+            subToolbar: new L._Toolbar({
+                actions: [
+                    Cancel,
+                    showIso
+                ]
+            })
+        }
+    });
+
     var ImmediateSubAction = L._ToolbarAction.extend({
         initialize: function (map, myAction) {
             this.map = cloud.get().map;
@@ -67,7 +123,6 @@ var createBufferBtn = function () {
             //this.myAction.disable();
         }
     });
-
     var circle1Btn = ImmediateSubAction.extend({
         options: {
             toolbarIcon: {
@@ -99,26 +154,20 @@ var createBufferBtn = function () {
         },
         addHooks: function () {
             this.myAction.disable();
-            cloud.get().map.removeLayer(circle1);
-            cloud.get().map.removeLayer(circle2);
+            mapObj.removeLayer(circle1);
+            mapObj.removeLayer(circle2);
+            mapObj.removeLayer(isochrone.gridSource);
             ImmediateSubAction.prototype.addHooks.call(this);
         }
     });
-
-
     var MyCustomAction = L._ToolbarAction.extend({
         options: {
             toolbarIcon: {
                 className: 'fa fa-circle-thin deactiveBtn',
                 color: "#000"
             },
-            /* Use L.Toolbar for sub-toolbars. A sub-toolbar is,
-             * by definition, contained inside another toolbar, so it
-             * doesn't need the additional styling and behavior of a
-             * L.Toolbar.Control or L.Toolbar.Popup.
-             */
             subToolbar: new L._Toolbar({
-                actions: [Cancel, circle2Btn, circle1Btn]
+                actions: [Cancel, circle2Btn, circle1Btn, showIso]
             })
         }
     });
@@ -186,6 +235,9 @@ var createBufferBtn = function () {
             })
         }
     });
+
+
+
     return new L._Toolbar.Control({
         position: 'topright',
         actions: [MyCustomAction, MyCustomAction2]
@@ -233,11 +285,11 @@ module.exports = {
                         handler: new L.Draw.Marker(map, {icon: new L.Icon.Default()}),
                         title: 'Beregn indenfor 500m og 1000m radius'
                     },
-                    {
+                 /*   {
                         enabled: true,
                         handler: new L.Draw.IsochroneMarker(map, {icon: new L.Icon.Default()}),
                         title: 'Beregn indenfor 15 og 30 minutters køretid'
-                    },
+                    },*/
                     {
                         enabled: true,
                         handler: new L.Draw.Polygon(map, {
@@ -312,6 +364,8 @@ module.exports = {
                 $(".fa-circle-thin").removeClass("deactiveBtn");
             } else if (e.layerType === "isochroneMarker") {
                 drawnItemsIsoMarker.addLayer(e.layer);
+                $(".showIsoBtn").removeClass("deactiveBtn");
+
 
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
@@ -328,13 +382,16 @@ module.exports = {
                 createBufferBtn().addTo(cloud.get().map);
 
                 try {
-                    cloud.get().map.removeLayer(circle1);
-                    cloud.get().map.removeLayer(circle2);
+                    mapObj.removeLayer(circle1);
+                    mapObj.removeLayer(circle2);
+                    mapObj.removeLayer(isochrone.gridSource);
+                    isochrone.clear();
                 } catch (e) {
                     console.log(e.message)
                 }
             } else if (e.layerType === "isochroneMarker") {
                 drawnItemsIsoMarker.clearLayers();
+                $(".showIsoBtn").addClass("deactiveBtn");
 
                 try {
                     isochrone.clear();
@@ -402,6 +459,7 @@ var buffer = function () {
     store.sql = JSON.stringify([reader.read(c1).toText(), reader.read(c2).toText()]);
     //cloud.addGeoJsonStore(store);
     store.load();
+    iso();
 };
 
 var polygon = function () {
@@ -426,8 +484,8 @@ var polygon = function () {
 
 var iso = function () {
     var layer, p = {};
-    for (var prop in drawnItemsIsoMarker._layers) {
-        layer = drawnItemsIsoMarker._layers[prop];
+    for (var prop in drawnItemsMarker._layers) {
+        layer = drawnItemsMarker._layers[prop];
         break;
     }
     if (typeof layer === "undefined") {
