@@ -9,7 +9,6 @@ var store;
 var db = "test";
 var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
-var drawnItemsIsoMarker = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
 var urlVars = require('./../../urlparser').urlVars;
@@ -237,7 +236,6 @@ var createBufferBtn = function () {
     });
 
 
-
     return new L._Toolbar.Control({
         position: 'topright',
         actions: [MyCustomAction, MyCustomAction2]
@@ -266,16 +264,14 @@ module.exports = {
 
         mapObj = cloud.get().map;
 
-        L.Draw.IsochroneMarker = L.Draw.Marker.extend({
-            options: {
-
-            },
+   /*     L.Draw.IsochroneMarker = L.Draw.Marker.extend({
+            options: {},
             initialize: function (map, options) {
                 this.type = 'isochroneMarker';
                 this.featureTypeCode = 'isochroneMarker';
                 L.Draw.Feature.prototype.initialize.call(this, map, options);
             }
-        });
+        });*/
 
         L.DrawToolbar.include({
             getModeHandlers: function (map) {
@@ -285,11 +281,11 @@ module.exports = {
                         handler: new L.Draw.Marker(map, {icon: new L.Icon.Default()}),
                         title: 'Beregn indenfor 500m og 1000m radius'
                     },
-                 /*   {
-                        enabled: true,
-                        handler: new L.Draw.IsochroneMarker(map, {icon: new L.Icon.Default()}),
-                        title: 'Beregn indenfor 15 og 30 minutters køretid'
-                    },*/
+                    /*   {
+                     enabled: true,
+                     handler: new L.Draw.IsochroneMarker(map, {icon: new L.Icon.Default()}),
+                     title: 'Beregn indenfor 15 og 30 minutters køretid'
+                     },*/
                     {
                         enabled: true,
                         handler: new L.Draw.Polygon(map, {
@@ -315,7 +311,6 @@ module.exports = {
         cloud.get().map.addControl(drawControl);
         cloud.get().map.addLayer(drawnItemsMarker);
         cloud.get().map.addLayer(drawnItemsPolygon);
-        cloud.get().map.addLayer(drawnItemsIsoMarker);
 
         backboneEvents.get().on("end:state", function () {
             cloud.get().addBaseLayer("dk", "osm", {
@@ -362,10 +357,6 @@ module.exports = {
                 });//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
                 drawnItemsMarker.addLayer(awm);//.openPopup();
                 $(".fa-circle-thin").removeClass("deactiveBtn");
-            } else if (e.layerType === "isochroneMarker") {
-                drawnItemsIsoMarker.addLayer(e.layer);
-                $(".showIsoBtn").removeClass("deactiveBtn");
-
 
             } else {
                 drawnItemsPolygon.addLayer(e.layer);
@@ -389,26 +380,13 @@ module.exports = {
                 } catch (e) {
                     console.log(e.message)
                 }
-            } else if (e.layerType === "isochroneMarker") {
-                drawnItemsIsoMarker.clearLayers();
-                $(".showIsoBtn").addClass("deactiveBtn");
-
-                try {
-                    isochrone.clear();
-                } catch (e) {
-                    console.error(e.message)
-                }
-
-
-            } else {
+            }  else {
                 drawnItemsPolygon.clearLayers();
             }
         });
         cloud.get().map.on('draw:drawstop', function (e) {
             if (e.layerType === "marker") {
                 buffer();
-            } else if (e.layerType === "isochroneMarker") {
-                iso();
             } else {
                 polygon();
             }
@@ -510,18 +488,18 @@ var iso = function () {
     backboneEvents.get().trigger("startLoading:layers");
 
     //mapObj.addLayer(isochrone.gridSource);
- /*   mapObj.addLayer(isochrone.pointLayer);
-    isochrone.pointLayer.addLayer(
-        L.circleMarker([p.y, p.x], {
-            color: '#ffffff',
-            fillColor: '#000000',
-            opacity: 1,
-            fillOpacity: 1,
-            weight: 3,
-            radius: 12,
-            clickable: false
-        })
-    );*/
+    /*   mapObj.addLayer(isochrone.pointLayer);
+     isochrone.pointLayer.addLayer(
+     L.circleMarker([p.y, p.x], {
+     color: '#ffffff',
+     fillColor: '#000000',
+     opacity: 1,
+     fillOpacity: 1,
+     weight: 3,
+     radius: 12,
+     clickable: false
+     })
+     );*/
 
     var url = new URL(profiles.car.endpoint);
 
@@ -595,17 +573,17 @@ var createStore = function (type) {
 
 
                     if (feature.properties.radius === "500") {
-                        $(".r500-val").html(feature.properties.antal);
-                        $(".r500-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
-                        $(".r500-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
-                        $(".r500-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
-                        $(".r500-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val").html(parseInt(feature.properties.antal).toLocaleString("da-DK"));
+                        $(".r500-val-fb_dagligv").html((Math.round(parseInt(feature.properties.fb_dagligv) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_beklaed").html((Math.round(parseInt(feature.properties.fb_beklaed) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_oevrige").html((Math.round(parseInt(feature.properties.fb_oevrige) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r500-val-fb_total").html((Math.round(parseInt(feature.properties.fb_total) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
                     } else {
-                        $(".r1000-val").html(feature.properties.antal);
-                        $(".r1000-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
-                        $(".r1000-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
-                        $(".r1000-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
-                        $(".r1000-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val").html(parseInt(feature.properties.antal).toLocaleString("da-DK"));
+                        $(".r1000-val-fb_dagligv").html((Math.round(parseInt(feature.properties.fb_dagligv) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_beklaed").html((Math.round(parseInt(feature.properties.fb_beklaed) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_oevrige").html((Math.round(parseInt(feature.properties.fb_oevrige) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".r1000-val-fb_total").html((Math.round(parseInt(feature.properties.fb_total) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
                     }
 
                     $.get("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + layer._latlng.lat + "," + layer._latlng.lng, function (data) {
@@ -619,26 +597,26 @@ var createStore = function (type) {
 
                 else if (feature.properties.minutter) {
                     if (feature.properties.minutter === "15") {
-                        $(".ik15-val").html(feature.properties.antal);
-                        $(".ik15-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
-                        $(".ik15-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
-                        $(".ik15-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
-                        $(".ik15-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val").html(parseInt(feature.properties.antal).toLocaleString("da-DK"));
+                        $(".ik15-val-fb_dagligv").html((Math.round(parseInt(feature.properties.fb_dagligv) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_beklaed").html((Math.round(parseInt(feature.properties.fb_beklaed) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_oevrige").html((Math.round(parseInt(feature.properties.fb_oevrige) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik15-val-fb_total").html((Math.round(parseInt(feature.properties.fb_total) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
                     } else {
-                        $(".ik30-val").html(feature.properties.antal);
-                        $(".ik30-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
-                        $(".ik30-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
-                        $(".ik30-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
-                        $(".ik30-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val").html(parseInt(feature.properties.antal).toLocaleString("da-DK"));
+                        $(".ik30-val-fb_dagligv").html((Math.round(parseInt(feature.properties.fb_dagligv) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_beklaed").html((Math.round(parseInt(feature.properties.fb_beklaed) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_oevrige").html((Math.round(parseInt(feature.properties.fb_oevrige) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                        $(".ik30-val-fb_total").html((Math.round(parseInt(feature.properties.fb_total) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
                     }
                 }
 
                 else {
-                    $(".polygon-val").html(feature.properties.antal);
-                    $(".polygon-val-fb_dagligv").html(parseInt(feature.properties.fb_dagligv).toLocaleString("da-DK") + " kr/år");
-                    $(".polygon-val-fb_beklaed").html(parseInt(feature.properties.fb_beklaed).toLocaleString("da-DK") + " kr/år");
-                    $(".polygon-val-fb_oevrige").html(parseInt(feature.properties.fb_oevrige).toLocaleString("da-DK") + " kr/år");
-                    $(".polygon-val-fb_total").html(parseInt(feature.properties.fb_total).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val").html(parseInt(feature.properties.antal).toLocaleString("da-DK"));
+                    $(".polygon-val-fb_dagligv").html((Math.round(parseInt(feature.properties.fb_dagligv) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_beklaed").html((Math.round(parseInt(feature.properties.fb_beklaed) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_oevrige").html((Math.round(parseInt(feature.properties.fb_oevrige) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
+                    $(".polygon-val-fb_total").html((Math.round(parseInt(feature.properties.fb_total) / 5000) * 5000).toLocaleString("da-DK") + " kr/år");
                 }
             });
             upDatePrintComment();
