@@ -57,17 +57,21 @@ module.exports = module.exports = {
                 if (v.id === str) {
                     if (typeof v.overlays === "object") {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
+                            const layerName = v.overlays[u].id;
                             l = cloud.get().addTileLayers($.extend({
                                 layers: [v.overlays[u].id],
                                 db: v.overlays[u].db,
                                 host: v.overlays[u].host || "",
                                 type: "tms",
                                 loadEvent: function () {
-
+                                    layers.decrementCountLoading(layerName);
+                                    backboneEvents.get().trigger("doneLoading:layers");
                                 },
                                 loadingEvent: function () {
+                                    layers.incrementCountLoading(layerName);
+                                    backboneEvents.get().trigger("startLoading:layers");
+                                },
 
-                                }
                             }, v.overlays[u].config));
                             // Set prefix on id, so the layer will not be returned by layers.getLayers
                             l[0].id = "__hidden." + v.overlays[u].id;
