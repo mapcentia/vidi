@@ -65,11 +65,11 @@ module.exports = module.exports = {
                                 type: "tms",
                                 loadEvent: function () {
                                     layers.decrementCountLoading(layerName);
-                                    backboneEvents.get().trigger("doneLoading:layers");
+                                    backboneEvents.get().trigger("doneLoading:layers", layerName);
                                 },
                                 loadingEvent: function () {
                                     layers.incrementCountLoading(layerName);
-                                    backboneEvents.get().trigger("startLoading:layers");
+                                    backboneEvents.get().trigger("startLoading:layers", layerName);
                                 },
 
                             }, v.overlays[u].config));
@@ -83,10 +83,10 @@ module.exports = module.exports = {
 
         cloud.get().setBaseLayer(str,
             function () {
-                backboneEvents.get().trigger("doneLoading:setBaselayer");
+                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
             },
             function () {
-                backboneEvents.get().trigger("startLoading:setBaselayer");
+                backboneEvents.get().trigger("startLoading:setBaselayer", str);
             }
         );
 

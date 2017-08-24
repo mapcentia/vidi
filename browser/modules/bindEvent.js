@@ -215,19 +215,21 @@ module.exports = module.exports = {
 
 
         backboneEvents.get().on("startLoading:layers", function (e) {
-            console.log("startLoading:layers triggered");
+            console.log("Start loading: " + e);
             doneB = doneL = false;
             loadingL = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
+            console.log("Start loading: " + e);
             doneB = doneL = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {
+            console.log("Done loading: " + e);
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
@@ -245,6 +247,7 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
+            console.log("Done loading: " + e);
             doneB = true;
             loadingB = false;
             if ((doneL && doneB) || loadingL === false) {

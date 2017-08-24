@@ -159,8 +159,7 @@ module.exports = {
     },
 
     decrementCountLoading: function (i) {
-        var index = array.indexOf(i);
-        array.splice(index, 1);
+        array.splice(array.indexOf(i), 1);
         return array.length;
     },
 
@@ -216,11 +215,11 @@ module.exports = {
                                 format: "image/png",
                                 loadEvent: function () {
                                     me.decrementCountLoading(layer);
-                                    backboneEvents.get().trigger("doneLoading:layers");
+                                    backboneEvents.get().trigger("doneLoading:layers", layer);
                                 },
                                 loadingEvent: function () {
                                     me.incrementCountLoading(layer);
-                                    backboneEvents.get().trigger("startLoading:layers");
+                                    backboneEvents.get().trigger("startLoading:layers", layer);
                                 },
                                 subdomains: window.gc2Options.subDomainsForTiles
                             });
