@@ -80,6 +80,11 @@ module.exports = module.exports = {
                 "en_US": "Start Google Street View or Mapillary from where you click on the map. The service starts in a new browser window."
             },
 
+            "Street View" : {
+                "da_DK": "Gadefoto",
+                "en_US": "Street View"
+            },
+
             "Choose service" : {
                 "da_DK": "Vælg service",
                 "en_US": "Choose service"
@@ -143,7 +148,7 @@ module.exports = module.exports = {
             }
         }
 
-        utils.createMainTab(exId, "Street View", __("Info"), require('./../../height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../height')().max);
 
         // Append to DOM
         //==============
