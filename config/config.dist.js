@@ -6,9 +6,9 @@ module.exports = {
     // ===============================================
 
 
-    // ====================================
+    // ========================================
     // Which back-end is used. "gc2" or "carto"
-    // ====================================
+    // ========================================
 
     "backend": "WHAT_BACKEND",
 
@@ -25,7 +25,7 @@ module.exports = {
 
     // ===============================================================
     // Configuration of print templates.
-    // Print templates must be enabled - look futher down.
+    // Print templates must be enabled - look further down.
     // mapsizePx ~ is the pixel dimension of the map view
     // mapsizeMm ~ is actual size of the map view on the resulting PDF
     // ===============================================================
@@ -39,24 +39,54 @@ module.exports = {
             // ================================
 
             "print": {
-                "A4": {
-                    "l": {
-                        "mapsizePx": [1000, 700],
-                        "mapsizeMm": [270, 190]
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
                     },
-                    "p": {
-                        "mapsizePx": [700, 1000],
-                        "mapsizeMm": [190, 270]
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
                     }
                 },
-                "A3": {
-                    "l": {
-                        "mapsizePx": [1480, 1040],
-                        "mapsizeMm": [401, 282]
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
                     },
-                    "p": {
-                        "mapsizePx": [1040, 1480],
-                        "mapsizeMm": [282, 401]
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                },
+                A2: {
+                    l: {
+                        mapsizePx: [2185, 1525],
+                        mapsizeMm: [576, 400]
+                    },
+                    p: {
+                        mapsizePx: [1525, 2185],
+                        mapsizeMm: [400, 576]
+                    }
+                },
+                A1: {
+                    l: {
+                        mapsizePx: [3120, 2185],
+                        mapsizeMm: [820, 576]
+                    },
+                    p: {
+                        mapsizePx: [2185, 3120],
+                        mapsizeMm: [576, 820]
+                    }
+                },
+                A0: {
+                    l: {
+                        mapsizePx: [4430, 3120],
+                        mapsizeMm: [1173, 825]
+                    },
+                    p: {
+                        mapsizePx: [3120, 4430],
+                        mapsizeMm: [825, 1173]
                     }
                 }
             },

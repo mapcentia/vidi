@@ -4,7 +4,9 @@ var http = require('http');
 var fs = require('fs');
 var wkhtmltopdf = require('wkhtmltopdf');
 
-//wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
+wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
+//wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
+
 
 /**
  *
@@ -36,10 +38,10 @@ router.post('/api/print', function (req, response) {
             R: 0,
             T: 0,
             encoding: "utf-8",
-            //disableSmartShrinking: true,
-            //javascriptDelay: 2000,
+            dpi: 96,
+            disableSmartShrinking: true,
+            javascriptDelay: 400,
             windowStatus: "all_loaded",
-            //runScript: 'window.setTimeout(function(){window.status="all_loaded";},1);',
             debug: true,
             noStopSlowScripts: true,
             debugJavascript: true
