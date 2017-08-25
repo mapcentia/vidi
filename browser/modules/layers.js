@@ -258,18 +258,18 @@ module.exports = {
                                     cartoLayer.baseLayer = false;
                                     cartoLayer.id = v.f_table_schema + "." + v.f_table_name;
                                     cartoLayer.on("load", function () {
-                                        console.log("Layer loaded");
-                                        countLoaded++;
-                                        backboneEvents.get().trigger("doneLoading:layers", countLoaded);
+                                        me.decrementCountLoading(cartoLayer.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", cartoLayer.id);
+                                    });
+                                    cartoLayer.on("loading", function () {
+                                        me.incrementCountLoading(cartoLayer.id);
+                                        backboneEvents.get().trigger("startLoading:layers", cartoLayer.id);
                                     });
                                     cloud.get().addLayer(cartoLayer, v.f_table_name);
 
                                     // We switch the layer on/off, so they become ready for state.
                                     cloud.get().showLayer(cartoLayer.id);
                                     cloud.get().hideLayer(cartoLayer.id);
-
-                                    resolve();
-
 
                                     // Carto layer object is not complete(!?), so we poll until _url prop is set
                                     if (interactivity.length > 0) {
@@ -311,12 +311,15 @@ module.exports = {
                                                 });
                                                 cartoDbLayersready = true;
                                                 backboneEvents.get().trigger("ready:layers");
+                                                resolve();
                                             } else {
                                                 setTimeout(function () {
                                                     poll1()
                                                 }, 50);
                                             }
                                         }());
+                                    } else {
+                                        resolve();
                                     }
 
                                 });

@@ -896,3 +896,7 @@ h4 small {
   right: 0;
   left: auto;
 }
+
+.alert-dismissable .close,.alert-dismissible .close {
+  top: -7px;
+}
