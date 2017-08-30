@@ -8,21 +8,20 @@ router.get('/api/legend/:db', function (req, response) {
     var l = req.query.l, db = req.params.db, url, jsfile;
     url = config.host + "/api/v1/legend/json/" + db + "?l=" + l;
 
-    request.get(url, function (err, res, body) {
+    request.get(url)
 
-        if (err) {
+        .on('response', function (res) {
+            if (res.statusCode !== 200) {
+                response.header('content-type', 'application/json');
+                response.status(400).send({
+                    success: false,
+                    message: "Could not get the legend data."
+                });
+            } else {
+                response.send((res));
+            }
+        })
 
-            response.header('content-type', 'application/json');
-            response.status(400).send({
-                success: false,
-                message: "Could not get the legend data."
-            });
-
-            return;
-        }
-
-        response.send(JSON.parse(body));
-    })
 
 });
 module.exports = router;
