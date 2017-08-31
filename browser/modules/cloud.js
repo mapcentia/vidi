@@ -40,7 +40,9 @@ module.exports = {
             el: "map",
             zoomControl: false,
             numZoomLevels: 21,
-            fadeAnimation: false
+            // Set CSS animation true if not print
+            fadeAnimation: (window.vidiTimeout <= 500),
+            zoomAnimation: (window.vidiTimeout <= 500)
         });
 
         /**

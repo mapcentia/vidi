@@ -43,7 +43,8 @@ module.exports = module.exports = {
                                 title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
                             }
                             var u, showLayer = false;
-                            if (typeof v === "object") {
+                            if (typeof v === "object" && v.classes !== undefined) {
+
                                 for (u = 0; u < v.classes.length; u = u + 1) {
                                     if (v.classes[u].name !== "") {
                                         showLayer = true;
@@ -63,6 +64,7 @@ module.exports = module.exports = {
                                     list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                     list.append(li.append(classUl));
                                 }
+
                             }
                         });
                         $(el ? el : '#legend').html(list);
