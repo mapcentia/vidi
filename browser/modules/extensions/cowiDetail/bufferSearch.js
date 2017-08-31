@@ -569,7 +569,7 @@ var createStore = function (type) {
                         layer = drawnItemsMarker._layers[prop];
                         break;
                     }
-                    $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + "<br>B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
+                    $("#r-coord-val").html("L: " + ( Math.round(layer._latlng.lng * 10000) / 10000) + ", B: " + ( Math.round(layer._latlng.lat * 10000) / 10000));
 
 
                     if (feature.properties.radius === "500") {
