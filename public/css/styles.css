@@ -768,6 +768,7 @@ body {
   cursor: pointer;
 }
 .close {
+  top: -7px !important;
   font-size: 29px;
   font-weight: inherit;
 }
@@ -895,8 +896,4 @@ h4 small {
   width: 152px;
   right: 0;
   left: auto;
-}
-
-.alert-dismissable .close,.alert-dismissible .close {
-  top: -7px;
 }
