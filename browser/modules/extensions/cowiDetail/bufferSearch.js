@@ -355,6 +355,7 @@ module.exports = {
                         prefix: 'fa'
                     })
                 });//.bindPopup('<table id="detail-data-r" class="table"><tr><td>Adresse</td><td class="r-adr-val">-</td> </tr> <tr> <td>Koordinat</td> <td id="r-coord-val">-</td> </tr> <tr> <td>Indenfor 500 m</td> <td class="r500-val">-</td> </tr> <tr> <td>Indenfor 1000 m</td> <td class="r1000-val">-</td> </tr> </table>', {closeOnClick: false, closeButton: false, className: "point-popup"});
+                awm._vidi_marker = true;
                 drawnItemsMarker.addLayer(awm);//.openPopup();
                 $(".fa-circle-thin").removeClass("deactiveBtn");
 
