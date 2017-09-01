@@ -52,16 +52,12 @@ module.exports = module.exports = {
         if (visible) {
             try {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
-                el.prop('checked', true);
-                me.update(doNotLegend, el);
             } catch (e) {
 
                 layers.addLayer(name)
 
                     .then(function () {
                         cloud.get().map.addLayer(cloud.get().getLayersByName(name));
-                        el.prop('checked', true);
-                        me.update(doNotLegend, el);
 
                         try {
                             cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
@@ -70,6 +66,10 @@ module.exports = module.exports = {
                             //console.error(e.message);
                         }
                 });
+
+            } finally {
+                el.prop('checked', true);
+                me.update(doNotLegend, el);
 
             }
 
