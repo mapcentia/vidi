@@ -52,6 +52,8 @@ var urlVars = urlparser.urlVars;
  */
 var db = urlparser.db;
 
+var layers;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -62,6 +64,7 @@ module.exports = module.exports = {
         setting = o.setting;
         utils = o.utils;
         meta = o.meta;
+        layers = o.layers;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -72,17 +75,66 @@ module.exports = module.exports = {
         $('#main-tabs a[href="#vectorlayer-content"]').tab('show');
 
         if (!urlVars.px && !urlVars.py) {
+
             $(document).arrive('.refresh-vector-layer', function () {
                 $(this).on("click", function (e) {
-                    var id = ($(this).parent().prev().children("input").data('gc2-id'));
+                    var id = ($(this).parent().prev().children("input").data('gc2-id-vec'));
+                    layers.incrementCountLoading(id);
+                    backboneEvents.get().trigger("startLoading:layers");
                     store[id].reset();
                     store[id].load();
-                    $('*[data-gc2-id="' + id + '"]').parent().siblings().children().addClass("fa-spin");
+                    $('*[data-gc2-id-vec="' + id + '"]').parent().siblings().children().addClass("fa-spin");
                     e.stopPropagation();
                 });
 
             });
+
+
+            $(document).arrive('[data-gc2-id-vec]', function () {
+                $(this).on("change", function (e) {
+
+                    var id = ($(this).data('gc2-id-vec')), el = $('*[data-gc2-id="' + id + '"]');
+
+                    if ($(this).context.checked) {
+
+                        // Add the geojson layer to the layercontrol
+
+                        $('*[data-gc2-id-vec="' + id + '"]').parent().siblings().children().addClass("fa-spin");
+
+                        try {
+
+                            cloud.get().map.addLayer(cloud.get().getLayersByName(id));
+
+                        }
+                        catch (e) {
+                            console.info(id + " added to the map.");
+
+                            cloud.get().layerControl.addOverlay(store[id].layer, id);
+                            cloud.get().map.addLayer(cloud.get().getLayersByName(id));
+
+                        }
+                        finally {
+
+                            store[id].load();
+                            el.prop('checked', true);
+                            layers.incrementCountLoading(id);
+                            backboneEvents.get().trigger("startLoading:layers", id);
+                        }
+
+
+                    } else {
+
+                        store[id].reset();
+                        cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
+                        el.prop('checked', false);
+
+                    }
+
+                    e.stopPropagation();
+                });
+            });
         }
+
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
             for (i = 0; i < metaData.data.length; ++i) {
@@ -115,9 +167,11 @@ module.exports = module.exports = {
                                     onLoad: function () {
                                         var me = this;
                                         try {
-                                            $('*[data-gc2-id="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
+                                            $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
                                         } catch (e) {
                                         }
+                                        layers.decrementCountLoading(me.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", me.id);
                                         (function poll() {
                                             setTimeout(function () {
                                                 if ($('*[data-gc2-id="' + me.id + '"]').is(':checked')) {
@@ -132,10 +186,10 @@ module.exports = module.exports = {
                                     }
                                 });
                                 // Add the geojson layer to the layercontrol
-                                cloud.get().layerControl.addOverlay(store[id].layer, id);
-                                store[id].load();
+                                //cloud.get().layerControl.addOverlay(store[id].layer, id);
+                                //store[id].load();
                                 displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
-                                $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id="' + id + '">' + text + '</label><span><i class="refresh-vector-layer fa fa-refresh fa-lg" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
+                                $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id-vec="' + id + '">' + text + '</label><span><i class="refresh-vector-layer fa fa-refresh fa-lg" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
                                 l.push({});
                             }
                         }
