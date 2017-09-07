@@ -12,6 +12,9 @@ var urlparser = require('./urlparser');
 var db = urlparser.db;
 var BACKEND = require('../../config/config.js').backend;
 
+var CSSParser = require("jscssp").CSSParser;
+
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -73,8 +76,10 @@ module.exports = module.exports = {
                 break;
             case "cartodb":
                 setTimeout(function () {
-                    var key, legend, list = $("<ul/>"), li, classUl, title, className, rightLabel, leftLabel,
-                        visibleLayers = _layers.getLayers();
+                    var key, legend, list = $('<ul class="list-group"/>'), li, classUl, title, className, rightLabel,
+                        leftLabel,
+                        visibleLayers = _layers.getLayers(), cssParser = new CSSParser;
+
                     if (!visibleLayers) {
                         visibleLayers = "";
                     }
@@ -88,6 +93,10 @@ module.exports = module.exports = {
                             catch (e) {
                             }
                             var u, showLayer = false;
+
+                            layerName = metaDataKeys[key].f_table_schema + "." + metaDataKeys[key].f_table_name;
+                            checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(",") : "") > -1) ? "checked" : "";
+
                             switch (legend.type) {
                                 case "category":
                                     for (u = 0; u < legend.items.length; u = u + 1) {
@@ -102,7 +111,7 @@ module.exports = module.exports = {
                                             className = "<span class='legend-text'>" + legend.items[u].name + "</span>";
                                             classUl.append("<li><span style='display: inline-block; height: 15px; width: 15px; background-color: " + legend.items[u].value + ";'></span>" + className + "</li>");
                                         }
-                                        list.append($("<li>" + title + "</li>"));
+                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                         list.append(li.append(classUl));
                                     }
                                     break;
@@ -125,9 +134,68 @@ module.exports = module.exports = {
                                             }
                                         }
                                         classUl.append(rightLabel);
-                                        list.append($("<li>" + title + "</li>"));
+                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
                                         list.append(li.append(classUl));
                                     }
+                                    break;
+                                case "none":
+
+                                    var cssObj = cssParser.parse(metaDataKeys[key].cartocss).cssRules[0].declarations,
+                                        obj = {};
+
+                                    for (u = 0; u < cssObj.length; u = u + 1) {
+
+                                        switch (cssObj[u].property) {
+                                            case "polygon-fill":
+                                                obj.fill = cssObj[u].valueText;
+                                                break;
+                                            case "polygon-opacity":
+                                                obj.opacity = cssObj[u].valueText;
+                                                break;
+                                            case "line-color":
+                                                obj.lineColor = cssObj[u].valueText;
+                                                break;
+                                            case "line-width":
+                                                obj.lineWidth = cssObj[u].valueText;
+                                                break;
+
+                                            // Marker
+                                            case "marker-line-color":
+                                                obj.lineColor = cssObj[u].valueText;
+                                                break;
+                                            case "marker-line-width":
+                                                obj.lineWidth = cssObj[u].valueText;
+                                                break;
+                                            case "marker-fill-opacity":
+                                                obj.opacity = cssObj[u].valueText;
+                                                break;
+                                            case "marker-fill":
+                                                obj.fill = cssObj[u].valueText;
+                                                break;
+                                            case "marker-line-opacity":
+                                                obj.lineOpacity = cssObj[u].valueText;
+                                                break;
+                                        }
+                                    }
+
+                                    var rules = {
+                                        fill: obj.fill || "none",
+                                        lineColor: obj.lineColor || "none",
+                                        opacity: obj.opacity || "1",
+                                        lineWidth: obj.lineWidth || "0",
+                                        lineOpacity: obj.lineOpacity || "1",
+                                    };
+
+                                    showLayer = true;
+                                    if (showLayer) {
+                                        li = $("<li class=''/>");
+                                        classUl = $("<ul />");
+                                        className = "<span class='legend-text'>" + title + "</span>";
+                                        classUl.append("<li><span style='display: inline-block; height: 15px; width: 15px; border-style: solid; background-color: " + rules.fill + "; border-color: " + rules.lineColor + "; border-width: " + rules.lineWidth + "px; opacity: " + rules.opacity + " '></span></li>");
+                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
+                                        list.append(li.append(classUl));
+                                    }
+
                                     break;
                             }
                         }
