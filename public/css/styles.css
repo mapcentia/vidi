@@ -897,3 +897,8 @@ h4 small {
   right: 0;
   left: auto;
 }
+
+#layer-search-list label:hover {
+  cursor: pointer;
+  color: rgba(0,0,0,.54);
+}
