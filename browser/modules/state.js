@@ -126,7 +126,7 @@ module.exports = {
         }
     },
     init: function () {
-        var arr, i;
+        var arr, i, layerCount = 0;
         if (hashArr[0]) {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
@@ -136,6 +136,7 @@ module.exports = {
                     arr = hashArr[4].split(",");
                     for (i = 0; i < arr.length; i++) {
                         switchLayer.init(arr[i], true, false);
+                        layerCount++;
                     }
                 }
             }
@@ -180,6 +181,7 @@ module.exports = {
                      * Recreate print
                      */
                     if (response.data.print !== null) {
+                        window.vidiTimeout = window.vidiTimeout + (3000 * layerCount);
                         GeoJsonAdded = false;
                         parr = response.data.print;
                         v = parr;

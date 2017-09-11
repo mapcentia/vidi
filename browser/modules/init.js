@@ -226,7 +226,8 @@ module.exports = {
 
         //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
-            require('./extensions/**/*.js', {glob: true});
+           require('./extensions/*/*.js', {glob: true});
+           require('./extensions/*/browser/*.js', {glob: true});
         }
 
         if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
