@@ -31,7 +31,7 @@ module.exports = {
                 '<div id="placfes">' +
                 '<input name="layer-search" id="layer-search" type="search" class="form-control" placeholder="Søg efter data">' +
                 '</div>' +
-                '<div id="layer-search-list" style="height: calc(100% - 38px); overflow: auto"></div>' +
+                '<div id="layer-search-list" style="height: calc(100% - 38px); overflow: auto; padding: 4px"></div>' +
                 '</div>');
 
             $( "#info-modal").animate({
