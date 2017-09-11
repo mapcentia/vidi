@@ -167,18 +167,62 @@ module.exports = {
             method: "GET",
             success: function (response) {
                 var html, fieldsObj = {"f_table_title": "Title", "layergroup": "Gruppe"};
-                $.each(response, function (i, hit) {
-                    html = "<section class='layer-search-list-item' style='margin-bottom: 7px'>";
-                    html = html + "<a href='javascript:void(0)' class='list-group-item' data-gc2-sf-title='" + hit._source.f_table_title + "' data-gc2-layer-search-key='" + i + "'>";
-                    html = html + "<div>";
-                    $.each(fieldsObj, function (u, v) {
-                        html = html + "<div><small class='layer-search-item'>" + v + " </small><span>" + (query ? highlighter(query, _.unescape(hit._source[u])) : _.unescape(hit._source[u])) + "</span></div>";
-                    });
-                    html = html + "</div></a></section>";
-                    $("#layer-search-list").append(html);
 
-                });
-                $('a.list-group-item').on("click", function (e) {
+                var base64name, arr, groups = [], i, l, count, displayInfo, tooltip;
+
+                for (i = 0; i < response.length; ++i) {
+                    groups[i] = response[i]._source.layergroup;
+                }
+
+                arr = array_unique(groups);
+
+
+                for (i = 0; i < arr.length; ++i) {
+                    if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                        l = [];
+                        base64name = Base64.encode(arr[i]).replace(/=/g, "");
+
+                        // Add group container
+                        // Only if container doesn't exist
+                        // ===============================
+                        if ($("#layersearch-layer-panel-" + base64name).length === 0) {
+                            $("#layer-search-list").append('<div class="panel panel-default panel-layertree" id="layersearch-layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#layersearch-collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="layersearch-group-' + base64name + '" role="tabpanel"></ul></div>');
+
+                            // Append to inner group container
+                            // ===============================
+                            $("#layersearch-group-" + base64name).append('<ul class="list-group"><div id="layersearch-collapse' + base64name + '" class="accordion-body collapse"></div></ul>');
+                        }
+
+                        // Add layers
+                        // ==========
+                        for (var u = 0; u < response.length; ++u) {
+                            if (response[u]._source.layergroup == arr[i]) {
+
+                                var text = (response[u]._source.f_table_title === null || response[u]._source.f_table_title === "") ? response[u]._source.f_table_name : response[u]._source.f_table_title;
+
+                                $("#layersearch-collapse" + base64name ).append('<li class="layer-item list-group-item" data-gc2-layer-search-key="' + u + '"><label class="overlay-label">' + text + '</label></li>');
+                                l.push({});
+
+                            }
+                        }
+
+
+                        $("#layersearch-layer-panel-" + base64name + " span:eq(0)").html(l.length);
+
+                        // Remove the group if empty
+                        if (l.length === 0) {
+                            $("#layersearch-layer-panel-" + base64name).remove();
+                        }
+
+                        if (l.length < 6) {
+                            $("#layersearch-layer-panel-" + base64name).find("a").trigger("click");
+
+                        }
+                    }
+                }
+
+
+                $('li.list-group-item').on("click", function (e) {
                     var clickedLayer = $(this).data('gc2-layer-search-key'), currentLayers, alreadyThere;
                     e.stopPropagation();
                     response[clickedLayer]._source.layergroup = "Tilføjede lag";
@@ -197,7 +241,9 @@ module.exports = {
                         $(this).parent("section").fadeOut(100).fadeIn(100);
                         return;
                     }
-                    $(this).parent("section").fadeOut(200);
+
+                    $(this).fadeOut(200);
+
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     layerTree.init();
 
