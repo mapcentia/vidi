@@ -127,7 +127,8 @@ module.exports = {
     },
     init: function () {
         var arr, i, layerCount = 0;
-        if (hashArr[0]) {
+
+        var setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
             if (hashArr[1] && hashArr[2] && hashArr[3]) {
@@ -141,21 +142,27 @@ module.exports = {
                 }
             }
             legend.init();
-        } else {
-            // Set base layer to the first added one.
-            setBaseLayer.init(baseLayer.getBaseLayer()[0]);
-            var extent = setting.getExtent();
-            if (extent !== null) {
-                if (BACKEND === "cartodb") {
-                    cloud.get().map.fitBounds(extent);
-                } else {
-                    cloud.get().zoomToExtent(extent);
-                }
+        };
+
+        if (urlVars.k === undefined) {
+            if (hashArr[0]) {
+                setLayers()
             } else {
-                cloud.get().zoomToExtent();
+                // Set base layer to the first added one.
+                setBaseLayer.init(baseLayer.getBaseLayer()[0]);
+                var extent = setting.getExtent();
+                if (extent !== null) {
+                    if (BACKEND === "cartodb") {
+                        cloud.get().map.fitBounds(extent);
+                    } else {
+                        cloud.get().zoomToExtent(extent);
+                    }
+                } else {
+                    cloud.get().zoomToExtent();
+                }
             }
         }
-        if (typeof urlVars.k !== "undefined") {
+        else  {
             var parr, v, l, t, GeoJsonAdded = false;
             parr = urlVars.k.split("#");
             if (parr.length > 1) {
@@ -170,6 +177,9 @@ module.exports = {
                 },
                 scriptCharset: "utf-8",
                 success: function (response) {
+
+
+
                     if (response.data.bounds !== null) {
                         var bounds = response.data.bounds;
                         cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -177,6 +187,9 @@ module.exports = {
                     if (response.data.customData !== null) {
                         backboneEvents.get().trigger("on:customData", response.data.customData);
                     }
+
+
+
                     /**
                      * Recreate print
                      */
@@ -214,8 +227,14 @@ module.exports = {
                                         parr.pop();
                                     }
                                     $("#comment").html(decodeURIComponent(parr.join()));
+
+                                    if (hashArr[0]) {
+                                        setLayers()
+                                    }
+
                                     cloud.get().map.removeLayer(g);
-                                }, 300)
+
+                                }, 0)
                             }
                         });
                     }
