@@ -504,10 +504,6 @@ div.olControlZoom {
   float: right;
   display: none;
 }
-.layer-item .fa {
-  float: right;
-  display: none;
-}
 .leaflet-control-layers {
   display: none;
 }
@@ -897,8 +893,10 @@ h4 small {
   right: 0;
   left: auto;
 }
-
-#layer-search-list label:hover {
+#layer-search-list .layer-item:not(.layer-search-is-added) label:hover {
   cursor: pointer;
-  color: rgba(0,0,0,.54);
+  color: rgba(0, 0, 0, 0.54);
+}
+#layer-search-list .layer-item:not(.layer-search-is-added) i {
+  display: none;
 }

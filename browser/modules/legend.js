@@ -94,6 +94,9 @@ module.exports = module.exports = {
                             }
                             var u, showLayer = false;
 
+
+                            legend.type = legend.type === "custom" ? "none" : legend.type;
+
                             layerName = metaDataKeys[key].f_table_schema + "." + metaDataKeys[key].f_table_name;
                             checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(",") : "") > -1) ? "checked" : "";
 

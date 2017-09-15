@@ -60,6 +60,8 @@ var sort = [
     {"f_table_title.raw": "asc"}
 ];
 
+var addedLayers = [];
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -120,7 +122,6 @@ module.exports = {
             terms = []
         });
         qJson.query.bool.should = med;
-        console.log(qJson);
         this.run(qJson, query);
     },
 
@@ -200,12 +201,14 @@ module.exports = {
 
                                 var text = (response[u]._source.f_table_title === null || response[u]._source.f_table_title === "") ? response[u]._source.f_table_name : response[u]._source.f_table_title;
 
-                                $("#layersearch-collapse" + base64name ).append('<li class="layer-item list-group-item" data-gc2-layer-search-key="' + u + '"><label class="overlay-label">' + text + '</label></li>');
+                                $("#layersearch-collapse" + base64name ).append('<li id="layer-search-' + u + '" class="layer-item list-group-item" data-gc2-layer-search-key="' + u + '"><label class="overlay-label">' + text + ' <i class="fa fa-check"></i></label></li>');
                                 l.push({});
 
+                                if (addedLayers.indexOf(response[u]._source.f_table_schema + "." + response[u]._source.f_table_name) !== -1) {
+                                    $("#layer-search-" + u).addClass("layer-search-is-added");
+                                }
                             }
                         }
-
 
                         $("#layersearch-layer-panel-" + base64name + " span:eq(0)").html(l.length);
 
@@ -216,17 +219,17 @@ module.exports = {
 
                         if (l.length < 6) {
                             $("#layersearch-layer-panel-" + base64name).find("a").trigger("click");
-
                         }
                     }
                 }
 
-
-                $('li.list-group-item').on("click", function (e) {
+                $('li.list-group-item:not(.layer-search-is-added)').on("click", function (e) {
                     var clickedLayer = $(this).data('gc2-layer-search-key'), currentLayers, alreadyThere;
+                    $(this).addClass("layer-search-is-added");
                     e.stopPropagation();
                     response[clickedLayer]._source.layergroup = "Tilføjede lag";
                     currentLayers = meta.getMetaData().data;
+
                     $.each(currentLayers, function (i, v) {
                         if (v.f_table_name === response[clickedLayer]._source.f_table_name && v.f_table_schema === response[clickedLayer]._source.f_table_schema) {
                             jquery.snackbar({
@@ -237,12 +240,12 @@ module.exports = {
                             alreadyThere = true;
                         }
                     });
+
                     if (alreadyThere) {
-                        $(this).parent("section").fadeOut(100).fadeIn(100);
                         return;
                     }
 
-                    $(this).fadeOut(200);
+                    addedLayers.push(response[clickedLayer]._source.f_table_schema + "." + response[clickedLayer]._source.f_table_name);
 
                     meta.addMetaData({"data": [response[clickedLayer]._source]});
                     layerTree.init();
