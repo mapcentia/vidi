@@ -42,11 +42,6 @@ var BACKEND = require('../../config/config.js').backend;
 
 
 /**
- * @type {string}
- */
-var host;
-
-/**
  *
  */
 var meta;
