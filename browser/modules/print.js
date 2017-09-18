@@ -99,10 +99,6 @@ module.exports = {
             }
             $("#select-scale").change(function (e) {
                 var s = e.target.value;
-                if (isNaN(s) || s < 1) {
-                    alert(__("Not a valid scale"));
-                }
-                console.log(s);
                 scale = s;
                 scales.push(s);
                 change();
@@ -191,6 +187,11 @@ module.exports = {
      */
     print: function (endEventName, customData) {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null;
+
+        if (isNaN(scale) || scale < 200) {
+            alert(__("Not a valid scale. Must be over 200."));
+            return false;
+        }
 
         backboneEvents.get().trigger("start:print");
 
@@ -333,6 +334,8 @@ module.exports = {
                 }
             }
         });
+
+        return true;
     },
 
     /**

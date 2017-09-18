@@ -276,9 +276,11 @@ module.exports = module.exports = {
         });
 
         $("#start-print-btn").on("click", function () {
-            print.print();
-            $(this).button('loading');
-            $("#get-print-fieldset").prop("disabled", true);
+            if (print.print()) {
+                $(this).button('loading');
+                $("#get-print-fieldset").prop("disabled", true);
+            }
+
         });
 
         backboneEvents.get().on("off:print", function () {

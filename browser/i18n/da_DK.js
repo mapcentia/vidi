@@ -146,7 +146,8 @@ module.exports = {
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
         "Cancel": "Fortryd",
         "Ok": "Ok",
-        "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?"
+        "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
+        "Not a valid scale. Must be over 200.": "Ikke en gyldig målestok. Den skal være over 200."
     }
 };

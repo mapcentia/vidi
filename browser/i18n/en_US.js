@@ -143,6 +143,8 @@ module.exports = {
         "Enter a text for the marker or cancel to add without text": "Enter a text for the marker or cancel to add without text",
         "Cancel": "Cancel",
         "Ok": "Ok",
-        "Apply default style settings for this drawing?": "Apply default style settings for this drawing?"
+        "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
+
+        "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200."
     }
 };
