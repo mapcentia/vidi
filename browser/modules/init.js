@@ -122,8 +122,9 @@ module.exports = {
             gc2i18n.dict.printDataTime = decodeURIComponent(urlVars.td); // TODO typo
             gc2i18n.dict.printDateTime = decodeURIComponent(urlVars.td);
             gc2i18n.dict.printDate = decodeURIComponent(urlVars.d);
+            window.vidiTimeout = 500;
         } else {
-            window.vidiTimeout = 1000;
+            window.vidiTimeout = 0;
         }
 
         if (urlVars.l) {

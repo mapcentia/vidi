@@ -56,18 +56,10 @@ var meta;
  */
 var backboneEvents;
 
-var countLoaded = 0;
-var countLoading = 0;
-
 var mustache = require('mustache');
 
-try {
-    host = require('../../config/config.js').gc2.host;
-    // Strip protocol
-    //host = host.replace("https:","").replace("http:","");
-} catch (e) {
-    console.info(e.message);
-}
+
+var host = require("./connection").getHost();
 
 var switchLayer;
 
