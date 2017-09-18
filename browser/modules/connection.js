@@ -13,17 +13,9 @@
 module.exports = {
     getHost: function () {
         var host;
-        try {
-            host = require('../../config/config.js').gc2.exHost;
-        } catch (e) {
-            console.info(e.message);
-            try {
-                host = require('../../config/config.js').gc2.host;
-            }
-            catch (e) {
-                console.info(e.message);
-            }
-        }
+
+        host = require('../../config/config.js').gc2.host;
+
         return host;
     }
 };
