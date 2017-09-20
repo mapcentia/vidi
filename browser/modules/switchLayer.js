@@ -50,14 +50,20 @@ module.exports = module.exports = {
     init: function (name, visible, doNotLegend) {
         var me = this, el = $('*[data-gc2-id="' + name + '"]');
         if (visible) {
+
             try {
+
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
+                me.update(doNotLegend, el);
+
             } catch (e) {
 
                 layers.addLayer(name)
 
                     .then(function () {
+
                         cloud.get().map.addLayer(cloud.get().getLayersByName(name));
+                        me.update(doNotLegend, el);
 
                         try {
                             cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
@@ -69,8 +75,6 @@ module.exports = module.exports = {
 
             } finally {
                 el.prop('checked', true);
-                me.update(doNotLegend, el);
-
             }
 
             try {
