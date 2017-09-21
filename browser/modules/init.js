@@ -273,7 +273,10 @@ module.exports = {
         $("#loadscreentext").html(__("Loading data"));
 
         if (window.vidiConfig.activateMainTab) {
-            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+            setTimeout(function () {
+                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+
+            }, 200);
         }
 
         $(window).resize(_.debounce(function () {
