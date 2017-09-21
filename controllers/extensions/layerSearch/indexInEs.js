@@ -185,7 +185,7 @@ router.get('/api/extension/layersearch/index/:db', function (req, response) {
                                 }
 
                                 // If GC2, when only index layers, which are flagged
-                                if ((BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta).layer_search_include) || BACKEND === "cartodb") {
+                                if ((BACKEND === "gc2" && layerObj.meta && JSON.parse(layerObj.meta) !== null && JSON.parse(layerObj.meta).layer_search_include) || BACKEND === "cartodb") {
                                     //layerObj.infowindow = null;
                                     bulkArr.push({index: {_index: indexName, _type: 'meta', _id: layerObj.f_table_schema + "." + layerObj.f_table_name}});
                                     bulkArr.push(layerObj);
