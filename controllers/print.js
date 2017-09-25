@@ -39,6 +39,7 @@ router.post('/api/print', function (req, response) {
             T: 0,
             encoding: "utf-8",
             dpi: 96,
+            imageQuality: 100,
             disableSmartShrinking: true,
             javascriptDelay: 400,
             windowStatus: "all_loaded",
