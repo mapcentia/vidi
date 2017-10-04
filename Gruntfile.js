@@ -94,6 +94,7 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap-table/dist/bootstrap-table.js',
                         'public/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js',
                         'public/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js',
+                        'public/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js',
                         'public/bower_components/tableExport.jquery.plugin/tableExport.min.js',
                         'public/bower_components/bootstrap-material-design/dist/js/ripples.js',
                         'public/bower_components/bootstrap-material-design/dist/js/material.js',
