@@ -50,7 +50,7 @@ var exId = "coordinates";
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 
-module.exports = module.exports = {
+module.exports = {
 
     /**
      *
