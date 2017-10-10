@@ -66,11 +66,12 @@ module.exports = {
         ul = $('<ul class="dropdown-menu"></ul>').appendTo('#' + exId);
 
         $.each(languages, function (i, v) {
-            ul.append('<li><a data-gc2-language="' + i + '" href="javascript:void(0)">' + v + '</a></li>');
+            ul.append('<li><a data-gc2-language="' + i + '" href="javascript:void(0)">' + v.txt + '</a></li>');
         });
 
         $("[data-gc2-language]").on("click", function (e) {
-            var url = anchor.getUri() + "?" + anchor.getParam() +  "&locale=" + $(this).data('gc2-language') + anchor.getAnchor();
+            var locale = $(this).data('gc2-language'),
+                url = anchor.getUri(languages[locale].schema) + "?" + anchor.getParam() +  "&locale=" + locale + anchor.getAnchor();
             location.href = url;
         });
     }

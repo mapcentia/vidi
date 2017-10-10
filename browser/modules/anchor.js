@@ -47,7 +47,8 @@ module.exports = {
      * Get the URL anchor for current state
      * @returns {string}
      */
-    getUri: function(){
+    getUri: function(s){
+        schema = s || schema;
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "");
     },
 
