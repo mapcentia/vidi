@@ -9,7 +9,6 @@
  *
  * @type {*|exports|module.exports}
  */
-var languages = require("../../../../config/config.js").extensionConfig.languages;
 
 
 /**
@@ -58,7 +57,8 @@ module.exports = {
      *
      */
     init: function () {
-        var ul;
+        var ul, languages = require("../../../../config/config.js").extensionConfig.languages;
+
         utils.createNavItem(exId, true);
 
         $('<a href="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">' + __("Languages") + '<b class="caret"></b></a>').appendTo('#' + exId);
