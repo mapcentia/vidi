@@ -42,6 +42,28 @@ module.exports = {
         paramStr = param.join("&");
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "")  + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     },
+
+    /**
+     * Get the URL anchor for current state
+     * @returns {string}
+     */
+    getUri: function(){
+        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "");
+    },
+
+    getParam: function(){
+        var param = [], paramStr, parr;
+        $.each(urlVars, function (i, v) {
+            parr = v.split("#");
+            if (parr.length > 1) {
+                parr.pop();
+            }
+            param.push(i + "=" + parr.join());
+        });
+        paramStr = param.join("&");
+        return paramStr;
+    },
+
     /**
      * Get the URL anchor for current state
      * @returns {string}

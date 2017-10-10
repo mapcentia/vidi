@@ -29,6 +29,10 @@ module.exports = {
             '</div>').appendTo("#side-panel .main-content");
     },
 
+    createNavItem: function (id, dropdown) {
+      $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
+    },
+
     injectCSS: function (css) {
         $("head").append("<style>" + css + "</style>");
     },
