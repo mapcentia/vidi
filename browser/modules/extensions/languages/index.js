@@ -71,7 +71,7 @@ module.exports = {
 
         $("[data-gc2-language]").on("click", function (e) {
             var locale = $(this).data('gc2-language'),
-                url = anchor.getUri(languages[locale].schema) + "?" + anchor.getParam() +  "&locale=" + locale + anchor.getAnchor();
+                url = anchor.getUri(languages[locale].schema) + "?" + anchor.getParam() +  "&locale=" + locale + anchor.getAnchor(languages[locale].schema);
             location.href = url;
         });
     }
