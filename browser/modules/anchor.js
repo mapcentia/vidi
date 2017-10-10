@@ -19,7 +19,7 @@ var layers;
 var anchor = function (s) {
     var layerStr, newArr = [], p;
 
-    if (layers.getLayers() !== "" && s) {
+    if (layers.getLayers() && s) {
         let arr = layers.getLayers().split(",");
         $.each(arr, function (i, v) {
             newArr.push(s + "." + v.split(".")[1])
