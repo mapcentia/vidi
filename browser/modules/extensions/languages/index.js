@@ -9,7 +9,8 @@
  *
  * @type {*|exports|module.exports}
  */
-var cloud;
+var languages = require("../../../../config/config.js").extensionConfig.languages;
+
 
 /**
  *
@@ -28,23 +29,11 @@ var backboneEvents;
  */
 var anchor;
 
-
 /**
  *
  * @type {string}
  */
 var exId = "languages";
-
-/**
- *
- */
-var clicktimer;
-
-/**
- *
- */
-var mapObj;
-
 
 /**
  *
@@ -69,16 +58,20 @@ module.exports = {
      *
      */
     init: function () {
+        var ul;
         utils.createNavItem(exId, true);
 
         $('<a href="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">' + __("Languages") + '<b class="caret"></b></a>').appendTo('#' + exId);
 
-        $('<ul class="dropdown-menu"><li><a data-gc2-language="da_DK" href="javascript:void(0)">Dansk</a></li><li><a data-gc2-language="gl_GL" href="javascript:void(0)">Grønlandsk</a></li></ul>').appendTo('#' + exId);
+        ul = $('<ul class="dropdown-menu"></ul>').appendTo('#' + exId);
+
+        $.each(languages, function (i, v) {
+            ul.append('<li><a data-gc2-language="' + i + '" href="javascript:void(0)">' + v + '</a></li>');
+        });
 
         $("[data-gc2-language]").on("click", function (e) {
-            var url = anchor.init(), token = url.indexOf("?") === -1 ? "?" : "&";
-            location.href = url  + token + "locale=" + $(this).data('gc2-language');
-            location.reload();
+            var url = anchor.getUri() + "?" + anchor.getParam() +  "&locale=" + $(this).data('gc2-language') + anchor.getAnchor();
+            location.href = url;
         });
     }
 };
