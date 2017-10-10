@@ -148,6 +148,8 @@ module.exports = {
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
-        "Not a valid scale. Must be over 200.": "Ikke en gyldig målestok. Den skal være over 200."
+        "Not a valid scale. Must be over 200.": "Ikke en gyldig målestok. Den skal være over 200.",
+
+        "Languages": "Sprog"
     }
 };
