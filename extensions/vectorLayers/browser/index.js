@@ -39,7 +39,7 @@ var backboneEvents;
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *
@@ -58,7 +58,7 @@ var layers;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     set: function (o) {
         cloud = o.cloud;
         setting = o.setting;

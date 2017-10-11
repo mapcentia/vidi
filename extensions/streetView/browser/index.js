@@ -276,7 +276,7 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max);
 
         // Append to DOM
         //==============

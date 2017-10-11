@@ -5,7 +5,7 @@
 
 'use strict';
 
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 var cloud;
 var clicktimer;
 var meta;
@@ -93,7 +93,7 @@ module.exports = {
                                 });
                                 var height;
                                 try {
-                                    height = require('./../../height')().max - 400;
+                                    height = require('./../../../browser/modules/height')().max - 400;
                                 } catch (e) {
                                     console.info(e.message);
                                     height = 0;

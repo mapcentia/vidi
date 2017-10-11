@@ -10,7 +10,7 @@ var conflictSearch;
 var backboneEvents;
 var reportRender;
 var infoClick;
-var config = require('../../../../config/config.js');
+var config = require('../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
 

@@ -28,7 +28,7 @@ var backboneEvents;
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *
@@ -45,7 +45,7 @@ var db = urlparser.db;
  *
  * @type {*|exports|module.exports}
  */
-var search = require('./../../search/danish');
+var search = require('./../../../browser/modules/search/danish');
 
 /**
  *
@@ -99,7 +99,7 @@ module.exports = module.exports = {
      */
     init: function () {
 
-        utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../height')().max);
+        utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../../browser/modules/height')().max);
 
         // Append to DOM
         //==============

@@ -57,7 +57,7 @@ module.exports = {
      *
      */
     init: function () {
-        var ul, languages = require("../../../../config/config.js").extensionConfig.languages;
+        var ul, languages = require("../../../config/config.js").extensionConfig.languages;
 
         utils.createNavItem(exId, true);
 

@@ -28,7 +28,7 @@ var ReactDOM = require('react-dom');
 var jquery = require('jquery');
 require('snackbarjs');
 
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 
 var db = urlparser.db;
 
@@ -44,7 +44,7 @@ module.exports = {
         return this;
     },
     init: function () {
-        utils.createMainTab("sharing", "Sharing", "fdff", require('./../../height')().max);
+        utils.createMainTab("sharing", "Sharing", "fdff", require('./../../../browser/modules/height')().max);
         ReactDOM.render(
             <Sharing />,
             document.getElementById('sharing')

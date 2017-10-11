@@ -226,15 +226,14 @@ module.exports = {
 
         //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
-           require('./extensions/*/*.js', {glob: true});
-           require('./extensions/*/browser/*.js', {glob: true});
+           require('./../../extensions/*/browser/*.js', {glob: true});
         }
 
         if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
             $.each(vidiConfig.extensions.browser, function (i, v) {
                 modules.extensions[Object.keys(v)[0]] = {};
                 $.each(v[Object.keys(v)[0]], function (n, m) {
-                    modules.extensions[Object.keys(v)[0]][m] = require('./extensions/' + Object.keys(v)[0] + '/' + m + ".js");
+                    modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
                     modules.extensions[Object.keys(v)[0]][m].set(modules);
                 })
             });

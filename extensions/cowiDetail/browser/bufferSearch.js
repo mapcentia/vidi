@@ -11,7 +11,7 @@ var drawnItemsMarker = new L.FeatureGroup();
 var drawnItemsPolygon = new L.FeatureGroup();
 var drawControl;
 var setBaseLayer;
-var urlVars = require('./../../urlparser').urlVars;
+var urlVars = require('./../../../browser/modules/urlparser').urlVars;
 var hostname = "https://kort.detailhandelsportalen.dk";
 var backboneEvents;
 var isochrone;

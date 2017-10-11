@@ -44,7 +44,7 @@ var switchLayer;
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *

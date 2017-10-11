@@ -27,7 +27,7 @@ var utils;
  *
  * @type {*|exports|module.exports}
  */
-var search = require('./../../search/danish');
+var search = require('./../../../browser/modules/search/danish');
 
 /**
  *
@@ -39,7 +39,7 @@ var backboneEvents;
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./../../urlparser');
+var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *
@@ -117,7 +117,7 @@ var dataItems = new L.FeatureGroup();
  *
  * @type {string}
  */
-var BACKEND = require('../../../../config/config.js').backend;
+var BACKEND = require('../../../config/config.js').backend;
 
 /**
  *
@@ -277,7 +277,7 @@ module.exports = module.exports = {
         });
 
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../height')().max);
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max);
         $("#conflict").append(dom);
 
         // DOM created
@@ -351,7 +351,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("reset:infoClick");
 
             // Setup and add draw control
-            L.drawLocal = require('./../../drawLocales/advancedInfo.js');
+            L.drawLocal = require('./../../../browser/modules/drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
@@ -534,7 +534,7 @@ module.exports = module.exports = {
                 coord = layer.getLatLng();
             }
             // Get utm zone
-            var zone = require('./../../utmZone.js').getZone(coord.lat, coord.lng);
+            var zone = require('./../../../browser/modules/utmZone.js').getZone(coord.lat, coord.lng);
             var crss = {
                 "proj": "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs",
                 "unproj": "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"
