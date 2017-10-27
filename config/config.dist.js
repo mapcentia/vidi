@@ -125,9 +125,9 @@ module.exports = {
 
     "extensions": {
         "browser": [
-            /*{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},*/
-            /*{"layerSearch": ["index", "controller"]},*/
-            {"streetView": ["index", "controller"]},
+            //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
+            //{"layerSearch": ["index", "controller"]},
+            {"streetView": ["index"]},
             {"coordinates": ["index"]}
         ],
         "server": [
@@ -267,9 +267,9 @@ module.exports = {
     "baseLayers": [
 
         // Pre-defined base layers
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
+        {"id": "osm", "name": "Open Street Map"},
 
-        {"id": "hereNormalNightGrey", "name": "hereNormalNightGrey"},
+        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
 
         // Base layer from GC2
         {
