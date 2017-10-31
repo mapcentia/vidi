@@ -165,7 +165,7 @@ module.exports = {
                                     if (property.value.querable) {
                                         fi.push({
                                             title: property.value.alias || property.key,
-                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + feature.properties[property.key] + "'>Link</a>" :
+                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + property.value.linkprefix + feature.properties[property.key] + "'>Link</a>" :
                                                 property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
                                                     feature.properties[property.key]
                                         });
