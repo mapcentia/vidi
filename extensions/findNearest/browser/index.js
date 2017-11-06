@@ -39,7 +39,7 @@ var urlVars = urlparser.urlVars;
 /**
  * @type {string}
  */
-var db = urlparser.db;
+var db = "baselayers";
 
 /**
  *
@@ -99,7 +99,9 @@ module.exports = module.exports = {
      */
     init: function () {
 
-        utils.createMainTab("findnearest", "Find nærmest", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../../browser/modules/height')().max);
+        var me = this;
+
+        utils.createMainTab("findnearest", "Skoleveje", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../../browser/modules/height')().max);
 
         // Append to DOM
         //==============
@@ -110,9 +112,13 @@ module.exports = module.exports = {
         // ================================
 
         search.init(function () {
+
             console.log(this.layer.toGeoJSON().features["0"].geometry.coordinates);
+
             cloud.get().map.addLayer(this.layer);
-            process(this.layer.toGeoJSON().features["0"].geometry.coordinates);
+            me.addPointLayer(this.layer.toGeoJSON().features["0"].geometry.coordinates[0], this.layer.toGeoJSON().features["0"].geometry.coordinates[1]);
+            process(this.layer.toGeoJSON().features["0"].geometry.coordinates, this.layer.toGeoJSON().features["0"].properties.kommunekode);
+
         }, "findnearest-custom-search", true);
 
     },
@@ -140,19 +146,24 @@ module.exports = module.exports = {
         }
     },
 
-    addPointLayer: function () {
+    addPointLayer: function (x, y) {
         var id = "_findNearestPoints";
+
+        try {
+            this.removePointLayer()
+        } catch(e) {}
+
         store = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
-            host: "",
+            host: "http://127.0.0.1",
             db: db,
-            uri: "/api/sql",
+            //uri: "/api/sql",
             clickable: true,
             id: id,
             name: id,
             lifetime: 0,
-            sql: "SELECT * FROM fot_test.skoler",
+            sql: "SELECT * FROM fot.skoler WHERE (ST_Transform(the_geom, 25832) && ST_buffer(ST_Transform(ST_GeometryFromText('POINT(" + x + " " + y + ")', 4326), 25832), 3000))",
             pointToLayer: function (feature, latlng) {
                 return L.marker(latlng, {
                     icon: L.AwesomeMarkers.icon({
@@ -167,7 +178,7 @@ module.exports = module.exports = {
                 layer.bindPopup(feature.properties['navn']);
             },
             onLoad: function () {
-                var me = this;
+                cloud.get().zoomToExtentOfgeoJsonStore(this);
             }
         });
         // Add the geojson layer to the layercontrol
@@ -200,14 +211,14 @@ cleanUp = function () {
  *
  * @param p
  */
-process = function (p) {
+process = function (p, code) {
     cleanUp();
     backboneEvents.get().trigger("start:findNearestProcess");
 
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/findNearest",
-        data: JSON.stringify({"db": db, "p": p}),
+        data: JSON.stringify({"db": db, "p": p, "komkode": code}),
         dataType: "json",
         scriptCharset: "utf-8",
         contentType: "application/json; charset=utf-8",

@@ -266,6 +266,19 @@ module.exports = {
 
     "baseLayers": [
 
+        {
+            "id": "geodk.bright",
+            "name": "GeoDanmark kort",
+            "db": "baselayers",
+            "host": "https://gc2.io",
+            "config": {
+                "maxZoom": 21,
+                "maxNativeZoom": 19,
+                "attribution": "&copy; SDFE & MapCentia ApS"
+            }
+        },
+
+
         // Pre-defined base layers
         {"id": "osm", "name": "Open Street Map"},
 

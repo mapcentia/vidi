@@ -12,10 +12,14 @@ moment.locale("da_DK");
 var BACKEND = config.backend;
 
 router.post('/api/extension/findNearest', function (req, response) {
-    var db = req.body.db, sql, url, jsfile;
+    var db = "baselayers", sql, url, jsfile;
     var point = req.body.p;
-    sql = "SELECT * FROM fot_test.skoler";
-    url = config.host + "/api/v1/sql/" + db + "?q=" + sql + "&srs=4326";
+    var code = req.body.komkode;
+    sql = "SELECT * FROM fot.skoler WHERE (the_geom && ST_buffer(ST_Transform(ST_GeometryFromText('POINT(" + point[0] + " " + point[1] + ")', 4326), 25832), 3000))";
+
+    url = "http://127.0.0.1/api/v2/sql/" + db + "?q=" + encodeURIComponent(sql) + "&srs=4326";
+
+    console.log(url);
     http.get(url, function (res) {
         if (res.statusCode != 200) {
             response.header('content-type', 'application/json');
@@ -50,12 +54,13 @@ router.post('/api/extension/findNearest', function (req, response) {
                     response.send(routes);
 
                 } else {
-                    var sql = "SELECT seq,gid,name,heading,cost,length,geom::GEOMETRY(Linestring,25832) from pgr_fromAtoB('fot_test.vejmidte_brudt'," +
-                        point[0] + "," +
-                        point[1] + "," +
-                        points[count].geometry.coordinates[0] + "," +
-                        points[count].geometry.coordinates[1] +
-                        ")",
+                    var sql = "SELECT seq,gid,name,heading,cost,length,geom::GEOMETRY(Linestring,25832) from pgr_fromAtoB('fot.vejmidte_brudt'," +
+                            point[0] + "," +
+                            point[1] + "," +
+                            points[count].geometry.coordinates[0] + "," +
+                            points[count].geometry.coordinates[1] + "," +
+                            "'" + code + "'" +
+                            ")",
                         postData = "q=" + sql + "&srs=4326&lifetime=0&client_encoding=UTF8",
                         options = {
                             method: 'POST',

@@ -71,6 +71,10 @@ module.exports = {
      */
     init: function () {
 
+        /**
+         *
+         * Native Leaflet object
+         */
         mapObj = cloud.get().map;
 
         /**

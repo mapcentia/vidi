@@ -553,7 +553,7 @@ module.exports = {
                 if (name === "adresse") {
                     placeStore.db = ADB;
                     placeStore.host = AHOST;
-                    placeStore.sql = "SELECT id,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
+                    placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
                 }
                 searchString = datum.value;
                 placeStore.load();
