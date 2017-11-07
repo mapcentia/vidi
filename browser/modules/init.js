@@ -255,7 +255,7 @@ module.exports = {
 
         function setHeight() {
             try {
-                var max = $(document).height() - $('.tab-pane').offset().top - 120;
+                var max = $(document).height() - $('.tab-pane').offset().top - 130;
             } catch (e) {
                 console.info(e.message);
             }

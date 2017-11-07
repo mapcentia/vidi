@@ -12,16 +12,17 @@ moment.locale("da_DK");
 var BACKEND = config.backend;
 
 router.post('/api/extension/findNearest', function (req, response) {
-    var db = "baselayers", sql, url, jsfile;
+    var db = "dk", sql, url, jsfile;
     var point = req.body.p;
     var code = req.body.komkode;
     sql = "SELECT * FROM fot.skoler WHERE (the_geom && ST_buffer(ST_Transform(ST_GeometryFromText('POINT(" + point[0] + " " + point[1] + ")', 4326), 25832), 3000))";
 
-    url = "http://127.0.0.1/api/v2/sql/" + db + "?q=" + encodeURIComponent(sql) + "&srs=4326";
+    url = "http://gc2.io/api/v2/sql/" + db + "?q=" + encodeURIComponent(sql) + "&srs=4326";
 
     console.log(url);
     http.get(url, function (res) {
         if (res.statusCode != 200) {
+            console.log(res);
             response.header('content-type', 'application/json');
             response.status(res.statusCode).send({
                 success: false,
@@ -64,9 +65,9 @@ router.post('/api/extension/findNearest', function (req, response) {
                         postData = "q=" + sql + "&srs=4326&lifetime=0&client_encoding=UTF8",
                         options = {
                             method: 'POST',
-                            host: "127.0.0.1",
-                            port: "3000",
-                            path: '/api/sql/' + db,
+                            host: "gc2.io",
+                            port: "80",
+                            path: '/api/v2/sql/dk',
                             headers: {
                                 'Content-Type': 'application/x-www-form-urlencoded ',
                                 'Content-Length': postData.length
@@ -75,6 +76,7 @@ router.post('/api/extension/findNearest', function (req, response) {
                     console.log(postData);
                     var req = http.request(options, function (res) {
                         if (res.statusCode != 200) {
+                            console.log(res);
                             response.header('content-type', 'application/json');
                             response.status(res.statusCode).send({
                                 success: false,

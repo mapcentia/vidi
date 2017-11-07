@@ -39,7 +39,7 @@ var urlVars = urlparser.urlVars;
 /**
  * @type {string}
  */
-var db = "baselayers";
+var db = "dk";
 
 /**
  *
@@ -101,7 +101,7 @@ module.exports = module.exports = {
 
         var me = this;
 
-        utils.createMainTab("findnearest", "Skoleveje", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt.", require('./../../../browser/modules/height')().max);
+        utils.createMainTab("findnearest", "Skoleveje", "Skriv en startadresse i feltet. Trafiksikre veje til kommunens skoler kan derefter vises på kortet, ved at klikke fluebenet til på listen. Strækninger via stier bliver vist med grønt og via vej bliver vist med rødt. Bemærk, at der ikke tages højde for trafikretning. Baseret på GeoDanmark vejmidter.", require('./../../../browser/modules/height')().max);
 
         // Append to DOM
         //==============
@@ -156,7 +156,7 @@ module.exports = module.exports = {
         store = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
-            host: "http://127.0.0.1",
+            host: "https://gc2.io",
             db: db,
             //uri: "/api/sql",
             clickable: true,
