@@ -165,6 +165,8 @@ module.exports = {
             cloud.get().map.off('draw:deletestart');
             cloud.get().map.off('draw:deletestop');
             cloud.get().map.off('draw:deleted');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:edited');
 
             // Bind events
             cloud.get().map.on('draw:editstart', function (e) {
@@ -427,8 +429,16 @@ module.exports = {
         $("#draw-btn").prop("checked", false);
         // Unbind events
         cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:drawstart');
+        cloud.get().map.off('draw:drawstop');
+        cloud.get().map.off('draw:editstart');
+        cloud.get().map.off('draw:editstop');
+        cloud.get().map.off('draw:deletestart');
+        cloud.get().map.off('draw:deletestop');
         cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:edited');
+
         // Call destruct functions
         $.each(destructFunctions, function (i, v) {
             v();
