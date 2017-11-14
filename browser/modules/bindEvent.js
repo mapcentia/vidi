@@ -155,15 +155,28 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
-            if ($(document).width() > 767 && isStarted === false) {
-                setTimeout(
-                    function () {
-                        $(".navbar-toggle").trigger("click");
-                    }, 50
-                );
-                isStarted = true;
-            }
-            $("#loadscreen").hide();
+
+            setTimeout(
+                function () {
+                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                    if ($(document).width() < 767 && isStarted === false) {
+                        setTimeout(
+                            function () {
+                                $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                            }, 200
+                        );
+                        isStarted = true;
+                    }
+                }, 200
+            );
+
+            setTimeout(
+                function () {
+                   $("#loadscreen").fadeOut(200);
+
+                }, 600
+            );
+
         });
 
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {

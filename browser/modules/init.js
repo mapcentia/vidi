@@ -281,7 +281,7 @@ module.exports = {
         $(window).resize(_.debounce(function () {
             $("#myNavmenu").offcanvas('hide');
             setTimeout(function () {
-                modules.cloud.get().map.invalidateSize()
+                modules.cloud.get().map.invalidateSize();
             }, 100);
 
             setHeight();

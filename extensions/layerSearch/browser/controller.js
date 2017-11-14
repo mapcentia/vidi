@@ -34,7 +34,7 @@ module.exports = {
                 '<div id="layer-search-list" style="height: calc(100% - 38px); overflow: auto; padding: 4px"></div>' +
                 '</div>');
 
-            $( "#info-modal").animate({
+            $("#info-modal.slide-right").animate({
                 right: "0"
             }, 200, function() {
                 $("input[name=layer-search]").focus();

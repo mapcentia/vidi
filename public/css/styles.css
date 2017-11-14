@@ -236,11 +236,11 @@ div.olControlZoom {
   color: #ffffff;
 }
 #loadscreen {
-  position: absolute;
+  position: fixed;
   width: 100%;
   height: 100%;
   background-color: white;
-  z-index: 1000;
+  z-index: 10000;
 }
 #loadscreen .center {
   position: absolute;
@@ -594,18 +594,26 @@ body {
   min-width: 350px;
   width: 30%;
   height: 100%;
-  right: -100%;
   background-color: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   display: block;
 }
+
+.slide-right {
+  right: -100%;
+}
+
+.slide-left {
+  left: -100%;
+}
+
 @media (max-width: 450px) {
   .navmenu,
   .navbar-offcanvas,
   #info-modal {
     width: 75%;
-    min-width: 250px;
+    min-width: 240px;
   }
   #info-modal {
     right: -75%;
@@ -900,3 +908,6 @@ h4 small {
 #layer-search-list .layer-item:not(.layer-search-is-added) i {
   display: none;
 }
+
+
+

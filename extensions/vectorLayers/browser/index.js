@@ -54,6 +54,10 @@ var db = urlparser.db;
 
 var layers;
 
+var onEachFeature = [];
+
+var onLoad = [];
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -164,7 +168,7 @@ module.exports = {
                                     name: id,
                                     lifetime: 0,
                                     sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
-                                    onLoad: function () {
+                                    onLoad: function (l) {
                                         var me = this;
                                         try {
                                             $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
@@ -183,7 +187,11 @@ module.exports = {
                                                 }
                                             }, 30000);
                                         }());
-                                    }
+
+                                        onLoad[me.id](l);
+                                    },
+
+                                    onEachFeature: onEachFeature[id]
                                 });
                                 // Add the geojson layer to the layercontrol
                                 //cloud.get().layerControl.addOverlay(store[id].layer, id);
@@ -202,5 +210,13 @@ module.exports = {
                 }
             }
         })
+    },
+
+    setOnEachFeature: function (layer, fn) {
+        onEachFeature[layer] = fn;
+    },
+
+    setOnLoad: function (layer, fn) {
+        onLoad[layer] = fn;
     }
 };

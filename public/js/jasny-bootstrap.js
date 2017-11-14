@@ -181,13 +181,12 @@ if (typeof jQuery === 'undefined') {
 
         var fixed_elements = canvas.find('*').filter(function () {
             return $(this).css('position') === 'fixed'
-        }).not(this.options.exclude)
+        }).not("#loadscreen").not(".loadingIndicator")
 
         return canvas.add(fixed_elements)
     }
 
     OffCanvas.prototype.slide = function (elements, offset, callback) {
-        //console.log(elements)
         // Use jQuery animation if CSS transitions aren't supported
         if (!$.support.transition) {
             var anim = {}
@@ -220,30 +219,30 @@ if (typeof jQuery === 'undefined') {
     }
 
     OffCanvas.prototype.disableScrolling = function () {
-        var bodyWidth = $('body').width()
+        var bodyWidth = $('#main-container').width()
         var prop = 'padding-' + this.opposite(this.placement)
 
-        if ($('body').data('offcanvas-style') === undefined) {
-            $('body').data('offcanvas-style', $('body').attr('style') || '')
+        if ($('#main-container').data('offcanvas-style') === undefined) {
+            $('#main-container').data('offcanvas-style', $('#main-container').attr('style') || '')
         }
 
-        $('body').css('overflow', 'hidden')
+        $('#main-container').css('overflow', 'hidden')
 
-        if ($('body').width() > bodyWidth) {
-            var padding = parseInt($('body').css(prop), 10) + $('body').width() - bodyWidth
+        if ($('#main-container').width() > bodyWidth) {
+            var padding = parseInt($('#main-container').css(prop), 10) + $('#main-container').width() - bodyWidth
 
             setTimeout(function () {
-                $('body').css(prop, padding)
+                $('#main-container').css(prop, padding)
             }, 1)
         }
         //disable scrolling on mobiles (they ignore overflow:hidden)
-        $('body').on('touchmove.bs', function (e) {
+        $('#main-container').on('touchmove.bs', function (e) {
             e.preventDefault();
         });
     }
 
     OffCanvas.prototype.enableScrolling = function () {
-        $('body').off('touchmove.bs');
+        $('#main-container').off('touchmove.bs');
     }
 
     OffCanvas.prototype.show = function () {
@@ -316,7 +315,7 @@ if (typeof jQuery === 'undefined') {
             this.$element.removeClass('in')
 
             elements.removeClass('canvas-sliding')
-            elements.add(this.$element).add('body').each(function () {
+            elements.add(this.$element).add('#main-container').each(function () {
                 $(this).attr('style', $(this).data('offcanvas-style')).removeData('offcanvas-style')
             })
 
@@ -357,7 +356,7 @@ if (typeof jQuery === 'undefined') {
                 callback()
         } else if (this.state == 'slide-out' && this.$backdrop) {
             this.$backdrop.removeClass('in');
-            $('body').off('touchmove.bs');
+            $('#main-container').off('touchmove.bs');
             var self = this;
             if ($.support.transition) {
                 this.$backdrop
@@ -381,7 +380,7 @@ if (typeof jQuery === 'undefined') {
         this.$calcClone = this.$element.clone()
             .html('')
             .addClass('offcanvas-clone').removeClass('in')
-            .appendTo($('body'))
+            .appendTo($('#main-container'))
     }
 
     OffCanvas.prototype.recalc = function () {
@@ -394,7 +393,7 @@ if (typeof jQuery === 'undefined') {
         this.$element.removeClass('in')
 
         elements.removeClass('canvas-slid')
-        elements.add(this.$element).add('body').each(function () {
+        elements.add(this.$element).add('#main-container').each(function () {
             $(this).attr('style', $(this).data('offcanvas-style')).removeData('offcanvas-style')
         })
     }
