@@ -588,7 +588,7 @@ body {
   font-style: normal;
   color: white !important;
 }
-#info-modal {
+#info-modal, #info-modal-top {
   position: fixed;
   max-width: 650px;
   z-index: 3000;
@@ -612,11 +612,11 @@ body {
 @media (max-width: 450px) {
   .navmenu,
   .navbar-offcanvas,
-  #info-modal {
+  #info-modal, #info-modal-top {
     width: 75%;
     min-width: 240px;
   }
-  #info-modal {
+  #info-modal, #info-modal-top {
     right: -75%;
   }
   .export {
@@ -910,5 +910,14 @@ h4 small {
   display: none;
 }
 
+.fixed-table-body .card-view .value {
+    display: inline-block;
+    max-width: 70%;
+    text-align: left!important;
+}
+
+.fixed-table-body .card-view .title {
+    vertical-align: top;
+}
 
 

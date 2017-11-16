@@ -102,6 +102,8 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
                         'public/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
                         //'public/bower_components/hyperform/dist/hyperform.min.js',
+                        'public/bower_components/raphael/raphael.min.js',
+                        'public/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
                         'public/js/jasny-bootstrap.js',
                         'public/js/templates.js',
                         'public/js/bundle.js',

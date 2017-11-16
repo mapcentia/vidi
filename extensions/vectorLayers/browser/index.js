@@ -226,10 +226,18 @@ module.exports = {
                         }
                     }
                     $("#vectorlayer-panel-" + base64name + " span:eq(1)").html(l.length);
+
                     // Remove the group if empty
+                    // =========================
+
                     if (l.length === 0) {
                         $("#vectorlayer-panel-" + base64name).remove();
                     }
+
+                    // Open the first panel
+                    // ====================
+
+                    $("#vectorlayers div:first").find("a").trigger("click");
                 }
             }
 
