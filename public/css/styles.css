@@ -68,7 +68,7 @@ img {
 }
 .modal-body {
   overflow: auto;
-  height: calc(100% - 52px);
+  height: calc(48%);
 }
 input[type="radio"],
 input[type="checkbox"] {
@@ -242,7 +242,6 @@ div.olControlZoom {
   background-color: white;
   z-index: 10000;
 }
-
 #loadscreen .center {
   position: absolute;
   top: 50%;
@@ -588,7 +587,8 @@ body {
   font-style: normal;
   color: white !important;
 }
-#info-modal, #info-modal-top {
+#info-modal,
+#info-modal-top {
   position: fixed;
   max-width: 650px;
   z-index: 3000;
@@ -600,23 +600,23 @@ body {
   box-sizing: border-box;
   display: block;
 }
-
 .slide-right {
   right: -100%;
 }
-
 .slide-left {
   left: -100%;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 27px 24px 0px, rgba(0, 0, 0, 0.22) 0px 40px 77px 0px;
 }
-
 @media (max-width: 450px) {
   .navmenu,
   .navbar-offcanvas,
-  #info-modal, #info-modal-top {
+  #info-modal,
+  #info-modal-top {
     width: 75%;
     min-width: 240px;
   }
-  #info-modal, #info-modal-top {
+  #info-modal,
+  #info-modal-top {
     right: -75%;
   }
   .export {
@@ -766,7 +766,7 @@ body {
   width: 100%;
 }
 .overlay-label {
-  width: calc(100% - 50px);
+  width: calc(50%);
 }
 .info-label {
   display: none;
@@ -909,15 +909,11 @@ h4 small {
 #layer-search-list .layer-item:not(.layer-search-is-added) i {
   display: none;
 }
-
 .fixed-table-body .card-view .value {
-    display: inline-block;
-    max-width: 70%;
-    text-align: left!important;
+  display: inline-block;
+  max-width: 70%;
+  text-align: left!important;
 }
-
 .fixed-table-body .card-view .title {
-    vertical-align: top;
+  vertical-align: top;
 }
-
-

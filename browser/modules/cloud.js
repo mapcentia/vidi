@@ -48,15 +48,19 @@ module.exports = {
         /**
          *
          */
+        var map = cloud.map;
+
         var zoomControl = L.control.zoom({
             position: 'topright'
         });
+
         cloud.map.addControl(zoomControl);
-        var map = cloud.map;
 
-
-        /*var scaleControl = L.control.scale({position: "bottomright"});
-         cloud.map.addControl(scaleControl);*/
+        var scaleControl = L.control.scale({
+            position: "bottomleft",
+            imperial: false
+        });
+        cloud.map.addControl(scaleControl);
 
         /**
          *
@@ -75,30 +79,30 @@ module.exports = {
         /**
          *
          */
-        var graphicScale = L.control.graphicScale({
-            doubleLine: false,
-            fill: 'hollow',
-            showSubunits: false,
-            position: "bottomleft"
-        }).addTo(map);
-
-        /**
-         *
-         * @type {div}
-         */
-        var scaleText = L.DomUtil.create('div', 'scaleText');
-        graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
-
-        /**
-         *
-         */
-        var styleChoices = scaleText.querySelectorAll('.choice');
-
-        for (var i = 0; i < styleChoices.length; i++) {
-            styleChoices[i].addEventListener('click', function (e) {
-                graphicScale._setStyle({fill: e.currentTarget.innerHTML});
-            });
-        }
+            // var graphicScale = L.control.graphicScale({
+            //       doubleLine: false,
+            //       fill: 'hollow',
+            //       showSubunits: false,
+            //       position: "bottomleft"
+            //   }).addTo(map);
+            //
+            //   /**
+            //    *
+            //    * @type {div}
+            //    */
+            //   var scaleText = L.DomUtil.create('div', 'scaleText');
+            //   graphicScale._container.insertBefore(scaleText, graphicScale._container.firstChild);
+            //
+            //   /**
+            //    *
+            //    */
+            //   var styleChoices = scaleText.querySelectorAll('.choice');
+            //
+            //   for (var i = 0; i < styleChoices.length; i++) {
+            //       styleChoices[i].addEventListener('click', function (e) {
+            //           graphicScale._setStyle({fill: e.currentTarget.innerHTML});
+            //       });
+            //   }
 
         var localization;
         if (window._vidiLocale === "da_DK") {
@@ -132,7 +136,7 @@ module.exports = {
 
 
         });
-        measureControl.addTo(map);
+        //measureControl.addTo(map);
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
