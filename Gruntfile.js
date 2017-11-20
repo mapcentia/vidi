@@ -70,6 +70,22 @@ module.exports = function (grunt) {
                 }
             }
         },
+        handlebars: {
+            publish: {
+                options: {
+                    namespace: function(filename) {
+                        var names = filename.replace(/modules\/(.*)(\/\w+\.hbs)/, '$1');
+                        return names.split('/').join('.');
+                    },
+                    commonjs: true
+                },
+                files: {
+                    "public/js/handlebars_templates.js": [
+                        "extensions/**/templates/*.hbs"
+                    ]
+                }
+            }
+        },
         browserify: {
             publish: {
                 files: {
@@ -163,6 +179,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
     grunt.loadNpmTasks('grunt-env');
+    grunt.loadNpmTasks('grunt-contrib-handlebars');
 
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
