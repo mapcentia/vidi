@@ -170,7 +170,7 @@ module.exports = {
         // Add the tooltip div
         // ===================
 
-        $("body").append('<div id="tail" style="position: absolute; float: left; display: none"></div>');
+        $("body").append('<div id="tail" style="position: fixed; float: left; display: none"></div>');
 
 
         // Init the modules
