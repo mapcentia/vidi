@@ -128,6 +128,9 @@ module.exports = module.exports = {
         cloud.get().on("moveend", function () {
             pushState.init();
         });
+        cloud.get().on("move", function () {
+            $("#tail").fadeOut(100);
+        });
 
         // Advanced info
         // =============
