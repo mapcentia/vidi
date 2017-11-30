@@ -25,6 +25,7 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap/dist/css/bootstrap.min.css',
                         'public/bower_components/snackbarjs/dist/snackbar.min.css',
                         'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
+                        'public/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
                         'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
                         'public/bower_components/bootstrap-table/dist/bootstrap-table.min.css',
                         //'public/bower_components/hyperform/css/hyperform.css',
