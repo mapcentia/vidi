@@ -933,7 +933,7 @@ h4 small {
   margin-top: 1px;
   margin-bottom: 1px;
 }
-@media (max-width: 320px) {
+@media (max-width: 319px) {
   #info-modal,
   .navbar {
     display: none;
