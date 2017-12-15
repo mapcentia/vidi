@@ -13,15 +13,10 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true,
     limit: '50mb'
 }));
-//app.use(bodyParser({limit: '50mb'}));
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
-app.use('/', express.static(path.join(__dirname, 'public'),
-    {maxage: '1h'}
-    )
-);
-
+app.use('/', express.static(path.join(__dirname, 'public'),    {maxage: '1h'}));
 
 app.use(require('./controllers'));
 

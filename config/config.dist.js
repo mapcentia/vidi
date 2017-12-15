@@ -10,7 +10,7 @@ module.exports = {
     // Which back-end is used. "gc2" or "carto"
     // ========================================
 
-    "backend": "WHAT_BACKEND",
+    "backend": "gc2",
 
 
     // ==========================================
