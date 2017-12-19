@@ -326,7 +326,7 @@ module.exports = {
                                     "bool": {
                                         "must": {
                                             "query_string": {
-                                                "default_field": "properties.string5",
+                                                "default_field": "properties.string4",
                                                 "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
                                                 "default_operator": "AND"
                                             }
@@ -347,6 +347,11 @@ module.exports = {
                                     },
                                     {
                                         "properties.husnr": {
+                                            "order": "asc"
+                                        }
+                                    },
+                                    {
+                                        "properties.litra": {
                                             "order": "asc"
                                         }
                                     }
