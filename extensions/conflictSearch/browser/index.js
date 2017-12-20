@@ -111,13 +111,20 @@ var bufferItems = new L.FeatureGroup();
  *
  * @type {L.FeatureGroup}
  */
+
 var dataItems = new L.FeatureGroup();
 
 /**
  *
  * @type {string}
  */
-var BACKEND = require('../../../config/config.js').backend;
+var config = require('../../../config/config.js');
+
+/**
+ *
+ * @type {string}
+ */
+var BACKEND = config.backend;
 
 /**
  *
@@ -258,7 +265,19 @@ module.exports = module.exports = {
      * Initiates the module
      */
     init: function () {
-        var metaData, me = this, socket = io.connect();
+        var metaData, me = this, socket = io.connect(), startBuffer, getProperty;
+
+        try {
+            startBuffer = config.extensionConfig.conflictSearch.startBuffer;
+        } catch (e){
+            startBuffer = 40;
+        }
+
+        try {
+            getProperty = config.extensionConfig.conflictSearch.getProperty;
+        } catch (e){
+            getProperty = false;
+        }
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
@@ -287,22 +306,19 @@ module.exports = module.exports = {
             _clearDrawItems();
             _clearDataItems();
             drawnItems.addLayer(this.layer._layers[Object.keys(this.layer._layers)[0]]);
-            cloud.zoomToExtentOfgeoJsonStore(this);
-            if (cloud.map.getZoom() > 17) {
-                cloud.map.setZoom(17);
-            }
+            cloud.zoomToExtentOfgeoJsonStore(this, 17);
             me.makeSearch($("#conflict-custom-search").val());
-        }, id);
+        }, id, false, getProperty);
 
         bufferSlider = document.getElementById('conflict-buffer-slider');
         bufferValue = document.getElementById('conflict-buffer-value');
         try {
             noUiSlider.create(bufferSlider, {
-                start: 40,
+                start: startBuffer,
                 connect: "lower",
                 step: 1,
                 range: {
-                    min: 0,
+                    min: -5,
                     max: 500
                 }
             });

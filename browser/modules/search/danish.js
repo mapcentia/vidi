@@ -50,7 +50,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
-    init: function (onLoad, el, onlyAddress) {
+    init: function (onLoad, el, onlyAddress, getProperty) {
         var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom;
 
@@ -550,16 +550,31 @@ module.exports = {
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
                 placeStore.reset();
-                if (name === "matrikel") {
-                    placeStore.db = MDB;
-                    placeStore.host = MHOST;
-                    placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
+
+                if (getProperty) {
+                    if (name === "matrikel") {
+                        placeStore.host = "//gc2.io";
+                        placeStore.db = "dk";
+                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
+                    }
+                    if (name === "adresse") {
+                        placeStore.host = "//gc2.io";
+                        placeStore.db = "dk";
+                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'))) group by esr_ejendomsnummer";
+                    }
+                } else {
+                    if (name === "matrikel") {
+                        placeStore.db = MDB;
+                        placeStore.host = MHOST;
+                        placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
+                    }
+                    if (name === "adresse") {
+                        placeStore.db = ADB;
+                        placeStore.host = AHOST;
+                        placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
+                    }
                 }
-                if (name === "adresse") {
-                    placeStore.db = ADB;
-                    placeStore.host = AHOST;
-                    placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
-                }
+
                 searchString = datum.value;
                 placeStore.load();
             } else {
