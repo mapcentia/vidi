@@ -136,7 +136,7 @@ module.exports = {
 
 
         });
-        //measureControl.addTo(map);
+        measureControl.addTo(map);
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {
