@@ -78,10 +78,7 @@ module.exports = {
                 var resultLayer = new L.FeatureGroup();
                 cloud.get().map.addLayer(resultLayer);
                 resultLayer.addLayer(this.layer);
-                cloud.get().zoomToExtentOfgeoJsonStore(this);
-                if (cloud.get().map.getZoom() > maxZoom) {
-                    cloud.get().map.setZoom(maxZoom);
-                }
+                cloud.get().zoomToExtentOfgeoJsonStore(this, maxZoom);
             }
         }
 
