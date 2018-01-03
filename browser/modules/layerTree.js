@@ -11,7 +11,7 @@ var meta;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     set: function (o) {
         meta = o.meta;
         return this;
