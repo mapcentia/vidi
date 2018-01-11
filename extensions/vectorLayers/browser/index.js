@@ -70,11 +70,14 @@ var styles = [];
 
 var  store = [];
 
+var automatic = true;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
+
     set: function (o) {
         cloud = o.cloud;
         setting = o.setting;
@@ -86,7 +89,8 @@ module.exports = {
     },
 
     init: function () {
-        var me = this, base64name, arr, groups = [], metaData, i, l, displayInfo;
+
+        var me = this;
 
         utils.createMainTab("vectorlayers", "Vektor lag");
 
@@ -133,7 +137,6 @@ module.exports = {
 
             });
 
-
             $(document).arrive('[data-gc2-id-vec]', function () {
 
                 $(this).on("change", function (e) {
@@ -149,101 +152,91 @@ module.exports = {
 
         backboneEvents.get().on("ready:meta", function () {
 
-            metaData = meta.getMetaData();
-
-            for (i = 0; i < metaData.data.length; ++i) {
-                groups[i] = metaData.data[i].layergroup;
+            if (automatic) {
+                me.createLayerTree();
             }
-
-            arr = array_unique(groups.reverse());
-
-            metaData.data.reverse();
-
-            for (i = 0; i < arr.length; ++i) {
-                if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                    l = [];
-                    base64name = Base64.encode(arr[i]).replace(/=/g, "");
-                    $("#vectorlayers").append('<div class="panel panel-default" id="vectorlayer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#vectorlayers" href="#vectorcollapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="vectorgroup-' + base64name + '" role="tabpanel"></ul></div>');
-                    $("#vectorgroup-" + base64name).append('<div id="vectorcollapse' + base64name + '" class="accordion-body collapse"></div>');
-                    for (var u = 0; u < metaData.data.length; ++u) {
-                        if (metaData.data[u].layergroup == arr[i]) {
-                            var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
-                                id = "v:" + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
-
-                            if (!metaData.data[u].baselayer) {
-                                store[id] = new geocloud.sqlStore({
-                                    jsonp: false,
-                                    method: "POST",
-                                    host: "",
-                                    db: db,
-                                    uri: "/api/sql",
-                                    clickable: true,
-                                    id: id,
-                                    name: id,
-                                    lifetime: 0,
-                                    styleMap: styles[id],
-                                    sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
-                                    onLoad: function (l) {
-
-                                        if (l === undefined) {
-                                            return
-                                        }
-
-                                        var me = l;
-                                        try {
-                                            $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
-                                        } catch (e) {
-                                        }
-                                        layers.decrementCountLoading(me.id);
-                                        backboneEvents.get().trigger("doneLoading:layers", me.id);
-                                        // (function poll() {
-                                        //     setTimeout(function () {
-                                        //         if ($('*[data-gc2-id="' + me.id + '"]').is(':checked')) {
-                                        //             me.reset();
-                                        //             me.load();
-                                        //             $('*[data-gc2-id="' + me.id + '"]').parent().siblings().children().addClass("fa-spin");
-                                        //         } else {
-                                        //             poll();
-                                        //         }
-                                        //     }, 30000);
-                                        // }());
-
-                                        onLoad[me.id](l);
-                                    },
-
-                                    onEachFeature: onEachFeature[id],
-
-                                    pointToLayer: pointToLayer[id]
-                                });
-                                // Add the geojson layer to the layercontrol
-                                //cloud.get().layerControl.addOverlay(store[id].layer, id);
-                                //store[id].load();
-                                displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
-                                $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id-vec="' + id + '">' + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
-                                    '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
-                                l.push({});
-                            }
-                        }
-                    }
-                    $("#vectorlayer-panel-" + base64name + " span:eq(1)").html(l.length);
-
-                    // Remove the group if empty
-                    // =========================
-
-                    if (l.length === 0) {
-                        $("#vectorlayer-panel-" + base64name).remove();
-                    }
-
-                    // Open the first panel
-                    // ====================
-
-                    $("#vectorlayers div:first").find("a").trigger("click");
-                }
-            }
-
-            backboneEvents.get().trigger("ready:vectorLayers");
 
         })
+    },
+
+    createLayerTree: function () {
+        var base64name, arr, groups = [], metaData, i, l, displayInfo;
+
+        metaData = meta.getMetaData();
+
+        for (i = 0; i < metaData.data.length; ++i) {
+            groups[i] = metaData.data[i].layergroup;
+        }
+
+        arr = array_unique(groups.reverse());
+
+        metaData.data.reverse();
+
+        for (i = 0; i < arr.length; ++i) {
+            if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                l = [];
+                base64name = Base64.encode(arr[i]).replace(/=/g, "");
+                $("#vectorlayers").append('<div class="panel panel-default" id="vectorlayer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#vectorlayers" href="#vectorcollapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="vectorgroup-' + base64name + '" role="tabpanel"></ul></div>');
+                $("#vectorgroup-" + base64name).append('<div id="vectorcollapse' + base64name + '" class="accordion-body collapse"></div>');
+                for (var u = 0; u < metaData.data.length; ++u) {
+                    if (metaData.data[u].layergroup == arr[i]) {
+                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
+                            id = "v:" + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
+
+                        if (!metaData.data[u].baselayer) {
+                            store[id] = new geocloud.sqlStore({
+                                jsonp: false,
+                                method: "POST",
+                                host: "",
+                                db: db,
+                                uri: "/api/sql",
+                                clickable: true,
+                                id: id,
+                                name: id,
+                                lifetime: 0,
+                                styleMap: styles[id],
+                                sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
+                                onLoad: function (l) {
+
+                                    if (l === undefined) {
+                                        return
+                                    }
+
+                                    var me = l;
+                                    try {
+                                        $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
+                                    } catch (e) {
+                                    }
+                                    layers.decrementCountLoading(me.id);
+                                    backboneEvents.get().trigger("doneLoading:layers", me.id);
+                                    onLoad[me.id](l);
+                                },
+
+                                onEachFeature: onEachFeature[id],
+
+                                pointToLayer: pointToLayer[id]
+                            });
+                            displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id-vec="' + id + '">' + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
+                                '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
+                            l.push({});
+                        }
+                    }
+                }
+                $("#vectorlayer-panel-" + base64name + " span:eq(1)").html(l.length);
+
+                // Remove the group if empty
+                // =========================
+                if (l.length === 0) {
+                    $("#vectorlayer-panel-" + base64name).remove();
+                }
+
+                // Open the first panel
+                // ====================
+                $("#vectorlayers div:first").find("a").trigger("click");
+            }
+        }
+        backboneEvents.get().trigger("ready:vectorLayers");
     },
 
     switchLayer: function (id, visible) {
@@ -316,5 +309,9 @@ module.exports = {
     setPointToLayer: function (layer, fn) {
 
         pointToLayer[layer] = fn;
+    },
+
+    setAutomatic: function (b) {
+        automatic = b;
     }
 };
