@@ -42,7 +42,8 @@ module.exports = {
             numZoomLevels: 21,
             // Set CSS animation true if not print
             fadeAnimation: (window.vidiTimeout === 0),
-            zoomAnimation: (window.vidiTimeout === 0)
+            zoomAnimation: (window.vidiTimeout === 0),
+            editable: true
         });
 
         /**
