@@ -253,19 +253,6 @@ module.exports = {
         // ============================================
         $("[data-toggle=tooltip]").tooltip();
 
-        function setHeight() {
-            try {
-                var max = $(document).height() - $('.tab-pane').offset().top - 130;
-            } catch (e) {
-                console.info(e.message);
-            }
-            $('.main-content > .tab-pane').not("#result-content").css('max-height', max);
-            $('#place-search .places').css('height', max - 130).css('min-height', 400);
-            $('.places .tt-dropdown-menu').css('max-height', max - 200).css('min-height', 400);
-        }
-
-        setHeight();
-
         $.material.init();
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
@@ -283,8 +270,6 @@ module.exports = {
             setTimeout(function () {
                 modules.cloud.get().map.invalidateSize();
             }, 100);
-
-            setHeight();
 
         }, 0));
     }

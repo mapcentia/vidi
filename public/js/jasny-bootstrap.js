@@ -291,6 +291,14 @@ if (typeof jQuery === 'undefined') {
             this.$element.addClass('in')
             this.slide(elements, offset, $.proxy(complete, this))
         }, this), 1)
+
+        try {
+            var max = $('.main-content').offset().top;
+        } catch (e) {
+            console.info(e.message);
+        }
+        $('.main-content > .tab-pane').not("#result-content").css('height', 'calc(100vh - ' + max + 'px)');
+        $('#place-search').css('height', 'calc(100vh - ' + (max+15) + 'px)');
     }
 
     OffCanvas.prototype.hide = function (fast) {
