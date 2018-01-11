@@ -3,6 +3,7 @@ var path = require('path');
 var app = express();
 var bulk = require('bulk-require');
 var bodyParser = require('body-parser');
+var session = require('express-session');
 
 app.use(bodyParser.json({
         limit: '50mb'
@@ -12,6 +13,16 @@ app.use(bodyParser.json({
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true,
     limit: '50mb'
+}));
+
+app.set('trust proxy', 1) // trust first proxy
+
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    name: "connect.gc2",
+    cookie: { secure: false }
 }));
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
