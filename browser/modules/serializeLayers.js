@@ -3,6 +3,7 @@
  * about its dependencies.
  */
 
+const MAX_RESOLUTION = 156543.03390625;
 
 /**
  * @type {*|exports|module.exports}
@@ -104,7 +105,7 @@ var _encoders = {
             }
 
             for (zoom = 0; zoom <= layer.options.maxZoom; ++zoom) {
-                resolutions.push(L.print.Provider.MAX_RESOLUTION / Math.pow(2, zoom));
+                resolutions.push(MAX_RESOLUTION / Math.pow(2, zoom));
             }
 
 
@@ -173,7 +174,7 @@ var _encoders = {
             var resolutions = [], zoom;
 
             for (zoom = 0; zoom <= layer.options.maxZoom; ++zoom) {
-                resolutions.push(L.print.Provider.MAX_RESOLUTION / Math.pow(2, zoom));
+                resolutions.push(MAX_RESOLUTION / Math.pow(2, zoom));
             }
 
             var customParams = {};
