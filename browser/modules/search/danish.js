@@ -51,8 +51,10 @@ module.exports = {
         return this;
     },
     init: function (onLoad, el, onlyAddress, getProperty) {
-        var type1, type2, gids = [], searchString, dslA, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
-            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom;
+        var type1, type2, type3, type4, gids = [], searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
+            komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
+            esrSearchActive = typeof(window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
+            sfeSearchActive = typeof(window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
 
         // Set max zoom then zooming on target
         // ===================================
@@ -543,37 +545,188 @@ module.exports = {
                     })();
                 }
             }
-        });
-        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
-            if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")) {
-                placeStore.reset();
+        }, {
+            name: 'esr_ejdnr',
+            displayKey: 'value',
+            templates: {
+                header: '<h2 class="typeahead-heading">Ejendomsnummer (ESR)</h2>'
+            },
+            source: function (query, cb) {
+                if (esrSearchActive) {
+                    var names = [];
+                    type3 = "esr_nr";
+                    if (!onlyAddress) {
+                        (function ca() {
+                            var qry = "";
+                            $.each(komKode, function (i, v) {
+                                qry += (qry.length < 1 ? "" : " OR ");
+                                qry += (query.startsWith(v) ? query.toLowerCase() : v + "*" + query.toLowerCase());
+                            });
+                            switch (type3) {
+                                case "esr_nr":
+                                    dslM = {
+                                        "from": 0,
+                                        "size": 100,
+                                        "query": {
+                                            "bool": {
+                                                "must": {
+                                                    "query_string": {
+                                                        "default_field": "properties.esr_ejendomsnummer",
+                                                        "query": encodeURIComponent(qry),
+                                                        "default_operator": "AND"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    };
+                                    break;
 
-                if (getProperty) {
-                    if (name === "matrikel") {
-                        placeStore.host = "//gc2.io";
-                        placeStore.db = "dk";
-                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
-                    }
-                    if (name === "adresse") {
-                        placeStore.host = "//gc2.io";
-                        placeStore.db = "dk";
-                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'))) group by esr_ejendomsnummer";
-                    }
-                } else {
-                    if (name === "matrikel") {
-                        placeStore.db = MDB;
-                        placeStore.host = MHOST;
-                        placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
-                    }
-                    if (name === "adresse") {
-                        placeStore.db = ADB;
-                        placeStore.host = AHOST;
-                        placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
+                            }
+
+                            $.ajax({
+                                url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
+                                data: '&q=' + JSON.stringify(dslM),
+                                contentType: "application/json; charset=utf-8",
+                                scriptCharset: "utf-8",
+                                dataType: 'jsonp',
+                                jsonp: 'jsonp_callback',
+                                success: function (response) {
+                                    $.each(response.hits.hits, function (i, hit) {
+                                        var str = hit._source.properties.esr_ejendomsnummer;
+                                        // find only the 20 first real properties
+                                        if (names.length < 20 && names.findIndex(x => x.value == str) < 0) {
+                                            names.push({value: str});
+                                            gids[str] = hit._source.properties.gid;
+                                        }
+                                    });
+                                    if (names.length === 1 && (type3 === "esr_ejdnr")) {
+                                        type3 = "esr_ejdnr";
+                                        names = [];
+                                        gids = [];
+                                        ca();
+                                    } else {
+                                        names.sort(function (a, b) {
+                                            return a.value - b.value
+                                        });
+                                        cb(names);
+                                    }
+                                }
+                            })
+                        })();
                     }
                 }
+            }
+        }, {
+            name: 'sfe_ejdnr',
+            displayKey: 'value',
+            templates: {
+                header: '<h2 class="typeahead-heading">Ejendomsnummer (SFE)</h2>'
+            },
+            source: function (query, cb) {
+                if (sfeSearchActive) {
+                    var names = [];
+                    type4 = "sfe_nr";
+                    if (!onlyAddress) {
+                        (function ca() {
 
-                searchString = datum.value;
-                placeStore.load();
+                            switch (type4) {
+                                case "sfe_nr":
+                                    dslM = {
+                                        "from": 0,
+                                        "size": 100,
+                                        "query": {
+                                            "bool": {
+                                                "must": {
+                                                    "query_string": {
+                                                        "default_field": "properties.sfe_ejendomsnummer",
+                                                        "query": encodeURIComponent(query.toLowerCase()),
+                                                        "default_operator": "AND"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    };
+                                    break;
+
+                            }
+
+                            $.ajax({
+                                url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
+                                data: '&q=' + JSON.stringify(dslM),
+                                contentType: "application/json; charset=utf-8",
+                                scriptCharset: "utf-8",
+                                dataType: 'jsonp',
+                                jsonp: 'jsonp_callback',
+                                success: function (response) {
+                                    $.each(response.hits.hits, function (i, hit) {
+                                        var str = hit._source.properties.sfe_ejendomsnummer;
+                                        // find only the 20 first real properties
+                                        if (names.length < 20 && names.findIndex(x => x.value === str) < 0) {
+                                            names.push({value: str});
+                                            gids[str] = hit._source.properties.gid;
+                                        }
+                                    });
+                                    if (names.length === 1 && (type4 === "sfe_ejdnr")) {
+                                        type4 = "sfe_ejdnr";
+                                        names = [];
+                                        gids = [];
+                                        ca();
+                                    } else {
+                                        names.sort(function (a, b) {
+                                            return a.value - b.value
+                                        });
+                                        cb(names);
+                                    }
+                                }
+                            })
+                        })();
+                    }
+                }
+            }
+        });
+        $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
+            if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
+                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")) {
+                placeStore.reset();
+                switch (name) {
+                    case "esr_ejdnr" :
+                        placeStore.db = MDB;
+                        placeStore.host = MHOST;
+                        searchString = datum.value;
+                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
+                        placeStore.load();
+                        break;
+                    case "sfe_ejdnr" :
+                        placeStore.db = MDB;
+                        placeStore.host = MHOST;
+                        searchString = datum.value;
+                        placeStore.sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by sfe_ejendomsnummer";
+                        placeStore.load();
+                        break;
+                    case "matrikel" :
+                        placeStore.db = MDB;
+                        placeStore.host = MHOST;
+                        searchString = datum.value;
+                        if (getProperty) {
+                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
+                        } else {
+                            placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
+                        }
+                        placeStore.load();
+                        break;
+                    case "adresse" :
+                        placeStore.db = ADB;
+                        placeStore.host = AHOST;
+                        if (getProperty) {
+                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'))) group by esr_ejendomsnummer";
+                        } else {
+                            placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
+                        }
+                        searchString = datum.value;
+                        placeStore.load();
+                        break;
+
+                }
             } else {
                 setTimeout(function () {
                     $("#" + el).val(datum.value + " ").trigger("paste").trigger("input");
@@ -583,4 +736,3 @@ module.exports = {
     }
 
 };
-
