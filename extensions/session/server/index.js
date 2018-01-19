@@ -40,7 +40,6 @@ router.post('/api/session/start', function (req, response) {
 
         try {
             JSON.parse(body);
-
         } catch (e) {
             response.status(500).send({
                 success: false,
@@ -58,8 +57,6 @@ router.post('/api/session/start', function (req, response) {
             return;
         }
 
-        console.log(JSON.parse(body));
-
         req.session.gc2SessionId = JSON.parse(body).session_id;
         req.session.gc2ApiKey = JSON.parse(body).api_key;
         req.session.gc2UserName = JSON.parse(body).screen_name;
@@ -76,7 +73,7 @@ router.post('/api/session/start', function (req, response) {
 router.get('/api/session/stop', function (req, response) {
     console.log("Session stopped");
     req.session.destroy(function (err) {
-        response.send({
+        response.status(200).send({
             success: true,
             message: "Logged out"
         });

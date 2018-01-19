@@ -39,18 +39,41 @@ module.exports = {
         var ReactDOM = require('react-dom');
 
 
-        $('<li><a href="#" id="' + exId + '">Log in</a></li>').appendTo('#main-navbar');
+        $('<li><a href="#" id="' + exId + '"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>').appendTo('#main-navbar');
+
+        // Check if signed in
+        //===================
+
+        $.ajax({
+            dataType: 'json',
+            url: "/api/session/status",
+            type: "GET",
+            success: function (data) {
+                if (data.status.authenticated) {
+                    $(".gc2-session-lock").show();
+                    $(".gc2-session-unlock").hide();
+                } else {
+                    $(".gc2-session-lock").hide();
+                    $(".gc2-session-unlock").show();
+                }
+
+            },
+            error: function (error) {
+                console.error(error.responseJSON);
+            }
+        });
+
 
         $("#" + exId).on("click", function () {
             $("#info-modal.slide-right").animate({
                 right: "0"
             }, 200, function () {
 
-                // Append to DOM
-                //==============
+                // Render
+                //=======
 
                 ReactDOM.render(
-                    <Session />,
+                    <Session/>,
                     document.getElementById("info-modal-body-wrapper")
                 );
 
@@ -103,9 +126,8 @@ module.exports = {
             }
 
             handleSubmit(event) {
-                console.log("submitting");
 
-                var me = this;
+                let me = this;
 
                 event.preventDefault();
 
@@ -116,7 +138,6 @@ module.exports = {
                         type: "POST",
                         data: "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public",
                         success: function (data) {
-                            console.log(data);
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Log out"});
@@ -124,39 +145,37 @@ module.exports = {
                             setTimeout(function () {
                                 $("#info-modal button.close").trigger("click");
                             }, 1000);
+                            $(".gc2-session-lock").show();
+                            $(".gc2-session-unlock").hide();
                         },
                         error: function (error) {
-                            console.error(error.responseJSON);
                             me.setState({statusText: "Wrong user name or password"});
                             me.setState({alertClass: "alert-danger"});
-
                         }
-
                     });
-                } else {
+                }
+
+                else {
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/stop",
                         type: "GET",
                         success: function (data) {
-                            console.log(data);
                             me.setState({statusText: "Not signed in"});
                             me.setState({alertClass: "alert-info"});
                             me.setState({btnText: "Sign in"});
                             me.setState({auth: false});
                             setTimeout(function () {
-                               // $("#info-modal button.close").trigger("click");
+                                $("#info-modal button.close").trigger("click");
                             }, 1000);
+                            $(".gc2-session-lock").hide();
+                            $(".gc2-session-unlock").show();
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
-
                         }
-
                     });
                 }
-
-
             }
 
             componentDidMount() {
@@ -167,23 +186,24 @@ module.exports = {
                     url: "/api/session/status",
                     type: "GET",
                     success: function (data) {
-                        console.log(data);
                         if (data.status.authenticated) {
                             me.setState({sessionEmail: data.status.userName});
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Sign out"});
                             me.setState({auth: true});
+                            $(".gc2-session-lock").show();
+                            $(".gc2-session-unlock").hide();
+                        } else {
+                            $(".gc2-session-lock").hide();
+                            $(".gc2-session-unlock").show();
                         }
 
                     },
                     error: function (error) {
                         console.error(error.responseJSON);
-
                     }
-
                 });
-
             }
 
             render() {
@@ -197,25 +217,27 @@ module.exports = {
                         <div className="login">
                             <form onSubmit={this.handleSubmit}>
 
-                                <div className="form-group">
-                                    <label htmlFor="session-email">User name</label>
-                                    <input
-                                        id="sessionEmail"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionEmail}
-                                        onChange={this.handleChange}
-                                    />
-                                </div>
+                                <div style={{display: this.state.auth ? 'none' : 'inline'}}>
+                                    <div className="form-group">
+                                        <label htmlFor="session-email">User name</label>
+                                        <input
+                                            id="sessionEmail"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionEmail}
+                                            onChange={this.handleChange}
+                                        />
+                                    </div>
 
-                                <div className="form-group">
-                                    <label htmlFor="session-password">Password</label>
-                                    <input
-                                        id="sessionPassword"
-                                        className="form-control"
-                                        defaultValue={this.state.sessionPassword}
-                                        onChange={this.handleChange}
-                                        type="password"
-                                    />
+                                    <div className="form-group">
+                                        <label htmlFor="session-password">Password</label>
+                                        <input
+                                            id="sessionPassword"
+                                            className="form-control"
+                                            defaultValue={this.state.sessionPassword}
+                                            onChange={this.handleChange}
+                                            type="password"
+                                        />
+                                    </div>
                                 </div>
 
                                 <button
