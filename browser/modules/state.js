@@ -91,12 +91,12 @@ var layerTree;
 
 var p, hashArr = hash.replace("#", "").split("/");
 
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
+
     /**
      *
      * @param o
@@ -126,7 +126,11 @@ module.exports = {
         }
     },
     init: function () {
-        var arr, i, layerCount = 0;
+        var arr, i;
+
+        // Reset hash. Needed if state is invoked after start up
+        hash = decodeURIComponent(window.location.hash);
+        hashArr = hash.replace("#", "").split("/");
 
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
@@ -161,7 +165,7 @@ module.exports = {
                 }
             }
         }
-        else  {
+        else {
             var parr, v, l, t, GeoJsonAdded = false;
             parr = urlVars.k.split("#");
             if (parr.length > 1) {
@@ -178,7 +182,6 @@ module.exports = {
                 success: function (response) {
 
 
-
                     if (response.data.bounds !== null) {
                         var bounds = response.data.bounds;
                         cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -188,10 +191,8 @@ module.exports = {
                     }
 
 
-
-                    /**
-                     * Recreate print
-                     */
+                    // Recreate print
+                    // ==============
                     if (response.data.print !== null) {
                         GeoJsonAdded = false;
                         parr = response.data.print;
@@ -237,9 +238,9 @@ module.exports = {
                         });
                     }
 
-                    /**
-                     * Recreate Drawings
-                     */
+                    // Recreate Drawings
+                    // =================
+
                     if (response.data.draw !== null) {
                         GeoJsonAdded = false;
                         parr = response.data.draw;
@@ -316,9 +317,9 @@ module.exports = {
                         draw.control();
                     }
 
-                    /**
-                     * Recreate query draw
-                     */
+                    // Recreate query draw
+                    // ===================
+
                     if (response.data.queryDraw !== null) {
                         GeoJsonAdded = false;
                         parr = response.data.queryDraw;
@@ -354,9 +355,9 @@ module.exports = {
                         });
                     }
 
-                    /**
-                     * Recreate query buffer
-                     */
+                    // Recreate query buffer
+                    // =====================
+
                     if (response.data.queryBuffer !== null) {
                         GeoJsonAdded = false;
                         parr = response.data.queryBuffer;
@@ -377,9 +378,10 @@ module.exports = {
                         });
                     }
 
-                    /**
-                     * Recreate result
-                     */
+
+                    // Recreate result
+                    // ===============
+
                     if (response.data.queryResult !== null) {
                         GeoJsonAdded = false;
                         parr = response.data.queryResult;

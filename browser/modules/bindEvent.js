@@ -93,6 +93,8 @@ var pushState;
 var layerTree;
 var layers;
 var infoClick;
+var setting;
+var state;
 
 var isStarted = false;
 
@@ -116,6 +118,8 @@ module.exports = module.exports = {
         infoClick = o.infoClick;
         backboneEvents = o.backboneEvents;
         reset = o.reset;
+        setting = o.setting;
+        state = o.state;
         return this;
     },
     init: function (str) {
@@ -161,21 +165,16 @@ module.exports = module.exports = {
 
             setTimeout(
                 function () {
-                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                    if ($(document).width() < 767 && isStarted === false) {
-                        setTimeout(
-                            function () {
-                                $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                            }, 200
-                        );
+                    if ($(document).width() > 767 && isStarted === false) {
+                        $("#navbar-fixed-top .navbar-toggle").trigger("click");
                         isStarted = true;
                     }
-                }, 200
+                }, 500
             );
 
             setTimeout(
                 function () {
-                   $("#loadscreen").fadeOut(200);
+                    $("#loadscreen").fadeOut(200);
 
                 }, 600
             );
@@ -238,7 +237,7 @@ module.exports = module.exports = {
                         console.info("Layers all loaded L");
                         doneB = doneL = false;
                         $(".loadingIndicator").fadeOut(200);
-                    },  window.vidiTimeout)
+                    }, window.vidiTimeout)
                 }
             }
         });
@@ -254,7 +253,7 @@ module.exports = module.exports = {
                     console.info("Layers all loaded B");
                     doneB = doneL = false;
                     $(".loadingIndicator").fadeOut(200);
-                },  window.vidiTimeout)
+                }, window.vidiTimeout)
             }
         });
 
@@ -290,6 +289,30 @@ module.exports = module.exports = {
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+        });
+
+        // Refresh browser state. E.g. after a session start
+        // =================================================
+        backboneEvents.get().on("refresh:meta", function (response) {
+
+            meta.init()
+
+                .then(function () {
+                        return setting.init();
+                    },
+
+                    function (error) {
+                        console.log(error); // Stacktrace
+                        alert("Vidi is loaded without schema. Can't set extent or add layers");
+                        backboneEvents.get().trigger("ready:meta");
+                        state.init();
+                    })
+
+                .then(function () {
+                    layerTree.init();
+                    state.init();
+                });
+
         });
 
 

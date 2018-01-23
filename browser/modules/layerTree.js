@@ -25,6 +25,9 @@ module.exports = {
         }
         arr = array_unique(groups.reverse());
         metaData.data.reverse();
+
+        $("#layers").empty();
+
         for (i = 0; i < arr.length; ++i) {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                 l = [];
@@ -54,7 +57,7 @@ module.exports = {
                         else {
                             displayInfo = ((metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined" && $.parseJSON(metaData.data[u].meta).meta_desc !== "") || metaData.data[u].f_table_abstract) ? "inline" : "none";
                             tooltip = metaData.data[u].f_table_abstract || "";
-                            $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + metaData.data[u].f_table_name + '" data-gc2-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '"><span>' + text + '</span></label><span data-toggle="tooltip" data-placement="left" title="' + tooltip + '" style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
+                            $("#collapse" + base64name).append('<li class="layer-item list-group-item"><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" id="' + metaData.data[u].f_table_name + '" data-gc2-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '"><span>' + text + (metaData.data[u].authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>":"") + '</span></label><span data-toggle="tooltip" data-placement="left" title="' + tooltip + '" style="display: ' + displayInfo + '" class="info-label label label-primary">Info</span></div></li>');
                             l.push({});
                         }
                     }

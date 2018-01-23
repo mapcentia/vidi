@@ -7,9 +7,9 @@ var request = require('request');
 router.post('/api/sql/:db', function (req, response) {
     var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, data = [];
 
-    var postData = "q=" + encodeURIComponent(q) + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding, options;
+    var postData = "q=" + encodeURIComponent(q) + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=" +req.session.gc2ApiKey, options;
 
-    if (req.body.key) {
+    if (req.body.key && !req.session.gc2ApiKey) {
         postData = postData + "&key=" + req.body.key;
     }
 

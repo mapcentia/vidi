@@ -11,9 +11,10 @@
  */
 var utils;
 
+var backboneEvents;
+
 var jquery = require('jquery');
 require('snackbarjs');
-
 
 var exId = "session";
 
@@ -24,9 +25,12 @@ var exId = "session";
 module.exports = {
     set: function (o) {
         utils = o.utils;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
+
+        var parent = this;
 
         /**
          *
@@ -39,7 +43,7 @@ module.exports = {
         var ReactDOM = require('react-dom');
 
 
-        $('<li><a href="#" id="' + exId + '"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>').appendTo('#main-navbar');
+        $('<li><a href="javascript:void(0)" id="' + exId + '"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>').appendTo('#main-navbar');
 
         // Check if signed in
         //===================
@@ -147,6 +151,7 @@ module.exports = {
                             }, 1000);
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            parent.update();
                         },
                         error: function (error) {
                             me.setState({statusText: "Wrong user name or password"});
@@ -170,6 +175,7 @@ module.exports = {
                             }, 1000);
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            parent.update();
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
@@ -259,6 +265,11 @@ module.exports = {
             }
         }
 
+
+    },
+
+    update: function () {
+        backboneEvents.get().trigger("refresh:meta");
 
     }
 };

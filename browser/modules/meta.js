@@ -93,6 +93,13 @@ module.exports = {
      */
     init: function (str) {
         var me = this;
+
+        // Reset
+        metaData = {data: []};
+        metaDataKeys = [];
+        metaDataKeysTitle = [];
+        ready = false;
+
         return new Promise(function (resolve, reject) {
             var schemata;
             if (str) {
