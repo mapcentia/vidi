@@ -41,6 +41,11 @@ var MHOST = "//gc2.io";
 var MDB = "dk";
 
 /**
+ * Global var with config object
+ */
+window.vidiConfig = require('../../../config/config.js');
+
+/**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
@@ -55,6 +60,19 @@ module.exports = {
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
             esrSearchActive = typeof(window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof(window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+
+        // adjust search text
+        var searchTxt = "Adresse, matr. nr.";
+        if (sfeSearchActive) {
+            $("#custom-search").attr("placeholder", 
+                searchTxt
+                + (esrSearchActive ? ", ESR nr. " : "")
+                + " eller SFE nr."); 
+        } else if (esrSearchActive) {
+            $("#custom-search").attr("placeholder",
+                searchTxt + " eller ESR nr."); 
+        }
+
 
         // Set max zoom then zooming on target
         // ===================================
