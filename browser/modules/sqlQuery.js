@@ -41,6 +41,9 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
+var jquery = require('jquery');
+require('alpaca');
+
 /**
  *
  * @type {string}
@@ -274,6 +277,34 @@ module.exports = {
                     } else {
                         l._vidi_type = "query_result";
                     }
+
+                    l.on("dblclick", function (e) {
+                        e.target.enableEdit();
+                        console.log(e);
+                    });
+
+                    $("#form").alpaca({
+                        "schema": {
+                            "title":"User Feedback",
+                            "description":"What do you think about Alpaca?",
+                            "type":"object",
+                            "properties": {
+                                "name": {
+                                    "type":"string",
+                                    "title":"Name"
+                                },
+                                "feedback": {
+                                    "type":"string",
+                                    "title":"Feedback"
+                                },
+                                "ranking": {
+                                    "type":"string",
+                                    "title":"Ranking",
+                                    "enum":['excellent','ok','so so']
+                                }
+                            }
+                        }
+                    });
                 }
             });
             cloud.get().addGeoJsonStore(qstore[index]);
