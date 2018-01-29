@@ -6,7 +6,6 @@
 'use strict';
 
 var urlparser = require('./urlparser');
-var urlVars = urlparser.urlVars;
 var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
@@ -44,7 +43,8 @@ module.exports = {
     },
     init: function () {
         var param = [], paramStr, parr;
-        $.each(urlVars, function (i, v) {
+
+        $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
             if (parr.length > 1) {
                 parr.pop();
@@ -53,6 +53,14 @@ module.exports = {
         });
         paramStr = param.join("&");
         return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+    },
+
+    urlVars: function getUrlVars() {
+        var mapvars = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function (m, key, value) {
+            mapvars[key] = value;
+        });
+        return mapvars;
     },
 
     /**
@@ -66,7 +74,7 @@ module.exports = {
 
     getParam: function () {
         var param = [], paramStr, parr;
-        $.each(urlVars, function (i, v) {
+        $.each(this.urlVars(), function (i, v) {
             parr = v.split("#");
             if (parr.length > 1) {
                 parr.pop();
