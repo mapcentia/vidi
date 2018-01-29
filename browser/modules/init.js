@@ -186,6 +186,7 @@ module.exports = {
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
+        modules.editor.init();
 
         modules.meta.init()
 

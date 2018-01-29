@@ -41,15 +41,6 @@ body {
   padding: 6px;
   overflow: auto;
 }
-
-.main-content > .tab-pane {
-  height: calc(100vh - 110px)
-}
-
-#place-search {
-    height: calc(100vh - 140px)
-}
-
 #pane {
   position: fixed;
   top: 0px;
@@ -400,7 +391,9 @@ div.olControlZoom {
 .typeahead {
   height: auto !important;
 }
-
+.places {
+  height: 100%;
+}
 .places .typeahead-heading {
   margin: 0 20px 5px 20px;
   padding: 3px 0;
@@ -793,13 +786,8 @@ body {
 }
 #info-modal-body-wrapper {
   overflow: auto;
-  height: 100%;
-}
-
-#info-modal-body-wrapper .modal-body {
   height: calc(100vh - 48px);
 }
-
 #searchinput {
   width: 200px;
 }

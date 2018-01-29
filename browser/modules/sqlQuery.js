@@ -31,6 +31,11 @@ var advancedInfo;
 var _layers;
 
 /**
+ * @type {*|exports|module.exports}
+ */
+var editor;
+
+/**
  *
  * @type {*|exports|module.exports}
  */
@@ -41,8 +46,8 @@ var urlparser = require('./urlparser');
  */
 var db = urlparser.db;
 
-var jquery = require('jquery');
-require('alpaca');
+var JSONSchemaForm = require("react-jsonschema-form");
+const Form = JSONSchemaForm.default;
 
 /**
  *
@@ -66,6 +71,7 @@ module.exports = {
         meta = o.meta;
         advancedInfo = o.advancedInfo;
         backboneEvents = o.backboneEvents;
+        editor = o.editor;
         _layers = o.layers;
         return this;
     },
@@ -81,6 +87,7 @@ module.exports = {
     init: function (qstore, wkt, proj, callBack, num) {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
+
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
@@ -97,7 +104,8 @@ module.exports = {
          */
         var defaultTemplate =
             '<div class="cartodb-popup-content">' +
-            '   {{#content.fields}}' +
+            '<button id="popup-edit-btn">Edit</button>' +
+            '   {{#_vidi_content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
             '       {{#value}}' +
             '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
@@ -105,7 +113,7 @@ module.exports = {
             '       {{^value}}' +
             '           <p class="empty">null</p>' +
             '       {{/value}}' +
-            '   {{/content.fields}}' +
+            '   {{/_vidi_content.fields}}' +
             '</div>';
 
         $.each(layers, function (index, value) {
@@ -117,12 +125,13 @@ module.exports = {
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;
+            var _key_ = metaDataKeys[value]._key_;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
-            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "" ) ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             _layers.incrementCountLoading(key);
@@ -146,7 +155,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "" ) ? metaDataKeys[value].infowindow.template : defaultTemplate;
+                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : defaultTemplate;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -184,8 +193,8 @@ module.exports = {
                                 });
                             }
 
-                            feature.properties.content = {};
-                            feature.properties.content.fields = fi; // Used in a "loop" template
+                            feature.properties._vidi_content = {};
+                            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
 
                             if (first) {
                                 $.each(out, function (name, property) {
@@ -217,6 +226,12 @@ module.exports = {
                             usingCartodb: BACKEND === "cartodb"
                         });
 
+                        _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            $("#popup-edit-btn").on("click", function () {
+                                editor.startEdit(e, _key_);
+                            })
+                        });
+
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable();
 
@@ -231,6 +246,9 @@ module.exports = {
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
                         })
+
+
+
                     } else {
                         layerObj.reset();
                     }
@@ -278,33 +296,6 @@ module.exports = {
                         l._vidi_type = "query_result";
                     }
 
-                    l.on("dblclick", function (e) {
-                        e.target.enableEdit();
-                        console.log(e);
-                    });
-
-                    $("#form").alpaca({
-                        "schema": {
-                            "title":"User Feedback",
-                            "description":"What do you think about Alpaca?",
-                            "type":"object",
-                            "properties": {
-                                "name": {
-                                    "type":"string",
-                                    "title":"Name"
-                                },
-                                "feedback": {
-                                    "type":"string",
-                                    "title":"Feedback"
-                                },
-                                "ranking": {
-                                    "type":"string",
-                                    "title":"Ranking",
-                                    "enum":['excellent','ok','so so']
-                                }
-                            }
-                        }
-                    });
                 }
             });
             cloud.get().addGeoJsonStore(qstore[index]);

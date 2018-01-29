@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var http = require('http');
 var config = require('../../config/config.js').gc2;
 var request = require('request');
 

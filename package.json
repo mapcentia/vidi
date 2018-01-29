@@ -69,6 +69,7 @@
     "react": "^15.4.2",
     "react-addons": "^0.9.1-deprecated",
     "react-dom": "^15.4.2",
+    "react-jsonschema-form": "^1.0.0",
     "reproject": "^1.1.1",
     "request": "^2.81.0",
     "require-globify": "^1.4.0",
