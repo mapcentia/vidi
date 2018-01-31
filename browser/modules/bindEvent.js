@@ -163,28 +163,30 @@ module.exports = module.exports = {
 
         backboneEvents.get().on("ready:meta", function () {
 
-            setTimeout(
-                function () {
-                    // HACK! Important to actual open the menu and when close it again
-                    // This will set the width of the pane the right way
-                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                    if ($(document).width() < 767 && isStarted === false) {
-                        setTimeout(
-                            function () {
-                                $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                                $("#myNavmenu").offcanvas('hide'); // Hide it also, in case of the toogle button is hidden
-                            }, 200
-                        );
-                        isStarted = true;
-                    }
-                }, 200
-            );
+            if (!isStarted) {
+                isStarted = true;
+                setTimeout(
+                    function () {
+                        // HACK! Important to actual open the menu and when close it again
+                        // This will set the width of the pane the right way
+                        $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                        if ($(document).width() < 767) {
+                            setTimeout(
+                                function () {
+                                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                                    $("#myNavmenu").offcanvas('hide'); // Hide it also, in case of the toogle button is hidden
+                                }, 200
+                            );
+                        }
+                    }, 200
+                );
 
-            setTimeout(
-                function () {
-                    $("#loadscreen").fadeOut(200);
-                }, 600
-            );
+                setTimeout(
+                    function () {
+                        $("#loadscreen").fadeOut(200);
+                    }, 600
+                );
+            }
 
         });
 
