@@ -165,17 +165,24 @@ module.exports = module.exports = {
 
             setTimeout(
                 function () {
-                    if ($(document).width() > 767 && isStarted === false) {
-                        $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                    // HACK! Important to actual open the menu and when close it again
+                    // This will set the width of the pane the right way
+                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                    if ($(document).width() < 767 && isStarted === false) {
+                        setTimeout(
+                            function () {
+                                $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                                $("#myNavmenu").offcanvas('hide'); // Hide it also, in case of the toogle button is hidden
+                            }, 200
+                        );
                         isStarted = true;
                     }
-                }, 500
+                }, 200
             );
 
             setTimeout(
                 function () {
                     $("#loadscreen").fadeOut(200);
-
                 }, 600
             );
 
