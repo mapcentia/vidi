@@ -14,6 +14,7 @@ var utils;
 var backboneEvents;
 
 var meta;
+var cloud;
 
 var jquery = require('jquery');
 require('snackbarjs');
@@ -21,6 +22,8 @@ require('snackbarjs');
 var JSONSchemaForm = require("react-jsonschema-form");
 
 const Form = JSONSchemaForm.default;
+
+var marker;
 
 /**
  *
@@ -30,6 +33,7 @@ module.exports = {
     set: function (o) {
         utils = o.utils;
         meta = o.meta;
+        cloud = o.cloud;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -55,7 +59,29 @@ module.exports = {
             fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
             properties = {};
 
-        e.enableEdit();
+
+        console.log(e)
+
+        if (e.feature.geometry.type === "Point") {
+
+            marker = L.marker(
+                e.getLatLng(),
+                {
+                    icon: L.AwesomeMarkers.icon({
+                            icon: 'arrows',
+                            markerColor: 'blue',
+                            prefix: 'fa'
+                        }
+                    )
+                }
+            ).addTo(cloud.get().map);
+
+            marker.enableEdit();
+
+        } else {
+            e.enableEdit();
+
+        }
 
         delete e.feature.properties._vidi_content;
         Object.keys(e.feature.properties).map(function (key, index) {
@@ -100,7 +126,10 @@ module.exports = {
             });
 
 
+            console.log(schemaQualifiedName);
             console.log(GeoJSON);
+            var l = cloud.get().getLayersByName(schemaQualifiedName);
+            l.redraw();
 
         };
 

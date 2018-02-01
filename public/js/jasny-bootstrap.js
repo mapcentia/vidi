@@ -298,7 +298,7 @@ if (typeof jQuery === 'undefined') {
             console.info(e.message);
         }
         $('.main-content > .tab-pane').not("#result-content").css('height', 'calc(100vh - ' + max + 'px)');
-        $('#place-search').css('height', 'calc(100vh - ' + (max+15) + 'px)');
+        $('#place-search').css('height', 'calc(100vh - ' + (max+75) + 'px)');
     }
 
     OffCanvas.prototype.hide = function (fast) {

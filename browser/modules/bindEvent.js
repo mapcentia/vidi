@@ -163,21 +163,30 @@ module.exports = module.exports = {
 
         backboneEvents.get().on("ready:meta", function () {
 
-            setTimeout(
-                function () {
-                    if ($(document).width() > 767 && isStarted === false) {
+            if (!isStarted) {
+                isStarted = true;
+                setTimeout(
+                    function () {
+                        // HACK! Important to actual open the menu and when close it again
+                        // This will set the width of the pane the right way
                         $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                        isStarted = true;
-                    }
-                }, 500
-            );
+                        if ($(document).width() < 767) {
+                            setTimeout(
+                                function () {
+                                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
+                                    $("#myNavmenu").offcanvas('hide'); // Hide it also, in case of the toogle button is hidden
+                                }, 200
+                            );
+                        }
+                    }, 200
+                );
 
-            setTimeout(
-                function () {
-                    $("#loadscreen").fadeOut(200);
-
-                }, 600
-            );
+                setTimeout(
+                    function () {
+                        $("#loadscreen").fadeOut(200);
+                    }, 600
+                );
+            }
 
         });
 
