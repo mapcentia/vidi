@@ -136,6 +136,17 @@ module.exports = module.exports = {
             $("#tail").fadeOut(100);
         });
 
+        cloud.get().on("dragstart", function () {
+            $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
+            $(".fade-then-dragging").css("pointer-events", "none");
+        });
+
+        cloud.get().on("dragend", function () {
+            $(".fade-then-dragging").animate({opacity: "1"}, 200);
+            $(".fade-then-dragging").css("pointer-events", "all");
+
+        });
+
         // Advanced info
         // =============
 
