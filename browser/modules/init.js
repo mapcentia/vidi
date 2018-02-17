@@ -35,7 +35,7 @@ module.exports = {
         var me = this, configFile, stop = false;
 
         var loadConfig = function () {
-            $.getJSON(window.vidiConfig.configUrl + "/" + configFile, function (data) {
+            $.getJSON( "/api/config/" + configFile, function (data) {
                 console.info("Started with config: " + configFile);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
