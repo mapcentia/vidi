@@ -104,7 +104,7 @@ module.exports = {
          */
         var defaultTemplate =
             '<div class="cartodb-popup-content">' +
-            '<button id="popup-edit-btn">Edit</button>' +
+            '<!--<button id="popup-edit-btn">Edit</button>-->' +
             '   {{#_vidi_content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
             '       {{#value}}' +
