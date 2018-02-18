@@ -17,7 +17,7 @@ module.exports = {
     init: function () {
 
     },
-    createMainTab: function (id, name, info, height) {
+    createMainTab: function (id, name, info) {
         $('<li role="presentation"><a href="#' + id + '-content" aria-controls role="tab" data-toggle="tab">' + name + '</a></li>').appendTo("#main-tabs");
 
         $('<div role="tabpanel" class="tab-pane fade" id="' + id + '-content">' +
