@@ -937,6 +937,9 @@ h4 small {
   margin-top: 1px;
   margin-bottom: 1px;
 }
+.gc2-session-lock {
+  display: inline;
+}
 @media (max-width: 319px) {
   #info-modal,
   .navbar {
