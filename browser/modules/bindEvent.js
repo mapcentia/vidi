@@ -124,7 +124,6 @@ module.exports = module.exports = {
     },
     init: function (str) {
         var doneL, doneB, loadingL = false, loadingB = false;
-        metaDataKeys = meta.getMetaDataKeys();
 
         cloud.get().on("dragend", function () {
             pushState.init();
@@ -173,6 +172,8 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
+
+            metaDataKeys = meta.getMetaDataKeys();
 
             if (!isStarted) {
                 isStarted = true;
