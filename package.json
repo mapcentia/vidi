@@ -57,6 +57,7 @@
     "handlebars": "^4.0.6",
     "ipaddr.js": "^1.5.4",
     "jquery": "^3.0.0",
+    "jrespond": "^1.0.0",
     "jsts": "^1.1.2",
     "lz-string": "^1.4.4",
     "moment": "^2.17.0",
