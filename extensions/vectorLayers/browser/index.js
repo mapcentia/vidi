@@ -160,7 +160,7 @@ module.exports = {
     },
 
     createLayerTree: function () {
-        var base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon;
+        var base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr;
 
         metaData = meta.getMetaData();
 
@@ -180,13 +180,10 @@ module.exports = {
                 $("#vectorlayers").append('<div class="panel panel-default" id="vectorlayer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#vectorlayers" href="#vectorcollapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="vectorgroup-' + base64name + '" role="tabpanel"></ul></div>');
                 $("#vectorgroup-" + base64name).append('<div id="vectorcollapse' + base64name + '" class="accordion-body collapse"></div>');
 
-                console.log(metaData.data);
-
                 for (var u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
 
-                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
-                            id = "v:" + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
+                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title, id;
 
                         try {
                             icon = "<img style='width: 20px;vertical-align: text-bottom;' src='https://webkort.syddjurs.dk/images/custom/map-icons/" + JSON.parse(metaData.data[u].meta).oplev_ikon + "'> ";
@@ -194,48 +191,65 @@ module.exports = {
                             icon = "";
                         }
 
+                        // If meta.usetiles is true, when add layers as tiles instead of vectors
+                        if (JSON.parse(metaData.data[u].meta) !== null && typeof JSON.parse(metaData.data[u].meta).usetiles !== "undefined" && JSON.parse(metaData.data[u].meta).usetiles === true) {
+
+                            id = metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
+                            dataAttr = "data-gc2-id";
+
+                        } else {
+
+                            id = "v:" + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name;
+                            dataAttr = "data-gc2-id-vec";
+
+                            if (!metaData.data[u].baselayer) {
+                                store[id] = new geocloud.sqlStore({
+                                    jsonp: false,
+                                    method: "POST",
+                                    host: "",
+                                    db: db,
+                                    uri: "/api/sql",
+                                    clickable: true,
+                                    id: id,
+                                    name: id,
+                                    lifetime: 0,
+                                    styleMap: styles[id],
+                                    sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
+                                    onLoad: function (l) {
+
+                                        if (l === undefined) {
+                                            return
+                                        }
+
+                                        var me = l;
+                                        try {
+                                            $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
+                                        } catch (e) {
+                                        }
+                                        layers.decrementCountLoading(me.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", me.id);
+                                        onLoad[me.id](l);
+                                    },
+
+                                    onEachFeature: onEachFeature[id],
+
+                                    pointToLayer: pointToLayer[id]
+                                });
+                            }
+                        }
+
                         if (!metaData.data[u].baselayer) {
-                            store[id] = new geocloud.sqlStore({
-                                jsonp: false,
-                                method: "POST",
-                                host: "",
-                                db: db,
-                                uri: "/api/sql",
-                                clickable: true,
-                                id: id,
-                                name: id,
-                                lifetime: 0,
-                                styleMap: styles[id],
-                                sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
-                                onLoad: function (l) {
-
-                                    if (l === undefined) {
-                                        return
-                                    }
-
-                                    var me = l;
-                                    try {
-                                        $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
-                                    } catch (e) {
-                                    }
-                                    layers.decrementCountLoading(me.id);
-                                    backboneEvents.get().trigger("doneLoading:layers", me.id);
-                                    onLoad[me.id](l);
-                                },
-
-                                onEachFeature: onEachFeature[id],
-
-                                pointToLayer: pointToLayer[id]
-                            });
 
                             displayInfo = (metaData.data[u].meta !== null && $.parseJSON(metaData.data[u].meta) !== null && typeof $.parseJSON(metaData.data[u].meta).meta_desc !== "undefined") ? "inline" : "none";
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" data-gc2-id-vec="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
                                 '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
                             l.push({});
+
                         }
+
                     }
                 }
                 $("#vectorlayer-panel-" + base64name + " span:eq(1)").html(l.length);
