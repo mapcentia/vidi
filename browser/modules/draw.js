@@ -323,7 +323,6 @@ module.exports = {
             }
         }
 
-
         if (type !== 'marker') {
             l.setStyle({dashArray: $("#draw-line-type").val()});
 
