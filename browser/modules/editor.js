@@ -23,7 +23,7 @@ var JSONSchemaForm = require("react-jsonschema-form");
 
 const Form = JSONSchemaForm.default;
 
-var marker;
+var markers;
 
 /**
  *
@@ -59,28 +59,53 @@ module.exports = {
             fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
             properties = {};
 
+        console.log(e);
 
-        console.log(e)
+        switch (e.feature.geometry.type) {
+            case "Point":
 
-        if (e.feature.geometry.type === "Point") {
+                markers[0] = L.marker(
+                    e.getLatLng(),
+                    {
+                        icon: L.AwesomeMarkers.icon({
+                                icon: 'arrows',
+                                markerColor: 'blue',
+                                prefix: 'fa'
+                            }
+                        )
+                    }
+                ).addTo(cloud.get().map);
 
-            marker = L.marker(
-                e.getLatLng(),
-                {
-                    icon: L.AwesomeMarkers.icon({
-                            icon: 'arrows',
-                            markerColor: 'blue',
-                            prefix: 'fa'
+                marker[0].enableEdit();
+
+                break;
+
+            case "MultiPoint":
+
+                e.feature.geometry.coordinates.map(function (v, i) {
+                    markers[i] = L.marker(
+                        v,
+                        {
+                            icon: L.AwesomeMarkers.icon({
+                                    icon: 'arrows',
+                                    markerColor: 'blue',
+                                    prefix: 'fa'
+                                }
+                            )
                         }
-                    )
-                }
-            ).addTo(cloud.get().map);
+                    ).addTo(cloud.get().map);
 
-            marker.enableEdit();
+                    markers[i].enableEdit();
 
-        } else {
-            e.enableEdit();
+                });
 
+                break;
+
+            default:
+
+                e.enableEdit();
+
+                break;
         }
 
         delete e.feature.properties._vidi_content;
