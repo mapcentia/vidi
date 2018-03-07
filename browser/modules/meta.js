@@ -19,11 +19,6 @@ var db = urlparser.db;
 /**
  * @type {string}
  */
-var schemataStr = urlparser.schema;
-
-/**
- * @type {string}
- */
 var urlVars = urlparser.urlVars;
 
 /**
@@ -92,13 +87,15 @@ module.exports = {
      *
      */
     init: function (str) {
-        var me = this;
+        var me = this,
+            schemataStr = urlparser.schema;
 
         // Reset
         metaData = {data: []};
         metaDataKeys = [];
         metaDataKeysTitle = [];
         ready = false;
+
 
         return new Promise(function (resolve, reject) {
             var schemata;
@@ -119,6 +116,7 @@ module.exports = {
                 reject(new Error('No schemata'));
                 return;
             }
+
             $.ajax({
                 url: '/api/meta/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",

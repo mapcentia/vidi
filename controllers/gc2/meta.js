@@ -13,7 +13,7 @@ router.get('/api/meta/:db/:schema', function (req, response) {
         uri: url,
         encoding: 'utf8',
         headers: {
-            Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";"
+            Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";" // GC2's Meta API is session based
         }
     };
 
