@@ -4,9 +4,16 @@ var config = require('../../config/config.js').gc2;
 var request = require('request');
 
 router.post('/api/sql/:db', function (req, response) {
-    var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, base64 = req.body.base64;
+    var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, base64 = req.body.base64, userName;
 
     var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true": "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=" +req.session.gc2ApiKey, options;
+
+    // Check if user is a sub user
+    if (req.session.gc2UserName && req.session.subUser) {
+        userName = req.session.subUser + "@" + db;
+    } else {
+        userName = db;
+    }
 
     if (req.body.key && !req.session.gc2ApiKey) {
         postData = postData + "&key=" + req.body.key;
@@ -14,7 +21,7 @@ router.post('/api/sql/:db', function (req, response) {
 
     options = {
         method: 'POST',
-        uri: config.host + "/api/v1/sql/" + db,
+        uri: config.host + "/api/v1/sql/" + userName,
         form: postData
     };
 
