@@ -5,10 +5,11 @@
 
 'use strict';
 
-/**
- * @type {string}
- */
-var uri = geocloud.pathName;
+var uriJs = require('urijs');
+
+var uriObj = new uriJs(window.location.href);
+
+var queryStr = uriObj.search();
 
 /**
  *
@@ -17,7 +18,8 @@ var uri = geocloud.pathName;
 module.exports = {
     hostname: geocloud_host,
     hash: decodeURIComponent(geocloud.urlHash),
-    db: uri[2],
-    schema: uri[3],
-    urlVars: geocloud.urlVars
+    db: uriObj.segmentCoded(1),
+    schema: uriObj.segmentCoded(2),
+    urlVars: uriJs.parseQuery(queryStr),
+    uriJs: uriJs
 };
