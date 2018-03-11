@@ -103,7 +103,7 @@ module.exports = {
             // Turn info click off
             backboneEvents.get().trigger("off:infoClick");
 
-            L.drawLocal = require('./drawLocales/draw.js');
+           // L.drawLocal = require('./drawLocales/draw.js');
 
             drawControl = new L.Control.Draw({
                 position: 'topright',
@@ -582,7 +582,7 @@ module.exports = {
             var svg = this._map._pathRoot;
 
             // Check if the defs node is already created
-            var defsNode;
+           /* var defsNode;
             if (L.DomUtil.hasClass(svg, 'defs')) {
                 defsNode = svg.getElementById('defs');
             } else {
@@ -591,8 +591,24 @@ module.exports = {
                 defsNode.setAttribute('id', 'defs');
                 var svgFirstChild = svg.childNodes[0];
                 svg.insertBefore(defsNode, svgFirstChild);
-            }
+            }*/
 
+            //
+
+            var svg = this._map._renderer._container;
+
+            // Check if the defs node is already created
+            var defsNode;
+            if (L.DomUtil.hasClass(svg, 'defs')) {
+                defsNode = svg.getElementById('defs');
+
+            } else{
+                L.DomUtil.addClass(svg, 'defs');
+                defsNode = L.SVG.create('defs');
+                defsNode.setAttribute('id', 'defs');
+                var svgFirstChild = svg.childNodes[0];
+                svg.insertBefore(defsNode, svgFirstChild);
+            }
 
             // Add the marker to the line
 
@@ -605,9 +621,10 @@ module.exports = {
                 markersNode = document.getElementById("defs").querySelector("#" + id);
                 markerPath = document.getElementById("defs").querySelector("#" + id).querySelector("path")
             } else {
-                markersNode = L.Path.prototype._createElement('marker');
-                markerPath = L.Path.prototype._createElement('path');
+                markersNode = L.SVG.create('marker');
+                markerPath = L.SVG.create('path');
             }
+
 
             // Create the markers definition
             markersNode.setAttribute('id', id);

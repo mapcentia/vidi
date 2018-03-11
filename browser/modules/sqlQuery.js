@@ -98,13 +98,15 @@ module.exports = {
             }
         }
 
+        backboneEvents.get().trigger("start:sqlQuery");
+
         /**
          * A default template for GC2, with a loop
          * @type {string}
          */
         var defaultTemplate =
             '<div class="cartodb-popup-content">' +
-            '<!--<button id="popup-edit-btn">Edit</button>-->' +
+            '<button id="popup-edit-btn">Edit</button>' +
             '   {{#_vidi_content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
             '       {{#value}}' +
@@ -135,8 +137,7 @@ module.exports = {
             var onLoad;
 
             _layers.incrementCountLoading(key);
-            backboneEvents.get().trigger("startLoading:layers");
-
+            backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -150,7 +151,7 @@ module.exports = {
                     var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
-                    backboneEvents.get().trigger("doneLoading:layers");
+                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
 
 
                     isEmpty = layerObj.isEmpty();
@@ -228,7 +229,7 @@ module.exports = {
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                             $("#popup-edit-btn").on("click", function () {
-                                editor.startEdit(e, _key_);
+                                editor.startEdit(e, _key_, qstore);
                             })
                         });
 

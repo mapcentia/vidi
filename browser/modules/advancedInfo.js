@@ -170,7 +170,7 @@ module.exports = {
 
             $("#buffer").show();
 
-            L.drawLocal = require('./drawLocales/advancedInfo.js');
+           // L.drawLocal = require('./drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {

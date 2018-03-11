@@ -10,5 +10,6 @@ router.use(require('./' + backend + '/sql'));
 router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));
+router.use(require('./feature'));
 
 module.exports = router;
