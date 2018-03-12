@@ -1,14 +1,21 @@
 ![Showdown][sd-logo]
 
-[![Build Status](https://travis-ci.org/showdownjs/showdown.svg?branch=master)](https://travis-ci.org/showdownjs/showdown) [![npm version](https://badge.fury.io/js/showdown.svg)](http://badge.fury.io/js/showdown) [![Bower version](https://badge.fury.io/bo/showdown.svg)](http://badge.fury.io/bo/showdown) [![Join the chat at https://gitter.im/showdownjs/showdown](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/showdownjs/showdown?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status: Linux](https://travis-ci.org/showdownjs/showdown.svg?branch=master)](https://travis-ci.org/showdownjs/showdown)
+[![Build Status: Windows](https://ci.appveyor.com/api/projects/status/github/showdownjs/showdown?branch=master&svg=true)](https://ci.appveyor.com/project/tivie/showdown/branch/master)
+[![npm version](https://badge.fury.io/js/showdown.svg)](http://badge.fury.io/js/showdown)
+[![Bower version](https://badge.fury.io/bo/showdown.svg)](http://badge.fury.io/bo/showdown)
+[![Join the chat at https://gitter.im/showdownjs/showdown](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/showdownjs/showdown?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Greenkeeper badge](https://badges.greenkeeper.io/showdownjs/showdown.svg)](https://greenkeeper.io/)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.me/tiviesantos)
 
 ------
 
-Showdown is a Javascript Markdown to HTML converter, based on the original works by John Gruber. Showdown can be used client side (in the browser) or server side (with NodeJs).
+Showdown is a Javascript Markdown to HTML converter, based on the original works by John Gruber.
+Showdown can be used client side (in the browser) or server side (with NodeJs).
 
 ## Live DEMO
 
-Check a live Demo here http://showdownjs.github.io/demo/
+Check a live Demo here http://demo.showdownjs.com/
 
 
 ## Who uses Showdown (or a fork)
@@ -20,6 +27,11 @@ Check a live Demo here http://showdownjs.github.io/demo/
  - [docular](https://github.com/Vertafore/docular)
  - [and some others...](https://www.npmjs.com/browse/depended/showdown)
 
+## Donate [![Click here to lend your support to: ShowdownJS website and testing platform and make a donation at pledgie.com](https://pledgie.com/campaigns/35166.png?skin_name=chrome)](https://pledgie.com/campaigns/35166)
+
+As you know, ShowdownJS is a free library and it will remain free forever. However, maintaining and improving the library costs time and money.
+
+If you like our work and find our library useful, please donate [through Pledgie](https://pledgie.com/campaigns/35166) or directly [through paypal](https://www.paypal.me/tiviesantos)!! Your contribution will be greatly appreciated and help us continue to develop this awesome library.
 
 ## Installation
 
@@ -34,6 +46,12 @@ You can download the latest release tarball directly from [releases][releases]
 ### npm (server-side)
 
     npm install showdown
+
+### NuGet package
+
+    PM> Install-Package showdownjs
+
+The NuGet Packages can be [found here](https://www.nuget.org/packages/showdownjs/).
 
 ### CDN
 
@@ -60,7 +78,8 @@ Showdown has been tested successfully with:
   * Netscape 8.1.2
   * Konqueror 3.5.4
 
-In theory, Showdown will work in any browser that supports ECMA 262 3rd Edition (JavaScript 1.5).  The converter itself might even work in things that aren't web browsers, like Acrobat.  No promises.
+In theory, Showdown will work in any browser that supports ECMA 262 3rd Edition (JavaScript 1.5).
+The converter itself might even work in things that aren't web browsers, like Acrobat.  No promises.
 
 
 ## Node compatibility
@@ -181,9 +200,27 @@ var defaultOptions = showdown.getDefaultOptions();
     <code><pre>var foo = 'bar';</pre></code>
     ```
 
- * **noHeaderId**: (boolean) [default false] Disable the automatic generation of header ids. Setting to true overrides **prefixHeaderId**
+ * **noHeaderId**: (boolean) [default false] Disable the automatic generation of header ids.
+   Setting to true overrides **prefixHeaderId**
 
- * **prefixHeaderId**: (string/boolean) [default false] Add a prefix to the generated header ids. Passing a string will prefix that string to the header id. Setting to `true` will add a generic 'section' prefix.
+ * **customizedHeaderId**: (boolean) [default false] Use text in curly braces as header id. **(since v1.7.0)**
+   Example:
+   ```
+   ## Sample header {real-id}     will use real-id as id
+   ```
+
+ * **ghCompatibleHeaderId**: (boolean) [default false] Generate header ids compatible with github style
+   (spaces are replaced with dashes and a bunch of non alphanumeric chars are removed) **(since v1.5.5)**
+
+ * **prefixHeaderId**: (string/boolean) [default false] Add a prefix to the generated header ids.
+   Passing a string will prefix that string to the header id. Setting to `true` will add a generic 'section' prefix.
+
+ * **rawPrefixHeaderId**: (boolean) [default false] Setting this option to true will prevent showdown from modifying the prefix.
+   This might result in malformed IDs (if, for instance, the " char is used in the prefix).
+   Has no effect if prefixHeaderId is set to false. **(since v 1.7.3)**
+
+ * **rawHeaderId**: (boolean) [default false] Remove only spaces, ' and " from generated header ids (including prefixes),
+    replacing them with dashes (-). WARNING: This might result in malformed ids **(since v1.7.3)**
  
  * **parseImgDimensions**: (boolean) [default false] Enable support for setting image dimensions from within markdown syntax.
    Examples:
@@ -204,7 +241,8 @@ var defaultOptions = showdown.getDefaultOptions();
     <h3>foo</h3>
     ```
 
- * **simplifiedAutoLink**: (boolean) [default false] Turning this on will enable GFM autolink style. This means that 
+ * **simplifiedAutoLink**: (boolean) [default false] Turning this option on will enable automatic linking to urls.
+   This means that:
 
    ```md
    some text www.google.com
@@ -213,8 +251,20 @@ var defaultOptions = showdown.getDefaultOptions();
    ````
    <p>some text <a href="www.google.com">www.google.com</a>
    ```
+ 
+ * **excludeTrailingPunctuationFromURLs**: (boolean) [default false] This option excludes trailing punctuation from autolinking urls.
+   Punctuation excluded: `. !  ? ( )`. Only applies if **simplifiedAutoLink** option is set to `true`.
    
- * **literalMidWordUnderscores**: (boolean) [default false] Turning this on will stop showdown from interpreting underscores in the middle of words as `<em>` and `<strong>` and instead treat them as literal underscores. 
+   ```md
+   check this link www.google.com!
+   ```
+   will be parsed as
+   ```html
+   <p>check this link <a href="www.google.com">www.google.com</a>!</p>
+   ```
+   
+ * **literalMidWordUnderscores**: (boolean) [default false] Turning this on will stop showdown from interpreting
+   underscores in the middle of words as `<em>` and `<strong>` and instead treat them as literal underscores.
 
    Example:
    
@@ -224,6 +274,19 @@ var defaultOptions = showdown.getDefaultOptions();
    will be parsed as
    ```html
    <p>some text with__underscores__in middle</p>
+   ```
+
+ * **literalMidWordAsterisks**: (boolean) [default false] Turning this on will stop showdown from interpreting asterisks
+   in the middle of words as `<em>` and `<strong>` and instead treat them as literal asterisks.
+
+   Example:
+
+   ```md
+   some text with**underscores**in middle
+   ```
+   will be parsed as
+   ```html
+   <p>some text with**underscores**in middle</p>
    ```
    
  * **strikethrough**: (boolean) [default false] Enable support for strikethrough syntax.
@@ -252,7 +315,83 @@ var defaultOptions = showdown.getDefaultOptions();
    ```
  * **smoothLivePreview**: (boolean) [default false] Prevents weird effects in live previews due to incomplete input
  
- * **smartIndentationFix**: (boolean) [default false] Tries to smartly fix indentation problems related to es6 template strings in the midst of indented code.
+ * **smartIndentationFix**: (boolean) [default false] Tries to smartly fix indentation problems related to es6 template
+   strings in the midst of indented code.
+
+ * **disableForced4SpacesIndentedSublists**: (boolean) [default false] Disables the requirement of indenting sublists
+   by 4 spaces for them to be nested, effectively reverting to the old behavior where 2 or 3 spaces were enough.
+   **(since v1.5.0)**
+ 
+ * **simpleLineBreaks**: (boolean) [default false] Parses line breaks as <br> like GitHub does, without
+   needing 2 spaces at the end of the line **(since v1.5.1)**
+ 
+   ```md
+   a line
+   wrapped in two
+   ```
+    
+   turns into:
+    
+   ```html
+   <p>a line<br>
+   wrapped in two</p>
+   ```
+
+ * **requireSpaceBeforeHeadingText**: (boolean) [default false] Makes adding a space between `#` and the header text mandatory **(since v1.5.3)**
+ 
+ * **ghMentions**: (boolean) [default false] Enables github @mentions, which link to the username mentioned **(since v1.6.0)**
+ 
+ * **ghMentionsLink**: (string) [default `https://github.com/{u}`] Changes the link generated by @mentions.
+   Showdown will replace `{u}` with the username. Only applies if ghMentions option is enabled.
+   Example: `@tivie` with ghMentionsOption set to `//mysite.com/{u}/profile` will result in `<a href="//mysite.com/tivie/profile">@tivie</a>`
+ 
+ * **encodeEmails**: (boolean) [default true] Enable e-mail addresses encoding through the use of Character Entities, transforming ASCII e-mail addresses into its equivalent decimal entities. (since v1.6.1)
+
+   NOTE: Prior to version 1.6.1, emails would always be obfuscated through dec and hex encoding.
+
+ * **openLinksInNewWindow**: (boolean) [default false] Open all links in new windows
+   (by adding the attribute `target="_blank"` to `<a>` tags) **(since v1.7.0)**
+
+ * **backslashEscapesHTMLTags**: (boolean) [default false] Support for HTML Tag escaping. ex: `\<div>foo\</div>` **(since v1.7.2)**
+
+ * **emoji**: (boolean) [default false] Enable emoji support. Ex: `this is a :smile: emoji`
+   For more info on available emojis, see https://github.com/showdownjs/showdown/wiki/Emojis **(since v.1.8.0)**
+
+ * **underline**: (boolean) [default false] ***EXPERIMENTAL FEATURE*** Enable support for underline.
+   Syntax is **double** or **triple** **underscores** ex: `__underlined word__`. With this option enabled, underscores are no longer parses into `<em>` and `<strong>`.
+
+ * **completeHTMLDocument**: (boolean) [default false] Outputs a complete html document,
+   including `<html>`, `<head>` and `<body>` tags' instead of an HTML fragment. (since v.1.8.5)
+
+ * **metadata**: (boolean) [default false] Enable support for document metadata (defined at the top of the document
+   between `«««` and `»»»` or between `---` and `---`).  (since v.1.8.5)
+
+ * **splitAdjacentBlockquotes**: (boolean) [default false] Split adjacent blockquote blocks.(since v.1.8.6)
+
+**NOTE**: Please note that until **version 1.6.0**, all of these options are ***DISABLED*** by default in the cli tool.
+
+
+## Flavors
+
+You can also use flavors or presets to set the correct options automatically, so that showdown behaves like popular markdown flavors.
+
+Currently, the following flavors are available:
+
+ * original - original markdown flavor as in [John Gruber's spec](https://daringfireball.net/projects/markdown/)
+ * vanilla  - showdown base flavor (as from v1.3.1)
+ * github   - GFM (GitHub Flavored Markdown)
+
+
+### Global
+```javascript
+showdown.setFlavor('github');
+```
+
+### Instance
+```javascript
+converter.setFlavor('github');
+```
+
 
 ## CLI Tool
 
@@ -282,6 +421,7 @@ for more information.
 ## Extensions
 
 Showdown allows additional functionality to be loaded via extensions. (you can find a list of known showdown extensions [here][ext-wiki])
+You can also find a boilerplate, to create your own extensions in [this repository][boilerplate-repo]
 
 ### Client-side Extension Usage
 
@@ -289,7 +429,7 @@ Showdown allows additional functionality to be loaded via extensions. (you can f
 <script src="showdown.js" />
 <script src="twitter-extension.js" />
 
-var converter = new showdown.Converter({ extensions: 'twitter' });
+var converter = new showdown.Converter({ extensions: ['twitter'] });
 ```
 
 ### Server-side Extension Usage
@@ -302,7 +442,8 @@ var showdown    = require('showdown'),
 
 ## Tests
 
-A suite of tests is available which require node.js.  Once node is installed, run the following command from the project root to install the dependencies:
+A suite of tests is available which require node.js.  Once node is installed, run the following command from
+the project root to install the dependencies:
 
     npm install
 
@@ -310,7 +451,8 @@ Once installed the tests can be run from the project root using:
 
     npm test
 
-New test cases can easily be added.  Create a markdown file (ending in `.md`) which contains the markdown to test.  Create a `.html` file of the exact same name.  It will automatically be tested when the tests are executed with `mocha`.
+New test cases can easily be added.  Create a markdown file (ending in `.md`) which contains the markdown to test.
+Create a `.html` file of the exact same name.  It will automatically be tested when the tests are executed with `mocha`.
 
 ## Contributing
 
@@ -341,14 +483,14 @@ PRs are awesome. However, before you submit your pull request consider the follo
  - We use commit notes to generate the changelog. It's extremely helpful if your commit messages adhere to the
  [**AngularJS Git Commit Guidelines**][ng-commit-guide].
  - If we suggest changes then:
-   - Make the required updates.
-   - Re-run the Angular test suite to ensure tests are still passing.
-   - Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
+     - Make the required updates.
+     - Re-run the Angular test suite to ensure tests are still passing.
+     - Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
-   ```bash
-   git rebase master -i
-   git push origin my-fix-branch -f
-   ```
+     ```bash
+     git rebase master -i
+     git push origin my-fix-branch -f
+     ```
  - After your pull request is merged, you can safely delete your branch.
 
 If you have time to contribute to this project, we feel obliged that you get credit for it.
@@ -378,3 +520,4 @@ Showdown is powered by:<br/>
 [ext-wiki]: https://github.com/showdownjs/showdown/wiki/extensions
 [coding-rules]: https://github.com/showdownjs/code-style/blob/master/README.md
 [ng-commit-guide]: https://github.com/showdownjs/code-style/blob/master/README.md#commit-message-convention
+[boilerplate-repo]: https://github.com/showdownjs/extension-boilerplate

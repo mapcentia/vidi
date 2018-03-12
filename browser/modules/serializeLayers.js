@@ -4,6 +4,8 @@
  */
 
 const MAX_RESOLUTION = 156543.03390625;
+const MAX_EXTENT = [-20037508.34, -20037508.34, 20037508.34, 20037508.34];
+const SRS ="EPSG:3857";
 
 /**
  * @type {*|exports|module.exports}
@@ -120,9 +122,9 @@ var _encoders = {
                     layer: layerName,
                     format: 'png',
                     tileSize: [layer.options.tileSize, layer.options.tileSize],
-                    maxExtent: L.print.Provider.MAX_EXTENT,
+                    maxExtent: MAX_EXTENT,
                     resolutions: resolutions,
-                    tileOrigin: {x: L.print.Provider.MAX_EXTENT[0], y: L.print.Provider.MAX_EXTENT[0]},
+                    tileOrigin: {x: MAX_EXTENT[0], y: MAX_EXTENT[0]},
                     singleTile: false
                 });
             } else {
@@ -133,9 +135,9 @@ var _encoders = {
                     baseURL: baseUrl,
                     extension: 'png',
                     tileSize: [layer.options.tileSize, layer.options.tileSize],
-                    maxExtent: L.print.Provider.MAX_EXTENT,
+                    maxExtent: MAX_EXTENT,
                     resolutions: resolutions,
-                    tileOrigin: {x: L.print.Provider.MAX_EXTENT[0], y: L.print.Provider.MAX_EXTENT[0]},
+                    tileOrigin: {x: MAX_EXTENT[0], y: MAX_EXTENT[0]},
                     singleTile: false
                 });
             }
@@ -190,7 +192,7 @@ var _encoders = {
                 opacity: layer.options.opacity,
                 extension: 'png',
                 tileSize: [layer.options.tileSize, layer.options.tileSize],
-                maxExtent: L.print.Provider.MAX_EXTENT,
+                maxExtent: MAX_EXTENT,
                 resolutions: resolutions,
                 singleTile: false,
                 customParams: customParams
@@ -202,7 +204,7 @@ var _encoders = {
                 opacity: layer.options.opacity,
                 name: 'image',
                 baseURL: _getAbsoluteUrl(layer._url),
-                extent: _projectBounds(L.print.Provider.SRS, layer._bounds)
+                extent: _projectBounds(SRS, layer._bounds)
             };
         },
         vector: function (features) {
@@ -268,10 +270,9 @@ var _encoders = {
                     featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else {
                     featureGeoJson = feature.toGeoJSON();
-                    featureGeoJson.geometry.coordinates = _projectCoords(L.print.Provider.SRS, featureGeoJson.geometry.coordinates);
+                    featureGeoJson.geometry.coordinates = _projectCoords(SRS, featureGeoJson.geometry.coordinates);
                     featureGeoJson.type = "Feature";
                 }
-
 
                 featureGeoJson.style = style;
                 featureGeoJson._vidi_type = feature._vidi_type;

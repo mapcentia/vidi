@@ -38,7 +38,22 @@ showdown.Converter = function (converterOptions) {
        * @private
        * @type {{}}
        */
-      listeners = {};
+      listeners = {},
+
+      /**
+       * The flavor set in this converter
+       */
+      setConvFlavor = setFlavor,
+
+    /**
+     * Metadata of the document
+     * @type {{parsed: {}, raw: string, format: string}}
+     */
+      metadata = {
+        parsed: {},
+        raw: '',
+        format: ''
+      };
 
   _constructor();
 
@@ -46,7 +61,7 @@ showdown.Converter = function (converterOptions) {
    * Converter constructor
    * @private
    */
-  function _constructor() {
+  function _constructor () {
     converterOptions = converterOptions || {};
 
     for (var gOpt in globalOptions) {
@@ -78,7 +93,7 @@ showdown.Converter = function (converterOptions) {
    * @param {string} [name='']
    * @private
    */
-  function _parseExtension(ext, name) {
+  function _parseExtension (ext, name) {
 
     name = name || null;
     // If it's a string, the extension was previously loaded
@@ -126,7 +141,7 @@ showdown.Converter = function (converterOptions) {
           outputModifiers.push(ext[i]);
           break;
       }
-      if (ext[i].hasOwnProperty(listeners)) {
+      if (ext[i].hasOwnProperty('listeners')) {
         for (var ln in ext[i].listeners) {
           if (ext[i].listeners.hasOwnProperty(ln)) {
             listen(ln, ext[i].listeners[ln]);
@@ -142,7 +157,7 @@ showdown.Converter = function (converterOptions) {
    * @param {*} ext
    * @param {string} name
    */
-  function legacyExtensionLoading(ext, name) {
+  function legacyExtensionLoading (ext, name) {
     if (typeof ext === 'function') {
       ext = ext(new showdown.Converter());
     }
@@ -174,7 +189,7 @@ showdown.Converter = function (converterOptions) {
    * @param {string} name
    * @param {function} callback
    */
-  function listen(name, callback) {
+  function listen (name, callback) {
     if (!showdown.helper.isString(name)) {
       throw Error('Invalid argument in converter.listen() method: name must be a string, but ' + typeof name + ' given');
     }
@@ -189,7 +204,7 @@ showdown.Converter = function (converterOptions) {
     listeners[name].push(callback);
   }
 
-  function rTrimInputText(text) {
+  function rTrimInputText (text) {
     var rsp = text.match(/^\s*/)[0].length,
         rgx = new RegExp('^\\s{0,' + rsp + '}', 'gm');
     return text.replace(rgx, '');
@@ -250,23 +265,30 @@ showdown.Converter = function (converterOptions) {
       langExtensions:  langExtensions,
       outputModifiers: outputModifiers,
       converter:       this,
-      ghCodeBlocks:    []
+      ghCodeBlocks:    [],
+      metadata: {
+        parsed: {},
+        raw: '',
+        format: ''
+      }
     };
 
-    // attacklab: Replace ~ with ~T
-    // This lets us use tilde as an escape char to avoid md5 hashes
+    // This lets us use ¨ trema as an escape char to avoid md5 hashes
     // The choice of character is arbitrary; anything that isn't
     // magic in Markdown will work.
-    text = text.replace(/~/g, '~T');
+    text = text.replace(/¨/g, '¨T');
 
-    // attacklab: Replace $ with ~D
+    // Replace $ with ¨D
     // RegExp interprets $ as a special character
     // when it's in a replacement string
-    text = text.replace(/\$/g, '~D');
+    text = text.replace(/\$/g, '¨D');
 
     // Standardize line endings
     text = text.replace(/\r\n/g, '\n'); // DOS to Unix
     text = text.replace(/\r/g, '\n'); // Mac to Unix
+
+    // Stardardize line spaces (nbsp causes trouble in older browsers and some regex flavors)
+    text = text.replace(/\u00A0/g, ' ');
 
     if (options.smartIndentationFix) {
       text = rTrimInputText(text);
@@ -278,8 +300,13 @@ showdown.Converter = function (converterOptions) {
     // detab
     text = showdown.subParser('detab')(text, options, globals);
 
-    // stripBlankLines
-    text = showdown.subParser('stripBlankLines')(text, options, globals);
+    /**
+     * Strip any lines consisting only of spaces and tabs.
+     * This makes subsequent regexs easier to write, because we can
+     * match consecutive blank lines with /\n+/ instead of something
+     * contorted like /[ \t]*\n+/
+     */
+    text = text.replace(/^[ \t]+$/mg, '');
 
     //run languageExtensions
     showdown.helper.forEach(langExtensions, function (ext) {
@@ -287,26 +314,32 @@ showdown.Converter = function (converterOptions) {
     });
 
     // run the sub parsers
+    text = showdown.subParser('metadata')(text, options, globals);
     text = showdown.subParser('hashPreCodeTags')(text, options, globals);
     text = showdown.subParser('githubCodeBlocks')(text, options, globals);
     text = showdown.subParser('hashHTMLBlocks')(text, options, globals);
-    text = showdown.subParser('hashHTMLSpans')(text, options, globals);
+    text = showdown.subParser('hashCodeTags')(text, options, globals);
     text = showdown.subParser('stripLinkDefinitions')(text, options, globals);
     text = showdown.subParser('blockGamut')(text, options, globals);
     text = showdown.subParser('unhashHTMLSpans')(text, options, globals);
     text = showdown.subParser('unescapeSpecialChars')(text, options, globals);
 
     // attacklab: Restore dollar signs
-    text = text.replace(/~D/g, '$$');
+    text = text.replace(/¨D/g, '$$');
 
-    // attacklab: Restore tildes
-    text = text.replace(/~T/g, '~');
+    // attacklab: Restore tremas
+    text = text.replace(/¨T/g, '¨');
+
+    // render a complete html document instead of a partial if the option is enabled
+    text = showdown.subParser('completeHTMLDocument')(text, options, globals);
 
     // Run output modifiers
     showdown.helper.forEach(outputModifiers, function (ext) {
       text = showdown.subParser('runExtension')(ext, text, options, globals);
     });
 
+    // update metadata
+    metadata = globals.metadata;
     return text;
   };
 
@@ -359,14 +392,24 @@ showdown.Converter = function (converterOptions) {
    * @param {string} name
    */
   this.setFlavor = function (name) {
-    if (flavor.hasOwnProperty(name)) {
-      var preset = flavor[name];
-      for (var option in preset) {
-        if (preset.hasOwnProperty(option)) {
-          options[option] = preset[option];
-        }
+    if (!flavor.hasOwnProperty(name)) {
+      throw Error(name + ' flavor was not found');
+    }
+    var preset = flavor[name];
+    setConvFlavor = name;
+    for (var option in preset) {
+      if (preset.hasOwnProperty(option)) {
+        options[option] = preset[option];
       }
     }
+  };
+
+  /**
+   * Get the currently set flavor of this converter
+   * @returns {string}
+   */
+  this.getFlavor = function () {
+    return setConvFlavor;
   };
 
   /**
@@ -403,5 +446,51 @@ showdown.Converter = function (converterOptions) {
       language: langExtensions,
       output: outputModifiers
     };
+  };
+
+  /**
+   * Get the metadata of the previously parsed document
+   * @param raw
+   * @returns {string|{}}
+   */
+  this.getMetadata = function (raw) {
+    if (raw) {
+      return metadata.raw;
+    } else {
+      return metadata.parsed;
+    }
+  };
+
+  /**
+   * Get the metadata format of the previously parsed document
+   * @returns {string}
+   */
+  this.getMetadataFormat = function () {
+    return metadata.format;
+  };
+
+  /**
+   * Private: set a single key, value metadata pair
+   * @param {string} key
+   * @param {string} value
+   */
+  this._setMetadataPair = function (key, value) {
+    metadata.parsed[key] = value;
+  };
+
+  /**
+   * Private: set metadata format
+   * @param {string} format
+   */
+  this._setMetadataFormat = function (format) {
+    metadata.format = format;
+  };
+
+  /**
+   * Private: set metadata raw text
+   * @param {string} raw
+   */
+  this._setMetadataRaw = function (raw) {
+    metadata.raw = raw;
   };
 };

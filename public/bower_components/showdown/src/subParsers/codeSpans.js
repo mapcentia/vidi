@@ -28,19 +28,6 @@ showdown.subParser('codeSpans', function (text, options, globals) {
 
   text = globals.converter._dispatch('codeSpans.before', text, options, globals);
 
-  /*
-   text = text.replace(/
-   (^|[^\\])					// Character before opening ` can't be a backslash
-   (`+)						// $2 = Opening run of `
-   (							// $3 = The code block
-   [^\r]*?
-   [^`]					// attacklab: work around lack of lookbehind
-   )
-   \2							// Matching closer
-   (?!`)
-   /gm, function(){...});
-   */
-
   if (typeof(text) === 'undefined') {
     text = '';
   }
@@ -49,8 +36,10 @@ showdown.subParser('codeSpans', function (text, options, globals) {
       var c = m3;
       c = c.replace(/^([ \t]*)/g, '');	// leading whitespace
       c = c.replace(/[ \t]*$/g, '');	// trailing whitespace
-      c = showdown.subParser('encodeCode')(c);
-      return m1 + '<code>' + c + '</code>';
+      c = showdown.subParser('encodeCode')(c, options, globals);
+      c = m1 + '<code>' + c + '</code>';
+      c = showdown.subParser('hashHTMLSpans')(c, options, globals);
+      return c;
     }
   );
 

@@ -524,11 +524,14 @@ module.exports = function (grunt) {
 
     "autoprefixer:material",
     "autoprefixer:ripples",
+    "csslint:dist",
     "cssmin:material",
     "cssmin:ripples",
+    "csslint:distmin"
   ]);
 
   grunt.registerTask("dist-js", [
+    "jshint",
     "copy:material",
     "uglify:material",
     "copy:ripples",
@@ -558,8 +561,12 @@ module.exports = function (grunt) {
 
 
   grunt.registerTask("serve", [
+    "htmllint",
+    "bootlint",
     "dist-less",
     "dist-js",
     "dist-fonts",
+    "connect:livereload",
+    "watch"
   ]);
 };

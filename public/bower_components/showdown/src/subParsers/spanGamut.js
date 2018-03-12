@@ -16,15 +16,33 @@ showdown.subParser('spanGamut', function (text, options, globals) {
   text = showdown.subParser('anchors')(text, options, globals);
 
   // Make links out of things like `<http://example.com/>`
-  // Must come after _DoAnchors(), because you can use < and >
+  // Must come after anchors, because you can use < and >
   // delimiters in inline links like [this](<url>).
   text = showdown.subParser('autoLinks')(text, options, globals);
-  text = showdown.subParser('encodeAmpsAndAngles')(text, options, globals);
+  text = showdown.subParser('simplifiedAutoLinks')(text, options, globals);
+  text = showdown.subParser('emoji')(text, options, globals);
+  text = showdown.subParser('underline')(text, options, globals);
   text = showdown.subParser('italicsAndBold')(text, options, globals);
   text = showdown.subParser('strikethrough')(text, options, globals);
+  text = showdown.subParser('ellipsis')(text, options, globals);
 
-  // Do hard breaks:
-  text = text.replace(/  +\n/g, ' <br />\n');
+  // we need to hash HTML tags inside spans
+  text = showdown.subParser('hashHTMLSpans')(text, options, globals);
+
+  // now we encode amps and angles
+  text = showdown.subParser('encodeAmpsAndAngles')(text, options, globals);
+
+  // Do hard breaks
+  if (options.simpleLineBreaks) {
+    // GFM style hard breaks
+    // only add line breaks if the text does not contain a block (special case for lists)
+    if (!/\n\n¨K/.test(text)) {
+      text = text.replace(/\n+/g, '<br />\n');
+    }
+  } else {
+    // Vanilla hard breaks
+    text = text.replace(/  +\n/g, '<br />\n');
+  }
 
   text = globals.converter._dispatch('spanGamut.after', text, options, globals);
   return text;

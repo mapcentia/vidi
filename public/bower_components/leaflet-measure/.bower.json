@@ -53,6 +53,5 @@
   },
   "_source": "git://github.com/mapcentia/leaflet-measure.git",
   "_target": "^2.0.2",
-  "_originalSource": "git://github.com/mapcentia/leaflet-measure.git",
-  "_direct": true
+  "_originalSource": "git://github.com/mapcentia/leaflet-measure.git"
 }

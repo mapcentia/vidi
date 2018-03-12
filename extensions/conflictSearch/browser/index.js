@@ -265,7 +265,7 @@ module.exports = module.exports = {
      * Initiates the module
      */
     init: function () {
-        var metaData, me = this, socket = io.connect(), startBuffer, getProperty;
+        var metaData, me = this, startBuffer, getProperty;
 
         try {
             startBuffer = config.extensionConfig.conflictSearch.startBuffer;
@@ -283,17 +283,7 @@ module.exports = module.exports = {
         cloud.map.addLayer(bufferItems);
         cloud.map.addLayer(dataItems);
 
-        // Start listen to the web socket
-        socket.on(socketId.get(), function (data) {
-            if (typeof data.num !== "undefined") {
-                $("#conflict-progress").html(data.num + " " + (data.title || data.table));
-                if (data.error === null) {
-                    $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
-                } else {
-                    $("#conflict-console").append(data.table + " : " + data.error + "\n");
-                }
-            }
-        });
+
 
         // Create a new tab in the main tab bar
         utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max);
@@ -347,6 +337,18 @@ module.exports = module.exports = {
         var me = this;
         if ($("#conflict-btn").is(':checked')) {
 
+            // Start listen to the web socket
+            io.connect().on(socketId.get(), function (data) {
+                if (typeof data.num !== "undefined") {
+                    $("#conflict-progress").html(data.num + " " + (data.title || data.table));
+                    if (data.error === null) {
+                        $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
+                    } else {
+                        $("#conflict-console").append(data.table + " : " + data.error + "\n");
+                    }
+                }
+            });
+
             backboneEvents.get().trigger("on:conflictInfoClick");
 
             // Emit "on" event
@@ -367,7 +369,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("reset:infoClick");
 
             // Setup and add draw control
-            L.drawLocal = require('./../../../browser/modules/drawLocales/advancedInfo.js');
+            //L.drawLocal = require('./../../../browser/modules/drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {

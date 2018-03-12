@@ -33,6 +33,5 @@
   },
   "_source": "https://github.com/coryasilva/Leaflet.ExtraMarkers.git",
   "_target": "^1.0.6",
-  "_originalSource": "Leaflet.extra-markers",
-  "_direct": true
+  "_originalSource": "Leaflet.extra-markers"
 }

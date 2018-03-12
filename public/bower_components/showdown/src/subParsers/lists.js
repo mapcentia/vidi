@@ -4,7 +4,6 @@
 showdown.subParser('lists', function (text, options, globals) {
   'use strict';
 
-  text = globals.converter._dispatch('lists.before', text, options, globals);
   /**
    * Process the contents of a single ordered or unordered list, splitting it
    * into individual list items.
@@ -39,13 +38,21 @@ showdown.subParser('lists', function (text, options, globals) {
     listStr = listStr.replace(/\n{2,}$/, '\n');
 
     // attacklab: add sentinel to emulate \z
-    listStr += '~0';
+    listStr += '¨0';
 
-    var rgx = /(\n)?(^[ \t]*)([*+-]|\d+[.])[ \t]+((\[(x|X| )?])?[ \t]*[^\r]+?(\n{1,2}))(?=\n*(~0|\2([*+-]|\d+[.])[ \t]+))/gm,
-        isParagraphed = (/\n[ \t]*\n(?!~0)/.test(listStr));
+    var rgx = /(\n)?(^ {0,3})([*+-]|\d+[.])[ \t]+((\[(x|X| )?])?[ \t]*[^\r]+?(\n{1,2}))(?=\n*(¨0| {0,3}([*+-]|\d+[.])[ \t]+))/gm,
+        isParagraphed = (/\n[ \t]*\n(?!¨0)/.test(listStr));
+
+    // Since version 1.5, nesting sublists requires 4 spaces (or 1 tab) indentation,
+    // which is a syntax breaking change
+    // activating this option reverts to old behavior
+    if (options.disableForced4SpacesIndentedSublists) {
+      rgx = /(\n)?(^ {0,3})([*+-]|\d+[.])[ \t]+((\[(x|X| )?])?[ \t]*[^\r]+?(\n{1,2}))(?=\n*(¨0|\2([*+-]|\d+[.])[ \t]+))/gm;
+    }
 
     listStr = listStr.replace(rgx, function (wholeMatch, m1, m2, m3, m4, taskbtn, checked) {
       checked = (checked && checked.trim() !== '');
+
       var item = showdown.subParser('outdent')(m4, options, globals),
           bulletStyle = '';
 
@@ -61,6 +68,19 @@ showdown.subParser('lists', function (text, options, globals) {
           return otp;
         });
       }
+
+      // ISSUE #312
+      // This input: - - - a
+      // causes trouble to the parser, since it interprets it as:
+      // <ul><li><li><li>a</li></li></li></ul>
+      // instead of:
+      // <ul><li>- - a</li></ul>
+      // So, to prevent it, we will put a marker (¨A)in the beginning of the line
+      // Kind of hackish/monkey patching, but seems more effective than overcomplicating the list parser
+      item = item.replace(/^([-*+]|\d\.)[ \t]+[\S\n ]*/g, function (wm2) {
+        return '¨A' + wm2;
+      });
+
       // m1 - Leading line or
       // Has a double return (multi paragraph) or
       // Has sublist
@@ -71,18 +91,27 @@ showdown.subParser('lists', function (text, options, globals) {
         // Recursion for sub-lists:
         item = showdown.subParser('lists')(item, options, globals);
         item = item.replace(/\n$/, ''); // chomp(item)
+        item = showdown.subParser('hashHTMLBlocks')(item, options, globals);
+
+        // Colapse double linebreaks
+        item = item.replace(/\n\n+/g, '\n\n');
         if (isParagraphed) {
           item = showdown.subParser('paragraphs')(item, options, globals);
         } else {
           item = showdown.subParser('spanGamut')(item, options, globals);
         }
       }
-      item =  '\n<li' + bulletStyle + '>' + item + '</li>\n';
+
+      // now we need to remove the marker (¨A)
+      item = item.replace('¨A', '');
+      // we can finally wrap the line in list item tags
+      item =  '<li' + bulletStyle + '>' + item + '</li>\n';
+
       return item;
     });
 
     // attacklab: strip sentinel
-    listStr = listStr.replace(/~0/g, '');
+    listStr = listStr.replace(/¨0/g, '');
 
     globals.gListLevel--;
 
@@ -93,6 +122,17 @@ showdown.subParser('lists', function (text, options, globals) {
     return listStr;
   }
 
+  function styleStartNumber (list, listType) {
+    // check if ol and starts by a number different than 1
+    if (listType === 'ol') {
+      var res = list.match(/^ *(\d+)\./);
+      if (res && res[1] !== '1') {
+        return ' start="' + res[1] + '"';
+      }
+    }
+    return '';
+  }
+
   /**
    * Check and parse consecutive lists (better fix for issue #142)
    * @param {string} list
@@ -100,65 +140,64 @@ showdown.subParser('lists', function (text, options, globals) {
    * @param {boolean} trimTrailing
    * @returns {string}
    */
-  function parseConsecutiveLists(list, listType, trimTrailing) {
+  function parseConsecutiveLists (list, listType, trimTrailing) {
     // check if we caught 2 or more consecutive lists by mistake
-    // we use the counterRgx, meaning if listType is UL we look for UL and vice versa
-    var counterRxg = (listType === 'ul') ? /^ {0,2}\d+\.[ \t]/gm : /^ {0,2}[*+-][ \t]/gm,
-      subLists = [],
-      result = '';
+    // we use the counterRgx, meaning if listType is UL we look for OL and vice versa
+    var olRgx = (options.disableForced4SpacesIndentedSublists) ? /^ ?\d+\.[ \t]/gm : /^ {0,3}\d+\.[ \t]/gm,
+        ulRgx = (options.disableForced4SpacesIndentedSublists) ? /^ ?[*+-][ \t]/gm : /^ {0,3}[*+-][ \t]/gm,
+        counterRxg = (listType === 'ul') ? olRgx : ulRgx,
+        result = '';
 
     if (list.search(counterRxg) !== -1) {
-      (function parseCL(txt) {
-        var pos = txt.search(counterRxg);
+      (function parseCL (txt) {
+        var pos = txt.search(counterRxg),
+            style = styleStartNumber(list, listType);
         if (pos !== -1) {
           // slice
-          result += '\n\n<' + listType + '>' + processListItems(txt.slice(0, pos), !!trimTrailing) + '</' + listType + '>\n\n';
+          result += '\n\n<' + listType + style + '>\n' + processListItems(txt.slice(0, pos), !!trimTrailing) + '</' + listType + '>\n';
 
           // invert counterType and listType
           listType = (listType === 'ul') ? 'ol' : 'ul';
-          counterRxg = (listType === 'ul') ? /^ {0,2}\d+\.[ \t]/gm : /^ {0,2}[*+-][ \t]/gm;
+          counterRxg = (listType === 'ul') ? olRgx : ulRgx;
 
           //recurse
           parseCL(txt.slice(pos));
         } else {
-          result += '\n\n<' + listType + '>' + processListItems(txt, !!trimTrailing) + '</' + listType + '>\n\n';
+          result += '\n\n<' + listType + style + '>\n' + processListItems(txt, !!trimTrailing) + '</' + listType + '>\n';
         }
       })(list);
-      for (var i = 0; i < subLists.length; ++i) {
-
-      }
     } else {
-      result = '\n\n<' + listType + '>' + processListItems(list, !!trimTrailing) + '</' + listType + '>\n\n';
+      var style = styleStartNumber(list, listType);
+      result = '\n\n<' + listType + style + '>\n' + processListItems(list, !!trimTrailing) + '</' + listType + '>\n';
     }
 
     return result;
   }
 
-  // attacklab: add sentinel to hack around khtml/safari bug:
+  /** Start of list parsing **/
+  text = globals.converter._dispatch('lists.before', text, options, globals);
+  // add sentinel to hack around khtml/safari bug:
   // http://bugs.webkit.org/show_bug.cgi?id=11231
-  text += '~0';
-
-  // Re-usable pattern to match any entire ul or ol list:
-  var wholeList = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+  text += '¨0';
 
   if (globals.gListLevel) {
-    text = text.replace(wholeList, function (wholeMatch, list, m2) {
-      var listType = (m2.search(/[*+-]/g) > -1) ? 'ul' : 'ol';
-      return parseConsecutiveLists(list, listType, true);
-    });
+    text = text.replace(/^(( {0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(¨0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm,
+      function (wholeMatch, list, m2) {
+        var listType = (m2.search(/[*+-]/g) > -1) ? 'ul' : 'ol';
+        return parseConsecutiveLists(list, listType, true);
+      }
+    );
   } else {
-    wholeList = /(\n\n|^\n?)(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
-    //wholeList = /(\n\n|^\n?)( {0,3}([*+-]|\d+\.)[ \t]+[\s\S]+?)(?=(~0)|(\n\n(?!\t| {2,}| {0,3}([*+-]|\d+\.)[ \t])))/g;
-    text = text.replace(wholeList, function (wholeMatch, m1, list, m3) {
-
-      var listType = (m3.search(/[*+-]/g) > -1) ? 'ul' : 'ol';
-      return parseConsecutiveLists(list, listType);
-    });
+    text = text.replace(/(\n\n|^\n?)(( {0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(¨0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm,
+      function (wholeMatch, m1, list, m3) {
+        var listType = (m3.search(/[*+-]/g) > -1) ? 'ul' : 'ol';
+        return parseConsecutiveLists(list, listType, false);
+      }
+    );
   }
 
-  // attacklab: strip sentinel
-  text = text.replace(/~0/, '');
-
+  // strip sentinel
+  text = text.replace(/¨0/, '');
   text = globals.converter._dispatch('lists.after', text, options, globals);
   return text;
 });

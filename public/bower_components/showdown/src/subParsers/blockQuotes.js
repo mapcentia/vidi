@@ -2,28 +2,23 @@ showdown.subParser('blockQuotes', function (text, options, globals) {
   'use strict';
 
   text = globals.converter._dispatch('blockQuotes.before', text, options, globals);
-  /*
-   text = text.replace(/
-   (								// Wrap whole match in $1
-   (
-   ^[ \t]*>[ \t]?			// '>' at the start of a line
-   .+\n					// rest of the first line
-   (.+\n)*					// subsequent consecutive lines
-   \n*						// blanks
-   )+
-   )
-   /gm, function(){...});
-   */
 
-  text = text.replace(/((^[ \t]{0,3}>[ \t]?.+\n(.+\n)*\n*)+)/gm, function (wholeMatch, m1) {
-    var bq = m1;
+  // add a couple extra lines after the text and endtext mark
+  text = text + '\n\n';
 
+  var rgx = /(^ {0,3}>[ \t]?.+\n(.+\n)*\n*)+/gm;
+
+  if (options.splitAdjacentBlockquotes) {
+    rgx = /^ {0,3}>[\s\S]*?(?:\n\n)/gm;
+  }
+
+  text = text.replace(rgx, function (bq) {
     // attacklab: hack around Konqueror 3.5.4 bug:
     // "----------bug".replace(/^-/g,"") == "bug"
-    bq = bq.replace(/^[ \t]*>[ \t]?/gm, '~0'); // trim one level of quoting
+    bq = bq.replace(/^[ \t]*>[ \t]?/gm, ''); // trim one level of quoting
 
     // attacklab: clean up hack
-    bq = bq.replace(/~0/g, '');
+    bq = bq.replace(/¨0/g, '');
 
     bq = bq.replace(/^[ \t]+$/gm, ''); // trim whitespace-only lines
     bq = showdown.subParser('githubCodeBlocks')(bq, options, globals);
@@ -34,8 +29,8 @@ showdown.subParser('blockQuotes', function (text, options, globals) {
     bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
       var pre = m1;
       // attacklab: hack around Konqueror 3.5.4 bug:
-      pre = pre.replace(/^  /mg, '~0');
-      pre = pre.replace(/~0/g, '');
+      pre = pre.replace(/^  /mg, '¨0');
+      pre = pre.replace(/¨0/g, '');
       return pre;
     });
 

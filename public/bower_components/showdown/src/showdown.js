@@ -7,19 +7,50 @@ var showdown = {},
     parsers = {},
     extensions = {},
     globalOptions = getDefaultOpts(true),
+    setFlavor = 'vanilla',
     flavor = {
       github: {
-        omitExtraWLInCodeBlocks:   true,
-        prefixHeaderId:            'user-content-',
-        simplifiedAutoLink:        true,
-        literalMidWordUnderscores: true,
-        strikethrough:             true,
-        tables:                    true,
-        tablesHeaderId:            true,
-        ghCodeBlocks:              true,
-        tasklists:                 true
+        omitExtraWLInCodeBlocks:              true,
+        simplifiedAutoLink:                   true,
+        excludeTrailingPunctuationFromURLs:   true,
+        literalMidWordUnderscores:            true,
+        strikethrough:                        true,
+        tables:                               true,
+        tablesHeaderId:                       true,
+        ghCodeBlocks:                         true,
+        tasklists:                            true,
+        disableForced4SpacesIndentedSublists: true,
+        simpleLineBreaks:                     true,
+        requireSpaceBeforeHeadingText:        true,
+        ghCompatibleHeaderId:                 true,
+        ghMentions:                           true,
+        backslashEscapesHTMLTags:             true,
+        emoji:                                true,
+        splitAdjacentBlockquotes:             true
       },
-      vanilla: getDefaultOpts(true)
+      original: {
+        noHeaderId:                           true,
+        ghCodeBlocks:                         false
+      },
+      ghost: {
+        omitExtraWLInCodeBlocks:              true,
+        parseImgDimensions:                   true,
+        simplifiedAutoLink:                   true,
+        excludeTrailingPunctuationFromURLs:   true,
+        literalMidWordUnderscores:            true,
+        strikethrough:                        true,
+        tables:                               true,
+        tablesHeaderId:                       true,
+        ghCodeBlocks:                         true,
+        tasklists:                            true,
+        smoothLivePreview:                    true,
+        simpleLineBreaks:                     true,
+        requireSpaceBeforeHeadingText:        true,
+        ghMentions:                           false,
+        encodeEmails:                         true
+      },
+      vanilla: getDefaultOpts(true),
+      allOn: allOptionsOn()
     };
 
 /**
@@ -83,13 +114,37 @@ showdown.resetOptions = function () {
  */
 showdown.setFlavor = function (name) {
   'use strict';
-  if (flavor.hasOwnProperty(name)) {
-    var preset = flavor[name];
-    for (var option in preset) {
-      if (preset.hasOwnProperty(option)) {
-        globalOptions[option] = preset[option];
-      }
+  if (!flavor.hasOwnProperty(name)) {
+    throw Error(name + ' flavor was not found');
+  }
+  showdown.resetOptions();
+  var preset = flavor[name];
+  setFlavor = name;
+  for (var option in preset) {
+    if (preset.hasOwnProperty(option)) {
+      globalOptions[option] = preset[option];
     }
+  }
+};
+
+/**
+ * Get the currently set flavor
+ * @returns {string}
+ */
+showdown.getFlavor = function () {
+  'use strict';
+  return setFlavor;
+};
+
+/**
+ * Get the options of a specified flavor. Returns undefined if the flavor was not found
+ * @param {string} name Name of the flavor
+ * @returns {{}|undefined}
+ */
+showdown.getFlavorOptions = function (name) {
+  'use strict';
+  if (flavor.hasOwnProperty(name)) {
+    return flavor[name];
   }
 };
 
@@ -206,14 +261,14 @@ showdown.resetExtensions = function () {
  * @param {string} name
  * @returns {{valid: boolean, error: string}}
  */
-function validate(extension, name) {
+function validate (extension, name) {
   'use strict';
 
   var errMsg = (name) ? 'Error in ' + name + ' extension->' : 'Error in unnamed extension',
-    ret = {
-      valid: true,
-      error: ''
-    };
+      ret = {
+        valid: true,
+        error: ''
+      };
 
   if (!showdown.helper.isArray(extension)) {
     extension = [extension];
@@ -293,7 +348,7 @@ function validate(extension, name) {
       if (showdown.helper.isString(ext.regex)) {
         ext.regex = new RegExp(ext.regex, 'g');
       }
-      if (!ext.regex instanceof RegExp) {
+      if (!(ext.regex instanceof RegExp)) {
         ret.valid = false;
         ret.error = baseMsg + '"regex" property must either be a string or a RegExp object, but ' + typeof ext.regex + ' given';
         return ret;

@@ -140,7 +140,7 @@ function demoRectangles() {
 
 	doc.setDrawColor(0);
 	doc.setFillColor(255, 255, 255);
-	doc.roundedRect(140, 20, 10, 10, 3, 3, 'FD'); //  Black sqaure with rounded corners
+	doc.roundedRect(140, 20, 10, 10, 3, 3, 'FD'); //  Black square with rounded corners
 
 	doc.save('Test.pdf');
 }
@@ -350,4 +350,33 @@ function demoFromHTML() {
         },
     	margins
     )
+}
+
+function demoTextAlign() {
+	var pdf = new jsPDF('p', 'pt', 'letter');
+	
+	pdf.setFillColor(0);
+	pdf.circle( 140, 50, 2, "F" );
+	pdf.text( 'This text is normally\raligned.', 140, 50 );
+	
+	pdf.circle( 140, 120, 2, "F" );
+	pdf.text( 'This text is centered\raround\rthis point.', 140, 120, 'center' );
+	
+	pdf.circle( 140, 300, 2, "F" );
+	pdf.text( 'This text is rotated\rand centered around\rthis point.', 140, 300, 45, 'center' );
+	
+	pdf.circle( 140, 400, 2, "F" );
+	pdf.text( 'This text is\raligned to the\rright.', 140, 400, 'right' );
+	
+	pdf.circle( 140, 550, 2, "F" );
+	pdf.text( 'This text is\raligned to the\rright.', 140, 550, 45, 'right' );
+	
+	pdf.circle( 460, 50, 2, "F" );
+	pdf.text( 'This single line is centered', 460, 50, 'center' );
+
+	pdf.circle( 460, 200, 2, "F" );
+	pdf.text( 'This right aligned text\r\rhas an empty line.', 460, 200, 'right' );
+	
+	
+	pdf.save('Test.pdf');
 }

@@ -345,9 +345,15 @@ var hyperform = (function () {
                              }
 
                              element.setAttribute('aria-errormessage', warning.id);
+                             if (!element.hasAttribute('aria-describedby')) {
+                               element.setAttribute('aria-describedby', warning.id);
+                             }
                              warning.textContent = msg;
                              Renderer.attachWarning(warning, element);
                            } else if (warning && warning.parentNode) {
+                             if (element.getAttribute('aria-describedby') === warning.id) {
+                               element.removeAttribute('aria-describedby');
+                             }
                              element.removeAttribute('aria-errormessage');
                              Renderer.detachWarning(warning, element);
                            }
@@ -1688,9 +1694,9 @@ var hyperform = (function () {
                              if (!element.hasAttribute('disabled') && !element.hasAttribute('readonly')) {
 
                                var wrapped_form = get_wrapper(element);
-                               /* it hasn't got the (non-standard) attribute 'novalidate' or its
-                                * parent form has got the strict parameter */
-                               if (wrapped_form && wrapped_form.settings.novalidateOnElements || !element.hasAttribute('novalidate') || !element.noValidate) {
+                               /* the parent form doesn't allow non-standard "novalidate" attributes
+                                * or it doesn't have such an attribute/property */
+                               if (wrapped_form && !wrapped_form.settings.novalidateOnElements || !element.hasAttribute('novalidate') || !element.noValidate) {
 
                                  /* it isn't part of a <fieldset disabled> */
                                  var p = element.parentNode;
@@ -2462,8 +2468,11 @@ var hyperform = (function () {
                            }
 
                            message_store.delete(this.element);
-                           this.element.classList.remove(invalidClass, userInvalidClass, outOfRangeClass);
-                           this.element.classList.add(validClass, inRangeClass);
+                           this.element.classList.remove(invalidClass);
+                           this.element.classList.remove(userInvalidClass);
+                           this.element.classList.remove(outOfRangeClass);
+                           this.element.classList.add(validClass);
+                           this.element.classList.add(inRangeClass);
                            if (this.element.value !== this.element.defaultValue) {
                              this.element.classList.add(userValidClass);
                            } else {
@@ -2505,7 +2514,7 @@ var hyperform = (function () {
                          return valid;
                        });
 
-                       var version = '0.9.6';
+                       var version = '0.9.10';
 
                        /* deprecate the old snake_case names
                         * TODO: delme before next non-patch release
@@ -2580,7 +2589,8 @@ var hyperform = (function () {
                          }
 
                          var settings = { debug: debug, strict: strict, preventImplicitSubmit: preventImplicitSubmit, revalidate: revalidate,
-                           validEvent: validEvent, extendFieldset: extendFieldset, classes: classes };
+                           validEvent: validEvent, extendFieldset: extendFieldset, classes: classes, novalidateOnElements: novalidateOnElements
+                         };
 
                          if (form instanceof window.NodeList || form instanceof window.HTMLCollection || form instanceof Array) {
                            return Array.prototype.map.call(form, function (element) {

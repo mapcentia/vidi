@@ -5,9 +5,11 @@ showdown.subParser('tables', function (text, options, globals) {
     return text;
   }
 
-  var tableRgx = /^[ \t]{0,3}\|?.+\|.+\n[ \t]{0,3}\|?[ \t]*:?[ \t]*(?:-|=){2,}[ \t]*:?[ \t]*\|[ \t]*:?[ \t]*(?:-|=){2,}[\s\S]+?(?:\n\n|~0)/gm;
+  var tableRgx       = /^ {0,3}\|?.+\|.+\n {0,3}\|?[ \t]*:?[ \t]*(?:[-=]){2,}[ \t]*:?[ \t]*\|[ \t]*:?[ \t]*(?:[-=]){2,}[\s\S]+?(?:\n\n|¨0)/gm,
+    //singeColTblRgx = /^ {0,3}\|.+\|\n {0,3}\|[ \t]*:?[ \t]*(?:[-=]){2,}[ \t]*:?[ \t]*\|[ \t]*\n(?: {0,3}\|.+\|\n)+(?:\n\n|¨0)/gm;
+      singeColTblRgx = /^ {0,3}\|.+\|[ \t]*\n {0,3}\|[ \t]*:?[ \t]*(?:[-=]){2,}[ \t]*:?[ \t]*\|[ \t]*\n( {0,3}\|.+\|[ \t]*\n)*(?:\n|¨0)/gm;
 
-  function parseStyles(sLine) {
+  function parseStyles (sLine) {
     if (/^:[ \t]*--*$/.test(sLine)) {
       return ' style="text-align:left;"';
     } else if (/^--*[ \t]*:[ \t]*$/.test(sLine)) {
@@ -19,10 +21,11 @@ showdown.subParser('tables', function (text, options, globals) {
     }
   }
 
-  function parseHeaders(header, style) {
+  function parseHeaders (header, style) {
     var id = '';
     header = header.trim();
-    if (options.tableHeaderId) {
+    // support both tablesHeaderId and tableHeaderId due to error in documentation so we don't break backwards compatibility
+    if (options.tablesHeaderId || options.tableHeaderId) {
       id = ' id="' + header.replace(/ /g, '_').toLowerCase() + '"';
     }
     header = showdown.subParser('spanGamut')(header, options, globals);
@@ -30,12 +33,12 @@ showdown.subParser('tables', function (text, options, globals) {
     return '<th' + id + style + '>' + header + '</th>\n';
   }
 
-  function parseCells(cell, style) {
+  function parseCells (cell, style) {
     var subText = showdown.subParser('spanGamut')(cell, options, globals);
     return '<td' + style + '>' + subText + '</td>\n';
   }
 
-  function buildTable(headers, cells) {
+  function buildTable (headers, cells) {
     var tb = '<table>\n<thead>\n<tr>\n',
         tblLgn = headers.length;
 
@@ -55,20 +58,19 @@ showdown.subParser('tables', function (text, options, globals) {
     return tb;
   }
 
-  text = globals.converter._dispatch('tables.before', text, options, globals);
-
-  text = text.replace(tableRgx, function (rawTable) {
-
+  function parseTable (rawTable) {
     var i, tableLines = rawTable.split('\n');
 
-    // strip wrong first and last column if wrapped tables are used
     for (i = 0; i < tableLines.length; ++i) {
-      if (/^[ \t]{0,3}\|/.test(tableLines[i])) {
-        tableLines[i] = tableLines[i].replace(/^[ \t]{0,3}\|/, '');
+      // strip wrong first and last column if wrapped tables are used
+      if (/^ {0,3}\|/.test(tableLines[i])) {
+        tableLines[i] = tableLines[i].replace(/^ {0,3}\|/, '');
       }
       if (/\|[ \t]*$/.test(tableLines[i])) {
         tableLines[i] = tableLines[i].replace(/\|[ \t]*$/, '');
       }
+      // parse code spans first, but we only support one line code spans
+      tableLines[i] = showdown.subParser('codeSpans')(tableLines[i], options, globals);
     }
 
     var rawHeaders = tableLines[0].split('|').map(function (s) { return s.trim();}),
@@ -121,7 +123,18 @@ showdown.subParser('tables', function (text, options, globals) {
     }
 
     return buildTable(headers, cells);
-  });
+  }
+
+  text = globals.converter._dispatch('tables.before', text, options, globals);
+
+  // find escaped pipe characters
+  text = text.replace(/\\(\|)/g, showdown.helper.escapeCharactersCallback);
+
+  // parse multi column tables
+  text = text.replace(tableRgx, parseTable);
+
+  // parse one column tables
+  text = text.replace(singeColTblRgx, parseTable);
 
   text = globals.converter._dispatch('tables.after', text, options, globals);
 

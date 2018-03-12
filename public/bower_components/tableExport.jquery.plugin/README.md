@@ -4,41 +4,49 @@ tableExport.jquery.plugin
 <h3>Export HTML Table to</h3>
 <ul>
 <li> CSV
-<li> TXT
-<li> JSON
-<li> XML
-<li> SQL
-<li> XLS
 <li> DOC
-<li> PNG
+<li> JSON
 <li> PDF
+<li> PNG
+<li> SQL
+<li> TSV
+<li> TXT
+<li> XLS   (Excel 2000 HTML format)
+<li> XLSX  (Excel 2007 Office Open XML format)
+<li> XML   (Excel 2003 XML Spreadsheet format)
+<li> XML   (Raw xml)
 </ul>
 
 Installation
 ============
 
-To save the generated export files on client side, include:
+To save the generated export files on client side, include in your html code:
 
-```javascript
+```html
 <script type="text/javascript" src="libs/FileSaver/FileSaver.min.js"></script>
+```
+
+To export the table in XLSX (Excel 2007+ XML Format) format, you need to include additionally:
+```html
+<script type="text/javascript" src="libs/js-xlsx/xlsx.core.min.js"></script>
 ```
 
 To export the table as a PDF file the following includes are required:
 
-```javascript
+```html
 <script type="text/javascript" src="libs/jsPDF/jspdf.min.js"></script>
 <script type="text/javascript" src="libs/jsPDF-AutoTable/jspdf.plugin.autotable.js"></script>
 ```
 
 To export the table in PNG format, you need to include:
 
-```javascript
+```html
 <script type="text/javascript" src="libs/html2canvas/html2canvas.min.js"></script>
 ```
 
-To generate the export file in the desired format, finally include:
+Regardless of the desired format, finally include:
 
-```javascript
+```html
 <script type="text/javascript" src="tableExport.min.js"></script>
 ```
 
@@ -46,14 +54,46 @@ Please keep this include order.
 
 
 
+Dependencies
+============
+
+Library | Version
+--------|--------
+[jQuery](https://github.com/jquery/jquery) | >= 1.9.1
+[FileSaver](https://github.com/hhurz/tableExport.jquery.plugin/blob/master/libs/FileSaver/FileSaver.min.js) | >= 1.2.0
+[html2canvas](https://github.com/niklasvh/html2canvas) | >= 0.5.0-beta4
+[jsPDF](https://github.com/MrRio/jsPDF) | 1.1.239 or 1.3.2
+[jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) | 2.0.14 or 2.0.17
+
+
+
+
 Examples
 ========
 
-```javascript
+```
+// CSV format
+
 $('#tableID').tableExport({type:'csv'});
 ```
 
-```javascript
+```
+// Excel 2000 html format
+
+$('#tableID').tableExport({type:'excel'});
+```
+
+```
+// XML Spreadsheet 2003 file format with multiple worksheet support
+
+$('table').tableExport({type:'excel',
+                        excelFileFormat:'xmlss',
+                        worksheetName: ['Table 1','Table 2', 'Table 3']});
+```
+
+```
+// PDF export using jsPDF only
+
 $('#tableID').tableExport({type:'pdf',
                            jspdf: {orientation: 'p',
                                    margins: {left:20, top:10},
@@ -61,7 +101,9 @@ $('#tableID').tableExport({type:'pdf',
                           });
 ```
 
-```javascript
+```
+// PDF format using jsPDF and jsPDF Autotable 
+
 $('#tableID').tableExport({type:'pdf',
                            jspdf: {orientation: 'l',
                                    format: 'a3',
@@ -73,7 +115,9 @@ $('#tableID').tableExport({type:'pdf',
                           });
 ```
 
-```javascript
+```
+// PDF format with callback example
+
 function DoCellData(cell, row, col, data) {}
 function DoBeforeAutotable(table, headers, rows, AutotableSettings) {}
 
@@ -88,17 +132,20 @@ $('table').tableExport({fileName: sFileName,
                        });
 ```
 
-Options
+Options (Default settings)
 =======
 
-```javascript
+```
 consoleLog: false
 csvEnclosure: '"'
 csvSeparator: ','
 csvUseBOM: true
 displayTableName: false
 escape: false
-excelstyles: [ 'css','properties','to','export','to','excel' ]
+excelRTL: false
+excelstyles: []
+excelFileFormat: 'xlshtml'
+exportHiddenCells: false
 fileName: 'tableExport'
 htmlContent: false
 ignoreColumn: []
@@ -111,6 +158,7 @@ jspdf: orientation: 'p'
                 right: 10
                 top: 10
                 bottom: 10
+       onDocCreated: null
        autotable: styles: cellPadding: 2
                           rowHeight: 12
                           fontSize: 8
@@ -125,23 +173,31 @@ jspdf: orientation: 'p'
                                 fontStyle: 'bold'
                                 halign: 'center'
                   alternateRowStyles: fillColor: 245
-                  tableExport: onAfterAutotable: null
+                  tableExport: doc: null
+                               onAfterAutotable: null
                                onBeforeAutotable: null
+                               onAutotableText: null
                                onTable: null
+                               outputImages: true
 numbers: html: decimalMark: '.'
                thousandsSeparator: ','
          output: decimalMark: '.',
                  thousandsSeparator: ','
 onCellData: null
 onCellHtmlData: null
+onIgnoreRow: null
 onMsoNumberFormat: null
 outputMode: 'file'
+pdfmake: enabled: false
+         docDefinition: pageOrientation: 'portrait'
+                        defaultStyle: font: 'Roboto'
+         fonts: {}
 tbodySelector: 'tr'
 tfootSelector: 'tr'
 theadSelector: 'tr'
 tableName: 'myTableName'
 type: 'csv'
-worksheetName: 'xlsWorksheetName'
+worksheetName: 'WorksheetName'
 ```
 
 ```ignoreColumn``` can be either an array of indexes (i.e. [0, 2]) or field names (i.e. ["id", "name"]).
@@ -149,33 +205,75 @@ worksheetName: 'xlsWorksheetName'
 * Field names should correspond to the values set on the "data-field" attribute of the header elements `th` in the DOM.
 * "Nameless" columns without data-field attribute will be named by their index number (converted to a string)
 
+To disable formatting of numbers in the exported output, which can be useful for csv and excel format, set the option ``` numbers: output ``` to ``` false ```.
+
+Set the option ``` excelFileFormat ``` to ``` 'xmlss' ``` if you want to export in XML Spreadsheet 2003 file format. Use this format if multiple tables should be exported into a single file. Excel 2000 html format is the default excel file format which has better support of exporting table styles.
+
+The ``` excelstyles ``` option lets you define the css attributes of the original html table cells, that should be taken over when exporting to an excel worksheet (Excel 2000 html format only).
+
+To export in XSLX format [protobi/js-xlsx](https://github.com/protobi/js-xlsx) forked from [SheetJS/js-xlsx](https://github.com/SheetJS/js-xlsx) is used. Please note that the implementation of this format type lets you only export table data, but not any styling information of the html table.
+
 For jspdf options see the documentation of [jsPDF](https://github.com/MrRio/jsPDF) and [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable) resp.
 
 There is an extended setting for ``` jsPDF option 'format' ```. Setting the option value to ``` 'bestfit' ``` lets the tableExport plugin try to choose the minimum required paper format and orientation in which the table (or tables in multitable mode) completely fits without column adjustment.
 
 Also there is an extended setting for the ``` jsPDF-AutoTable options 'fillColor', 'textColor' and 'fontStyle'```. When setting these option values to ``` 'inherit' ``` the original css values for background and text color will be used as fill and text color while exporting to pdf. A css font-weight >= 700 results in a bold fontStyle and the italic css font-style will be used as italic fontStyle.
 
+When exporting to pdf the option ``` outputImages ``` lets you enable or disable the output of images that are located in the original html table.
+
+
 Optional html data attributes
 =============================
-(can be set while generating the table you want to export)
+(can be applied while generating the table that you want to export)
 
-<h3>data-tableexport-display</h3>
+<h4>data-tableexport-cellformat</h4>
+
 ```html
-<table style="display:none;" data-tableexport-display="always">...</table> -> hidden table will be exported
-
-<td style="display:none;" data-tableexport-display="always">...</td> -> hidden cell will be exported
-
-<td data-tableexport-display="none">...</td> -> cell will not be exported
-
-<tr data-tableexport-display="none">...</tr> -> all cells of this row will not be exported
+<td data-tableexport-cellformat="">...</td> -> An empty data value preserves format of cell content. E.g. no number seperator conversion
+                                               
+                                               More cell formats to be come...
 ```
 
-<h3>data-tableexport-msonumberformat</h3>
+<h4>data-tableexport-colspan</h4>
+
 ```html
-<td data-tableexport-msonumberformat="\@">...</td> -> data value will be used as mso-number-format style attribute when exporting to excel
+<td colspan="2" data-tableexport-colspan="3">...</td> -> Overwrites the colspan attribute of the table cell during export. 
+                                                         This attribute can be used if there follow hidden cells, that will be exported by using the "data-tableexport-display" attribute.
 ```
 
-<h3>data-tableexport-value</h3>
+<h4>data-tableexport-display</h4>
+
+```html
+<table style="display:none;" data-tableexport-display="always">...</table> -> A hidden table will be exported
+
+<td style="display:none;" data-tableexport-display="always">...</td> -> A hidden cell will be exported
+
+<td data-tableexport-display="none">...</td> -> This cell will not be exported
+
+<tr data-tableexport-display="none">...</tr> -> All cells of this row will not be exported
+```
+
+<h4>data-tableexport-msonumberformat</h4>
+
+```html
+<td data-tableexport-msonumberformat="\@">...</td> -> Data value will be used to style excel cells with mso-number-format (Excel 2000 html format only)
+                                                      Examples:
+                                                      "\@"       excel treats cell content alway as text, even numbers
+                                                      "0"        excel will display no decimals for numbers
+                                                      "0\.000"   excel displays numbers with 3 decimals
+                                                      "0%"       excel will display a number as percent with no decimals
+                                                      "Percent"  excel will display a number as percent with 2 decimals
+```
+
+<h4>data-tableexport-rowspan</h4>
+
+```html
+<td rowspan="2" data-tableexport-rowspan="3">...</td> -> Overwrites the rowspan attribute of the table cell during export. 
+                                                         This attribute can be used if there follow hidden rows, that will be exported by using the "data-tableexport-display" attribute.
+```
+
+<h4>data-tableexport-value</h4>
+
 ```html
 <th data-tableexport-value="export title">title</th> -> "export title" instead of "title" will be exported
 

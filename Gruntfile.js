@@ -28,13 +28,8 @@ module.exports = function (grunt) {
                         'public/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
                         'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
                         'public/bower_components/bootstrap-table/dist/bootstrap-table.min.css',
-                        //'public/bower_components/hyperform/css/hyperform.css',
                         'public/css/jasny-bootstrap.min.css',
-                        'public/css/L.Control.Locate.min.css',
-                        'public/css/Leaflet.GraphicScale.min.css',
-                        'public/css/leaflet.toolbar.css',
-                        'public/css/styles.css',
-                        'public/css/cartodb.css'
+                        'public/css/styles.css'
                     ]
                 }
             }
@@ -103,6 +98,13 @@ module.exports = function (grunt) {
             publish: {
                 files: {
                     'public/js/build/all.min.js': [
+                        'public/js/leaflet/leaflet.js',
+                        'public/js/leaflet/plugins/Leaflet.Draw/leaflet.draw.js',
+                        'public/js/leaflet/plugins/Leaflet.Editable/src/Leaflet.Editable.js',
+                        'public/js/leaflet/plugins/Leaflet.Locate/dist/L.Control.Locate.min.js',
+                        'public/js/leaflet/plugins/Leaflet.PathDrag/Path.Drag.js',
+                        'public/js/leaflet/plugins/Leaflet.Toolbar/leaflet.toolbar.js',
+
                         'public/bower_components/leaflet-measure/dist/leaflet-measure.js',
                         'public/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid.js',
                         'public/bower_components/jquery/dist/jquery.min.js',

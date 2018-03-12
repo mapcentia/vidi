@@ -88,4 +88,4 @@ config/_variables.less
 /config/_styles.less
 /config/configServer.js
 /public/js/templates.js
-/public/bower_components/bootstrap-select/
+/public/bower_components

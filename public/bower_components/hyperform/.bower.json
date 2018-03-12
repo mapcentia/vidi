@@ -1,6 +1,6 @@
 {
   "name": "hyperform",
-  "version": "0.9.6",
+  "version": "0.9.10",
   "homepage": "https://github.com/hyperform/hyperform",
   "authors": [
     "Manuel Strehl"
@@ -29,14 +29,13 @@
     "test",
     "tests"
   ],
-  "_release": "0.9.6",
+  "_release": "0.9.10",
   "_resolution": {
     "type": "version",
-    "tag": "v0.9.6",
-    "commit": "91609dea393fb1ac5776a7f5e4a395911336beb7"
+    "tag": "v0.9.10",
+    "commit": "0bd2613f28fd158f524f9cd039976da7dcc4f592"
   },
   "_source": "https://github.com/hyperform/hyperform.git",
   "_target": "^0.9.6",
-  "_originalSource": "hyperform",
-  "_direct": true
+  "_originalSource": "hyperform"
 }

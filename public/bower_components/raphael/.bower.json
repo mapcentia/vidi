@@ -42,6 +42,5 @@
   },
   "_source": "https://github.com/DmitryBaranovskiy/raphael.git",
   "_target": "^2.2.7",
-  "_originalSource": "raphael",
-  "_direct": true
+  "_originalSource": "raphael"
 }

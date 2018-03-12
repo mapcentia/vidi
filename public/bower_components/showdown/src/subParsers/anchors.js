@@ -6,17 +6,16 @@ showdown.subParser('anchors', function (text, options, globals) {
 
   text = globals.converter._dispatch('anchors.before', text, options, globals);
 
-  var writeAnchorTag = function (wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
-    if (showdown.helper.isUndefined(m7)) {
-      m7 = '';
+  var writeAnchorTag = function (wholeMatch, linkText, linkId, url, m5, m6, title) {
+    if (showdown.helper.isUndefined(title)) {
+      title = '';
     }
-    wholeMatch = m1;
-    var linkText = m2,
-        linkId = m3.toLowerCase(),
-        url = m4,
-        title = m7;
+    linkId = linkId.toLowerCase();
 
-    if (!url) {
+    // Special case for explicit empty url
+    if (wholeMatch.search(/\(<?\s*>? ?(['"].*['"])?\)$/m) > -1) {
+      url = '';
+    } else if (!url) {
       if (!linkId) {
         // lower-case and turn embedded newlines into spaces
         linkId = linkText.toLowerCase().replace(/ ?\n/g, ' ');
@@ -29,22 +28,27 @@ showdown.subParser('anchors', function (text, options, globals) {
           title = globals.gTitles[linkId];
         }
       } else {
-        if (wholeMatch.search(/\(\s*\)$/m) > -1) {
-          // Special case for explicit empty url
-          url = '';
-        } else {
-          return wholeMatch;
-        }
+        return wholeMatch;
       }
     }
 
-    url = showdown.helper.escapeCharacters(url, '*_', false);
+    //url = showdown.helper.escapeCharacters(url, '*_', false); // replaced line to improve performance
+    url = url.replace(showdown.helper.regexes.asteriskDashAndColon, showdown.helper.escapeCharactersCallback);
+
     var result = '<a href="' + url + '"';
 
     if (title !== '' && title !== null) {
       title = title.replace(/"/g, '&quot;');
-      title = showdown.helper.escapeCharacters(title, '*_', false);
+      //title = showdown.helper.escapeCharacters(title, '*_', false); // replaced line to improve performance
+      title = title.replace(showdown.helper.regexes.asteriskDashAndColon, showdown.helper.escapeCharactersCallback);
       result += ' title="' + title + '"';
+    }
+
+    // optionLinksInNewWindow only applies
+    // to external links. Hash links (#) open in same page
+    if (options.openLinksInNewWindow && !/^#/.test(url)) {
+      // escaped _
+      result += ' target="¨E95Eblank"';
     }
 
     result += '>' + linkText + '</a>';
@@ -53,80 +57,41 @@ showdown.subParser('anchors', function (text, options, globals) {
   };
 
   // First, handle reference-style links: [link text] [id]
-  /*
-   text = text.replace(/
-   (							// wrap whole match in $1
-   \[
-   (
-   (?:
-   \[[^\]]*\]		// allow brackets nested one level
-   |
-   [^\[]			// or anything else
-   )*
-   )
-   \]
+  text = text.replace(/\[((?:\[[^\]]*]|[^\[\]])*)] ?(?:\n *)?\[(.*?)]()()()()/g, writeAnchorTag);
 
-   [ ]?					// one optional space
-   (?:\n[ ]*)?				// one optional newline followed by spaces
-
-   \[
-   (.*?)					// id = $3
-   \]
-   )()()()()					// pad remaining backreferences
-   /g,_DoAnchors_callback);
-   */
-  text = text.replace(/(\[((?:\[[^\]]*]|[^\[\]])*)][ ]?(?:\n[ ]*)?\[(.*?)])()()()()/g, writeAnchorTag);
-
-  //
   // Next, inline-style links: [link text](url "optional title")
-  //
+  // cases with crazy urls like ./image/cat1).png
+  text = text.replace(/\[((?:\[[^\]]*]|[^\[\]])*)]()[ \t]*\([ \t]?<([^>]*)>(?:[ \t]*((["'])([^"]*?)\5))?[ \t]?\)/g,
+    writeAnchorTag);
 
-  /*
-   text = text.replace(/
-   (						// wrap whole match in $1
-   \[
-   (
-   (?:
-   \[[^\]]*\]	// allow brackets nested one level
-   |
-   [^\[\]]			// or anything else
-   )
-   )
-   \]
-   \(						// literal paren
-   [ \t]*
-   ()						// no id, so leave $3 empty
-   <?(.*?)>?				// href = $4
-   [ \t]*
-   (						// $5
-   (['"])				// quote char = $6
-   (.*?)				// Title = $7
-   \6					// matching quote
-   [ \t]*				// ignore any spaces/tabs between closing quote and )
-   )?						// title is optional
-   \)
-   )
-   /g,writeAnchorTag);
-   */
-  text = text.replace(/(\[((?:\[[^\]]*]|[^\[\]])*)]\([ \t]*()<?(.*?(?:\(.*?\).*?)?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g,
+  // normal cases
+  text = text.replace(/\[((?:\[[^\]]*]|[^\[\]])*)]()[ \t]*\([ \t]?<?([\S]+?(?:\([\S]*?\)[\S]*?)?)>?(?:[ \t]*((["'])([^"]*?)\5))?[ \t]?\)/g,
                       writeAnchorTag);
 
-  //
-  // Last, handle reference-style shortcuts: [link text]
+  // handle reference-style shortcuts: [link text]
   // These must come last in case you've also got [link test][1]
   // or [link test](/foo)
-  //
+  text = text.replace(/\[([^\[\]]+)]()()()()()/g, writeAnchorTag);
 
-  /*
-   text = text.replace(/
-   (                // wrap whole match in $1
-   \[
-   ([^\[\]]+)       // link text = $2; can't contain '[' or ']'
-   \]
-   )()()()()()      // pad rest of backreferences
-   /g, writeAnchorTag);
-   */
-  text = text.replace(/(\[([^\[\]]+)])()()()()()/g, writeAnchorTag);
+  // Lastly handle GithubMentions if option is enabled
+  if (options.ghMentions) {
+    text = text.replace(/(^|\s)(\\)?(@([a-z\d\-]+))(?=[.!?;,[\]()]|\s|$)/gmi, function (wm, st, escape, mentions, username) {
+      if (escape === '\\') {
+        return st + mentions;
+      }
+
+      //check if options.ghMentionsLink is a string
+      if (!showdown.helper.isString(options.ghMentionsLink)) {
+        throw new Error('ghMentionsLink option must be a string');
+      }
+      var lnk = options.ghMentionsLink.replace(/\{u}/g, username),
+          target = '';
+      if (options.openLinksInNewWindow) {
+        target = ' target="¨E95Eblank"';
+      }
+      return st + '<a href="' + lnk + '"' + target + '>' + mentions + '</a>';
+    });
+  }
 
   text = globals.converter._dispatch('anchors.after', text, options, globals);
   return text;
