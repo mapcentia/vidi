@@ -195,7 +195,9 @@ module.exports = module.exports = {
 
                 setTimeout(
                     function () {
-                        $("#loadscreen").fadeOut(200);
+                        if (!window.vidiConfig.doNotCloseLoadScreen) {
+                            $("#loadscreen").fadeOut(200);
+                        }
                     }, 600
                 );
             }
