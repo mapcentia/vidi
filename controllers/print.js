@@ -5,7 +5,7 @@ var fs = require('fs');
 var wkhtmltopdf = require('wkhtmltopdf');
 
 wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
-//wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
+wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
 
 
 /**
