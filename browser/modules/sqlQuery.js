@@ -106,7 +106,7 @@ module.exports = {
          */
         var defaultTemplate =
             '<div class="cartodb-popup-content">' +
-            '<button id="popup-edit-btn">Edit</button>' +
+            '<!--<button class="popup-edit-btn">Edit</button>-->' +
             '   {{#_vidi_content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
             '       {{#value}}' +
@@ -228,9 +228,9 @@ module.exports = {
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
-                            $("#popup-edit-btn").on("click", function () {
+                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.startEdit(e, _key_, qstore);
-                            })
+                            });
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
@@ -247,7 +247,6 @@ module.exports = {
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
                         })
-
 
 
                     } else {
