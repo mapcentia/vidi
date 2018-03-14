@@ -7,11 +7,11 @@
     <meta name="google" value="notranslate">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
-
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:200,300,400,500,700">
     <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
-
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
     <!-- build:css /css/build/all.min.css -->
     <!-- Leafet -->
     <link rel="stylesheet" href="/bower_components/leaflet/dist/leaflet.css">
@@ -37,15 +37,11 @@
     <!-- custom -->
     <link rel="stylesheet" href="/css/styles.css">
     <!-- /build -->
-
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
 </head>
 <body>
-
 <div class="loadingIndicator">
     <div class="loadingIndicator__bar"></div>
 </div>
-
 <div id="loadscreen">
     <div class="center text">
         <div id="loadscreentext"></div>
@@ -64,9 +60,7 @@
         </div>
     </div>
 </div>
-
 <div id="main-container"></div>
-
 </body>
 <script src="/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js"></script>
 <script src="/js/templates.js"></script>
@@ -90,12 +84,13 @@
         window.MapCentia = new Vidi().init.init();
     }
 </script>
+<!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
-
+<!-- Polyfills -->
 <script src="//cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from"></script>
-
 <!-- build:js /js/build/all.min.js -->
+<!-- Leaflet -->
 <script src="/bower_components/leaflet/dist/leaflet-src.js"></script>
 <script src="/bower_components/leaflet-draw/dist/leaflet.draw-src.js"></script>
 <script src="/bower_components/Path.Drag.js/src/Path.Drag.js"></script>
@@ -113,7 +108,7 @@
 <script src="/bower_components/q-cluster/src/clustering.js"></script>
 <script src="/js/point-clusterer.js"></script>
 <script src="/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
-
+<!-- Core -->
 <script src="/bower_components/es5-shim/es5-shim.js"></script>
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
 <script src="/bower_components/jrespond/js/jRespond.js"></script>
@@ -123,7 +118,8 @@
 <script src="/bower_components/backbone/backbone.js"></script>
 <script src="/bower_components/momentjs/min/moment-with-locales.js"></script>
 <script src="/bower_components/d3/d3.js"></script>
-
+<script src="/js/proj4js-combined.js"></script>
+<!-- Bootstrap -->
 <script src="/bower_components/typeahead.js/dist/typeahead.jquery.min.js"></script>
 <script src="/bower_components/bootstrap-table/dist/bootstrap-table.js"></script>
 <script src="/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js"></script>
@@ -135,21 +131,15 @@
 <script src="/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
 <script src="/bower_components/bootstrap-select/js/bootstrap-select.js"></script>
 <script src="/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js"></script>
-
-<script src="/js/proj4js-combined.js"></script>
-<script src="/js/jasny-bootstrap.js"></script>
+<!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
-<script src="/js/vidi.js"></script>
-
-<!-- /build -->
-
-<script src="//gc2.io/js/raphael/dist/rlayer-src.js"></script>
-
+<!-- Custom -->
+<script src="/js/jasny-bootstrap.js"></script>
 <script src="/js/gc2/geocloud.js"></script>
 <script src="/js/gc2/gc2table.js"></script>
-
+<script src="/js/vidi.js"></script>
+<!-- /build -->
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
-
 </html>
