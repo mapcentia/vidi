@@ -20,15 +20,33 @@ module.exports = function (grunt) {
         },
         cssmin: {
             build: {
+                options: {
+                    target: "./build",
+                    rebase: true
+                },
                 files: {
                     'public/css/build/all.min.css': [
-                        'public/bower_components/bootstrap/dist/css/bootstrap.min.css',
-                        'public/bower_components/snackbarjs/dist/snackbar.min.css',
-                        'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
-                        'public/bower_components/bootstrap-material-design/dist/css/ripples.min.css',
+                        // Leaflet
+                        'public/bower_components/leaflet/dist/leaflet.css',
+                        'public/bower_components/leaflet-draw/dist/leaflet.draw.css',
+                        'public/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.css',
+                        'public/bower_components/leaflet.toolbar/dist/leaflet.toolbar.css',
+                        'public/bower_components/leaflet-measure-path/leaflet-measure-path.css',
+                        'public/bower_components/leaflet-measure/dist/leaflet-measure.css',
+                        'public/bower_components/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css',
+                        'public/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css',
+                        'public/bower_components/q-cluster/css/q-cluster.css',
+                        // Bootstrap
+                        'public/bower_components/bootstrap/dist/css/bootstrap.css',
+                        'public/bower_components/snackbarjs/dist/snackbar.css',
+                        'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.css',
+                        'public/bower_components/bootstrap-material-design/dist/css/ripples.css',
                         'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
-                        'public/bower_components/bootstrap-table/dist/bootstrap-table.min.css',
-                        'public/css/jasny-bootstrap.min.css',
+                        'public/bower_components/bootstrap-table/dist/bootstrap-table.css',
+                        'public/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css',
+                        'public/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css',
+                        'public/css/jasny-bootstrap.css',
+                        //custon
                         'public/css/styles.css'
                     ]
                 }
@@ -96,38 +114,69 @@ module.exports = function (grunt) {
         },
         uglify: {
             publish: {
+                options: {
+                    sourceMap: true,
+                    sourceMapIncludeSources: true,
+                    compress: {
+                        sequences: true,
+                        dead_code: true,
+                        conditionals: true,
+                        booleans: true,
+                        unused: true,
+                        if_return: true,
+                        join_vars: true,
+                        drop_console: false
+                    }
+                },
                 files: {
                     'public/js/build/all.min.js': [
-                        'public/js/leaflet/leaflet.js',
-                        'public/js/leaflet/plugins/Leaflet.Draw/leaflet.draw.js',
-                        'public/js/leaflet/plugins/Leaflet.Editable/src/Leaflet.Editable.js',
-                        'public/js/leaflet/plugins/Leaflet.Locate/dist/L.Control.Locate.min.js',
-                        'public/js/leaflet/plugins/Leaflet.PathDrag/Path.Drag.js',
-                        'public/js/leaflet/plugins/Leaflet.Toolbar/leaflet.toolbar.js',
-
+                        'public/bower_components/leaflet/dist/leaflet-src.js',
+                        'public/bower_components/leaflet-draw/dist/leaflet.draw-src.js',
+                        'public/bower_components/Path.Drag.js/src/Path.Drag.js',
+                        'public/bower_components/leaflet.editable/src/Leaflet.Editable.js',
+                        'public/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.min.js',
+                        'public/bower_components/leaflet.toolbar/dist/leaflet.toolbar-src.js',
+                        'public/bower_components/leaflet-measure-path/leaflet-measure-path.js',
                         'public/bower_components/leaflet-measure/dist/leaflet-measure.js',
-                        'public/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid.js',
-                        'public/bower_components/jquery/dist/jquery.min.js',
-                        'public/bower_components/typeahead.js/dist/typeahead.jquery.min.js',
-                        'public/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js',
+                        'public/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js',
+                        'public/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
+                        'public/bower_components/leaflet-plugins/layer/tile/Yandex.js',
+                        'public/bower_components/leaflet-plugins/layer/tile/Bing.js',
+                        'public/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+                        'public/bower_components/q-cluster/src/utils.js',
+                        'public/bower_components/q-cluster/src/clustering.js',
+                        'public/js/point-clusterer.js',
+                        'public/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js',
+
+                        'public/bower_components/es5-shim/es5-shim.js',
+                        'public/bower_components/jquery/dist/jquery.js',
+                        'public/bower_components/jrespond/js/jRespond.js',
+                        'public/bower_components/mustache.js/mustache.js',
+                        'public/bower_components/underscore/underscore.js',
+                        //'public/bower_components/raphael/raphael.js',
+                        'public/bower_components/backbone/backbone.js',
+                        'public/bower_components/momentjs/min/moment-with-locales.js',
+                        'public/bower_components/d3/d3.js',
+
+                        'public/bower_components/typeahead.js/dist/typeahead.jquery.js',
                         'public/bower_components/bootstrap-table/dist/bootstrap-table.js',
-                        'public/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js',
-                        'public/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js',
-                        'public/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js',
-                        'public/bower_components/tableExport.jquery.plugin/tableExport.min.js',
+                        'public/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.js',
+                        'public/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
+                        'public/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.js',
+                        'public/bower_components/tableExport.jquery.plugin/tableExport.js',
                         'public/bower_components/bootstrap-material-design/dist/js/ripples.js',
                         'public/bower_components/bootstrap-material-design/dist/js/material.js',
-                        'public/bower_components/momentjs/min/moment-with-locales.js',
                         'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
+                        'public/bower_components/bootstrap-select/js/bootstrap-select.js',
                         'public/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
-                        'public/bower_components/bootstrap-select/dist/css/bootstrap-select.css',
-                        //'public/bower_components/hyperform/dist/hyperform.min.js',
-                        'public/bower_components/raphael/raphael.min.js',
-                        'public/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
+
+                        'public/js/proj4js-combined.js',
                         'public/js/jasny-bootstrap.js',
-                        'public/js/templates.js',
                         'public/js/bundle.js',
-                        'public/js/vidi.js'
+                        'public/js/vidi.js',
+                        'public/js/gc2/geocloud.js',
+                        'public/js/gc2/gc2table.js'
+
                     ]
                 }
             }
