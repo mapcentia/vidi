@@ -244,7 +244,7 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item">' + (subOrderHeader !== "" ? '<div class="layer-sub-order-header">' + subOrderHeader + '</div>':'') + '<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
                                 '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
                             l.push({});
 
