@@ -7,7 +7,6 @@
 
 var meta;
 
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
