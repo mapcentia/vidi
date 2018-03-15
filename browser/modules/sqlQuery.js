@@ -106,7 +106,7 @@ module.exports = {
          */
         var defaultTemplate =
             '<div class="cartodb-popup-content">' +
-            '<!--<button class="popup-edit-btn">Edit</button>-->' +
+            '<button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button>' +
             '   {{#_vidi_content.fields}}' +
             '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
             '       {{#value}}' +
@@ -122,7 +122,6 @@ module.exports = {
             if (layers[0] === "") {
                 return false;
             }
-
 
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
@@ -229,7 +228,7 @@ module.exports = {
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                editor.startEdit(e, _key_, qstore);
+                                editor.edit(e, _key_, qstore);
                             });
                         });
 
@@ -286,7 +285,6 @@ module.exports = {
                 // so they can be recreated as query layers
                 // after serialization
                 // ========================================
-
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
@@ -295,6 +293,23 @@ module.exports = {
                     } else {
                         l._vidi_type = "query_result";
                     }
+
+                    l.on("click", function (e) {
+
+
+                        setTimeout(function () {
+                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                editor.edit(l, _key_, qstore);
+
+                            });
+
+                            $(".popup-delete-btn").unbind("click.ge-delete").bind("click.ge-delete", function () {
+                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                    editor.delete(l, _key_, qstore);
+                                }
+                            });
+                        }, 500)
+                    });
 
                 }
             });
@@ -372,5 +387,5 @@ var sortObject = function (obj) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array
-}
+};
 

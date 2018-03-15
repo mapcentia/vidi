@@ -52,10 +52,10 @@ module.exports = {
         return this;
     },
     init: function () {
-
+        var me = this;
     },
 
-    startEdit: function (e, k, qstore) {
+    edit: function (e, k, qstore) {
 
         var me = this;
 
@@ -77,7 +77,6 @@ module.exports = {
             properties = {};
 
         console.log(e);
-        console.log(metaDataKeys);
 
         cloud.get().map.closePopup();
 
@@ -212,7 +211,6 @@ module.exports = {
                     GeoJSON
                 ]
             };
-            console.log(schemaQualifiedName);
 
             $.ajax({
                 url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
@@ -246,6 +244,136 @@ module.exports = {
             ), document.getElementById("info-modal-body-wrapper"));
 
         });
+    },
+
+    delete: function (e, k, qstore) {
+        let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            GeoJSON = e.toGeoJSON(),
+            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
+        console.log(metaDataKeys[schemaQualifiedName].pkey)
+        console.log(GeoJSON);
+        $.ajax({
+            url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/" + gid,
+            type: "DELETE",
+            dataType: 'json',
+            contentType: 'application/json',
+            scriptCharset: "utf-8",
+            success: function (response) {
+                sqlQuery.reset(qstore);
+                let l = cloud.get().getLayersByName(schemaQualifiedName);
+                l.redraw();
+            },
+            error: function (response) {
+                alert(response.responseText);
+            }
+        });
+    },
+
+    add: function (k) {
+        let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            type = metaDataKeys[schemaQualifiedName].type,
+            editor;
+
+
+            editor = cloud.get().map.editTools.startPolygon();
+
+
+
+        var action = LeafletToolbar.ToolbarAction.extend({
+            initialize: function (map, myAction) {
+                this.map = cloud.get().map;
+                this.myAction = myAction;
+                LeafletToolbar.ToolbarAction.prototype.initialize.call(this);
+            },
+            addHooks: function () {
+                // this.myAction.disable();
+            }
+        });
+
+        var cancel = action.extend({
+            options: {
+                toolbarIcon: {
+                    html: '<i class="fa fa-times"></i>',
+                    tooltip: 'Cancel'
+                }
+            },
+            addHooks: function () {
+                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                    cloud.get().map.editTools.stopDrawing();
+                    editor.disableEdit();
+                    cloud.get().map.removeLayer(editor);
+                } else {
+                    return;
+                }
+                this.myAction.disable();
+                action.prototype.addHooks.call(this);
+            }
+        });
+
+        var save = action.extend({
+
+            options: {
+                toolbarIcon: {
+                    className: 'fa fa-floppy-o'
+                }
+            },
+
+            addHooks: function () {
+
+                // Save feature
+                var json = editor.toGeoJSON();
+
+                console.log(json);
+                json.properties = store[id].geoJSON.features[0].properties;
+
+                $.ajax({
+                    url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
+                    type: "POST",
+                    dataType: 'json',
+                    contentType: 'application/json',
+                    scriptCharset: "utf-8",
+                    success: function (response) {
+                        sqlQuery.reset(qstore);
+                        let l = cloud.get().getLayersByName(schemaQualifiedName);
+                        l.redraw();
+                    },
+                    error: function (response) {
+                        alert(response.responseText);
+                    }
+                });
+
+                me.commitDrawing(store[id], json, type, token, client).then(
+                    function (e) {
+                        cloud.get().map.removeLayer(editor);
+                        cloud.get().map.removeLayer(toolBar);
+                        jquery.snackbar({
+                            id: "snackbar-conflict",
+                            content: "Entity '" + json.properties.SeqNoType + "' (" + json.properties.SeqNo + ") stedfæstet",
+                            htmlAllowed: true,
+                            timeout: 5000
+                        });
+
+                    },
+                    function (e) {
+                        // Error
+                        alert(e.responseText);
+                    });
+            }
+
+        });
+
+
+        var toolBar = new LeafletToolbar.Control({
+            position: 'topright',
+            actions: [cancel, save]
+        });
+
+        toolBar.addTo(cloud.get().map);
+
+
+
     },
 
     stopEdit: function (e) {
