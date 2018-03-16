@@ -954,3 +954,52 @@ h4 small {
     display: none;
   }
 }
+
+//Brevflet Start
+
+#brevflet{
+  .address{
+    padding: 10px;
+    transition: 0.2s all;
+
+    &:hover{
+      color: white;
+      background-color: #03a9f4;
+    }
+  }
+
+  .selected-addresses{
+    padding: 10px;
+    background-color: #03a9f4;
+    text-align: center;
+    font-size: 18px;
+    color:white;
+    margin-bottom: 15px;
+  }
+
+  .remove-icon{
+    float: right;
+    font-size: 18px;
+    cursor: pointer;
+  }
+}
+
+.brevflet-marker{
+  transition: 0.2s all;
+  background-color: green;
+  color: white;
+  text-align: center;
+  width: 24px !important;
+  height: 16px !important;
+
+  &:hover{
+    background-color: yellowgreen;
+  }
+
+  &.active{
+    background-color: yellowgreen;
+  }
+
+}
+
+//Brevflet End
