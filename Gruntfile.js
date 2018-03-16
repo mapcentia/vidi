@@ -103,7 +103,8 @@ module.exports = function (grunt) {
         browserify: {
             publish: {
                 files: {
-                    'public/js/bundle.js': ['browser/index.js']
+                    'public/js/bundle.js': ['browser/index.js'],
+                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
                 },
                 options: {
                     //transform: ['reactify', 'require-globify']

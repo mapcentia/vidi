@@ -8,8 +8,8 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Material Design fonts -->
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:200,300,400,500,700">
-    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/icons/material-icons.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
     <!-- build:css /css/build/all.min.css -->
@@ -30,8 +30,11 @@
     <link rel="stylesheet" href="/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css">
     <link rel="stylesheet" href="/bower_components/bootstrap-select/dist/css/bootstrap-select.css">
     <link rel="stylesheet" href="/bower_components/bootstrap-table/dist/bootstrap-table.css"/>
-    <link rel="stylesheet"
-          href="/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+    <link rel="stylesheet" href="/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+
+    <!-- Leaflet plugin styles -->
+    <link rel="stylesheet" href="/js/leaflet-easybutton/easy-button.css"/>
+
     <link rel="stylesheet" href="/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
     <link rel="stylesheet" href="/css/jasny-bootstrap.css">
     <!-- custom -->
@@ -61,6 +64,12 @@
     </div>
 </div>
 <div id="main-container"></div>
+
+<div class="caching-progress">
+    <div class="header">
+        <span class="badge badge-warning">Demo caching progress box: <span class="status">idle</span></span>
+    </div>
+</div>
 </body>
 <script src="/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js"></script>
 <script src="/js/templates.js"></script>
@@ -108,6 +117,10 @@
 <script src="/bower_components/q-cluster/src/clustering.js"></script>
 <script src="/js/point-clusterer.js"></script>
 <script src="/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
+
+<!-- Leaflet plugins -->
+<script src="/js/leaflet-easybutton/easy-button.js"></script>
+
 <!-- Core -->
 <script src="/bower_components/es5-shim/es5-shim.js"></script>
 <script src="/bower_components/jquery/dist/jquery.min.js"></script>
@@ -119,6 +132,10 @@
 <script src="/bower_components/momentjs/min/moment-with-locales.js"></script>
 <script src="/bower_components/d3/d3.js"></script>
 <script src="/js/proj4js-combined.js"></script>
+
+<!-- GoogleMaps -->
+<script src="//maps.google.com/maps/api/js?v=3&libraries=places&key=AIzaSyCjTXR2Tmg_Ok7u4S5dl6_Rgy3br_BQfPQ"></script>
+
 <!-- Bootstrap -->
 <script src="/bower_components/typeahead.js/dist/typeahead.jquery.min.js"></script>
 <script src="/bower_components/bootstrap-table/dist/bootstrap-table.js"></script>

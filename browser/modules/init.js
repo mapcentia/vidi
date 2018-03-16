@@ -185,6 +185,7 @@ module.exports = {
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();
+        modules.tilecache.init();
         modules.print.init();
         modules.editor.init();
 
@@ -273,5 +274,13 @@ module.exports = {
             }, 100);
 
         }, 0));
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.bundle.js').then(function(registration) {
+                console.log('Registered:', registration);
+            }).catch(function(error) {
+                console.log('Registration failed: ', error);
+            });
+        }
     }
 };
