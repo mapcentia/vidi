@@ -27,8 +27,6 @@ const getTileUrls = (map, bounds, tileLayer, currentZoom) => {
     for (let localZoom = currentZoom; localZoom <= maxZoom; localZoom++) {
         let min = map.project(bounds.getNorthWest(), localZoom).divideBy(256).floor();
         let max = map.project(bounds.getSouthEast(), localZoom).divideBy(256).floor();
-
-        console.log(localZoom);
         for (let i = min.x; i <= max.x; i++) {
             for (let j = min.y; j <= max.y; j++) {
                 var coords = new L.Point(i, j);
