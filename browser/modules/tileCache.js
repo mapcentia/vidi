@@ -1,6 +1,9 @@
 /**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
+ * 
+ * @todo Remove this file as all its functionality was moved to
+ * the offlineMap extension.
  */
 
 'use strict';

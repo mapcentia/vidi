@@ -107,6 +107,8 @@ module.exports = function (grunt) {
                     'public/service-worker.bundle.js': ['browser/service-worker/index.js']
                 },
                 options: {
+                    watch: true,
+                    keepAlive: true,
                     //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
 

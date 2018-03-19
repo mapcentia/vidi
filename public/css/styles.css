@@ -938,15 +938,11 @@ h4 small {
     display: none;
   }
 }
-.caching-progress {
-  position: fixed;
-  left: 4px;
-  top: 4px;
+.offline-map-extension .available-space-container {
+  text-align: right;
+  color: darkgrey;
 }
-.caching-progress .badge {
-  background-color: firebrick;
-  font-size: 22px;
-}
-.caching-progress .content {
-  font-size: 22px;
+.offline-map-extension .add-offline-record-container > div {
+  display: inline-block;
+  border: 1px black solid;
 }
