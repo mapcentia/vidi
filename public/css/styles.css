@@ -938,3 +938,8 @@ h4 small {
     display: none;
   }
 }
+.gc2-add-feature,
+.popup-edit-btn,
+.popup-delete-btn {
+  display: none;
+}
