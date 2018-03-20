@@ -106,11 +106,31 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
-
+                }
+            },
+            watch: {
+                files: {
+                    'public/js/bundle.js': ['browser/index.js']
+                },
+                options: {
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify'],
+                    watch: true,
+                    keepAlive: true
                 }
             }
+        },
+        watch: {
+
+            // options: {
+            //     livereload: true
+            // },
+            //
+            // js: {
+            //     files: 'browser/modules/editor.js',
+            //     tasks: ['jshint']
+            // }
+
         },
         uglify: {
             publish: {
@@ -233,7 +253,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-cache-bust');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
-
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
