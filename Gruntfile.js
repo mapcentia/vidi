@@ -87,7 +87,7 @@ module.exports = function (grunt) {
         handlebars: {
             publish: {
                 options: {
-                    namespace: function(filename) {
+                    namespace: function (filename) {
                         var names = filename.replace(/modules\/(.*)(\/\w+\.hbs)/, '$1');
                         return names.split('/').join('.');
                     },
