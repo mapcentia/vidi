@@ -74,7 +74,7 @@ module.exports = function (grunt) {
         handlebars: {
             publish: {
                 options: {
-                    namespace: function(filename) {
+                    namespace: function (filename) {
                         var names = filename.replace(/modules\/(.*)(\/\w+\.hbs)/, '$1');
                         return names.split('/').join('.');
                     },
@@ -93,9 +93,17 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
-
+                }
+            },
+            watch: {
+                files: {
+                    'public/js/bundle.js': ['browser/index.js']
+                },
+                options: {
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify'],
+                    watch: true,
+                    keepAlive: true
                 }
             }
         },
@@ -182,6 +190,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-cache-bust');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
+    grunt.loadNpmTasks('grunt-watchify');
 
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
