@@ -274,7 +274,6 @@ module.exports = {
 
         }, 0));
 
-        /*
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then(function(registration) {
                 console.log('Registered:', registration);
@@ -282,6 +281,5 @@ module.exports = {
                 console.log('Registration failed: ', error);
             });
         }
-        */
     }
 };

@@ -6,6 +6,11 @@
 'use strict';
 
 /**
+ * Translations
+ */
+const translations = require('./translations');
+
+/**
  *
  * @type {*|exports|module.exports}
  */
@@ -45,6 +50,10 @@ var clicktimer;
  */
 var mapObj;
 
+/**
+ *
+ */
+var setBaseLayer;
 
 /**
  *
@@ -61,8 +70,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         utils = o.utils;
-        transformPoint = o.transformPoint;
-        backboneEvents = o.backboneEvents;
+        setBaseLayer = o.setBaseLayer;
         return this;
     },
 
@@ -91,64 +99,7 @@ module.exports = {
          *
          * @type {{Info: {da_DK: string, en_US: string}}}
          */
-        var dict = {
-            "Info": {
-                "da_DK": "# Here specific map areas can be stored to be used offline",
-                "en_US": "# Here specific map areas can be stored to be used offline"
-            },
-            "Description": {
-                "da_DK": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
-                "en_US": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space."
-            },
-            "Available space": {
-                "da_DK": "Ledig plads",
-                "en_US": "Available space"
-            },
-            "Offline map": {
-                "da_DK": "Offline kort",
-                "en_US": "Offline map"
-            },
-            "Comment": {
-                "da_DK": "Kommentar",
-                "en_US": "Comment"
-            },
-            "Clear": {
-                "da_DK": "Klar",
-                "en_US": "Clear"
-            },
-            "Zoom": {
-                "da_DK": "Zoom",
-                "en_US": "Zoom"
-            },
-            "Define": {
-                "da_DK": "Definere",
-                "en_US": "Define"
-            },
-            "Redefine": {
-                "da_DK": "Omdefinere",
-                "en_US": "Redefine"
-            },
-            "Show on map": {
-                "da_DK": "Vis på kort",
-                "en_US": "Show on map"
-            },
-            "Store map area": {
-                "da_DK": "# Store map area",
-                "en_US": "# Store map area"
-            },
-            "Extent": {
-                "da_DK": "# Extent",
-                "en_US": "# Extent"
-            },
-            "Saved tiles will be used in...": {
-                "da_DK": "# Saved tiles will be used in...",
-                "en_US": "# Saved tiles will be used in..."
-            },
-            "Store": {
-                "da_DK": "# Store",
-                "en_US": "# Store"
-            },
-        };
+        var dict = translations;
 
         /**
          *
@@ -180,18 +131,45 @@ module.exports = {
                     storageUsed: 0,
                     storageAvailable: 0,
                     drawRectangleControl: false,
-                    currentBaseLayer: false,
                     drawnExtentLayer: false,
                     newAreaExtent: false,
                     newAreaComment: '',
-                    newAreaZoomMin: minimalZoomLevel,
-                    newAreaZoomMax: maximumZoomLevel
+                    newAreaZoomMax: maximumZoomLevel,
+                    loading: false,
+                    tilesLoaded: 0,
+                    tilesLeftToLoad: 0
                 };
 
                 this.setExtent = this.setExtent.bind(this);
                 this.clearExtent = this.clearExtent.bind(this);
                 this.setMinZoom = this.setMinZoom.bind(this);
                 this.setMaxZoom = this.setMaxZoom.bind(this);
+                this.onSave = this.onSave.bind(this);
+            }
+
+            /**
+             *
+             */
+            componentDidMount() {
+                let drawControlFull = new L.Control.Draw({ draw: { polyline: false } });
+
+                this.refreshUsageStatistics();
+
+                this.setState({
+                    drawRectangleControl: new L.Draw.Rectangle(mapObj, drawControlFull.options.rectangle),
+                    newAreaZoomMin: mapObj.getZoom(),
+                    newAreaZoomMax: this.getMapMaxZoom(),
+                    zoomMin: this.getMapMinZoom(),
+                    zoomMax: this.getMapMaxZoom()
+                });
+
+                mapObj.on('zoomend', (e) => {
+                    if (mapObj.getZoom() <= this.state.newAreaZoomMax) {
+                        this.setState({ newAreaZoomMin: mapObj.getZoom() });
+                    } else {
+                        this.setState({ newAreaZoomMin: this.state.newAreaZoomMax });
+                    }
+                });
             }
 
             /**
@@ -202,13 +180,12 @@ module.exports = {
              * @param {*} tileLayer tile layer
              * @param {*} currentZoom current map zoom
              */
-            getTileUrls (map, bounds, tileLayer, currentZoom) {
+            getTileUrls (map, bounds, tileLayer, minZoom, maxZoom) {
                 if (!tileLayer) throw new Error('Tile layer is undefined');
-                let maxZoom = 18;
                 let urls = [];
 
-                console.log(`Getting all tiles for specified boundary from ${currentZoom} to ${maxZoom} zoom`);
-                for (let localZoom = currentZoom; localZoom <= maxZoom; localZoom++) {
+                console.log(`Getting all tiles for specified boundary from ${minZoom} to ${maxZoom} zoom`);
+                for (let localZoom = minZoom; localZoom <= maxZoom; localZoom++) {
                     let min = map.project(bounds.getNorthWest(), localZoom).divideBy(256).floor();
                     let max = map.project(bounds.getSouthEast(), localZoom).divideBy(256).floor();
                     for (let i = min.x; i <= max.x; i++) {
@@ -243,23 +220,30 @@ module.exports = {
              * @param e
              */
             onSave(e) {
-                /*
-                let urls = getTileUrls(mapObj, bounds, currentBaseLayer, currentZoom);
-    
-                var numberOfLoadedTiles = 0;
-                var numberOfTilesToLoad = urls.length;
-                const onloadCallback = () => {
-                    numberOfLoadedTiles++;
+                let layer = false;
+                let activeBaseLayer = setBaseLayer.getActiveBaseLayer();
+                for (let key in mapObj._layers) {
+                    if (mapObj._layers[key].id && mapObj._layers[key].id === activeBaseLayer.id) {
+                        layer = mapObj._layers[key];
+                    }
                 }
-    
-                const onerrorCallback = () => {
-                    numberOfTilesToLoad--;
-                }
-    
-                fetchAndCacheTiles(urls, onloadCallback, onerrorCallback);
 
-                //this.state.drawRectangleControl.disable();
-                */
+                let tileURLs = this.getTileUrls(mapObj, this.state.newAreaExtent, layer,
+                    this.state.newAreaZoomMin, this.state.newAreaZoomMax);
+                
+                this.setState({
+                    tilesLoaded: 0,
+                    tilesLeftToLoad: tileURLs.length
+                });
+
+                // @todo What if there are 1000 tiles - 1000 updates?
+                this.fetchAndCacheTiles(tileURLs, () => {
+                    this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
+                }, () => {
+                    this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
+                });
+
+                this.setState({ loading: true });
             }
 
             refreshUsageStatistics() {
@@ -281,25 +265,12 @@ module.exports = {
                 });
             }
 
-            /**
-             *
-             */
-            componentDidMount() {
-                let drawControlFull = new L.Control.Draw({ draw: { polyline: false } });
+            getMapMinZoom() {
+                return minimalZoomLevel;
+            }
 
-                this.refreshUsageStatistics();
-
-                this.setState({
-                    drawRectangleControl: new L.Draw.Rectangle(mapObj, drawControlFull.options.rectangle),
-                    newAreaZoomMin: mapObj.getZoom()
-                });
-
-                mapObj.on('baselayerchange', (e) => {
-                    console.log('baselayerchange');
-                    this.setState({ currentBaseLayer: e.layer });
-                });
-
-
+            getMapMaxZoom() {
+                return (isFinite(mapObj.getMaxZoom()) ? mapObj.getMaxZoom() : maximumZoomLevel);
             }
 
             /**
@@ -356,11 +327,16 @@ module.exports = {
                 }
             }
 
+            formIsValid() {
+                return (this.state.newAreaExtent && this.state.newAreaZoomMax && this.state.newAreaZoomMin);
+            }
+
             /**
              *
              * @returns {XML}
              */
             render() {
+                console.log('Rendering');
                 const showExtentButton = this.state.newAreaExtent ? (
                     <span>
                         <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Redefine")}</button>
@@ -371,16 +347,50 @@ module.exports = {
                 );
 
                 let zoomMinOptions = [];
-                
-                for (let i = minimalZoomLevel; i < this.state.newAreaZoomMax; i++) {
+                for (let i = this.state.zoomMin; i <= this.state.newAreaZoomMax; i++) {
                     zoomMinOptions.push(<option key={i} value={i}>{i}</option>);
                 }
 
                 let zoomMaxOptions = [];
-                for (let i = this.state.newAreaZoomMin; i <= maximumZoomLevel; i++) {
+                for (let i = this.state.newAreaZoomMin; i <= this.state.zoomMax; i++) {
                     zoomMaxOptions.push(<option key={i} value={i}>{i}</option>);
                 }
-                
+
+                let required = (<span style={{color: 'red'}}><sup>*</sup></span>);
+
+                let loadingOverlay = false;
+                // @todo Translations
+                if (this.state.loading) {
+                    let content = false;
+                    if (this.state.tilesLoaded === this.state.tilesLeftToLoad) {
+                        content = (<div>
+                            <h4><i className="material-icons" style={{color: 'green'}}>&#xE5CA;</i> Done</h4>
+                        </div>);
+                    } else {
+                        content = (<div>
+                            <h4>Saving tiles ({this.state.tilesLoaded} of {this.state.tilesLeftToLoad})</h4>
+                            <div className="progress">
+                                <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{width: ((this.state.tilesLoaded / this.state.tilesLeftToLoad * 100) + '%')}}></div>
+                            </div>
+                        </div>);
+                    }
+
+                    loadingOverlay = (<div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        zIndex: '1000'
+                    }}>
+                        <div style={{
+                            top: '40px',
+                            textAlign: 'center',
+                            position: 'relative',
+                            padding: '40px'
+                        }}>{content}</div>
+                    </div>);
+                }
+
                 return (
                     <div role="tabpanel">
                         <div className="panel panel-default">
@@ -403,12 +413,13 @@ module.exports = {
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap1" role="tabpanel">
-                                <div id="collapseOfflineMap1" className="accordion-body collapse in" aria-expanded="true">
+                                <div id="collapseOfflineMap1" className="accordion-body collapse in" aria-expanded="true" style={{position: 'relative'}}>
+                                    {loadingOverlay}
                                     <div className="container-fluid">
                                         <div className="row">
                                             <div className="col-lg-12">
                                                 <div>
-                                                    <h3>{__("Extent")}</h3>
+                                                    <h3>{__("Extent")} {required}</h3>
                                                     {showExtentButton}
                                                 </div>
                                                 <div>
@@ -416,11 +427,11 @@ module.exports = {
                                                     <textarea className="form-control" placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
-                                                    <h3>{__("Zoom")}</h3>
+                                                    <h3>{__("Zoom")} {required}</h3>
                                                     <div className="container-fluid">
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <select className="form-control" onChange={this.setMinZoom} defaultValue={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
+                                                                <select className="form-control" onChange={this.setMinZoom} value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
                                                             </div>
                                                             <div className="col-md-6">
                                                                 <select className="form-control" onChange={this.setMaxZoom} defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
@@ -429,7 +440,9 @@ module.exports = {
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <button type="button" className="btn btn-primary btn-block"><i className="material-icons">&#xE149;</i> {__("Store")}</button>
+                                                    <button type="button" className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')} onClick={this.onSave}>
+                                                        <i className="material-icons">&#xE149;</i> {__("Store")}
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>

@@ -942,7 +942,3 @@ h4 small {
   text-align: right;
   color: darkgrey;
 }
-.offline-map-extension .add-offline-record-container > div {
-  display: inline-block;
-  border: 1px black solid;
-}
