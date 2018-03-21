@@ -138,7 +138,7 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
-                        'public/js/lib/leaflet/leaflet-src.j',
+                        'public/js/lib/leaflet/leaflet-src.js',
                         'public/js/lib/leaflet-draw/leaflet.draw.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet.editable/Leaflet.Editable.js',
@@ -166,7 +166,8 @@ module.exports = function (grunt) {
                         'public/js/lib/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
 
-                        'public/js/lib/typeahead.js/typeahead.bundle.js',
+                        'public/js/lib/typeahead.js/typeahead.query.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
                         'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
                         'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
                         'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
