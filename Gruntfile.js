@@ -240,6 +240,18 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
+        },
+        bower: {
+            install: {
+                //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
+                options: {
+                    targetDir: "./public/js/lib",
+                    copy: true,
+                    install: true,
+                    cleanTargetDir: true,
+                    verbose: true,
+                }
+            }
         }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
@@ -254,6 +266,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-bower-task');
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
