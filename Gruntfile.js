@@ -163,10 +163,10 @@ module.exports = function (grunt) {
                         'public/js/lib/underscore/underscore.js',
                         //'public/js/lib/raphael/raphael.min.js',
                         'public/js/lib/backbone/backbone.js',
-                        'public/js/lib/moment-with-locales.js',
+                        'public/js/lib/momentjs/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
 
-                        'public/js/lib/typeahead.js/typeahead.query.js',
+                        'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap-table/bootstrap-table.js',
                         'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
                         'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
