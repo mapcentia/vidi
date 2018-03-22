@@ -210,7 +210,7 @@ module.exports = function (grunt) {
         },
         shell: {
             default: {
-                command: 'cp ./config/_variables.less ./public/bower_components/bootstrap-material-design/less'
+                command: 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design'
             }
         },
         cacheBust: {
@@ -236,7 +236,7 @@ module.exports = function (grunt) {
                     targetDir: "./public/js/lib",
                     copy: true,
                     install: true,
-                    cleanTargetDir: true,
+                    cleanTargetDir: false,
                     verbose: true,
                 }
             }
