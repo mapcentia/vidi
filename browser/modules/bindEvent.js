@@ -360,8 +360,26 @@ module.exports = module.exports = {
             });
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
-                    var t = ($(this).prev().children("input").data('gc2-id')), html;
-                    html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
+                    var t = ($(this).prev().children("input").data('gc2-id')), html, meta = $.parseJSON(metaDataKeys[t].meta);
+
+                    html = (metaDataKeys[t].meta !== null && meta !== null
+                        && typeof meta.meta_desc !== "undefined"
+                        && meta.meta_desc !== "") ?
+                        converter.makeHtml(meta.meta_desc) : metaDataKeys[t].f_table_abstract;
+
+                    moment.locale('da');
+
+                    for (var key in  metaDataKeys[t]) {
+                        if (metaDataKeys[t].hasOwnProperty(key)) {
+                            console.log(key + " -> " + metaDataKeys[t][key]);
+                            if (key === "lastmodified") {
+                                metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+                            }
+                        }
+                    }
+
+                    html =Mustache.render(html, metaDataKeys[t]);
+
                     $("#info-modal.slide-right").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
