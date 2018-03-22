@@ -362,16 +362,12 @@ module.exports = module.exports = {
             });
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
-                    var t = ($(this).data('gc2-id')), html,
-                        meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                        name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                        title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                        abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
+                    var t = ($(this).prev().children("input").data('gc2-id')), html, meta = $.parseJSON(metaDataKeys[t].meta);
 
-                    html = (meta !== null
+                    html = (metaDataKeys[t].meta !== null && meta !== null
                         && typeof meta.meta_desc !== "undefined"
                         && meta.meta_desc !== "") ?
-                        converter.makeHtml(meta.meta_desc) : abstract;
+                        converter.makeHtml(meta.meta_desc) : metaDataKeys[t].f_table_abstract;
 
                     moment.locale('da');
 
@@ -384,7 +380,11 @@ module.exports = module.exports = {
                         }
                     }
 
+<<<<<<< HEAD
                     html = html ? Mustache.render(html, metaDataKeys[t]) : "";
+=======
+                    html =Mustache.render(html, metaDataKeys[t]);
+>>>>>>> Template for meta data in meta.desc
 
                     $("#info-modal.slide-right").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(title || name);
