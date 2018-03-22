@@ -6,6 +6,11 @@
 'use strict';
 
 /**
+ * CachedAreasManager
+ */
+const CachedAreasManager = require('./CachedAreasManager');
+
+/**
  * Translations
  */
 const translations = require('./translations');
@@ -57,6 +62,16 @@ var setBaseLayer;
 
 /**
  *
+ */
+var cachedAreasManagerInstance = new CachedAreasManager();
+
+/**
+ * React components
+ */
+const MapAreaList = require('./components/MapAreaList');
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 
@@ -78,7 +93,6 @@ module.exports = {
      *
      */
     init: function () {
-
         /**
          *
          * Native Leaflet object
@@ -128,6 +142,7 @@ module.exports = {
                 super(props);
 
                 this.state = {
+                    existingCachedAreas: {},
                     storageUsed: 0,
                     storageAvailable: 0,
                     drawRectangleControl: false,
@@ -142,8 +157,10 @@ module.exports = {
 
                 this.setExtent = this.setExtent.bind(this);
                 this.clearExtent = this.clearExtent.bind(this);
+                this.setComment = this.setComment.bind(this);
                 this.setMinZoom = this.setMinZoom.bind(this);
                 this.setMaxZoom = this.setMaxZoom.bind(this);
+                this.clearAddForm = this.clearAddForm.bind(this);
                 this.onSave = this.onSave.bind(this);
             }
 
@@ -153,7 +170,7 @@ module.exports = {
             componentDidMount() {
                 let drawControlFull = new L.Control.Draw({ draw: { polyline: false } });
 
-                this.refreshUsageStatistics();
+                this.refreshStatus();
 
                 this.setState({
                     drawRectangleControl: new L.Draw.Rectangle(mapObj, drawControlFull.options.rectangle),
@@ -215,6 +232,18 @@ module.exports = {
                 }
             };
 
+            clearAddForm() {
+                this.clearExtent();
+                this.setState({
+                    newAreaComment: '',
+                    newAreaZoomMin: mapObj.getZoom(),
+                    newAreaZoomMax: this.getMapMaxZoom(),
+                    loading: false,
+                    tilesLoaded: 0,
+                    tilesLeftToLoad: 0
+                });
+            }
+
             /**
              *
              * @param e
@@ -236,24 +265,44 @@ module.exports = {
                     tilesLeftToLoad: tileURLs.length
                 });
 
+                const attemptToSaveCachedArea = (tileURLs) => {
+                    if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
+                        cachedAreasManagerInstance.add({
+                            tileURLs,
+                            comment: this.state.newAreaComment,
+                            zoomMin: this.state.newAreaZoomMin,
+                            zoomMax: this.state.newAreaZoomMax
+                        }).then(() => {
+                            this.refreshStatus();
+                        });
+                    }
+                };
+
                 // @todo What if there are 1000 tiles - 1000 updates?
                 this.fetchAndCacheTiles(tileURLs, () => {
                     this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
+                    attemptToSaveCachedArea(tileURLs);
                 }, () => {
+                    console.log('Unable to fetch tile');
                     this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
+                    attemptToSaveCachedArea(tileURLs);
                 });
 
                 this.setState({ loading: true });
             }
 
-            refreshUsageStatistics() {
+            refreshStatus() {
                 const bytesToSize = (bytes) => {
                     var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
                     if (bytes == 0) return '0 Byte';
 
                     let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
                     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                 };
+                };
+
+                cachedAreasManagerInstance.getAll().then(existingCachedAreas => {
+                    this.setState({ existingCachedAreas });
+                });
 
                 navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
                     this.setState({
@@ -270,7 +319,7 @@ module.exports = {
             }
 
             getMapMaxZoom() {
-                return (isFinite(mapObj.getMaxZoom()) ? mapObj.getMaxZoom() : maximumZoomLevel);
+                return maximumZoomLevel;
             }
 
             /**
@@ -281,6 +330,10 @@ module.exports = {
                 // Move the tile management logic into the separate class
                 // Clear drawn extent
                 // Stop listening to draw:created
+            }
+
+            setComment(e) {
+                this.setState({ newAreaComment: e.target.value });
             }
 
             setMinZoom(e) {
@@ -365,6 +418,7 @@ module.exports = {
                     if (this.state.tilesLoaded === this.state.tilesLeftToLoad) {
                         content = (<div>
                             <h4><i className="material-icons" style={{color: 'green'}}>&#xE5CA;</i> Done</h4>
+                            <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{__("Store another")}</button>
                         </div>);
                     } else {
                         content = (<div>
@@ -400,6 +454,7 @@ module.exports = {
                             </div>
                         </div>
 
+                        {/* Add cached map form */}
                         <div className="panel panel-default">
                             <div className="panel-heading" role="tab">
                                 <h4 className="panel-title">
@@ -409,11 +464,11 @@ module.exports = {
                                         data-toggle="collapse"
                                         data-parent="#layers"
                                         href="#collapseOfflineMap1"
-                                        aria-expanded="true"><i className="material-icons">&#xE149;</i> {__("Store map area")}</a>
+                                        aria-expanded="true"><i className="material-icons">&#xE906;</i> {__("Store map area")}</a>
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap1" role="tabpanel">
-                                <div id="collapseOfflineMap1" className="accordion-body collapse in" aria-expanded="true" style={{position: 'relative'}}>
+                                <div id="collapseOfflineMap1" className="accordion-body collapse" aria-expanded="true" style={{position: 'relative'}}>
                                     {loadingOverlay}
                                     <div className="container-fluid">
                                         <div className="row">
@@ -424,7 +479,7 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <h3>{__("Comment")}</h3>
-                                                    <textarea className="form-control" placeholder={__('Saved tiles will be used in...')}></textarea>
+                                                    <textarea className="form-control" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
                                                     <h3>{__("Zoom")} {required}</h3>
@@ -441,12 +496,32 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <button type="button" className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')} onClick={this.onSave}>
-                                                        <i className="material-icons">&#xE149;</i> {__("Store")}
+                                                        <i className="material-icons">&#xE906;</i> {__("Store")}
                                                     </button>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                </div>
+                            </ul>
+                        </div>
+
+                        {/* Existing cached map list */}
+                        <div className="panel panel-default">
+                            <div className="panel-heading" role="tab">
+                                <h4 className="panel-title">
+                                    <a
+                                        style={{display: 'block'}}
+                                        className="accordion-toggle"
+                                        data-toggle="collapse"
+                                        data-parent="#layers"
+                                        href="#collapseOfflineMap2"
+                                        aria-expanded="true"><i className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
+                                </h4>
+                            </div>
+                            <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
+                                <div id="collapseOfflineMap2" className="accordion-body collapse in" aria-expanded="true">
+                                    <MapAreaList items={this.state.existingCachedAreas}/>
                                 </div>
                             </ul>
                         </div>

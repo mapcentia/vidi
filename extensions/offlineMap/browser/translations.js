@@ -7,6 +7,50 @@ const translations = {
         "da_DK": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
         "en_US": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space."
     },
+    "Extent": {
+        "da_DK": "# Extent",
+        "en_US": "# Extent"
+    },
+    "Stored map areas": {
+        "da_DK": "# Stored map areas",
+        "en_US": "# Stored map areas"
+    },
+    "Store another": {
+        "da_DK": "# Store another",
+        "en_US": "# Store another"
+    },
+    "Show extent": {
+        "da_DK": "# Show extent",
+        "en_US": "# Show extent"
+    },
+    "No map areas have been stored yet": {
+        "da_DK": "# No map areas have been stored yet",
+        "en_US": "# No map areas have been stored yet"
+    },
+    "Saved tiles will be used in...": {
+        "da_DK": "# Saved tiles will be used in...",
+        "en_US": "# Saved tiles will be used in..."
+    },
+    "Date": {
+        "da_DK": "Dato",
+        "en_US": "Date"
+    },
+    "Delete": {
+        "da_DK": "Slet",
+        "en_US": "Delete"
+    },
+    "Refresh": {
+        "da_DK": "Opdater",
+        "en_US": "Refresh"
+    },
+    "Actions": {
+        "da_DK": "Handlinger",
+        "en_US": "Actions"
+    },
+    "Store": {
+        "da_DK": "Bewaren",
+        "en_US": "Store"
+    },
     "Available space": {
         "da_DK": "Ledig plads",
         "en_US": "Available space"
@@ -42,19 +86,7 @@ const translations = {
     "Store map area": {
         "da_DK": "# Store map area",
         "en_US": "# Store map area"
-    },
-    "Extent": {
-        "da_DK": "# Extent",
-        "en_US": "# Extent"
-    },
-    "Saved tiles will be used in...": {
-        "da_DK": "# Saved tiles will be used in...",
-        "en_US": "# Saved tiles will be used in..."
-    },
-    "Store": {
-        "da_DK": "# Store",
-        "en_US": "# Store"
-    },
+    }
 };
 
 module.exports = translations;

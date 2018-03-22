@@ -27,8 +27,8 @@ var urlSubstitution = [{
 
 self.addEventListener('install', function(event) {
     console.log('Service worker was installed, caching specified resources');
-    event.waitUntil(caches.open(CACHE_NAME).then(function(cache) {
-        cache.addAll(urlsToCache).then(function() {
+    event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
+        cache.addAll(urlsToCache).then(() => {
            console.log('All resources have been fetched and cached.');
         }).catch(error => {
             console.log(error);
