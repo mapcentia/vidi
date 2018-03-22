@@ -560,7 +560,17 @@ module.exports = module.exports = {
             var reader = new jsts.io.GeoJSONReader();
             var writer = new jsts.io.GeoJSONWriter();
             var geom = reader.read(reproject.reproject(primitive, "unproj", "proj", crss));
+
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
+
+
+            var projWktWithBuffer;
+            if (buffer === 0) {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
+            } else {
+                projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry.buffer(buffer)));
+            }
+
             var l = L.geoJson(buffer4326, {
                 "color": "#ff7800",
                 "weight": 1,
@@ -595,7 +605,6 @@ module.exports = module.exports = {
                     setTimeout(function () {
                         jquery("#snackbar-conflict").snackbar("hide");
                     }, 1000);
-                    backboneEvents.get().trigger("end:conflictSearch");
                     $("#spinner span").hide();
                     $("#result-origin").html(response.text);
                     $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
@@ -656,6 +665,10 @@ module.exports = module.exports = {
                         _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
                         e.stopPropagation();
                     });
+
+                    backboneEvents.get().trigger("end:conflictSearch", projWktWithBuffer);
+
+
                     L.geoJson(response.geom, {
                         "color": "#ff7800",
                         "weight": 1,
