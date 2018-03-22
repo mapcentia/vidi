@@ -10,7 +10,6 @@ var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
-var mustache = require('mustache');
 var backboneEvents;
 
 require("bootstrap");
