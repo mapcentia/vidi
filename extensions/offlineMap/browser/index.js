@@ -5,6 +5,8 @@
 
 'use strict';
 
+const CACHE_NAME = 'vidi-static-cache';
+
 /**
  * CachedAreasManager
  */
@@ -246,6 +248,28 @@ module.exports = {
                 }
             };
 
+            onMapAreaDelete(item) {
+                console.log(item, this.state);
+                for (let key in this.state.existingCachedAreas) {
+                    if (key === item.id) {
+                        if (confirm(__("Delete map area") + "?")) {
+                            caches.open(CACHE_NAME).then((cache) => {
+                                let promises = [];
+                                for (let i = 0; i < item.data.tileURLs.length; i++) {
+                                    promises.push(cache.delete(item.data.tileURLs[i]));
+                                }
+        
+                                Promise.all(promises).then(() => {
+                                    cachedAreasManagerInstance.delete(item.id).then(() => {
+                                        this.refreshStatus();
+                                    });
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+
             reloadPage(e) {
                 window.location.reload();
             }
@@ -287,6 +311,7 @@ module.exports = {
                     if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
                         cachedAreasManagerInstance.add({
                             tileURLs,
+                            extent: this.state.newAreaExtent,
                             comment: this.state.newAreaComment,
                             zoomMin: this.state.newAreaZoomMin,
                             zoomMax: this.state.newAreaZoomMax
@@ -502,15 +527,15 @@ module.exports = {
                                     <div className="row">
                                         <div className="col-lg-12">
                                             <div>
-                                                <h3>{__("Extent")} {required}</h3>
+                                                <h4>{__("Extent")} {required}</h4>
                                                 {showExtentButton}
                                             </div>
                                             <div>
-                                                <h3>{__("Comment")}</h3>
+                                                <h4>{__("Comment")}</h4>
                                                 <textarea className="form-control" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
                                             </div>
                                             <div>
-                                                <h3>{__("Zoom")} {required}</h3>
+                                                <h4>{__("Zoom")} {required}</h4>
                                                 <div className="container-fluid">
                                                     <div className="row">
                                                         <div className="col-md-6">
@@ -551,7 +576,7 @@ module.exports = {
                         </div>
                         <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
                             <div id="collapseOfflineMap2" className="accordion-body collapse in" aria-expanded="true">
-                                <MapAreaList items={this.state.existingCachedAreas}/>
+                                <MapAreaList onMapAreaDelete={(item) => {this.onMapAreaDelete(item)}} mapObj={mapObj} items={this.state.existingCachedAreas}/>
                             </div>
                         </ul>
                     </div>);

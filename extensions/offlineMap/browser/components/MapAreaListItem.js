@@ -29,16 +29,58 @@ class MapAreaListItem extends React.Component {
 
         this.id = props.id;
         this.data = props.data;
-        
+        this.mapObj = props.mapObj;
+        this.extentLayer = false;
+
         this.state = {
             showExtent: false
         };
 
         this.onToggleShowExtent = this.onToggleShowExtent.bind(this);
+        this.onRefresh = this.onRefresh.bind(this);
     }
 
     onToggleShowExtent(e) {
+        if (!this.state.showExtent) {
+            let ne = this.data.extent._northEast;
+            let sw = this.data.extent._southWest;
+            let extentFeature = {
+                "type":"FeatureCollection",
+                "features":[
+                    {
+                        "type":"Feature",
+                        "geometry": {
+                            "type":"Polygon",
+                            "coordinates":[[
+                                [ne.lng, ne.lat],
+                                [sw.lng, ne.lat],
+                                [sw.lng, sw.lat],
+                                [ne.lng, sw.lat],
+                                [ne.lng, ne.lat]
+                            ]]
+                        },
+                        "style":{
+                            "fill":"red",
+                            "stroke-width":"3",
+                            "fill-opacity":0.6
+                        },
+                        "properties":{
+                            "name": `Extent for map area ${this.id}`
+                        }
+                    }
+                ]
+            };
+    
+            this.extentLayer = L.geoJSON(extentFeature).addTo(this.mapObj);
+        } else {
+            this.mapObj.removeLayer(this.extentLayer);
+        }
+
         this.setState({ showExtent: !this.state.showExtent });
+    }
+
+    onRefresh(e) {
+        console.log('Refreshing map area');
     }
 
     render() {
@@ -50,9 +92,13 @@ class MapAreaListItem extends React.Component {
         let date = new Date(this.data.created_at.toString());
         let dateFormatted = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
 
-        let showExtentIcon = (<i className="material-icons">&#xE8F4;</i>);
+        let showExtentButton = (<button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Show extent")}>
+            <i className="material-icons">&#xE8F4;</i>
+        </button>);
         if (this.state.showExtent === true) {
-            showExtentIcon = (<i className="material-icons">&#xE8F5;</i>);
+            showExtentButton = (<button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Hide extent")}>
+                <i className="material-icons">&#xE8F5;</i>
+            </button>);
         }
 
         return (<tr>
@@ -60,13 +106,11 @@ class MapAreaListItem extends React.Component {
             <td>{this.data.comment}</td>
             <td>
                 <div className="btn-group" role="group">
-                    <button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Show extent")}>
-                        
-                    </button>
-                    <button type="button" className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
+                    {showExtentButton}
+                    <button type="button" onClick={this.onRefresh} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
                         <i className="material-icons">&#xE5D5;</i>
                     </button>
-                    <button type="button" className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Delete")}>
+                    <button type="button" onClick={this.props.onDelete} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Delete")}>
                         <i className="material-icons">&#xE872;</i>
                     </button>
                 </div>

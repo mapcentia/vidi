@@ -29,7 +29,7 @@ class CachedAreasManager {
      * 
      * @return {Promise} 
      */
-    add({ tileURLs, zoomMin, zoomMax, comment = '' }) {
+    add({ tileURLs, extent, zoomMin, zoomMax, comment = '' }) {
         let result = new Promise((resolve, reject) => {
             if (!(zoomMin > MIN_POSSIBLE_ZOOM && zoomMin < MAX_POSSIBLE_ZOOM) ) {
                 throw new Error(`Invalid minimal zoom`);
@@ -46,12 +46,16 @@ class CachedAreasManager {
             if (!tileURLs || !(tileURLs.length > 0)) {
                 throw new Error(`There have to be at least one tile URL`);
             }
+
+            if (!extent) {
+                throw new Error(`Extent has to be provided`);
+            }
     
             comment = comment.toString();
             const id = uuidv1();
     
             localforage.getItem(STORAGE_KEY).then((data) => {
-                data[id] = { tileURLs, zoomMin, zoomMax, comment, created_at: new Date() };
+                data[id] = { tileURLs, extent, zoomMin, zoomMax, comment, created_at: new Date() };
                 localforage.setItem(STORAGE_KEY, data).then(() => {
                     resolve();
                 });
@@ -70,8 +74,24 @@ class CachedAreasManager {
         return localforage.getItem(STORAGE_KEY);
     }
 
-    delete() {
-        console.log('CAM: here we delete');
+    delete(id) {
+        let result = new Promise((resolve, reject) => {
+            localforage.getItem(STORAGE_KEY).then((data) => {
+                if (data[id]) {
+                    console.log(id);
+                    delete data[id];
+                    localforage.setItem(STORAGE_KEY, data).then(() => {
+                        resolve();
+                    });
+                } else {
+                    throw new Error('Specified item does not exist');
+                }
+            }).catch(error => {
+                throw new Error(error);
+            });
+        });
+
+        return result;
     }
 }
 

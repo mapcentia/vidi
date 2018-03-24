@@ -23,6 +23,14 @@ const translations = {
         "da_DK": "# Show extent",
         "en_US": "# Show extent"
     },
+    "Hide extent": {
+        "da_DK": "# Hide extent",
+        "en_US": "# Hide extent"
+    },
+    "Delete map area": {
+        "da_DK": "# Delete map area",
+        "en_US": "# Delete map area"
+    },
     "No map areas have been stored yet": {
         "da_DK": "# No map areas have been stored yet",
         "en_US": "# No map areas have been stored yet"
