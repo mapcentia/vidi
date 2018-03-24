@@ -29,6 +29,16 @@ class MapAreaListItem extends React.Component {
 
         this.id = props.id;
         this.data = props.data;
+        
+        this.state = {
+            showExtent: false
+        };
+
+        this.onToggleShowExtent = this.onToggleShowExtent.bind(this);
+    }
+
+    onToggleShowExtent(e) {
+        this.setState({ showExtent: !this.state.showExtent });
     }
 
     render() {
@@ -39,13 +49,19 @@ class MapAreaListItem extends React.Component {
 
         let date = new Date(this.data.created_at.toString());
         let dateFormatted = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
+
+        let showExtentIcon = (<i className="material-icons">&#xE8F4;</i>);
+        if (this.state.showExtent === true) {
+            showExtentIcon = (<i className="material-icons">&#xE8F5;</i>);
+        }
+
         return (<tr>
             <td>{dateFormatted}</td>
             <td>{this.data.comment}</td>
             <td>
                 <div className="btn-group" role="group">
-                    <button type="button" className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Show extent")}>
-                        <i className="material-icons">&#xE3C6;</i>
+                    <button type="button" onClick={this.onToggleShowExtent} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Show extent")}>
+                        
                     </button>
                     <button type="button" className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
                         <i className="material-icons">&#xE5D5;</i>

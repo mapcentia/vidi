@@ -31,9 +31,29 @@ const translations = {
         "da_DK": "# Saved tiles will be used in...",
         "en_US": "# Saved tiles will be used in..."
     },
+    "Saving tiles": {
+        "da_DK": "# Saving tiles",
+        "en_US": "# Saving tiles"
+    },
+    "Please reload the page": {
+        "da_DK": "# Please reload the page",
+        "en_US": "# Please reload the page"
+    },
+    "Checking the cache status": {
+        "da_DK": "# Checking the cache status",
+        "en_US": "# Checking the cache status"
+    },
+    "of": {
+        "da_DK": "of",
+        "en_US": "af"
+    },
     "Date": {
         "da_DK": "Dato",
         "en_US": "Date"
+    },
+    "Done": {
+        "da_DK": "Færdig",
+        "en_US": "Done"
     },
     "Delete": {
         "da_DK": "Slet",
