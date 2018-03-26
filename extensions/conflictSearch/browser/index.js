@@ -604,7 +604,7 @@ module.exports = module.exports = {
                     _result = response;
                     setTimeout(function () {
                         jquery("#snackbar-conflict").snackbar("hide");
-                    }, 1000);
+                    }, 200);
                     $("#spinner span").hide();
                     $("#result-origin").html(response.text);
                     $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
@@ -666,8 +666,7 @@ module.exports = module.exports = {
                         e.stopPropagation();
                     });
 
-                    backboneEvents.get().trigger("end:conflictSearch", projWktWithBuffer);
-
+                    backboneEvents.get().trigger("end:conflictSearch", {"projWktWithBuffer": projWktWithBuffer});
 
                     L.geoJson(response.geom, {
                         "color": "#ff7800",
