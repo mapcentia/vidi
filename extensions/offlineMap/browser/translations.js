@@ -31,6 +31,10 @@ const translations = {
         "da_DK": "# Delete map area",
         "en_US": "# Delete map area"
     },
+    "Refresh map area": {
+        "da_DK": "# Refresh map area",
+        "en_US": "# Refresh map area"
+    },
     "No map areas have been stored yet": {
         "da_DK": "# No map areas have been stored yet",
         "en_US": "# No map areas have been stored yet"
@@ -39,9 +43,9 @@ const translations = {
         "da_DK": "# Saved tiles will be used in...",
         "en_US": "# Saved tiles will be used in..."
     },
-    "Saving tiles": {
-        "da_DK": "# Saving tiles",
-        "en_US": "# Saving tiles"
+    "Processing tiles": {
+        "da_DK": "# Processing tiles",
+        "en_US": "# Processing tiles"
     },
     "Please reload the page": {
         "da_DK": "# Please reload the page",

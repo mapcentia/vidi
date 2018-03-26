@@ -37,7 +37,6 @@ class MapAreaListItem extends React.Component {
         };
 
         this.onToggleShowExtent = this.onToggleShowExtent.bind(this);
-        this.onRefresh = this.onRefresh.bind(this);
     }
 
     onToggleShowExtent(e) {
@@ -79,10 +78,6 @@ class MapAreaListItem extends React.Component {
         this.setState({ showExtent: !this.state.showExtent });
     }
 
-    onRefresh(e) {
-        console.log('Refreshing map area');
-    }
-
     render() {
         let smallButtonStyle = {
             paddingLeft: '0px',
@@ -107,7 +102,7 @@ class MapAreaListItem extends React.Component {
             <td>
                 <div className="btn-group" role="group">
                     {showExtentButton}
-                    <button type="button" onClick={this.onRefresh} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
+                    <button type="button" onClick={this.props.onRefresh} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Refresh")}>
                         <i className="material-icons">&#xE5D5;</i>
                     </button>
                     <button type="button" onClick={this.props.onDelete} className="btn btn-sm btn-primary" style={smallButtonStyle} title={__("Delete")}>

@@ -8,9 +8,19 @@
 const CACHE_NAME = 'vidi-static-cache';
 
 /**
+ * Async
+ */
+import queue from 'async/queue';
+
+/**
  * CachedAreasManager
  */
 const CachedAreasManager = require('./CachedAreasManager');
+
+/**
+ * LoadingOverlay
+ */
+const LoadingOverlay = require('./components/LoadingOverlay');
 
 /**
  * Translations
@@ -155,7 +165,9 @@ module.exports = {
                     newAreaZoomMax: maximumZoomLevel,
                     loading: false,
                     tilesLoaded: 0,
-                    tilesLeftToLoad: 0
+                    tilesLeftToLoad: 0,
+                    mapAreasTilesLoaded: 0,
+                    mapAreasTilesLeftToLoad: 0,
                 };
 
                 this.setExtent = this.setExtent.bind(this);
@@ -248,22 +260,60 @@ module.exports = {
                 }
             };
 
+            onMapAreaRefresh(item) {
+                for (let key in this.state.existingCachedAreas) {
+                    if (key === item.id) {
+                        if (confirm(__("Refresh map area") + "?")) {
+                            this.deleteMapArea(item).then(() => {
+                                this.setState({
+                                    mapAreasTilesLoaded: 0,
+                                    mapAreasTilesLeftToLoad: item.data.tileURLs.length
+                                });
+
+                                const checkRefreshStatus = () => {
+                                    if (this.state.mapAreasTilesLoaded === this.state.mapAreasTilesLeftToLoad) {
+                                        setTimeout(() => {
+                                            this.setState({
+                                                mapAreasTilesLoaded: 0,
+                                                mapAreasTilesLeftToLoad: 0
+                                            });
+                                        }, 1000);
+                                    }
+                                }
+
+                                this.fetchAndCacheTiles(item.data.tileURLs, () => {
+                                    this.setState({ mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1) });
+                                    checkRefreshStatus();
+                                }, () => {
+                                    console.log('Unable to fetch tile');
+                                    this.setState({ mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad-- });
+                                    checkRefreshStatus();
+                                });
+                            });
+                        }
+                    }
+                }
+            }
+
+            deleteMapArea(item) {
+                return caches.open(CACHE_NAME).then((cache) => {
+                    let promises = [];
+                    for (let i = 0; i < item.data.tileURLs.length; i++) {
+                        promises.push(cache.delete(item.data.tileURLs[i]));
+                    }
+
+                    return Promise.all(promises);
+                });
+            }
+
             onMapAreaDelete(item) {
-                console.log(item, this.state);
                 for (let key in this.state.existingCachedAreas) {
                     if (key === item.id) {
                         if (confirm(__("Delete map area") + "?")) {
-                            caches.open(CACHE_NAME).then((cache) => {
-                                let promises = [];
-                                for (let i = 0; i < item.data.tileURLs.length; i++) {
-                                    promises.push(cache.delete(item.data.tileURLs[i]));
-                                }
-        
-                                Promise.all(promises).then(() => {
-                                    cachedAreasManagerInstance.delete(item.id).then(() => {
-                                        this.refreshStatus();
-                                    });
-                                });
+                            this.deleteMapArea(item).then(() => {
+                                cachedAreasManagerInstance.delete(item.id).then(() => {
+                                    this.refreshStatus();
+                                }); 
                             });
                         }
                     }
@@ -286,6 +336,21 @@ module.exports = {
                 });
             }
 
+            attemptToSaveCachedArea(tileURLs) {
+                if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
+                    cachedAreasManagerInstance.add({
+                        tileURLs,
+                        extent: this.state.newAreaExtent,
+                        comment: this.state.newAreaComment,
+                        zoomMin: this.state.newAreaZoomMin,
+                        zoomMax: this.state.newAreaZoomMax
+                    }).then(() => {
+                        this.clearExtent();
+                        this.refreshStatus();
+                    });
+                }
+            };
+
             /**
              *
              * @param e
@@ -307,29 +372,14 @@ module.exports = {
                     tilesLeftToLoad: tileURLs.length
                 });
 
-                const attemptToSaveCachedArea = (tileURLs) => {
-                    if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
-                        cachedAreasManagerInstance.add({
-                            tileURLs,
-                            extent: this.state.newAreaExtent,
-                            comment: this.state.newAreaComment,
-                            zoomMin: this.state.newAreaZoomMin,
-                            zoomMax: this.state.newAreaZoomMax
-                        }).then(() => {
-                            this.clearExtent();
-                            this.refreshStatus();
-                        });
-                    }
-                };
-
                 // @todo What if there are 1000 tiles - 1000 updates?
                 this.fetchAndCacheTiles(tileURLs, () => {
                     this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
-                    attemptToSaveCachedArea(tileURLs);
+                    this.attemptToSaveCachedArea(tileURLs);
                 }, () => {
                     console.log('Unable to fetch tile');
                     this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
-                    attemptToSaveCachedArea(tileURLs);
+                    this.attemptToSaveCachedArea(tileURLs);
                 });
 
                 this.setState({ loading: true });
@@ -456,37 +506,17 @@ module.exports = {
                 let required = (<span style={{color: 'red'}}><sup>*</sup></span>);
 
                 let loadingOverlay = false;
-
                 if (this.state.loading) {
-                    let content = false;
-                    if (this.state.tilesLoaded === this.state.tilesLeftToLoad) {
-                        content = (<div>
-                            <h4><i className="material-icons" style={{color: 'green'}}>&#xE5CA;</i> {__("Done")}</h4>
-                            <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{__("Store another")}</button>
-                        </div>);
-                    } else {
-                        content = (<div>
-                            <h4>{__("Saving tiles")} ({this.state.tilesLoaded} {__("of")} {this.state.tilesLeftToLoad})</h4>
-                            <div className="progress">
-                                <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{width: ((this.state.tilesLoaded / this.state.tilesLeftToLoad * 100) + '%')}}></div>
-                            </div>
-                        </div>);
-                    }
+                    loadingOverlay = (<LoadingOverlay tilesLoaded={this.state.tilesLoaded} tilesLeftToLoad={this.state.tilesLeftToLoad}>
+                        <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{__("Store another")}</button>
+                    </LoadingOverlay>);
+                }
 
-                    loadingOverlay = (<div style={{
-                        position: 'absolute',
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        zIndex: '1000'
-                    }}>
-                        <div style={{
-                            top: '40px',
-                            textAlign: 'center',
-                            position: 'relative',
-                            padding: '40px'
-                        }}>{content}</div>
-                    </div>);
+                let mapAreasRefreshOverlay = false;
+                if (this.state.mapAreasTilesLeftToLoad > 0) {
+                    mapAreasRefreshOverlay = (<LoadingOverlay
+                        tilesLoaded={this.state.mapAreasTilesLoaded}
+                        tilesLeftToLoad={this.state.mapAreasTilesLeftToLoad}/>);
                 }
 
                 let cacheNotification = false;
@@ -576,7 +606,12 @@ module.exports = {
                         </div>
                         <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
                             <div id="collapseOfflineMap2" className="accordion-body collapse in" aria-expanded="true">
-                                <MapAreaList onMapAreaDelete={(item) => {this.onMapAreaDelete(item)}} mapObj={mapObj} items={this.state.existingCachedAreas}/>
+                                {mapAreasRefreshOverlay}
+                                <MapAreaList
+                                    onMapAreaRefresh={(item) => {this.onMapAreaRefresh(item)}}
+                                    onMapAreaDelete={(item) => {this.onMapAreaDelete(item)}}
+                                    mapObj={mapObj}
+                                    items={this.state.existingCachedAreas}/>
                             </div>
                         </ul>
                     </div>);

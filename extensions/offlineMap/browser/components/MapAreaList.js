@@ -49,6 +49,10 @@ class MapAreaList extends React.Component {
         this.setState({ items });
     }
 
+    onRefreshHandler(item) {
+        this.props.onMapAreaRefresh(item);
+    }
+
     onDeleteHandler(item) {
         this.props.onMapAreaDelete(item);
     }
@@ -59,7 +63,13 @@ class MapAreaList extends React.Component {
         } else {
             let renderedItems = [];
             this.state.items.map((item, index) => {
-                renderedItems.push(<MapAreaListItem onDelete={this.onDeleteHandler.bind(this, item)} mapObj={this.mapObj} key={index} id={item.key} data={item.data}/>);
+                renderedItems.push(<MapAreaListItem
+                    onRefresh={this.onRefreshHandler.bind(this, item)}
+                    onDelete={this.onDeleteHandler.bind(this, item)}
+                    mapObj={this.mapObj}
+                    key={index}
+                    id={item.key}
+                    data={item.data}/>);
             });
 
             return (<table className="table table-striped">
