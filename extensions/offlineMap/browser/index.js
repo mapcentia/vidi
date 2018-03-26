@@ -6,10 +6,11 @@
 'use strict';
 
 const CACHE_NAME = 'vidi-static-cache';
-
+const NUMBER_OF_SIMULTANEOUS_REQUESTS = 2;
 /**
  * Async
  */
+import async from 'async';
 import queue from 'async/queue';
 
 /**
@@ -252,12 +253,23 @@ module.exports = {
              * @param {*} tileURLs Tile URLs
              */
             fetchAndCacheTiles (tileURLs, onloadCallback, onerrorCallback) {
-                for (var i = 0; i < tileURLs.length; ++i) {
+                var fetchTileQueue = async.queue((requestURL, callback) => {
                     let img = new Image();
-                    img.onload = () => { onloadCallback(); };
-                    img.onerror = () => { onerrorCallback(); };
-                    img.src = tileURLs[i];
-                }
+                    img.onload = () => {
+                        onloadCallback();
+                        callback();
+                    };
+
+                    img.onerror = () => {
+                        onerrorCallback();
+                        callback();
+                    };
+
+                    img.src = requestURL;
+                }, NUMBER_OF_SIMULTANEOUS_REQUESTS);
+
+                fetchTileQueue.drain = () => {};
+                fetchTileQueue.push(tileURLs, (err) => {});
             };
 
             onMapAreaRefresh(item) {
