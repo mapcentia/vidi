@@ -4,7 +4,7 @@
 var CACHE_NAME = 'vidi-static-cache';
 var LOG = false;
 
-var urlsToCache = ['/app/alexshumilov/public/favicon.ico', '/app/index.html', 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js'];
+var urlsToCache = ['/app/alexshumilov/public/favicon.ico', '/app/index.html'];
 
 var urlSubstitution = [{
     requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
@@ -41,6 +41,9 @@ var urlSubstitution = [{
     local: '/js/google-maps/places_impl.js'
 }, {
     requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/stats.js',
+    local: '/js/google-maps/stats.js'
+}, {
+    requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
     local: '/js/google-maps/stats.js'
 }, {
     requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',

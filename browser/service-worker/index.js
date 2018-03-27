@@ -3,8 +3,7 @@ const LOG = false;
 
 const urlsToCache = [
     '/app/alexshumilov/public/favicon.ico',
-    '/app/index.html',
-    'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
+    '/app/index.html'
 ];
 
 const urlSubstitution = [{
@@ -42,6 +41,9 @@ const urlSubstitution = [{
     local: '/js/google-maps/places_impl.js'
 }, {
     requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/stats.js',
+    local: '/js/google-maps/stats.js'
+}, {
+    requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
     local: '/js/google-maps/stats.js'
 }, {
     requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
