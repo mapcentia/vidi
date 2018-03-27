@@ -97,7 +97,7 @@ class MapAreaListItem extends React.Component {
         }
 
         return (<tr>
-            <td>{dateFormatted}</td>
+            <td>{this.data.layerId}<br/>{dateFormatted}</td>
             <td>{this.data.comment}</td>
             <td>
                 <div className="btn-group" role="group">

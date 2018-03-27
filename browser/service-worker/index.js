@@ -1,5 +1,5 @@
 const CACHE_NAME = 'vidi-static-cache';
-const LOG = true;
+const LOG = false;
 
 let urlsToCache = [
     '/index.html',

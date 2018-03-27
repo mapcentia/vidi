@@ -6,7 +6,8 @@
 'use strict';
 
 const CACHE_NAME = 'vidi-static-cache';
-const NUMBER_OF_SIMULTANEOUS_REQUESTS = 2;
+const NUMBER_OF_SIMULTANEOUS_REQUESTS = 8;
+
 /**
  * Async
  */
@@ -352,10 +353,11 @@ module.exports = {
                 });
             }
 
-            attemptToSaveCachedArea(tileURLs) {
+            attemptToSaveCachedArea(tileURLs, baseLayer) {
                 if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
                     cachedAreasManagerInstance.add({
                         tileURLs,
+                        layerId: baseLayer.id,
                         extent: this.state.newAreaExtent,
                         comment: this.state.newAreaComment,
                         zoomMin: this.state.newAreaZoomMin,
@@ -372,33 +374,37 @@ module.exports = {
              * @param e
              */
             onSave(e) {
-                let layer = false;
-                let activeBaseLayer = setBaseLayer.getActiveBaseLayer();
-                for (let key in mapObj._layers) {
-                    if (mapObj._layers[key].id && mapObj._layers[key].id === activeBaseLayer.id) {
-                        layer = mapObj._layers[key];
+                if (this.formIsValid()) {
+                    let layer = false;
+                    let activeBaseLayer = setBaseLayer.getActiveBaseLayer();
+                    for (let key in mapObj._layers) {
+                        if (mapObj._layers[key].id && mapObj._layers[key].id === activeBaseLayer.id) {
+                            layer = mapObj._layers[key];
+                        }
                     }
+
+                    if (!layer) throw new Error("Unable to find active base layer");
+
+                    let tileURLs = this.getTileUrls(mapObj, this.state.newAreaExtent, layer,
+                        this.state.newAreaZoomMin, this.state.newAreaZoomMax);
+                    
+                    this.setState({
+                        tilesLoaded: 0,
+                        tilesLeftToLoad: tileURLs.length
+                    });
+
+                    // @todo What if there are 1000 tiles - 1000 updates?
+                    this.fetchAndCacheTiles(tileURLs, () => {
+                        this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
+                        this.attemptToSaveCachedArea(tileURLs, layer);
+                    }, () => {
+                        console.log('Unable to fetch tile');
+                        this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
+                        this.attemptToSaveCachedArea(tileURLs, layer);
+                    });
+
+                    this.setState({ loading: true });
                 }
-
-                let tileURLs = this.getTileUrls(mapObj, this.state.newAreaExtent, layer,
-                    this.state.newAreaZoomMin, this.state.newAreaZoomMax);
-                
-                this.setState({
-                    tilesLoaded: 0,
-                    tilesLeftToLoad: tileURLs.length
-                });
-
-                // @todo What if there are 1000 tiles - 1000 updates?
-                this.fetchAndCacheTiles(tileURLs, () => {
-                    this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
-                    this.attemptToSaveCachedArea(tileURLs);
-                }, () => {
-                    console.log('Unable to fetch tile');
-                    this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
-                    this.attemptToSaveCachedArea(tileURLs);
-                });
-
-                this.setState({ loading: true });
             }
 
             refreshStatus() {
@@ -534,7 +540,6 @@ module.exports = {
                         tilesLoaded={this.state.mapAreasTilesLoaded}
                         tilesLeftToLoad={this.state.mapAreasTilesLeftToLoad}/>);
                 }
-
 
                 let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) ? true : false);
                 let securedPageNotification = false;
@@ -672,7 +677,7 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Offline map"), __("Info"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Offline map"), __("Block description"), require('./../../../browser/modules/height')().max);
         try {
             ReactDOM.render(
                 <OfflineMap />,

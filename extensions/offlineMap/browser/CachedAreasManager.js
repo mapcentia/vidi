@@ -29,7 +29,7 @@ class CachedAreasManager {
      * 
      * @return {Promise} 
      */
-    add({ tileURLs, extent, zoomMin, zoomMax, comment = '' }) {
+    add({ tileURLs, extent, zoomMin, zoomMax, layerId, comment = '' }) {
         let result = new Promise((resolve, reject) => {
             if (!(zoomMin > MIN_POSSIBLE_ZOOM && zoomMin < MAX_POSSIBLE_ZOOM) ) {
                 throw new Error(`Invalid minimal zoom`);
@@ -50,12 +50,16 @@ class CachedAreasManager {
             if (!extent) {
                 throw new Error(`Extent has to be provided`);
             }
-    
+
+            if (!layerId) {
+                throw new Error(`Base layer id has to be provided`);
+            }
+            
             comment = comment.toString();
             const id = uuidv1();
     
             localforage.getItem(STORAGE_KEY).then((data) => {
-                data[id] = { tileURLs, extent, zoomMin, zoomMax, comment, created_at: new Date() };
+                data[id] = { tileURLs, extent, zoomMin, zoomMax, layerId, comment, created_at: new Date() };
                 localforage.setItem(STORAGE_KEY, data).then(() => {
                     resolve();
                 });

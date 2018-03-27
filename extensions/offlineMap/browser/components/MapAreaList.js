@@ -75,7 +75,7 @@ class MapAreaList extends React.Component {
             return (<table className="table table-striped">
                 <thead>
                     <tr>
-                        <th scope="col">{__("Date")}</th>
+                        <th scope="col">{__("Info")}</th>
                         <th scope="col">{__("Comment")}</th>
                         <th scope="col">{__("Actions")}</th>
                     </tr>

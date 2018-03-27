@@ -1,7 +1,11 @@
 const translations = {
-    "Info": {
+    "Block description": {
         "da_DK": "# Here specific map areas can be stored to be used offline",
         "en_US": "# Here specific map areas can be stored to be used offline"
+    },
+    "Info": {
+        "da_DK": "Info",
+        "en_US": "Info"
     },
     "Description": {
         "da_DK": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
