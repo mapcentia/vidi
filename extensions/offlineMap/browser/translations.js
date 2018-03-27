@@ -19,6 +19,10 @@ const translations = {
         "da_DK": "# Store another",
         "en_US": "# Store another"
     },
+    "Please use the secured version of page (HTTPS enabled)": {
+        "da_DK": "# Please use the secured version of page (HTTPS enabled)",
+        "en_US": "# Please use the secured version of page (HTTPS enabled)"
+    },
     "Show extent": {
         "da_DK": "# Show extent",
         "en_US": "# Show extent"
