@@ -1,5 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
-const LOG = false;
+const API_ROUTES_START = 'api';
+const LOG = true;
 
 let urlsToCache = [
     '/index.html',
@@ -79,7 +80,6 @@ let urlsToCache = [
     '/js/leaflet-easybutton/easy-button.css',
     '/css/styles.css',
     '/fonts/roboto-v18-latin-300.woff2',
-    '/app/index.html',
     '/js/point-clusterer.js',
     '/js/leaflet-easybutton/easy-button.js',
     '/js/proj4js-combined.js',
@@ -132,6 +132,10 @@ const urlSubstitution = [{
     requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
     local: '/js/google-maps/stats.js'
 }, {
+    regExp: true,
+    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
+    local: '/index.html'
+}, {
     requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
     local: '/js/gc2/gc2table.js'
 }];
@@ -145,8 +149,14 @@ const normalizeTheURL = (URL) => {
     }
 
     urlSubstitution.map(item => {
-        if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
-            if (LOG) console.log(`Requested the ${cleanedRequestURL} but fetching the ${item.local}`);
+        if (item.regExp) {
+            let re = new RegExp(item.requested);
+            if (re.test(URL)) {
+                if (LOG) console.log(`Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
+                cleanedRequestURL = item.local;
+            }
+        } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
+            if (LOG) console.log(`Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
             cleanedRequestURL = item.local;
         }
     });
@@ -157,9 +167,6 @@ const normalizeTheURL = (URL) => {
 self.addEventListener('install', function(event) {
     if (LOG) console.log('Service worker was installed, caching specified resources');
     event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
-
-
-        console.log(self.registration.scope);
         let urlsToCacheAliased = urlsToCache;        
         for (let i = 0; i < urlsToCacheAliased.length; i++) {
             urlsToCacheAliased[i] = normalizeTheURL(urlsToCacheAliased[i]);
@@ -177,23 +184,38 @@ self.addEventListener('activate', event => {
     if (LOG) console.log('Service worker is ready to handle fetches now');
 });
  
-self.addEventListener('fetch', function(event) {
+self.addEventListener('fetch', (event) => {
     if (LOG) console.log('Reacting to fetch event');
     let cleanedRequestURL = normalizeTheURL(event.request.url);
-    event.respondWith(caches.match(cleanedRequestURL).then(function(response) {
-        if (!response) {
+    event.respondWith(caches.match(cleanedRequestURL).then((response) => {
+        if (response) {
+            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                if (LOG) console.log('API call detected', cleanedRequestURL);
+                const apiRequest = new Request(cleanedRequestURL);
+                return fetch(apiRequest).then(apiResponse => {
+                    if (LOG) console.log('API request was performed despite the existance of cached request');
+                    return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                        return apiResponse;
+                    });
+                }).catch(error => {
+                    if (LOG) console.log('API request failed, using the cached request');
+                    return response;
+                });
+            } else {
+                if (LOG) console.log(`In cache ${event.request.url}`);
+                return response;
+            }
+        } else {
             if (LOG) console.log(`Not in cache ${event.request.url}`);
-            return caches.open(CACHE_NAME).then(function(cache) {
-                const noCORSRequest = new Request(cleanedRequestURL);
-                return fetch(noCORSRequest).then(response => {
+            return caches.open(CACHE_NAME).then((cache) => {
+                const request = new Request(cleanedRequestURL);
+                return fetch(request).then(response => {
                     return cache.put(cleanedRequestURL, response.clone()).then(() => {
                         return response;
                     });
                 });
             });
-        } else {
-            if (LOG) console.log(`In cache ${event.request.url}`);
-            return response;
         }
     }));
 });
@@ -205,7 +227,7 @@ function fetchAndCache(request) {
         throw Error(response.statusText);
       }
 
-      return caches.open(CACHE_NAME).then(function(cache) {
+      return caches.open(CACHE_NAME).then((cache) => {
         cache.put(request.url, response.clone());
         return response;
       });
