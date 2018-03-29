@@ -1,6 +1,13 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = true;
+const LOG = false;
+
+/**
+ * ServiceWorker. Caches all requests, some requests are processed in specific way:
+ * 1. API calls are always performed, the cached response is retured only if the app is offline or 
+ * there is a API-related problem;
+ * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally.
+ */
 
 let urlsToCache = [
     '/index.html',
@@ -140,6 +147,12 @@ const urlSubstitution = [{
     local: '/js/gc2/gc2table.js'
 }];
 
+let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
+
+/**
+ * 
+ */
+let ignoredExtensionsRegExps = [];
 
 const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
@@ -166,6 +179,12 @@ const normalizeTheURL = (URL) => {
 
 self.addEventListener('install', function(event) {
     if (LOG) console.log('Service worker was installed, caching specified resources');
+
+    extensionsIgnoredForCaching.map(item => {
+        let localRegExp = new RegExp(`.${item}$`, 'i');
+        ignoredExtensionsRegExps.push(localRegExp);
+    });
+
     event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
         let urlsToCacheAliased = urlsToCache;        
         for (let i = 0; i < urlsToCacheAliased.length; i++) {
@@ -189,12 +208,15 @@ self.addEventListener('fetch', (event) => {
     let cleanedRequestURL = normalizeTheURL(event.request.url);
     event.respondWith(caches.match(cleanedRequestURL).then((response) => {
         if (response) {
+            // The request was found in cache
             let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+            // API requests should not use the probably stalled cached copy if it is possible
             if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                 if (LOG) console.log('API call detected', cleanedRequestURL);
                 const apiRequest = new Request(cleanedRequestURL);
                 return fetch(apiRequest).then(apiResponse => {
                     if (LOG) console.log('API request was performed despite the existance of cached request');
+                    // Caching the API request in case if app will go offline aftewards
                     return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
                         return apiResponse;
                     });
@@ -207,15 +229,30 @@ self.addEventListener('fetch', (event) => {
                 return response;
             }
         } else {
-            if (LOG) console.log(`Not in cache ${event.request.url}`);
-            return caches.open(CACHE_NAME).then((cache) => {
-                const request = new Request(cleanedRequestURL);
-                return fetch(request).then(response => {
-                    return cache.put(cleanedRequestURL, response.clone()).then(() => {
-                        return response;
+            // The request was not found in cache
+           
+            // Checking if it is eligible for caching 
+            let requestHasToBeCached = true;
+            ignoredExtensionsRegExps.map(item => {
+                if (item.test(cleanedRequestURL)) {
+                    requestHasToBeCached = false;
+                    return false;
+                }
+            });
+
+            if (requestHasToBeCached) {
+                if (LOG) console.log(`Caching ${event.request.url}`);
+                return caches.open(CACHE_NAME).then((cache) => {
+                    const request = new Request(cleanedRequestURL);
+                    return fetch(request).then(response => {
+                        return cache.put(cleanedRequestURL, response.clone()).then(() => {
+                            return response;
+                        });
                     });
                 });
-            });
+            } else {
+                return fetch(request);
+            }
         }
     }));
 });
