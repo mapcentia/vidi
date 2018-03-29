@@ -285,6 +285,7 @@ module.exports = {
 
                                 const checkRefreshStatus = () => {
                                     if (this.state.mapAreasTilesLoaded === this.state.mapAreasTilesLeftToLoad) {
+                                        navigator.serviceWorker.controller.postMessage({force: false});
                                         setTimeout(() => {
                                             this.setState({
                                                 mapAreasTilesLoaded: 0,
@@ -294,6 +295,7 @@ module.exports = {
                                     }
                                 }
 
+                                navigator.serviceWorker.controller.postMessage({force: true});
                                 this.fetchAndCacheTiles(item.data.tileURLs, () => {
                                     this.setState({ mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1) });
                                     checkRefreshStatus();
@@ -355,6 +357,7 @@ module.exports = {
 
             attemptToSaveCachedArea(tileURLs, baseLayer) {
                 if (this.state.tilesLeftToLoad === this.state.tilesLoaded) {
+                    navigator.serviceWorker.controller.postMessage({force: false});
                     cachedAreasManagerInstance.add({
                         tileURLs,
                         layerId: baseLayer.id,
@@ -392,6 +395,8 @@ module.exports = {
                         tilesLoaded: 0,
                         tilesLeftToLoad: tileURLs.length
                     });
+
+                    navigator.serviceWorker.controller.postMessage({force: true});
 
                     // @todo What if there are 1000 tiles - 1000 updates?
                     this.fetchAndCacheTiles(tileURLs, () => {

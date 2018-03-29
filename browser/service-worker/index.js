@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
@@ -8,6 +8,16 @@ const LOG = false;
  * there is a API-related problem;
  * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally.
  */
+
+/**
+ * 
+ */
+let ignoredExtensionsRegExps = [];
+
+/**
+ *
+ */
+let forceIgnoredExtensionsCaching = false;
 
 let urlsToCache = [
     '/index.html',
@@ -150,10 +160,12 @@ const urlSubstitution = [{
 let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
 /**
+ * Cleaning up and substituting with local URLs provided address
  * 
+ * @param {String} URL
+ * 
+ * @return {String}
  */
-let ignoredExtensionsRegExps = [];
-
 const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
     if (URL.indexOf('_=') !== -1) {
@@ -177,6 +189,10 @@ const normalizeTheURL = (URL) => {
     return cleanedRequestURL;
 }
 
+
+/**
+ * "install" event handler
+ */
 self.addEventListener('install', function(event) {
     if (LOG) console.log('Service worker was installed, caching specified resources');
 
@@ -199,10 +215,31 @@ self.addEventListener('install', function(event) {
     }));
 });
 
+/**
+ * "activate" event handler
+ */
 self.addEventListener('activate', event => {
     if (LOG) console.log('Service worker is ready to handle fetches now');
 });
  
+
+/**
+ * "message" event handler
+ */
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.force) {
+        if (LOG) console.log('Forcing caching of files with ignored extensions');
+        forceIgnoredExtensionsCaching = true;
+    } else {
+        if (LOG) console.log('Not forcing caching of files with ignored extensions');
+        forceIgnoredExtensionsCaching = false;
+    }
+});
+
+
+/**
+ * "fetch" event handler
+ */
 self.addEventListener('fetch', (event) => {
     if (LOG) console.log('Reacting to fetch event');
     let cleanedRequestURL = normalizeTheURL(event.request.url);
@@ -230,20 +267,22 @@ self.addEventListener('fetch', (event) => {
             }
         } else {
             // The request was not found in cache
-           
-            // Checking if it is eligible for caching 
-            let requestHasToBeCached = true;
-            ignoredExtensionsRegExps.map(item => {
-                if (item.test(cleanedRequestURL)) {
-                    requestHasToBeCached = false;
-                    return false;
-                }
-            });
 
+            // Checking if the request is eligible for caching 
+            let requestHasToBeCached = true;
+            if (forceIgnoredExtensionsCaching === false) {
+                ignoredExtensionsRegExps.map(item => {
+                    if (item.test(cleanedRequestURL)) {
+                        requestHasToBeCached = false;
+                        return false;
+                    }
+                });
+            }
+
+            const request = new Request(cleanedRequestURL);
             if (requestHasToBeCached) {
                 if (LOG) console.log(`Caching ${event.request.url}`);
                 return caches.open(CACHE_NAME).then((cache) => {
-                    const request = new Request(cleanedRequestURL);
                     return fetch(request).then(response => {
                         return cache.put(cleanedRequestURL, response.clone()).then(() => {
                             return response;
@@ -256,19 +295,3 @@ self.addEventListener('fetch', (event) => {
         }
     }));
 });
-
-function fetchAndCache(request) {
-    if (LOG) console.log(`Before fetching`, request);
-    fetch(request).then((response) => {
-      if (!response.ok) {
-        throw Error(response.statusText);
-      }
-
-      return caches.open(CACHE_NAME).then((cache) => {
-        cache.put(request.url, response.clone());
-        return response;
-      });
-    }).catch((error) => {
-      console.log('- Request failed:', error);
-    });
-}
