@@ -941,5 +941,5 @@ h4 small {
 .gc2-add-feature,
 .popup-edit-btn,
 .popup-delete-btn {
-  display: nonde;
+  display: inline;
 }

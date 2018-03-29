@@ -129,7 +129,9 @@ module.exports = {
 
                 sqlQuery.reset();
 
-                markers[0].enableEdit(qstore);
+                markers[0].enableEdit();
+                sqlQuery.reset(qstore);
+
 
                 break;
 
@@ -369,7 +371,7 @@ module.exports = {
                           onSubmit={onSubmit}
                     />
                 </div>
-            ), document.getElementById("info-modal-body-wrapper"));
+            ), document.getElementById("info-modal-body"));
 
         });
 

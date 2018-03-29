@@ -132,6 +132,7 @@ module.exports = {
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
+            var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
@@ -230,6 +231,12 @@ module.exports = {
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(e, _key_, qstore);
                             });
+
+                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                    editor.delete(e, _key_, qstore);
+                                }
+                            });
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
@@ -303,7 +310,7 @@ module.exports = {
 
                             });
 
-                            $(".popup-delete-btn").unbind("click.ge-delete").bind("click.ge-delete", function () {
+                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
                                 if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
                                     editor.delete(l, _key_, qstore);
                                 }
@@ -315,21 +322,21 @@ module.exports = {
             });
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fields = [], fieldStr;
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
 
-            if (fieldConf) {
-                $.each(fieldConf, function (i, v) {
+            if (fields) {
+                $.each(fields, function (i, v) {
                     if (v.type === "bytea") {
-                        fields.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
-                    } else if (i !== f_geometry_column) {
-                        fields.push("\"" + i + "\"");
+                        fieldNames.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
+                    } else {
+                        fieldNames.push("\"" + i + "\"");
                     }
                 });
-                fieldStr = fields.join(",") + ",\"" + f_geometry_column + "\"";
+                fieldStr = fieldNames.join(",");
+                console.log(fieldStr)
             } else {
                 fieldStr = "*";
             }
-
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
