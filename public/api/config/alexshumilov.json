@@ -19,7 +19,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "http://gc2.mapcentia.com"
+        "host": "https://gc2.mapcentia.com"
     },
 
 

@@ -3,7 +3,7 @@
 
 var CACHE_NAME = 'vidi-static-cache';
 var API_ROUTES_START = 'api';
-var LOG = true;
+var LOG = false;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:

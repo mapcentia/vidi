@@ -194,8 +194,7 @@ module.exports = {
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
 
                     if (text !== null) {
-                        drawLayer.bindLabel(text, {noHide: true}).on("click", function () {
-                        }).showLabel();
+                        drawLayer.bindTooltip(text);
 
                         drawLayer._vidi_marker_text = text;
 
@@ -207,6 +206,7 @@ module.exports = {
                 }
 
                 drawnItems.addLayer(drawLayer);
+                drawLayer.openTooltip();
 
                 me.setStyle(drawLayer, type);
 
