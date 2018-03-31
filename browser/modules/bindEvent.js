@@ -383,7 +383,7 @@ module.exports = module.exports = {
                 $(this).on("click", function (e) {
                     var t = ($(this).data('gc2-key'));
 
-                    console.log(t)
+                    console.log(editor, t);
 
                     editor.add(t);
                     e.stopPropagation();

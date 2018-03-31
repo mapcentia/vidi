@@ -3,7 +3,7 @@
 
 var CACHE_NAME = 'vidi-static-cache';
 var API_ROUTES_START = 'api';
-var LOG = false;
+var LOG = true;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
@@ -22,7 +22,7 @@ var ignoredExtensionsRegExps = [];
  */
 var forceIgnoredExtensionsCaching = false;
 
-var urlsToCache = ['/index.html', 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css', 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0', 'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from', 'https://maps.google.com/maps/api/js?v=3&libraries=places&key=AIzaSyCjTXR2Tmg_Ok7u4S5dl6_Rgy3br_BQfPQ', 'https://maps.google.com/maps-api-v3/api/js/31/8b/places_impl.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/common.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/util.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/controls.js', 'https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png', 'https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png', '/bower_components/momentjs/min/moment-with-locales.js', '/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js', '/bower_components/es5-shim/es5-shim.js', '/bower_components/d3/d3.js', '/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js', '/bower_components/tableExport.jquery.plugin/tableExport.min.js', '/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js', '/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js', '/bower_components/bootstrap-table/dist/bootstrap-table.js', '/bower_components/typeahead.js/dist/typeahead.jquery.min.js', '/bower_components/backbone/backbone.js', '/bower_components/raphael/raphael.min.js', '/bower_components/underscore/underscore.js', '/bower_components/jrespond/js/jRespond.js', '/bower_components/mustache.js/mustache.js', '/bower_components/jquery/dist/jquery.min.js', '/bower_components/q-cluster/src/clustering.js', '/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js', '/bower_components/q-cluster/src/utils.js', '/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js', '/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js', '/bower_components/bootstrap-select/js/bootstrap-select.js', '/bower_components/leaflet-plugins/layer/tile/Bing.js', '/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css', '/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js', '/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js', '/bower_components/bootstrap-material-design/dist/js/material.js', '/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js', '/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css', '/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js', '/bower_components/leaflet-plugins/layer/tile/Yandex.js', '/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css', '/bower_components/bootstrap-table/dist/bootstrap-table.css', '/bower_components/bootstrap-material-design/dist/js/ripples.js', '/bower_components/bootstrap-select/dist/css/bootstrap-select.css', '/bower_components/leaflet-measure/dist/leaflet-measure.css', '/bower_components/leaflet-measure-path/leaflet-measure-path.css', '/bower_components/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css', '/bower_components/bootstrap/dist/css/bootstrap.css', '/bower_components/bootstrap-material-design/dist/css/ripples.css', '/bower_components/q-cluster/css/q-cluster.css', '/bower_components/snackbarjs/dist/snackbar.css', '/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css', '/bower_components/leaflet-draw/dist/leaflet.draw.css', '/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.css', '/bower_components/leaflet.toolbar/dist/leaflet.toolbar.css', '/bower_components/leaflet/dist/leaflet.css', '/bower_components/leaflet-measure/dist/leaflet-measure.js', '/bower_components/leaflet-measure-path/leaflet-measure-path.js', '/bower_components/leaflet.editable/src/Leaflet.Editable.js', '/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.min.js', '/bower_components/leaflet.toolbar/dist/leaflet.toolbar-src.js', '/bower_components/leaflet-draw/dist/leaflet.draw-src.js', '/bower_components/Path.Drag.js/src/Path.Drag.js', '/bower_components/leaflet/dist/leaflet-src.js', '/bower_components/leaflet-measure/dist/images/rulers.png', '/bower_components/localforage/dist/localforage.min.js', '/js/templates.js', '/js/vidi.js', '/locale', '/api/config/vidi.json', '/fonts/fonts.css', '/icons/material-icons.css', '/js/leaflet-easybutton/easy-button.css', '/css/styles.css', '/fonts/roboto-v18-latin-300.woff2', '/js/point-clusterer.js', '/js/leaflet-easybutton/easy-button.js', '/js/proj4js-combined.js', '/js/gc2/gc2table.js', '/js/gc2/geocloud.js', '/js/jasny-bootstrap.js', '/js/point-clusterer.js', '/js/bundle.js', '/css/styles.css', '/css/jasny-bootstrap.css'];
+var urlsToCache = ['/index.html', 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css', 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0', 'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from', 'https://maps.google.com/maps/api/js?v=3&libraries=places&key=AIzaSyCjTXR2Tmg_Ok7u4S5dl6_Rgy3br_BQfPQ', 'https://maps.google.com/maps-api-v3/api/js/31/8b/places_impl.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/common.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/util.js', 'https://maps.google.com/maps-api-v3/api/js/31/8b/controls.js', 'https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png', 'https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png', '/js/lib/momentjs/min/moment-with-locales.js', '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js', '/js/lib/es5-shim/es5-shim.js', '/js/lib/d3/d3.js', '/js/lib/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js', '/js/lib/tableExport.jquery.plugin/tableExport.min.js', '/js/lib/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js', '/js/lib/bootstrap-table/dist/bootstrap-table-locale-all.min.js', '/js/lib/bootstrap-table/dist/bootstrap-table.js', '/js/lib/typeahead.js/dist/typeahead.jquery.min.js', '/js/lib/backbone/backbone.js', '/js/lib/raphael/raphael.min.js', '/js/lib/underscore/underscore.js', '/js/lib/jrespond/js/jRespond.js', '/js/lib/mustache.js/mustache.js', '/js/lib/jquery/dist/jquery.min.js', '/js/lib/q-cluster/src/clustering.js', '/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js', '/js/lib/q-cluster/src/utils.js', '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js', '/js/lib/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js', '/js/lib/bootstrap-select/js/bootstrap-select.js', '/js/lib/leaflet-plugins/layer/tile/Bing.js', '/js/lib/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css', '/js/lib/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js', '/js/lib/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js', '/js/lib/bootstrap-material-design/dist/js/material.js', '/js/lib/hogan.js/web/builds/3.0.2/hogan-3.0.2.js', '/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css', '/js/lib/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js', '/js/lib/leaflet-plugins/layer/tile/Yandex.js', '/js/lib/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css', '/js/lib/bootstrap-table/dist/bootstrap-table.css', '/js/lib/bootstrap-material-design/dist/js/ripples.js', '/js/lib/bootstrap-select/dist/css/bootstrap-select.css', '/js/lib/leaflet-measure/dist/leaflet-measure.css', '/js/lib/leaflet-measure-path/leaflet-measure-path.css', '/js/lib/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css', '/js/lib/bootstrap/dist/css/bootstrap.css', '/js/lib/bootstrap-material-design/dist/css/ripples.css', '/js/lib/q-cluster/css/q-cluster.css', '/js/lib/snackbarjs/dist/snackbar.css', '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css', '/js/lib/leaflet-draw/dist/leaflet.draw.css', '/js/lib/leaflet.locatecontrol/dist/L.Control.Locate.css', '/js/lib/leaflet.toolbar/dist/leaflet.toolbar.css', '/js/lib/leaflet/dist/leaflet.css', '/js/lib/leaflet-measure/dist/leaflet-measure.js', '/js/lib/leaflet-measure-path/leaflet-measure-path.js', '/js/lib/leaflet.editable/src/Leaflet.Editable.js', '/js/lib/leaflet.locatecontrol/dist/L.Control.Locate.min.js', '/js/lib/leaflet.toolbar/dist/leaflet.toolbar-src.js', '/js/lib/leaflet-draw/dist/leaflet.draw-src.js', '/js/lib/Path.Drag.js/src/Path.Drag.js', '/js/lib/leaflet/dist/leaflet-src.js', '/js/lib/leaflet-measure/dist/images/rulers.png', '/js/lib/localforage/localforage.js', '/js/templates.js', '/js/vidi.js', '/locale', '/api/config/vidi.json', '/fonts/fonts.css', '/icons/material-icons.css', '/js/leaflet-easybutton/easy-button.css', '/css/styles.css', '/fonts/roboto-v18-latin-300.woff2', '/js/point-clusterer.js', '/js/leaflet-easybutton/easy-button.js', '/js/proj4js-combined.js', '/js/gc2/gc2table.js', '/js/gc2/geocloud.js', '/js/jasny-bootstrap.js', '/js/point-clusterer.js', '/js/bundle.js', '/css/styles.css', '/css/jasny-bootstrap.css'];
 
 var urlSubstitution = [{
     requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
@@ -153,21 +153,24 @@ self.addEventListener('message', function (event) {
  * "fetch" event handler
  */
 self.addEventListener('fetch', function (event) {
-    if (LOG) console.log('Reacting to fetch event');
+    if (LOG) console.log('Reacting to fetch event ' + event.request.url, event.request);
     var cleanedRequestURL = normalizeTheURL(event.request.url);
-    event.respondWith(caches.match(cleanedRequestURL).then(function (response) {
+    return caches.match(cleanedRequestURL).then(function (response) {
         if (response) {
             // The request was found in cache
             var apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+
             // API requests should not use the probably stalled cached copy if it is possible
             if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                 if (LOG) console.log('API call detected', cleanedRequestURL);
-                var apiRequest = new Request(cleanedRequestURL);
-                return fetch(apiRequest).then(function (apiResponse) {
-                    if (LOG) console.log('API request was performed despite the existance of cached request');
+                return fetch(event.request).then(function (apiResponse) {
+                    if (LOG) console.log('API request was performed despite the existence of cached request');
                     // Caching the API request in case if app will go offline aftewards
                     return cache.put(cleanedRequestURL, apiResponse.clone()).then(function () {
+                        throw new Error('Response was put into the cache');
                         return apiResponse;
+                    }).catch(function (error) {
+                        throw new Error('Unable to put the response in cache');
                     });
                 }).catch(function (error) {
                     if (LOG) console.log('API request failed, using the cached request');
@@ -191,21 +194,27 @@ self.addEventListener('fetch', function (event) {
                 });
             }
 
-            var request = new Request(cleanedRequestURL);
+            var requestToMake = event.request.clone();
+            if (cleanedRequestURL !== event.request.url) {
+                if (LOG) console.log('Creating raw GET request');
+                requestToMake = new Request(cleanedRequestURL);
+            }
+
+            console.log(event.request);
             if (requestHasToBeCached) {
-                if (LOG) console.log('Caching ' + event.request.url);
+                if (LOG) console.log('Caching ' + requestToMake.url);
                 return caches.open(CACHE_NAME).then(function (cache) {
-                    return fetch(request).then(function (response) {
-                        return cache.put(cleanedRequestURL, response.clone()).then(function () {
+                    return fetch(requestToMake).then(function (response) {
+                        return cache.put(requestToMake.url, response.clone()).then(function () {
                             return response;
                         });
                     });
                 });
             } else {
-                return fetch(request);
+                return fetch(requestToMake);
             }
         }
-    }));
+    });
 });
 
 },{}]},{},[1]);

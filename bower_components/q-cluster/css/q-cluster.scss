@@ -1,0 +1,112 @@
+/* Source: clusters.scss */
+
+$clusterStrokeClr: #FFF;
+$singleClusterDm: 20px;
+$smClusterDm: 34px;
+$mdClusterDm: 50px;
+$lgClusterDm: 66px;
+$clusterStroke: 2;
+
+.q-marker-cluster {
+    background-color: $clusterStrokeClr;
+    color: $clusterStrokeClr;
+    background-clip: border-box;
+    text-align: center;
+    font-size: 9px;
+    font-family: Arial;
+     border-radius: 50%;
+}
+
+.q-marker-cluster.active-marker {
+  background-color: #ffde01;
+  border:3px solid #ffde01;
+}
+
+.q-marker-cluster > div  {
+
+  margin-left: 2px;
+  margin-top: 2px;
+  text-align: center;
+  border-radius: 50%;
+    background-color:#666;
+}
+
+.q-marker-cluster > div > span, .q-marker-cluster > div > div > span {
+  position: relative;
+  top: 0.1em;
+}
+
+.q-marker-cluster-single {
+  background-color: initial;
+  border-radius: 50%;
+  width: $singleClusterDm !important;
+  height: $singleClusterDm !important;
+  margin-left: $singleClusterDm/-2 !important;
+  margin-top: $singleClusterDm/-2 !important;
+}
+
+.q-marker-cluster-single > div { 
+  width: $singleClusterDm - $clusterStroke*2;
+  height: $singleClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-single > div > div > span {
+  line-height: $singleClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-small {
+  width: $smClusterDm !important;
+  height: $smClusterDm !important;
+  margin-left: $smClusterDm/-2 !important;
+  margin-top: $smClusterDm/-2 !important;
+
+}
+
+.q-marker-cluster-small  > div {
+  width: $smClusterDm - $clusterStroke*2;
+  height: $smClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-small  > div > span {
+  line-height: $smClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-medium {
+  width: $mdClusterDm !important;
+  height: $mdClusterDm !important;
+  margin-left: $mdClusterDm/-2 !important;
+  margin-top: $mdClusterDm/-2 !important;
+}
+
+.q-marker-cluster-medium > div {
+  width: $mdClusterDm - $clusterStroke*2;
+  height:$mdClusterDm - $clusterStroke*2;
+  border-radius: $mdClusterDm;
+}
+
+.q-marker-cluster-medium > div > span {
+  line-height: $mdClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-large {
+  border-radius: $lgClusterDm;
+  width: $lgClusterDm !important;
+  height:$lgClusterDm !important;
+  margin-left: $lgClusterDm/-2 !important;
+  margin-top: $lgClusterDm/-2 !important;
+}
+
+.q-marker-cluster-large > div {
+  width: $lgClusterDm - $clusterStroke*2;
+  height:$lgClusterDm - $clusterStroke*2;
+}
+
+.q-marker-cluster-large > div > span {
+  line-height: $lgClusterDm - $clusterStroke*2;
+}
+
+.clusterDonut {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}

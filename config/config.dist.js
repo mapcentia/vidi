@@ -128,11 +128,14 @@ module.exports = {
             //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             //{"layerSearch": ["index", "controller"]},
             {"streetView": ["index"]},
-            {"coordinates": ["index"]}
+            {"coordinates": ["index"]},
+            {"offlineMap": ["index"]},
+            {"session": ["index"]}
         ],
         "server": [
             /*{conflictSearch: ["index"]},*/
             /*{layerSearch: ["index", "indexInEs"]},*/
+            {"session": ["index"]}
         ]
     },
 
