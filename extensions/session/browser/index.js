@@ -78,7 +78,7 @@ module.exports = {
 
                 ReactDOM.render(
                     <Session/>,
-                    document.getElementById("info-modal-body-wrapper")
+                    document.getElementById("info-modal-body")
                 );
 
             });

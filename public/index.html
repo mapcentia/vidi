@@ -14,16 +14,17 @@
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
     <!-- build:css /css/build/all.min.css -->
     <!-- Leafet -->
-    <link rel="stylesheet" href="/bower_components/leaflet/dist/leaflet.css">
-    <link rel="stylesheet" href="/bower_components/leaflet-draw/dist/leaflet.draw.css">
-    <link rel="stylesheet" href="/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.css">
-    <link rel="stylesheet" href="/bower_components/leaflet.toolbar/dist/leaflet.toolbar.css">
-    <link rel="stylesheet" href="/bower_components/leaflet-measure-path/leaflet-measure-path.css">
-    <link rel="stylesheet" href="/bower_components/leaflet-measure/dist/leaflet-measure.css">
-    <link rel="stylesheet" href="/bower_components/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css"/>
-    <link rel="stylesheet" href="/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="/bower_components/q-cluster/css/q-cluster.css"/>
+    <link rel="stylesheet" href="/js/lib/leaflet/leaflet.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-draw/leaflet.draw.css">
+    <link rel="stylesheet" href="/js/lib/leaflet.locatecontrol/L.Control.Locate.css">
+    <link rel="stylesheet" href="/js/lib/leaflet.toolbar/leaflet.toolbar.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-measure-path/leaflet-measure-path.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-measure/leaflet-measure.css">
+    <link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="/js/lib/q-cluster/css/q-cluster.css"/>
     <!-- Bootstrap -->
+<<<<<<< HEAD
     <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/bower_components/snackbarjs/dist/snackbar.css">
     <link rel="stylesheet" href="/bower_components/bootstrap-material-design/dist/css/ripples.css">
@@ -37,6 +38,18 @@
 
     <link rel="stylesheet" href="/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css">
     <link rel="stylesheet" href="/css/jasny-bootstrap.css">
+=======
+    <link rel="stylesheet" href="/js/lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/ripples.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-select/bootstrap-select.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-table/bootstrap-table.css"/>
+    <link rel="stylesheet"
+          href="/js/lib/bootstrap-material-design/bootstrap-material-design.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css">
+    <link rel="stylesheet" href="/css/jasny-bootstrap.min.css">
+>>>>>>> develop
     <!-- custom -->
     <link rel="stylesheet" href="/css/styles.css">
     <!-- /build -->
@@ -65,7 +78,7 @@
 </div>
 <div id="main-container"></div>
 </body>
-<script src="/bower_components/hogan.js/web/builds/3.0.2/hogan-3.0.2.js"></script>
+<script src="/js/lib/hogan.js/hogan-3.0.2.js"></script>
 <script src="/js/templates.js"></script>
 <script>
     var tmpl = "loadscreen_" + window.location.pathname.split("/")[2] + ".tmpl";
@@ -94,55 +107,51 @@
 <script src="//cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from"></script>
 <!-- build:js /js/build/all.min.js -->
 <!-- Leaflet -->
-<script src="/bower_components/localforage/dist/localforage.min.js"></script>
-<script src="/bower_components/leaflet/dist/leaflet-src.js"></script>
-<script src="/bower_components/leaflet-draw/dist/leaflet.draw-src.js"></script>
-<script src="/bower_components/Path.Drag.js/src/Path.Drag.js"></script>
-<script src="/bower_components/leaflet.editable/src/Leaflet.Editable.js"></script>
-<script src="/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
-<script src="/bower_components/leaflet.toolbar/dist/leaflet.toolbar-src.js"></script>
-<script src="/bower_components/leaflet-measure-path/leaflet-measure-path.js"></script>
-<script src="/bower_components/leaflet-measure/dist/leaflet-measure.js"></script>
-<script src="/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js"></script>
-<script src="/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js"></script>
-<script src="/bower_components/leaflet-plugins/layer/tile/Yandex.js"></script>
-<script src="/bower_components/leaflet-plugins/layer/tile/Bing.js"></script>
-<script src="/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
-<script src="/bower_components/q-cluster/src/utils.js"></script>
-<script src="/bower_components/q-cluster/src/clustering.js"></script>
+<script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
+<script src="/js/lib/Path.Drag.js/src/Path.Drag.js"></script>
+<script src="/js/lib/leaflet.editable/Leaflet.Editable.js"></script>
+<script src="/js/lib/leaflet.locatecontrol/L.Control.Locate.js"></script>
+<script src="/js/lib/leaflet.toolbar/leaflet.toolbar.js"></script>
+<script src="/js/lib/leaflet-measure-path/leaflet-measure-path.js"></script>
+<script src="/js/lib/leaflet-measure/leaflet-measure.min.js"></script>
+<script src="/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js"></script>
+<script src="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js"></script>
+<script src="/js/lib/leaflet-plugins/Yandex.js"></script>
+<script src="/js/lib/leaflet-plugins/Bing.js"></script>
+<script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
+<script src="/js/lib/q-cluster/src/utils.js"></script>
+<script src="/js/lib/q-cluster/src/clustering.js"></script>
 <script src="/js/point-clusterer.js"></script>
-<script src="/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
-
-<!-- Leaflet plugins -->
-<script src="/js/leaflet-easybutton/easy-button.js"></script>
-
+<script src="/js/lib/localforage/dist/localforage.min.js"></script>
+<script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
 <!-- Core -->
-<script src="/bower_components/es5-shim/es5-shim.js"></script>
-<script src="/bower_components/jquery/dist/jquery.min.js"></script>
-<script src="/bower_components/jrespond/js/jRespond.js"></script>
-<script src="/bower_components/mustache.js/mustache.js"></script>
-<script src="/bower_components/underscore/underscore.js"></script>
-<script src="/bower_components/raphael/raphael.min.js"></script>
-<script src="/bower_components/backbone/backbone.js"></script>
-<script src="/bower_components/momentjs/min/moment-with-locales.js"></script>
-<script src="/bower_components/d3/d3.js"></script>
+<script src="/js/lib/es5-shim/es5-shim.js"></script>
+<script src="/js/lib/jquery/jquery.js"></script>
+<script src="/js/lib/jrespond/jRespond.js"></script>
+<script src="/js/lib/mustache.js/mustache.js"></script>
+<script src="/js/lib/underscore/underscore.js"></script>
+<script src="/js/lib/raphael/raphael.min.js"></script>
+<script src="/js/lib/backbone/backbone.js"></script>
+<script src="/js/lib/momentjs/moment-with-locales.js"></script>
+<script src="/js/lib/d3/d3.js"></script>
 <script src="/js/proj4js-combined.js"></script>
 
 <!-- GoogleMaps -->
 <script src="//maps.google.com/maps/api/js?v=3&libraries=places&key=AIzaSyCjTXR2Tmg_Ok7u4S5dl6_Rgy3br_BQfPQ"></script>
 
 <!-- Bootstrap -->
-<script src="/bower_components/typeahead.js/dist/typeahead.jquery.min.js"></script>
-<script src="/bower_components/bootstrap-table/dist/bootstrap-table.js"></script>
-<script src="/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.min.js"></script>
-<script src="/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js"></script>
-<script src="/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-<script src="/bower_components/tableExport.jquery.plugin/tableExport.min.js"></script>
-<script src="/bower_components/bootstrap-material-design/dist/js/ripples.js"></script>
-<script src="/bower_components/bootstrap-material-design/dist/js/material.js"></script>
-<script src="/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
-<script src="/bower_components/bootstrap-select/js/bootstrap-select.js"></script>
-<script src="/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js"></script>
+<script src="/js/lib/typeahead.js/typeahead.jquery.js"></script>
+<script src="/js/lib/bootstrap-table/bootstrap-table.js"></script>
+<script src="/js/lib/bootstrap-table/bootstrap-table-locale-all.js"></script>
+<script src="/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js"></script>
+<script src="/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
+<script src="/js/lib/tableExport.jquery.plugin/tableExport.js"></script>
+<script src="/js/lib/bootstrap-material-design/ripples.js"></script>
+<script src="/js/lib/bootstrap-material-design/material.js"></script>
+<script src="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js"></script>
+<script src="/js/lib/bootstrap-select/bootstrap-select.js"></script>
+<script src="/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- Custom -->

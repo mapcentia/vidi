@@ -20,6 +20,8 @@ var sqlQuery;
 var jquery = require('jquery');
 require('snackbarjs');
 
+var multiply = require('geojson-multiply');
+
 var JSONSchemaForm = require("react-jsonschema-form");
 
 var Form = JSONSchemaForm.default;
@@ -55,28 +57,42 @@ module.exports = {
         var me = this;
     },
 
+    createFormObj: function (fieldConf, pkey, f_geometry_column) {
+
+        var properties = {};
+
+        Object.keys(fieldConf).map(function (key, index) {
+
+            if (key !== pkey && key !== f_geometry_column)
+            properties[key] = {
+                type:
+                    (fieldConf[key] !== undefined && fieldConf[key].type === "string") ? "string" :
+                        (fieldConf[key] !== undefined && fieldConf[key].type === "int") ? "integer" :
+                            "string",
+                title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key
+            };
+
+            if (fieldConf[key] !== undefined && fieldConf[key].type === "date") {
+                properties[key].format = "date-time";
+            }
+
+        });
+
+        return properties;
+    },
+
     edit: function (e, k, qstore) {
 
-        var me = this;
-
-        markers = [];
-
-        /**
-         *
-         */
         let React = require('react');
 
-        /**
-         *
-         */
         let ReactDOM = require('react-dom');
 
-        let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+        let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
             fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
-            properties = {};
+            properties;
 
-        console.log(e);
+        markers = [];
 
         cloud.get().map.closePopup();
 
@@ -84,8 +100,16 @@ module.exports = {
             me.stopEdit(e);
         });
 
-        $(".slide-right .close").on("click", function () {
-            me.stopEdit(e);
+        $(".slide-right .close").unbind("click.edit").bind("click.edit", function (e) {
+
+            if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                me.stopEdit(e);
+                sqlQuery.reset(qstore);
+                $(".slide-right .close").unbind("click.edit");
+
+            } else {
+                return false;
+            }
         });
 
         switch (e.feature.geometry.type) {
@@ -105,7 +129,9 @@ module.exports = {
 
                 sqlQuery.reset();
 
-                markers[0].enableEdit(qstore);
+                markers[0].enableEdit();
+                sqlQuery.reset(qstore);
+
 
                 break;
 
@@ -125,7 +151,6 @@ module.exports = {
                         }
                     ).addTo(cloud.get().map);
 
-
                     markers[i].enableEdit();
 
                 });
@@ -142,34 +167,15 @@ module.exports = {
 
         delete e.feature.properties._vidi_content;
         delete e.feature.properties._id;
-        //delete e.feature.properties.gid;
 
         Object.keys(e.feature.properties).map(function (key, index) {
-
             // Set NULL values to undefined, so because NULL is a type
             if (e.feature.properties[key] === null) {
                 e.feature.properties[key] = undefined;
             }
-
-            properties[key] = {
-                type:
-                    (fieldConf[key] !== undefined && fieldConf[key].type === "string") ? "string" :
-                        (fieldConf[key] !== undefined && fieldConf[key].type === "int") ? "integer" :
-                            "string",
-                title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key
-            };
-
-            if (fieldConf[key] !== undefined && fieldConf[key].type === "date") {
-                properties[key].format = "date-time";
-            }
         });
 
-        const schema = {
-            //title: "Todo",
-            type: "object",
-            //required: ["title"],
-            properties: properties
-        };
+        properties = this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column);
 
         const onSubmit = function (formData) {
 
@@ -197,7 +203,6 @@ module.exports = {
                     break;
             }
 
-
             Object.keys(e.feature.properties).map(function (key, index) {
                 GeoJSON.properties[key] = formData.formData[key];
                 if (GeoJSON.properties[key] === undefined) {
@@ -221,6 +226,8 @@ module.exports = {
                 data: JSON.stringify(featureCollection),
                 success: function (response) {
                     var l = cloud.get().getLayersByName(schemaQualifiedName);
+                    me.stopEdit(e);
+                    sqlQuery.reset(qstore);
                     l.redraw();
                 },
                 error: function (response) {
@@ -229,6 +236,12 @@ module.exports = {
             });
         };
 
+        const schema = {
+            //title: "Todo",
+            type: "object",
+            //required: ["title"],
+            properties: properties
+        };
 
         $("#info-modal.slide-right").animate({
             right: "0"
@@ -241,7 +254,7 @@ module.exports = {
                           onSubmit={onSubmit}
                     />
                 </div>
-            ), document.getElementById("info-modal-body-wrapper"));
+            ), document.getElementById("info-modal-body"));
 
         });
     },
@@ -251,8 +264,7 @@ module.exports = {
             metaDataKeys = meta.getMetaDataKeys(),
             GeoJSON = e.toGeoJSON(),
             gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
-        console.log(metaDataKeys[schemaQualifiedName].pkey)
-        console.log(GeoJSON);
+
         $.ajax({
             url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/" + gid,
             type: "DELETE",
@@ -270,109 +282,111 @@ module.exports = {
         });
     },
 
-    add: function (k) {
+    add: function (k, qstore) {
+
+        let React = require('react');
+
+        let ReactDOM = require('react-dom');
+
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
+            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
             type = metaDataKeys[schemaQualifiedName].type,
-            editor;
+            editor, properties;
 
+        $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
+
+            e.stopPropagation();
+
+            if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                cloud.get().map.editTools.stopDrawing();
+                editor.disableEdit();
+                cloud.get().map.removeLayer(editor);
+            } else {
+                return false;
+            }
+
+        });
+
+        properties = this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column);
+
+        const onSubmit = function (formData) {
+
+            let featureCollection, geoJson = editor.toGeoJSON();
+
+            if (type.substring(0, 5) === "MULTI") {
+                geoJson = multiply([geoJson]);
+            }
+
+            Object.keys(formData.formData).map(function (key, index) {
+                geoJson.properties[key] = formData.formData[key];
+                if (geoJson.properties[key] === undefined) {
+                    geoJson.properties[key] = null;
+                }
+            });
+
+            featureCollection = {
+                "type": "FeatureCollection",
+                "features": [
+                    geoJson
+                ]
+            };
+
+            $.ajax({
+                url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
+                type: "POST",
+                dataType: 'json',
+                contentType: 'application/json',
+                scriptCharset: "utf-8",
+                data: JSON.stringify(featureCollection),
+                success: function (response) {
+                    let l = cloud.get().getLayersByName(schemaQualifiedName);
+                    l.redraw();
+                    cloud.get().map.removeLayer(editor);
+                    jquery.snackbar({
+                        id: "snackbar-conflict",
+                        content: "Entity  stedfæstet",
+                        htmlAllowed: true,
+                        timeout: 5000
+                    });
+                },
+                error: function (response) {
+                    alert(response.responseText);
+                }
+            });
+        };
+
+        const schema = {
+            type: "object",
+            properties: properties
+        };
+
+        $("#info-modal.slide-right").animate({
+            right: "0"
+        }, 200, function () {
+
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("info-modal-body"));
+
+        });
+
+        if (type === "POLYGON" || type === "MULTIPOLYGON") {
 
             editor = cloud.get().map.editTools.startPolygon();
 
+        } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
 
+            editor = cloud.get().map.editTools.startPolyline();
+        }
+        else if (type === "POINT" || type === "MULTIPOINT") {
 
-        var action = LeafletToolbar.ToolbarAction.extend({
-            initialize: function (map, myAction) {
-                this.map = cloud.get().map;
-                this.myAction = myAction;
-                LeafletToolbar.ToolbarAction.prototype.initialize.call(this);
-            },
-            addHooks: function () {
-                // this.myAction.disable();
-            }
-        });
-
-        var cancel = action.extend({
-            options: {
-                toolbarIcon: {
-                    html: '<i class="fa fa-times"></i>',
-                    tooltip: 'Cancel'
-                }
-            },
-            addHooks: function () {
-                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
-                    cloud.get().map.editTools.stopDrawing();
-                    editor.disableEdit();
-                    cloud.get().map.removeLayer(editor);
-                } else {
-                    return;
-                }
-                this.myAction.disable();
-                action.prototype.addHooks.call(this);
-            }
-        });
-
-        var save = action.extend({
-
-            options: {
-                toolbarIcon: {
-                    className: 'fa fa-floppy-o'
-                }
-            },
-
-            addHooks: function () {
-
-                // Save feature
-                var json = editor.toGeoJSON();
-
-                console.log(json);
-                json.properties = store[id].geoJSON.features[0].properties;
-
-                $.ajax({
-                    url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
-                    type: "POST",
-                    dataType: 'json',
-                    contentType: 'application/json',
-                    scriptCharset: "utf-8",
-                    success: function (response) {
-                        sqlQuery.reset(qstore);
-                        let l = cloud.get().getLayersByName(schemaQualifiedName);
-                        l.redraw();
-                    },
-                    error: function (response) {
-                        alert(response.responseText);
-                    }
-                });
-
-                me.commitDrawing(store[id], json, type, token, client).then(
-                    function (e) {
-                        cloud.get().map.removeLayer(editor);
-                        cloud.get().map.removeLayer(toolBar);
-                        jquery.snackbar({
-                            id: "snackbar-conflict",
-                            content: "Entity '" + json.properties.SeqNoType + "' (" + json.properties.SeqNo + ") stedfæstet",
-                            htmlAllowed: true,
-                            timeout: 5000
-                        });
-
-                    },
-                    function (e) {
-                        // Error
-                        alert(e.responseText);
-                    });
-            }
-
-        });
-
-
-        var toolBar = new LeafletToolbar.Control({
-            position: 'topright',
-            actions: [cancel, save]
-        });
-
-        toolBar.addTo(cloud.get().map);
-
-
+            editor = cloud.get().map.editTools.startMarker();
+        }
 
     },
 

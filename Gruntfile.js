@@ -35,24 +35,24 @@ module.exports = function (grunt) {
                 files: {
                     'public/css/build/all.min.css': [
                         // Leaflet
-                        'public/bower_components/leaflet/dist/leaflet.css',
-                        'public/bower_components/leaflet-draw/dist/leaflet.draw.css',
-                        'public/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.css',
-                        'public/bower_components/leaflet.toolbar/dist/leaflet.toolbar.css',
-                        'public/bower_components/leaflet-measure-path/leaflet-measure-path.css',
-                        'public/bower_components/leaflet-measure/dist/leaflet-measure.css',
-                        'public/bower_components/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css',
-                        'public/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css',
-                        'public/bower_components/q-cluster/css/q-cluster.css',
+                        'public/js/lib/leaflet/leaflet.css',
+                        'public/js/lib/leaflet-draw/leaflet.draw.css',
+                        'public/js/lib/leaflet.locatecontrol/L.Control.Locate.css',
+                        'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
+                        'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
+                        'public/js/lib/leaflet-measure/leaflet-measure.css',
+                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
+                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
+                        'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
-                        'public/bower_components/bootstrap/dist/css/bootstrap.css',
-                        'public/bower_components/snackbarjs/dist/snackbar.css',
-                        'public/bower_components/bower_components/bootstrap-material-design/dist/css/ripples.css',
-                        'public/bower_components/bootstrap-material-design/dist/css/ripples.css',
-                        'public/bower_components/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
-                        'public/bower_components/bootstrap-table/dist/bootstrap-table.css',
-                        'public/bower_components/bootstrap-material-design/dist/css/bootstrap-material-design.css',
-                        'public/bower_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css',
+                        'public/js/lib/bootstrap/css/bootstrap.css',
+                        'public/js/lib/snackbarjs/snackbar.min.css',
+                        'public/js/lib/bootstrap-material-design/ripples.css',
+                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
+                        'public/js/lib/bootstrap-select/bootstrap-select.css',
+                        'public/js/lib/bootstrap-table/bootstrap-table.css',
+                        'public/js/lib/bootstrap-material-design/bootstrap-material-design.css',
+                        'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
                         'public/css/styles.css'
@@ -119,7 +119,16 @@ module.exports = function (grunt) {
                     keepAlive: watch,
                     //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
-
+                }
+            },
+            watch: {
+                files: {
+                    'public/js/bundle.js': ['browser/index.js']
+                },
+                options: {
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify'],
+                    watch: true,
+                    keepAlive: true
                 }
             }
         },
@@ -141,45 +150,45 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/js/build/all.min.js': [
-                        'public/bower_components/leaflet/dist/leaflet-src.js',
-                        'public/bower_components/leaflet-draw/dist/leaflet.draw-src.js',
-                        'public/bower_components/Path.Drag.js/src/Path.Drag.js',
-                        'public/bower_components/leaflet.editable/src/Leaflet.Editable.js',
-                        'public/bower_components/leaflet.locatecontrol/dist/L.Control.Locate.min.js',
-                        'public/bower_components/leaflet.toolbar/dist/leaflet.toolbar-src.js',
-                        'public/bower_components/leaflet-measure-path/leaflet-measure-path.js',
-                        'public/bower_components/leaflet-measure/dist/leaflet-measure.js',
-                        'public/bower_components/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js',
-                        'public/bower_components/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
-                        'public/bower_components/leaflet-plugins/layer/tile/Yandex.js',
-                        'public/bower_components/leaflet-plugins/layer/tile/Bing.js',
-                        'public/bower_components/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-                        'public/bower_components/q-cluster/src/utils.js',
-                        'public/bower_components/q-cluster/src/clustering.js',
+                        'public/js/lib/leaflet/leaflet-src.js',
+                        'public/js/lib/leaflet-draw/leaflet.draw.js',
+                        'public/js/lib/Path.Drag.js/src/Path.Drag.js',
+                        'public/js/lib/leaflet.editable/Leaflet.Editable.js',
+                        'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
+                        'public/js/lib/leaflet.toolbar/leaflet.toolbar.js',
+                        'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
+                        'public/js/lib/leaflet-measure/leaflet-measure.min.js',
+                        'public/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
+                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
+                        'public/js/lib/leaflet-plugins/Yandex.js',
+                        'public/js/lib/leaflet-plugins/Bing.js',
+                        'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+                        'public/js/lib/q-cluster/src/utils.js',
+                        'public/js/lib/q-cluster/src/clustering.js',
                         'public/js/point-clusterer.js',
-                        'public/bower_components/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js',
+                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
-                        'public/bower_components/es5-shim/es5-shim.js',
-                        'public/bower_components/jquery/dist/jquery.js',
-                        'public/bower_components/jrespond/js/jRespond.js',
-                        'public/bower_components/mustache.js/mustache.js',
-                        'public/bower_components/underscore/underscore.js',
-                        //'public/bower_components/raphael/raphael.js',
-                        'public/bower_components/backbone/backbone.js',
-                        'public/bower_components/momentjs/min/moment-with-locales.js',
-                        'public/bower_components/d3/d3.js',
+                        'public/js/lib/es5-shim/es5-shim.js',
+                        'public/js/lib/jquery/jquery.js',
+                        'public/js/lib/jrespond/jRespond.js',
+                        'public/js/lib/mustache.js/mustache.js',
+                        'public/js/lib/underscore/underscore.js',
+                        //'public/js/lib/raphael/raphael.min.js',
+                        'public/js/lib/backbone/backbone.js',
+                        'public/js/lib/momentjs/moment-with-locales.js',
+                        'public/js/lib/d3/d3.js',
 
-                        'public/bower_components/typeahead.js/dist/typeahead.jquery.js',
-                        'public/bower_components/bootstrap-table/dist/bootstrap-table.js',
-                        'public/bower_components/bootstrap-table/dist/bootstrap-table-locale-all.js',
-                        'public/bower_components/bootstrap-table/dist/extensions/export/bootstrap-table-export.js',
-                        'public/bower_components/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.js',
-                        'public/bower_components/tableExport.jquery.plugin/tableExport.js',
-                        'public/bower_components/bootstrap-material-design/dist/js/ripples.js',
-                        'public/bower_components/bootstrap-material-design/dist/js/material.js',
-                        'public/bower_components/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
-                        'public/bower_components/bootstrap-select/js/bootstrap-select.js',
-                        'public/bower_components/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
+                        'public/js/lib/typeahead.js/typeahead.jquery.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
+                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
+                        'public/js/lib/bootstrap-material-design/ripples.js',
+                        'public/js/lib/bootstrap-material-design/material.js',
+                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js',
+                        'public/js/lib/bootstrap-select/bootstrap-select.js',
+                        'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'public/js/proj4js-combined.js',
                         'public/js/jasny-bootstrap.js',
@@ -213,7 +222,7 @@ module.exports = function (grunt) {
         },
         shell: {
             default: {
-                command: 'cp ./config/_variables.less ./public/bower_components/bootstrap-material-design/less'
+                command: 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design'
             }
         },
         cacheBust: {
@@ -231,6 +240,18 @@ module.exports = function (grunt) {
                     src: ['index.html']
                 }]
             }
+        },
+        bower: {
+            install: {
+                //just run 'grunt bower:install' and you'll see files from your Bower packages in lib directory
+                options: {
+                    targetDir: "./public/js/lib",
+                    copy: true,
+                    install: true,
+                    cleanTargetDir: false,
+                    verbose: true,
+                }
+            }
         }
     });
     grunt.loadNpmTasks('grunt-templates-hogan');
@@ -244,7 +265,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-cache-bust');
     grunt.loadNpmTasks('grunt-env');
     grunt.loadNpmTasks('grunt-contrib-handlebars');
-
+    grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-bower-task');
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
