@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = true;
+const LOG = false;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
@@ -241,6 +241,13 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
+/*
+    let it = event.request.headers.keys();
+    console.log(Array.from(it));
+
+    console.log(event.request);
+    return fetch(event.request);
+*/
     if (LOG) console.log(`Reacting to fetch event ${event.request.url}`, event.request);
     let cleanedRequestURL = normalizeTheURL(event.request.url);
     return caches.match(cleanedRequestURL).then((response) => {
@@ -288,7 +295,6 @@ self.addEventListener('fetch', (event) => {
                 requestToMake = new Request(cleanedRequestURL);
             }
 
-            console.log(event.request);
             if (requestHasToBeCached) {
                 if (LOG) console.log(`Caching ${requestToMake.url}`);
                 return caches.open(CACHE_NAME).then((cache) => {

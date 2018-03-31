@@ -290,7 +290,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
+            fieldConf = metaDataKeys[schemaQualifiedName].fieldconf ? JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf) : metaDataKeys[schemaQualifiedName].fields,
             type = metaDataKeys[schemaQualifiedName].type,
             editor, properties;
 
