@@ -31,49 +31,48 @@ let urlsToCache = [
     'https://maps.google.com/maps-api-v3/api/js/31/8b/controls.js',
     'https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png',
     'https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png',
-    '/js/lib/momentjs/min/moment-with-locales.js',
-    '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js',
+    '/js/lib/momentjs/moment-with-locales.js',
+    '/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
     '/js/lib/es5-shim/es5-shim.js',
     '/js/lib/d3/d3.js',
-    '/js/lib/bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js',
-    '/js/lib/tableExport.jquery.plugin/tableExport.min.js',
-    '/js/lib/bootstrap-table/dist/extensions/filter-control/bootstrap-table-filter-control.min.js',
-    '/js/lib/bootstrap-table/dist/bootstrap-table-locale-all.min.js',
-    '/js/lib/bootstrap-table/dist/bootstrap-table.js',
-    '/js/lib/typeahead.js/dist/typeahead.jquery.min.js',
+    '/js/lib/bootstrap-table/bootstrap-table.js',
+    '/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
+    '/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
+    '/js/lib/bootstrap-table/bootstrap-table-locale-all.min.js',
+    '/js/lib/tableExport.jquery.plugin/tableExport.js',
+    '/js/lib/typeahead.js/typeahead.jquery.js',
     '/js/lib/backbone/backbone.js',
     '/js/lib/raphael/raphael.min.js',
     '/js/lib/underscore/underscore.js',
     '/js/lib/jrespond/js/jRespond.js',
     '/js/lib/mustache.js/mustache.js',
-    '/js/lib/jquery/dist/jquery.min.js',
+    '/js/lib/jquery/dist/jquery.js',
     '/js/lib/q-cluster/src/clustering.js',
     '/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+    '/js/lib/leaflet-plugins/layer/tile/Bing.js',
+    '/js/lib/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js',
+    '/js/lib/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
+    '/js/lib/leaflet-plugins/layer/tile/Yandex.js',
     '/js/lib/q-cluster/src/utils.js',
-    '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.js',
     '/js/lib/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
     '/js/lib/bootstrap-select/js/bootstrap-select.js',
-    '/js/lib/leaflet-plugins/layer/tile/Bing.js',
     '/js/lib/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css',
     '/js/lib/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
-    '/js/lib/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js',
     '/js/lib/bootstrap-material-design/dist/js/material.js',
     '/js/lib/hogan.js/web/builds/3.0.2/hogan-3.0.2.js',
     '/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
-    '/js/lib/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
-    '/js/lib/leaflet-plugins/layer/tile/Yandex.js',
     '/js/lib/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
     '/js/lib/bootstrap-table/dist/bootstrap-table.css',
     '/js/lib/bootstrap-material-design/dist/js/ripples.js',
     '/js/lib/bootstrap-select/dist/css/bootstrap-select.css',
-    '/js/lib/leaflet-measure/dist/leaflet-measure.css',
-    '/js/lib/leaflet-measure-path/leaflet-measure-path.css',
-    '/js/lib/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css',
     '/js/lib/bootstrap/dist/css/bootstrap.css',
     '/js/lib/bootstrap-material-design/dist/css/ripples.css',
     '/js/lib/q-cluster/css/q-cluster.css',
     '/js/lib/snackbarjs/dist/snackbar.css',
-    '/js/lib/Leaflet.awesome-markers/dist/leaflet.awesome-markers.css',
+    '/js/lib/leaflet-measure/dist/leaflet-measure.css',
+    '/js/lib/leaflet-measure-path/leaflet-measure-path.css',
+    '/js/lib/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css',
+    '/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
     '/js/lib/leaflet-draw/dist/leaflet.draw.css',
     '/js/lib/leaflet.locatecontrol/dist/L.Control.Locate.css',
     '/js/lib/leaflet.toolbar/dist/leaflet.toolbar.css',
@@ -149,12 +148,12 @@ const urlSubstitution = [{
     requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
     local: '/js/google-maps/stats.js'
 }, {
+    requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
+    local: '/js/gc2/gc2table.js'
+}, {
     regExp: true,
     requested: '/[\\w]*/[\\w]*/[\\w]*/#',
     local: '/index.html'
-}, {
-    requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
-    local: '/js/gc2/gc2table.js'
 }];
 
 let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
@@ -243,27 +242,48 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
     if (LOG) console.log(`Reacting to fetch event ${event.request.url}`, event.request);
     let cleanedRequestURL = normalizeTheURL(event.request.url);
-    return caches.match(cleanedRequestURL).then((response) => {
-        if (response) {
-            // The request was found in cache
-            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
 
-            // API requests should not use the probably stalled cached copy if it is possible
-            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                if (LOG) console.log('API call detected', cleanedRequestURL);
+    /**
+     * Wrapper for API calls - the API responses should be as relevant as possible.
+     * 
+     * @param {*} event Fetch event
+     * @param {*} cachedResponse Already cached response
+     * 
+     * @return {Promise}
+     */
+    const queryAPI = (event, cachedResponse) => {
+        if (LOG) console.log('API call detected', cleanedRequestURL);
+        let result = new Promise((resolve, reject) => {
+            return caches.open(CACHE_NAME).then((cache) => {
                 return fetch(event.request).then(apiResponse => {
                     if (LOG) console.log('API request was performed despite the existence of cached request');
                     // Caching the API request in case if app will go offline aftewards
                     return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                        throw new Error('Response was put into the cache');
-                        return apiResponse;
+                        resolve(apiResponse);
                     }).catch(error => {
                         throw new Error('Unable to put the response in cache');
+                        reject();
                     });
                 }).catch(error => {
-                    if (LOG) console.log('API request failed, using the cached request');
-                    return response;
+                    if (LOG) console.log('API request failed, using the cached response');
+                    resolve(cachedResponse);
                 });
+            }).catch(error => {
+                throw new Error('Unable to open cache');
+                reject();
+            });
+        });
+
+        return result;
+    };
+
+    event.respondWith(caches.match(cleanedRequestURL).then((response) => {
+        if (response) {
+            // The request was found in cache
+            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+            // API requests should not use the probably stalled cached copy if it is possible
+            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                return queryAPI(event, response);
             } else {
                 if (LOG) console.log(`In cache ${event.request.url}`);
                 return response;
@@ -271,30 +291,36 @@ self.addEventListener('fetch', (event) => {
         } else {
             // The request was not found in cache
 
-            // Checking if the request is eligible for caching 
-            let requestHasToBeCached = true;
-            if (forceIgnoredExtensionsCaching === false) {
-                ignoredExtensionsRegExps.map(item => {
-                    if (item.test(cleanedRequestURL)) {
-                        requestHasToBeCached = false;
-                        return false;
-                    }
-                });
-            }
+            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+            // API requests should not use the probably stalled cached copy if it is possible
+            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                return queryAPI(event, response);
+            } else {
+                // Checking if the request is eligible for caching 
+                let requestHasToBeCached = true;
+                if (forceIgnoredExtensionsCaching === false) {
+                    ignoredExtensionsRegExps.map(item => {
+                        if (item.test(cleanedRequestURL)) {
+                            requestHasToBeCached = false;
+                            return false;
+                        }
+                    });
+                }
 
-            let requestToMake = new Request(cleanedRequestURL);
-            if (requestHasToBeCached) {
-                if (LOG) console.log(`Caching ${requestToMake.url}`);
-                return caches.open(CACHE_NAME).then((cache) => {
-                    return fetch(requestToMake).then(response => {
-                        return cache.put(requestToMake.url, response.clone()).then(() => {
-                            return response;
+                let requestToMake = new Request(cleanedRequestURL);
+                if (requestHasToBeCached) {
+                    if (LOG) console.log(`Caching ${requestToMake.url}`);
+                    return caches.open(CACHE_NAME).then((cache) => {
+                        return fetch(requestToMake).then(response => {
+                            return cache.put(requestToMake.url, response.clone()).then(() => {
+                                return response;
+                            });
                         });
                     });
-                });
-            } else {
-                return fetch(requestToMake);
+                } else {
+                    return fetch(requestToMake);
+                }
             }
         }
-    });
+    }));
 });
