@@ -95,7 +95,6 @@ var layers;
 var infoClick;
 var setting;
 var state;
-var editor;
 
 var isStarted = false;
 
@@ -121,7 +120,6 @@ module.exports = module.exports = {
         reset = o.reset;
         setting = o.setting;
         state = o.state;
-        editor = o.editor;
         return this;
     },
     init: function (str) {
@@ -379,17 +377,7 @@ module.exports = module.exports = {
 
             });
 
-            $(document).arrive('.gc2-add-feature', function () {
-                $(this).on("click", function (e) {
-                    var t = ($(this).data('gc2-key'));
 
-                    console.log(t)
-
-                    editor.add(t);
-                    e.stopPropagation();
-                });
-
-            });
 
             $(document).arrive('[data-scale-ul]', function () {
                 $(this).on("click", function (e) {
