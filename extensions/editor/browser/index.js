@@ -541,13 +541,17 @@ module.exports = {
             cloud.get().map.editTools.stopDrawing();
             editor.disableEdit();
             cloud.get().map.removeLayer(editor);
-        } catch (e) {}
+        } catch (e) {
+        }
 
-        markers.map(function (v, i) {
-            markers[i].disableEdit();
-            cloud.get().map.removeLayer(markers[i]);
+        try {
+            markers.map(function (v, i) {
+                markers[i].disableEdit();
+                cloud.get().map.removeLayer(markers[i]);
 
-        });
+            });
+        } catch (e) {
+        }
     }
 };
 
