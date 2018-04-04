@@ -211,7 +211,10 @@ module.exports = function (grunt) {
         },
         shell: {
             default: {
-                command: 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design'
+                command: [
+                    'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
+                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
+                    ].join('&&')
             }
         },
         cacheBust: {

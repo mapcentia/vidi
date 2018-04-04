@@ -135,12 +135,6 @@ module.exports = module.exports = {
             $("#tail").fadeOut(100);
         });
 
-        cloud.get().map.on("editable:disable", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
-        });
-
         cloud.get().on("dragstart", function () {
             $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
             $(".fade-then-dragging").css("pointer-events", "none");

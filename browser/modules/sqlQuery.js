@@ -90,9 +90,10 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
-
-        editor = extensions.editor.index;
-
+        try {
+            editor = extensions.editor.index;
+        } catch (e) {
+        }
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
@@ -111,18 +112,18 @@ module.exports = {
          * @type {string}
          */
         var defaultTemplate =
-            '<div class="cartodb-popup-content">' +
-            '<button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button>' +
-            '   {{#_vidi_content.fields}}' +
-            '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
-            '       {{#value}}' +
-            '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
-            '       {{/value}}' +
-            '       {{^value}}' +
-            '           <p class="empty">null</p>' +
-            '       {{/value}}' +
-            '   {{/_vidi_content.fields}}' +
-            '</div>';
+            `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="display: none"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
+                  {{#_vidi_content.fields}}
+                     {{#title}}<h4>{{title}}</h4>{{/title}}
+                     {{#value}}
+                       <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                     {{/value}}
+                     {{^value}}
+                       <p class="empty">null</p>
+                     {{/value}}
+                  {{/_vidi_content.fields}}
+                </div>`;
 
         $.each(layers, function (index, value) {
             if (layers[0] === "") {
