@@ -37,13 +37,13 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
                         'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
-                        'public/js/lib/bootstrap/css/bootstrap.css',
+                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/ripples.css',
+                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
                         'public/js/lib/bootstrap-select/bootstrap-select.css',
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
-                        'public/js/lib/bootstrap-material-design/bootstrap-material-design.css',
+                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
