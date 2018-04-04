@@ -113,7 +113,7 @@ module.exports = {
          */
         var defaultTemplate =
             `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="display: none"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
+                <div class="form-group gc2-edit-tools" style="visibility: hidden"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
                   {{#_vidi_content.fields}}
                      {{#title}}<h4>{{title}}</h4>{{/title}}
                      {{#value}}

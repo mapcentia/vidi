@@ -99,7 +99,7 @@ module.exports = {
 
         // Listen to arrival of edit-tools
         $(document).arrive('.gc2-edit-tools', function () {
-            $(this).css("display", "inline")
+            $(this).css("visibility", "visible")
 
         });
 
