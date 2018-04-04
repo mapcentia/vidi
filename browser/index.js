@@ -113,7 +113,6 @@ window.Vidi = function () {
         utils: require('./modules/utils'),
         //loading: require('./modules/loading'),
         reset: require('./modules/reset'),
-        editor: require('./modules/editor'),
         extensions: {},
         search: {}
     };
@@ -146,7 +145,6 @@ window.Vidi = function () {
     modules.utils.set(modules);
     //modules.loading.set(modules);
     modules.reset.set(modules);
-    modules.editor.set(modules);
 
     // Return the init module to be called in index.html
     // =================================================

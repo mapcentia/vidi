@@ -68,7 +68,7 @@ var cm = [];
 
 var styles = [];
 
-var  store = [];
+var store = [];
 
 var automatic = true;
 
@@ -160,7 +160,8 @@ module.exports = {
     },
 
     createLayerTree: function () {
-        var base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr;
+
+        let base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr;
 
         metaData = meta.getMetaData();
 
@@ -180,10 +181,11 @@ module.exports = {
                 $("#vectorlayers").append('<div class="panel panel-default" id="vectorlayer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#vectorlayers" href="#vectorcollapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="vectorgroup-' + base64name + '" role="tabpanel"></ul></div>');
                 $("#vectorgroup-" + base64name).append('<div id="vectorcollapse' + base64name + '" class="accordion-body collapse"></div>');
 
-                for (var u = 0; u < metaData.data.length; ++u) {
+                for (let u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
 
-                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title, id;
+                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
+                            id;
 
                         try {
                             icon = "<img style='width: 20px;vertical-align: text-bottom;' src='https://webkort.syddjurs.dk/images/custom/map-icons/" + JSON.parse(metaData.data[u].meta).oplev_ikon + "'> ";
@@ -228,12 +230,9 @@ module.exports = {
                                         }
                                         layers.decrementCountLoading(me.id);
                                         backboneEvents.get().trigger("doneLoading:layers", me.id);
-                                        onLoad[me.id](l);
                                     },
 
-                                    onEachFeature: onEachFeature[id],
-
-                                    pointToLayer: pointToLayer[id]
+                                    onEachFeature: onEachFeature[id]
                                 });
                             }
                         }
@@ -244,7 +243,7 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><i data-vector="1" data-gc2-key="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i></span><span style="display: none"><i class="refresh-vector-layer fa fa-list' +
                                 '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
                             l.push({});
 
@@ -262,15 +261,17 @@ module.exports = {
 
                 // Open the first panel
                 // ====================
-                //$("#vectorlayers div:first").find("a").trigger("click");
+                $("#vectorlayers div:first").find("a").trigger("click");
             }
         }
         backboneEvents.get().trigger("ready:vectorLayers");
     },
 
+    // Turn layers on/off
+    // ==================
     switchLayer: function (id, visible) {
 
-         var el = $('*[data-gc2-id-vec="' + id + '"]');
+        let el = $('*[data-gc2-id-vec="' + id + '"]');
 
         if (visible) {
 
@@ -281,6 +282,7 @@ module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(id));
 
             }
+
             catch (e) {
 
                 console.info(id + " added to the map.");
@@ -289,6 +291,7 @@ module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(id));
 
             }
+
             finally {
 
                 store[id].load();
@@ -296,7 +299,6 @@ module.exports = {
                 layers.incrementCountLoading(id);
                 backboneEvents.get().trigger("startLoading:layers", id);
             }
-
 
         } else {
 
@@ -342,5 +344,13 @@ module.exports = {
 
     setAutomatic: function (b) {
         automatic = b;
+    },
+
+    getStores: function () {
+        return store;
+    },
+
+    load: function (id) {
+        store[id].load();
     }
 };

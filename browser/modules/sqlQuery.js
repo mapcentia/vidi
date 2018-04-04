@@ -55,6 +55,8 @@ const Form = JSONSchemaForm.default;
  */
 var BACKEND = require('../../config/config.js').backend;
 
+var extensions;
+
 
 /**
  *
@@ -71,8 +73,8 @@ module.exports = {
         meta = o.meta;
         advancedInfo = o.advancedInfo;
         backboneEvents = o.backboneEvents;
-        editor = o.editor;
         _layers = o.layers;
+        extensions = o.extensions;
         return this;
     },
 
@@ -87,6 +89,10 @@ module.exports = {
     init: function (qstore, wkt, proj, callBack, num) {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
+
+
+        editor = extensions.editor.index;
+
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
