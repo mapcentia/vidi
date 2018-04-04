@@ -147,6 +147,9 @@ module.exports = {
 
         "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
 
-        "Languages": "Languages"
+        "Languages": "Languages",
+
+        "Finish": "Finish",
+        "Finish drawing": "Finish drawing"
     }
 };

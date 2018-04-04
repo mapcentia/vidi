@@ -206,7 +206,8 @@ module.exports = {
                             fillOpacity: 0
                         }
                     },
-                    marker: true
+                    marker: true,
+                    circlemarker: false
                 },
                 edit: {
                     featureGroup: drawnItems,

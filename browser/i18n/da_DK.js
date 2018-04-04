@@ -150,6 +150,9 @@ module.exports = {
 
         "Not a valid scale. Must be over 200.": "Ikke en gyldig målestok. Den skal være over 200.",
 
-        "Languages": "Sprog"
+        "Languages": "Sprog",
+
+        "Finish": "Afslut",
+        "Finish drawing": "Afslut tegning"
     }
 };
