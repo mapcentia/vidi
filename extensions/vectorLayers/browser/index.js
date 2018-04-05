@@ -43,6 +43,12 @@ var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+//let APIBridge = require('./api-bridge');
+
+/**
+ *
  * @type {array}
  */
 var urlVars = urlparser.urlVars;
@@ -72,6 +78,8 @@ var store = [];
 
 var automatic = true;
 
+var apiBridgeInstance = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -89,6 +97,8 @@ module.exports = {
     },
 
     init: function () {
+        // @todo Move all API requests to the APIBridge
+        //apiBridgeInstance = new APIBridge();
 
         var me = this;
 
