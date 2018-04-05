@@ -208,9 +208,8 @@ module.exports = {
 
         let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
+            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
             properties, oldGeom = jQuery.extend(true, {}, e.feature.geometry);
-
         me.stopEdit();
 
         markers = []; // Holds marker(s) for Point and MultiPoints layers
@@ -390,7 +389,7 @@ module.exports = {
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
+            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
             type = metaDataKeys[schemaQualifiedName].type;
 
         me.stopEdit();

@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = true;
+const LOG = false;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
