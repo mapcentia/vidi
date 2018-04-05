@@ -103,13 +103,12 @@ module.exports = {
             // Turn info click off
             backboneEvents.get().trigger("off:infoClick");
 
-           // L.drawLocal = require('./drawLocales/draw.js');
+            L.drawLocal = require('./drawLocales/draw.js');
 
             drawControl = new L.Control.Draw({
                 position: 'topright',
                 draw: {
                     polygon: {
-                        title: 'Draw a polygon!',
                         allowIntersection: true,
                         shapeOptions: {
                             color: '#ff0000'
@@ -131,7 +130,10 @@ module.exports = {
                         shapeOptions: {
                             color: '#ff0000'
                         }
-                    }
+                    },
+                    marker: true,
+                    circlemarker: false
+
                 },
                 edit: {
                     featureGroup: drawnItems

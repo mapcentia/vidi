@@ -45,13 +45,13 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
                         'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
-                        'public/js/lib/bootstrap/css/bootstrap.css',
+                        'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
-                        'public/js/lib/bootstrap-material-design/ripples.css',
+                        'public/js/lib/bootstrap-material-design/dist/css/ripples.css',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
                         'public/js/lib/bootstrap-select/bootstrap-select.css',
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
-                        'public/js/lib/bootstrap-material-design/bootstrap-material-design.css',
+                        'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
@@ -169,6 +169,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
                         'public/js/lib/es5-shim/es5-shim.js',
+                        'public/js/lib/es6-shim/es6-shim.js',
                         'public/js/lib/jquery/jquery.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
@@ -184,8 +185,8 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
                         'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
                         'public/js/lib/tableExport.jquery.plugin/tableExport.js',
-                        'public/js/lib/bootstrap-material-design/ripples.js',
-                        'public/js/lib/bootstrap-material-design/material.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
+                        'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js',
                         'public/js/lib/bootstrap-select/bootstrap-select.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
@@ -222,7 +223,10 @@ module.exports = function (grunt) {
         },
         shell: {
             default: {
-                command: 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design'
+                command: [
+                    'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
+                    'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
+                    ].join('&&')
             }
         },
         cacheBust: {

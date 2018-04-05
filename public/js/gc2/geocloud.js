@@ -627,7 +627,7 @@ geocloud = (function () {
                 if (usingSubDomains) {
                     config.subdomains = defaults.subdomains;
                 }
-                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png?{ran}", config);
+                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png", config);
                 l.id = layer;
                 if (defaults.loadEvent) {
                     l.on("load", defaults.loadEvent);

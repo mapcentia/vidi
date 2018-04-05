@@ -135,12 +135,6 @@ module.exports = module.exports = {
             $("#tail").fadeOut(100);
         });
 
-        cloud.get().map.on("editable:disable", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
-        });
-
         cloud.get().on("dragstart", function () {
             $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
             $(".fade-then-dragging").css("pointer-events", "none");
@@ -389,7 +383,7 @@ module.exports = module.exports = {
                     html =Mustache.render(html, metaDataKeys[t]);
 
                     $("#info-modal.slide-right").animate({right: "0"}, 200);
-                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
+                    $("#info-modal .modal-title").html(title || name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
                     legend.init([t], "#info-modal-legend");
                     e.stopPropagation();

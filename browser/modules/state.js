@@ -217,8 +217,8 @@ module.exports = {
                                         scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
 
                                     $("#container1").css("transform", "scale(" + scaleFactor + ")");
-                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
-                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
+                                    $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                    $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
                                     $("#scale").html("1 : " + response.data.scale);
                                     $("#title").html(decodeURIComponent(urlVars.t));
                                     parr = urlVars.c.split("#");
@@ -230,9 +230,7 @@ module.exports = {
                                     if (hashArr[0]) {
                                         setLayers()
                                     }
-
                                     cloud.get().map.removeLayer(g);
-
                                 }, 0)
                             }
                         });

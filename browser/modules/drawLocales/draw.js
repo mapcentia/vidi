@@ -33,6 +33,11 @@ module.exports = {
                     start: __('Click map to place marker.')
                 }
             },
+            circlemarker: {
+                tooltip: {
+                    start: 'Click map to place circle marker.'
+                }
+            },
             polygon: {
                 tooltip: {
                     start: __('Click to start drawing shape.'),

@@ -30,6 +30,8 @@ var markers;
 
 var vectorLayers;
 
+var editor;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -41,12 +43,20 @@ var urlparser = require('./../../../browser/modules/urlparser');
  */
 var db = urlparser.db;
 
+var isInit = false;
+
 
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
     set: function (o) {
         utils = o.utils;
         meta = o.meta;
@@ -56,8 +66,15 @@ module.exports = {
         vectorLayers = o.extensions.vectorLayers.index;
         return this;
     },
+
+    /**
+     *
+     */
     init: function () {
-        var me = this, metaDataKeys, metaData, i, styleFn, features;
+
+        let me = this, metaDataKeys, metaData, styleFn;
+
+        isInit = true;
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
@@ -73,6 +90,20 @@ module.exports = {
 
         });
 
+        // When editing is disabled, close the slide panel with attribute form
+        cloud.get().map.on("editable:disable", function () {
+            $("#info-modal").animate({
+                right: "-" + $("#myNavmenu").width() + "px"
+            }, 200)
+        });
+
+        // Listen to arrival of edit-tools
+        $(document).arrive('.gc2-edit-tools', function () {
+            $(this).css("visibility", "visible")
+
+        });
+
+        // Don't init layer tree automatic. Let this module activate it
         vectorLayers.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
@@ -132,6 +163,13 @@ module.exports = {
 
     },
 
+    /**
+     * Create the attribute form
+     * @param fieldConf
+     * @param pkey
+     * @param f_geometry_column
+     * @returns {{}}
+     */
     createFormObj: function (fieldConf, pkey, f_geometry_column) {
 
         let properties = {};
@@ -156,19 +194,24 @@ module.exports = {
         return properties;
     },
 
-    // Change existing feature
-    // =======================
+    /**
+     * Change existing feature
+     * @param e
+     * @param k
+     * @param qstore
+     */
     edit: function (e, k, qstore) {
 
         let React = require('react');
 
         let ReactDOM = require('react-dom');
 
-        let me = this, editor, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+        let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
             fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
             properties, oldGeom = jQuery.extend(true, {}, e.feature.geometry);
 
+        me.stopEdit();
 
         markers = []; // Holds marker(s) for Point and MultiPoints layers
 
@@ -178,7 +221,7 @@ module.exports = {
             //me.stopEdit(e);
         });
 
-        // Bind cancel of editing to close of slide panel with attribut form
+        // Bind cancel of editing to close of slide panel with attribute form
         $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
 
             if (window.confirm("Are you sure? Changes will not be saved!")) {
@@ -268,8 +311,10 @@ module.exports = {
 
         });
 
-        // Commit to GC2
-        // =============
+        /**
+         * Commit to GC2
+         * @param formData
+         */
         const onSubmit = function (formData) {
 
             let GeoJSON = e.toGeoJSON(), featureCollection;
@@ -331,30 +376,30 @@ module.exports = {
                     alert(response.responseText);
                 }
             });
-
         };
-
-
     },
 
-    // Add new features to layer
-    // =========================
+    /**
+     * Add new features to layer
+     * @param k
+     * @param qstore
+     * @param doNotRemoveEditor
+     */
     add: function (k, qstore, doNotRemoveEditor) {
 
-        let React = require('react'), ReactDOM = require('react-dom'),
+        let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = metaDataKeys[schemaQualifiedName].fieldconf ? JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf) : metaDataKeys[schemaQualifiedName].fields,
-            type = metaDataKeys[schemaQualifiedName].type,
-            editor, properties;
+            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
+            type = metaDataKeys[schemaQualifiedName].type;
+
+        me.stopEdit();
 
         // Bind cancel of editing to close of slide panel with attribute form
         $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
             e.stopPropagation();
             if (window.confirm("Are you sure? Changes will not be saved!")) {
-                cloud.get().map.editTools.stopDrawing();
-                editor.disableEdit();
-                cloud.get().map.removeLayer(editor);
+                me.stopEdit();
             } else {
                 return false;
             }
@@ -389,8 +434,10 @@ module.exports = {
             editor = cloud.get().map.editTools.startMarker();
         }
 
-        // Commit to GC2
-        // =============
+        /**
+         * Commit to GC2
+         * @param formData
+         */
         const onSubmit = function (formData) {
 
             let featureCollection, geoJson = editor.toGeoJSON();
@@ -433,8 +480,7 @@ module.exports = {
                     if (!doNotRemoveEditor) {
                         cloud.get().map.removeLayer(editor);
                     } else {
-                        cloud.get().map.editTools.stopDrawing();
-                        editor.disableEdit();
+                        me.stopEdit();
                     }
 
                     jquery.snackbar({
@@ -451,8 +497,12 @@ module.exports = {
         };
     },
 
-    // Delete feature from layer
-    // =========================
+    /**
+     * Delete feature from layer
+     * @param e
+     * @param k
+     * @param qstore
+     */
     delete: function (e, k, qstore) {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
@@ -481,19 +531,27 @@ module.exports = {
         });
     },
 
-    // Stop editing and clean up
-    // =========================
-    stopEdit: function (e) {
-        try {
-            e.disableEdit();
-        } catch (e) {
-            console.error(e.message)
-        }
-        markers.map(function (v, i) {
-            markers[i].disableEdit();
-            cloud.get().map.removeLayer(markers[i]);
+    /**
+     * Stop editing and clean up
+     * @param e
+     */
+    stopEdit: function () {
 
-        });
+        try {
+            cloud.get().map.editTools.stopDrawing();
+            editor.disableEdit();
+            cloud.get().map.removeLayer(editor);
+        } catch (e) {
+        }
+
+        try {
+            markers.map(function (v, i) {
+                markers[i].disableEdit();
+                cloud.get().map.removeLayer(markers[i]);
+
+            });
+        } catch (e) {
+        }
     }
 };
 
