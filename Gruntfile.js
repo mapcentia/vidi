@@ -95,7 +95,7 @@ module.exports = function (grunt) {
         handlebars: {
             publish: {
                 options: {
-                    namespace: function(filename) {
+                    namespace: function (filename) {
                         var names = filename.replace(/modules\/(.*)(\/\w+\.hbs)/, '$1');
                         return names.split('/').join('.');
                     },
@@ -267,7 +267,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
-
+    grunt.loadNpmTasks('grunt-watchify');
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
 };
