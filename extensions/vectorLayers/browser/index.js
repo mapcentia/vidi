@@ -230,9 +230,15 @@ module.exports = {
                                         }
                                         layers.decrementCountLoading(me.id);
                                         backboneEvents.get().trigger("doneLoading:layers", me.id);
+                                        if (onLoad[me.id] !== undefined) {
+                                            onLoad[me.id](l);
+                                        }
                                     },
 
-                                    onEachFeature: onEachFeature[id]
+                                    onEachFeature: onEachFeature[id],
+
+                                    pointToLayer: pointToLayer[id]
+
                                 });
                             }
                         }

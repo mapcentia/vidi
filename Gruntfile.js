@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
                         'public/js/lib/leaflet-measure/leaflet-measure.css',
-                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
+                        'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
                         'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
