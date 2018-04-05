@@ -366,13 +366,9 @@ module.exports = {
                 scriptCharset: "utf-8",
                 data: JSON.stringify(featureCollection),
                 success: function (response) {
+                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
-                    try {
-                        let l = cloud.get().getLayersByName(schemaQualifiedName);
-                        l.redraw();
-                    } catch (e) {
-                    }
                 },
                 error: function (response) {
                     alert(response.responseText);
@@ -472,18 +468,8 @@ module.exports = {
                 data: JSON.stringify(featureCollection),
                 success: function (response) {
                     sqlQuery.reset(qstore);
-
-                    try {
-                        let l = cloud.get().getLayersByName(schemaQualifiedName);
-                        l.redraw();
-                    } catch (e) {
-                    }
-
-                    if (!doNotRemoveEditor) {
-                        cloud.get().map.removeLayer(editor);
-                    } else {
-                        me.stopEdit();
-                    }
+                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                    me.stopEdit(l);
 
                     jquery.snackbar({
                         id: "snackbar-conflict",
@@ -506,6 +492,7 @@ module.exports = {
      * @param qstore
      */
     delete: function (e, k, qstore) {
+        let me = this;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
@@ -521,11 +508,8 @@ module.exports = {
             scriptCharset: "utf-8",
             success: function (response) {
                 sqlQuery.reset(qstore);
-                try {
-                    let l = cloud.get().getLayersByName(schemaQualifiedName);
-                    l.redraw();
-                } catch (e) {
-                }
+                cloud.get().map.closePopup();
+                me.reloadLayer("v:" + schemaQualifiedName);
             },
             error: function (response) {
                 alert(response.responseText);
@@ -534,17 +518,25 @@ module.exports = {
     },
 
     /**
+     * Reloading provided layer.
+     * 
+     * @param {String} layerId Layer identifier
+     */
+    reloadLayer: (layerId) => {
+        vectorLayers.switchLayer(layerId, false);
+        vectorLayers.switchLayer(layerId, true);
+    },
+
+    /**
      * Stop editing and clean up
      * @param e
      */
     stopEdit: function (e) {
+        let me = this;
+
         if (e) {
-            console.log('e:', e);
-            if (e.editEnabled()) {
-                e.disableEdit();
-                vectorLayers.switchLayer(e.id, false);
-                vectorLayers.switchLayer(e.id, true);
-            }
+            console.log(e);
+            me.reloadLayer(e.id);
         }
 
         // @todo Remove try
