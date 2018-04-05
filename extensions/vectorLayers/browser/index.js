@@ -301,9 +301,11 @@ module.exports = {
             }
 
         } else {
+            if (store[id]) {
+                store[id].abort();
+                store[id].reset();
+            }
 
-            store[id].abort();
-            store[id].reset();
             cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
             el.prop('checked', false);
 

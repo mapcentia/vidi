@@ -209,8 +209,11 @@ module.exports = {
         let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
             fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
-            properties, oldGeom = jQuery.extend(true, {}, e.feature.geometry);
+            properties;
         me.stopEdit();
+
+        e.id = "v:" + metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
+        e.initialFeatureJSON = e.toGeoJSON();
 
         markers = []; // Holds marker(s) for Point and MultiPoints layers
 
@@ -534,22 +537,31 @@ module.exports = {
      * Stop editing and clean up
      * @param e
      */
-    stopEdit: function () {
+    stopEdit: function (e) {
+        if (e) {
+            console.log('e:', e);
+            if (e.editEnabled()) {
+                e.disableEdit();
+                vectorLayers.switchLayer(e.id, false);
+                vectorLayers.switchLayer(e.id, true);
+            }
+        }
 
+        // @todo Remove try
         try {
             cloud.get().map.editTools.stopDrawing();
-            editor.disableEdit();
             cloud.get().map.removeLayer(editor);
         } catch (e) {
+            console.log(e);
         }
 
         try {
             markers.map(function (v, i) {
                 markers[i].disableEdit();
                 cloud.get().map.removeLayer(markers[i]);
-
             });
         } catch (e) {
+            console.log(e);
         }
     }
 };
