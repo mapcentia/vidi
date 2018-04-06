@@ -56,7 +56,7 @@ geocloud = (function () {
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
-        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com/en/geocloud/geocloud.htm'>MapCentia GC2</a> " : window.mapAttribution,
+        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
             4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
             76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
@@ -166,7 +166,7 @@ geocloud = (function () {
                         style: this.defaults.styleMap,
                         pointToLayer: this.defaults.pointToLayer,
                         onEachFeature: this.defaults.onEachFeature,
-                        clickable: this.defaults.clickable
+                        interactive: this.defaults.clickable
                     });
                     this.layer.id = this.defaults.name;
                     break;
@@ -247,7 +247,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true": encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
+                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -620,14 +620,14 @@ geocloud = (function () {
                     maxZoom: defaults.maxZoom,
                     maxNativeZoom: defaults.maxNativeZoom,
                     tileSize: 256,
-                    ran: function() {
+                    ran: function () {
                         return Math.random();
                     }
                 };
                 if (usingSubDomains) {
                     config.subdomains = defaults.subdomains;
                 }
-                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png", config);
+                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png" + (defaults.isBaseLayer ? "" : "?{ran}"), config);
                 l.id = layer;
                 if (defaults.loadEvent) {
                     l.on("load", defaults.loadEvent);
