@@ -9,9 +9,17 @@
  *
  * @type {*|exports|module.exports}
  */
+let APIBridgeSingletone = require('./api-bridge');
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var utils;
 
 var backboneEvents;
+
+var apiBridgeInstance = false;
 
 var meta;
 var cloud;
@@ -71,6 +79,7 @@ module.exports = {
      *
      */
     init: function () {
+        apiBridgeInstance = APIBridgeSingletone();
 
         let me = this, metaDataKeys, metaData, styleFn;
 
@@ -459,28 +468,27 @@ module.exports = {
                 ]
             };
 
-            $.ajax({
-                url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
-                type: "POST",
-                dataType: 'json',
-                contentType: 'application/json',
-                scriptCharset: "utf-8",
-                data: JSON.stringify(featureCollection),
-                success: function (response) {
-                    sqlQuery.reset(qstore);
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(l);
+            /**
+             * Feature saving callback
+             * 
+             * @param {Object} result Saving result
+             */
+            const featureIsSaved = (result) => {
+console.log('featureIsSaved', schemaQualifiedName);
+                sqlQuery.reset(qstore);
+                let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                me.stopEdit(l);
 
-                    jquery.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
-                },
-                error: function (response) {
-                    alert(response.responseText);
-                }
+                jquery.snackbar({
+                    id: "snackbar-conflict",
+                    content: "Entity  stedfæstet",
+                    htmlAllowed: true,
+                    timeout: 5000
+                });
+            };
+
+            apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
+                throw new Error(error);
             });
         };
     },
@@ -533,27 +541,16 @@ module.exports = {
      */
     stopEdit: function (e) {
         let me = this;
+        cloud.get().map.editTools.stopDrawing();
 
-        if (e) {
-            console.log(e);
-            me.reloadLayer(e.id);
-        }
+        if (e) me.reloadLayer(e.id);
+        if (editor) cloud.get().map.removeLayer(editor);
 
-        // @todo Remove try
-        try {
-            cloud.get().map.editTools.stopDrawing();
-            cloud.get().map.removeLayer(editor);
-        } catch (e) {
-            console.log(e);
-        }
-
-        try {
+        if (markers) {
             markers.map(function (v, i) {
                 markers[i].disableEdit();
                 cloud.get().map.removeLayer(markers[i]);
             });
-        } catch (e) {
-            console.log(e);
         }
     }
 };
