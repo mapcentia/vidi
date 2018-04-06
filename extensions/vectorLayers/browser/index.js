@@ -161,7 +161,7 @@ module.exports = {
 
     createLayerTree: function () {
 
-        let base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr;
+        let base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr, styleFn;
 
         metaData = meta.getMetaData();
 
@@ -183,6 +183,15 @@ module.exports = {
 
                 for (let u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
+
+                        // if (JSON.parse(metaData.data[u].meta) !== null && typeof JSON.parse(metaData.data[u].meta).vectorstyle !== "undefined") {
+                        //     try {
+                        //         styleFn = eval("(" + JSON.parse(metaData.data[u].meta).vectorstyle + ")");
+                        //     } catch (e) {
+                        //         styleFn = function () {
+                        //         };
+                        //     }
+                        // }
 
                         var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
                             id;
@@ -211,7 +220,7 @@ module.exports = {
                                     host: "",
                                     db: db,
                                     uri: "/api/sql",
-                                    clickable: true,
+                                    clickable: false,
                                     id: id,
                                     name: id,
                                     lifetime: 0,
