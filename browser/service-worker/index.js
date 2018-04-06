@@ -204,8 +204,6 @@ const normalizeTheURL = (URL) => {
 self.addEventListener('install', event => {
     if (LOG) console.log('Service worker is being installed, caching specified resources');
 
-
-    
     extensionsIgnoredForCaching.map(item => {
         let localRegExp = new RegExp(`.${item}$`, 'i');
         ignoredExtensionsRegExps.push(localRegExp);
@@ -267,28 +265,32 @@ self.addEventListener('fetch', (event) => {
      */
     const queryAPI = (event, cachedResponse) => {
         if (LOG) console.log('API call detected', cleanedRequestURL);
-        let result = new Promise((resolve, reject) => {
-            return caches.open(CACHE_NAME).then((cache) => {
-                return fetch(event.request).then(apiResponse => {
-                    if (LOG) console.log('API request was performed despite the existence of cached request');
-                    // Caching the API request in case if app will go offline aftewards
-                    return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                        resolve(apiResponse);
+        if (cleanedRequestURL.indexOf('/api/feature') === -1) {
+            let result = new Promise((resolve, reject) => {
+                return caches.open(CACHE_NAME).then((cache) => {
+                    return fetch(event.request).then(apiResponse => {
+                        if (LOG) console.log('API request was performed despite the existence of cached request');
+                        // Caching the API request in case if app will go offline aftewards
+                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                            resolve(apiResponse);
+                        }).catch(error => {
+                            throw new Error('Unable to put the response in cache');
+                            reject();
+                        });
                     }).catch(error => {
-                        throw new Error('Unable to put the response in cache');
-                        reject();
+                        if (LOG) console.log('API request failed, using the cached response');
+                        resolve(cachedResponse);
                     });
                 }).catch(error => {
-                    if (LOG) console.log('API request failed, using the cached response');
-                    resolve(cachedResponse);
+                    throw new Error('Unable to open cache');
+                    reject();
                 });
-            }).catch(error => {
-                throw new Error('Unable to open cache');
-                reject();
             });
-        });
 
-        return result;
+            return result;
+        } else {
+            return fetch(event.request);
+        }
     };
 
     event.respondWith(caches.match(cleanedRequestURL).then((response) => {
