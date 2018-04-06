@@ -21,16 +21,17 @@ let forceIgnoredExtensionsCaching = false;
 
 let urlsToCache = [
     '/index.html',
+    '/js/lib/leaflet/images/marker-icon.png',
+    '/js/lib/leaflet/images/marker-shadow.png',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
     'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',
     'https://maps.google.com/maps/api/js?v=3&libraries=places&key=AIzaSyCjTXR2Tmg_Ok7u4S5dl6_Rgy3br_BQfPQ',
-    'https://maps.google.com/maps-api-v3/api/js/31/8b/places_impl.js',
-    'https://maps.google.com/maps-api-v3/api/js/31/8b/common.js',
-    'https://maps.google.com/maps-api-v3/api/js/31/8b/util.js',
-    'https://maps.google.com/maps-api-v3/api/js/31/8b/controls.js',
-    'https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3.png',
-    'https://maps.gstatic.com/mapfiles/api-3/images/autocomplete-icons.png',
+    '/js/google-maps/common.js',
+    '/js/google-maps/util.js',
+    '/js/google-maps/controls.js',
+    '/js/google-maps/places_impl.js',
+    '/js/google-maps/stats.js',
     '/js/lib/momentjs/moment-with-locales.js',
     '/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
     '/js/lib/es5-shim/es5-shim.js',
@@ -44,48 +45,48 @@ let urlsToCache = [
     '/js/lib/backbone/backbone.js',
     '/js/lib/raphael/raphael.min.js',
     '/js/lib/underscore/underscore.js',
-    '/js/lib/jrespond/js/jRespond.js',
+    '/js/lib/jrespond/jRespond.js',
     '/js/lib/mustache.js/mustache.js',
-    '/js/lib/jquery/dist/jquery.js',
+    '/js/lib/jquery/jquery.js',
     '/js/lib/q-cluster/src/clustering.js',
     '/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-    '/js/lib/leaflet-plugins/layer/tile/Bing.js',
-    '/js/lib/Leaflet.utfgrid/dist/leaflet.utfgrid-src.js',
-    '/js/lib/Leaflet.extra-markers/dist/js/leaflet.extra-markers.min.js',
-    '/js/lib/leaflet-plugins/layer/tile/Yandex.js',
+    '/js/lib/leaflet-plugins/Bing.js',
+    '/js/lib/leaflet-plugins/Yandex.js',
+    '/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
+    '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
+    '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
     '/js/lib/q-cluster/src/utils.js',
-    '/js/lib/bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js',
-    '/js/lib/bootstrap-select/js/bootstrap-select.js',
-    '/js/lib/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.css',
-    '/js/lib/bootstrap-material-datetimepicker/js/bootstrap-material-datetimepicker.js',
+    '/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+    '/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
+    '/js/lib/bootstrap-select/bootstrap-select.css',
+    '/js/lib/bootstrap-select/bootstrap-select.js',
+    '/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js',
+    '/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css',
     '/js/lib/bootstrap-material-design/dist/js/material.js',
-    '/js/lib/hogan.js/web/builds/3.0.2/hogan-3.0.2.js',
     '/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
-    '/js/lib/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.css',
-    '/js/lib/bootstrap-table/dist/bootstrap-table.css',
-    '/js/lib/bootstrap-material-design/dist/js/ripples.js',
-    '/js/lib/bootstrap-select/dist/css/bootstrap-select.css',
-    '/js/lib/bootstrap/dist/css/bootstrap.css',
     '/js/lib/bootstrap-material-design/dist/css/ripples.css',
+    '/js/lib/bootstrap-material-design/dist/js/ripples.js',
+    '/js/lib/hogan.js/hogan-3.0.2.js',
+    '/js/lib/bootstrap-table/bootstrap-table.css',
+    '/js/lib/bootstrap/dist/css/bootstrap.min.css',
     '/js/lib/q-cluster/css/q-cluster.css',
-    '/js/lib/snackbarjs/dist/snackbar.css',
-    '/js/lib/leaflet-measure/dist/leaflet-measure.css',
+    '/js/lib/snackbarjs/snackbar.min.css',
+    '/js/lib/leaflet-measure/leaflet-measure.css',
     '/js/lib/leaflet-measure-path/leaflet-measure-path.css',
-    '/js/lib/Leaflet.extra-markers/dist/css/leaflet.extra-markers.min.css',
     '/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
-    '/js/lib/leaflet-draw/dist/leaflet.draw.css',
-    '/js/lib/leaflet.locatecontrol/dist/L.Control.Locate.css',
-    '/js/lib/leaflet.toolbar/dist/leaflet.toolbar.css',
-    '/js/lib/leaflet/dist/leaflet.css',
-    '/js/lib/leaflet-measure/dist/leaflet-measure.js',
+    '/js/lib/leaflet-draw/leaflet.draw.css',
+    '/js/lib/leaflet.locatecontrol/L.Control.Locate.css',
+    '/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
+    '/js/lib/leaflet.toolbar/leaflet.toolbar.css',
+    '/js/lib/leaflet.toolbar/leaflet.toolbar.js',
+    '/js/lib/leaflet/leaflet.css',
+    '/js/lib/leaflet-measure/leaflet-measure.js',
     '/js/lib/leaflet-measure-path/leaflet-measure-path.js',
-    '/js/lib/leaflet.editable/src/Leaflet.Editable.js',
-    '/js/lib/leaflet.locatecontrol/dist/L.Control.Locate.min.js',
-    '/js/lib/leaflet.toolbar/dist/leaflet.toolbar-src.js',
-    '/js/lib/leaflet-draw/dist/leaflet.draw-src.js',
+    '/js/lib/leaflet.editable/Leaflet.Editable.js',
+    '/js/lib/leaflet-draw/leaflet.draw-src.js',
     '/js/lib/Path.Drag.js/src/Path.Drag.js',
-    '/js/lib/leaflet/dist/leaflet-src.js',
-    '/js/lib/leaflet-measure/dist/images/rulers.png',
+    '/js/lib/leaflet/leaflet-src.js',
+    '/js/lib/leaflet-measure/images/rulers.png',
     '/js/lib/localforage/localforage.js',
     '/js/templates.js',
     '/js/vidi.js',
@@ -154,6 +155,14 @@ const urlSubstitution = [{
     regExp: true,
     requested: '/[\\w]*/[\\w]*/[\\w]*/#',
     local: '/index.html'
+}, {
+    regExp: true,
+    requested: '/js/lib/leaflet/images/marker-icon.png',
+    local: '/js/lib/leaflet/images/marker-icon.png'
+}, {
+    regExp: true,
+    requested: '/js/lib/leaflet/images/marker-shadow.png',
+    local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
 let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
@@ -192,9 +201,11 @@ const normalizeTheURL = (URL) => {
 /**
  * "install" event handler
  */
-self.addEventListener('install', function(event) {
-    if (LOG) console.log('Service worker was installed, caching specified resources');
+self.addEventListener('install', event => {
+    if (LOG) console.log('Service worker is being installed, caching specified resources');
 
+
+    
     extensionsIgnoredForCaching.map(item => {
         let localRegExp = new RegExp(`.${item}$`, 'i');
         ignoredExtensionsRegExps.push(localRegExp);
@@ -211,7 +222,10 @@ self.addEventListener('install', function(event) {
         }).catch(error => {
             console.log(error);
         });
+    }).catch(error => {
+        console.log(error);
     }));
+    
 });
 
 /**
