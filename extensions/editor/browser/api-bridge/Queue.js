@@ -1,5 +1,7 @@
 'use strict';
 
+const QUEUE_PROCESSING_INTERVAL = 5000;
+
 /**
  * FIFO queue abstraction. Queue items are stored
  * in browser storage and do not depend on page reload
@@ -10,14 +12,37 @@ class Queue {
             throw new Error('No processor for queue was specified');
         }
 
+        let _self = this;
         this._locked = false;
         this._queue = [];
         this._processor = processor;
-        /*
-        this._interval = setInterval(() => {
-            console.log('Queue interval');
-        }, 1000);
-        */
+
+        const processQueue = () => {
+            console.log('Queue interval, total items in queue:', _self._queue.length, _self._locked);
+
+            const scheduleNextQueueProcessingRun = () => {
+                setTimeout(() => {
+                    processQueue();
+                }, QUEUE_PROCESSING_INTERVAL);
+            };
+
+            if (_self._queue.length > 0 && _self._locked === false) {
+                _self._locked = true;
+                console.warn('Queue is not empty, trying to push changes');
+
+                _self._dispatch().then(() => {
+                    _self._locked = false;
+                    scheduleNextQueueProcessingRun();
+                }).catch(error => {
+                    _self._locked = false;
+                    scheduleNextQueueProcessingRun();
+                });
+            } else {
+                scheduleNextQueueProcessingRun();
+            }
+        };
+
+        processQueue();
     }
 
     /**
@@ -51,7 +76,7 @@ class Queue {
 
         let result = new Promise((resolve, reject) => {
             const processOldestItem = () => {
-                
+
                 console.log('Queue: processOldest');
 
                 new Promise((localResolve, localReject) => {
@@ -103,7 +128,7 @@ class Queue {
                 then older elements have to be processed first.
             */
             if (_self._queue.length === 1) {
-                this._locked = true;
+                _self._locked = true;
                 _self._dispatch().then(() => {
                     _self._locked = false;
 
