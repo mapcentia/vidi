@@ -152,6 +152,9 @@ const urlSubstitution = [{
     requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
     local: '/js/gc2/gc2table.js'
 }, {
+    requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
+    local: '/js/nr-1071.min.js'
+}, {
     regExp: true,
     requested: '/[\\w]*/[\\w]*/[\\w]*/#',
     local: '/index.html'
