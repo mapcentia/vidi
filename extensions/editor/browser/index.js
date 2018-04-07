@@ -80,13 +80,7 @@ module.exports = {
      */
     init: function () {
         let me = this, metaDataKeys, metaData, styleFn;
-        apiBridgeInstance = APIBridgeSingletone((statistic) => {
-            console.log('Queue state statistics', statistic);
-
-
-        });
-
-        
+        apiBridgeInstance = APIBridgeSingletone();
 
         isInit = true;
 

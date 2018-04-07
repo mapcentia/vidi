@@ -9,6 +9,12 @@
  *
  * @type {*|exports|module.exports}
  */
+let APIBridgeSingletone = require('../../editor/browser/api-bridge');
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var cloud;
 
 /**
@@ -72,6 +78,8 @@ var store = [];
 
 var automatic = true;
 
+var apiBridgeInstance = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -90,6 +98,10 @@ module.exports = {
 
     init: function () {
         var me = this;
+
+        apiBridgeInstance = APIBridgeSingletone((statistic) => {
+            console.log('Queue state statistics', statistic);
+        });
 
         utils.createMainTab("vectorlayers", "Vektor lag");
 
@@ -242,8 +254,29 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><i data-vector="1" data-gc2-key="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i></span><span style="display: none"><i class="refresh-vector-layer fa fa-list' +
-                                '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
+                            let buttonStyle = `padding: 5px; background-color: #FF6666; color: black; border-radius: 10px;`;
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item">\
+                                <div class="layer-sub-order-header">' + subOrderHeader + '</div>\
+                                    <div class="checkbox">\
+                                        <label class="overlay-label" style="width: calc(100% - 50px);">\
+                                            <input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '\
+                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-plus"></i> 1\
+                                            </button>\
+                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-edit"></i> 2\
+                                            </button>\
+                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-trash"></i> 3\
+                                            </button>\
+                                        </label>\
+                                        <i data-vector="1" data-gc2-key="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i>\
+                                        </span>\
+                                        <span style="display: none">\
+                                            <i class="refresh-vector-layer fa fa-list' + '" style="display: inline-block; float: none; cursor: pointer;"></i>\
+                                        </span>\
+                                    </div>\
+                                </li>');
                             l.push({});
 
                         }

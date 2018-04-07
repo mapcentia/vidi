@@ -86,7 +86,16 @@ class APIBridge {
         let _self = this;
         this._validateFeatureData(feature, db, meta);
 
-        return _self._queue.pushAndProcess({ feature, db, meta });
+        return _self._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
+    }
+
+    /**
+     * Sets queue status listener
+     * 
+     * @param {Function} listener Listening function
+     */
+    setOnQueueUpdate(onUpdate) {
+        this._queue.setOnUpdate(onUpdate);
     }
 
     /**
@@ -127,9 +136,13 @@ class APIBridge {
 
 };
 
-const APIBridgeSingletone = () => {
+const APIBridgeSingletone = (onQueueUpdate) => {
     if (!singletoneInstance) {
         singletoneInstance = new APIBridge();
+    }
+
+    if (onQueueUpdate) {
+        singletoneInstance.setOnQueueUpdate(onQueueUpdate);
     }
 
     return singletoneInstance;
