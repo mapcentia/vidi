@@ -473,7 +473,6 @@ module.exports = {
              * @param {Object} result Saving result
              */
             const featureIsSaved = (result) => {
-console.log('featureIsSaved', schemaQualifiedName);
                 sqlQuery.reset(qstore);
                 let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                 me.stopEdit(l);

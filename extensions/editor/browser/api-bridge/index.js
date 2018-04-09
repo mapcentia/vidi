@@ -140,7 +140,7 @@ const APIBridgeSingletone = (onQueueUpdate) => {
     if (!singletoneInstance) {
         singletoneInstance = new APIBridge();
     }
-
+console.log(onQueueUpdate);
     if (onQueueUpdate) {
         singletoneInstance.setOnQueueUpdate(onQueueUpdate);
     }

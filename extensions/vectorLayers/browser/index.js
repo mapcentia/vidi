@@ -101,6 +101,28 @@ module.exports = {
 
         apiBridgeInstance = APIBridgeSingletone((statistic) => {
             console.log('Queue state statistics', statistic);
+
+            let actions = ['add', 'update', 'delete'];
+            $(`[data-gc2-layer-key]`).each((index, container) => {
+                actions.map(action => {
+                    $(container).find('.js-' + action).addClass('hidden');
+                    $(container).find('.js-' + action).find('.js-value').html('');
+                });
+            });
+
+            for (let key in statistic) {
+                let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
+                if (layerControlContainer.length === 1) {
+                    actions.map(action => {
+                        if (statistic[key][action.toUpperCase()] > 0) {
+                            $(layerControlContainer).find('.js-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-' + action).find('.js-value').html(statistic[key][action.toUpperCase()]);
+                        }
+                    });
+                } else {
+                    throw new Error('Unable to find corresponding layer control container');
+                }
+            }
         });
 
         utils.createMainTab("vectorlayers", "Vektor lag");
@@ -254,23 +276,26 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            let buttonStyle = `padding: 5px; background-color: #FF6666; color: black; border-radius: 10px;`;
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item">\
+                            let buttonStyle = `padding: 2px; background-color: #FF6666; color: black;
+                            border-radius: 4px; height: 22px; margin: 0px;`;
+
+                            let layerKey = metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column;
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item" data-gc2-layer-key="' + layerKey + '" >\
                                 <div class="layer-sub-order-header">' + subOrderHeader + '</div>\
                                     <div class="checkbox">\
                                         <label class="overlay-label" style="width: calc(100% - 50px);">\
                                             <input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '\
-                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
-                                                <i class="fa fa-plus"></i> 1\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-add" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-plus"></i> <span class="js-value"></span>\
                                             </button>\
-                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
-                                                <i class="fa fa-edit"></i> 2\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-update" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-edit"></i> <span class="js-value"></span>\
                                             </button>\
-                                            <button type="button" class="btn btn-sm btn-secondary" style="' + buttonStyle + '" disabled>\
-                                                <i class="fa fa-trash"></i> 3\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="' + buttonStyle + '" disabled>\
+                                                <i class="fa fa-trash"></i> <span class="js-value"></span>\
                                             </button>\
                                         </label>\
-                                        <i data-vector="1" data-gc2-key="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i>\
+                                        <i data-vector="1" data-gc2-key="' + layerKey + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i>\
                                         </span>\
                                         <span style="display: none">\
                                             <i class="refresh-vector-layer fa fa-list' + '" style="display: inline-block; float: none; cursor: pointer;"></i>\
