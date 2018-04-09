@@ -1,6 +1,7 @@
 'use strict';
 
 const QUEUE_PROCESSING_INTERVAL = 5000;
+const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
 const LOG = true;
 
@@ -29,6 +30,8 @@ class Queue {
         this._onUpdateListener = () => {};
         this._queue = [];
         this._processor = processor;
+
+        this._restoreState();
 
         const processQueue = () => {
             if (LOG) console.log('Queue interval, total items in queue:', _self._queue.length, _self._locked);
@@ -107,12 +110,35 @@ class Queue {
     /**
      * Restores previous queue state from browser storage
      */
-    restorePreviousState() {}
+    _restoreState() {
+        let _self = this;
+        localforage.getItem(QUEUE_STORE_NAME, (error, value) => {
+
+            if (LOG) console.log('Queue: getting state');
+
+            if (error) {
+                throw new Error('Error occured while accessing the store');
+            }
+
+            if (value) {
+                _self._queue = JSON.parse(value);
+            }
+        });
+    }
 
     /**
      * Saves current queue state to disk
      */
-    saveState() {}
+    _saveState() {
+        localforage.setItem(QUEUE_STORE_NAME, JSON.stringify(this._queue), (error) => {
+
+            if (LOG) console.log('Queue: saving state');
+
+            if (error) {
+                throw new Error('Error occured while storing the queue');
+            }
+        });
+    }
 
     /**
      * Delete items that are mutually exclusive, for
@@ -132,9 +158,9 @@ class Queue {
         if (LOG) console.log('Queue: _dispatch');
 
         let _self = this;
-        _self._onUpdateListener(_self._generateCurrentStatistics());
 
-        console.log('After _onUpdateListener()');
+        _self._onUpdateListener(_self._generateCurrentStatistics());
+        _self._saveState();
 
         let result = new Promise((resolve, reject) => {
             const processOldestItem = () => {
@@ -151,6 +177,7 @@ class Queue {
 
                         if (_self._queue.length === 0) {
                             _self._onUpdateListener(_self._generateCurrentStatistics());
+                            _self._saveState();
 
                             resolve();
                         } else {
@@ -162,6 +189,7 @@ class Queue {
                         if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
 
                         _self._onUpdateListener(_self._generateCurrentStatistics());
+                        _self._saveState();
 
                         localReject();
                     });

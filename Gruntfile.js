@@ -1,11 +1,3 @@
-/**
- * Watching for file changes during development.
- */
-let watch = false;
-if (process.argv.indexOf('--watch') !== -1) {
-    watch = true;
-}
-
 module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
@@ -111,13 +103,9 @@ module.exports = function (grunt) {
         browserify: {
             publish: {
                 files: {
-                    'public/js/bundle.js': ['browser/index.js'],
-                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+                    'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    watch: watch,
-                    keepAlive: watch,
-                    //transform: ['reactify', 'require-globify']
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
                 }
             },
