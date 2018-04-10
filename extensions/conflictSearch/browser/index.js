@@ -666,7 +666,7 @@ module.exports = module.exports = {
                         e.stopPropagation();
                     });
 
-                    backboneEvents.get().trigger("end:conflictSearch", {"projWktWithBuffer": projWktWithBuffer});
+                    backboneEvents.get().trigger("end:conflictSearch", {"projWktWithBuffer": projWktWithBuffer, "file": response.file});
 
                     L.geoJson(response.geom, {
                         "color": "#ff7800",

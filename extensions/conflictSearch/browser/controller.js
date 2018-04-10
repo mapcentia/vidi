@@ -42,6 +42,7 @@ module.exports = {
             $("#conflict-download-pdf").prop("download", response.key);
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
+            backboneEvents.get().trigger("end:conflictSearchPrint", response);
         });
 
         // When conflict search is done, enable the print button
