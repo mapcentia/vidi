@@ -156,8 +156,6 @@ module.exports = function (grunt) {
                         'public/js/point-clusterer.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
-                        'public/js/lib/es5-shim/es5-shim.js',
-                        'public/js/lib/es6-shim/es6-shim.js',
                         'public/js/lib/jquery/jquery.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
