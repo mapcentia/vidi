@@ -83,10 +83,9 @@ class APIBridge {
      * @param {Object} data    Meta data
      */
     addFeature(feature, db, meta) {
-        let _self = this;
         this._validateFeatureData(feature, db, meta);
 
-        return _self._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
+        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
     }
 
     /**
@@ -96,6 +95,28 @@ class APIBridge {
      */
     setOnQueueUpdate(onUpdate) {
         this._queue.setOnUpdate(onUpdate);
+    }
+
+    /**
+     * Transforms responses for geocloud
+     * Adds, updates or removes features according to corresponding
+     * requests made in the offline mode. Assumes that in offline mode
+     * the API response is cached through the service worker. 
+     */
+    transformResponseHandler(response, tableId) {
+        let currentQueueItems = this._queue.getItems();
+        console.log('### in handler', response, currentQueueItems, tableId);
+
+        // @todo Check if this is a valid table
+        currentQueueItems.map(item => {
+            if (item.type === Queue.ADD_REQUEST) {
+                response.features.push(Object.assign({}, item.feature));
+            }
+        });
+
+        console.log('### resulting response', response);
+
+        return response;
     }
 
     /**
@@ -140,7 +161,7 @@ const APIBridgeSingletone = (onQueueUpdate) => {
     if (!singletoneInstance) {
         singletoneInstance = new APIBridge();
     }
-console.log(onQueueUpdate);
+
     if (onQueueUpdate) {
         singletoneInstance.setOnQueueUpdate(onQueueUpdate);
     }

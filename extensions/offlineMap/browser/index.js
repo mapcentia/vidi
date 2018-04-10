@@ -510,7 +510,6 @@ module.exports = {
              * @returns {XML}
              */
             render() {
-                console.log('Rendering');
                 const showExtentButton = this.state.newAreaExtent ? (
                     <span>
                         <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Redefine")}</button>

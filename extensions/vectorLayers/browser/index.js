@@ -100,8 +100,6 @@ module.exports = {
         var me = this;
 
         apiBridgeInstance = APIBridgeSingletone((statistic) => {
-            console.log('Queue state statistics', statistic);
-
             let actions = ['add', 'update', 'delete'];
             $(`[data-gc2-layer-key]`).each((index, container) => {
                 actions.map(action => {
@@ -264,7 +262,7 @@ module.exports = {
                                         layers.decrementCountLoading(me.id);
                                         backboneEvents.get().trigger("doneLoading:layers", me.id);
                                     },
-
+                                    transformResponse: (response) => { return apiBridgeInstance.transformResponseHandler(response, id); },
                                     onEachFeature: onEachFeature[id]
                                 });
                             }

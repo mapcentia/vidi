@@ -3,7 +3,7 @@
 const QUEUE_PROCESSING_INTERVAL = 5000;
 const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
-const LOG = true;
+const LOG = false;
 
 // Types of queue items
 const ADD_REQUEST = 0;
@@ -59,6 +59,13 @@ class Queue {
         };
 
         processQueue();
+    }
+
+    /**
+     * Returns current items
+     */
+    getItems() {
+        return this._queue;
     }
 
     /**
@@ -218,6 +225,7 @@ class Queue {
 
         let _self = this;
         this.push(item);
+
         let result = new Promise((resolve, reject) => {
             /*
                 If there is only one element in the queue (the one that
@@ -225,7 +233,9 @@ class Queue {
                 result back. If there are more than one element in the queue,
                 then older elements have to be processed first.
             */
-            if (_self._queue.length === 1) {
+
+            // @todo Remove the false condition
+            if (_self._queue.length === 1 && false) {
                 _self._locked = true;
                 _self._dispatch().then(() => {
                     _self._locked = false;
@@ -255,8 +265,12 @@ class Queue {
 
     /**
      * Returns queue length
+     * 
+     * @return {Number}
      */
-    get length() {}
+    get length() {
+        return this._queue.length;
+    }
 
 };
 

@@ -114,6 +114,9 @@ geocloud = (function () {
         },
         onLoad: function () {
         },
+        transformResponse: (response) => {
+            return response;
+        },
         loading: function () {
         },
         index: "",
@@ -216,6 +219,7 @@ geocloud = (function () {
         this.db = this.defaults.db;
         this.host = this.defaults.host.replace("cdn.", "");
         this.onLoad = this.defaults.onLoad;
+        this.transformResponse = this.defaults.transformResponse;
         this.loading = this.defaults.loading;
         this.dataType = this.defaults.dataType;
         this.async = this.defaults.async;
@@ -257,6 +261,8 @@ geocloud = (function () {
                     }
                     if (response.success === true) {
                         if (response.features !== null) {
+                            response = me.transformResponse(response);
+
                             me.geoJSON = response;
                             switch (MAPLIB) {
                                 case "ol2":
