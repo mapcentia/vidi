@@ -278,6 +278,20 @@ module.exports = {
                                 l.addLayer(g);
                             }
 
+                            // If circle marker
+                            // ================
+                            if (m.type === "CircleMarker") {
+                                g = L.marker(m._latlng, m.style);
+                                g.feature = m.feature;
+
+                                // Add label
+                                if (m._vidi_marker_text) {
+                                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                                    }).openTooltip();
+                                }
+                                l.addLayer(g);
+                            }
+
                             // If marker
                             // =========
                             if (m.type === "Marker") {
@@ -286,8 +300,8 @@ module.exports = {
 
                                 // Add label
                                 if (m._vidi_marker_text) {
-                                    g.bindLabel(m._vidi_marker_text, {noHide: true}).on("click", function () {
-                                    }).showLabel();
+                                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                                    }).openTooltip();
                                 }
                                 l.addLayer(g);
 

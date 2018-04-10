@@ -79,6 +79,10 @@ module.exports = {
                 finish: {
                     title: __('Cancel editing, discards all changes.'),
                     text: __('Cancel')
+                },
+                clearAll: {
+                    title: __('Cancel editing, discards all changes.'),
+                    text: __('Cancel')
                 }
             },
             buttons: {
