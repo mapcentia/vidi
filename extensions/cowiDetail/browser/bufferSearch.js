@@ -559,6 +559,7 @@ var createStore = function (type) {
         db: db,
         uri: "/api/extension/cowiDetail/" + type,
         clickable: true,
+        base64: false,
         id: 1,
         onLoad: function () {
             var layerObj = this;
