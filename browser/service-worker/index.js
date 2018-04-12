@@ -23,6 +23,8 @@ let urlsToCache = [
     '/index.html',
     '/js/lib/leaflet/images/marker-icon.png',
     '/js/lib/leaflet/images/marker-shadow.png',
+    '/js/lib/Leaflet.awesome-markers/images/markers-soft.png',
+    '/js/lib/Leaflet.awesome-markers/images/markers-shadow.png',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
     'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',
@@ -40,6 +42,25 @@ let urlsToCache = [
     '/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
     '/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
     '/js/lib/bootstrap-table/bootstrap-table-locale-all.min.js',
+    '/js/lib/bootstrap-colorpicker/img/bootstrap-colorpicker/hue.png',
+    '/js/lib/bootstrap-colorpicker/img/bootstrap-colorpicker/alpha.png',
+    '/js/lib/bootstrap-colorpicker/img/bootstrap-colorpicker/saturation.png',
+    '/js/lib/leaflet-measure/images/check.png',
+    '/js/lib/leaflet-measure/images/cancel.png',
+    '/js/lib/leaflet-measure/images/start.png',
+    '/js/lib/leaflet/images/layers.png',
+    '/fonts/roboto-v18-latin-italic.ttf',
+    '/icons/MaterialIcons-Regular.ttf',
+    '/fonts/roboto-v18-latin-regular.ttf',
+    '/fonts/roboto-v18-latin-500.ttf',
+    '/fonts/roboto-v18-latin-italic.woff',
+    '/icons/MaterialIcons-Regular.woff',
+    '/fonts/roboto-v18-latin-regular.woff',
+    '/fonts/roboto-v18-latin-500.woff',
+    '/fonts/roboto-v18-latin-italic.woff2',
+    '/icons/MaterialIcons-Regular.woff2',
+    '/fonts/roboto-v18-latin-regular.woff2',
+    '/fonts/roboto-v18-latin-500.woff2',
     '/js/lib/tableExport.jquery.plugin/tableExport.js',
     '/js/lib/typeahead.js/typeahead.jquery.js',
     '/js/lib/backbone/backbone.js',
@@ -55,9 +76,15 @@ let urlsToCache = [
     '/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
     '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
     '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
+    '/js/lib/leaflet-measure/leaflet-measure.min.js',
+    '/js/lib/leaflet-draw/leaflet.draw.js',
+    '/js/lib/es6-shim/es6-shim.js',
     '/js/lib/q-cluster/src/utils.js',
+    '/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
     '/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
     '/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
+    '/css/jasny-bootstrap.min.css',
+    '/js/lib/bootstrap/dist/css/bootstrap.css',
     '/js/lib/bootstrap-select/bootstrap-select.css',
     '/js/lib/bootstrap-select/bootstrap-select.js',
     '/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js',
@@ -234,6 +261,8 @@ self.addEventListener('install', event => {
  */
 self.addEventListener('activate', event => {
     if (LOG) console.log('Service worker is ready to handle fetches now');
+
+    event.waitUntil(self.clients.claim());
 });
  
 

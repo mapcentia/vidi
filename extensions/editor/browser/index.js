@@ -365,22 +365,17 @@ module.exports = {
                 ]
             };
 
-            // Commit using XHR
-            $.ajax({
-                url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
-                type: "PUT",
-                dataType: 'json',
-                contentType: 'application/json',
-                scriptCharset: "utf-8",
-                data: JSON.stringify(featureCollection),
-                success: function (response) {
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(e);
-                    sqlQuery.reset(qstore);
-                },
-                error: function (response) {
-                    alert(response.responseText);
-                }
+            const featureIsUpdated = () => {
+                console.log('Editor: featureIsUpdated');
+
+                let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                me.stopEdit(e);
+                sqlQuery.reset(qstore);
+            };
+
+            apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
+                console.log('Editor: error occured while performing updateFeature()');
+                throw new Error(error);
             });
         };
     },
@@ -473,6 +468,8 @@ module.exports = {
              * @param {Object} result Saving result
              */
             const featureIsSaved = (result) => {
+                console.log('Editor: featureIsSaved');
+
                 sqlQuery.reset(qstore);
                 let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                 me.stopEdit(l);
@@ -486,6 +483,7 @@ module.exports = {
             };
 
             apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
+                console.log('Editor: error occured while performing addFeature()');
                 throw new Error(error);
             });
         };
@@ -505,21 +503,17 @@ module.exports = {
             GeoJSON = e.toGeoJSON(),
             gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
 
-        // Commit using XHR
-        $.ajax({
-            url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/" + gid,
-            type: "DELETE",
-            dataType: 'json',
-            contentType: 'application/json',
-            scriptCharset: "utf-8",
-            success: function (response) {
-                sqlQuery.reset(qstore);
-                cloud.get().map.closePopup();
-                me.reloadLayer("v:" + schemaQualifiedName);
-            },
-            error: function (response) {
-                alert(response.responseText);
-            }
+        const featureIsDeleted = () => {
+            console.log('Editor: featureIsDeleted');
+
+            sqlQuery.reset(qstore);
+            cloud.get().map.closePopup();
+            me.reloadLayer("v:" + schemaQualifiedName);
+        };
+
+        apiBridgeInstance.deleteFeature(gid, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
+            console.log('Editor: error occured while performing deleteFeature()');
+            throw new Error(error);
         });
     },
 

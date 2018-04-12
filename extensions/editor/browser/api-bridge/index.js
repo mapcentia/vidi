@@ -28,16 +28,38 @@ class APIBridge {
             let result = new Promise((success, error) => {
                 console.log('In queue processor, ', queueItem);
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
-                $.ajax({
-                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
-                    type: "POST",
+
+                let generalRequestParameters = {
                     dataType: 'json',
                     contentType: 'application/json',
                     scriptCharset: "utf-8",
-                    data: JSON.stringify(queueItem.feature),
                     success,
                     error
-                });
+                };
+
+                switch (queueItem.type) {
+                    case Queue.ADD_REQUEST:
+                        $.ajax(Object.assign(generalRequestParameters, {
+                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
+                            type: "POST",
+                            data: JSON.stringify(queueItem.feature),
+                        }));
+                        break;
+                    case Queue.UPDATE_REQUEST:
+                        $.ajax(Object.assign(generalRequestParameters, {
+                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
+                            type: "PUT",
+                            data: JSON.stringify(queueItem.feature),
+                        }));
+                        break;
+                    break;
+                    case Queue.DELETE_REQUEST:
+                        $.ajax(Object.assign(generalRequestParameters, {
+                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.properties.gid,
+                            type: "DELETE"
+                        }));
+                        break;
+                }
             });
 
             return result;
@@ -51,17 +73,17 @@ class APIBridge {
      * @param {String} db      Database name
      * @param {Object} data    Meta data
      */ 
-    _validateFeatureData(feature, db, meta) {
-        if (!feature || !feature.type || feature.type !== 'FeatureCollection') {
-            throw new Error('Invalid feature was provided');
-        }
-
+    _validateFeatureData(db, meta, feature = -1) {
         if (!db || !(db.length > 0)) {
             throw new Error('Invalid database was provided');
         }
 
         if (!meta || !meta.f_geometry_column || !meta.f_table_name || !meta.f_table_schema) {
             throw new Error('Invalid meta was provided');
+        }
+
+        if (feature !== -1 && (!feature || !feature.type || feature.type !== 'FeatureCollection')) {
+            throw new Error('Invalid feature was provided');
         }
     };
 
@@ -74,19 +96,6 @@ class APIBridge {
      * Returns features for specific vector layer
      */
     getFeaturesForLayer() {}
-
-    /**
-     * Adds feature to specific vector layer
-     * 
-     * @param {Object} feature Feature collection data
-     * @param {String} db      Database name
-     * @param {Object} data    Meta data
-     */
-    addFeature(feature, db, meta) {
-        this._validateFeatureData(feature, db, meta);
-
-        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
-    }
 
     /**
      * Sets queue status listener
@@ -105,30 +114,70 @@ class APIBridge {
      */
     transformResponseHandler(response, tableId) {
         let currentQueueItems = this._queue.getItems();
-        console.log('### in handler', response, currentQueueItems, tableId);
+        if (currentQueueItems.length > 0) {
+            console.log('### in handler', response.features.length, currentQueueItems, tableId);
+            
+            const copyArray = (items) => {
+                let result = [];
+                items.map(item => {
+                    result.push(Object.assign({} , item));
+                });
 
-        // @todo Check if this is a valid table
-        currentQueueItems.map(item => {
-            if (item.type === Queue.ADD_REQUEST) {
-                response.features.push(Object.assign({}, item.feature));
+                return result;
             }
-        });
 
-        console.log('### resulting response', response);
+            let features;
+            currentQueueItems.map(item => {
+                switch (item.type) {
+                    case Queue.ADD_REQUEST:
+                        console.log('############# ADD', item);
+                        response.features.push(Object.assign({}, item.feature));
+                        break;
+                    case Queue.UPDATE_REQUEST:
+                        features = copyArray(response.features);
+                        for (let i = 0; i < features.length; i++) {
+                            console.log('GIDDY', features[i], item.feature);
+                            if (features[i].properties.gid === item.feature.features[0].properties.gid) {
+                                console.log('############# UPDATE', item);
+                                features[i] = Object.assign({}, item.feature.features[0]);
+                                break;
+                            }
+                        }
+
+                        response.features = features;
+                        break;
+                    case Queue.DELETE_REQUEST:
+                        features = copyArray(response.features);
+                        for (let i = 0; i < features.length; i++) {
+                            if (features[i].properties.gid === item.feature.properties.gid) {
+                                console.log('############# DELETE', item);
+                                features.splice(i, 1);
+                                break;
+                            }
+                        }
+
+                        response.features = features;
+                        break;
+                }
+            });
+
+            console.log('### resulting response', response.features.length);
+        }
 
         return response;
     }
 
+
     /**
-     * Updates feature from specific vector layer
+     * Adds feature to specific vector layer
      * 
-     * @param {Object} data Complete feature data
+     * @param {Object} feature Feature collection data
+     * @param {String} db      Database name
+     * @param {Object} data    Meta data
      */
-    updateFeature(data) {
-        /*
-        PUT --> success -> return
-            \-> failure -> push to queue
-        */
+    addFeature(feature, db, meta) {
+        this._validateFeatureData(db, meta, feature);
+        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
     }
 
     /**
@@ -136,11 +185,23 @@ class APIBridge {
      * 
      * @param {Object} data Complete feature data
      */
-    deleteFeature(data) {
-        /*
-        DELETE --> success -> return
-               \-> failure -> push to queue
-        */
+    updateFeature(feature, db, meta) {
+        this._validateFeatureData(db, meta, feature);
+        return this._queue.pushAndProcess({ type: Queue.UPDATE_REQUEST, feature, db, meta });
+    }
+
+    /**
+     * Updates feature from specific vector layer
+     * 
+     * @param {Object} data Complete feature data
+     */
+    deleteFeature(gid, db, meta) {
+        this._validateFeatureData(db, meta);
+        if (!gid || !(gid > 0)) {
+            throw new Error('Invalid gid value');
+        }
+
+        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { properties: { gid }}, db, meta });
     }
 
     // @todo Do not need to abstract following methods yet

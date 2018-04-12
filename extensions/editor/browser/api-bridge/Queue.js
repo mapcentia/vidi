@@ -3,7 +3,7 @@
 const QUEUE_PROCESSING_INTERVAL = 5000;
 const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
-const LOG = false;
+const LOG = true;
 
 // Types of queue items
 const ADD_REQUEST = 0;
@@ -34,7 +34,7 @@ class Queue {
         this._restoreState();
 
         const processQueue = () => {
-            if (LOG) console.log('Queue interval, total items in queue:', _self._queue.length, _self._locked);
+            if (LOG) console.log(`Queue interval, total items in queue: ${_self._queue.length}, locked: ${_self._locked}`);
 
             const scheduleNextQueueProcessingRun = () => {
                 setTimeout(() => {
@@ -75,7 +75,6 @@ class Queue {
         let stats = {};
         for (let key in this._queue) {
             let currentItem = this._queue[key];
-            console.log('item: ', currentItem);
             if (currentItem.meta && currentItem.meta.f_table_schema && currentItem.meta.f_table_name && currentItem.meta.f_geometry_column) {
                 let layer = `${currentItem.meta.f_table_schema}.${currentItem.meta.f_table_name}.${currentItem.meta.f_geometry_column}`;
                 if (('' + layer) in stats === false) {
@@ -175,11 +174,13 @@ class Queue {
                 if (LOG) console.log('Queue: processOldest');
 
                 new Promise((localResolve, localReject) => {
-                    let oldestItem = Object.assign({}, _self._queue[(_self._queue.length - 1)]);
-                    _self._processor(oldestItem).then((result) => {
-                        let processedItem = _self._queue.shift();
+                    _self._onUpdateListener(_self._generateCurrentStatistics());
 
-                        if (LOG) console.log('Queue: item is processed', processedItem, result);
+                    let oldestItem = Object.assign({}, _self._queue[0]);
+                    _self._processor(oldestItem).then((result) => {
+                        _self._queue.shift();
+
+                        if (LOG) console.log('Queue: item was processed', oldestItem, result);
                         if (LOG) console.log('Queue: items left', _self._queue.length);
 
                         if (_self._queue.length === 0) {
@@ -216,8 +217,8 @@ class Queue {
      * @return {Promise}
      */
     pushAndProcess(item) {
-        
-        if (LOG) console.log('Queue: pushAndProcess');
+
+        if (LOG) console.log('Queue: pushAndProcess', item);
 
         if (!('type' in item) || [ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST].indexOf(item.type) === -1) {
             throw new Error('Queue item has to have a certain type');
@@ -234,8 +235,8 @@ class Queue {
                 then older elements have to be processed first.
             */
 
-            // @todo Remove the false condition
-            if (_self._queue.length === 1 && false) {
+            if (_self._queue.length === 1 && _self._locked === false) {
+                console.log('Queue: processing pushAndProcess item right away');
                 _self._locked = true;
                 _self._dispatch().then(() => {
                     _self._locked = false;
@@ -248,6 +249,8 @@ class Queue {
                     resolve();
                 });
             } else {
+                console.log('Queue: queue is busy', _self._queue.length, _self._locked);
+                _self._onUpdateListener(_self._generateCurrentStatistics());
                 resolve();
             }
         });
