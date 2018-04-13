@@ -79,15 +79,9 @@ geocloud = (function () {
     if (typeof L === "object") {
         MAPLIB = "leaflet";
     }
-    //Only if loaded in script tag
-    if (document.readyState === "loading") {
-        if (typeof jQuery === "undefined") {
-            document.write("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'><\/script>");
-        }
-    }
     var setHost = function (str) {
         host = str;
-    }
+    };
     // Helper for extending classes
     extend = function (ChildClass, ParentClass) {
         ChildClass.prototype = new ParentClass();
@@ -285,7 +279,7 @@ geocloud = (function () {
                 }
 
             });
-            return this.layer;
+            return xhr;
         };
         this.abort = function () {
             xhr.abort();
