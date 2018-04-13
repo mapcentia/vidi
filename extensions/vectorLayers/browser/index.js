@@ -220,7 +220,7 @@ module.exports = {
                                     host: "",
                                     db: db,
                                     uri: "/api/sql",
-                                    clickable: false,
+                                    clickable: true,
                                     id: id,
                                     name: id,
                                     lifetime: 0,
@@ -258,7 +258,7 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item"><div class="layer-sub-order-header">' + subOrderHeader + '</div><div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><i data-vector="1" data-gc2-key="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i></span><span style="display: none"><i class="refresh-vector-layer fa fa-list' +
+                            $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item">' + (subOrderHeader !== "" ? '<div class="layer-sub-order-header">' + subOrderHeader + '</div>':'') + '<div class="checkbox"><label class="overlay-label" style="width: calc(100% - 50px);"><input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '</label><span><i class="refresh-vector-layer fa fa-list' +
                                 '" style="display: inline-block; float: none; cursor: pointer;"></i></span></div></li>');
                             l.push({});
 
@@ -309,11 +309,13 @@ module.exports = {
 
             finally {
 
-                store[id].load();
                 el.prop('checked', true);
                 layers.incrementCountLoading(id);
                 backboneEvents.get().trigger("startLoading:layers", id);
+
             }
+            // XHR promise, so with call back ".done()"
+            return store[id].load();
 
         } else {
 
@@ -321,6 +323,11 @@ module.exports = {
             store[id].reset();
             cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
             el.prop('checked', false);
+            // Return dummy ".done()"
+            return {
+                done: function () {
+                }
+            };
 
         }
 
