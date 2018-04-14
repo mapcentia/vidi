@@ -197,6 +197,7 @@ const urlSubstitution = [{
 
 let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
+
 /**
  * Cleaning up and substituting with local URLs provided address
  * 
@@ -225,6 +226,39 @@ const normalizeTheURL = (URL) => {
     });
 
     return cleanedRequestURL;
+};
+
+
+/**
+ * Cleaning up and substituting with local URLs provided address
+ * 
+ * @param {FetchEvent} event
+ * 
+ * @return {Promise}
+ */
+const normalizeTheURLForFetch = (event) => {
+    let URL = event.request.url;
+    let result = new Promise((resolve, reject) => {
+        let cleanedRequestURL = normalizeTheURL(URL);
+
+        if (event && event.request.method === 'POST' && event.request.url.indexOf('/api/sql') !== -1) {
+            let clonedRequest = event.request.clone();
+            clonedRequest.formData().then((formdata) => {
+                let payload = '';
+                for (var p of formdata) {
+                    payload += p.toString();
+                }
+
+                cleanedRequestURL += '/' + btoa(payload);
+
+                resolve(cleanedRequestURL);
+            });
+        } else {
+            resolve(cleanedRequestURL);
+        }
+    });
+
+    return result;
 }
 
 
@@ -285,7 +319,6 @@ self.addEventListener('message', (event) => {
  */
 self.addEventListener('fetch', (event) => {
     if (LOG) console.log(`Reacting to fetch event ${event.request.url}`, event.request);
-    let cleanedRequestURL = normalizeTheURL(event.request.url);
 
     /**
      * Wrapper for API calls - the API responses should be as relevant as possible.
@@ -295,9 +328,14 @@ self.addEventListener('fetch', (event) => {
      * 
      * @return {Promise}
      */
-    const queryAPI = (event, cachedResponse) => {
+    const queryAPI = (cleanedRequestURL, event, cachedResponse) => {
         if (LOG) console.log('API call detected', cleanedRequestURL);
-        if (cleanedRequestURL.indexOf('/api/feature') === -1) {
+        if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
+            return fetch(event.request);
+        
+        //} else if (cleanedRequestURL.indexOf('/api/sql') !== -1) {
+
+        } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
                     return fetch(event.request).then(apiResponse => {
@@ -320,55 +358,55 @@ self.addEventListener('fetch', (event) => {
             });
 
             return result;
-        } else {
-            return fetch(event.request);
         }
     };
 
-    event.respondWith(caches.match(cleanedRequestURL).then((response) => {
-        if (response) {
-            // The request was found in cache
-            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-            // API requests should not use the probably stalled cached copy if it is possible
-            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                return queryAPI(event, response);
-            } else {
-                if (LOG) console.log(`In cache ${event.request.url}`);
-                return response;
-            }
-        } else {
-            // The request was not found in cache
-
-            let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-            // API requests should not use the probably stalled cached copy if it is possible
-            if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                return queryAPI(event, response);
-            } else {
-                // Checking if the request is eligible for caching 
-                let requestHasToBeCached = true;
-                if (forceIgnoredExtensionsCaching === false) {
-                    ignoredExtensionsRegExps.map(item => {
-                        if (item.test(cleanedRequestURL)) {
-                            requestHasToBeCached = false;
-                            return false;
-                        }
-                    });
+    event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
+        return caches.match(cleanedRequestURL).then((response) => {
+            if (response) {
+                // The request was found in cache
+                let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+                // API requests should not use the probably stalled cached copy if it is possible
+                if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                    return queryAPI(cleanedRequestURL, event, response);
+                } else {
+                    if (LOG) console.log(`In cache ${event.request.url}`);
+                    return response;
                 }
+            } else {
+                // The request was not found in cache
 
-                let requestToMake = new Request(cleanedRequestURL);
-                if (requestHasToBeCached) {
-                    if (LOG) console.log(`Caching ${requestToMake.url}`);
-                    return caches.open(CACHE_NAME).then((cache) => {
-                        return fetch(requestToMake).then(response => {
-                            return cache.put(requestToMake.url, response.clone()).then(() => {
-                                return response;
+                let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+                // API requests should not use the probably stalled cached copy if it is possible
+                if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                    return queryAPI(cleanedRequestURL, event, response);
+                } else {
+                    // Checking if the request is eligible for caching 
+                    let requestHasToBeCached = true;
+                    if (forceIgnoredExtensionsCaching === false) {
+                        ignoredExtensionsRegExps.map(item => {
+                            if (item.test(cleanedRequestURL)) {
+                                requestHasToBeCached = false;
+                                return false;
+                            }
+                        });
+                    }
+
+                    let requestToMake = new Request(cleanedRequestURL);
+                    if (requestHasToBeCached) {
+                        if (LOG) console.log(`Caching ${requestToMake.url}`);
+                        return caches.open(CACHE_NAME).then((cache) => {
+                            return fetch(requestToMake).then(response => {
+                                return cache.put(requestToMake.url, response.clone()).then(() => {
+                                    return response;
+                                });
                             });
                         });
-                    });
-                } else {
-                    return fetch(requestToMake);
+                    } else {
+                        return fetch(requestToMake);
+                    }
                 }
             }
-        }
+        });
     }));
 });

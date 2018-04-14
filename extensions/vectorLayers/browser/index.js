@@ -262,7 +262,9 @@ module.exports = {
                                         layers.decrementCountLoading(me.id);
                                         backboneEvents.get().trigger("doneLoading:layers", me.id);
                                     },
-                                    transformResponse: (response) => { return apiBridgeInstance.transformResponseHandler(response, id); },
+                                    transformResponse: (response, id) => {
+                                        return apiBridgeInstance.transformResponseHandler(response, id);
+                                    },
                                     onEachFeature: onEachFeature[id]
                                 });
                             }

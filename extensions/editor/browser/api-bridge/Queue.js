@@ -267,6 +267,23 @@ class Queue {
     }
 
     /**
+     * Removes all queue items with specific gid
+     * 
+     * @param {Number} gid 
+     */
+    removeItemsByGID(gid) {
+        for (let i = 0; i < this._queue.length; i++) {
+            if (this._queue[i].feature.features[0].properties.gid === gid) {
+                console.log('Queue: deleting item', Object.assign({}, this._queue[i]));
+                this._queue.splice(i, 1);
+            }
+        }
+
+        _self._onUpdateListener(_self._generateCurrentStatistics());
+        this._saveState();
+    }
+
+    /**
      * Returns queue length
      * 
      * @return {Number}

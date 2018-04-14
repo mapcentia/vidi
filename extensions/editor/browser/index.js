@@ -468,7 +468,7 @@ module.exports = {
              * @param {Object} result Saving result
              */
             const featureIsSaved = (result) => {
-                console.log('Editor: featureIsSaved');
+                console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
 
                 sqlQuery.reset(qstore);
                 let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
@@ -511,6 +511,11 @@ module.exports = {
             me.reloadLayer("v:" + schemaQualifiedName);
         };
 
+        if (!gid) {
+            gid = GeoJSON.properties.gid;
+            console.log('GeoJSON', GeoJSON);
+        }
+
         apiBridgeInstance.deleteFeature(gid, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
             console.log('Editor: error occured while performing deleteFeature()');
             throw new Error(error);
@@ -523,6 +528,7 @@ module.exports = {
      * @param {String} layerId Layer identifier
      */
     reloadLayer: (layerId) => {
+        console.log('reloadLayer', layerId);
         vectorLayers.switchLayer(layerId, false);
         vectorLayers.switchLayer(layerId, true);
     },

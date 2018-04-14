@@ -39,10 +39,13 @@ class APIBridge {
 
                 switch (queueItem.type) {
                     case Queue.ADD_REQUEST:
+                        let queueItemCopy = Object.assign({}, queueItem);
+                        delete queueItemCopy.feature.features[0].properties.gid;
+
                         $.ajax(Object.assign(generalRequestParameters, {
-                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
+                            url: "/api/feature/" + queueItemCopy.db + "/" + schemaQualifiedName + "." + queueItemCopy.meta.f_geometry_column + "/4326",
                             type: "POST",
-                            data: JSON.stringify(queueItem.feature),
+                            data: JSON.stringify(queueItemCopy.feature),
                         }));
                         break;
                     case Queue.UPDATE_REQUEST:
@@ -113,10 +116,8 @@ class APIBridge {
      * the API response is cached through the service worker. 
      */
     transformResponseHandler(response, tableId) {
-        let currentQueueItems = this._queue.getItems();
-        if (currentQueueItems.length > 0) {
-            console.log('### in handler', response.features.length, currentQueueItems, tableId);
-            
+        if (this._queue.length > 0) {
+            console.log('# TransformResponse handler', response.features.length, tableId);
             const copyArray = (items) => {
                 let result = [];
                 items.map(item => {
@@ -127,41 +128,63 @@ class APIBridge {
             }
 
             let features;
+
+            let currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
-                switch (item.type) {
-                    case Queue.ADD_REQUEST:
-                        console.log('############# ADD', item);
-                        response.features.push(Object.assign({}, item.feature));
-                        break;
-                    case Queue.UPDATE_REQUEST:
-                        features = copyArray(response.features);
-                        for (let i = 0; i < features.length; i++) {
-                            console.log('GIDDY', features[i], item.feature);
-                            if (features[i].properties.gid === item.feature.features[0].properties.gid) {
-                                console.log('############# UPDATE', item);
-                                features[i] = Object.assign({}, item.feature.features[0]);
-                                break;
-                            }
-                        }
+                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                if (itemParentTable === tableId) {
+                    switch (item.type) {
+                        case Queue.DELETE_REQUEST:
+                            features = copyArray(response.features);
+                            for (let i = 0; i < features.length; i++) {
+                                console.log('## DELETE CHECK', features[i], item);
+                                if (features[i].properties.gid === item.feature.properties.gid) {
+                                    console.log('## DELETE', item);
+                                    features.splice(i, 1);
 
-                        response.features = features;
-                        break;
-                    case Queue.DELETE_REQUEST:
-                        features = copyArray(response.features);
-                        for (let i = 0; i < features.length; i++) {
-                            if (features[i].properties.gid === item.feature.properties.gid) {
-                                console.log('############# DELETE', item);
-                                features.splice(i, 1);
-                                break;
-                            }
-                        }
+                                    /*
+                                    if (item.feature.properties.gid < 0) {
+                                        console.log('### DETECTED VIRTUAL GID', item);
+                                        _self._queue.removeItemsByGID(item.feature.properties.gid);
+                                    }
+                                    */
 
-                        response.features = features;
-                        break;
+                                    break;
+                                }
+                            }
+
+                            response.features = features;
+                            break;
+                    }
                 }
             });
 
-            console.log('### resulting response', response.features.length);
+            currentQueueItems = this._queue.getItems();
+            currentQueueItems.map(item => {
+                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                if (itemParentTable === tableId) {
+                    switch (item.type) {
+                        case Queue.ADD_REQUEST:
+                            console.log('## ADD', item);
+                            response.features.push(Object.assign({}, item.feature.features[0]));
+                            break;
+                        case Queue.UPDATE_REQUEST:
+                            features = copyArray(response.features);
+                            for (let i = 0; i < features.length; i++) {
+                                if (features[i].properties.gid === item.feature.features[0].properties.gid) {
+                                    console.log('## UPDATE', item);
+                                    features[i] = Object.assign({}, item.feature.features[0]);
+                                    break;
+                                }
+                            }
+
+                            response.features = features;
+                            break;
+                    }
+                }
+            });
+
+            console.log('# Result of transformResponse handler', response.features.length, response.features);
         }
 
         return response;
@@ -176,6 +199,10 @@ class APIBridge {
      * @param {Object} data    Meta data
      */
     addFeature(feature, db, meta) {
+        let date = new Date();
+        let timestamp = date.getTime();
+        feature.features[0].properties.gid = (-1 * timestamp);
+
         this._validateFeatureData(db, meta, feature);
         return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
     }
@@ -196,11 +223,11 @@ class APIBridge {
      * @param {Object} data Complete feature data
      */
     deleteFeature(gid, db, meta) {
-        this._validateFeatureData(db, meta);
-        if (!gid || !(gid > 0)) {
-            throw new Error('Invalid gid value');
+        if (gid === undefined) {
+            throw new Error('Invalid gid');
         }
 
+        this._validateFeatureData(db, meta);
         return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { properties: { gid }}, db, meta });
     }
 

@@ -261,7 +261,7 @@ geocloud = (function () {
                     }
                     if (response.success === true) {
                         if (response.features !== null) {
-                            response = me.transformResponse(response);
+                            response = me.transformResponse(response, me.id);
 
                             me.geoJSON = response;
                             switch (MAPLIB) {
