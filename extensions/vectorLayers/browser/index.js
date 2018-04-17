@@ -99,7 +99,11 @@ module.exports = {
     init: function () {
         var me = this;
 
-        apiBridgeInstance = APIBridgeSingletone((statistic) => {
+        const clearLayerRequests = (layerId) => {
+            apiBridgeInstance.removeByLayerId(layerId);
+        };
+
+        apiBridgeInstance = APIBridgeSingletone((statistics) => {
             let actions = ['add', 'update', 'delete'];
             $(`[data-gc2-layer-key]`).each((index, container) => {
                 actions.map(action => {
@@ -108,24 +112,25 @@ module.exports = {
                 });
             });
 
-            for (let key in statistic) {
+            $('.js-clear').addClass('hidden');
+            $('.js-clear').off();
+
+            for (let key in statistics) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
                 if (layerControlContainer.length === 1) {
                     let totalRequests = 0;
                     actions.map(action => {
-                        if (statistic[key][action.toUpperCase()] > 0) {
+                        if (statistics[key][action.toUpperCase()] > 0) {
                             totalRequests++;
                             $(layerControlContainer).find('.js-' + action).removeClass('hidden');
-                            $(layerControlContainer).find('.js-' + action).find('.js-value').html(statistic[key][action.toUpperCase()]);
+                            $(layerControlContainer).find('.js-' + action).find('.js-value').html(statistics[key][action.toUpperCase()]);
                         }
                     });
 
-                    $(layerControlContainer).find('.js-clear').addClass('hidden');
-                    $(layerControlContainer).find('.js-clear').off();
                     if (totalRequests > 0) {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
-                            alert('Delete all pending feature management requests?');
+                            clearLayerRequests($(event.target).parent().data('layer-id'));
                         });
                     }
                 } else {
@@ -288,7 +293,7 @@ module.exports = {
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
                             let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
-                            let queueInfoButtonStyle = regularButtonStyle + ` background-color: #FF6666;`;
+                            let queueInfoButtonStyle = regularButtonStyle + ` background-color: #FF6666; padding-left: 4px; padding-right: 4px;`;
 
                             let layerKey = metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column;
                             $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item" data-gc2-layer-key="' + layerKey + '" >\
@@ -303,10 +308,10 @@ module.exports = {
                                                 <i class="fa fa-edit"></i> <span class="js-value"></span>\
                                             </button>\
                                             <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="' + queueInfoButtonStyle + '" disabled>\
-                                                <i class="fa fa-trash"></i> <span class="js-value"></span>\
+                                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>\
                                             </button>\
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-clear" style="' + regularButtonStyle + '">\
-                                                Clear\
+                                            <button type="button" data-layer-id="' + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + '" class="hidden btn btn-sm btn-secondary js-clear" style="' + regularButtonStyle + '">\
+                                                <i class="fa fa-trash"></i>\
                                             </button>\
                                         </label>\
                                         <i data-vector="1" data-gc2-key="' + layerKey + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i>\

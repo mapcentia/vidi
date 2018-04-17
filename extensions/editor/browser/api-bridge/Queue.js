@@ -293,8 +293,17 @@ class Queue {
      * @param {String} layerId 
      */
     removeByLayerId(layerId) {
-        console.log('layerId', layerId);
-        throw new Error('Not implemented yet');
+        for (let i = 0; i < this._queue.length; i++) {
+            if ((this._queue[i].meta.f_table_schema + '.' + this._queue[i].meta.f_table_name) === layerId) {
+
+                if (LOG) console.log('Queue: deleting item by layerId', layerId, this._queue[i]);
+
+                this._queue.splice(i, 1);
+            }
+        }
+
+        this._saveState();
+        this._onUpdateListener(this._generateCurrentStatistics());
     }
 
     /**

@@ -262,6 +262,15 @@ class APIBridge {
         return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { features: [{ properties: { gid }}]}, db, meta });
     }
 
+    /**
+     * Removes all requests by layer identifier
+     * 
+     * @param {String} layerId 
+     */
+    removeByLayerId(layerId) {
+        return this._queue.removeByLayerId(layerId);
+    }
+
     // @todo Do not need to abstract following methods yet
 
     getBaseLayers() {}
