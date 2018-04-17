@@ -24,7 +24,7 @@ let singletoneInstance = false;
 
 class APIBridge {
     constructor() {
-        this._queue = new Queue((queueItem) => {
+        this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
                 console.log('In queue processor, ', queueItem);
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
@@ -33,8 +33,26 @@ class APIBridge {
                     dataType: 'json',
                     contentType: 'application/json',
                     scriptCharset: "utf-8",
-                    success: () => {
-                        console.log('Request succeeded');
+                    success: (response) => {
+                        console.log('Request succeeded', response);
+
+                        if (queueItem.type === Queue.ADD_REQUEST) {
+                            let newFeatureId = false;
+                            let featureIdRaw = response.message['wfs:InsertResult']['ogc:FeatureId']['fid'].split(".");
+                            if (featureIdRaw.length === 2) {
+                                newFeatureId = featureIdRaw[1];
+                            } else {
+                                throw new Error('Unable to detect the pushed feature id');
+                            }
+
+                            let queueItems = queue.getItems();
+                            queueItems.map(item => {
+                                if (queueItem.feature.features[0].properties.gid === item.feature.features[0].properties.gid) {
+                                    queue.replaceVirtualGid(queueItem.feature.features[0].properties.gid, newFeatureId);
+                                }
+                            });
+                        }
+
                         resolve();
                     },
                     error: () => {

@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
@@ -22,9 +22,12 @@ let forceIgnoredExtensionsCaching = false;
 let urlsToCache = [
     '/index.html',
     '/js/lib/leaflet/images/marker-icon.png',
+    '/js/lib/leaflet/images/marker-icon-2x.png',
     '/js/lib/leaflet/images/marker-shadow.png',
     '/js/lib/Leaflet.awesome-markers/images/markers-soft.png',
+    '/js/lib/Leaflet.awesome-markers/images/markers-soft@2x.png',
     '/js/lib/Leaflet.awesome-markers/images/markers-shadow.png',
+    '/js/lib/Leaflet.awesome-markers/images/markers-shadow@2x.png',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css',
     'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
     'https://cdn.polyfill.io/v2/polyfill.min.js?features=Element.prototype.classList,WeakMap,MutationObserver,URL,Array.from',

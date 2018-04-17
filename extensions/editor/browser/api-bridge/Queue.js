@@ -169,7 +169,7 @@ class Queue {
                     _self._onUpdateListener(_self._generateCurrentStatistics());
 
                     let oldestItem = Object.assign({}, _self._queue[0]);
-                    _self._processor(oldestItem).then((result) => {
+                    _self._processor(oldestItem, _self).then((result) => {
                         _self._queue.shift();
 
                         if (LOG) console.log('Queue: item was processed', oldestItem, result);
@@ -259,6 +259,21 @@ class Queue {
      */
     push(item) {
         this._queue.push(item);
+    }
+
+    /**
+     * Replaces gid for queue items
+     */
+    replaceVirtualGid(oldGid, newGid) {
+        for (let i = 0; i < this._queue.length; i++) {
+            if (this._queue[i].feature.features[0].properties.gid === oldGid) {
+                this._queue[i].feature.features[0].properties.gid = newGid;
+
+                if (LOG) console.log(`Queue: replacing gid from ${oldGid} to ${newGid}`);
+            }
+        }
+
+        this._saveState();
     }
 
     /**
