@@ -111,12 +111,23 @@ module.exports = {
             for (let key in statistic) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
                 if (layerControlContainer.length === 1) {
+                    let totalRequests = 0;
                     actions.map(action => {
                         if (statistic[key][action.toUpperCase()] > 0) {
+                            totalRequests++;
                             $(layerControlContainer).find('.js-' + action).removeClass('hidden');
                             $(layerControlContainer).find('.js-' + action).find('.js-value').html(statistic[key][action.toUpperCase()]);
                         }
                     });
+
+                    $(layerControlContainer).find('.js-clear').addClass('hidden');
+                    $(layerControlContainer).find('.js-clear').off();
+                    if (totalRequests > 0) {
+                        $(layerControlContainer).find('.js-clear').removeClass('hidden');
+                        $(layerControlContainer).find('.js-clear').on('click', (event) => {
+                            alert('Delete all pending feature management requests?');
+                        });
+                    }
                 } else {
                     throw new Error('Unable to find corresponding layer control container');
                 }
@@ -276,8 +287,8 @@ module.exports = {
 
                             subOrderHeader = (typeof metaData.data[u].extra !== "undefined" && metaData.data[u].extra !== null) ? metaData.data[u].extra : "";
 
-                            let buttonStyle = `padding: 2px; background-color: #FF6666; color: black;
-                            border-radius: 4px; height: 22px; margin: 0px;`;
+                            let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+                            let queueInfoButtonStyle = regularButtonStyle + ` background-color: #FF6666;`;
 
                             let layerKey = metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + "." + metaData.data[u].f_geometry_column;
                             $("#vectorcollapse" + base64name).append('<li class="layer-item list-group-item" data-gc2-layer-key="' + layerKey + '" >\
@@ -285,14 +296,17 @@ module.exports = {
                                     <div class="checkbox">\
                                         <label class="overlay-label" style="width: calc(100% - 50px);">\
                                             <input type="checkbox" ' + dataAttr + '="' + id + '">' + icon + "" + text + '\
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-add" style="' + buttonStyle + '" disabled>\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-add" style="' + queueInfoButtonStyle + '" disabled>\
                                                 <i class="fa fa-plus"></i> <span class="js-value"></span>\
                                             </button>\
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-update" style="' + buttonStyle + '" disabled>\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-update" style="' + queueInfoButtonStyle + '" disabled>\
                                                 <i class="fa fa-edit"></i> <span class="js-value"></span>\
                                             </button>\
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="' + buttonStyle + '" disabled>\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="' + queueInfoButtonStyle + '" disabled>\
                                                 <i class="fa fa-trash"></i> <span class="js-value"></span>\
+                                            </button>\
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-clear" style="' + regularButtonStyle + '">\
+                                                Clear\
                                             </button>\
                                         </label>\
                                         <i data-vector="1" data-gc2-key="' + layerKey + '" class="fa fa-pencil gc2-session-lock gc2-add-feature" aria-hidden="true"></i>\

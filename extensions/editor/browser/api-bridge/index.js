@@ -25,7 +25,7 @@ let singletoneInstance = false;
 class APIBridge {
     constructor() {
         this._queue = new Queue((queueItem) => {
-            let result = new Promise((success, error) => {
+            let result = new Promise((resolve, reject) => {
                 console.log('In queue processor, ', queueItem);
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
 
@@ -33,13 +33,19 @@ class APIBridge {
                     dataType: 'json',
                     contentType: 'application/json',
                     scriptCharset: "utf-8",
-                    success,
-                    error
+                    success: () => {
+                        console.log('Request succeeded');
+                        resolve();
+                    },
+                    error: () => {
+                        console.warn('Request failed');
+                        reject();
+                    }
                 };
 
                 switch (queueItem.type) {
                     case Queue.ADD_REQUEST:
-                        let queueItemCopy = Object.assign({}, queueItem);
+                        let queueItemCopy = JSON.parse(JSON.stringify(queueItem));
                         delete queueItemCopy.feature.features[0].properties.gid;
 
                         $.ajax(Object.assign(generalRequestParameters, {
@@ -49,18 +55,29 @@ class APIBridge {
                         }));
                         break;
                     case Queue.UPDATE_REQUEST:
-                        $.ajax(Object.assign(generalRequestParameters, {
-                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
-                            type: "PUT",
-                            data: JSON.stringify(queueItem.feature),
-                        }));
+                        if (queueItem.feature.features[0].properties.gid < 0) {
+                            console.warn('Feature with virtual gid is not supposed to be commited to server (update), skipping');
+                            resolve();
+                        } else {
+                            $.ajax(Object.assign(generalRequestParameters, {
+                                url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
+                                type: "PUT",
+                                data: JSON.stringify(queueItem.feature),
+                            }));
+                        }
+
                         break;
-                    break;
                     case Queue.DELETE_REQUEST:
-                        $.ajax(Object.assign(generalRequestParameters, {
-                            url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.properties.gid,
-                            type: "DELETE"
-                        }));
+                        if (queueItem.feature.features[0].properties.gid < 0) {
+                            console.warn('Feature with virtual gid is not supposed to be commited to server (delete), skipping');
+                            resolve();
+                        } else {
+                            $.ajax(Object.assign(generalRequestParameters, {
+                                url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties.gid,
+                                type: "DELETE"
+                            }));
+                        }
+
                         break;
                 }
             });
@@ -129,6 +146,7 @@ class APIBridge {
 
             let features;
 
+            // Deleting regular features from response
             let currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
@@ -137,18 +155,9 @@ class APIBridge {
                         case Queue.DELETE_REQUEST:
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
-                                console.log('## DELETE CHECK', features[i], item);
-                                if (features[i].properties.gid === item.feature.properties.gid) {
+                                if (features[i].properties.gid === item.feature.features[0].properties.gid) {
                                     console.log('## DELETE', item);
                                     features.splice(i, 1);
-
-                                    /*
-                                    if (item.feature.properties.gid < 0) {
-                                        console.log('### DETECTED VIRTUAL GID', item);
-                                        _self._queue.removeItemsByGID(item.feature.properties.gid);
-                                    }
-                                    */
-
                                     break;
                                 }
                             }
@@ -157,6 +166,26 @@ class APIBridge {
                             break;
                     }
                 }
+            });
+
+            // Deleting non-commited feature management requests
+            currentQueueItems.map(item => {
+                let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                let localQueueItems = this._queue.getItems();
+                let gidsToRemove = [];
+                if (itemParentTable === tableId) {
+                    if (item.type === Queue.DELETE_REQUEST && item.feature.features[0].properties.gid < 0) {
+                        let virtualGid = item.feature.features[0].properties.gid;
+                        localQueueItems.map(localItem => {
+                            if ([Queue.ADD_REQUEST, Queue.UPDATE_REQUEST].indexOf(localItem.type) !== -1
+                                && localItem.feature.features[0].properties.gid === virtualGid) {
+                                gidsToRemove.push(virtualGid);
+                            }
+                        });
+                    }
+                }
+
+                this._queue.removeByGID(gidsToRemove);
             });
 
             currentQueueItems = this._queue.getItems();
@@ -199,12 +228,14 @@ class APIBridge {
      * @param {Object} data    Meta data
      */
     addFeature(feature, db, meta) {
+        let copiedFeature = JSON.parse(JSON.stringify(feature));
         let date = new Date();
         let timestamp = date.getTime();
-        feature.features[0].properties.gid = (-1 * timestamp);
+        
+        copiedFeature.features[0].properties['gid'] = (-1 * timestamp);
 
-        this._validateFeatureData(db, meta, feature);
-        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature, db, meta });
+        this._validateFeatureData(db, meta, copiedFeature);
+        return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature: copiedFeature, db, meta });
     }
 
     /**
@@ -228,7 +259,7 @@ class APIBridge {
         }
 
         this._validateFeatureData(db, meta);
-        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { properties: { gid }}, db, meta });
+        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { features: [{ properties: { gid }}]}, db, meta });
     }
 
     // @todo Do not need to abstract following methods yet

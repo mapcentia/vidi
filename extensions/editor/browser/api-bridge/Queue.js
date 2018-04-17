@@ -65,7 +65,7 @@ class Queue {
      * Returns current items
      */
     getItems() {
-        return this._queue;
+        return JSON.parse(JSON.stringify(this._queue));
     }
 
     /**
@@ -145,14 +145,6 @@ class Queue {
             }
         });
     }
-
-    /**
-     * Delete items that are mutually exclusive, for
-     * example, requests to add feature A and delete 
-     * feature A should be annihilated as it is pointless
-     * to send them to server
-     */
-    houseKeeping() {}
 
     /**
      * Iterate over queue and perform request in FIFO manner
@@ -236,7 +228,9 @@ class Queue {
             */
 
             if (_self._queue.length === 1 && _self._locked === false) {
-                console.log('Queue: processing pushAndProcess item right away');
+                
+                if (LOG) console.log('Queue: processing pushAndProcess item right away');
+
                 _self._locked = true;
                 _self._dispatch().then(() => {
                     _self._locked = false;
@@ -249,7 +243,9 @@ class Queue {
                     resolve();
                 });
             } else {
-                console.log('Queue: queue is busy', _self._queue.length, _self._locked);
+
+                if (LOG) console.log('Queue: queue is busy', _self._queue.length, _self._locked);
+
                 _self._onUpdateListener(_self._generateCurrentStatistics());
                 resolve();
             }
@@ -257,7 +253,6 @@ class Queue {
 
         return result;
     }
-
 
     /**
      * Add item to the queue
@@ -269,18 +264,37 @@ class Queue {
     /**
      * Removes all queue items with specific gid
      * 
-     * @param {Number} gid 
+     * @param {Array<Number>} gids
      */
-    removeItemsByGID(gid) {
+    removeByGID(gids = []) {
+        let initialNumberOfItems = this._queue.length;
         for (let i = 0; i < this._queue.length; i++) {
-            if (this._queue[i].feature.features[0].properties.gid === gid) {
-                console.log('Queue: deleting item', Object.assign({}, this._queue[i]));
-                this._queue.splice(i, 1);
+            for (let j = 0; j < gids.length; j++) {
+                if (this._queue[i].feature.features[0].properties.gid === gids[j]) {
+
+                    if (LOG) console.log('Queue: deleting item by gid', gids[j], this._queue[i]);
+
+                    this._queue.splice(i, 1);
+                }
             }
         }
 
-        _self._onUpdateListener(_self._generateCurrentStatistics());
+        if (this._queue.length !== (initialNumberOfItems - gids.length)) {
+            throw new Error('Some queue elements have not been deleted');
+        }
+
         this._saveState();
+        this._onUpdateListener(this._generateCurrentStatistics());
+    }
+
+    /**
+     * Removes all requests by layer identifier
+     * 
+     * @param {String} layerId 
+     */
+    removeByLayerId(layerId) {
+        console.log('layerId', layerId);
+        throw new Error('Not implemented yet');
     }
 
     /**
