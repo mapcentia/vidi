@@ -335,9 +335,6 @@ self.addEventListener('fetch', (event) => {
         if (LOG) console.log('API call detected', cleanedRequestURL);
         if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
             return fetch(event.request);
-        
-        //} else if (cleanedRequestURL.indexOf('/api/sql') !== -1) {
-
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
@@ -396,6 +393,9 @@ self.addEventListener('fetch', (event) => {
                     }
 
                     let requestToMake = new Request(cleanedRequestURL);
+
+                    if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) requestHasToBeCached = false;
+
                     if (requestHasToBeCached) {
                         if (LOG) console.log(`Caching ${requestToMake.url}`);
                         return caches.open(CACHE_NAME).then((cache) => {

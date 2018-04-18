@@ -82,6 +82,31 @@ var apiBridgeInstance = false;
 
 /**
  *
+ * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
+ */
+var dict = {
+    "Force offline mode": {
+        "da_DK": "# Force offline mode",
+        "en_US": "# Force offline mode"
+    }
+};
+
+/**
+ *
+ * @param txt
+ * @returns {*}
+ * @private
+ */
+var __ = function (txt) {
+    if (dict[txt][window._vidiLocale]) {
+        return dict[txt][window._vidiLocale];
+    } else {
+        return txt;
+    }
+};
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
@@ -223,7 +248,7 @@ module.exports = {
             <div class="panel-body">
                 <div class="togglebutton">
                     <label>
-                        <input class="js-toggle-offline-mode" type="checkbox"> Force offline mode
+                        <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
                     </label>
                 </div>
             </div>

@@ -87,15 +87,32 @@ module.exports = {
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
             $(this).on("click", function (e) {
-                var t = ($(this).data('gc2-key'));
-                if (($(this).data('vector'))) {
-                    me.add(t, null, true);
+                let _this = this;
+
+                const openAddFeatureForm = () => {
+                    var t = ($(_this).data('gc2-key'));
+                    if (($(_this).data('vector'))) {
+                        me.add(t, null, true);
+                    } else {
+                        me.add(t);
+                    }
+                };
+
+                
+                if ($(this).data('layer-type') === 'tile') {
+                    $.get('/connection-check.ico', () => {}).done(function() {
+                        openAddFeatureForm();
+                    }).fail(() => {
+                        if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+                            openAddFeatureForm();
+                        }
+                    });
                 } else {
-                    me.add(t);
+                    openAddFeatureForm();
                 }
+
                 e.stopPropagation();
             });
-
         });
 
         // When editing is disabled, close the slide panel with attribute form
