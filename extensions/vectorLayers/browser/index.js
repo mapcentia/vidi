@@ -220,18 +220,13 @@ module.exports = {
         metaData.data.reverse();
 
         let toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-            <ul class="list-group" role="tabpanel">
-                <div class="accordion-body collapse in" aria-expanded="true" style="">
-                    <li class="layer-item list-group-item">
-                        <div class="layer-sub-order-header"></div>
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" class="js-toggle-offline-mode"/> Offline mode 
-                            </label>
-                        </div>
-                    </li>
+            <div class="panel-body">
+                <div class="togglebutton">
+                    <label>
+                        <input class="js-toggle-offline-mode" type="checkbox"> Force offline mode
+                    </label>
                 </div>
-            </ul>
+            </div>
         </div>`);
 
         $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
