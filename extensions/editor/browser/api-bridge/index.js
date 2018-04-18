@@ -1,7 +1,7 @@
 'use strict';
 
 const Queue = require('./Queue');
-
+const LOG = true;
 const errorCodes = {
     "UNAUTHORIZED": 0,
     "NOT_FOUND": 1,
@@ -24,9 +24,14 @@ let singletoneInstance = false;
 
 class APIBridge {
     constructor() {
+        this._forcedOffline = false;
         this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
-                console.log('In queue processor, ', queueItem);
+                if (LOG) {
+                    console.log('APIBridge: in queue processor, ', queueItem);
+                    console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforced());
+                }
+
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
 
                 let generalRequestParameters = {
@@ -34,7 +39,8 @@ class APIBridge {
                     contentType: 'application/json',
                     scriptCharset: "utf-8",
                     success: (response) => {
-                        console.log('Request succeeded', response);
+
+                        if (LOG) console.log('APIBridge: request succeeded', response);
 
                         if (queueItem.type === Queue.ADD_REQUEST) {
                             let newFeatureId = false;
@@ -56,7 +62,9 @@ class APIBridge {
                         resolve();
                     },
                     error: () => {
-                        console.warn('Request failed');
+
+                        if (LOG) console.warn('APIBridge: request failed');
+
                         reject();
                     }
                 };
@@ -66,34 +74,59 @@ class APIBridge {
                         let queueItemCopy = JSON.parse(JSON.stringify(queueItem));
                         delete queueItemCopy.feature.features[0].properties.gid;
 
-                        $.ajax(Object.assign(generalRequestParameters, {
-                            url: "/api/feature/" + queueItemCopy.db + "/" + schemaQualifiedName + "." + queueItemCopy.meta.f_geometry_column + "/4326",
-                            type: "POST",
-                            data: JSON.stringify(queueItemCopy.feature),
-                        }));
+                        if (singletoneInstance.offlineModeIsEnforced()) {
+                            
+                            if (LOG) console.log('APIBridge: offline mode is enforced, add request was not performed');
+                            
+                            reject();
+                        } else {
+                            $.ajax(Object.assign(generalRequestParameters, {
+                                url: "/api/feature/" + queueItemCopy.db + "/" + schemaQualifiedName + "." + queueItemCopy.meta.f_geometry_column + "/4326",
+                                type: "POST",
+                                data: JSON.stringify(queueItemCopy.feature),
+                            }));
+                        }
                         break;
                     case Queue.UPDATE_REQUEST:
                         if (queueItem.feature.features[0].properties.gid < 0) {
-                            console.warn('Feature with virtual gid is not supposed to be commited to server (update), skipping');
+                            
+                            if (LOG) console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (update), skipping');
+                            
                             resolve();
                         } else {
-                            $.ajax(Object.assign(generalRequestParameters, {
-                                url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
-                                type: "PUT",
-                                data: JSON.stringify(queueItem.feature),
-                            }));
+                            if (singletoneInstance.offlineModeIsEnforced()) {
+                                
+                                if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
+
+                                reject();
+                            } else {
+                                $.ajax(Object.assign(generalRequestParameters, {
+                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/4326",
+                                    type: "PUT",
+                                    data: JSON.stringify(queueItem.feature),
+                                }));
+                            }
                         }
 
                         break;
                     case Queue.DELETE_REQUEST:
                         if (queueItem.feature.features[0].properties.gid < 0) {
-                            console.warn('Feature with virtual gid is not supposed to be commited to server (delete), skipping');
+                            
+                            if (LOG) console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (delete), skipping');
+
                             resolve();
                         } else {
-                            $.ajax(Object.assign(generalRequestParameters, {
-                                url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties.gid,
-                                type: "DELETE"
-                            }));
+                            if (singletoneInstance.offlineModeIsEnforced()) {
+                                
+                                if (LOG) console.log('APIBridge: offline mode is enforced, delete request was not performed');
+
+                                reject();
+                            } else {
+                                $.ajax(Object.assign(generalRequestParameters, {
+                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties.gid,
+                                    type: "DELETE"
+                                }));
+                            }
                         }
 
                         break;
@@ -145,6 +178,24 @@ class APIBridge {
     }
 
     /**
+     * Sets offline mode
+     * 
+     * @param {Function} listener Listening function
+     */
+    setOfflineMode(mode) {
+        this._forcedOffline = mode;
+    }
+
+    /**
+     * Tells if the offline mode is currently enforced
+     * 
+     * @return {Boolean}
+     */
+    offlineModeIsEnforced() {
+        return this._forcedOffline;
+    }
+
+    /**
      * Transforms responses for geocloud
      * Adds, updates or removes features according to corresponding
      * requests made in the offline mode. Assumes that in offline mode
@@ -152,7 +203,9 @@ class APIBridge {
      */
     transformResponseHandler(response, tableId) {
         if (this._queue.length > 0) {
-            console.log('# TransformResponse handler', response.features.length, tableId);
+
+            if (LOG) console.log('APIBridge: transformResponse handler', response.features.length, tableId);
+
             const copyArray = (items) => {
                 let result = [];
                 items.map(item => {
@@ -174,7 +227,9 @@ class APIBridge {
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
                                 if (features[i].properties.gid === item.feature.features[0].properties.gid) {
-                                    console.log('## DELETE', item);
+                                    
+                                    if (LOG) console.log('APIBridge: ## DELETE', item);
+
                                     features.splice(i, 1);
                                     break;
                                 }
@@ -212,14 +267,18 @@ class APIBridge {
                 if (itemParentTable === tableId) {
                     switch (item.type) {
                         case Queue.ADD_REQUEST:
-                            console.log('## ADD', item);
+                            
+                            if (LOG) console.log('APIBridge: ## ADD', item);
+
                             response.features.push(Object.assign({}, item.feature.features[0]));
                             break;
                         case Queue.UPDATE_REQUEST:
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
                                 if (features[i].properties.gid === item.feature.features[0].properties.gid) {
-                                    console.log('## UPDATE', item);
+
+                                    if (LOG) console.log('APIBridge: ## UPDATE', item);
+
                                     features[i] = Object.assign({}, item.feature.features[0]);
                                     break;
                                 }
@@ -231,7 +290,7 @@ class APIBridge {
                 }
             });
 
-            console.log('# Result of transformResponse handler', response.features.length, response.features);
+            if (LOG) console.log('APIBridge: # Result of transformResponse handler', response.features.length, response.features);
         }
 
         return response;

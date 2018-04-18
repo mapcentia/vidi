@@ -192,7 +192,6 @@ module.exports = {
 
                     e.stopPropagation();
 
-
                 });
             });
         }
@@ -219,6 +218,31 @@ module.exports = {
         arr = array_unique(groups.reverse());
 
         metaData.data.reverse();
+
+        let toggleOfllineOnlineMode = $(`<div class="panel panel-default">
+            <ul class="list-group" role="tabpanel">
+                <div class="accordion-body collapse in" aria-expanded="true" style="">
+                    <li class="layer-item list-group-item">
+                        <div class="layer-sub-order-header"></div>
+                        <div class="checkbox">
+                            <label>
+                                <input type="checkbox" class="js-toggle-offline-mode"/> Offline mode 
+                            </label>
+                        </div>
+                    </li>
+                </div>
+            </ul>
+        </div>`);
+
+        $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+            if ($(event.target).is(":checked")) {
+                apiBridgeInstance.setOfflineMode(true);
+            } else {
+                apiBridgeInstance.setOfflineMode(false);
+            }
+        });
+
+        $("#vectorlayers").append(toggleOfllineOnlineMode);
 
         for (i = 0; i < arr.length; ++i) {
 
