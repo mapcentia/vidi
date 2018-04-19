@@ -29,6 +29,7 @@ var legend;
 var moment = require('moment');
 var meta;
 var uriJs = require('urijs');
+var callBack= function () {};
 
 /**
  * @private
@@ -78,6 +79,10 @@ module.exports = {
         $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
     },
 
+    setCallBack: function (fn) {
+        callBack = fn;
+    },
+
     /**
      *
      */
@@ -91,8 +96,6 @@ module.exports = {
             $("#select-scale").empty();
             center = null;
             scale = null;
-
-            //hyperform(document.getElementById("print-form"));
 
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
@@ -328,12 +331,15 @@ module.exports = {
                     backboneEvents.get().trigger(endEventName, response);
                 }
             },
-            error: function () {
+            error: function (response) {
                 if (!endEventName) {
                     backboneEvents.get().trigger("end:print", response);
                 } else {
                     backboneEvents.get().trigger(endEventName, response);
                 }
+            },
+            complete: function (response) {
+                callBack(response.responseJSON);
             }
         });
 
