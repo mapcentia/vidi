@@ -12,8 +12,6 @@ wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
  *
  * @type {module.exports.print|{templates, scales}}
  */
-var config = require('../config/config.js').print;
-
 router.post('/api/print', function (req, response) {
     req.setTimeout(0); // no timeout
     var q = req.body;
