@@ -4,9 +4,6 @@ var http = require('http');
 var fs = require('fs');
 var wkhtmltopdf = require('wkhtmltopdf');
 
-wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
-//wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
-
 /**
  *
  * @type {module.exports.print|{templates, scales}}
@@ -21,7 +18,10 @@ router.post('/api/print', function (req, response) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    // TODO
+
+    wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
+    //wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
+
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), function (err) {
         if (err) {
             response.send({success: true, error: err});
