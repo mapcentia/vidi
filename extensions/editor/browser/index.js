@@ -505,11 +505,18 @@ module.exports = {
         if (isVectorLayer) {
             addFeature();
         } else {
-            $.get('/connection-check.ico', () => {}).done(function() {
-                addFeature();
-            }).fail(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+            $.ajax({
+                method: 'GET',
+                url: '/connection-check.ico'
+            }).done((data, textStatus, jqXHR) => {
+                if (jqXHR.statusText === 'ONLINE') {
                     addFeature();
+                } else if (jqXHR.statusText === 'OFFLINE') {
+                    if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+                        addFeature();
+                    }
+                } else {
+                    throw new Error('Unable the determine the online status');
                 }
             });
         }
