@@ -30,12 +30,6 @@ var ready = false;
 
 /**
  *
- * @type {boolean}
- */
-var cartoDbLayersready = false;
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -92,14 +86,7 @@ module.exports = {
     },
 
     ready: function () {
-        // If CartoDB, we wait for cartodb.createLayer to finish
-        if (BACKEND === "cartodb") {
-            return (ready && cartoDbLayersready);
-        }
-        // GC2 layers are direct tile request
-        else {
-            return ready;
-        }
+        return ready;
     },
 
     getLayers: function (separator, includeHidden) {
@@ -132,11 +119,10 @@ module.exports = {
             }
         }
     },
-    resetCount: function (i) {
-        ready = cartoDbLayersready = false;
+
+    resetCount: function () {
+        ready = false;
     },
-
-
 
     incrementCountLoading: function (i) {
         if (array.indexOf(i) === -1) {
@@ -215,101 +201,6 @@ module.exports = {
 
                             resolve();
 
-                            break;
-
-                        case "cartodb":
-
-                            var tooltipHtml;
-
-                            var fieldconf = JSON.parse(v.fieldconf), interactivity = ["cartodb_id"], template;
-
-                            template = (typeof v.tooltip !== "undefined" && v.tooltip.template !== "" ) ? v.tooltip.template : null;
-
-                            $.each(fieldconf, function (name, property) {
-                                if (typeof property.utfgrid !== "undefined" && property.utfgrid === true) {
-                                    interactivity.push(name)
-                                }
-                            });
-
-                            cartodb.createLayer(cloud.get().map, {
-                                user_name: db,
-                                type: 'cartodb',
-                                sublayers: [{
-                                    sql: v.sql,
-                                    cartocss: v.cartocss,
-                                    interactivity: interactivity.join(",")
-                                }]
-                            })
-                                .on('done', function (cartoLayer) {
-
-                                    cartoLayer.baseLayer = false;
-                                    cartoLayer.id = v.f_table_schema + "." + v.f_table_name;
-                                    cartoLayer.on("load", function () {
-                                        me.decrementCountLoading(cartoLayer.id);
-                                        backboneEvents.get().trigger("doneLoading:layers", cartoLayer.id);
-                                    });
-                                    cartoLayer.on("loading", function () {
-                                        me.incrementCountLoading(cartoLayer.id);
-                                        backboneEvents.get().trigger("startLoading:layers", cartoLayer.id);
-                                    });
-                                    cloud.get().addLayer(cartoLayer, v.f_table_name);
-
-                                    // We switch the layer on/off, so they become ready for state.
-                                    cloud.get().showLayer(cartoLayer.id);
-                                    cloud.get().hideLayer(cartoLayer.id);
-
-                                    // Carto layer object is not complete(!?), so we poll until _url prop is set
-                                    if (interactivity.length > 0) {
-                                        (function poll1() {
-                                            if (typeof cartoLayer._url !== "undefined") {
-
-                                                // A bit hackery way to set UTFgrid url
-                                                var utfGrid = new L.UtfGrid(cartoLayer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
-                                                utfGrid.id = cartoLayer.id + "_vidi_utfgrid";
-                                                cloud.get().addLayer(utfGrid);
-                                                utfGrid.on('mouseover', _.debounce(function (e) {
-                                                    var tmp = $.extend(true, {}, e.data), fi = [];
-                                                    flag = true;
-                                                    $.each(tmp, function (name, property) {
-                                                        if (name !== "cartodb_id") {
-                                                            fi.push({
-                                                                title: fieldconf[name].alias_tooltip || name,
-                                                                value: property
-                                                            });
-                                                        }
-                                                    });
-                                                    tmp.fields = fi; // Used in a "loop" template
-                                                    tooltipHtml = Mustache.render(template, tmp);
-                                                    if (fi.length > 0) {
-                                                        $("#tail").fadeIn(100);
-                                                        $("#tail").html(tooltipHtml);
-                                                    }
-
-                                                }, 0));
-                                                utfGrid.on('mouseout', function (e) {
-                                                    flag = false;
-                                                    // Wait 200 ms before closing tooltip, so its not blinking between close features
-                                                    setTimeout(function () {
-                                                        if (!flag) {
-                                                            $("#tail").fadeOut(100);
-                                                        }
-                                                    }, 200)
-
-                                                });
-                                                cartoDbLayersready = true;
-                                                backboneEvents.get().trigger("ready:layers");
-                                                resolve();
-                                            } else {
-                                                setTimeout(function () {
-                                                    poll1()
-                                                }, 50);
-                                            }
-                                        }());
-                                    } else {
-                                        resolve();
-                                    }
-
-                                });
                             break;
                     }
                 }
