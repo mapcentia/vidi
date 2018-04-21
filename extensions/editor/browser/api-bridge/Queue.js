@@ -355,7 +355,7 @@ class Queue {
         }
 
         this._saveState();
-        this._onUpdateListener(this._generateCurrentStatistics());
+        this._onUpdateListener(this._generateCurrentStatistics(), true);
     }
 
     /**

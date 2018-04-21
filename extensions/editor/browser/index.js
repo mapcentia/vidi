@@ -53,7 +53,6 @@ var db = urlparser.db;
 
 var isInit = false;
 
-
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}

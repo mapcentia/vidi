@@ -80,6 +80,8 @@ var automatic = true;
 
 var apiBridgeInstance = false;
 
+var applicationIsOnline = -1;
+
 /**
  *
  * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
@@ -128,7 +130,7 @@ module.exports = {
             apiBridgeInstance.removeByLayerId(layerId);
         };
 
-        apiBridgeInstance = APIBridgeSingletone((statistics) => {
+        apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate = false) => {
             let actions = ['add', 'update', 'delete'];
             $(`[data-gc2-layer-key]`).each((index, container) => {
                 actions.map(action => {
@@ -140,12 +142,21 @@ module.exports = {
             $('.js-clear').addClass('hidden');
             $('.js-clear').off();
 
-            console.log('statistics', statistics);
             $('.js-app-is-online-badge').addClass('hidden');
             $('.js-app-is-offline-badge').addClass('hidden');
             if (statistics.online) {
+                $('.js-toggle-offline-mode').prop('disabled', false);
+
+                applicationIsOnline = 1;
                 $('.js-app-is-online-badge').removeClass('hidden');
             } else {
+                if (applicationIsOnline !== 0) {
+                    $('.js-toggle-offline-mode').trigger('click');
+                }
+
+                $('.js-toggle-offline-mode').prop('disabled', true);
+
+                applicationIsOnline = 0;
                 $('.js-app-is-offline-badge').removeClass('hidden');
             }
 
@@ -168,6 +179,13 @@ module.exports = {
                         });
                     }
                 }
+            }
+
+            if (forceLayerUpdate) {
+                me.getActiveLayers().map(item => {
+                    me.switchLayer(item, false);
+                    me.switchLayer(item, true);
+                });
             }
         });
 
@@ -219,7 +237,6 @@ module.exports = {
             $(document).arrive('[data-gc2-id-vec]', function () {
 
                 $(this).on("change", function (e) {
-
                     me.switchLayer(($(this).data('gc2-id-vec')), $(this).context.checked);
 
                     e.stopPropagation();
@@ -396,11 +413,29 @@ module.exports = {
         backboneEvents.get().trigger("ready:vectorLayers");
     },
 
-    // Turn layers on/off
-    // ==================
-    switchLayer: function (id, visible) {
+    /**
+     * Returns list of currently enabled layers
+     */
+    getActiveLayers: () => {
+        let activeLayerIds = [];
+        $('*[data-gc2-id-vec]').each((index, item) => {
+            let isEnabled = $(item).is(':checked');
+            if (isEnabled) {
+                activeLayerIds.push($(item).data('gc2-id-vec'));
+            }
+        });
 
+        return activeLayerIds;
+    },
+
+    /**
+     * Turns layers on/off
+     */
+    switchLayer: (id, visible) => {
         let el = $('*[data-gc2-id-vec="' + id + '"]');
+        if (el.length !== 1) {
+            throw new Error('Unable to find specified layer');
+        }
 
         if (visible) {
 
