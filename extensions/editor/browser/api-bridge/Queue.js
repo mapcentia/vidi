@@ -26,6 +26,7 @@ class Queue {
         }
 
         let _self = this;
+        this._online = false;
         this._locked = false;
         this._onUpdateListener = () => {};
         this._queue = [];
@@ -42,20 +43,47 @@ class Queue {
                 }, QUEUE_PROCESSING_INTERVAL);
             };
 
-            if (_self._queue.length > 0 && _self._locked === false) {
-                _self._locked = true;
-                console.warn('Queue is not empty, trying to push changes');
+            _self._onUpdateListener(_self._generateCurrentStatistics());
 
-                _self._dispatch().then(() => {
-                    _self._locked = false;
+            $.ajax({
+                method: 'GET',
+                url: '/connection-check.ico'
+            }).done((data, textStatus, jqXHR) => {
+                if (jqXHR.statusText === 'ONLINE') {
+                    if (_self._online === false) {
+                        _self._online = true;
+
+                        if (LOG) console.log(`Queue: app is back online`);
+
+                        _self._onUpdateListener(_self._generateCurrentStatistics());
+                    }
+                } else if (jqXHR.statusText === 'OFFLINE') {
+                    if (_self._online) {
+                        _self._online = false;
+                        
+                        if (LOG) console.log(`Queue: app went offline`);
+
+                        _self._onUpdateListener(_self._generateCurrentStatistics());
+                    }
+                } else {
+                    throw new Error('Unable the determine the online status');
+                }
+            }).always(() => {
+                if (_self._queue.length > 0 && _self._locked === false) {
+                    _self._locked = true;
+                    console.warn('Queue is not empty, trying to push changes');
+    
+                    _self._dispatch().then(() => {
+                        _self._locked = false;
+                        scheduleNextQueueProcessingRun();
+                    }).catch(error => {
+                        _self._locked = false;
+                        scheduleNextQueueProcessingRun();
+                    });
+                } else {
                     scheduleNextQueueProcessingRun();
-                }).catch(error => {
-                    _self._locked = false;
-                    scheduleNextQueueProcessingRun();
-                });
-            } else {
-                scheduleNextQueueProcessingRun();
-            }
+                }
+            });
         };
 
         processQueue();
@@ -72,7 +100,10 @@ class Queue {
      * Generates current queue statistics by layer
      */
     _generateCurrentStatistics() {
-        let stats = {};
+        let stats = {
+            online: this._online
+        };
+
         for (let key in this._queue) {
             let currentItem = this._queue[key];
             if (currentItem.meta && currentItem.meta.f_table_schema && currentItem.meta.f_table_name && currentItem.meta.f_geometry_column) {
@@ -169,7 +200,6 @@ class Queue {
                 }
         
                 _self._saveState();
-        
 
                 new Promise((localResolve, localReject) => {
                     let oldestItem = Object.assign({}, _self._queue[0]);

@@ -393,10 +393,19 @@ self.addEventListener('fetch', (event) => {
                     }
 
                     let requestToMake = new Request(cleanedRequestURL);
+                    if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
+                        var result = new Promise((resolve, reject) => {
+                            fetch(requestToMake).then(() => {
+                                let dummyResponse = new Response(null, { statusText: 'ONLINE' });
+                                resolve(dummyResponse);
+                            }).catch(() => {
+                                let dummyResponse = new Response(null, { statusText: 'OFFLINE' });
+                                resolve(dummyResponse);
+                            });
+                        });
 
-                    if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) requestHasToBeCached = false;
-
-                    if (requestHasToBeCached) {
+                        return result;
+                    } else if (requestHasToBeCached) {
                         if (LOG) console.log(`Caching ${requestToMake.url}`);
                         return caches.open(CACHE_NAME).then((cache) => {
                             return fetch(requestToMake).then(response => {

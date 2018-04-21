@@ -383,7 +383,7 @@ module.exports = {
         if (isVectorLayer) {
             editFeature();
         } else {
-            $.get('/connection-check.ico', () => {}).done(function() {
+            $.get('/connection-check.ico', () => {}).done(() => {
                 editFeature();
             }).fail(() => {
                 if (confirm('Application is offline, tiles will not be updated. Proceed?')) {

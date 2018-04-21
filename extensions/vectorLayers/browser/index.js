@@ -140,6 +140,15 @@ module.exports = {
             $('.js-clear').addClass('hidden');
             $('.js-clear').off();
 
+            console.log('statistics', statistics);
+            $('.js-app-is-online-badge').addClass('hidden');
+            $('.js-app-is-offline-badge').addClass('hidden');
+            if (statistics.online) {
+                $('.js-app-is-online-badge').removeClass('hidden');
+            } else {
+                $('.js-app-is-offline-badge').removeClass('hidden');
+            }
+
             for (let key in statistics) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
                 if (layerControlContainer.length === 1) {
@@ -158,8 +167,6 @@ module.exports = {
                             clearLayerRequests($(event.target).parent().data('layer-id'));
                         });
                     }
-                } else {
-                    throw new Error('Unable to find corresponding layer control container');
                 }
             }
         });
@@ -249,6 +256,8 @@ module.exports = {
                 <div class="togglebutton">
                     <label>
                         <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
+                        <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
+                        <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
                     </label>
                 </div>
             </div>
