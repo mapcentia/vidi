@@ -151,23 +151,27 @@ class Queue {
      * 
      * @param {Function} dispatcher Function that perfroms actual request
      */
-    _dispatch() {
+    _dispatch(emitQueueStateChangeBeforeCommit = true) {
 
         if (LOG) console.log('Queue: _dispatch');
 
         let _self = this;
 
-        _self._onUpdateListener(_self._generateCurrentStatistics());
-        _self._saveState();
-
+        let numberOfRuns = 0;
         let result = new Promise((resolve, reject) => {
             const processOldestItem = () => {
+                numberOfRuns++;
 
-                if (LOG) console.log('Queue: processOldest');
+                if (LOG) console.log('Queue: processOldest, runs:', numberOfRuns);
+
+                if (numberOfRuns > 1 || emitQueueStateChangeBeforeCommit) {
+                    _self._onUpdateListener(_self._generateCurrentStatistics());
+                }
+        
+                _self._saveState();
+        
 
                 new Promise((localResolve, localReject) => {
-                    _self._onUpdateListener(_self._generateCurrentStatistics());
-
                     let oldestItem = Object.assign({}, _self._queue[0]);
                     _self._processor(oldestItem, _self).then((result) => {
                         _self._queue.shift();
@@ -181,6 +185,9 @@ class Queue {
 
                             resolve();
                         } else {
+                            _self._onUpdateListener(_self._generateCurrentStatistics());
+                            _self._saveState();
+
                             localResolve();
                         }
                     }).catch((error) => {
@@ -232,7 +239,7 @@ class Queue {
                 if (LOG) console.log('Queue: processing pushAndProcess item right away');
 
                 _self._locked = true;
-                _self._dispatch().then(() => {
+                _self._dispatch(false).then(() => {
                     _self._locked = false;
 
                     resolve();
