@@ -63,8 +63,7 @@ module.exports = function (grunt) {
             extensions: {
                 options: {
                     target: "./build",
-                    rebase: true,
-                    compress: false
+                    rebase: true
                 },
                 files: {
                     'public/css/styles.min.css': [
@@ -272,7 +271,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
-    grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
+    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
 
