@@ -204,6 +204,18 @@ module.exports = module.exports = {
 
         });
 
+        // When reset:all is triggered, we rwe reset all modules.
+        // Extensions must implement a listener for the reset:all event
+        // and clean up
+        // ============================================================
+        backboneEvents.get().on("reset:all", function () {
+            console.info("Resets all");
+            backboneEvents.get().trigger("on:infoClick");
+            backboneEvents.get().trigger("off:advancedInfo");
+            backboneEvents.get().trigger("off:drawing");
+            backboneEvents.get().trigger("off:print");
+        });
+
         backboneEvents.get().on("off:advancedInfo on:drawing", function () {
             console.info("Stopping advanced info");
             advancedInfo.off();
@@ -216,7 +228,6 @@ module.exports = module.exports = {
 
         // Info click
         // ==========
-
         backboneEvents.get().on("on:infoClick", function () {
             console.info("Activating infoClick");
             infoClick.active(true);
@@ -232,7 +243,8 @@ module.exports = module.exports = {
             infoClick.reset();
         });
 
-
+        // Layer loading
+        // =============
         backboneEvents.get().on("startLoading:layers", function (e) {
             console.log("Start loading: " + e);
             doneB = doneL = false;
