@@ -13,18 +13,18 @@ module.exports = function (grunt) {
                     compress: false,
                     optimization: 2
                 },
-                files: {
-                    "public/css/styles.css": "public/less/styles.less" // destination file and source file
-                }
-            },
-            extensions: {
-                files: [{
-                    expand: true,        // Enable dynamic expansion.
-                    cwd: 'extensions',  // Src matches are relative to this path.
-                    src: ['**/less/*.less',],     // Actual pattern(s) to match.
-                    dest: 'public/css/extensions',  // Destination path prefix.
-                    ext: '.css',         // Dest filepaths will have this extension.
-                }]
+                files: [
+                    {
+                        "public/css/styles.css": "public/less/styles.less" // destination file and source file
+                    },
+                    {
+                        expand: true,        // Enable dynamic expansion.
+                        cwd: 'extensions',  // Src matches are relative to this path.
+                        src: ['**/less/*.less',],     // Actual pattern(s) to match.
+                        dest: 'public/css/extensions',  // Destination path prefix.
+                        ext: '.css',         // Dest filepaths will have this extension.
+                    }
+                ]
             }
         },
         cssmin: {
@@ -56,8 +56,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
-                        'public/css/styles.css',
-                        'public/css/extensions/all.min.css'
+                        'public/css/styles.min.css'
                     ]
                 }
             },
@@ -68,7 +67,8 @@ module.exports = function (grunt) {
                     compress: false
                 },
                 files: {
-                    'public/css/extensions/all.min.css': [
+                    'public/css/styles.min.css': [
+                        'public/css/styles.css',
                         'public/css/extensions/**/less/*.css'
                     ]
                 }
@@ -273,7 +273,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
-    grunt.registerTask('extension-css', ['less:extensions', 'cssmin:extensions']);
+    grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
 
 
