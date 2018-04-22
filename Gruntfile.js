@@ -16,6 +16,15 @@ module.exports = function (grunt) {
                 files: {
                     "public/css/styles.css": "public/less/styles.less" // destination file and source file
                 }
+            },
+            extensions: {
+                files: [{
+                    expand: true,        // Enable dynamic expansion.
+                    cwd: 'extensions',  // Src matches are relative to this path.
+                    src: ['**/less/*.less',],     // Actual pattern(s) to match.
+                    dest: 'public/css/extensions',  // Destination path prefix.
+                    ext: '.css',         // Dest filepaths will have this extension.
+                }]
             }
         },
         cssmin: {
@@ -47,10 +56,24 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
-                        'public/css/styles.css'
+                        'public/css/styles.css',
+                        'public/css/extensions/all.min.css'
+                    ]
+                }
+            },
+            extensions: {
+                options: {
+                    target: "./build",
+                    rebase: true,
+                    compress: false
+                },
+                files: {
+                    'public/css/extensions/all.min.css': [
+                        'public/css/extensions/**/less/*.css'
                     ]
                 }
             }
+
         },
         jshint: {
             options: {
@@ -87,7 +110,7 @@ module.exports = function (grunt) {
         handlebars: {
             publish: {
                 options: {
-                    namespace: function(filename) {
+                    namespace: function (filename) {
                         var names = filename.replace(/modules\/(.*)(\/\w+\.hbs)/, '$1');
                         return names.split('/').join('.');
                     },
@@ -174,7 +197,6 @@ module.exports = function (grunt) {
                         'public/js/vidi.js',
                         'public/js/gc2/geocloud.js',
                         'public/js/gc2/gc2table.js'
-
                     ]
                 }
             }
@@ -203,7 +225,7 @@ module.exports = function (grunt) {
                 command: [
                     'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                    ].join('&&')
+                ].join('&&')
             }
         },
         cacheBust: {
@@ -251,6 +273,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
     grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
+    grunt.registerTask('extension-css', ['less:extensions', 'cssmin:extensions']);
 };
 
 
