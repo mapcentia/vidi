@@ -60,13 +60,13 @@ class Queue {
                 } else if (jqXHR.statusText === 'OFFLINE') {
                     if (_self._online) {
                         _self._online = false;
-                        
+
                         if (LOG) console.log(`Queue: app went offline`);
 
                         _self._onUpdateListener(_self._generateCurrentStatistics());
                     }
                 } else {
-                    throw new Error('Unable the determine the online status');
+                    console.warn(`Unable the determine the online status`);
                 }
             }).always(() => {
                 if (_self._queue.length > 0 && _self._locked === false) {

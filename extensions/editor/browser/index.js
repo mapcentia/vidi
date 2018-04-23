@@ -9,7 +9,7 @@
  *
  * @type {*|exports|module.exports}
  */
-let APIBridgeSingletone = require('./api-bridge');
+let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
 /**
  *
@@ -36,7 +36,7 @@ var Form = JSONSchemaForm.default;
 
 var markers;
 
-var vectorLayers;
+var formerVectorLayers;
 
 var editor;
 
@@ -70,7 +70,7 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
-        vectorLayers = o.extensions.vectorLayers.index;
+        formerVectorLayers = o.layerTree;
         return this;
     },
 
@@ -111,7 +111,7 @@ module.exports = {
         });
 
         // Don't init layer tree automatic. Let this module activate it
-        vectorLayers.setAutomatic(false);
+        formerVectorLayers.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
 
@@ -131,7 +131,7 @@ module.exports = {
                 }
 
                 // Set popup with Edit and Delete buttons
-                vectorLayers.setOnEachFeature("v:" + layerName, function (feature, layer) {
+                formerVectorLayers.setOnEachFeature("v:" + layerName, function (feature, layer) {
 
                     let popup = L.popup({
                         autoPan: false
@@ -156,18 +156,16 @@ module.exports = {
                     });
                 });
 
-                vectorLayers.setStyle(layerName, styleFn);
+                formerVectorLayers.setStyle(layerName, styleFn);
+            });
+
+            backboneEvents.get().on("ready:formerVectorLayers", function () {
 
             });
 
-            backboneEvents.get().on("ready:vectorLayers", function () {
-
-            });
-
-            vectorLayers.createLayerTree();
-
+            // @todo Find out why it was originally called
+            // formerVectorLayers.createLayerTree();
         });
-
     },
 
     /**
@@ -575,8 +573,8 @@ module.exports = {
      */
     reloadLayer: (layerId) => {
         console.log('reloadLayer', layerId);
-        vectorLayers.switchLayer(layerId, false);
-        vectorLayers.switchLayer(layerId, true);
+        formerVectorLayers.switchLayer(layerId, false);
+        formerVectorLayers.switchLayer(layerId, true);
     },
 
     /**
