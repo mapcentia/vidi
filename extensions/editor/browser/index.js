@@ -199,6 +199,128 @@ module.exports = {
         return properties;
     },
 
+
+    /**
+     * Add new features to layer
+     * @param k
+     * @param qstore
+     * @param doNotRemoveEditor
+     */
+    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        let me = this, React = require('react'), ReactDOM = require('react-dom'),
+            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
+            type = metaDataKeys[schemaQualifiedName].type;
+
+        const addFeature = () => {
+            me.stopEdit();
+
+            // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
+                e.stopPropagation();
+                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                    me.stopEdit();
+                } else {
+                    return false;
+                }
+            });
+
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
+            };
+
+            // Slide panel with attributes in and render form component
+            $("#info-modal.slide-right").animate({
+                right: "0"
+            }, 200, function () {
+                ReactDOM.render((
+                    <div style={{"padding": "15px"}}>
+                        <Form schema={schema}
+                            onSubmit={onSubmit}
+                        />
+                    </div>
+                ), document.getElementById("info-modal-body"));
+            });
+
+            // Start editor with the right type
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            }
+            else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            }
+
+            /**
+             * Commit to GC2
+             * @param formData
+             */
+            const onSubmit = function (formData) {
+
+                let featureCollection, geoJson = editor.toGeoJSON();
+
+                // Promote MULTI geom
+                if (type.substring(0, 5) === "MULTI") {
+                    geoJson = multiply([geoJson]);
+                }
+
+                Object.keys(formData.formData).map(function (key, index) {
+                    geoJson.properties[key] = formData.formData[key];
+                    if (geoJson.properties[key] === undefined) {
+                        geoJson.properties[key] = null;
+                    }
+                });
+
+                featureCollection = {
+                    "type": "FeatureCollection",
+                    "features": [
+                        geoJson
+                    ]
+                };
+
+                /**
+                 * Feature saving callback
+                 * 
+                 * @param {Object} result Saving result
+                 */
+                const featureIsSaved = (result) => {
+                    console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
+
+                    sqlQuery.reset(qstore);
+                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                    me.stopEdit(l);
+
+                    jquery.snackbar({
+                        id: "snackbar-conflict",
+                        content: "Entity  stedfæstet",
+                        htmlAllowed: true,
+                        timeout: 5000
+                    });
+                };
+
+                apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
+                    console.log('Editor: error occured while performing addFeature()');
+                    throw new Error(error);
+                });
+            };
+        };
+
+        if (isVectorLayer) {
+            addFeature();
+        } else {
+            this.checkIfAppIsOnline().then(addFeature).catch(() => {
+                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+                    addFeature();
+                }
+            });
+        }
+    },
+
+
     /**
      * Change existing feature
      * @param e
@@ -380,144 +502,18 @@ module.exports = {
         if (isVectorLayer) {
             editFeature();
         } else {
-            $.get('/connection-check.ico', () => {}).done(() => {
-                editFeature();
-            }).fail(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
-                    editFeature();
-                }
-            });
-        }
-    },
-
-    /**
-     * Add new features to layer
-     * @param k
-     * @param qstore
-     * @param doNotRemoveEditor
-     */
-    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
-        let me = this, React = require('react'), ReactDOM = require('react-dom'),
-            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-            metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
-            type = metaDataKeys[schemaQualifiedName].type;
-
-        const addFeature = () => {
-            me.stopEdit();
-
-            // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
-                e.stopPropagation();
-                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                    me.stopEdit();
-                } else {
-                    return false;
-                }
-            });
-
-            // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
-
-            // Slide panel with attributes in and render form component
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-                ReactDOM.render((
-                    <div style={{"padding": "15px"}}>
-                        <Form schema={schema}
-                            onSubmit={onSubmit}
-                        />
-                    </div>
-                ), document.getElementById("info-modal-body"));
-            });
-
-            // Start editor with the right type
-            if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
-            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
-            }
-            else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
-            }
-
-            /**
-             * Commit to GC2
-             * @param formData
-             */
-            const onSubmit = function (formData) {
-
-                let featureCollection, geoJson = editor.toGeoJSON();
-
-                // Promote MULTI geom
-                if (type.substring(0, 5) === "MULTI") {
-                    geoJson = multiply([geoJson]);
-                }
-
-                Object.keys(formData.formData).map(function (key, index) {
-                    geoJson.properties[key] = formData.formData[key];
-                    if (geoJson.properties[key] === undefined) {
-                        geoJson.properties[key] = null;
-                    }
-                });
-
-                featureCollection = {
-                    "type": "FeatureCollection",
-                    "features": [
-                        geoJson
-                    ]
-                };
-
-                /**
-                 * Feature saving callback
-                 * 
-                 * @param {Object} result Saving result
-                 */
-                const featureIsSaved = (result) => {
-                    console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(l);
-
-                    jquery.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
-                };
-
-                apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
-                    console.log('Editor: error occured while performing addFeature()');
-                    throw new Error(error);
-                });
-            };
-        };
-
-        if (isVectorLayer) {
-            addFeature();
-        } else {
-            $.ajax({
-                method: 'GET',
-                url: '/connection-check.ico'
-            }).done((data, textStatus, jqXHR) => {
-                if (jqXHR.statusText === 'ONLINE') {
-                    addFeature();
-                } else if (jqXHR.statusText === 'OFFLINE') {
+            if (isVectorLayer) {
+                addFeature();
+            } else {
+                this.checkIfAppIsOnline().then(editFeature).catch(() => {
                     if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
-                        addFeature();
+                        editFeature();
                     }
-                } else {
-                    throw new Error('Unable the determine the online status');
-                }
-            });
+                });
+            }
         }
     },
+
 
     /**
      * Delete feature from layer
@@ -539,7 +535,7 @@ module.exports = {
 
                 sqlQuery.reset(qstore);
                 cloud.get().map.closePopup();
-                me.reloadLayer("v:" + schemaQualifiedName);
+                formerVectorLayers.reloadLayer("v:" + schemaQualifiedName);
             };
 
             if (!gid) {
@@ -556,25 +552,12 @@ module.exports = {
         if (isVectorLayer) {
             deleteFeature();
         } else {
-            $.get('/connection-check.ico', () => {}).done(function() {
-                deleteFeature();
-            }).fail(() => {
+            this.checkIfAppIsOnline().then(deleteFeature).catch(() => {
                 if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
                     deleteFeature();
                 }
             });
         }
-    },
-
-    /**
-     * Reloading provided layer.
-     * 
-     * @param {String} layerId Layer identifier
-     */
-    reloadLayer: (layerId) => {
-        console.log('reloadLayer', layerId);
-        formerVectorLayers.switchLayer(layerId, false);
-        formerVectorLayers.switchLayer(layerId, true);
     },
 
     /**
@@ -585,7 +568,7 @@ module.exports = {
         let me = this;
         cloud.get().map.editTools.stopDrawing();
 
-        if (e) me.reloadLayer(e.id);
+        if (e) formerVectorLayers.reloadLayer(e.id);
         if (editor) cloud.get().map.removeLayer(editor);
 
         if (markers) {
@@ -594,7 +577,30 @@ module.exports = {
                 cloud.get().map.removeLayer(markers[i]);
             });
         }
-    }
+    },
+
+    /**
+     * Checks if application is online.
+     */
+    checkIfAppIsOnline: () => {
+        let result = new Promise((resolve, reject) => {
+            $.ajax({
+                method: 'GET',
+                url: '/connection-check.ico'
+            }).done((data, textStatus, jqXHR) => {
+                if (jqXHR.statusText === 'ONLINE') {
+                    resolve();
+                } else if (jqXHR.statusText === 'OFFLINE') {
+                    reject();
+                } else {
+                    console.warn(`Unable the determine the online status`);
+                    reject();
+                }
+            });
+        });
+
+        return result;
+    },
 };
 
 

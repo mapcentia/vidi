@@ -7,6 +7,8 @@
 
 var meta;
 
+var layerSwitcher;
+
 var layers;
 
 var onEachFeature = [];
@@ -74,6 +76,7 @@ var dict = {
 module.exports = {
     set: function (o) {
         meta = o.meta;
+        layerSwitcher = o.switchLayer;
         return this;
     },
     init: function () {
@@ -141,14 +144,17 @@ module.exports = {
 
             if (forceLayerUpdate) {
                 _self.getActiveLayers().map(item => {
-                    _self.switchLayer(item, false);
-                    _self.switchLayer(item, true);
+                    layerSwitcher.switchLayer(item, false);
+                    layerSwitcher.switchLayer(item, true);
                 });
             }
         });
 
-        var base64name, arr, groups, metaData, i, l, count, displayInfo, tooltip;
+        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
+
         groups = [];
+
+        // Getting set of all loaded vectors
         metaData = meta.getMetaDataLatestLoaded();
         for (i = 0; i < metaData.data.length; ++i) {
             groups[i] = metaData.data[i].layergroup;
@@ -181,21 +187,31 @@ module.exports = {
         });
 
         $("#layers").append(toggleOfllineOnlineMode);
-
+        // Filling up groups and underlying layers (except ungrouped ones)
         for (i = 0; i < arr.length; ++i) {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
                 l = [];
-                base64name = Base64.encode(arr[i]).replace(/=/g, "");
+                base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
                 // Add group container
                 // Only if container doesn't exist
                 // ===============================
-                if ($("#layer-panel-" + base64name).length === 0) {
-                    $("#layers").append('<div class="panel panel-default panel-layertree" id="layer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="group-' + base64name + '" role="tabpanel"></ul></div>');
+                if ($("#layer-panel-" + base64GroupName).length === 0) {
+                    $("#layers").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+                        <div class="panel-heading" role="tab">
+                            <h4 class="panel-title">
+                                <div class="layer-count badge">
+                                    <span>0</span> / <span></span>
+                                </div>
+                                <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
+                            </h4>
+                        </div>
+                        <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                    </div>`);
 
                     // Append to inner group container
                     // ===============================
-                    $("#group-" + base64name).append('<div id="collapse' + base64name + '" class="accordion-body collapse"></div>');
+                    $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
                 }
 
                 // Add layers
@@ -205,10 +221,17 @@ module.exports = {
                     if (localMeta.layergroup == arr[i]) {
                         var text = (localMeta.f_table_title === null || localMeta.f_table_title === "") ? localMeta.f_table_name : localMeta.f_table_title;
                         if (localMeta.baselayer) {
-                            $("#base-layer-list").append(
-                                "<div class='list-group-item'><div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='" + localMeta.f_table_schema + "." + localMeta.f_table_name + "'><label class='baselayer-label'><input type='radio' name='baselayers'>" + text + "<span class='fa fa-check' aria-hidden='true'></span></label></div></div>"
-                            );
+                            $("#base-layer-list").append(`<div class='list-group-item'>
+                                <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${localMeta.f_table_schema}.${localMeta.f_table_name}'>
+                                    <label class='baselayer-label'>
+                                        <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
+                                    </label>
+                                </div>
+                            </div>`);
                         } else {
+                            let layerKey = localMeta.f_table_schema + "." + localMeta.f_table_name;
+                            let layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
+
                             let isDisabledAttribute = '';
                             let selectorLabel = __('Tile');
                             if (localMeta && localMeta.meta) {
@@ -228,8 +251,12 @@ module.exports = {
 
                             displayInfo = ((localMeta.meta !== null && $.parseJSON(localMeta.meta) !== null && typeof $.parseJSON(localMeta.meta).meta_desc !== "undefined" && $.parseJSON(localMeta.meta).meta_desc !== "") || localMeta.f_table_abstract) ? "visible" : "hidden";
                             tooltip = localMeta.f_table_abstract || "";
+
                             let lockedLayer = (localMeta.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-                            let layerControlRecord = $(`<li class="layer-item list-group-item">
+
+                            let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+                            let queueInfoButtonStyle = regularButtonStyle + ` background-color: #FF6666; padding-left: 4px; padding-right: 4px;`;
+                            let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
                                 <div style="display: inline-block;">
                                     <div class="checkbox" style="width: 34px;">
                                         <label>
@@ -257,6 +284,18 @@ module.exports = {
                                 </div>
                                 <div style="display: inline-block;">
                                     <span>${text}${lockedLayer}</span>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-add" style="${queueInfoButtonStyle}" disabled>
+                                        <i class="fa fa-plus"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-update" style="${queueInfoButtonStyle}" disabled>
+                                        <i class="fa fa-edit"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="${queueInfoButtonStyle}" disabled>
+                                        <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" data-layer-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
                                 </div>
                                 <div style="display: inline-block;">
                                     <button style="padding: 8px;" type="button" data-gc2-key="${localMeta.f_table_schema}.${localMeta.f_table_name}.${localMeta.f_geometry_column}"
@@ -278,23 +317,23 @@ module.exports = {
                                 e.stopPropagation();
                             });
 
-                            $("#collapse" + base64name).append(layerControlRecord);
+                            $("#collapse" + base64GroupName).append(layerControlRecord);
 
                             l.push({});
                         }
                     }
                 }
 
-                if (!isNaN(parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()))) {
-                    count = parseInt($($("#layer-panel-" + base64name + " .layer-count span")[1]).html()) + l.length;
+                if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+                    count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
                 } else {
                     count = l.length;
                 }
 
-                $("#layer-panel-" + base64name + " span:eq(1)").html(count);
+                $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
                 // Remove the group if empty
                 if (l.length === 0) {
-                    $("#layer-panel-" + base64name).remove();
+                    $("#layer-panel-" + base64GroupName).remove();
                 }
             }
         }
@@ -306,374 +345,6 @@ module.exports = {
     },
 
 
-
-    /**
-     * Change existing feature
-     * @param e
-     * @param k
-     * @param qstore
-     */
-    edit: function (e, k, qstore, isVectorLayer = false) {
-        const editFeature = () => {
-            let React = require('react');
-
-            let ReactDOM = require('react-dom');
-
-            let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-                metaDataKeys = meta.getMetaDataKeys(),
-                fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
-                properties;
-            me.stopEdit();
-
-            e.id = "v:" + metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
-            e.initialFeatureJSON = e.toGeoJSON();
-
-            markers = []; // Holds marker(s) for Point and MultiPoints layers
-
-            cloud.get().map.closePopup();
-
-            backboneEvents.get().on("start:sqlQuery", function () {
-                //me.stopEdit(e);
-            });
-
-            // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
-
-                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                    me.stopEdit(e);
-                    sqlQuery.reset(qstore);
-                    $(".slide-right .close").unbind("click.edit");
-
-                } else {
-                    return false;
-                }
-            });
-
-            // Hack to edit (Multi)Point layers
-            // Create markers, which can be dragged
-            switch (e.feature.geometry.type) {
-
-                case "Point":
-                    markers[0] = L.marker(
-                        e.getLatLng(),
-                        {
-                            icon: L.AwesomeMarkers.icon({
-                                    icon: 'arrows',
-                                    markerColor: 'blue',
-                                    prefix: 'fa'
-                                }
-                            )
-                        }
-                    ).addTo(cloud.get().map);
-                    sqlQuery.reset();
-                    markers[0].enableEdit();
-                    sqlQuery.reset(qstore);
-                    break;
-
-                case "MultiPoint":
-                    e.feature.geometry.coordinates.map(function (v, i) {
-                        markers[i] = L.marker(
-                            [v[1], v[0]],
-                            {
-                                icon: L.AwesomeMarkers.icon({
-                                        icon: 'arrows',
-                                        markerColor: 'blue',
-                                        prefix: 'fa'
-                                    }
-                                )
-                            }
-                        ).addTo(cloud.get().map);
-                        markers[i].enableEdit();
-
-                    });
-                    sqlQuery.reset(qstore);
-                    break;
-
-                default:
-                    editor = e.enableEdit();
-                    break;
-            }
-
-            // Delete som system attributes
-            delete e.feature.properties._vidi_content;
-            delete e.feature.properties._id;
-
-            // Set NULL values to undefined, because NULL is a type
-            Object.keys(e.feature.properties).map(function (key) {
-                if (e.feature.properties[key] === null) {
-                    e.feature.properties[key] = undefined;
-                }
-            });
-
-            // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
-
-            // Slide panel with attributes in and render form component
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-                ReactDOM.render((
-                    <div style={{"padding": "15px"}}>
-                        <Form schema={schema}
-                            formData={e.feature.properties}
-                            onSubmit={onSubmit}
-                        />
-                    </div>
-                ), document.getElementById("info-modal-body"));
-
-            });
-
-            /**
-             * Commit to GC2
-             * @param formData
-             */
-            const onSubmit = function (formData) {
-
-                let GeoJSON = e.toGeoJSON(), featureCollection;
-
-                // HACK to handle (Multi)Point layers
-                // Update the GeoJSON from markers
-                switch (e.feature.geometry.type) {
-                    case "Point":
-                        GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
-                        break;
-
-                    case "MultiPoint":
-                        markers.map(function (v, i) {
-                            GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
-                        });
-                        break;
-
-                    default:
-                        //pass
-                        break;
-                }
-
-                // Set GeoJSON properties from form values
-                Object.keys(e.feature.properties).map(function (key) {
-                    GeoJSON.properties[key] = formData.formData[key];
-                    // Set undefined values back to NULL
-                    if (GeoJSON.properties[key] === undefined) {
-                        GeoJSON.properties[key] = null;
-                    }
-                });
-
-                // Set the GeoJSON FeatureCollection
-                // This is committed to GC2
-                featureCollection = {
-                    "type": "FeatureCollection",
-                    "features": [
-                        GeoJSON
-                    ]
-                };
-
-                const featureIsUpdated = () => {
-                    console.log('Editor: featureIsUpdated');
-
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(e);
-                    sqlQuery.reset(qstore);
-                };
-
-                apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
-                    console.log('Editor: error occured while performing updateFeature()');
-                    throw new Error(error);
-                });
-            };
-        };
-
-        if (isVectorLayer) {
-            editFeature();
-        } else {
-            $.get('/connection-check.ico', () => {}).done(() => {
-                editFeature();
-            }).fail(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
-                    editFeature();
-                }
-            });
-        }
-    },
-
-    /**
-     * Add new features to layer
-     * @param k
-     * @param qstore
-     * @param doNotRemoveEditor
-     */
-    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
-        let me = this, React = require('react'), ReactDOM = require('react-dom'),
-            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-            metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
-            type = metaDataKeys[schemaQualifiedName].type;
-
-        const addFeature = () => {
-            me.stopEdit();
-
-            // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
-                e.stopPropagation();
-                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                    me.stopEdit();
-                } else {
-                    return false;
-                }
-            });
-
-            // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
-
-            // Slide panel with attributes in and render form component
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-                ReactDOM.render((
-                    <div style={{"padding": "15px"}}>
-                        <Form schema={schema}
-                            onSubmit={onSubmit}
-                        />
-                    </div>
-                ), document.getElementById("info-modal-body"));
-            });
-
-            // Start editor with the right type
-            if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
-            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
-            }
-            else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
-            }
-
-            /**
-             * Commit to GC2
-             * @param formData
-             */
-            const onSubmit = function (formData) {
-
-                let featureCollection, geoJson = editor.toGeoJSON();
-
-                // Promote MULTI geom
-                if (type.substring(0, 5) === "MULTI") {
-                    geoJson = multiply([geoJson]);
-                }
-
-                Object.keys(formData.formData).map(function (key, index) {
-                    geoJson.properties[key] = formData.formData[key];
-                    if (geoJson.properties[key] === undefined) {
-                        geoJson.properties[key] = null;
-                    }
-                });
-
-                featureCollection = {
-                    "type": "FeatureCollection",
-                    "features": [
-                        geoJson
-                    ]
-                };
-
-                /**
-                 * Feature saving callback
-                 * 
-                 * @param {Object} result Saving result
-                 */
-                const featureIsSaved = (result) => {
-                    console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
-
-                    sqlQuery.reset(qstore);
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(l);
-
-                    jquery.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
-                };
-
-                apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
-                    console.log('Editor: error occured while performing addFeature()');
-                    throw new Error(error);
-                });
-            };
-        };
-
-        if (isVectorLayer) {
-            addFeature();
-        } else {
-            $.ajax({
-                method: 'GET',
-                url: '/connection-check.ico'
-            }).done((data, textStatus, jqXHR) => {
-                if (jqXHR.statusText === 'ONLINE') {
-                    addFeature();
-                } else if (jqXHR.statusText === 'OFFLINE') {
-                    if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
-                        addFeature();
-                    }
-                } else {
-                    console.warn(`Unable the determine the online status`);
-                }
-            });
-        }
-    },
-
-    /**
-     * Delete feature from layer
-     * @param e
-     * @param k
-     * @param qstore
-     */
-    delete: function (e, k, qstore, isVectorLayer = false) {
-        let me = this;
-
-        let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-            metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON(),
-            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
-
-        const deleteFeature = () => {
-            const featureIsDeleted = () => {
-                console.log('Editor: featureIsDeleted');
-
-                sqlQuery.reset(qstore);
-                cloud.get().map.closePopup();
-                me.reloadLayer("v:" + schemaQualifiedName);
-            };
-
-            if (!gid) {
-                gid = GeoJSON.properties.gid;
-                console.log('GeoJSON', GeoJSON);
-            }
-
-            apiBridgeInstance.deleteFeature(gid, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
-                console.log('Editor: error occured while performing deleteFeature()');
-                throw new Error(error);
-            });
-        };
-
-        if (isVectorLayer) {
-            deleteFeature();
-        } else {
-            $.get('/connection-check.ico', () => {}).done(function() {
-                deleteFeature();
-            }).fail(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
-                    deleteFeature();
-                }
-            });
-        }
-    },
-
     /**
      * Reloading provided layer.
      * 
@@ -681,32 +352,16 @@ module.exports = {
      */
     reloadLayer: (layerId) => {
         console.log('reloadLayer', layerId);
-        vectorLayers.switchLayer(layerId, false);
-        vectorLayers.switchLayer(layerId, true);
+        layerSwitcher.switchLayer(layerId, false);
+        layerSwitcher.switchLayer(layerId, true);
     },
 
-    /**
-     * Stop editing and clean up
-     * @param e
-     */
-    stopEdit: function (e) {
-        let me = this;
-        cloud.get().map.editTools.stopDrawing();
-
-        if (e) me.reloadLayer(e.id);
-        if (editor) cloud.get().map.removeLayer(editor);
-
-        if (markers) {
-            markers.map(function (v, i) {
-                markers[i].disableEdit();
-                cloud.get().map.removeLayer(markers[i]);
-            });
-        }
-    },
 
     /**
      * Turns layers on/off
      */
+    /*
+    // Same function as in switchLayer.js, avoiding duplication
     switchLayer: (id, visible) => {
         let el = $('*[data-gc2-id-vec="' + id + '"]');
         if (el.length !== 1) {
@@ -716,7 +371,6 @@ module.exports = {
         if (visible) {
             el.parent().siblings().children().addClass("fa-spin");
 
-            // @todo Refactor the try / catch code piece
             try {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(id));
             } catch (e) {
@@ -740,6 +394,7 @@ module.exports = {
             el.prop('checked', false);
         }
     },
+    */
 
     /**
      * Returns list of currently enabled layers
@@ -755,7 +410,6 @@ module.exports = {
 
         return activeLayerIds;
     },
-
 
     setOnEachFeature: function (layer, fn) {
         onEachFeature[layer] = fn;
@@ -774,7 +428,6 @@ module.exports = {
     },
 
     setCM: function (layer, c) {
-
         cm[layer] = c;
     },
 

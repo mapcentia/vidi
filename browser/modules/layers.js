@@ -81,8 +81,6 @@ module.exports = {
      */
     init: function () {
 
-
-
     },
 
     ready: function () {
