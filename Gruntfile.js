@@ -270,7 +270,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
 
-    grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
+    grunt.registerTask('default', ['browserify:publish', 'extension-css', 'hogan']);
     grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
