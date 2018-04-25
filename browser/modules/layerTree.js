@@ -7,9 +7,11 @@
 
 var meta;
 
-var layerSwitcher;
+var switchLayer;
 
 var layers;
+
+var backboneEvents;
 
 var onEachFeature = [];
 
@@ -28,6 +30,17 @@ var styles = [];
 var store = [];
 
 var automatic = true;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./urlparser');
+
+/**
+ * @type {string}
+ */
+var db = urlparser.db;
 
 /**
  *
@@ -76,7 +89,9 @@ var dict = {
 module.exports = {
     set: function (o) {
         meta = o.meta;
-        layerSwitcher = o.switchLayer;
+        layers = o.layers;
+        switchLayer = o.switchLayer;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
@@ -144,8 +159,8 @@ module.exports = {
 
             if (forceLayerUpdate) {
                 _self.getActiveLayers().map(item => {
-                    layerSwitcher.switchLayer(item, false);
-                    layerSwitcher.switchLayer(item, true);
+                    switchLayer.init(item, false);
+                    switchLayer.init(item, true);
                 });
             }
         });
@@ -177,6 +192,12 @@ module.exports = {
                 </div>
             </div>
         </div>`);
+
+
+        // @todo Remove
+        try {
+
+
 
         $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
             if ($(event.target).is(":checked")) {
@@ -229,11 +250,9 @@ module.exports = {
                                 </div>
                             </div>`);
                         } else {
-                            let layerKey = localMeta.f_table_schema + "." + localMeta.f_table_name;
-                            let layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
-
                             let isDisabledAttribute = '';
                             let selectorLabel = __('Tile');
+                            let defaultLayerType = 'tile';
                             if (localMeta && localMeta.meta) {
                                 let parsedMeta = JSON.parse(localMeta.meta);
                                 if (parsedMeta.vidi_layer_type) {
@@ -243,10 +262,55 @@ module.exports = {
                                     }
 
                                     if (parsedMeta.vidi_layer_type === 'v') {
+                                        defaultLayerType = 'vector';
                                         selectorLabel = __('Vector');
                                         isDisabledAttribute = 'disabled';
                                     }
                                 }
+                            }
+
+                            // If meta.usetiles is true, when add layers as tiles instead of vectors
+                            let layerKey, layerKeyWithGeom;
+                            if (JSON.parse(localMeta.meta) !== null && typeof JSON.parse(localMeta.meta).usetiles !== "undefined" &&
+                                JSON.parse(localMeta.meta).usetiles === true) {
+                                layerKey = localMeta.f_table_schema + "." + localMeta.f_table_name;
+                                layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
+                            } else if (!localMeta.baselayer) {
+                                layerKey = "v:" + localMeta.f_table_schema + "." + localMeta.f_table_name;
+                                layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
+
+                                store[layerKey] = new geocloud.sqlStore({
+                                    jsonp: false,
+                                    method: "POST",
+                                    host: "",
+                                    db: db,
+                                    uri: "/api/sql",
+                                    clickable: true,
+                                    id: layerKey,
+                                    name: layerKey,
+                                    lifetime: 0,
+                                    styleMap: styles[layerKey],
+                                    sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
+                                    onLoad: function (l) {
+                                        if (l === undefined) {
+                                            return
+                                        }
+
+                                        var me = l;
+
+                                        try {
+                                            $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
+                                        } catch (e) {
+                                        }
+
+                                        layers.decrementCountLoading(me.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", me.id);
+                                    },
+                                    transformResponse: (response, id) => {
+                                        return apiBridgeInstance.transformResponseHandler(response, id);
+                                    },
+                                    onEachFeature: onEachFeature[layerKey]
+                                });
                             }
 
                             displayInfo = ((localMeta.meta !== null && $.parseJSON(localMeta.meta) !== null && typeof $.parseJSON(localMeta.meta).meta_desc !== "undefined" && $.parseJSON(localMeta.meta).meta_desc !== "") || localMeta.f_table_abstract) ? "visible" : "hidden";
@@ -261,16 +325,19 @@ module.exports = {
                                     <div class="checkbox" style="width: 34px;">
                                         <label>
                                             <input type="checkbox"
+                                                class="js-show-layer-control"
                                                 id="${localMeta.f_table_name}"
-                                                data-gc2-id="${localMeta.f_table_schema}.${localMeta.f_table_name}">
+                                                data-gc2-id="${localMeta.f_table_schema}.${localMeta.f_table_name}"
+                                                data-gc2-layer-type="${defaultLayerType}">
                                         </label>
                                     </div>
                                 </div>
                                 <div style="display: inline-block;">
                                     <div class="dropdown">
                                         <button style="padding: 8px;" class="btn btn-default dropdown-toggle" type="button"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ${isDisabledAttribute}>${selectorLabel}
-                                        <span class="caret"></span>
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ${isDisabledAttribute}>
+                                            <span class="js-dropdown-label">${selectorLabel}</span>
+                                            <span class="caret"></span>
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
@@ -308,13 +375,19 @@ module.exports = {
                             </li>`);
 
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
-                                console.log('tile type was chosen');
-                                e.stopPropagation();
+                                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                $(switcher).data('gc2-layer-type', 'tile');
+                                console.log('label', $(switcher).find('.js-dropdown-label'));
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text('tile');
+                                _self.reloadLayer($(switcher).data('gc2-id'), 'tile');
                             });
 
                             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
-                                console.log('vector type was chosen');
-                                e.stopPropagation();
+                                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                $(switcher).data('gc2-layer-type', 'vector');
+                                console.log('label', $(switcher).find('.js-dropdown-label'));
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text('vector');
+                                _self.reloadLayer($(switcher).data('gc2-id'), 'vector');
                             });
 
                             $("#collapse" + base64GroupName).append(layerControlRecord);
@@ -342,6 +415,13 @@ module.exports = {
         // ====================
 
         $("#layers div:first").find("a").trigger("click");
+
+
+        } catch (e) {
+            console.log(e);
+        }
+
+
     },
 
 
@@ -350,51 +430,12 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId) => {
+    reloadLayer: (layerId, layerType) => {
         console.log('reloadLayer', layerId);
-        layerSwitcher.switchLayer(layerId, false);
-        layerSwitcher.switchLayer(layerId, true);
+        switchLayer.init(layerId, false, false, layerType, store);
+        switchLayer.init(layerId, true, false, layerType, store);
     },
 
-
-    /**
-     * Turns layers on/off
-     */
-    /*
-    // Same function as in switchLayer.js, avoiding duplication
-    switchLayer: (id, visible) => {
-        let el = $('*[data-gc2-id-vec="' + id + '"]');
-        if (el.length !== 1) {
-            throw new Error('Unable to find specified layer');
-        }
-
-        if (visible) {
-            el.parent().siblings().children().addClass("fa-spin");
-
-            try {
-                cloud.get().map.addLayer(cloud.get().getLayersByName(id));
-            } catch (e) {
-                console.info(id + " added to the map.");
-
-                cloud.get().layerControl.addOverlay(store[id].layer, id);
-                cloud.get().map.addLayer(cloud.get().getLayersByName(id));
-            } finally {
-                store[id].load();
-                el.prop('checked', true);
-                layers.incrementCountLoading(id);
-                backboneEvents.get().trigger("startLoading:layers", id);
-            }
-        } else {
-            if (store[id]) {
-                store[id].abort();
-                store[id].reset();
-            }
-
-            cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
-            el.prop('checked', false);
-        }
-    },
-    */
 
     /**
      * Returns list of currently enabled layers

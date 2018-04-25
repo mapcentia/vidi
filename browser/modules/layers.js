@@ -147,7 +147,7 @@ module.exports = {
      * @param l
      * @returns {Promise}
      */
-    addLayer: function (l) {
+    addLayer: function (l, layerType) {
         var me = this;
 
         if (typeof window.vidiConfig.singleTiled === "object" && window.vidiConfig.singleTiled.length > 0) {
@@ -163,44 +163,37 @@ module.exports = {
                 var layer = v.f_table_schema + "." + v.f_table_name;
 
                 if (layer === l) {
+                    isBaseLayer = v.baselayer ? true : false;
 
-                    switch (BACKEND) {
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        host: host,
+                        layers: [layer],
+                        db: db,
+                        type: layerType,
+                        isBaseLayer: isBaseLayer,
+                        tileCached: singleTiled.indexOf(layer) === -1,
+                        visibility: false,
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        name: v.f_table_name,
+                        // Single tile option
+                        type: singleTiled.indexOf(layer) === -1 ? "tms" : "wms",
+                        tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
+                        format: "image/png",
+                        loadEvent: function () {
+                            me.decrementCountLoading(layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
 
-                        case "gc2":
+                    layers[[layer]][0].setZIndex(v.sort_id + 10000);
 
-                            isBaseLayer = v.baselayer ? true : false;
-
-                            layers[[layer]] = cloud.get().addTileLayers({
-                                host: host,
-                                layers: [layer],
-                                db: db,
-                                isBaseLayer: isBaseLayer,
-                                tileCached: singleTiled.indexOf(layer) === -1,
-                                visibility: false,
-                                wrapDateLine: false,
-                                displayInLayerSwitcher: true,
-                                name: v.f_table_name,
-                                // Single tile option
-                                type: singleTiled.indexOf(layer) === -1 ? "tms" : "wms",
-                                tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
-                                format: "image/png",
-                                loadEvent: function () {
-                                    me.decrementCountLoading(layer);
-                                    backboneEvents.get().trigger("doneLoading:layers", layer);
-                                },
-                                loadingEvent: function () {
-                                    me.incrementCountLoading(layer);
-                                    backboneEvents.get().trigger("startLoading:layers", layer);
-                                },
-                                subdomains: window.gc2Options.subDomainsForTiles
-                            });
-
-                            layers[[layer]][0].setZIndex(v.sort_id + 10000);
-
-                            resolve();
-
-                            break;
-                    }
+                    resolve();
                 }
             });
 

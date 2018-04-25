@@ -346,7 +346,7 @@ module.exports = module.exports = {
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 $(this).on("change", function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
+                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked, true, $(this).data('gc2-layer-type'));
                     e.stopPropagation();
                 });
             });
