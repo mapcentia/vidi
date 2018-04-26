@@ -97,7 +97,7 @@ module.exports = module.exports = {
             if (layer) {
                 cloud.get().map.removeLayer(layer);
             }
-
+console.log('forceTileReload', forceTileReload);
             if (layer && layer.type === layerType) {
                 // Layer already exists and has the same type, then no need to recreate
 

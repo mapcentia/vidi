@@ -414,12 +414,9 @@ module.exports = {
 
         $("#layers div:first").find("a").trigger("click");
 
-
         } catch (e) {
             console.log(e);
         }
-
-
     },
 
 
@@ -428,15 +425,15 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, layerType = 'tile') => {
-        console.log('reloadLayer', layerId);
+    reloadLayer: (layerId, layerType = 'tile', forceTileRedraw = false) => {
+        console.log('reloadLayer', layerId, layerType, forceTileRedraw);
         if (layerId.startsWith('v:')) {
             layerId = layerId.replace('v:', '');
             layerType = 'vector';
         }
 
-        switchLayer.init(layerId, false, false, layerType);
-        switchLayer.init(layerId, true, false, layerType);
+        switchLayer.init(layerId, false, false, layerType, forceTileRedraw);
+        switchLayer.init(layerId, true, false, layerType, forceTileRedraw);
     },
 
 
