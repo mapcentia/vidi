@@ -98,8 +98,15 @@ module.exports = module.exports = {
                 cloud.get().map.removeLayer(layer);
             }
 
+console.log('wmsLayer.setParams({}, false);', layer);
+
             if (layer && layer.type === layerType) {
                 // Layer already exists and has the same type, then no need to recreate
+
+                layer.setUrl(layer._url + "?" + Math.random() + "&");
+                layer.redraw();
+
+
                 cloud.get().map.addLayer(layer);
                 me.update(doNotLegend, el);
             } else {
@@ -107,6 +114,11 @@ module.exports = module.exports = {
                 if (layerType === 'tile') {
                     layers.addLayer(name, layerType).then(() => {
                         let createdLayer = cloud.get().getLayersByName(name);
+
+
+                        createdLayer.setUrl(createdLayer._url + "?" + Math.random() + "&");
+                        createdLayer.redraw();
+
 
                         cloud.get().map.addLayer(createdLayer);
                         me.update(doNotLegend, el);

@@ -19,6 +19,8 @@ var utils;
 
 var backboneEvents;
 
+var layerTree;
+
 var apiBridgeInstance = false;
 
 var meta;
@@ -69,6 +71,7 @@ module.exports = {
         meta = o.meta;
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
         formerVectorLayers = o.layerTree;
         return this;
@@ -86,13 +89,13 @@ module.exports = {
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
             $(this).on("click", function (e) {
-                var t = ($(this).data('gc2-key'));
-                if (($(this).data('vector'))) {
-                    me.add(t, null, true, true);
-                } else {
-                    me.add(t);
+                let isVectorLayer = false;
+                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
+                    isVectorLayer = true;
                 }
-                
+
+                var t = ($(this).data('gc2-key'));
+                me.add(t, null, true, isVectorLayer);
                 e.stopPropagation();
             });
         });
@@ -292,6 +295,7 @@ module.exports = {
 
                     sqlQuery.reset(qstore);
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                    layerTree.reloadLayer(schemaQualifiedName);
                     me.stopEdit(l);
 
                     jquery.snackbar({
@@ -490,6 +494,7 @@ module.exports = {
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
+                    layerTree.reloadLayer(schemaQualifiedName);
                 };
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
@@ -534,6 +539,7 @@ module.exports = {
                 console.log('Editor: featureIsDeleted');
 
                 sqlQuery.reset(qstore);
+                layerTree.reloadLayer(schemaQualifiedName);
                 cloud.get().map.closePopup();
                 formerVectorLayers.reloadLayer("v:" + schemaQualifiedName);
             };

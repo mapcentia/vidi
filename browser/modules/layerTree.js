@@ -377,7 +377,6 @@ module.exports = {
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'tile');
-                                console.log('label', $(switcher).find('.js-dropdown-label'));
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('tile');
                                 _self.reloadLayer($(switcher).data('gc2-id'), 'tile');
                             });
@@ -385,7 +384,6 @@ module.exports = {
                             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'vector');
-                                console.log('label', $(switcher).find('.js-dropdown-label'));
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('vector');
                                 _self.reloadLayer($(switcher).data('gc2-id'), 'vector');
                             });
@@ -430,10 +428,15 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, layerType) => {
+    reloadLayer: (layerId, layerType = 'tile') => {
         console.log('reloadLayer', layerId);
-        switchLayer.init(layerId, false, false, layerType, store);
-        switchLayer.init(layerId, true, false, layerType, store);
+        if (layerId.startsWith('v:')) {
+            layerId = layerId.replace('v:', '');
+            layerType = 'vector';
+        }
+
+        switchLayer.init(layerId, false, false, layerType);
+        switchLayer.init(layerId, true, false, layerType);
     },
 
 

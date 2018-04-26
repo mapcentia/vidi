@@ -392,6 +392,7 @@ self.addEventListener('fetch', (event) => {
                         });
                     }
 
+                    if (LOG) console.log('requestHasToBeCached: ', requestHasToBeCached);
                     let requestToMake = new Request(cleanedRequestURL);
                     if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
                         var result = new Promise((resolve, reject) => {
