@@ -295,7 +295,7 @@ module.exports = {
 
                     sqlQuery.reset(qstore);
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    layerTree.reloadLayer(schemaQualifiedName);
+                    layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
                     me.stopEdit(l);
 
                     jquery.snackbar({
@@ -494,7 +494,7 @@ module.exports = {
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
-                    layerTree.reloadLayer(schemaQualifiedName);
+                    layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
                 };
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
@@ -539,7 +539,7 @@ module.exports = {
                 console.log('Editor: featureIsDeleted');
 
                 sqlQuery.reset(qstore);
-                layerTree.reloadLayer(schemaQualifiedName);
+                layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
                 cloud.get().map.closePopup();
                 formerVectorLayers.reloadLayer("v:" + schemaQualifiedName);
             };

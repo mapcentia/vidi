@@ -59,7 +59,7 @@ module.exports = module.exports = {
      * @param doNotLegend {boolean}
      * @param layerType {string}
      */
-    init: function (name, enable, doNotLegend, layerType) {
+    init: function (name, enable, doNotLegend, layerType, forceTileReload) {
         let store = layerTree.getStores();
         var me = this, el = $('*[data-gc2-id="' + name + '"]');
 
@@ -98,14 +98,13 @@ module.exports = module.exports = {
                 cloud.get().map.removeLayer(layer);
             }
 
-console.log('wmsLayer.setParams({}, false);', layer);
-
             if (layer && layer.type === layerType) {
                 // Layer already exists and has the same type, then no need to recreate
 
-                layer.setUrl(layer._url + "?" + Math.random() + "&");
-                layer.redraw();
-
+                if (forceTileReload) {
+                    layer.setUrl(layer._url + "?" + Math.random() + "&");
+                    layer.redraw();
+                }
 
                 cloud.get().map.addLayer(layer);
                 me.update(doNotLegend, el);
@@ -115,10 +114,10 @@ console.log('wmsLayer.setParams({}, false);', layer);
                     layers.addLayer(name, layerType).then(() => {
                         let createdLayer = cloud.get().getLayersByName(name);
 
-
-                        createdLayer.setUrl(createdLayer._url + "?" + Math.random() + "&");
-                        createdLayer.redraw();
-
+                        if (forceTileReload) {
+                            createdLayer.setUrl(createdLayer._url + "?" + Math.random() + "&");
+                            createdLayer.redraw();
+                        }
 
                         cloud.get().map.addLayer(createdLayer);
                         me.update(doNotLegend, el);
