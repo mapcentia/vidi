@@ -29,6 +29,12 @@ var layers;
  *
  * @type {*|exports|module.exports}
  */
+var layerTree;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var pushState;
 
 /**
@@ -40,6 +46,7 @@ module.exports = module.exports = {
         cloud = o.cloud;
         legend = o.legend;
         layers = o.layers;
+        layerTree = o.layerTree;
         pushState = o.pushState;
         backboneEvents = o.backboneEvents;
         return this;
@@ -52,60 +59,40 @@ module.exports = module.exports = {
      * @param doNotLegend {boolean}
      * @param layerType {string}
      */
-    init: function (name, enable, doNotLegend, layerType, store = []) {
+    init: function (name, enable, doNotLegend, layerType) {
+        let store = layerTree.getStores();
         var me = this, el = $('*[data-gc2-id="' + name + '"]');
 
         if (!layerType || ['tile', 'vector'].indexOf(layerType) === -1) {
             throw new Error('Invalid layer type was provided');
         }
 
-/*
-if (visible) {
+        const removeTileLayer = (id) => {
+            cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
+        };
 
-            el.parent().siblings().children().addClass("fa-spin");
-
-            try {
-
-                cloud.get().map.addLayer(cloud.get().getLayersByName(id));
-
-            }
-
-            catch (e) {
-
-                console.info(id + " added to the map.");
-
-                cloud.get().layerControl.addOverlay(store[id].layer, id);
-                cloud.get().map.addLayer(cloud.get().getLayersByName(id));
-
-            }
-
-            finally {
-
-                store[id].load();
-                el.prop('checked', true);
-                layers.incrementCountLoading(id);
-                backboneEvents.get().trigger("startLoading:layers", id);
-            }
-
-        } else {
+        const removeVectorLayer = (id) => {
             if (store[id]) {
                 store[id].abort();
                 store[id].reset();
             }
 
             cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
-            el.prop('checked', false);
+        };
 
-        }
-*/
-console.log('$$$ DATA', store, me);
         let id = 'v:' + name;
-        if (id in store === false && layerType === 'vector') {
-            throw new Error('No specified layer in store');
-        }
 
         let layer = cloud.get().getLayersByName(name);
+        let vectorLayer = cloud.get().getLayersByName(id);
+
+        if (layer && layerType === 'vector') removeTileLayer(name);
+        if (vectorLayer && layerType === 'tile') removeVectorLayer(id);
+
         if (enable) {
+            if (id in store === false && layerType === 'vector') {
+                throw new Error('No specified layer in store');
+            }
+
             // Always removing layer from the map if it exists
             if (layer) {
                 cloud.get().map.removeLayer(layer);
@@ -136,13 +123,10 @@ console.log('$$$ DATA', store, me);
 
             el.prop('checked', true);
         } else {
-            if (layer) {
-                cloud.get().map.removeLayer(layer);
-            }
-
-            if (layerType === 'vector') {
-                store[id].abort();
-                store[id].reset();
+            if (layerType === 'tile' && layer) {
+                removeTileLayer(name);
+            } else if (layerType === 'vector' && vectorLayer) {
+                removeVectorLayer(id);
             }
 
             el.prop('checked', false);
