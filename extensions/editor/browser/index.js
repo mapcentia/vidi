@@ -38,8 +38,6 @@ var Form = JSONSchemaForm.default;
 
 var markers;
 
-var formerVectorLayers;
-
 var editor;
 
 /**
@@ -73,7 +71,6 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
-        formerVectorLayers = o.layerTree;
         return this;
     },
 
@@ -114,7 +111,7 @@ module.exports = {
         });
 
         // Don't init layer tree automatic. Let this module activate it
-        formerVectorLayers.setAutomatic(false);
+        layerTree.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
 
@@ -134,7 +131,7 @@ module.exports = {
                 }
 
                 // Set popup with Edit and Delete buttons
-                formerVectorLayers.setOnEachFeature("v:" + layerName, function (feature, layer) {
+                layerTree.setOnEachFeature("v:" + layerName, function (feature, layer) {
 
                     let popup = L.popup({
                         autoPan: false
@@ -159,15 +156,15 @@ module.exports = {
                     });
                 });
 
-                formerVectorLayers.setStyle(layerName, styleFn);
+                layerTree.setStyle(layerName, styleFn);
             });
 
-            backboneEvents.get().on("ready:formerVectorLayers", function () {
+            backboneEvents.get().on("ready:layerTree", function () {
 
             });
 
             // @todo Find out why it was originally called
-            // formerVectorLayers.createLayerTree();
+            // layerTree.createLayerTree();
         });
     },
 
@@ -295,7 +292,13 @@ module.exports = {
 
                     sqlQuery.reset(qstore);
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
+                    console.log('### isVectorLayer', schemaQualifiedName, isVectorLayer);
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
+                    
                     me.stopEdit(l);
 
                     jquery.snackbar({
@@ -494,7 +497,7 @@ module.exports = {
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
-                    layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
+                    layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                 };
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
@@ -539,9 +542,8 @@ module.exports = {
                 console.log('Editor: featureIsDeleted');
 
                 sqlQuery.reset(qstore);
-                layerTree.reloadLayer(schemaQualifiedName, 'tile', true);
                 cloud.get().map.closePopup();
-                formerVectorLayers.reloadLayer("v:" + schemaQualifiedName);
+                layerTree.reloadLayer("v:" + schemaQualifiedName);
             };
 
             if (!gid) {
@@ -574,7 +576,7 @@ module.exports = {
         let me = this;
         cloud.get().map.editTools.stopDrawing();
 
-        if (e) formerVectorLayers.reloadLayer(e.id);
+        if (e) layerTree.reloadLayer(e.id);
         if (editor) cloud.get().map.removeLayer(editor);
 
         if (markers) {

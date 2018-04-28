@@ -253,6 +253,7 @@ module.exports = {
                             let isDisabledAttribute = '';
                             let selectorLabel = __('Tile');
                             let defaultLayerType = 'tile';
+                            let layerTypePrefix = '';
                             if (localMeta && localMeta.meta) {
                                 let parsedMeta = JSON.parse(localMeta.meta);
                                 if (parsedMeta.vidi_layer_type) {
@@ -265,6 +266,7 @@ module.exports = {
                                         defaultLayerType = 'vector';
                                         selectorLabel = __('Vector');
                                         isDisabledAttribute = 'disabled';
+                                        layerTypePrefix = 'v:';
                                     }
                                 }
                             }
@@ -327,7 +329,7 @@ module.exports = {
                                             <input type="checkbox"
                                                 class="js-show-layer-control"
                                                 id="${localMeta.f_table_name}"
-                                                data-gc2-id="${localMeta.f_table_schema}.${localMeta.f_table_name}"
+                                                data-gc2-id="${layerTypePrefix}${localMeta.f_table_schema}.${localMeta.f_table_name}"
                                                 data-gc2-layer-type="${defaultLayerType}">
                                         </label>
                                     </div>
@@ -376,16 +378,14 @@ module.exports = {
 
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                $(switcher).data('gc2-layer-type', 'tile');
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('tile');
-                                _self.reloadLayer($(switcher).data('gc2-id'), 'tile');
+                                _self.reloadLayer($(switcher).data('gc2-id'));
                             });
 
                             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                $(switcher).data('gc2-layer-type', 'vector');
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('vector');
-                                _self.reloadLayer($(switcher).data('gc2-id'), 'vector');
+                                _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
                             });
 
                             $("#collapse" + base64GroupName).append(layerControlRecord);
@@ -425,15 +425,10 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, layerType = 'tile', forceTileRedraw = false) => {
-        console.log('reloadLayer', layerId, layerType, forceTileRedraw);
-        if (layerId.startsWith('v:')) {
-            layerId = layerId.replace('v:', '');
-            layerType = 'vector';
-        }
-
-        switchLayer.init(layerId, false, false, layerType, forceTileRedraw);
-        switchLayer.init(layerId, true, false, layerType, forceTileRedraw);
+    reloadLayer: (layerId, forceTileRedraw = false) => {
+        console.log('reloadLayer', layerId, forceTileRedraw);
+        switchLayer.init(layerId, false, false, forceTileRedraw);
+        switchLayer.init(layerId, true, false, forceTileRedraw);
     },
 
 

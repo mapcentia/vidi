@@ -47,10 +47,7 @@ var backboneEvents;
 
 var mustache = require('mustache');
 
-
 var host = require("./connection").getHost();
-
-var switchLayer;
 
 var singleTiled = [];
 
@@ -72,7 +69,6 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
-        switchLayer = o.switchLayer;
         return this;
     },
 
@@ -155,14 +151,12 @@ module.exports = {
         }
 
         return new Promise(function (resolve, reject) {
-
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             $.each(metaData.data, function (i, v) {
-
                 var layer = v.f_table_schema + "." + v.f_table_name;
-
                 if (layer === l) {
+                    console.log('### addLayer', l, layerType);
                     isBaseLayer = v.baselayer ? true : false;
 
                     layers[[layer]] = cloud.get().addTileLayers({
