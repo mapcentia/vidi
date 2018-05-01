@@ -346,7 +346,13 @@ module.exports = module.exports = {
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 $(this).on("change", function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked, true);
+                    let prefix = '';
+                    if ($(this).data('gc2-layer-type') === 'vector') {
+                        prefix = 'v:';
+                    }
+
+                    console.log('Listener fired at bindEvents', prefix + $(this).data('gc2-id'));
+                    switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, true);
                     e.stopPropagation();
                 });
             });

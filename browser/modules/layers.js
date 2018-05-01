@@ -143,7 +143,7 @@ module.exports = {
      * @param l
      * @returns {Promise}
      */
-    addLayer: function (l, layerType) {
+    addLayer: function (l) {
         var me = this;
 
         if (typeof window.vidiConfig.singleTiled === "object" && window.vidiConfig.singleTiled.length > 0) {
@@ -156,14 +156,13 @@ module.exports = {
             $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name;
                 if (layer === l) {
-                    console.log('### addLayer', l, layerType);
+                    console.log('### addLayer', l);
                     isBaseLayer = v.baselayer ? true : false;
 
                     layers[[layer]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [layer],
                         db: db,
-                        type: layerType,
                         isBaseLayer: isBaseLayer,
                         tileCached: singleTiled.indexOf(layer) === -1,
                         visibility: false,

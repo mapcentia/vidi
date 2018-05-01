@@ -88,12 +88,8 @@ module.exports = module.exports = {
 
         console.log('### switchLayer', name);
         if (enable) {
-            if (layerType === 'vector' && vectorLayerId in store === false) {
-                throw new Error('No specified layer in store');
-            }
-
             if (layerType === 'tile') {
-                layers.addLayer(name, layerType).then(() => {
+                layers.addLayer(name).then(() => {
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
 
                     if (forceTileReload) {
@@ -105,8 +101,13 @@ module.exports = module.exports = {
                     me.update(doNotLegend, el);
                 });
             } else {
+                if (vectorLayerId in store === false) {
+                    throw new Error('No specified layer in store');
+                }
+
                 cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
-                cloud.get().map.addLayer(cloud.get().getLayersByName(vectorLayerId));
+                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                cloud.get().map.addLayer(existingLayer);
                 store[vectorLayerId].load();
 
                 layers.incrementCountLoading(vectorLayerId);

@@ -158,6 +158,7 @@ module.exports = {
             }
 
             if (forceLayerUpdate) {
+                console.log(_self.getActiveLayers());
                 _self.getActiveLayers().map(item => {
                     switchLayer.init(item, false);
                     switchLayer.init(item, true);
@@ -290,10 +291,10 @@ module.exports = {
                                     db: db,
                                     uri: "/api/sql",
                                     clickable: true,
-                                    id: layerKey,
-                                    name: layerKey,
+                                    id: 'v:' + layerKey,
+                                    name: 'v:' + layerKey,
                                     lifetime: 0,
-                                    styleMap: styles[layerKey],
+                                    styleMap: styles['v:' + layerKey],
                                     sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
                                     onLoad: function (l) {
                                         if (l === undefined) {
@@ -379,12 +380,16 @@ module.exports = {
 
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                $(switcher).data('gc2-layer-type', 'tile');
+                                $(switcher).prop('checked', true);
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('tile');
                                 _self.reloadLayer($(switcher).data('gc2-id'));
                             });
 
                             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                $(switcher).data('gc2-layer-type', 'vector');
+                                $(switcher).prop('checked', true);
                                 $(e.target).closest('.layer-item').find('.js-dropdown-label').text('vector');
                                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
                             });
@@ -438,10 +443,14 @@ module.exports = {
      */
     getActiveLayers: () => {
         let activeLayerIds = [];
-        $('*[data-gc2-id-vec]').each((index, item) => {
+        $('*[data-gc2-layer-type]').each((index, item) => {
             let isEnabled = $(item).is(':checked');
             if (isEnabled) {
-                activeLayerIds.push($(item).data('gc2-id-vec'));
+                if ($(item).data('gc2-layer-type') === 'tile') {
+                    activeLayerIds.push($(item).data('gc2-id'));
+                } else {
+                    activeLayerIds.push('v:' + $(item).data('gc2-id'));
+                }
             }
         });
 
