@@ -292,7 +292,6 @@ module.exports = {
 
                     sqlQuery.reset(qstore);
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    console.log('### isVectorLayer', schemaQualifiedName, isVectorLayer);
                     if (isVectorLayer) {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     } else {

@@ -95,8 +95,9 @@ module.exports = module.exports = {
             if (layerType === 'tile') {
                 layers.addLayer(name, layerType).then(() => {
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
+
                     if (forceTileReload) {
-                        tileLayer.setUrl(createdLayer._url + "?" + Math.random() + "&");
+                        tileLayer.setUrl(tileLayer._url + "?" + Math.random() + "&");
                         tileLayer.redraw();
                     }
 

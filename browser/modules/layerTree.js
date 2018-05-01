@@ -151,7 +151,7 @@ module.exports = {
                     if (totalRequests > 0) {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
-                            clearLayerRequests($(event.target).parent().data('layer-id'));
+                            clearLayerRequests($(event.target).parent().data('gc2-id'));
                         });
                     }
                 }
@@ -198,7 +198,6 @@ module.exports = {
         try {
 
 
-
         $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
             if ($(event.target).is(":checked")) {
                 apiBridgeInstance.setOfflineMode(true);
@@ -238,50 +237,53 @@ module.exports = {
                 // Add layers
                 // ==========
                 for (var u = 0; u < metaData.data.length; ++u) {
-                    let localMeta = metaData.data[u];
-                    if (localMeta.layergroup == arr[i]) {
-                        var text = (localMeta.f_table_title === null || localMeta.f_table_title === "") ? localMeta.f_table_name : localMeta.f_table_title;
-                        if (localMeta.baselayer) {
+                    let layer = metaData.data[u];
+                    if (layer.layergroup == arr[i]) {
+                        var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
+                        if (layer.baselayer) {
                             $("#base-layer-list").append(`<div class='list-group-item'>
-                                <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${localMeta.f_table_schema}.${localMeta.f_table_name}'>
+                                <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
                                     <label class='baselayer-label'>
                                         <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
                                     </label>
                                 </div>
                             </div>`);
                         } else {
+                            let layerIsTheTileOne = true;
+                            let layerIsTheVectorOne = true;
+                                                        
                             let isDisabledAttribute = '';
                             let selectorLabel = __('Tile');
                             let defaultLayerType = 'tile';
-                            let layerTypePrefix = '';
-                            if (localMeta && localMeta.meta) {
-                                let parsedMeta = JSON.parse(localMeta.meta);
+
+                            if (layer && layer.meta) {
+                                let parsedMeta = JSON.parse(layer.meta);
+
+                                if (parsedMeta) {
+                                    displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                                }
+
                                 if (parsedMeta.vidi_layer_type) {
                                     if (parsedMeta.vidi_layer_type === 't') {
                                         selectorLabel = __('Tile');
                                         isDisabledAttribute = 'disabled';
+                                        layerIsTheVectorOne = false;
                                     }
 
                                     if (parsedMeta.vidi_layer_type === 'v') {
                                         defaultLayerType = 'vector';
                                         selectorLabel = __('Vector');
                                         isDisabledAttribute = 'disabled';
-                                        layerTypePrefix = 'v:';
+                                        layerIsTheTileOne = false;
                                     }
                                 }
                             }
 
-                            // If meta.usetiles is true, when add layers as tiles instead of vectors
-                            let layerKey, layerKeyWithGeom;
-                            if (JSON.parse(localMeta.meta) !== null && typeof JSON.parse(localMeta.meta).usetiles !== "undefined" &&
-                                JSON.parse(localMeta.meta).usetiles === true) {
-                                layerKey = localMeta.f_table_schema + "." + localMeta.f_table_name;
-                                layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
-                            } else if (!localMeta.baselayer) {
-                                layerKey = "v:" + localMeta.f_table_schema + "." + localMeta.f_table_name;
-                                layerKeyWithGeom = localMeta.f_table_schema + "." + localMeta.f_table_name + "." + localMeta.f_geometry_column;
+                            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+                            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
-                                store[layerKey] = new geocloud.sqlStore({
+                            if (layerIsTheVectorOne) {
+                                store['v:' + layerKey] = new geocloud.sqlStore({
                                     jsonp: false,
                                     method: "POST",
                                     host: "",
@@ -292,7 +294,7 @@ module.exports = {
                                     name: layerKey,
                                     lifetime: 0,
                                     styleMap: styles[layerKey],
-                                    sql: "SELECT * FROM " + metaData.data[u].f_table_schema + "." + metaData.data[u].f_table_name + " LIMIT 500",
+                                    sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
                                     onLoad: function (l) {
                                         if (l === undefined) {
                                             return
@@ -315,10 +317,9 @@ module.exports = {
                                 });
                             }
 
-                            displayInfo = ((localMeta.meta !== null && $.parseJSON(localMeta.meta) !== null && typeof $.parseJSON(localMeta.meta).meta_desc !== "undefined" && $.parseJSON(localMeta.meta).meta_desc !== "") || localMeta.f_table_abstract) ? "visible" : "hidden";
-                            tooltip = localMeta.f_table_abstract || "";
+                            tooltip = layer.f_table_abstract || "";
 
-                            let lockedLayer = (localMeta.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+                            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
                             let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
                             let queueInfoButtonStyle = regularButtonStyle + ` background-color: #FF6666; padding-left: 4px; padding-right: 4px;`;
@@ -328,8 +329,8 @@ module.exports = {
                                         <label>
                                             <input type="checkbox"
                                                 class="js-show-layer-control"
-                                                id="${localMeta.f_table_name}"
-                                                data-gc2-id="${layerTypePrefix}${localMeta.f_table_schema}.${localMeta.f_table_name}"
+                                                id="${layer.f_table_name}"
+                                                data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
                                                 data-gc2-layer-type="${defaultLayerType}">
                                         </label>
                                     </div>
@@ -362,17 +363,17 @@ module.exports = {
                                     <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="${queueInfoButtonStyle}" disabled>
                                         <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" data-layer-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
+                                    <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </div>
                                 <div style="display: inline-block;">
-                                    <button style="padding: 8px;" type="button" data-gc2-key="${localMeta.f_table_schema}.${localMeta.f_table_name}.${localMeta.f_geometry_column}"
+                                    <button style="padding: 8px;" type="button" data-gc2-key="${layerKeyWithGeom}"
                                         data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
                                         <i class="fa fa-plus"></i>
                                     </button>
                                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
-                                        style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${localMeta.f_table_schema}.${localMeta.f_table_name}">Info</span>
+                                        style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                 </div>
                             </li>`);
 
