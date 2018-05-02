@@ -351,11 +351,11 @@ module.exports = module.exports = {
                         prefix = 'v:';
                     }
 
-                    console.log('Listener fired at bindEvents', prefix + $(this).data('gc2-id'));
                     switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, true);
                     e.stopPropagation();
                 });
             });
+
             $(document).arrive('[data-gc2-base-id]', function () {
                 $(this).on("change", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
@@ -363,9 +363,11 @@ module.exports = module.exports = {
                     $(this).css("background-color", "white");
                 });
             });
+
             $(document).arrive('[data-toggle="tooltip"]', function () {
                 $(this).tooltip()
             });
+
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
                     var t = ($(this).prev().children("input").data('gc2-id')), html, meta = $.parseJSON(metaDataKeys[t].meta);

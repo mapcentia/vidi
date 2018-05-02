@@ -156,7 +156,6 @@ module.exports = {
             $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name;
                 if (layer === l) {
-                    console.log('### addLayer', l);
                     isBaseLayer = v.baselayer ? true : false;
 
                     layers[[layer]] = cloud.get().addTileLayers({
