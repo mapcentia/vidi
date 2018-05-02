@@ -67,7 +67,10 @@ module.exports = module.exports = {
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
         let store = layerTree.getStores();
-        var me = this, el = $('*[data-gc2-id="' + name + '"]');
+        var me = this, el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
+        if (!el) {
+            throw new Error('Unable to find layer switch control');
+        }
 
         let layer = cloud.get().getLayersByName(name);
         let layerType, tileLayerId, vectorLayerId;
@@ -95,6 +98,9 @@ module.exports = module.exports = {
         console.log('### switchLayer', name);
         if (enable) {
             if (layerType === 'tile') {
+                el.data('gc2-layer-type', 'tile');
+                el.closest('.layer-item').find('.js-dropdown-label').first().html('Tile');
+
                 layers.addLayer(name).then(() => {
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
 
@@ -109,6 +115,9 @@ module.exports = module.exports = {
                     me.update(doNotLegend, el);
                 });
             } else {
+                el.data('gc2-layer-type', 'vector');
+                el.closest('.layer-item').find('.js-dropdown-label').first().html('Vector');
+
                 if (vectorLayerId in store === false) {
                     throw new Error('No specified layer in store');
                 }
@@ -124,8 +133,8 @@ module.exports = module.exports = {
 
             el.prop('checked', true);
         } else {
-            el.prop('checked', false);
             me.update(doNotLegend, el);
+            el.prop('checked', false);
         }
     },
 
