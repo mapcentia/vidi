@@ -183,6 +183,7 @@ class APIBridge {
      * @param {Function} listener Listening function
      */
     setOfflineMode(mode) {
+        console.log('setOfflineMode', mode);
         this._forcedOffline = mode;
     }
 

@@ -31,6 +31,8 @@ var store = [];
 
 var automatic = true;
 
+var _self;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -88,6 +90,9 @@ var dict = {
  */
 module.exports = {
     set: function (o) {
+
+        console.log('@@@ set called');
+
         meta = o.meta;
         layers = o.layers;
         switchLayer = o.switchLayer;
@@ -95,7 +100,10 @@ module.exports = {
         return this;
     },
     init: function () {
-        var _self = this;
+
+        console.log('@@@ init called');
+
+        _self = this;
 
         const clearLayerRequests = (layerId) => {
             apiBridgeInstance.removeByLayerId(layerId);
@@ -158,26 +166,12 @@ module.exports = {
             }
 
             if (forceLayerUpdate) {
-                console.log(_self.getActiveLayers());
                 _self.getActiveLayers().map(item => {
                     switchLayer.init(item, false);
                     switchLayer.init(item, true);
                 });
             }
         });
-
-        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
-
-        groups = [];
-
-        // Getting set of all loaded vectors
-        metaData = meta.getMetaDataLatestLoaded();
-        for (i = 0; i < metaData.data.length; ++i) {
-            groups[i] = metaData.data[i].layergroup;
-        }
-
-        arr = array_unique(groups.reverse());
-        metaData.data.reverse();
 
         $("#layers").empty();
 
@@ -194,11 +188,6 @@ module.exports = {
             </div>
         </div>`);
 
-
-        // @todo Remove
-        try {
-
-
         $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
             if ($(event.target).is(":checked")) {
                 apiBridgeInstance.setOfflineMode(true);
@@ -208,6 +197,29 @@ module.exports = {
         });
 
         $("#layers").append(toggleOfllineOnlineMode);
+    },
+
+
+    /**
+     * Builds actual layer tree.
+     */
+    create: () => {
+
+        console.log('@@@ create called');
+
+        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
+
+        groups = [];
+
+        // Getting set of all loaded vectors
+        metaData = meta.getMetaDataLatestLoaded();
+        for (i = 0; i < metaData.data.length; ++i) {
+            groups[i] = metaData.data[i].layergroup;
+        }
+
+        arr = array_unique(groups.reverse());
+        metaData.data.reverse();
+
         // Filling up groups and underlying layers (except ungrouped ones)
         for (i = 0; i < arr.length; ++i) {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
@@ -296,25 +308,17 @@ module.exports = {
                                     lifetime: 0,
                                     styleMap: styles['v:' + layerKey],
                                     sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
-                                    onLoad: function (l) {
-                                        if (l === undefined) {
-                                            return
-                                        }
+                                    onLoad: (l) => {
+                                        if (l === undefined) return;
+                                        $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
-                                        var me = l;
-
-                                        try {
-                                            $('*[data-gc2-id-vec="' + me.id + '"]').parent().siblings().children().removeClass("fa-spin")
-                                        } catch (e) {
-                                        }
-
-                                        layers.decrementCountLoading(me.id);
-                                        backboneEvents.get().trigger("doneLoading:layers", me.id);
+                                        layers.decrementCountLoading(l.id);
+                                        backboneEvents.get().trigger("doneLoading:layers", l.id);
                                     },
                                     transformResponse: (response, id) => {
                                         return apiBridgeInstance.transformResponseHandler(response, id);
                                     },
-                                    onEachFeature: onEachFeature[layerKey]
+                                    onEachFeature: onEachFeature['v:' + layerKey]
                                 });
                             }
 
@@ -414,17 +418,7 @@ module.exports = {
                 }
             }
         }
-
-        // Open the first panel
-        // ====================
-
-        $("#layers div:first").find("a").trigger("click");
-
-        } catch (e) {
-            console.log(e);
-        }
     },
-
 
     /**
      * Reloading provided layer.
@@ -478,12 +472,10 @@ module.exports = {
     },
 
     setStyle: function (layer, s) {
-
         styles[layer] = s;
     },
 
     setPointToLayer: function (layer, fn) {
-
         pointToLayer[layer] = fn;
     },
 

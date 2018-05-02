@@ -186,23 +186,17 @@ module.exports = {
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
-        modules.meta.init()
-
-            .then(function () {
-                    return modules.setting.init();
-                },
-
-                function (error) {
-                    console.log(error); // Stacktrace
-                    alert("Vidi is loaded without schema. Can't set extent or add layers");
-                    backboneEvents.get().trigger("ready:meta");
-                    modules.state.init();
-                })
-
-            .then(function () {
-                modules.layerTree.init();
-                modules.state.init();
-            });
+        modules.layerTree.init();
+        modules.meta.init().then(() => {
+            return modules.setting.init();
+        }, (error) => {
+            console.log(error); // Stacktrace
+            alert("Vidi is loaded without schema. Can't set extent or add layers");
+            backboneEvents.get().trigger("ready:meta");
+            modules.state.init();
+        }).then(() => {
+            modules.state.init();
+        });
 
         // Require search module
         // =====================
@@ -274,7 +268,7 @@ module.exports = {
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
-                console.log('Service worker was registered', registration);
+                console.log('Service worker was registered');
             }).catch(error => {
                 console.log('Registration failed: ', error);
             });

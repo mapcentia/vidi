@@ -114,11 +114,9 @@ module.exports = {
         layerTree.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
-
             metaDataKeys = meta.getMetaDataKeys();
             metaData = meta.getMetaData();
-            metaData.data.map(function (v) {
-
+            metaData.data.map(v => {
                 let layerName = v.f_table_schema + "." + v.f_table_name;
 
                 if (JSON.parse(v.meta) !== null && typeof JSON.parse(v.meta).vectorstyle !== "undefined") {
@@ -131,18 +129,18 @@ module.exports = {
                 }
 
                 // Set popup with Edit and Delete buttons
-                layerTree.setOnEachFeature("v:" + layerName, function (feature, layer) {
-
+                layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
                     let popup = L.popup({
                         autoPan: false
                     });
 
                     layer.on("click", function (e) {
-
-                        popup
-                            .setLatLng(e.latlng)
-                            .setContent('<button class="btn btn-primary btn-xs ge-start-edit"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs ge-delete"><i class="fa fa-trash" aria-hidden="true"></i></button>')
-                            .openOn(cloud.get().map);
+                        popup.setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-primary btn-xs ge-delete">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>`).openOn(cloud.get().map);
 
                         $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
                             me.edit(layer, layerName + ".the_geom", null, true);
@@ -159,12 +157,9 @@ module.exports = {
                 layerTree.setStyle(layerName, styleFn);
             });
 
-            backboneEvents.get().on("ready:layerTree", function () {
+            backboneEvents.get().on("ready:layerTree", () => {});
 
-            });
-
-            // @todo Find out why it was originally called
-            // layerTree.createLayerTree();
+            layerTree.create();
         });
     },
 
@@ -491,12 +486,17 @@ module.exports = {
                 };
 
                 const featureIsUpdated = () => {
-                    console.log('Editor: featureIsUpdated');
+                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
 
                     let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
-                    layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
                 };
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
@@ -538,11 +538,16 @@ module.exports = {
 
         const deleteFeature = () => {
             const featureIsDeleted = () => {
-                console.log('Editor: featureIsDeleted');
+                console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
 
                 sqlQuery.reset(qstore);
                 cloud.get().map.closePopup();
-                layerTree.reloadLayer("v:" + schemaQualifiedName);
+                
+                if (isVectorLayer) {
+                    layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                } else {
+                    layerTree.reloadLayer(schemaQualifiedName, true);
+                }
             };
 
             if (!gid) {
@@ -575,7 +580,6 @@ module.exports = {
         let me = this;
         cloud.get().map.editTools.stopDrawing();
 
-        if (e) layerTree.reloadLayer(e.id);
         if (editor) cloud.get().map.removeLayer(editor);
 
         if (markers) {
