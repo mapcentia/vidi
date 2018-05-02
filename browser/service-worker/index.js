@@ -6,7 +6,8 @@ const LOG = false;
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
  * 1. API calls are always performed, the cached response is retured only if the app is offline or 
  * there is a API-related problem;
- * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally.
+ * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
+ * the 'message' event.
  */
 
 /**
@@ -272,7 +273,7 @@ self.addEventListener('install', event => {
     if (LOG) console.log('Service worker is being installed, caching specified resources');
 
     extensionsIgnoredForCaching.map(item => {
-        let localRegExp = new RegExp(`.${item}$`, 'i');
+        let localRegExp = new RegExp(`.${item}[\?]?`, 'i');
         ignoredExtensionsRegExps.push(localRegExp);
     });
 
@@ -413,6 +414,8 @@ self.addEventListener('fetch', (event) => {
                                 return cache.put(requestToMake.url, response.clone()).then(() => {
                                     return response;
                                 });
+                            }).catch(error => {
+                                console.warn(`Unable the fetch ${requestToMake.url}`);
                             });
                         });
                     } else {

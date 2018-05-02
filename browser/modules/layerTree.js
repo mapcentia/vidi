@@ -90,9 +90,6 @@ var dict = {
  */
 module.exports = {
     set: function (o) {
-
-        console.log('@@@ set called');
-
         meta = o.meta;
         layers = o.layers;
         switchLayer = o.switchLayer;
@@ -100,9 +97,6 @@ module.exports = {
         return this;
     },
     init: function () {
-
-        console.log('@@@ init called');
-
         _self = this;
 
         const clearLayerRequests = (layerId) => {
@@ -204,9 +198,6 @@ module.exports = {
      * Builds actual layer tree.
      */
     create: () => {
-
-        console.log('@@@ create called');
-
         var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
 
         groups = [];
