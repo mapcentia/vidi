@@ -39,6 +39,12 @@ var pushState;
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var tileLayersCacheBuster = 0;
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = module.exports = {
@@ -93,9 +99,11 @@ module.exports = module.exports = {
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
 
                     if (forceTileReload) {
-                        tileLayer.setUrl(tileLayer._url + "?" + Math.random() + "&");
-                        tileLayer.redraw();
+                        tileLayersCacheBuster = Math.random();
                     }
+
+                    tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
+                    tileLayer.redraw();
 
                     cloud.get().map.addLayer(tileLayer);
                     me.update(doNotLegend, el);
