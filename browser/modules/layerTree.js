@@ -166,6 +166,14 @@ module.exports = {
                 });
             }
         });
+    },
+
+
+    /**
+     * Builds actual layer tree.
+     */
+    create: () => {
+        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
 
         $("#layers").empty();
 
@@ -182,8 +190,12 @@ module.exports = {
             </div>
         </div>`);
 
+        if (apiBridgeInstance.offlineModeIsEnforced()) {
+            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+        }
+
         $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
-            if ($(event.target).is(":checked")) {
+            if ($(event.target).is(':checked')) {
                 apiBridgeInstance.setOfflineMode(true);
             } else {
                 apiBridgeInstance.setOfflineMode(false);
@@ -191,14 +203,6 @@ module.exports = {
         });
 
         $("#layers").append(toggleOfllineOnlineMode);
-    },
-
-
-    /**
-     * Builds actual layer tree.
-     */
-    create: () => {
-        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
 
         groups = [];
 

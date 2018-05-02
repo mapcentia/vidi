@@ -95,7 +95,6 @@ module.exports = module.exports = {
             store[vectorLayerId].reset();
         }
 
-        console.log('### switchLayer', name);
         if (enable) {
             if (layerType === 'tile') {
                 el.data('gc2-layer-type', 'tile');

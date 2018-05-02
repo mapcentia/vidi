@@ -332,7 +332,7 @@ module.exports = module.exports = {
                     })
 
                 .then(function () {
-                    layerTree.init();
+                    layerTree.create();
                     state.init();
                 });
 

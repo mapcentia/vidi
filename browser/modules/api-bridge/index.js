@@ -184,6 +184,7 @@ class APIBridge {
      */
     setOfflineMode(mode) {
         console.log('setOfflineMode', mode);
+        console.trace('setOfflineMode');
         this._forcedOffline = mode;
     }
 
