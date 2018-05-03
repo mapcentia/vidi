@@ -29,24 +29,27 @@ class MapAreaList extends React.Component {
         super(props);
 
         this.mapObj = props.mapObj;
-
         this.state = {
-            items: []
+            areaItems: (props.items ? this.itemsObjectToArray(props.items) : [])
         };
     }
 
-    componentWillReceiveProps(nextProps) {
+    itemsObjectToArray(propItems) {
         let items = [];
-        if (nextProps.items) {
-            for (let key in nextProps.items) {
+        if (propItems) {
+            for (let key in propItems) {
                 items.push({
                     id: key,
-                    data: nextProps.items[key]
+                    data: propItems[key]
                 });
             }
         }
 
-        this.setState({ items });
+        return items;
+    }
+
+    componentWillReceiveProps(nextProps) {
+        this.setState({ areaItems: this.itemsObjectToArray(nextProps.items) });
     }
 
     onRefreshHandler(item) {
@@ -58,11 +61,12 @@ class MapAreaList extends React.Component {
     }
 
     render() {
-        if (this.state.items.length === 0) {
+        console.log(this.state);
+        if (this.state.areaItems.length === 0) {
             return (<div style={{textAlign: 'center', padding: '20px'}}>{__("No map areas have been stored yet")}</div>);
         } else {
             let renderedItems = [];
-            this.state.items.map((item, index) => {
+            this.state.areaItems.map((item, index) => {
                 renderedItems.push(<MapAreaListItem
                     onRefresh={this.onRefreshHandler.bind(this, item)}
                     onDelete={this.onDeleteHandler.bind(this, item)}

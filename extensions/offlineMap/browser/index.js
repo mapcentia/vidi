@@ -620,7 +620,6 @@ module.exports = {
                         </div>);
                     }
 
-                    
                     if (this.state.cacheIsAvailable === 1) {
                         existingCachedMapListBlock = (<div className="panel panel-default">
                             <div className="panel-heading" role="tab">
