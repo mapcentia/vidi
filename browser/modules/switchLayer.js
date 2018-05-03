@@ -111,7 +111,6 @@ module.exports = module.exports = {
                     tileLayer.redraw();
 
                     cloud.get().map.addLayer(tileLayer);
-                    me.update(doNotLegend, el);
                 });
             } else {
                 el.data('gc2-layer-type', 'vector');
@@ -130,6 +129,7 @@ module.exports = module.exports = {
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
             }
 
+            me.update(doNotLegend, el);
             el.prop('checked', true);
         } else {
             me.update(doNotLegend, el);

@@ -86,15 +86,21 @@ module.exports = {
     getLayers: function (separator, includeHidden) {
         var layerArr = [];
         var layers = cloud.get().map._layers;
+
         for (var key in layers) {
             if (layers.hasOwnProperty(key)) {
-                if (layers[key].baseLayer !== true && typeof layers[key]._tiles === "object") {
+                if (layers[key].baseLayer !== true) {
                     if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                        layerArr.push(layers[key].id);
+                        if (typeof layers[key]._tiles === "object") {
+                            layerArr.push(layers[key].id);
+                        } else if (layers[key].id && layers[key].id.startsWith('v:')) {
+                            layerArr.push(layers[key].id);
+                        }
                     }
                 }
             }
         }
+
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
         }
