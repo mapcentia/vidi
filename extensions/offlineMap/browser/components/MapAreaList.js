@@ -61,7 +61,6 @@ class MapAreaList extends React.Component {
     }
 
     render() {
-        console.log(this.state);
         if (this.state.areaItems.length === 0) {
             return (<div style={{textAlign: 'center', padding: '20px'}}>{__("No map areas have been stored yet")}</div>);
         } else {
