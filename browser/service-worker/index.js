@@ -201,6 +201,10 @@ const urlSubstitution = [{
 
 let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
+let urlsIgnoredForCaching = [{
+    regExp: true,
+    requested: 'bam.nr-data.net',
+}];
 
 /**
  * Cleaning up and substituting with local URLs provided address
@@ -322,7 +326,7 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
-    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`, event.request);
+    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
 
     /**
      * Wrapper for API calls - the API responses should be as relevant as possible.
@@ -362,67 +366,87 @@ self.addEventListener('fetch', (event) => {
         }
     };
 
-    event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
-        return caches.match(cleanedRequestURL).then((response) => {
-            if (response) {
-                // The request was found in cache
-                let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-                // API requests should not use the probably stalled cached copy if it is possible
-                if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                    return queryAPI(cleanedRequestURL, event, response);
-                } else {
-                    if (LOG) console.log(`In cache ${event.request.url}`);
-                    return response;
-                }
-            } else {
-                // The request was not found in cache
-
-                let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-                // API requests should not use the probably stalled cached copy if it is possible
-                if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                    return queryAPI(cleanedRequestURL, event, response);
-                } else {
-                    // Checking if the request is eligible for caching 
-                    let requestHasToBeCached = true;
-                    if (forceIgnoredExtensionsCaching === false) {
-                        ignoredExtensionsRegExps.map(item => {
-                            if (item.test(cleanedRequestURL)) {
-                                requestHasToBeCached = false;
-                                return false;
-                            }
-                        });
-                    }
-
-                    if (LOG) console.log('requestHasToBeCached: ', requestHasToBeCached);
-                    let requestToMake = new Request(cleanedRequestURL);
-                    if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
-                        var result = new Promise((resolve, reject) => {
-                            fetch(requestToMake).then(() => {
-                                let dummyResponse = new Response(null, { statusText: 'ONLINE' });
-                                resolve(dummyResponse);
-                            }).catch(() => {
-                                let dummyResponse = new Response(null, { statusText: 'OFFLINE' });
-                                resolve(dummyResponse);
-                            });
-                        });
-
-                        return result;
-                    } else if (requestHasToBeCached) {
-                        if (LOG) console.log(`Caching ${requestToMake.url}`);
-                        return caches.open(CACHE_NAME).then((cache) => {
-                            return fetch(requestToMake).then(response => {
-                                return cache.put(requestToMake.url, response.clone()).then(() => {
-                                    return response;
-                                });
-                            }).catch(error => {
-                                console.warn(`Unable the fetch ${requestToMake.url}`);
-                            });
-                        });
-                    } else {
-                        return fetch(requestToMake);
-                    }
-                }
+    let requestShouldBeBypassed = false;
+    urlsIgnoredForCaching.map(item => {
+        if (item.regExp) {
+            let regExp = new RegExp(item.requested);
+            if (regExp.test(event.request.url)) {
+                requestShouldBeBypassed = true;
+                return false;
             }
-        });
-    }));
+        } else if (event.request.url === item.requested) {
+            requestShouldBeBypassed = true;
+            return false;
+        }
+    });
+
+    if (requestShouldBeBypassed) {
+        if (LOG) console.log(`Bypassing the ${event.request.url} request`);
+
+        event.respondWith(fetch(event.request));
+    } else {
+        event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
+            return caches.match(cleanedRequestURL).then((response) => {
+                if (response) {
+                    // The request was found in cache
+                    let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+                    // API requests should not use the probably stalled cached copy if it is possible
+                    if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                        return queryAPI(cleanedRequestURL, event, response);
+                    } else {
+                        if (LOG) console.log(`In cache ${event.request.url}`);
+                        return response;
+                    }
+                } else {
+                    // The request was not found in cache
+
+                    let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
+                    // API requests should not use the probably stalled cached copy if it is possible
+                    if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
+                        return queryAPI(cleanedRequestURL, event, response);
+                    } else {
+                        // Checking if the request is eligible for caching 
+                        let requestHasToBeCached = true;
+                        if (forceIgnoredExtensionsCaching === false) {
+                            ignoredExtensionsRegExps.map(item => {
+                                if (item.test(cleanedRequestURL)) {
+                                    requestHasToBeCached = false;
+                                    return false;
+                                }
+                            });
+                        }
+
+                        if (LOG) console.log('requestHasToBeCached: ', requestHasToBeCached);
+                        let requestToMake = new Request(cleanedRequestURL);
+                        if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
+                            var result = new Promise((resolve, reject) => {
+                                fetch(requestToMake).then(() => {
+                                    let dummyResponse = new Response(null, { statusText: 'ONLINE' });
+                                    resolve(dummyResponse);
+                                }).catch(() => {
+                                    let dummyResponse = new Response(null, { statusText: 'OFFLINE' });
+                                    resolve(dummyResponse);
+                                });
+                            });
+
+                            return result;
+                        } else if (requestHasToBeCached) {
+                            if (LOG) console.log(`Caching ${requestToMake.url}`);
+                            return caches.open(CACHE_NAME).then((cache) => {
+                                return fetch(requestToMake).then(response => {
+                                    return cache.put(requestToMake.url, response.clone()).then(() => {
+                                        return response;
+                                    });
+                                }).catch(error => {
+                                    console.warn(`Unable the fetch ${requestToMake.url}`);
+                                });
+                            });
+                        } else {
+                            return fetch(requestToMake);
+                        }
+                    }
+                }
+            });
+        }));
+    }
 });
