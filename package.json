@@ -4,7 +4,7 @@
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/bootstrap.js --recursive test"
+    "test": "mocha test/bootstrap.js -t 100000 --recursive test"
   },
   "repository": {
     "type": "git",
@@ -71,6 +71,7 @@
     "jquery": "^3.0.0",
     "jrespond": "^1.0.0",
     "jsts": "^1.1.2",
+    "localforage": "^1.7.1",
     "lz-string": "^1.4.4",
     "moment": "^2.17.0",
     "mustache": "^2.3.0",

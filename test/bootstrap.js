@@ -1,7 +1,8 @@
 const puppeteer = require("puppeteer");
+const localforage = require("localforage");
 const { expect } = require("chai");
 const _ = require("lodash");
-const globalVariables = _.pick(global, ["browser", "expect"]);
+const globalVariables = _.pick(global, ["browser", "expect", "localforage"]);
 
 // puppeteer options
 const opts = {
@@ -14,6 +15,7 @@ const opts = {
 // expose variables
 before(async function() {
   global.expect = expect;
+  global.localforage = localforage;
   global.browser = await puppeteer.launch(opts);
 });
 
@@ -22,5 +24,6 @@ after(function() {
   browser.close();
 
   global.browser = globalVariables.browser;
+  global.localforage = globalVariables.localforage;
   global.expect = globalVariables.expect;
 });
