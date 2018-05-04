@@ -24,6 +24,8 @@ let singletoneInstance = false;
 
 class APIBridge {
     constructor() {
+        console.log('APIBridge: initializing');
+
         this._forcedOffline = false;
         this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
@@ -202,6 +204,8 @@ class APIBridge {
      * the API response is cached through the service worker. 
      */
     transformResponseHandler(response, tableId) {
+        if (LOG) console.log('APIBridge: running transformResponse handler');
+
         if (this._queue.length > 0) {
 
             if (LOG) console.log('APIBridge: transformResponse handler', response.features.length, tableId);

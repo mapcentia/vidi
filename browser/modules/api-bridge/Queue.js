@@ -10,6 +10,8 @@ const ADD_REQUEST = 0;
 const UPDATE_REQUEST = 1;
 const DELETE_REQUEST = 2;
 
+let queueStateUndefined = true;
+
 /**
  * FIFO queue abstraction. Queue items are stored
  * in browser storage and do not depend on page reload
@@ -32,8 +34,6 @@ class Queue {
         this._queue = [];
         this._processor = processor;
 
-        this._restoreState();
-
         const processQueue = () => {
             if (LOG) console.log(`Queue interval, total items in queue: ${_self._queue.length}, locked: ${_self._locked}`);
 
@@ -43,7 +43,12 @@ class Queue {
                 }, QUEUE_PROCESSING_INTERVAL);
             };
 
-            _self._onUpdateListener(_self._generateCurrentStatistics());
+            if (queueStateUndefined) {
+                queueStateUndefined = false;
+                _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+            } else {
+                _self._onUpdateListener(_self._generateCurrentStatistics());
+            }
 
             $.ajax({
                 method: 'GET',
@@ -86,7 +91,9 @@ class Queue {
             });
         };
 
-        processQueue();
+        this._restoreState().then(() => {
+            processQueue();
+        });
     }
 
     /**
@@ -149,18 +156,27 @@ class Queue {
      */
     _restoreState() {
         let _self = this;
-        localforage.getItem(QUEUE_STORE_NAME, (error, value) => {
 
-            if (LOG) console.log('Queue: getting state');
+        if (LOG) console.log('Queue: before getting state');
 
-            if (error) {
-                throw new Error('Error occured while accessing the store');
-            }
+        let result = new Promise((resolve, reject) => {
+            localforage.getItem(QUEUE_STORE_NAME, (error, value) => {
 
-            if (value) {
-                _self._queue = JSON.parse(value);
-            }
+                if (LOG) console.log('Queue: after getting state');
+
+                if (error) {
+                    throw new Error('Error occured while accessing the store');
+                }
+
+                if (value) {
+                    _self._queue = JSON.parse(value);
+                }
+
+                resolve();
+            });
         });
+
+        return result;
     }
 
     /**
