@@ -23,7 +23,7 @@ describe('Offline map', () => {
     describe('should not be affected by page reload', () => {});
 });
 
-describe('Layers module', () => {
+describe('Layers', () => {
     describe('should group layers', () => {});
     describe('should display the layer when checkbox is clicked', () => {});
     describe('should display the active / available status for each layer group', () => {});
@@ -40,13 +40,4 @@ describe('Layers module', () => {
     describe('should warn user of not displaying feature changes in offline mode', () => {});
     describe('should restore original feature data after editing cancellation', () => {});
     describe('should correctly show layer and forced offline mode status after the layers panel reaload', () => {});
-});
-
-// @todo Remove before real test implementation
-describe('Array', () => {
-    describe('#indexOf()', () => {
-        it('should return -1 when the value is not present', () => {
-            assert.equal(-1, [1, 2, 3].indexOf(4));
-        });
-    });
 });

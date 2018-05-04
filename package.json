@@ -4,7 +4,7 @@
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
-    "test": "karma start --single-run --browsers ChromeHeadless_no_sandbox karma.config.js"
+    "test": "mocha test/bootstrap.js --recursive test"
   },
   "repository": {
     "type": "git",
