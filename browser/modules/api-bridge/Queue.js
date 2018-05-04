@@ -44,6 +44,9 @@ class Queue {
             };
 
             if (queueStateUndefined) {
+
+                if (LOG) console.log(`Queue: last actual state is retrieved, reloading layers`);
+
                 queueStateUndefined = false;
                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
             } else {
