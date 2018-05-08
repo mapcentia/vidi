@@ -276,7 +276,7 @@ module.exports = {
 
                 // Open the first panel
                 // ====================
-                $("#vectorlayers div:first").find("a").trigger("click");
+                // $("#vectorlayers div:first").find("a").trigger("click");
             }
         }
         backboneEvents.get().trigger("ready:vectorLayers");
