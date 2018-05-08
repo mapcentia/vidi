@@ -70,6 +70,7 @@
     "mutationobserver-shim": "^0.3.2",
     "nouislider": "^8.5.1",
     "pg": "^6.1.0",
+    "pg-escape": "^0.2.0",
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
     "react": "^15.4.2",
