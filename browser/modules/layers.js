@@ -206,7 +206,7 @@ module.exports = {
 
                 }
             });
-
+            reject();
             console.info(l + " added to the map.");
         })
     }

@@ -31,6 +31,24 @@ var pushState;
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var meta;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var backboneEvents;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var layerTree;
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = module.exports = {
@@ -39,6 +57,9 @@ module.exports = module.exports = {
         legend = o.legend;
         layers = o.layers;
         pushState = o.pushState;
+        meta = o.meta;
+        backboneEvents = o.backboneEvents;
+        layerTree = o.layerTree;
         return this;
     },
     /**
@@ -60,18 +81,32 @@ module.exports = module.exports = {
 
                 layers.addLayer(name)
 
-                    .then(function () {
+                    .then(
 
-                        cloud.get().map.addLayer(cloud.get().getLayersByName(name));
-                        me.update(doNotLegend, el);
+                        function () {
 
-                        try {
-                            cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
-                            el.prop('checked', true);
-                        } catch (e) {
-                            //console.error(e.message);
+                            cloud.get().map.addLayer(cloud.get().getLayersByName(name));
+                            me.update(doNotLegend, el);
+
+                            try {
+                                cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+                                el.prop('checked', true);
+                            } catch (e) {
+                                //console.error(e.message);
+                            }
+
+                        },
+                        // If layer is not in Meta we load meta from GC2 and init agian in a recursive call
+                        function () {
+                            console.log("Layer " + name + " not in Meta");
+                            meta.init(name, true).then(
+                                function () {
+                                    layerTree.init();
+                                    me.init(name, true); // recursive
+                                }
+                            );
                         }
-                });
+                    );
 
             } finally {
                 el.prop('checked', true);
