@@ -131,7 +131,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             id: socketId,
                             error: error || null,
                             message: message,
-                            sql: metaDataKeys[table.split(".")[1]].sql
+                            sql: metaDataKeys[table.split(".")[1]].sql,
+                            meta: metaDataKeys[table.split(".")[1]]
                         };
                         hits[table] = hit;
                         io.emit(socketId, hit);
