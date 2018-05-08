@@ -7,8 +7,8 @@ const globalVariables = _.pick(global, ["browser", "expect", "localforage"]);
 // puppeteer options
 const opts = {
   headless: true,
-  slowMo: 100,
   timeout: 10000,
+  //executablePath: '/usr/bin/google-chrome',
   args: ["--no-sandbox"]
 };
 
