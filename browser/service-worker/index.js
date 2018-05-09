@@ -3,6 +3,12 @@ const API_ROUTES_START = 'api';
 const LOG = false;
 
 /**
+ * Browser detection
+ */
+const { detect } = require('detect-browser');
+const browser = detect();
+
+/**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
  * 1. API calls are always performed, the cached response is retured only if the app is offline or 
  * there is a API-related problem;
@@ -251,19 +257,31 @@ const normalizeTheURLForFetch = (event) => {
 
         if (event && event.request.method === 'POST' && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
-
-            let rawResult = "";
-            let reader = clonedRequest.body.getReader();
-            reader.read().then(function processText({ done, value }) {
-                if (done) {
-                    cleanedRequestURL += '/' + btoa(rawResult);
+            if (browser.name === 'safari') {
+                let rawResult = "";
+                let reader = clonedRequest.body.getReader();
+                reader.read().then(function processText({ done, value }) {
+                    if (done) {
+                        cleanedRequestURL += '/' + btoa(rawResult);
+                        resolve(cleanedRequestURL);
+                        return;
+                    }
+    
+                    rawResult += value;
+                    return reader.read().then(processText);
+                });
+            } else {
+                clonedRequest.formData().then((formdata) => {
+                    let payload = '';
+                    for (var p of formdata) {
+                        payload += p.toString();
+                    }
+    
+                    cleanedRequestURL += '/' + btoa(payload);
+    
                     resolve(cleanedRequestURL);
-                    return;
-                }
- 
-                rawResult += value;
-                return reader.read().then(processText);
-            });
+                });
+            }
         } else {
             resolve(cleanedRequestURL);
         }
