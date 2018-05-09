@@ -154,6 +154,8 @@ var currentFromText;
  */
 var id = "conflict-custom-search";
 
+var searchStr = "";
+
 /**
  *
  */
@@ -202,6 +204,15 @@ var _clearAllItems = function () {
     _clearDataItems();
 };
 
+/**
+ * A function, whick are called before the conflict is run. Must return a promise
+ * Can be overided in setPreProcessor method
+ */
+var preProcessor = function () {
+    return new Promise(function (resolve, reject) {
+        resolve();
+    })
+};
 
 /**
  *
@@ -217,26 +228,17 @@ var _zoomToFeature = function (table, key, fid) {
         dataItems.addLayer(this.layer);
         cloud.zoomToExtentOfgeoJsonStore(this);
     };
-    switch (BACKEND) {
-        case "gc2":
-            dataStore = new geocloud.sqlStore({
-                jsonp: false,
-                method: "POST",
-                host: "",
-                db: db,
-                uri: "/api/sql",
-                sql: "SELECT * FROM " + table + " WHERE " + key + "=" + fid,
-                onLoad: onLoad
-            });
-            break;
-        case "cartodb":
-            dataStore = new geocloud.cartoDbStore({
-                db: db,
-                sql: "SELECT * FROM (" + table + ") as foo WHERE " + key + "=" + fid,
-                onLoad: onLoad
-            });
-            break;
-    }
+
+    dataStore = new geocloud.sqlStore({
+        jsonp: false,
+        method: "POST",
+        host: "",
+        db: db,
+        uri: "/api/sql",
+        sql: "SELECT * FROM " + table + " WHERE " + key + "=" + fid,
+        onLoad: onLoad
+    });
+
     dataStore.load();
 };
 
@@ -269,21 +271,19 @@ module.exports = module.exports = {
 
         try {
             startBuffer = config.extensionConfig.conflictSearch.startBuffer;
-        } catch (e){
+        } catch (e) {
             startBuffer = 40;
         }
 
         try {
             getProperty = config.extensionConfig.conflictSearch.getProperty;
-        } catch (e){
+        } catch (e) {
             getProperty = false;
         }
 
         cloud.map.addLayer(drawnItems);
         cloud.map.addLayer(bufferItems);
         cloud.map.addLayer(dataItems);
-
-
 
         // Create a new tab in the main tab bar
         utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max);
@@ -452,7 +452,10 @@ module.exports = module.exports = {
             });
 
             // Show tool tips for drawing tools
-            var po = $('.leaflet-draw-toolbar-top').popover({content: __("Use these tools for querying the overlay maps."), placement: "left"});
+            var po = $('.leaflet-draw-toolbar-top').popover({
+                content: __("Use these tools for querying the overlay maps."),
+                placement: "left"
+            });
             po.popover("show");
             setTimeout(function () {
                 po.popover("hide");
@@ -507,6 +510,7 @@ module.exports = module.exports = {
      * @param callBack
      */
     makeSearch: function (text, callBack) {
+
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()),
             hitsTable = $("#hits-content tbody"),
@@ -580,7 +584,12 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            jquery.snackbar({id: "snackbar-conflict", content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>", htmlAllowed: true, timeout: 1000000});
+            jquery.snackbar({
+                id: "snackbar-conflict",
+                content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>",
+                htmlAllowed: true,
+                timeout: 1000000
+            });
 
             var schemata = [];
             var schemataStr = urlparser.schema;
@@ -594,94 +603,102 @@ module.exports = module.exports = {
                 schemataStr = schemata.join(",");
             }
 
-            xhr = $.ajax({
-                method: "POST",
-                url: "/api/extension/conflictSearch",
-                data: "db=" + db + "&schema=" + schemataStr + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
-                scriptCharset: "utf-8",
-                success: function (response) {
-                    var hitsCount = 0, noHitsCount = 0, errorCount = 0;
-                    _result = response;
-                    setTimeout(function () {
-                        jquery("#snackbar-conflict").snackbar("hide");
-                    }, 200);
-                    $("#spinner span").hide();
-                    $("#result-origin").html(response.text);
-                    $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
-                    $('#conflict-result-content a[href="#hits-content"]').tab('show');
-                    $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
-                    fileId = response.file;
-                    searchFinish = true;
-                    $.each(response.hits, function (i, v) {
-                            var table = i, table1, table2, tr, td, title;
-                            title = (typeof metaDataKeys[table].f_table_title !== "undefined" && metaDataKeys[table].f_table_title !== "" && metaDataKeys[table].f_table_title !== null) ? metaDataKeys[table].f_table_title : table;
-                            if (v.error === null) {
-                                if (metaDataKeys[table].meta_url) {
-                                    title = "<a target='_blank' href='" + metaDataKeys[table].meta_url + "'>" + title + "</a>";
-                                }
-                                row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                if (v.hits > 0) {
-                                    hitsTable.append(row);
-                                    hitsCount++;
-                                    if (v.data.length > 0) {
-                                        table1 = $("<table class='table table-data'/>");
-                                        hitsData.append("<h3>" + title + " (" + v.data.length + ")</h3>");
-                                        $.each(v.data, function (u, row) {
-                                            var key = null, fid = null;
-                                            tr = $("<tr/>");
-                                            td = $("<td/>");
-                                            table2 = $("<table class='table'/>");
-                                            $.each(row, function (n, field) {
-                                                if (!field.key) {
-                                                    table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>")
-                                                } else {
-                                                    key = field.name;
-                                                    fid = field.value;
-                                                }
-                                            });
-                                            td.append(table2);
-                                            tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + (BACKEND === "cartodb" ? v.sql : i) + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
-                                            tr.append(td);
-                                            table1.append(tr);
-                                        });
-                                        hitsData.append(table1);
+            preProcessor({
+                "projWktWithBuffer": projWktWithBuffer
 
+            }).then(function () {
+                xhr = $.ajax({
+                    method: "POST",
+                    url: "/api/extension/conflictSearch",
+                    data: "db=" + db + "&schema=" + schemataStr + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                    scriptCharset: "utf-8",
+                    success: function (response) {
+                        var hitsCount = 0, noHitsCount = 0, errorCount = 0;
+                        _result = response;
+                        setTimeout(function () {
+                            jquery("#snackbar-conflict").snackbar("hide");
+                        }, 200);
+                        $("#spinner span").hide();
+                        $("#result-origin").html(response.text);
+                        $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
+                        $('#conflict-result-content a[href="#hits-content"]').tab('show');
+                        $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+                        fileId = response.file;
+                        searchFinish = true;
+                        $.each(response.hits, function (i, v) {
+                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
+                                title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
+                                if (v.error === null) {
+                                    if (metaData.meta_url) {
+                                        title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                                    }
+                                    row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                                    if (v.hits > 0) {
+                                        hitsTable.append(row);
+                                        hitsCount++;
+                                        if (v.data.length > 0) {
+                                            table1 = $("<table class='table table-data'/>");
+                                            hitsData.append("<h3>" + title + " (" + v.data.length + ")</h3>");
+                                            $.each(v.data, function (u, row) {
+                                                var key = null, fid = null;
+                                                tr = $("<tr/>");
+                                                td = $("<td/>");
+                                                table2 = $("<table class='table'/>");
+                                                $.each(row, function (n, field) {
+                                                    if (!field.key) {
+                                                        table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>")
+                                                    } else {
+                                                        key = field.name;
+                                                        fid = field.value;
+                                                    }
+                                                });
+                                                td.append(table2);
+                                                tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + (BACKEND === "cartodb" ? v.sql : i) + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                tr.append(td);
+                                                table1.append(tr);
+                                            });
+                                            hitsData.append(table1);
+
+                                        }
+                                    } else {
+                                        noHitsTable.append(row);
+                                        noHitsCount++;
                                     }
                                 } else {
-                                    noHitsTable.append(row);
-                                    noHitsCount++;
+                                    row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
+                                    errorTable.append(row);
+                                    errorCount++;
                                 }
-                            } else {
-                                row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
-                                errorTable.append(row);
-                                errorCount++;
+                                $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                                $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
+                                $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
                             }
-                            $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
-                            $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
-                            $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                        );
+                        $(".zoom-to-feature").click(function (e) {
+                            _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
+                            e.stopPropagation();
+                        });
+
+                        backboneEvents.get().trigger("end:conflictSearch", {
+                            "projWktWithBuffer": projWktWithBuffer,
+                            "file": response.file
+                        });
+
+                        L.geoJson(response.geom, {
+                            "color": "#ff7800",
+                            "weight": 1,
+                            "opacity": 0.65,
+                            "dashArray": '5,3'
+                        });
+                        geomStr = response.geom;
+                        if (callBack) {
+                            callBack();
                         }
-                    );
-                    $(".zoom-to-feature").click(function (e) {
-                        _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
-                        e.stopPropagation();
-                    });
-
-                    backboneEvents.get().trigger("end:conflictSearch", {"projWktWithBuffer": projWktWithBuffer});
-
-                    L.geoJson(response.geom, {
-                        "color": "#ff7800",
-                        "weight": 1,
-                        "opacity": 0.65,
-                        "dashArray": '5,3'
-                    });
-                    geomStr = response.geom;
-                    if (callBack) {
-                        callBack();
+                    },
+                    error: function () {
+                        jquery("#snackbar-conflict").snackbar("hide");
                     }
-                },
-                error: function () {
-                    jquery("#snackbar-conflict").snackbar("hide");
-                }
+                })
             })
         }
     },
@@ -693,6 +710,12 @@ module.exports = module.exports = {
     },
     getResult: function () {
         return _result;
+    },
+    setPreProcessor: function (fn) {
+        preProcessor = fn;
+    },
+    setSearchStr: function(str) {
+        searchStr = str;
     }
 };
 

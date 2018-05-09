@@ -28,6 +28,8 @@ var backboneEvents;
 var legend;
 var moment = require('moment');
 var meta;
+var uriJs = require('urijs');
+var callBack= function () {};
 
 /**
  * @private
@@ -77,6 +79,10 @@ module.exports = {
         $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
     },
 
+    setCallBack: function (fn) {
+        callBack = fn;
+    },
+
     /**
      *
      */
@@ -90,8 +96,6 @@ module.exports = {
             $("#select-scale").empty();
             center = null;
             scale = null;
-
-            //hyperform(document.getElementById("print-form"));
 
             // Set up print dialog
             for (var i = 0; i < scales.length; i++) {
@@ -186,7 +190,7 @@ module.exports = {
      *
      */
     print: function (endEventName, customData) {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null;
+        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
         if (isNaN(scale) || scale < 200) {
             alert(__("Not a valid scale. Must be over 200."));
@@ -300,7 +304,8 @@ module.exports = {
             customData: customData || null,
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
-            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1]
+            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
+            queryString: uriObj.search()
         };
 
         if (urlVars.config) {
@@ -326,12 +331,15 @@ module.exports = {
                     backboneEvents.get().trigger(endEventName, response);
                 }
             },
-            error: function () {
+            error: function (response) {
                 if (!endEventName) {
                     backboneEvents.get().trigger("end:print", response);
                 } else {
                     backboneEvents.get().trigger(endEventName, response);
                 }
+            },
+            complete: function (response) {
+                callBack(response.responseJSON);
             }
         });
 

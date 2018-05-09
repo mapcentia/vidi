@@ -1,11 +1,3 @@
-/**
- * Watching for file changes during development.
- */
-let watch = false;
-if (process.argv.indexOf('--watch') !== -1) {
-    watch = true;
-}
-
 module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
@@ -21,9 +13,18 @@ module.exports = function (grunt) {
                     compress: false,
                     optimization: 2
                 },
-                files: {
-                    "public/css/styles.css": "public/less/styles.less" // destination file and source file
-                }
+                files: [
+                    {
+                        "public/css/styles.css": "public/less/styles.less" // destination file and source file
+                    },
+                    {
+                        expand: true,        // Enable dynamic expansion.
+                        cwd: 'extensions',  // Src matches are relative to this path.
+                        src: ['**/less/*.less',],     // Actual pattern(s) to match.
+                        dest: 'public/css/extensions',  // Destination path prefix.
+                        ext: '.css',         // Dest filepaths will have this extension.
+                    }
+                ]
             }
         },
         cssmin: {
@@ -41,7 +42,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
                         'public/js/lib/leaflet-measure/leaflet-measure.css',
-                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
+                        'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
                         'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
@@ -55,10 +56,23 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
                         //custon
-                        'public/css/styles.css'
+                        'public/css/styles.min.css'
+                    ]
+                }
+            },
+            extensions: {
+                options: {
+                    target: "./build",
+                    rebase: true
+                },
+                files: {
+                    'public/css/styles.min.css': [
+                        'public/css/styles.css',
+                        'public/css/extensions/**/less/*.css'
                     ]
                 }
             }
+
         },
         jshint: {
             options: {
@@ -134,16 +148,7 @@ module.exports = function (grunt) {
                 options: {
                     sourceMap: true,
                     sourceMapIncludeSources: true,
-                    compress: {
-                        sequences: true,
-                        dead_code: true,
-                        conditionals: true,
-                        booleans: true,
-                        unused: true,
-                        if_return: true,
-                        join_vars: true,
-                        drop_console: false
-                    }
+                    compress: false
                 },
                 files: {
                     'public/js/build/all.min.js': [
@@ -160,13 +165,12 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-plugins/Yandex.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+                        'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
                         'public/js/lib/q-cluster/src/utils.js',
                         'public/js/lib/q-cluster/src/clustering.js',
                         'public/js/point-clusterer.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
-                        'public/js/lib/es5-shim/es5-shim.js',
-                        'public/js/lib/es6-shim/es6-shim.js',
                         'public/js/lib/jquery/jquery.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
@@ -194,7 +198,6 @@ module.exports = function (grunt) {
                         'public/js/vidi.js',
                         'public/js/gc2/geocloud.js',
                         'public/js/gc2/gc2table.js'
-
                     ]
                 }
             }
@@ -223,7 +226,7 @@ module.exports = function (grunt) {
                 command: [
                     'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
-                    ].join('&&')
+                ].join('&&')
             }
         },
         cacheBust: {
@@ -269,6 +272,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-watchify');
-    grunt.registerTask('default', ['browserify', 'less', 'hogan', 'shell']);
-    grunt.registerTask('production', ['env', 'gitreset', 'gitpull', 'browserify', 'less', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin', 'cacheBust']);
+
+    grunt.registerTask('default', ['browserify:publish', 'extension-css', 'hogan']);
+    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

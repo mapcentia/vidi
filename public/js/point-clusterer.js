@@ -114,7 +114,9 @@ var QCluster = (function(module){
             ZERO_OFFSET,
             QUAD,
             ROUND_ERROR,
-            ABC;
+            ABC,
+            PI;
+
 
         var ABC = 'ABCDEFGHIJKLMNOPQRSTUVWXYZABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
@@ -384,8 +386,8 @@ var QCluster = (function(module){
 
         var clusterArr, clusterDictionary, cnt,divHtml,divClass,myIcon,
             latlon,points,clusterMarker,classificationIds, mapBounds,
-            resolution, webMercMapBounds, clusterLength, i
-        clusterMarkers = [], lats = [], lngs = [];
+            resolution, webMercMapBounds, clusterLength, i,
+            clusterMarkers = [], lats = [], lngs = [];
 
         // If map is not visible, don't proceed
         if(!$(this.map._container).is(":visible")) {

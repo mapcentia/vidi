@@ -6,6 +6,7 @@
 'use strict';
 
 var meta;
+var layers;
 
 var switchLayer;
 

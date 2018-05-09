@@ -56,7 +56,7 @@ geocloud = (function () {
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
-        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com/en/geocloud/geocloud.htm'>MapCentia GC2</a> " : window.mapAttribution,
+        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
             4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
             76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
@@ -79,15 +79,9 @@ geocloud = (function () {
     if (typeof L === "object") {
         MAPLIB = "leaflet";
     }
-    //Only if loaded in script tag
-    if (document.readyState === "loading") {
-        if (typeof jQuery === "undefined") {
-            document.write("<script src='//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'><\/script>");
-        }
-    }
     var setHost = function (str) {
         host = str;
-    }
+    };
     // Helper for extending classes
     extend = function (ChildClass, ParentClass) {
         ChildClass.prototype = new ParentClass();
@@ -169,7 +163,7 @@ geocloud = (function () {
                         style: this.defaults.styleMap,
                         pointToLayer: this.defaults.pointToLayer,
                         onEachFeature: this.defaults.onEachFeature,
-                        clickable: this.defaults.clickable
+                        interactive: this.defaults.clickable
                     });
                     this.layer.id = this.defaults.name;
                     break;
@@ -251,7 +245,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true": encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
+                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -291,7 +285,7 @@ geocloud = (function () {
                 }
 
             });
-            return this.layer;
+            return xhr;
         };
         this.abort = function () {
             xhr.abort();
@@ -515,7 +509,8 @@ geocloud = (function () {
             tileCached: true,
             name: null,
             isBaseLayer: false,
-            resolutions: resolutions
+            resolutions: resolutions,
+            uri: null
 
         };
         if (config) {
@@ -528,10 +523,16 @@ geocloud = (function () {
 
     //ol2, ol3 and leaflet
     createTileLayer = function (layer, defaults) {
-        var parts, l, url, urlArray;
+        var parts, l, url, urlArray, uri;
         parts = layer.split(".");
+
         if (!defaults.tileCached) {
-            url = defaults.host + "/wms/" + defaults.db + "/" + parts[0] + "?";
+            if (!defaults.uri) {
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?";
+            } else {
+                uri = defaults.uri;
+            }
+            url = defaults.host + uri;
             urlArray = [url];
         } else {
             url = defaults.host + "/mapcache/" + defaults.db + "/wms";
@@ -562,21 +563,30 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
-                l = new L.TileLayer.WMS(url, {
+
+                var options = {
                     layers: layer,
                     format: 'image/png',
                     transparent: true,
-                    subdomains: ["cdn1", "cdn2", "cdn3"],
                     maxZoom: defaults.maxZoom,
                     tileSize: defaults.tileSize
-                });
+                };
+
+                if (defaults.singleTile) {
+                    l = new L.nonTiledLayer.wms(url, options);
+                } else {
+                    l = new L.TileLayer.WMS(url, options);
+                }
+
                 l.id = layer;
+
                 if (defaults.loadEvent) {
                     l.on("load", defaults.loadEvent);
                 }
                 if (defaults.loadingEvent) {
                     l.on("loading", defaults.loadingEvent);
                 }
+
                 break;
         }
         return l;
@@ -626,14 +636,14 @@ geocloud = (function () {
                     maxZoom: defaults.maxZoom,
                     maxNativeZoom: defaults.maxNativeZoom,
                     tileSize: 256,
-                    ran: function() {
+                    ran: function () {
                         return Math.random();
                     }
                 };
                 if (usingSubDomains) {
                     config.subdomains = defaults.subdomains;
                 }
-                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png", config);
+                l = new L.TileLayer(url + "1.0.0/" + layer + "" + "/{z}/{x}/{y}.png" + (defaults.isBaseLayer ? "" : "?{ran}"), config);
                 l.id = layer;
                 if (defaults.loadEvent) {
                     l.on("load", defaults.loadEvent);
@@ -1690,7 +1700,8 @@ geocloud = (function () {
                 type: "wms",
                 maxZoom: 21,
                 maxNativeZoom: 21,
-                tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256
+                tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
+                uri: null
             };
             if (config) {
                 for (prop in config) {
@@ -1702,7 +1713,7 @@ geocloud = (function () {
             for (var i = 0; i < layers.length; i++) {
                 var l;
                 switch (defaults.type) {
-                    case  "wms":
+                    case "wms":
                         l = createTileLayer(layers[i], defaults);
                         break;
                     case "tms":
@@ -2358,99 +2369,3 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
-
-if (geocloud.MAPLIB === "leaflet") {
-    (function () {
-        var bounce = false, isSet = true, first = true;
-        /* Patch for Leaflet 0.7.3  */
-        if (L.TileLayer && L.TileLayer.WMS) {
-            /* Set tileSize option to 9999 (or greater) to switch it to single tile mode */
-            L.TileLayer.WMS.prototype.getTileUrl2 = function (tilePoint) {
-                var me = this;
-
-                if (!this._singleTile) {
-                    return this.getTileUrl(tilePoint);
-                }
-                var tmp = this._map.getSize();
-                this.wmsParams.width = tmp.x;
-                this.wmsParams.height = tmp.y;
-                tmp = this._map.getBounds();
-
-                var nw = this._crs.project(tmp.getNorthWest());
-                var se = this._crs.project(tmp.getSouthEast());
-                var bbox = this._wmsVersion >= 1.3 && this._crs === L.CRS.EPSG4326 ?
-                    [se.y, nw.x, nw.y, se.x].join(',') :
-                    [nw.x, se.y, se.x, nw.y].join(',');
-                url = L.Util.template(this._url, {s: this._getSubdomain(tilePoint)});
-
-                if (!bounce && !first) {
-                    bounce = true;
-                    setTimeout(function () {
-                        first = true;
-
-                        bounce = false
-                    }, 1000)
-                    isSet = true;
-                    return url + L.Util.getParamString(this.wmsParams, url, true) + '&BBOX=' + bbox;
-                } else {
-                    isSet = false;
-                    setTimeout(function () {
-                        first = false;
-
-                        if (!isSet) {
-                            me.redraw();
-                        }
-                    }, 1000)
-                    return false
-                }
-            }
-            L.TileLayer.WMS.prototype._loadTile = function (tile, tilePoint) {
-                var me = this;
-                if (this._singleTile) {
-                    var siz = this._map.getSize();
-                    tile.style.width = siz.x + 'px';
-                    tile.style.height = siz.y + 'px';
-                }
-                tile._layer = this;
-
-
-                tile.onload = function () {
-                    if (this._layer._singleTile) {
-                        this._layer._reset({hard: true});
-                        this._layer._tileContainer.appendChild(this);
-                        this._layer.fire("load");
-                    }
-                    L.TileLayer.WMS.prototype._tileOnLoad.call(this);
-                };
-                tile.onerror = this._tileOnError;
-                this._adjustTilePoint(tilePoint);
-                var url = this.getTileUrl2(tilePoint);
-                if (url) {
-                    //console.info(url);
-                    tile.src = url
-                } else {
-                    console.info("Skipping single tile");
-                }
-                this.fire('tileloadstart', {tile: tile, url: tile.src});
-            }
-            L.TileLayer.WMS.prototype._addTilesFromCenterOut = function (bounds) {
-                this._singleTile = this.options.tileSize >= 9999;
-                if (!this._singleTile) {
-                    return L.TileLayer.prototype._addTilesFromCenterOut.call(this, bounds);
-                }
-
-                var fragment = document.createDocumentFragment();
-                this.fire('loading');
-                this._addTile(new L.Point(bounds.min.x, bounds.min.y), fragment);
-                this._tileContainer.appendChild(fragment);
-            }
-            L.TileLayer.WMS.prototype._getTilePos = function (tilePoint) {
-                if (!this._singleTile) {
-                    return L.TileLayer.prototype._getTilePos.call(this, tilePoint);
-                }
-                return this._map.getPixelBounds().min.subtract(this._map.getPixelOrigin())
-            }
-        }
-    }());
-}
-

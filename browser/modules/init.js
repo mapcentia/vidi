@@ -220,6 +220,7 @@ module.exports = {
         //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
            require('./../../extensions/*/browser/*.js', {glob: true});
+           require('./../../extensions/*/browser/*/*.js', {glob: true});
         }
 
         if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -268,7 +269,7 @@ module.exports = {
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
-                console.log('Service worker was registered', registration);
+                console.log('Service worker was registered');
             }).catch(error => {
                 console.warn('Service worker registration failed', error);
             });

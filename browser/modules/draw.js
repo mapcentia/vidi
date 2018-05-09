@@ -111,33 +111,30 @@ module.exports = {
                     polygon: {
                         allowIntersection: true,
                         shapeOptions: {
-                            color: '#ff0000'
                         },
                         showArea: true
                     },
                     polyline: {
                         metric: true,
                         shapeOptions: {
-                            color: '#ff0000'
                         }
                     },
                     rectangle: {
                         shapeOptions: {
-                            color: '#ff0000'
                         }
                     },
                     circle: {
                         shapeOptions: {
-                            color: '#ff0000'
                         }
                     },
                     marker: true,
-                    circlemarker: false
-
+                    circlemarker: true
                 },
+
                 edit: {
                     featureGroup: drawnItems
                 }
+
             });
 
             drawControl.setDrawingOptions({
@@ -156,6 +153,8 @@ module.exports = {
             });
 
             cloud.get().map.addControl(drawControl);
+            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-commenting-o" aria-hidden="true"></i>').css("background-image", "none");
+
             drawOn = true;
 
             // Unbind events
@@ -188,15 +187,22 @@ module.exports = {
             });
 
             cloud.get().map.on('draw:created', function (e) {
+
                 var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
+
                 if (type === 'marker') {
+                    drawLayer._vidi_marker = true;
+                }
+
+                if (type === 'circlemarker') {
 
                     drawLayer._vidi_marker = true;
 
                     var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
 
                     if (text !== null) {
-                        drawLayer.bindTooltip(text);
+                        drawLayer.bindTooltip(text, {permanent: true}).on("click", function () {
+                        }).openTooltip();
 
                         drawLayer._vidi_marker_text = text;
 
@@ -212,11 +218,13 @@ module.exports = {
 
                 me.setStyle(drawLayer, type);
 
-                drawLayer.on('click', function (event) {
+                if (type !== 'circlemarker') {
+                    drawLayer.on('click', function (event) {
 
-                    me.bindPopup(event);
+                        me.bindPopup(event);
 
-                });
+                    });
+                }
 
                 if (type === "polygon" || type === "rectangle") {
                     area = _getArea(drawLayer);
@@ -245,19 +253,24 @@ module.exports = {
                 table.loadDataInTable();
             });
             cloud.get().map.on('draw:edited', function (e) {
-                $.each(e.layers._layers, function (i, v) {
 
-                    v.updateMeasurements();
+                $.each(e.layers._layers, function (i, v) {
 
                     if (typeof v._mRadius !== "undefined") {
                         v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
+                        v.updateMeasurements();
+
                     }
                     else if (typeof v._icon !== "undefined") {
                     } else if (v.feature.properties.distance !== null) {
                         v.feature.properties.distance = _getDistance(v);
+                        v.updateMeasurements();
+
                     }
                     else if (v.feature.properties.area !== null) {
                         v.feature.properties.area = _getArea(v);
+                        v.updateMeasurements();
+
                     }
                 });
                 table.loadDataInTable();
@@ -320,17 +333,13 @@ module.exports = {
                 showTotal: $("#draw-line-total-dist").is(":checked")
             });
         } else {
-            if (type !== 'marker') {
+            if (type !== 'marker' && type !== 'circlemarker' ) {
                 l.hideMeasurements();
             }
         }
 
-        if (type !== 'marker') {
+        if (type !== 'marker' && type !== 'circlemarker') {
             l.setStyle({dashArray: $("#draw-line-type").val()});
-
-        }
-
-        if (type !== 'marker') {
 
             l.setStyle({lineCap: $("#draw-line-cap").val()});
 
@@ -350,10 +359,12 @@ module.exports = {
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
             }
-
         }
 
-
+        if (type === 'circlemarker') {
+            l.setStyle({opacity: "0.0"});
+            l.setStyle({fillOpacity: "0.0"});
+        }
     },
 
     init: function () {
@@ -584,16 +595,16 @@ module.exports = {
             var svg = this._map._pathRoot;
 
             // Check if the defs node is already created
-           /* var defsNode;
-            if (L.DomUtil.hasClass(svg, 'defs')) {
-                defsNode = svg.getElementById('defs');
-            } else {
-                L.DomUtil.addClass(svg, 'defs');
-                defsNode = L.Path.prototype._createElement('defs');
-                defsNode.setAttribute('id', 'defs');
-                var svgFirstChild = svg.childNodes[0];
-                svg.insertBefore(defsNode, svgFirstChild);
-            }*/
+            /* var defsNode;
+             if (L.DomUtil.hasClass(svg, 'defs')) {
+                 defsNode = svg.getElementById('defs');
+             } else {
+                 L.DomUtil.addClass(svg, 'defs');
+                 defsNode = L.Path.prototype._createElement('defs');
+                 defsNode.setAttribute('id', 'defs');
+                 var svgFirstChild = svg.childNodes[0];
+                 svg.insertBefore(defsNode, svgFirstChild);
+             }*/
 
             //
 

@@ -41,7 +41,19 @@ var pushState;
  *
  * @type {*|exports|module.exports}
  */
-var tileLayersCacheBuster = 0;
+var meta;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var backboneEvents;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var layerTree;
 
 /**
  *
@@ -54,7 +66,9 @@ module.exports = module.exports = {
         layers = o.layers;
         layerTree = o.layerTree;
         pushState = o.pushState;
+        meta = o.meta;
         backboneEvents = o.backboneEvents;
+        layerTree = o.layerTree;
         return this;
     },
 
@@ -111,6 +125,12 @@ module.exports = module.exports = {
                     tileLayer.redraw();
 
                     cloud.get().map.addLayer(tileLayer);
+                }, () => {
+                    console.log("Layer " + name + " not in Meta");
+                    meta.init(name, true).then(() => {
+                        layerTree.init();
+                        me.init(name, true); // recursive
+                    });
                 });
             } else {
                 el.data('gc2-layer-type', 'vector');

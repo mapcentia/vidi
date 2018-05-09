@@ -30,6 +30,11 @@ module.exports = {
     init: function () {
         var endPrintEventName = "end:conflictPrint";
 
+        // Listen and reacting to the global Reset ALL event
+        backboneEvents.get().on("reset:all", function () {
+            backboneEvents.get().trigger("off:conflict");
+        });
+
         // Turn off if advanced info or drawing is activated
         backboneEvents.get().on("off:conflict on:advancedInfo on:drawing", function () {
             conflictSearch.off();
@@ -42,6 +47,7 @@ module.exports = {
             $("#conflict-download-pdf").prop("download", response.key);
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
+            backboneEvents.get().trigger("end:conflictSearchPrint", response);
         });
 
         // When conflict search is done, enable the print button

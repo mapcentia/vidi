@@ -45,15 +45,13 @@ var meta;
  */
 var backboneEvents;
 
-var mustache = require('mustache');
-
 var host = require("./connection").getHost();
 
-var singleTiled = [];
+var switchLayer;
 
+var array = [];
 
-
-var array =[];
+var uri = null
 
 /**
  *
@@ -88,14 +86,12 @@ module.exports = {
         var layers = cloud.get().map._layers;
 
         for (var key in layers) {
-            if (layers.hasOwnProperty(key)) {
-                if (layers[key].baseLayer !== true) {
-                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                        if (typeof layers[key]._tiles === "object") {
-                            layerArr.push(layers[key].id);
-                        } else if (layers[key].id && layers[key].id.startsWith('v:')) {
-                            layerArr.push(layers[key].id);
-                        }
+            if (layers[key].baseLayer !== true) {
+                if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
+                    if (typeof layers[key]._tiles === "object") {
+                        layerArr.push(layers[key].id);
+                    } else if (layers[key].id && layers[key].id.startsWith('v:')) {
+                        layerArr.push(layers[key].id);
                     }
                 }
             }
@@ -136,12 +132,16 @@ module.exports = {
         return array.length;
     },
 
-    getCountLoading: function() {
-      return  array.length;
+    getCountLoading: function () {
+        return array.length;
     },
 
-    getArray: function() {
-      return  array;
+    getArray: function () {
+        return array;
+    },
+
+    setUri: function (str) {
+      uri = str;
     },
 
     /**
@@ -152,32 +152,33 @@ module.exports = {
     addLayer: function (l) {
         var me = this;
 
-        if (typeof window.vidiConfig.singleTiled === "object" && window.vidiConfig.singleTiled.length > 0) {
-            singleTiled = window.vidiConfig.singleTiled
-        }
-
         return new Promise(function (resolve, reject) {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             $.each(metaData.data, function (i, v) {
-                var layer = v.f_table_schema + "." + v.f_table_name;
-                if (layer === l) {
-                    isBaseLayer = v.baselayer ? true : false;
 
+                var layer = v.f_table_schema + "." + v.f_table_name,
+                    singleTiled = (v.meta !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+
+                if (layer === l) {
+                    isBaseLayer = !!v.baselayer;
+                    console.log('### addLayer', layer, host, singleTiled);
                     layers[[layer]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [layer],
                         db: db,
                         isBaseLayer: isBaseLayer,
-                        tileCached: singleTiled.indexOf(layer) === -1,
-                        visibility: false,
+                        tileCached: !singleTiled,
+                        singleTile: singleTiled,
+                        // @todo Was somehow set to false
+                        //visibility: false,
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: v.f_table_name,
                         // Single tile option
-                        type: singleTiled.indexOf(layer) === -1 ? "tms" : "wms",
-                        tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
+                        type: !singleTiled ? "tms" : "wms",
                         format: "image/png",
+                        uri: uri,
                         loadEvent: function () {
                             me.decrementCountLoading(layer);
                             backboneEvents.get().trigger("doneLoading:layers", layer);
@@ -195,7 +196,9 @@ module.exports = {
                 }
             });
 
-            console.info(l + " added to the map.");
+            reject();
+
+            console.info(l + " not added to the map.");
         })
     }
 };
