@@ -95,6 +95,10 @@ const translations = {
         "da_DK": "Ledig plads",
         "en_US": "Available space"
     },
+    "Available space can not be detected": {
+        "da_DK": "# Available space can not be detected",
+        "en_US": "# Available space can not be detected"
+    },
     "Offline map": {
         "da_DK": "Offline kort",
         "en_US": "Offline map"

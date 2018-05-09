@@ -9,6 +9,12 @@ const CACHE_NAME = 'vidi-static-cache';
 const NUMBER_OF_SIMULTANEOUS_REQUESTS = 8;
 
 /**
+ * Browser detection
+ */
+const { detect } = require('detect-browser');
+const browser = detect();
+
+/**
  * Async
  */
 import async from 'async';
@@ -413,26 +419,28 @@ module.exports = {
             }
 
             refreshStatus() {
-                const bytesToSize = (bytes) => {
-                    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                    if (bytes == 0) return '0 Byte';
-
-                    let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                };
-
                 cachedAreasManagerInstance.getAll().then(existingCachedAreas => {
                     this.setState({ existingCachedAreas });
                 });
 
-                navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
-                    this.setState({
-                        storageUsed: bytesToSize(usedBytes),
-                        storageAvailable: bytesToSize(grantedBytes)
+                if (browser.name !== 'safari') {
+                    const bytesToSize = (bytes) => {
+                        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                        if (bytes == 0) return '0 Byte';
+    
+                        let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+                        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                    };
+
+                    navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
+                        this.setState({
+                            storageUsed: bytesToSize(usedBytes),
+                            storageAvailable: bytesToSize(grantedBytes)
+                        });
+                    }, (e) => {
+                        console.log('Error', e);
                     });
-                }, (e) => {
-                    console.log('Error', e);
-                });
+                }
             }
 
             getMapMinZoom() {
@@ -655,11 +663,22 @@ module.exports = {
                     </div>);
                 }
 
+                let availableSpaceNotification = (<div className="available-space-container">
+                    {__("Available space")}: {this.state.storageUsed}/{this.state.storageAvailable}
+                </div>);
+                if (browser && browser.name === 'safari') {
+                    availableSpaceNotification = (<div className="available-space-container">
+                        {__("Available space can not be detected")}
+                    </div>);
+                }
+
                 return (
                     <div role="tabpanel">
                         <div className="panel panel-default">
                             <div className="panel-body offline-map-extension">
-                                <div className="available-space-container">{__("Available space")}: {this.state.storageUsed}/{this.state.storageAvailable}</div>
+                                {/* Available storage notification */}
+                                {availableSpaceNotification}
+
                                 <p>{__("Description")}</p>
                             </div>
                         </div>

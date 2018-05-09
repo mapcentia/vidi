@@ -59,6 +59,7 @@
     "circular-functions": "0.0.3",
     "cors": "^2.7.1",
     "crypto-browserify": "^3.11.0",
+    "detect-browser": "^2.4.0",
     "dom-shims": "^0.1.4",
     "elasticsearch": "^12.1.3",
     "es6-promise": "^4.0.5",
