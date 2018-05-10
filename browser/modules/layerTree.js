@@ -105,11 +105,19 @@ module.exports = {
         };
 
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate = false) => {
+
+            console.log('### statistics', statistics);
+
             let actions = ['add', 'update', 'delete'];
             $(`[data-gc2-layer-key]`).each((index, container) => {
                 actions.map(action => {
-                    $(container).find('.js-' + action).addClass('hidden');
-                    $(container).find('.js-' + action).find('.js-value').html('');
+                    $(container).find('.js-failed-' + action).addClass('hidden');
+                    $(container).find('.js-failed-' + action).find('.js-value').html('');
+                    $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
+                    $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
+
+                    $(container).find('.js-rejectedByServerItems').empty();
+                    $(container).find('.js-rejectedByServerItems').addClass('hidden');
                 });
             });
 
@@ -143,13 +151,34 @@ module.exports = {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
                 if (layerControlContainer.length === 1) {
                     let totalRequests = 0;
+                    let rejectedByServerRequests = 0;
                     actions.map(action => {
-                        if (statistics[key][action.toUpperCase()] > 0) {
+                        if (statistics[key]['failed'][action.toUpperCase()] > 0) {
                             totalRequests++;
-                            $(layerControlContainer).find('.js-' + action).removeClass('hidden');
-                            $(layerControlContainer).find('.js-' + action).find('.js-value').html(statistics[key][action.toUpperCase()]);
+                            $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
+                        }
+
+                        if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
+                            rejectedByServerRequests++;
+                            totalRequests++;
+                            $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
                         }
                     });
+
+                    if (rejectedByServerRequests > 0) {
+                        $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
+                        statistics[key]['rejectedByServer'].items.map(item => {
+                            let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
+                            delete copiedItemProperties.gid;
+
+                            $(layerControlContainer).find('.js-rejectedByServerItems').append(`<div>
+                                <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
+                                <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
+                            </div>`)
+                        });
+                    }
 
                     if (totalRequests > 0) {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
@@ -323,7 +352,8 @@ module.exports = {
                             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
                             let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
-                            let queueInfoButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
+                            let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
+                            let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
                             let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
                                 <div style="display: inline-block;">
                                     <div class="checkbox" style="width: 34px;">
@@ -355,13 +385,22 @@ module.exports = {
                                 </div>
                                 <div style="display: inline-block;">
                                     <span>${text}${lockedLayer}</span>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-add" style="${queueInfoButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-update" style="${queueInfoButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-update" style="${queueFailedButtonStyle}" disabled>
                                         <i class="fa fa-edit"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-delete" style="${queueInfoButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                        <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                        <i class="fa fa-plus"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                        <i class="fa fa-edit"></i> <span class="js-value"></span>
+                                    </button>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
                                         <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
                                     </button>
                                     <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
@@ -376,6 +415,7 @@ module.exports = {
                                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                 </div>
+                                <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;"></div>
                             </li>`);
 
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {

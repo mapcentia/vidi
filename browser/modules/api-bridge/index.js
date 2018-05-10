@@ -53,12 +53,14 @@ class APIBridge {
                                 throw new Error('Unable to detect the pushed feature id');
                             }
 
+                            // @todo Can be removed, leaving for additional data integrity check
                             let queueItems = queue.getItems();
                             queueItems.map(item => {
                                 if (queueItem.feature.features[0].properties.gid === item.feature.features[0].properties.gid) {
-                                    queue.replaceVirtualGid(queueItem.feature.features[0].properties.gid, newFeatureId);
+                                    throw new Error('Multiple queue element with the same gid');
                                 }
                             });
+
                         }
 
                         resolve();
@@ -70,22 +72,33 @@ class APIBridge {
                         Add special "skip" flag to this elements
                         Mention these rejected elements in transform response
                         When these element are pushed to the queue again, find their old buddies and replace them
+                        What if onlye n-th queue item was rejected? Got to keep queue rolling
                         */
-                       
+
                         let itemWasReqectedByServer = false;
-                        console.log('# Request failed 1', error);
+                        let serverErrorMessage = '';
                         if (error.status === 500 && error.responseJSON) {
-                            if (error.responseJSON.message && error.responseJSON.message.success === 'false') {
-                                console.log('# Request failed');
+                            if (error.responseJSON.message && error.responseJSON.message.success === false) {
+                                itemWasReqectedByServer = true;
                                 if (error.responseJSON.message.message.ServiceException) {
-                                    console.log('# Reason', error.responseJSON.message.message.ServiceException);
+                                    serverErrorMessage = error.responseJSON.message.message.ServiceException;
                                 }
                             }
                         }
 
-                        if (LOG) console.warn('APIBridge: request failed');
+                        if (itemWasReqectedByServer) {
+                            if (LOG) console.warn('APIBridge: request was rejected by server');
 
-                        reject();
+                            reject({
+                                rejectedByServer: true,
+                                message: serverErrorMessage
+                            });
+                        } else {
+                            if (LOG) console.warn('APIBridge: request failed');
+                            reject({
+                                rejectedByServer: false
+                            });
+                        }
                     }
                 };
 
@@ -287,10 +300,18 @@ class APIBridge {
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
 
+                let itemColor = 'orange';
+                if (item.skip) {
+
+                    if (LOG) console.log('APIBridge: skipped item was detected');
+
+                    itemColor = 'red';
+                }
+
                 let feature = Object.assign({}, item.feature.features[0], {
                     'style':{
-                        fillColor: 'orange',
-                        color: 'orange'
+                        fillColor: itemColor,
+                        color: itemColor
                     }
                 });
 

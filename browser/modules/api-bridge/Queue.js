@@ -126,7 +126,10 @@ class Queue {
         for (let key in itemsClassifiedByGid) {
             if (itemsClassifiedByGid[key].length > 1) {
                 let initialItemImage = Object.assign({}, itemsClassifiedByGid[key][0]);
-                let itemGid = getItemGid(initialItemImage);              
+                let itemGid = getItemGid(initialItemImage);
+
+                // Giving the item another chance
+                initialItemImage.skip = false;
 
                 if (LOG) console.log(`Queue: more than one queue item with gid ${itemGid}, merging`);
 
@@ -170,21 +173,35 @@ class Queue {
                 let layer = `${currentItem.meta.f_table_schema}.${currentItem.meta.f_table_name}.${currentItem.meta.f_geometry_column}`;
                 if (('' + layer) in stats === false) {
                     stats[layer] = {
-                        ADD: 0,
-                        UPDATE: 0,
-                        DELETE: 0
+                        failed: {
+                            ADD: 0,
+                            UPDATE: 0,
+                            DELETE: 0
+                        },
+                        rejectedByServer: {
+                            ADD: 0,
+                            UPDATE: 0,
+                            DELETE: 0,
+                            items: []
+                        }
                     };
+                }
+
+                let category = 'failed';
+                if (currentItem.skip) {
+                    category = 'rejectedByServer';
+                    stats[layer][category].items.push(Object.assign({}, currentItem));
                 }
 
                 switch (currentItem.type) {
                     case ADD_REQUEST:
-                        stats[layer].ADD++;
+                        stats[layer][category].ADD++;
                         break;
                     case UPDATE_REQUEST:
-                        stats[layer].UPDATE++;
+                        stats[layer][category].UPDATE++;
                         break;
                     case DELETE_REQUEST:
-                        stats[layer].DELETE++;
+                        stats[layer][category].DELETE++;
                         break;
                     default:
                         throw new Error('Invalid request type');
@@ -246,6 +263,18 @@ class Queue {
         });
     }
 
+    _getOldestNonSkippedItem(offset) {
+        let result = false;
+        for (let i = offset; i < _self._queue.length; i++) {
+            if (!_self._queue[i].skip) {
+                result = _self._queue[i];
+                break;
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Iterate over queue and perform request in FIFO manner
      * 
@@ -257,39 +286,48 @@ class Queue {
 
         let _self = this;
 
-        let numberOfRuns = 0;
+        let queueSearchOffset = -1;
+
         let result = new Promise((resolve, reject) => {
             const processOldestItem = () => {
-                numberOfRuns++;
+                queueSearchOffset++;
 
-                if (LOG) console.log('Queue: processOldest, runs:', numberOfRuns);
+                if (LOG) console.log('Queue: processOldest, runs:', queueSearchOffset);
 
-                if (numberOfRuns > 1 || emitQueueStateChangeBeforeCommit) {
+                if (queueSearchOffset > 0 || emitQueueStateChangeBeforeCommit) {
                     _self._onUpdateListener(_self._generateCurrentStatistics());
                 }
         
                 _self._saveState();
 
                 new Promise((localResolve, localReject) => {
-                    let oldestItem = Object.assign({}, _self._queue[0]);
+
+                    let oldestItem = Object.assign({}, _self._getOldestNonSkippedItem(queueSearchOffset));
+
                     _self._processor(oldestItem, _self).then((result) => {
                         _self._queue.shift();
 
                         if (LOG) console.log('Queue: item was processed', oldestItem, result);
                         if (LOG) console.log('Queue: items left', _self._queue.length);
 
-                        if (_self._queue.length === 0) {
-                            _self._onUpdateListener(_self._generateCurrentStatistics());
-                            _self._saveState();
+                        let oldestNonSkippedItem = _self._getOldestNonSkippedItem(queueSearchOffset);
 
-                            resolve();
-                        } else {
-                            _self._onUpdateListener(_self._generateCurrentStatistics());
-                            _self._saveState();
-
+                        _self._onUpdateListener(_self._generateCurrentStatistics());
+                        _self._saveState();
+                        if (oldestNonSkippedItem) {
+                            // There are still items to process
                             localResolve();
+                        } else {
+                            // No items in queue or all of them are skipped
+                            resolve();
                         }
-                    }).catch((error) => {
+                    }).catch(error => {
+                        if (error.rejectedByServer) {
+
+                            if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[queueSearchOffset]);
+
+                            _self._queue[queueSearchOffset].skip = true;
+                        }
 
                         if (LOG) console.log('Queue: item was not processed', oldestItem);
                         if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
