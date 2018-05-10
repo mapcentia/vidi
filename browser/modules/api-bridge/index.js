@@ -1,7 +1,7 @@
 'use strict';
 
 const Queue = require('./Queue');
-const LOG = true;
+const LOG = false;
 const errorCodes = {
     "UNAUTHORIZED": 0,
     "NOT_FOUND": 1,
@@ -63,7 +63,10 @@ class APIBridge {
 
                         resolve();
                     },
-                    error: () => {
+                    error: (error) => {                        
+                        if (error.status === 500) {
+                            console.log('# That is our client', error);
+                        }
 
                         if (LOG) console.warn('APIBridge: request failed');
 
@@ -268,13 +271,21 @@ class APIBridge {
             currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+
+                let feature = Object.assign({}, item.feature.features[0], {
+                    "style":{
+                        fillColor: "orange",
+                        color: "orange",
+                    }
+                });
+
                 if (itemParentTable === tableId) {
                     switch (item.type) {
                         case Queue.ADD_REQUEST:
                             
                             if (LOG) console.log('APIBridge: ## ADD', item);
 
-                            response.features.push(Object.assign({}, item.feature.features[0]));
+                            response.features.push(Object.assign({}, feature));
                             break;
                         case Queue.UPDATE_REQUEST:
                             features = copyArray(response.features);
@@ -283,7 +294,7 @@ class APIBridge {
 
                                     if (LOG) console.log('APIBridge: ## UPDATE', item);
 
-                                    features[i] = Object.assign({}, item.feature.features[0]);
+                                    features[i] = Object.assign({}, feature);
                                     break;
                                 }
                             }

@@ -101,7 +101,7 @@ geocloud = (function () {
         projection: (MAPLIB === "leaflet") ? "4326" : "900913",
         //Only leaflet
         pointToLayer: function (feature, latlng) {
-            return L.circleMarker(latlng);
+            return (feature.style ? L.circleMarker(latlng, feature.style) : L.circleMarker(latlng));
         },
         //Only leaflet
         onEachFeature: function () {
