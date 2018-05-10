@@ -79,8 +79,9 @@ class Queue {
             }).always(() => {
                 if (_self._queue.length > 0 && _self._locked === false) {
                     _self._locked = true;
-                    console.warn('Queue is not empty, trying to push changes');
+                    if (LOG) console.log(`Queue: not empty, trying to push changes`);
     
+                    _self._eliminateItemsWithSameIdentifier();
                     _self._dispatch().then(() => {
                         _self._locked = false;
                         scheduleNextQueueProcessingRun();
@@ -97,6 +98,55 @@ class Queue {
         this._restoreState().then(() => {
             processQueue();
         });
+    }
+
+    /**
+     * Eliminates items with same identifier in the queue
+     * 
+     * This is needed to ensure that queue does not have more than
+     * one data manipulation with any feature
+     */
+    _eliminateItemsWithSameIdentifier() {
+        const getItemGid = (item) => {
+            return item.feature.features[0].properties.gid;
+        };
+
+        let _self = this;
+
+        let itemsClassifiedByGid = {};
+        for (let i = 0; i < _self._queue.length; i++) {
+            let itemGid = getItemGid(_self._queue[i]);
+            if (!itemsClassifiedByGid[`gid_${itemGid}`]) {
+                itemsClassifiedByGid[`gid_${itemGid}`] = [];
+            }
+
+            itemsClassifiedByGid[`gid_${itemGid}`].push(_self._queue[i]);
+        }
+
+        for (let key in itemsClassifiedByGid) {
+            if (itemsClassifiedByGid[key].length > 1) {
+                let initialItemImage = Object.assign({}, itemsClassifiedByGid[key][0]);
+                let itemGid = getItemGid(initialItemImage);              
+
+                if (LOG) console.log(`Queue: more than one queue item with gid ${itemGid}, merging`);
+
+                for (let i = 1; i < itemsClassifiedByGid[key].length; i++) {
+
+                    if (LOG) console.log(`Queue: merging the ${i} queue item into the initial one (gid ${itemGid})`);
+                    initialItemImage.feature.features[0].properties = itemsClassifiedByGid[key][i].feature.features[0].properties;
+                }
+
+                for (let j = 0; j < _self._queue.length; j++) {
+                    if (getItemGid(_self._queue[j]) === itemGid) {
+                        _self._queue.splice(j, 1);
+                    }
+                }
+
+                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were merged into`, initialItemImage);
+
+                _self._queue.push(initialItemImage);
+            }
+        }
     }
 
     /**

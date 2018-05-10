@@ -63,9 +63,24 @@ class APIBridge {
 
                         resolve();
                     },
-                    error: (error) => {                        
-                        if (error.status === 500) {
-                            console.log('# That is our client', error);
+                    error: (error) => {
+                        /*
+                        Ensure that there is only one element with the specific identifier in the queue (run check on every
+                        queue run)
+                        Add special "skip" flag to this elements
+                        Mention these rejected elements in transform response
+                        When these element are pushed to the queue again, find their old buddies and replace them
+                        */
+                       
+                        let itemWasReqectedByServer = false;
+                        console.log('# Request failed 1', error);
+                        if (error.status === 500 && error.responseJSON) {
+                            if (error.responseJSON.message && error.responseJSON.message.success === 'false') {
+                                console.log('# Request failed');
+                                if (error.responseJSON.message.message.ServiceException) {
+                                    console.log('# Reason', error.responseJSON.message.message.ServiceException);
+                                }
+                            }
                         }
 
                         if (LOG) console.warn('APIBridge: request failed');
@@ -273,9 +288,9 @@ class APIBridge {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
 
                 let feature = Object.assign({}, item.feature.features[0], {
-                    "style":{
-                        fillColor: "orange",
-                        color: "orange",
+                    'style':{
+                        fillColor: 'orange',
+                        color: 'orange'
                     }
                 });
 
