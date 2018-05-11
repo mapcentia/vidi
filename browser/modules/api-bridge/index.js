@@ -52,15 +52,6 @@ class APIBridge {
                             } else {
                                 throw new Error('Unable to detect the pushed feature id');
                             }
-
-                            // @todo Can be removed, leaving for additional data integrity check
-                            let queueItems = queue.getItems();
-                            queueItems.map(item => {
-                                if (queueItem.feature.features[0].properties.gid === item.feature.features[0].properties.gid) {
-                                    throw new Error('Multiple queue element with the same gid');
-                                }
-                            });
-
                         }
 
                         resolve();
@@ -87,11 +78,11 @@ class APIBridge {
                         }
 
                         if (itemWasReqectedByServer) {
-                            if (LOG) console.warn('APIBridge: request was rejected by server');
+                            if (LOG) console.warn(`APIBridge: request was rejected by server, error: `, serverErrorMessage);
 
                             reject({
                                 rejectedByServer: true,
-                                message: serverErrorMessage
+                                serverErrorMessage
                             });
                         } else {
                             if (LOG) console.warn('APIBridge: request failed');

@@ -130,6 +130,11 @@ module.exports = {
                 return false;
             }
 
+            if (!metaDataKeys[value]) {
+                console.warn(`metaDataKeys[${value}] is undefined`);
+                return false;
+            }
+
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;

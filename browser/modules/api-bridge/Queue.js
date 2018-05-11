@@ -77,11 +77,12 @@ class Queue {
                     console.warn(`Unable the determine the online status`);
                 }
             }).always(() => {
+
                 if (_self._queue.length > 0 && _self._locked === false) {
                     _self._locked = true;
+
                     if (LOG) console.log(`Queue: not empty, trying to push changes`);
     
-                    _self._eliminateItemsWithSameIdentifier();
                     _self._dispatch().then(() => {
                         _self._locked = false;
                         scheduleNextQueueProcessingRun();
@@ -125,6 +126,8 @@ class Queue {
 
         for (let key in itemsClassifiedByGid) {
             if (itemsClassifiedByGid[key].length > 1) {
+                let initialNumberOfItemsInQueue = _self._queue.length;
+
                 let initialItemImage = Object.assign({}, itemsClassifiedByGid[key][0]);
                 let itemGid = getItemGid(initialItemImage);
 
@@ -136,16 +139,20 @@ class Queue {
                 for (let i = 1; i < itemsClassifiedByGid[key].length; i++) {
 
                     if (LOG) console.log(`Queue: merging the ${i} queue item into the initial one (gid ${itemGid})`);
+
                     initialItemImage.feature.features[0].properties = itemsClassifiedByGid[key][i].feature.features[0].properties;
                 }
 
-                for (let j = 0; j < _self._queue.length; j++) {
+                let numberOfItemsRemoved = 0;
+                for (let j = (_self._queue.length - 1); j >= 0; j--) {
                     if (getItemGid(_self._queue[j]) === itemGid) {
+                        numberOfItemsRemoved++;
                         _self._queue.splice(j, 1);
                     }
                 }
 
-                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were merged into`, initialItemImage);
+                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were merged into (${initialNumberOfItemsInQueue}
+                    queue items before, ${_self._queue.length + 1} now, ${numberOfItemsRemoved} removed`, initialItemImage);
 
                 _self._queue.push(initialItemImage);
             }
@@ -264,6 +271,8 @@ class Queue {
     }
 
     _getOldestNonSkippedItem(offset) {
+        let _self = this;
+
         let result = false;
         for (let i = offset; i < _self._queue.length; i++) {
             if (!_self._queue[i].skip) {
@@ -281,9 +290,6 @@ class Queue {
      * @param {Function} dispatcher Function that perfroms actual request
      */
     _dispatch(emitQueueStateChangeBeforeCommit = true) {
-
-        if (LOG) console.log('Queue: _dispatch');
-
         let _self = this;
 
         let queueSearchOffset = -1;
@@ -292,51 +298,72 @@ class Queue {
             const processOldestItem = () => {
                 queueSearchOffset++;
 
-                if (LOG) console.log('Queue: processOldest, runs:', queueSearchOffset);
+                if (LOG) console.log('Queue: before processing oldest item, run:', queueSearchOffset);
 
                 if (queueSearchOffset > 0 || emitQueueStateChangeBeforeCommit) {
                     _self._onUpdateListener(_self._generateCurrentStatistics());
                 }
-        
+
                 _self._saveState();
 
                 new Promise((localResolve, localReject) => {
+                    let itemToProcess = _self._getOldestNonSkippedItem(queueSearchOffset);
+                    if (itemToProcess === false) {
 
-                    let oldestItem = Object.assign({}, _self._getOldestNonSkippedItem(queueSearchOffset));
+                        if (LOG) console.log('Queue: no queue items to process');
 
-                    _self._processor(oldestItem, _self).then((result) => {
-                        _self._queue.shift();
+                        resolve();
+                    } else {
 
-                        if (LOG) console.log('Queue: item was processed', oldestItem, result);
-                        if (LOG) console.log('Queue: items left', _self._queue.length);
+                        let oldestNonSkippedItem = Object.assign({}, itemToProcess);
 
-                        let oldestNonSkippedItem = _self._getOldestNonSkippedItem(queueSearchOffset);
+                        if (LOG) console.log('Queue: processing oldest non-skipped item', oldestNonSkippedItem);
 
-                        _self._onUpdateListener(_self._generateCurrentStatistics());
-                        _self._saveState();
-                        if (oldestNonSkippedItem) {
-                            // There are still items to process
-                            localResolve();
-                        } else {
-                            // No items in queue or all of them are skipped
-                            resolve();
-                        }
-                    }).catch(error => {
-                        if (error.rejectedByServer) {
+                        let queueItems = _self.getItems();
+                        queueItems.map(queueItem => {
+                            if (queueItem.feature.features[0].properties.gid === oldestNonSkippedItem.feature.features[0].properties.gid) {
+                                console.warn('Multiple queue element with the same gid');
+                            }
+                        });
 
-                            if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[queueSearchOffset]);
+                        _self._processor(oldestNonSkippedItem, _self).then((result) => {
+                            _self._queue.shift();
 
-                            _self._queue[queueSearchOffset].skip = true;
-                        }
+                            if (LOG) console.log('Queue: item was processed', oldestNonSkippedItem, result);
+                            if (LOG) console.log('Queue: items left to process', (_self._queue.length - queueSearchOffset));
 
-                        if (LOG) console.log('Queue: item was not processed', oldestItem);
-                        if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
+                            let oldestNonSkippedItem = _self._getOldestNonSkippedItem(queueSearchOffset);
 
-                        _self._onUpdateListener(_self._generateCurrentStatistics());
-                        _self._saveState();
+                            _self._saveState();
+                            if (oldestNonSkippedItem) {
+                                // There are still items to process
+                                _self._onUpdateListener(_self._generateCurrentStatistics());
+                                localResolve();
+                            } else {
+                                // No items in queue or all of them are skipped
+                                _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+                                resolve();
+                            }
+                        }).catch(error => {
+                            if (error.rejectedByServer) {
 
-                        localReject();
-                    });
+                                if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[queueSearchOffset]);
+
+                                _self._queue[queueSearchOffset].skip = true;
+                                if (error.serverErrorMessage) {
+                                    _self._queue[queueSearchOffset].serverErrorMessage = serverErrorMessage;
+                                }
+                            }
+
+                            if (LOG) console.log('Queue: item was not processed', oldestNonSkippedItem);
+                            if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
+
+                            _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+                            _self._saveState();
+
+                            localReject();
+                        });
+                    }
                 }).then(processOldestItem.bind(null)).catch(reject);
             };
 
@@ -387,6 +414,8 @@ class Queue {
                     resolve();
                 });
             } else {
+
+                _self._eliminateItemsWithSameIdentifier();
 
                 if (LOG) console.log('Queue: queue is busy', _self._queue.length, _self._locked);
 
