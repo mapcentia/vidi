@@ -319,17 +319,26 @@ class Queue {
 
                         if (LOG) console.log('Queue: processing oldest non-skipped item', oldestNonSkippedItem);
 
+                        // @todo Remove as soon as possible
+                        try {
+
                         let queueItems = _self.getItems();
+
+                        let numberOfItemsWithCurrentGid = 0;
                         queueItems.map(queueItem => {
                             if (queueItem.feature.features[0].properties.gid === oldestNonSkippedItem.feature.features[0].properties.gid) {
-                                console.warn('Multiple queue element with the same gid');
+                                numberOfItemsWithCurrentGid++;
+                            }
+
+                            if (numberOfItemsWithCurrentGid > 1) {
+                                throw new Error('Multiple queue element with the same gid');
                             }
                         });
 
                         _self._processor(oldestNonSkippedItem, _self).then((result) => {
                             _self._queue.shift();
 
-                            if (LOG) console.log('Queue: item was processed', oldestNonSkippedItem, result);
+                            if (LOG) console.log('Queue: item was processed');
                             if (LOG) console.log('Queue: items left to process', (_self._queue.length - queueSearchOffset));
 
                             let oldestNonSkippedItem = _self._getOldestNonSkippedItem(queueSearchOffset);
@@ -345,24 +354,29 @@ class Queue {
                                 resolve();
                             }
                         }).catch(error => {
-                            if (error.rejectedByServer) {
+                            if (LOG) console.log('Queue: item was not processed', oldestNonSkippedItem);
+                            if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
+
+                            if (error && error.rejectedByServer) {
 
                                 if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[queueSearchOffset]);
 
                                 _self._queue[queueSearchOffset].skip = true;
                                 if (error.serverErrorMessage) {
-                                    _self._queue[queueSearchOffset].serverErrorMessage = serverErrorMessage;
+                                    _self._queue[queueSearchOffset].serverErrorMessage = error.serverErrorMessage;
                                 }
-                            }
-
-                            if (LOG) console.log('Queue: item was not processed', oldestNonSkippedItem);
-                            if (LOG) console.log('Queue: stopping processing, items left', _self._queue.length);
+                            }                           
 
                             _self._onUpdateListener(_self._generateCurrentStatistics(), true);
                             _self._saveState();
 
                             localReject();
                         });
+
+                        } catch(e) {
+                            console.warn('Queue: error occured');
+                            console.log(e);
+                        }
                     }
                 }).then(processOldestItem.bind(null)).catch(reject);
             };

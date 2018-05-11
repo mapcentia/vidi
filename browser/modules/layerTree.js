@@ -104,97 +104,102 @@ module.exports = {
             apiBridgeInstance.removeByLayerId(layerId);
         };
 
+        let lastStatisticsHash = '';
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate = false) => {
+            let currentStatisticsHash = btoa(JSON.stringify(statistics));
+            //if (currentStatisticsHash !== lastStatisticsHash) {
+                lastStatisticsHash = currentStatisticsHash;
 
-            console.log('### statistics', statistics);
-
-            let actions = ['add', 'update', 'delete'];
-            $(`[data-gc2-layer-key]`).each((index, container) => {
-                actions.map(action => {
-                    $(container).find('.js-failed-' + action).addClass('hidden');
-                    $(container).find('.js-failed-' + action).find('.js-value').html('');
-                    $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
-                    $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
-
-                    $(container).find('.js-rejectedByServerItems').empty();
-                    $(container).find('.js-rejectedByServerItems').addClass('hidden');
-                });
-            });
-
-            $('.js-clear').addClass('hidden');
-            $('.js-clear').off();
-
-            $('.js-app-is-online-badge').addClass('hidden');
-            $('.js-app-is-offline-badge').addClass('hidden');
-
-            if (statistics.online) {
-                $('.js-toggle-offline-mode').prop('disabled', false);
-
-                applicationIsOnline = 1;
-                $('.js-app-is-online-badge').removeClass('hidden');
-            } else {
-                if (applicationIsOnline !== 0) {
-                    $('.js-toggle-offline-mode').trigger('click');
-                }
-
-                $('.js-toggle-offline-mode').prop('disabled', true);
-
-                applicationIsOnline = 0;
-                $('.js-app-is-offline-badge').removeClass('hidden');
-            }
-
-            if (applicationIsOnline !== -1) {
-                $('.js-app-is-pending-badge').remove();
-            }
-
-            for (let key in statistics) {
-                let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
-                if (layerControlContainer.length === 1) {
-                    let totalRequests = 0;
-                    let rejectedByServerRequests = 0;
+                let actions = ['add', 'update', 'delete'];
+                $(`[data-gc2-layer-key]`).each((index, container) => {
                     actions.map(action => {
-                        if (statistics[key]['failed'][action.toUpperCase()] > 0) {
-                            totalRequests++;
-                            $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
-                            $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
-                        }
+                        $(container).find('.js-failed-' + action).addClass('hidden');
+                        $(container).find('.js-failed-' + action).find('.js-value').html('');
+                        $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
+                        $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
 
-                        if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
-                            rejectedByServerRequests++;
-                            totalRequests++;
-                            $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
-                            $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
-                        }
+                        $(container).find('.js-rejectedByServerItems').empty();
+                        $(container).find('.js-rejectedByServerItems').addClass('hidden');
                     });
+                });
 
-                    if (rejectedByServerRequests > 0) {
-                        $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
-                        statistics[key]['rejectedByServer'].items.map(item => {
-                            let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
-                            delete copiedItemProperties.gid;
+                $('.js-clear').addClass('hidden');
+                $('.js-clear').off();
 
-                            $(layerControlContainer).find('.js-rejectedByServerItems').append(`<div>
-                                <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
-                                <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
-                            </div>`)
-                        });
+                $('.js-app-is-online-badge').addClass('hidden');
+                $('.js-app-is-offline-badge').addClass('hidden');
+
+                if (statistics.online) {
+                    $('.js-toggle-offline-mode').prop('disabled', false);
+
+                    applicationIsOnline = 1;
+                    $('.js-app-is-online-badge').removeClass('hidden');
+                } else {
+                    if (applicationIsOnline !== 0) {
+                        $('.js-toggle-offline-mode').trigger('click');
                     }
 
-                    if (totalRequests > 0) {
-                        $(layerControlContainer).find('.js-clear').removeClass('hidden');
-                        $(layerControlContainer).find('.js-clear').on('click', (event) => {
-                            clearLayerRequests($(event.target).parent().data('gc2-id'));
+                    $('.js-toggle-offline-mode').prop('disabled', true);
+
+                    applicationIsOnline = 0;
+                    $('.js-app-is-offline-badge').removeClass('hidden');
+                }
+
+                if (applicationIsOnline !== -1) {
+                    $('.js-app-is-pending-badge').remove();
+                }
+
+                for (let key in statistics) {
+                    let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
+                    if (layerControlContainer.length === 1) {
+                        let totalRequests = 0;
+                        let rejectedByServerRequests = 0;
+                        actions.map(action => {
+                            if (statistics[key]['failed'][action.toUpperCase()] > 0) {
+                                totalRequests++;
+                                $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
+                                $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
+                            }
+
+                            if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
+                                rejectedByServerRequests++;
+                                totalRequests++;
+                                $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
+                                $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
+                            }
                         });
+
+                        if (rejectedByServerRequests > 0) {
+                            $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
+                            statistics[key]['rejectedByServer'].items.map(item => {
+                                let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
+                                delete copiedItemProperties.gid;
+
+                                $(layerControlContainer).find('.js-rejectedByServerItems').append(`<div>
+                                    <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
+                                    <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
+                                    <br/>
+                                    <div style="overflow: scroll;font-size: 12px; color: darkgray;">${item.serverErrorMessage}</div>
+                                </div>`)
+                            });
+                        }
+
+                        if (totalRequests > 0) {
+                            $(layerControlContainer).find('.js-clear').removeClass('hidden');
+                            $(layerControlContainer).find('.js-clear').on('click', (event) => {
+                                clearLayerRequests($(event.target).parent().data('gc2-id'));
+                            });
+                        }
                     }
                 }
-            }
 
-            if (forceLayerUpdate) {
-                _self.getActiveLayers().map(item => {
-                    switchLayer.init(item, false);
-                    switchLayer.init(item, true);
-                });
-            }
+                if (forceLayerUpdate) {
+                    _self.getActiveLayers().map(item => {
+                        switchLayer.init(item, false);
+                        switchLayer.init(item, true);
+                    });
+                }
+            //}
         });
     },
 
@@ -415,7 +420,7 @@ module.exports = {
                                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                 </div>
-                                <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;"></div>
+                                <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                             </li>`);
 
                             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
