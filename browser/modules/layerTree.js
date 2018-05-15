@@ -10,6 +10,8 @@ var layers;
 
 var switchLayer;
 
+var cloud;
+
 var layers;
 
 var backboneEvents;
@@ -91,6 +93,7 @@ var dict = {
  */
 module.exports = {
     set: function (o) {
+        cloud = o.cloud;
         meta = o.meta;
         layers = o.layers;
         switchLayer = o.switchLayer;
@@ -177,15 +180,28 @@ module.exports = {
                         if (rejectedByServerRequests > 0) {
                             $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
                             statistics[key]['rejectedByServer'].items.map(item => {
+                                let copiedItem = Object.assign({}, item.feature.features[0]);
                                 let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
                                 delete copiedItemProperties.gid;
 
-                                $(layerControlContainer).find('.js-rejectedByServerItems').append(`<div>
+                                let errorRecord = $(`<div>
                                     <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
+                                    <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
+                                        <i style="color: black;" class="fa fa-map-marker"></i>
+                                    </button>
                                     <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
                                     <br/>
                                     <div style="overflow: scroll;font-size: 12px; color: darkgray;">${item.serverErrorMessage}</div>
-                                </div>`)
+                                </div>`);
+
+                                $(errorRecord).find('.js-center-map-on-item').click((event) => {
+                                    let geometry = $(event.currentTarget).data(`feature-geometry`);
+                                    if (geometry) {
+                                        cloud.get().map.panTo(new L.LatLng(geometry.coordinates[1], geometry.coordinates[0]));
+                                    }
+                                });
+
+                                $(layerControlContainer).find('.js-rejectedByServerItems').append(errorRecord);
                             });
                         }
 
