@@ -1,7 +1,9 @@
 'use strict';
 
 const Queue = require('./Queue');
-const LOG = true;
+
+const LOG = false;
+
 const errorCodes = {
     "UNAUTHORIZED": 0,
     "NOT_FOUND": 1,
@@ -242,6 +244,11 @@ class APIBridge {
             }
 
             let features;
+
+            /*
+                @todo Refactor, as the similar functionality is already in
+                queue - make the queue smarter, not the processor
+            */
 
             // Deleting regular features from response
             let currentQueueItems = this._queue.getItems();

@@ -125,22 +125,41 @@ class Queue {
         }
 
         for (let key in itemsClassifiedByGid) {
-            if (itemsClassifiedByGid[key].length > 1) {
+            if (itemsClassifiedByGid[key].length === 2) {
                 let initialNumberOfItemsInQueue = _self._queue.length;
 
                 let initialItemImage = Object.assign({}, itemsClassifiedByGid[key][0]);
+                let latestItemImage = Object.assign({}, itemsClassifiedByGid[key][1]);
+
                 let itemGid = getItemGid(initialItemImage);
 
-                // Giving the item another chance
-                initialItemImage.skip = false;
+                // Merging two items in one, leaving only the initial one
+                let itemsHaveToBeMerged = false;
 
-                if (LOG) console.log(`Queue: more than one queue item with gid ${itemGid}, merging`);
+                // Deleting both items
+                let itemsHaveToBeDeleted = false;
 
-                for (let i = 1; i < itemsClassifiedByGid[key].length; i++) {
+                // Leaving only the latest item
+                let itemsHaveToBeCleaned = false;
 
-                    if (LOG) console.log(`Queue: merging the ${i} queue item into the initial one (gid ${itemGid})`);
+                // Guards
+                if (initialItemImage.type === UPDATE_REQUEST && itemGid < 0) {
+                    throw new Error(`Queue: cannot update item that does not exists on backend`);
+                }
 
-                    initialItemImage.feature.features[0].properties = itemsClassifiedByGid[key][i].feature.features[0].properties;
+                if (initialItemImage.type === ADD_REQUEST && latestItemImage.type === UPDATE_REQUEST ||
+                    initialItemImage.type === UPDATE_REQUEST && latestItemImage.type === UPDATE_REQUEST) {
+                    itemsHaveToBeMerged = true;
+                } else if (initialItemImage.type === ADD_REQUEST && latestItemImage.type === DELETE_REQUEST ||
+                    initialItemImage.type === UPDATE_REQUEST && latestItemImage.type === DELETE_REQUEST) {
+                    // Item is virtual, delete everything that is related to it
+                    if (itemGid > 0) {
+                        itemsHaveToBeCleaned = true;
+                    } else {
+                        itemsHaveToBeDeleted = true;
+                    }
+                } else {
+                    throw new Error(`Queue: erroneous queue item pairs, ${initialItemImage.type} followed by ${latestItemImage.type}`);
                 }
 
                 let numberOfItemsRemoved = 0;
@@ -151,10 +170,32 @@ class Queue {
                     }
                 }
 
-                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were merged into (${initialNumberOfItemsInQueue}
-                    queue items before, ${_self._queue.length + 1} now, ${numberOfItemsRemoved} removed`, initialItemImage);
+                if (itemsHaveToBeMerged) {
+                    
+                    if (LOG) console.log(`Queue: more than one queue item with gid ${itemGid}, items have to be merged`);
+                    
+                    // Giving the item another chance
+                    initialItemImage.skip = false;
+                    initialItemImage.feature.features[0].geometry = latestItemImage.feature.features[0].geometry;
+                    initialItemImage.feature.features[0].properties = latestItemImage.feature.features[0].properties;
+                    _self._queue.push(initialItemImage);
+                } else if (itemsHaveToBeDeleted) {
 
-                _self._queue.push(initialItemImage);
+                    if (LOG) console.log(`Queue: items with gid ${itemGid} have to be deleted`);
+
+                } else if (itemsHaveToBeCleaned) {
+
+                    if (LOG) console.log(`Queue: any changes for gid ${itemGid} were cleared, item has to be deleted`);
+
+                    _self._queue.push(latestItemImage);
+                } else {
+                    console.log(`Items: `, initialItemImage, latestItemImage);
+                    throw new Error(`Queue: no action was selected`);
+                }
+
+                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were managed, (${initialNumberOfItemsInQueue} queue items before, ${_self._queue.length} now, ${numberOfItemsRemoved} removed)`);
+            } else if (itemsClassifiedByGid[key].length > 2) {
+                throw new Error('Queue: more than 2 queue items with same gid');
             }
         }
     }
@@ -365,9 +406,12 @@ class Queue {
                                 if (error.serverErrorMessage) {
                                     _self._queue[queueSearchOffset].serverErrorMessage = error.serverErrorMessage;
                                 }
-                            }                           
 
-                            _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+                                _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+                            } else {
+                                _self._onUpdateListener(_self._generateCurrentStatistics());
+                            }
+                            
                             _self._saveState();
 
                             localReject();
@@ -403,6 +447,7 @@ class Queue {
 
         let _self = this;
         this.push(item);
+        _self._eliminateItemsWithSameIdentifier();
 
         let result = new Promise((resolve, reject) => {
             /*
@@ -428,8 +473,6 @@ class Queue {
                     resolve();
                 });
             } else {
-
-                _self._eliminateItemsWithSameIdentifier();
 
                 if (LOG) console.log('Queue: queue is busy', _self._queue.length, _self._locked);
 

@@ -105,9 +105,10 @@ module.exports = {
         };
 
         let lastStatisticsHash = '';
+        let theStatisticsPanelWasDrawn = false;
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate = false) => {
             let currentStatisticsHash = btoa(JSON.stringify(statistics));
-            //if (currentStatisticsHash !== lastStatisticsHash) {
+            if (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false) {
                 lastStatisticsHash = currentStatisticsHash;
 
                 let actions = ['add', 'update', 'delete'];
@@ -128,6 +129,10 @@ module.exports = {
 
                 $('.js-app-is-online-badge').addClass('hidden');
                 $('.js-app-is-offline-badge').addClass('hidden');
+
+                if ($('.js-app-is-online-badge').length === 1) {
+                    theStatisticsPanelWasDrawn = true;
+                }
 
                 if (statistics.online) {
                     $('.js-toggle-offline-mode').prop('disabled', false);
@@ -192,14 +197,14 @@ module.exports = {
                         }
                     }
                 }
+            }
 
-                if (forceLayerUpdate) {
-                    _self.getActiveLayers().map(item => {
-                        switchLayer.init(item, false);
-                        switchLayer.init(item, true);
-                    });
-                }
-            //}
+            if (forceLayerUpdate) {
+                _self.getActiveLayers().map(item => {
+                    switchLayer.init(item, false);
+                    switchLayer.init(item, true);
+                });
+            }
         });
     },
 
