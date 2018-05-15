@@ -28,7 +28,28 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
     request.get(url, function (err, res, body) {
         if (!err) {
-            var metaData = JSON.parse(body);
+            var emptyReport = {
+                hits: {},
+                file: null,
+                text: null,
+                dateTime: moment().format('MMMM Do YYYY, H:mm')
+            };
+
+            try {
+                var metaData = JSON.parse(body);
+            } catch(e) {
+                response.send(emptyReport);
+                return;
+            }
+
+            console.log(metaData.data.length)
+
+            if (metaData.data.length === 0) {
+
+                response.send(emptyReport);
+                return;
+            }
+
             // Count layers
             for (var i = 0; i < metaData.data.length; i = i + 1) {
                 if (metaData.data[i].type !== "RASTER" &&
@@ -39,26 +60,18 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 }
             }
             (function iter() {
+
                 startTime = new Date().getTime();
                 table = metaDataFinal.data[count].f_table_schema + "." + metaDataFinal.data[count].f_table_name;
-                switch (BACKEND) {
-                    case "gc2":
-                        geomField = metaDataFinal.data[count].f_geometry_column;
-                        if (buffer > 0) {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
-                        } else {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
-                        }
-                        break;
-                    case "cartodb":
-                        geomField = "the_geom_webmercator";
-                        if (buffer > 0) {
-                            sql = "SELECT geography(ST_transform(" + geomField + ",4326)) as _gc2_geom, * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_DWithin(ST_GeogFromText('" + wkt + "'), geography(ST_transform(" + geomField + ",4326)), " + buffer + ")";
-                        } else {
-                            sql = "SELECT * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
-                        }
-                        break;
+
+                geomField = metaDataFinal.data[count].f_geometry_column;
+
+                if (buffer > 0) {
+                    sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
+                } else {
+                    sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
                 }
+
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
 
                 var postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql,
