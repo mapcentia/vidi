@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = true;
+const LOG = false;
 
 /**
  * Browser detection
@@ -22,10 +22,10 @@ const browser = detect();
  * actual service worker file change. The update will be centralized and performed by setting the different 
  * app version in the configuration file.
  * Steps to implement (@todo remove upon implementation):
- * 1. Store the app version in the file (probably it already exists).
- * 2. Return the app version via the API call (or fetching the local configuration JSON file).
- * 3. Store the current application version client-side.
- * 4. Compare the versions upon application loading (offline-tolerant).
+ * 1+. Store the app version in the file (probably it already exists).
+ * 2+. Return the app version via the API call (or fetching the local configuration JSON file).
+ * 3+. Store the current application version client-side.
+ * 4+. Compare the versions upon application loading (offline-tolerant).
  * 5. Give user choice to update the application via UI control.
  * 6. Reset the cache (not the offline-map cache, though) and reload the application.
  */
@@ -237,6 +237,7 @@ const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
     if (URL.indexOf('_=') !== -1) {
         cleanedRequestURL = URL.split("?")[0];
+
         if (LOG) console.log(`Service worker: URL was cleaned up: ${cleanedRequestURL} (${URL})`);
     }
 
@@ -244,11 +245,15 @@ const normalizeTheURL = (URL) => {
         if (item.regExp) {
             let re = new RegExp(item.requested);
             if (re.test(URL)) {
+
                 if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
+
                 cleanedRequestURL = item.local;
             }
         } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
+
             if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
+
             cleanedRequestURL = item.local;
         }
     });
@@ -358,9 +363,9 @@ self.addEventListener('install', event => {
  */
 self.addEventListener('activate', event => {
 
-    if (LOG) console.log('Service worker: service worker is ready to handle fetches now');
+    if (LOG) console.log('Service worker: service worker is ready to handle fetches now', self.clients);
 
-    event.waitUntil(self.clients.claim());
+    event.waitUntil(clients.claim());
 });
  
 
@@ -386,7 +391,8 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
-    //if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
+    
+    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
 
     /**
      * Wrapper for API calls - the API responses should be as relevant as possible.

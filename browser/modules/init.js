@@ -35,7 +35,7 @@ module.exports = {
 
         var loadConfig = function () {
             $.getJSON( "/api/config/" + configFile, function (data) {
-                console.info("Started with config: " + configFile);
+                window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -274,6 +274,26 @@ module.exports = {
             });
         } else {
             console.warn('Service workers are not supported in this browser');
+        }
+
+        if (window.localforage) {
+            localforage.getItem('appVersion').then(value => {
+                if (value === null) {
+                    localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
+                        console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion})`);
+                    }).catch(error => {
+                        throw new Error(`Unable to store current application version`);
+                    });
+                } else {
+                    if (parseInt(window.vidiConfig.appVersion) !== parseInt(value)) {
+                        console.log(`Versioning: new application version is available (current: ${value}, latest: ${window.vidiConfig.appVersion})`);
+                    } else {
+                        console.log('Versioning: new application version is not available');
+                    }
+                }
+            });
+        } else {
+            throw new Error(`localforage is not available`);
         }
     }
 };
