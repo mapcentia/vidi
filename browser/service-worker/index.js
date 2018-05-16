@@ -98,7 +98,7 @@ let urlsToCache = [
     '/js/lib/leaflet-plugins/Bing.js',
     '/js/lib/leaflet-plugins/Yandex.js',
     '/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
-    '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.css',
+    '/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
     '/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
     '/js/lib/leaflet-measure/leaflet-measure.min.js',
     '/js/lib/leaflet-draw/leaflet.draw.js',
@@ -237,18 +237,18 @@ const normalizeTheURL = (URL) => {
     let cleanedRequestURL = URL;
     if (URL.indexOf('_=') !== -1) {
         cleanedRequestURL = URL.split("?")[0];
-        if (LOG) console.log(`URL was cleaned up: ${cleanedRequestURL} (${URL})`);
+        if (LOG) console.log(`Service worker: URL was cleaned up: ${cleanedRequestURL} (${URL})`);
     }
 
     urlSubstitution.map(item => {
         if (item.regExp) {
             let re = new RegExp(item.requested);
             if (re.test(URL)) {
-                if (LOG) console.log(`Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
+                if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
                 cleanedRequestURL = item.local;
             }
         } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
-            if (LOG) console.log(`Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
+            if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
             cleanedRequestURL = item.local;
         }
     });
@@ -309,7 +309,7 @@ const normalizeTheURLForFetch = (event) => {
  * "install" event handler
  */
 self.addEventListener('install', event => {
-    if (LOG) console.log('Service worker is being installed, caching specified resources');
+    if (LOG) console.log('Service worker: is being installed, caching specified resources');
 
     extensionsIgnoredForCaching.map(item => {
         let localRegExp = new RegExp(`.${item}[\?]?`, 'i');
@@ -317,16 +317,36 @@ self.addEventListener('install', event => {
     });
 
     event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
-        let urlsToCacheAliased = urlsToCache;        
+        let urlsToCacheAliased = urlsToCache;
         for (let i = 0; i < urlsToCacheAliased.length; i++) {
             urlsToCacheAliased[i] = normalizeTheURL(urlsToCacheAliased[i]);
         }
 
-        cache.addAll(urlsToCacheAliased).then(() => {
-            if (LOG) console.log('All resources have been fetched and cached.');
-        }).catch(error => {
-            console.log(error);
+        let cachingRequests = [];
+        urlsToCacheAliased.map(item => {
+            let result = new Promise((resolve, reject) => {
+                cache.add(item).then(() => {
+                    resolve();
+                }).catch(error => {
+                    console.log('Service worker: failed to fetch during install', item, error);
+                    reject();
+                });
+            });
+
+            cachingRequests.push(result);
         });
+
+        let result = new Promise((resolve, reject) => {
+            Promise.all(cachingRequests).then(() => {
+                if (LOG) console.log('Service worker: all resources have been fetched and cached');
+                resolve();
+            }).catch(error => {
+                if (LOG) console.warn('Service worker: failed to load initial resources');
+                reject();
+            });
+        });
+
+        return result;
     }).catch(error => {
         console.log(error);
     }));
@@ -337,7 +357,8 @@ self.addEventListener('install', event => {
  * "activate" event handler
  */
 self.addEventListener('activate', event => {
-    if (LOG) console.log('Service worker is ready to handle fetches now');
+
+    if (LOG) console.log('Service worker: service worker is ready to handle fetches now');
 
     event.waitUntil(self.clients.claim());
 });
@@ -348,10 +369,14 @@ self.addEventListener('activate', event => {
  */
 self.addEventListener('message', (event) => {
     if (event.data && event.data.force) {
-        if (LOG) console.log('Forcing caching of files with ignored extensions');
+
+        if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');
+
         forceIgnoredExtensionsCaching = true;
     } else {
-        if (LOG) console.log('Not forcing caching of files with ignored extensions');
+
+        if (LOG) console.log('Service worker: not forcing caching of files with ignored extensions');
+
         forceIgnoredExtensionsCaching = false;
     }
 });
@@ -372,14 +397,16 @@ self.addEventListener('fetch', (event) => {
      * @return {Promise}
      */
     const queryAPI = (cleanedRequestURL, event, cachedResponse) => {
-        if (LOG) console.log('API call detected', cleanedRequestURL);
+
+        if (LOG) console.log('Service worker: API call detected', cleanedRequestURL);
+
         if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
             return fetch(event.request);
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
                     return fetch(event.request).then(apiResponse => {
-                        if (LOG) console.log('API request was performed despite the existence of cached request');
+                        if (LOG) console.log('Service worker: API request was performed despite the existence of cached request');
                         // Caching the API request in case if app will go offline aftewards
                         return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
                             resolve(apiResponse);
@@ -388,7 +415,7 @@ self.addEventListener('fetch', (event) => {
                             reject();
                         });
                     }).catch(error => {
-                        if (LOG) console.log('API request failed, using the cached response');
+                        if (LOG) console.log('Service worker: API request failed, using the cached response');
                         resolve(cachedResponse);
                     });
                 }).catch(error => {
@@ -416,7 +443,7 @@ self.addEventListener('fetch', (event) => {
     });
 
     if (requestShouldBeBypassed) {
-        if (LOG) console.log(`Bypassing the ${event.request.url} request`);
+        if (LOG) console.log(`Service worker: bypassing the ${event.request.url} request`);
 
         event.respondWith(fetch(event.request));
     } else {
@@ -429,7 +456,7 @@ self.addEventListener('fetch', (event) => {
                     if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                         return queryAPI(cleanedRequestURL, event, response);
                     } else {
-                        if (LOG) console.log(`In cache ${event.request.url}`);
+                        if (LOG) console.log(`Service worker: in cache ${event.request.url}`);
                         return response;
                     }
                 } else {
@@ -451,7 +478,6 @@ self.addEventListener('fetch', (event) => {
                             });
                         }
 
-                        if (LOG) console.log('requestHasToBeCached: ', requestHasToBeCached);
                         let requestToMake = new Request(cleanedRequestURL);
                         if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
                             var result = new Promise((resolve, reject) => {
@@ -466,14 +492,14 @@ self.addEventListener('fetch', (event) => {
 
                             return result;
                         } else if (requestHasToBeCached) {
-                            if (LOG) console.log(`Caching ${requestToMake.url}`);
+                            if (LOG) console.log(`Service worker: caching ${requestToMake.url}`);
                             return caches.open(CACHE_NAME).then((cache) => {
                                 return fetch(requestToMake).then(response => {
                                     return cache.put(requestToMake.url, response.clone()).then(() => {
                                         return response;
                                     });
                                 }).catch(error => {
-                                    console.warn(`Unable the fetch ${requestToMake.url}`);
+                                    console.warn(`Service worker: unable the fetch ${requestToMake.url}`);
                                 });
                             });
                         } else {

@@ -13,6 +13,15 @@ module.exports = {
     "backend": "gc2",
 
 
+    // ========================================
+    // Front-end settings - latest app version
+    // ========================================
+
+    "frontend": {
+        "appVersion": 1
+    },
+
+
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
     // Carto is hardcoded to carto.com

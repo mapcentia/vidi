@@ -264,7 +264,6 @@ module.exports = {
             setTimeout(function () {
                 modules.cloud.get().map.invalidateSize();
             }, 100);
-
         }, 0));
 
         if ('serviceWorker' in navigator) {
