@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
 
 /**
  * Browser detection
@@ -14,6 +14,20 @@ const browser = detect();
  * there is a API-related problem;
  * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
  * the 'message' event.
+ *
+ * Update mechanism. There should be an API method that returns the current application version. If it differs
+ * from the previous one that is stored in localforage, then user should be notified about the update. If
+ * user agrees to the update, then the current service worker is unregistered, cache wiped out and page
+ * is reloaded (as well as all assets). This way the application update will not be dependent on the
+ * actual service worker file change. The update will be centralized and performed by setting the different 
+ * app version in the configuration file.
+ * Steps to implement (@todo remove upon implementation):
+ * 1. Store the app version in the file (probably it already exists).
+ * 2. Return the app version via the API call (or fetching the local configuration JSON file).
+ * 3. Store the current application version client-side.
+ * 4. Compare the versions upon application loading (offline-tolerant).
+ * 5. Give user choice to update the application via UI control.
+ * 6. Reset the cache (not the offline-map cache, though) and reload the application.
  */
 
 /**
@@ -347,7 +361,7 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
-    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
+    //if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
 
     /**
      * Wrapper for API calls - the API responses should be as relevant as possible.
