@@ -267,11 +267,7 @@ module.exports = {
         }, 0));
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
-                console.log('Service worker was registered');
-            }).catch(error => {
-                console.warn('Service worker registration failed', error);
-            });
+            navigator.serviceWorker.register('/service-worker.bundle.js');
         } else {
             console.warn('Service workers are not supported in this browser');
         }

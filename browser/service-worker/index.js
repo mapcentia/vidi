@@ -182,19 +182,24 @@ const urlSubstitution = [{
     requested: 'https://maps.google.com/maps/api/js',
     local: '/js/google-maps/index.js'
 }, {
-    requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/common.js',
+    regExp: true,
+    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/common.js',
     local: '/js/google-maps/common.js'
 }, {
-    requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/util.js',
+    regExp: true,
+    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/util.js',
     local: '/js/google-maps/util.js'
 }, {
-    requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/controls.js',
+    regExp: true,
+    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/controls.js',
     local: '/js/google-maps/controls.js'
 }, {
-    requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/places_impl.js',
+    regExp: true,
+    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/places_impl.js',
     local: '/js/google-maps/places_impl.js'
 }, {
-    requested: 'https://maps.google.com/maps-api-v3/api/js/31/8b/stats.js',
+    regExp: true,
+    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/stats.js',
     local: '/js/google-maps/stats.js'
 }, {
     requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
@@ -351,7 +356,7 @@ self.addEventListener('install', event => {
             });
         });
 
-        return result;
+        return self.skipWaiting();
     }).catch(error => {
         console.log(error);
     }));
@@ -363,7 +368,7 @@ self.addEventListener('install', event => {
  */
 self.addEventListener('activate', event => {
 
-    if (LOG) console.log('Service worker: service worker is ready to handle fetches now', self.clients);
+    if (LOG) console.log('Service worker: service worker is ready to handle fetches');
 
     event.waitUntil(clients.claim());
 });
