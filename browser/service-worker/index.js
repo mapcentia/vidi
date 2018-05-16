@@ -21,14 +21,9 @@ const browser = detect();
  * is reloaded (as well as all assets). This way the application update will not be dependent on the
  * actual service worker file change. The update will be centralized and performed by setting the different 
  * app version in the configuration file.
- * Steps to implement (@todo remove upon implementation):
- * 1+. Store the app version in the file (probably it already exists).
- * 2+. Return the app version via the API call (or fetching the local configuration JSON file).
- * 3+. Store the current application version client-side.
- * 4+. Compare the versions upon application loading (offline-tolerant).
- * 5. Give user choice to update the application via UI control.
- * 6. Reset the cache (not the offline-map cache, though) and reload the application.
  */
+
+console.log('I am new guy on the block');
 
 /**
  * 

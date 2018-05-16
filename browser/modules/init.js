@@ -282,7 +282,28 @@ module.exports = {
                     });
                 } else {
                     if (parseInt(window.vidiConfig.appVersion) !== parseInt(value)) {
-                        console.log(`Versioning: new application version is available (current: ${value}, latest: ${window.vidiConfig.appVersion})`);
+                        if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
+                            // Unregister service worker
+                            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                                for(let registration of registrations) {
+                                    console.log(`Versioning: unregistering service worker`, registration);
+                                    registration.unregister();
+                                }
+                            });
+
+                            // Clear caches
+                            caches.keys().then(function(names) {
+                                for (let name of names) {
+                                    console.log(`Versioning: clearing cache`, name);
+                                    caches.delete(name);
+                                }
+                            });
+
+                            // Remove current app version
+                            localforage.removeItem('appVersion').then(() => {
+                                location.reload();
+                            })
+                        }
                     } else {
                         console.log('Versioning: new application version is not available');
                     }
