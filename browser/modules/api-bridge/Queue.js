@@ -33,6 +33,7 @@ class Queue {
         this._onUpdateListener = () => {};
         this._queue = [];
         this._processor = processor;
+        this._lastStats = false;
 
         const processQueue = () => {
             if (LOG) console.log(`Queue interval, total items in queue: ${_self._queue.length}, locked: ${_self._locked}`);
@@ -259,6 +260,7 @@ class Queue {
             }
         }
 
+        this._lastStats = stats;
         return stats;
     }
 

@@ -64,6 +64,10 @@ var apiBridgeInstance = false;
  */
 var applicationIsOnline = -1;
 
+var lastStatistics = false;
+
+var theStatisticsPanelWasDrawn = false;
+
 /**
  *
  * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
@@ -100,130 +104,135 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         return this;
     },
+
     init: function () {
         _self = this;
 
-        const clearLayerRequests = (layerId) => {
-            apiBridgeInstance.removeByLayerId(layerId);
-        };
-
-        let lastStatisticsHash = '';
-        let theStatisticsPanelWasDrawn = false;
-        apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate = false) => {
-            let currentStatisticsHash = btoa(JSON.stringify(statistics));
-            if (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false) {
-                lastStatisticsHash = currentStatisticsHash;
-
-                let actions = ['add', 'update', 'delete'];
-                $(`[data-gc2-layer-key]`).each((index, container) => {
-                    actions.map(action => {
-                        $(container).find('.js-failed-' + action).addClass('hidden');
-                        $(container).find('.js-failed-' + action).find('.js-value').html('');
-                        $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
-                        $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
-
-                        $(container).find('.js-rejectedByServerItems').empty();
-                        $(container).find('.js-rejectedByServerItems').addClass('hidden');
-                    });
-                });
-
-                $('.js-clear').addClass('hidden');
-                $('.js-clear').off();
-
-                $('.js-app-is-online-badge').addClass('hidden');
-                $('.js-app-is-offline-badge').addClass('hidden');
-
-                if ($('.js-app-is-online-badge').length === 1) {
-                    theStatisticsPanelWasDrawn = true;
-                }
-
-                if (statistics.online) {
-                    $('.js-toggle-offline-mode').prop('disabled', false);
-
-                    applicationIsOnline = 1;
-                    $('.js-app-is-online-badge').removeClass('hidden');
-                } else {
-                    if (applicationIsOnline !== 0) {
-                        $('.js-toggle-offline-mode').trigger('click');
-                    }
-
-                    $('.js-toggle-offline-mode').prop('disabled', true);
-
-                    applicationIsOnline = 0;
-                    $('.js-app-is-offline-badge').removeClass('hidden');
-                }
-
-                if (applicationIsOnline !== -1) {
-                    $('.js-app-is-pending-badge').remove();
-                }
-
-                for (let key in statistics) {
-                    let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
-                    if (layerControlContainer.length === 1) {
-                        let totalRequests = 0;
-                        let rejectedByServerRequests = 0;
-                        actions.map(action => {
-                            if (statistics[key]['failed'][action.toUpperCase()] > 0) {
-                                totalRequests++;
-                                $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
-                                $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
-                            }
-
-                            if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
-                                rejectedByServerRequests++;
-                                totalRequests++;
-                                $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
-                                $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
-                            }
-                        });
-
-                        if (rejectedByServerRequests > 0) {
-                            $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
-                            statistics[key]['rejectedByServer'].items.map(item => {
-                                let copiedItem = Object.assign({}, item.feature.features[0]);
-                                let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
-                                delete copiedItemProperties.gid;
-
-                                let errorRecord = $(`<div>
-                                    <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
-                                    <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
-                                        <i style="color: black;" class="fa fa-map-marker"></i>
-                                    </button>
-                                    <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
-                                    <br/>
-                                    <div style="overflow: scroll;font-size: 12px; color: darkgray;">${item.serverErrorMessage}</div>
-                                </div>`);
-
-                                $(errorRecord).find('.js-center-map-on-item').click((event) => {
-                                    let geometry = $(event.currentTarget).data(`feature-geometry`);
-                                    if (geometry) {
-                                        cloud.get().map.panTo(new L.LatLng(geometry.coordinates[1], geometry.coordinates[0]));
-                                    }
-                                });
-
-                                $(layerControlContainer).find('.js-rejectedByServerItems').append(errorRecord);
-                            });
-                        }
-
-                        if (totalRequests > 0) {
-                            $(layerControlContainer).find('.js-clear').removeClass('hidden');
-                            $(layerControlContainer).find('.js-clear').on('click', (event) => {
-                                clearLayerRequests($(event.target).parent().data('gc2-id'));
-                            });
-                        }
-                    }
-                }
-            }
-
-            if (forceLayerUpdate) {
-                _self.getActiveLayers().map(item => {
-                    switchLayer.init(item, false);
-                    switchLayer.init(item, true);
-                });
-            }
+        apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
+            _self.statisticsHandler(statistics, forceLayerUpdate);
         });
     },
 
+    /**
+     * Displays current state of APIBridge feature management
+     * 
+     * @param {*} statistics 
+     * @param {*} forceLayerUpdate 
+     */
+    statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
+        let currentStatisticsHash = btoa(JSON.stringify(statistics));
+        let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
+        if (skipLastStatisticsCheck || (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false)) {
+            lastStatistics = statistics;
+
+            let actions = ['add', 'update', 'delete'];
+            $(`[data-gc2-layer-key]`).each((index, container) => {
+                actions.map(action => {
+                    $(container).find('.js-failed-' + action).addClass('hidden');
+                    $(container).find('.js-failed-' + action).find('.js-value').html('');
+                    $(container).find('.js-rejectedByServer-' + action).addClass('hidden');
+                    $(container).find('.js-rejectedByServer-' + action).find('.js-value').html('');
+
+                    $(container).find('.js-rejectedByServerItems').empty();
+                    $(container).find('.js-rejectedByServerItems').addClass('hidden');
+                });
+            });
+
+            $('.js-clear').addClass('hidden');
+            $('.js-clear').off();
+
+            $('.js-app-is-online-badge').addClass('hidden');
+            $('.js-app-is-offline-badge').addClass('hidden');
+
+            if ($('.js-app-is-online-badge').length === 1) {
+                theStatisticsPanelWasDrawn = true;
+            }
+            
+            if (statistics.online) {
+                $('.js-toggle-offline-mode').prop('disabled', false);
+
+                applicationIsOnline = 1;
+                $('.js-app-is-online-badge').removeClass('hidden');
+            } else {
+                if (applicationIsOnline !== 0) {
+                    $('.js-toggle-offline-mode').trigger('click');
+                }
+
+                $('.js-toggle-offline-mode').prop('disabled', true);
+
+                applicationIsOnline = 0;
+                $('.js-app-is-offline-badge').removeClass('hidden');
+            }
+
+            if (applicationIsOnline !== -1) {
+                $('.js-app-is-pending-badge').remove();
+            }
+
+            for (let key in statistics) {
+                let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
+                if (layerControlContainer.length === 1) {
+                    let totalRequests = 0;
+                    let rejectedByServerRequests = 0;
+                    actions.map(action => {
+                        if (statistics[key]['failed'][action.toUpperCase()] > 0) {
+                            totalRequests++;
+                            $(layerControlContainer).find('.js-failed-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-failed-' + action).find('.js-value').html(statistics[key]['failed'][action.toUpperCase()]);
+                        }
+
+                        if (statistics[key]['rejectedByServer'][action.toUpperCase()] > 0) {
+                            rejectedByServerRequests++;
+                            totalRequests++;
+                            $(layerControlContainer).find('.js-rejectedByServer-' + action).removeClass('hidden');
+                            $(layerControlContainer).find('.js-rejectedByServer-' + action).find('.js-value').html(statistics[key]['rejectedByServer'][action.toUpperCase()]);
+                        }
+                    });
+
+                    if (rejectedByServerRequests > 0) {
+                        $(layerControlContainer).find('.js-rejectedByServerItems').removeClass('hidden');
+                        statistics[key]['rejectedByServer'].items.map(item => {
+                            let copiedItem = Object.assign({}, item.feature.features[0]);
+                            let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
+                            delete copiedItemProperties.gid;
+
+                            let errorRecord = $(`<div>
+                                <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
+                                <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
+                                    <i style="color: black;" class="fa fa-map-marker"></i>
+                                </button>
+                                <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
+                                <br/>
+                                <div style="overflow: scroll;font-size: 12px; color: darkgray;">${item.serverErrorMessage}</div>
+                            </div>`);
+
+                            $(errorRecord).find('.js-center-map-on-item').click((event) => {
+                                let geometry = $(event.currentTarget).data(`feature-geometry`);
+                                if (geometry) {
+                                    cloud.get().map.panTo(new L.LatLng(geometry.coordinates[1], geometry.coordinates[0]));
+                                }
+                            });
+
+                            $(layerControlContainer).find('.js-rejectedByServerItems').append(errorRecord);
+                        });
+                    }
+
+                    if (totalRequests > 0) {
+                        $(layerControlContainer).find('.js-clear').removeClass('hidden');
+                        $(layerControlContainer).find('.js-clear').on('click', (event) => {
+                            apiBridgeInstance.removeByLayerId($(event.target).parent().data('gc2-id'));
+                        });
+                    }
+                }
+            }
+        }
+
+        if (forceLayerUpdate) {
+            _self.getActiveLayers().map(item => {
+                switchLayer.init(item, false);
+                switchLayer.init(item, true);
+            });
+        }
+    },
 
     /**
      * Builds actual layer tree.
@@ -479,6 +488,10 @@ module.exports = {
                     $("#layer-panel-" + base64GroupName).remove();
                 }
             }
+        }
+
+        if (lastStatistics) {
+            _self.statisticsHandler(lastStatistics, false, true);
         }
     },
 
