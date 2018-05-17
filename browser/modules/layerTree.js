@@ -88,6 +88,10 @@ var dict = {
     "Pending": {
         "da_DK": "# Pending",
         "en_US": "# Pending"
+    },
+    "Cancel feature changes": {
+        "da_DK": "# Cancel feature changes",
+        "en_US": "# Cancel feature changes"
     }
 };
 
@@ -218,9 +222,11 @@ module.exports = {
 
                     if (totalRequests > 0) {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
-                        
+
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
-                            apiBridgeInstance.removeByLayerId($(event.target).parent().data('gc2-id'));
+                            if (confirm(`${__('Cancel feature changes')}?`)) {
+                                apiBridgeInstance.removeByLayerId($(event.target).parent().data('gc2-id'));
+                            }
                         });
 
                         $(layerControlContainer).find('.js-clear').hover(event => {
