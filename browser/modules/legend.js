@@ -28,187 +28,53 @@ module.exports = module.exports = {
     },
     init: function (layerArr, el) {
         var metaDataKeys = meta.getMetaDataKeys();
-        switch (BACKEND) {
-            case "gc2":
-                var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
-                if (layerArr) {
-                    layers = layerArr.join(";");
-                } else {
-                    layers = visibleLayers;
-                }
-                var param = 'l=' + layers + '&db=' + db;
-                $.ajax({
-                    url: '/api/legend/' + db + '?' + param,
-                    success: function (response) {
-                        var list = $('<ul class="list-group"/>'), li, classUl, title, className;
-                        $.each(response, function (i, v) {
-                            if (typeof v.id !== "undefined") {
-                                title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
-                            }
-                            var u, showLayer = false;
-                            if (typeof v === "object" && v.classes !== undefined) {
 
-                                for (u = 0; u < v.classes.length; u = u + 1) {
-                                    if (v.classes[u].name !== "") {
-                                        showLayer = true;
-                                    }
-                                }
-                                if (showLayer) {
-                                    li = $("<li class=''/>");
-                                    classUl = $('<ul />');
-                                    for (u = 0; u < v.classes.length; u = u + 1) {
-                                        if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
-                                            className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
-                                            classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
-                                        }
-                                    }
-                                    layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
-                                    checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                                    list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
-                                    list.append(li.append(classUl));
-                                }
+        var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
 
-                            }
-                        });
-                        $(el ? el : '#legend').html(list);
+        if (layerArr) {
+            layers = layerArr.join(";");
+        } else {
+            layers = visibleLayers;
+        }
+        var param = 'l=' + layers + '&db=' + db;
+        $.ajax({
+            url: '/api/legend/' + db + '?' + param,
+            success: function (response) {
+                var list = $('<ul class="list-group"/>'), li, classUl, title, className;
+                $.each(response, function (i, v) {
+                    if (typeof v.id !== "undefined") {
+                        title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
                     }
-                });
-                break;
-            case "cartodb":
-                setTimeout(function () {
-                    var key, legend, list = $('<ul class="list-group"/>'), li, classUl, title, className, rightLabel,
-                        leftLabel,
-                        visibleLayers = _layers.getLayers(), cssParser = new CSSParser;
+                    var u, showLayer = false;
+                    if (typeof v === "object" && v.classes !== undefined) {
 
-                    if (!visibleLayers) {
-                        visibleLayers = "";
-                    }
-                    $.each(visibleLayers.split(","), function (i, v) {
-                        key = v;
-                        if (typeof key !== "undefined" && typeof metaDataKeys[key] !== "undefined") {
-                            legend = metaDataKeys[key].legend;
-                            try {
-                                title = metaDataKeys[key].f_table_title;
-                            }
-                            catch (e) {
-                            }
-                            var u, showLayer = false;
-
-
-                            legend.type = legend.type === "custom" ? "none" : legend.type;
-
-                            layerName = metaDataKeys[key].f_table_schema + "." + metaDataKeys[key].f_table_name;
-                            checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(",") : "") > -1) ? "checked" : "";
-
-                            switch (legend.type) {
-                                case "category":
-                                    for (u = 0; u < legend.items.length; u = u + 1) {
-                                        if (legend.items[u].name !== "") {
-                                            showLayer = true;
-                                        }
-                                    }
-                                    if (showLayer) {
-                                        li = $("<li/>");
-                                        classUl = $("<ul/>");
-                                        for (u = 0; u < legend.items.length; u = u + 1) {
-                                            className = "<span class='legend-text'>" + legend.items[u].name + "</span>";
-                                            classUl.append("<li><span style='display: inline-block; height: 15px; width: 15px; background-color: " + legend.items[u].value + ";'></span>" + className + "</li>");
-                                        }
-                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
-                                        list.append(li.append(classUl));
-                                    }
-                                    break;
-                                case "choropleth":
-                                    for (u = 0; u < legend.items.length; u = u + 1) {
-                                        if (legend.items[u].name !== "") {
-                                            showLayer = true;
-                                        }
-                                    }
-                                    if (showLayer) {
-                                        li = $("<li/>");
-                                        classUl = $("<ul/>");
-                                        for (u = 0; u < legend.items.length; u = u + 1) {
-                                            if (legend.items[u].name === "Left label") {
-                                                classUl.append("<li style='display:inline;'><span class='legend-text'>" + legend.items[u].value + "</span></li>");
-                                            } else if (legend.items[u].name === "Right label") {
-                                                rightLabel = "<li style='display:inline;'><span class='legend-text'>" + legend.items[u].value + "</span></li>"
-                                            } else {
-                                                classUl.append("<li style='display:inline;'><span style='display: inline-block; height: 15px; width: 15px; background-color: " + legend.items[u].value + ";'></span></li>");
-                                            }
-                                        }
-                                        classUl.append(rightLabel);
-                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
-                                        list.append(li.append(classUl));
-                                    }
-                                    break;
-                                case "none":
-
-                                    var cssObj = cssParser.parse(metaDataKeys[key].cartocss).cssRules[0].declarations,
-                                        obj = {};
-
-                                    for (u = 0; u < cssObj.length; u = u + 1) {
-
-                                        switch (cssObj[u].property) {
-                                            case "polygon-fill":
-                                                obj.fill = cssObj[u].valueText;
-                                                break;
-                                            case "polygon-opacity":
-                                                obj.opacity = cssObj[u].valueText;
-                                                break;
-                                            case "line-color":
-                                                obj.lineColor = cssObj[u].valueText;
-                                                break;
-                                            case "line-width":
-                                                obj.lineWidth = cssObj[u].valueText;
-                                                break;
-
-                                            // Marker
-                                            case "marker-line-color":
-                                                obj.lineColor = cssObj[u].valueText;
-                                                break;
-                                            case "marker-line-width":
-                                                obj.lineWidth = cssObj[u].valueText;
-                                                break;
-                                            case "marker-fill-opacity":
-                                                obj.opacity = cssObj[u].valueText;
-                                                break;
-                                            case "marker-fill":
-                                                obj.fill = cssObj[u].valueText;
-                                                break;
-                                            case "marker-line-opacity":
-                                                obj.lineOpacity = cssObj[u].valueText;
-                                                break;
-                                        }
-                                    }
-
-                                    var rules = {
-                                        fill: obj.fill || "none",
-                                        lineColor: obj.lineColor || "none",
-                                        opacity: obj.opacity || "1",
-                                        lineWidth: obj.lineWidth || "0",
-                                        lineOpacity: obj.lineOpacity || "1",
-                                    };
-
-                                    showLayer = true;
-                                    if (showLayer) {
-                                        li = $("<li class=''/>");
-                                        classUl = $("<ul />");
-                                        className = "<span class='legend-text'>" + title + "</span>";
-                                        classUl.append("<li><span style='display: inline-block; height: 15px; width: 15px; border-style: solid; background-color: " + rules.fill + "; border-color: " + rules.lineColor + "; border-width: " + rules.lineWidth + "px; opacity: " + rules.opacity + " '></span></li>");
-                                        list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
-                                        list.append(li.append(classUl));
-                                    }
-
-                                    break;
+                        for (u = 0; u < v.classes.length; u = u + 1) {
+                            if (v.classes[u].name !== "") {
+                                showLayer = true;
                             }
                         }
-                    });
-                    $('#legend').html(list);
-                }, 500);
-                break
-        }
+                        if (showLayer) {
+                            li = $("<li class=''/>");
+                            classUl = $('<ul />');
+                            for (u = 0; u < v.classes.length; u = u + 1) {
+                                if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
+                                    className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
+                                    classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
+                                }
+                            }
+                            layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
+                            checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
+                            list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
+                            list.append(li.append(classUl));
+                        }
+
+                    }
+                });
+                $(el ? el : '#legend').html(list);
+            }
+        });
     }
-};
+}
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
@@ -271,33 +137,41 @@ var kUNKNOWN_AT_RULE = "Unknow @-rule";
 /* FROM http://peter.sh/data/vendor-prefixed-css.php?js=1 */
 
 var kCSS_VENDOR_VALUES = {
-    "-moz-box":             {"webkit": "-webkit-box",        "presto": "", "trident": "", "generic": "box" },
-    "-moz-inline-box":      {"webkit": "-webkit-inline-box", "presto": "", "trident": "", "generic": "inline-box" },
-    "-moz-initial":         {"webkit": "",                   "presto": "", "trident": "", "generic": "initial" },
-    "flex":                 {"webkit": "-webkit-flex",       "presto": "", "trident": "", "generic": "" },
-    "inline-flex":          {"webkit": "-webkit-inline-flex", "presto": "", "trident": "", "generic": "" },
+    "-moz-box": {"webkit": "-webkit-box", "presto": "", "trident": "", "generic": "box"},
+    "-moz-inline-box": {"webkit": "-webkit-inline-box", "presto": "", "trident": "", "generic": "inline-box"},
+    "-moz-initial": {"webkit": "", "presto": "", "trident": "", "generic": "initial"},
+    "flex": {"webkit": "-webkit-flex", "presto": "", "trident": "", "generic": ""},
+    "inline-flex": {"webkit": "-webkit-inline-flex", "presto": "", "trident": "", "generic": ""},
 
-    "linear-gradient": {"webkit20110101":FilterLinearGradient,
+    "linear-gradient": {
+        "webkit20110101": FilterLinearGradient,
         "webkit": FilterLinearGradient,
         "presto": FilterLinearGradient,
         "trident": FilterLinearGradient,
-        "gecko1.9.2": FilterLinearGradient },
-    "repeating-linear-gradient": {"webkit20110101":FilterLinearGradient,
+        "gecko1.9.2": FilterLinearGradient
+    },
+    "repeating-linear-gradient": {
+        "webkit20110101": FilterLinearGradient,
         "webkit": FilterLinearGradient,
         "presto": FilterLinearGradient,
         "trident": FilterLinearGradient,
-        "gecko1.9.2": FilterLinearGradient },
+        "gecko1.9.2": FilterLinearGradient
+    },
 
-    "radial-gradient": {"webkit20110101":FilterRadialGradient,
+    "radial-gradient": {
+        "webkit20110101": FilterRadialGradient,
         "webkit": FilterRadialGradient,
         "presto": FilterRadialGradient,
         "trident": FilterRadialGradient,
-        "gecko1.9.2": FilterRadialGradient },
-    "repeating-radial-gradient": {"webkit20110101":FilterRadialGradient,
+        "gecko1.9.2": FilterRadialGradient
+    },
+    "repeating-radial-gradient": {
+        "webkit20110101": FilterRadialGradient,
         "webkit": FilterRadialGradient,
         "presto": FilterRadialGradient,
         "trident": FilterRadialGradient,
-        "gecko1.9.2": FilterRadialGradient }
+        "gecko1.9.2": FilterRadialGradient
+    }
 };
 
 var kCSS_PREFIXED_VALUE = [
@@ -305,331 +179,823 @@ var kCSS_PREFIXED_VALUE = [
 ];
 
 var kCSS_VENDOR_PREFIXES =
-    {"lastUpdate":1392220206,"properties":[
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-accelerator","status":"P"},
-        {"gecko":"","webkit":"","presto":"-wap-accesskey","trident":"","status":""},
-        {"gecko":"align-content","webkit":"-webkit-align-content","presto":"","trident":"","status":""},
-        {"gecko":"align-items","webkit":"-webkit-align-items","presto":"","trident":"","status":""},
-        {"gecko":"align-self","webkit":"-webkit-align-self","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-alt","presto":"","trident":"","status":""},
-        {"gecko":"animation","webkit":"-webkit-animation","presto":"","trident":"animation","status":"WD"},
-        {"gecko":"animation-delay","webkit":"-webkit-animation-delay","presto":"","trident":"animation-delay","status":"WD"},
-        {"gecko":"animation-direction","webkit":"-webkit-animation-direction","presto":"","trident":"animation-direction","status":"WD"},
-        {"gecko":"animation-duration","webkit":"-webkit-animation-duration","presto":"","trident":"animation-duration","status":"WD"},
-        {"gecko":"animation-fill-mode","webkit":"-webkit-animation-fill-mode","presto":"","trident":"animation-fill-mode","status":"ED"},
-        {"gecko":"animation-iteration-count","webkit":"-webkit-animation-iteration-count","presto":"","trident":"animation-iteration-count","status":"WD"},
-        {"gecko":"animation-name","webkit":"-webkit-animation-name","presto":"","trident":"animation-name","status":"WD"},
-        {"gecko":"animation-play-state","webkit":"-webkit-animation-play-state","presto":"","trident":"animation-play-state","status":"WD"},
-        {"gecko":"animation-timing-function","webkit":"-webkit-animation-timing-function","presto":"","trident":"animation-timing-function","status":"WD"},
-        {"gecko":"-moz-appearance","webkit":"-webkit-appearance","presto":"","trident":"","status":"CR"},
-        {"gecko":"backface-visibility","webkit":"-webkit-backface-visibility","presto":"","trident":"backface-visibility","status":"WD"},
-        {"gecko":"background-clip","webkit":"-webkit-background-clip","presto":"background-clip","trident":"background-clip","status":"WD"},
-        {"gecko":"","webkit":"-webkit-background-composite","presto":"","trident":"","status":""},
-        {"gecko":"-moz-background-inline-policy","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"background-origin","webkit":"-webkit-background-origin","presto":"background-origin","trident":"background-origin","status":"WD"},
-        {"gecko":"","webkit":"background-position-x","presto":"","trident":"-ms-background-position-x","status":""},
-        {"gecko":"","webkit":"background-position-y","presto":"","trident":"-ms-background-position-y","status":""},
-        {"gecko":"background-size","webkit":"-webkit-background-size","presto":"background-size","trident":"background-size","status":"WD"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-behavior","status":""},
-        {"gecko":"-moz-binding","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"-webkit-blend-mode","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-block-progression","status":""},
-        {"gecko":"","webkit":"-webkit-border-after","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-after-color","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-after-style","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-after-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-before","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-before-color","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-before-style","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-before-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-bottom-colors","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"border-bottom-left-radius","webkit":"-webkit-border-bottom-left-radius","presto":"border-bottom-left-radius","trident":"border-bottom-left-radius","status":"WD"},
-        {"gecko":"border-bottom-right-radius","webkit":"-webkit-border-bottom-right-radius","presto":"border-bottom-right-radius","trident":"border-bottom-right-radius","status":"WD"},
-        {"gecko":"-moz-border-end","webkit":"-webkit-border-end","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-end-color","webkit":"-webkit-border-end-color","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-end-style","webkit":"-webkit-border-end-style","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-end-width","webkit":"-webkit-border-end-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-border-fit","presto":"","trident":"","status":""},
-        {"gecko":"border-image","webkit":"-webkit-border-image","presto":"-o-border-image","trident":"","status":"WD"},
-        {"gecko":"-moz-border-left-colors","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"border-radius","webkit":"-webkit-border-radius","presto":"border-radius","trident":"border-radius","status":"WD"},
-        {"gecko":"-moz-border-right-colors","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-border-start","webkit":"-webkit-border-start","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-start-color","webkit":"-webkit-border-start-color","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-start-style","webkit":"-webkit-border-start-style","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-start-width","webkit":"-webkit-border-start-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-border-top-colors","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"border-top-left-radius","webkit":"-webkit-border-top-left-radius","presto":"border-top-left-radius","trident":"border-top-left-radius","status":"WD"},
-        {"gecko":"border-top-right-radius","webkit":"-webkit-border-top-right-radius","presto":"border-top-right-radius","trident":"border-top-right-radius","status":"WD"},
-        {"gecko":"-moz-box-align","webkit":"-webkit-box-align","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-box-decoration-break","presto":"box-decoration-break","trident":"","status":"WD"},
-        {"gecko":"-moz-box-direction","webkit":"","presto":"","trident":"","status":"WD"},
-        {"gecko":"-moz-box-flex","webkit":"-webkit-box-flex","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-box-flex-group","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-box-lines","presto":"","trident":"","status":"WD"},
-        {"gecko":"-moz-box-ordinal-group","webkit":"-webkit-box-ordinal-group","presto":"","trident":"","status":"WD"},
-        {"gecko":"-moz-box-orient","webkit":"-webkit-box-orient","presto":"","trident":"","status":"WD"},
-        {"gecko":"-moz-box-pack","webkit":"-webkit-box-pack","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-box-reflect","presto":"","trident":"","status":""},
-        {"gecko":"box-shadow","webkit":"-webkit-box-shadow","presto":"box-shadow","trident":"box-shadow","status":"WD"},
-        {"gecko":"box-sizing","webkit":"-webkit-box-sizing","presto":"box-sizing","trident":"box-sizing","status":"CR"},
-        {"gecko":"caption-side","webkit":"-epub-caption-side","presto":"caption-side","trident":"caption-side","status":""},
-        {"gecko":"clip-path","webkit":"-webkit-clip-path","presto":"clip-path","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-column-axis","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-column-break-after","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-column-break-before","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-column-break-inside","presto":"","trident":"","status":""},
-        {"gecko":"-moz-column-count","webkit":"-webkit-column-count","presto":"column-count","trident":"column-count","status":"CR"},
-        {"gecko":"-moz-column-fill","webkit":"-webkit-column-fill","presto":"column-fill","trident":"column-fill","status":"CR"},
-        {"gecko":"-moz-column-gap","webkit":"-webkit-column-gap","presto":"column-gap","trident":"column-gap","status":"CR"},
-        {"gecko":"","webkit":"-webkit-column-progression","presto":"","trident":"","status":""},
-        {"gecko":"-moz-column-rule","webkit":"-webkit-column-rule","presto":"column-rule","trident":"column-rule","status":"CR"},
-        {"gecko":"-moz-column-rule-color","webkit":"-webkit-column-rule-color","presto":"column-rule-color","trident":"column-rule-color","status":"CR"},
-        {"gecko":"-moz-column-rule-style","webkit":"-webkit-column-rule-style","presto":"column-rule-style","trident":"column-rule-style","status":"CR"},
-        {"gecko":"-moz-column-rule-width","webkit":"-webkit-column-rule-width","presto":"column-rule-width","trident":"column-rule-width","status":"CR"},
-        {"gecko":"","webkit":"-webkit-column-span","presto":"column-span","trident":"column-span","status":"CR"},
-        {"gecko":"-moz-column-width","webkit":"-webkit-column-width","presto":"column-width","trident":"column-width","status":"CR"},
-        {"gecko":"-moz-columns","webkit":"-webkit-columns","presto":"columns","trident":"columns","status":"CR"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-chaining","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-limit","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-limit-max","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-limit-min","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-snap","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-snap-points","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zoom-snap-type","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-content-zooming","status":""},
-        {"gecko":"-moz-control-character-visibility","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-dashboard-region","presto":"-apple-dashboard-region","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-o-device-pixel-ratio","trident":"","status":""},
-        {"gecko":"filter","webkit":"-webkit-filter","presto":"filter","trident":"-ms-filter","status":""},
-        {"gecko":"flex","webkit":"-webkit-flex","presto":"","trident":"-ms-flex","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-flex-align","status":""},
-        {"gecko":"flex-basis","webkit":"-webkit-flex-basis","presto":"","trident":"","status":""},
-        {"gecko":"flex-direction","webkit":"-webkit-flex-direction","presto":"","trident":"-ms-flex-direction","status":""},
-        {"gecko":"flex-flow","webkit":"-webkit-flex-flow","presto":"","trident":"","status":""},
-        {"gecko":"flex-grow","webkit":"-webkit-flex-grow","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-flex-order","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-flex-pack","status":""},
-        {"gecko":"flex-shrink","webkit":"-webkit-flex-shrink","presto":"","trident":"","status":""},
-        {"gecko":"flex-wrap","webkit":"-webkit-flex-wrap","presto":"","trident":"-ms-flex-wrap","status":""},
-        {"gecko":"-moz-float-edge","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"-webkit-flow-from","presto":"","trident":"-ms-flow-from","status":""},
-        {"gecko":"","webkit":"-webkit-flow-into","presto":"","trident":"-ms-flow-into","status":""},
-        {"gecko":"","webkit":"","presto":"-o-focus-opacity","trident":"","status":""},
-        {"gecko":"-moz-font-feature-settings","webkit":"","presto":"","trident":"font-feature-settings","status":""},
-        {"gecko":"-moz-font-language-override","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-font-size-delta","presto":"","trident":"","status":""},
-        {"gecko":"-moz-force-broken-image-icon","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-area","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-auto-columns","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-auto-flow","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-auto-rows","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-column","presto":"","trident":"-ms-grid-column","status":"WD"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-column-align","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-column-end","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-column-span","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-column-start","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-columns","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-row","presto":"","trident":"-ms-grid-row","status":"WD"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-row-align","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-row-end","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-row-span","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-row-start","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-grid-rows","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-template","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-grid-template-columns","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-grid-template-rows","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-high-contrast-adjust","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-hyphenate-limit-chars","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-hyphenate-limit-lines","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-hyphenate-limit-zone","status":""},
-        {"gecko":"-moz-hyphens","webkit":"-epub-hyphens","presto":"","trident":"-ms-hyphens","status":"WD"},
-        {"gecko":"-moz-image-region","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"ime-mode","webkit":"","presto":"","trident":"-ms-ime-mode","status":""},
-        {"gecko":"","webkit":"","presto":"-wap-input-format","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-wap-input-required","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-interpolation-mode","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-interpret-as","trident":"","status":""},
-        {"gecko":"justify-content","webkit":"-webkit-justify-content","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-flow","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-grid","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-grid-char","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-grid-line","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-grid-mode","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-layout-grid-type","status":""},
-        {"gecko":"","webkit":"-webkit-line-clamp","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-o-link","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-o-link-source","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-logical-height","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-logical-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-margin-after","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-margin-after-collapse","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-margin-before","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-margin-before-collapse","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-margin-bottom-collapse","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-margin-collapse","presto":"","trident":"","status":""},
-        {"gecko":"-moz-margin-end","webkit":"-webkit-margin-end","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-margin-start","webkit":"-webkit-margin-start","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-margin-top-collapse","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-marquee","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-wap-marquee-dir","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-marquee-direction","presto":"","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-marquee-increment","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-wap-marquee-loop","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-marquee-repetition","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-marquee-speed","presto":"-wap-marquee-speed","trident":"","status":"WD"},
-        {"gecko":"","webkit":"-webkit-marquee-style","presto":"-wap-marquee-style","trident":"","status":"WD"},
-        {"gecko":"mask","webkit":"-webkit-mask","presto":"mask","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image-outset","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image-repeat","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image-slice","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image-source","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-box-image-width","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-clip","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-composite","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-image","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-origin","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-position","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-position-x","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-position-y","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-repeat","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-repeat-x","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-repeat-y","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-size","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-mask-source-type","presto":"","trident":"","status":""},
-        {"gecko":"-moz-math-display","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-math-variant","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-max-logical-height","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-max-logical-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-min-logical-height","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-min-logical-width","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"","presto":"-o-mini-fold","trident":"","status":""},
-        {"gecko":"","webkit":"object-fit","presto":"-o-object-fit","trident":"","status":"ED"},
-        {"gecko":"","webkit":"","presto":"-o-object-position","trident":"","status":"ED"},
-        {"gecko":"opacity","webkit":"-webkit-opacity","presto":"opacity","trident":"opacity","status":"WD"},
-        {"gecko":"order","webkit":"-webkit-order","presto":"","trident":"","status":""},
-        {"gecko":"-moz-orient","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-osx-font-smoothing","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-outline-radius","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-outline-radius-bottomleft","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-outline-radius-bottomright","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-outline-radius-topleft","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-outline-radius-topright","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-overflow-style","status":"CR"},
-        {"gecko":"overflow-x","webkit":"overflow-x","presto":"overflow-x","trident":"-ms-overflow-x","status":"WD"},
-        {"gecko":"overflow-y","webkit":"overflow-y","presto":"overflow-y","trident":"-ms-overflow-y","status":"WD"},
-        {"gecko":"","webkit":"-webkit-padding-after","presto":"","trident":"","status":"ED"},
-        {"gecko":"","webkit":"-webkit-padding-before","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-padding-end","webkit":"-webkit-padding-end","presto":"","trident":"","status":"ED"},
-        {"gecko":"-moz-padding-start","webkit":"-webkit-padding-start","presto":"","trident":"","status":"ED"},
-        {"gecko":"perspective","webkit":"-webkit-perspective","presto":"","trident":"perspective","status":"WD"},
-        {"gecko":"perspective-origin","webkit":"-webkit-perspective-origin","presto":"","trident":"perspective-origin","status":"WD"},
-        {"gecko":"","webkit":"-webkit-perspective-origin-x","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-perspective-origin-y","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-phonemes","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-progress-appearance","status":""},
-        {"gecko":"","webkit":"-webkit-region-break-after","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-region-break-before","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-region-break-inside","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-region-fragment","presto":"","trident":"","status":""},
-        {"gecko":"-moz-script-level","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-script-min-size","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-script-size-multiplier","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-chaining","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-limit","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-limit-x-max","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-limit-x-min","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-limit-y-max","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-limit-y-min","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-rails","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-snap-points-x","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-snap-points-y","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-snap-type","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-snap-x","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-snap-y","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-scroll-translation","status":""},
-        {"gecko":"","webkit":"","presto":"scrollbar-arrow-color","trident":"-ms-scrollbar-arrow-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-base-color","trident":"-ms-scrollbar-base-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-darkshadow-color","trident":"-ms-scrollbar-darkshadow-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-face-color","trident":"-ms-scrollbar-face-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-highlight-color","trident":"-ms-scrollbar-highlight-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-shadow-color","trident":"-ms-scrollbar-shadow-color","status":"P"},
-        {"gecko":"","webkit":"","presto":"scrollbar-track-color","trident":"-ms-scrollbar-track-color","status":"P"},
-        {"gecko":"","webkit":"-webkit-shape-image-threshold","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-shape-inside","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-shape-margin","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-shape-outside","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-shape-padding","presto":"","trident":"","status":""},
-        {"gecko":"-moz-stack-sizing","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"-webkit-svg-shadow","presto":"","trident":"","status":""},
-        {"gecko":"-moz-tab-size","webkit":"","presto":"-o-tab-size","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-o-table-baseline","trident":"","status":""},
-        {"gecko":"","webkit":"-webkit-tap-highlight-color","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-text-align-last","webkit":"","presto":"","trident":"-ms-text-align-last","status":"WD"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-text-autospace","status":"WD"},
-        {"gecko":"","webkit":"-epub-text-combine","presto":"","trident":"","status":""},
-        {"gecko":"text-decoration","webkit":"-webkit-text-decoration","presto":"text-decoration","trident":"text-decoration","status":"WD"},
-        {"gecko":"-moz-text-decoration-color","webkit":"-webkit-text-decoration-color","presto":"","trident":"","status":""},
-        {"gecko":"-moz-text-decoration-line","webkit":"-webkit-text-decoration-line","presto":"","trident":"","status":""},
-        {"gecko":"-moz-text-decoration-style","webkit":"-webkit-text-decoration-style","presto":"","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-text-justify","status":"WD"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-text-kashida-space","status":"P"},
-        {"gecko":"text-orientation","webkit":"-epub-text-orientation","presto":"","trident":"","status":""},
-        {"gecko":"text-overflow","webkit":"text-overflow","presto":"text-overflow","trident":"-ms-text-overflow","status":"WD"},
-        {"gecko":"-moz-text-size-adjust","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"text-transform","webkit":"-epub-text-transform","presto":"text-transform","trident":"text-transform","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-text-underline-position","status":"P"},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-touch-action","status":""},
-        {"gecko":"","webkit":"-webkit-touch-callout","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-transform","webkit":"-webkit-transform","presto":"-o-transform","trident":"transform","status":"WD"},
-        {"gecko":"transform-origin","webkit":"-webkit-transform-origin","presto":"-o-transform-origin","trident":"transform-origin","status":"WD"},
-        {"gecko":"","webkit":"-webkit-transform-origin-x","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"-webkit-transform-origin-y","presto":"","trident":"","status":"P"},
-        {"gecko":"","webkit":"-webkit-transform-origin-z","presto":"","trident":"","status":"P"},
-        {"gecko":"transform-style","webkit":"-webkit-transform-style","presto":"","trident":"transform-style","status":"WD"},
-        {"gecko":"transition","webkit":"-webkit-transition","presto":"-o-transition","trident":"transition","status":"WD"},
-        {"gecko":"transition-delay","webkit":"-webkit-transition-delay","presto":"-o-transition-delay","trident":"transition-delay","status":"WD"},
-        {"gecko":"transition-duration","webkit":"-webkit-transition-duration","presto":"-o-transition-duration","trident":"transition-duration","status":"WD"},
-        {"gecko":"transition-property","webkit":"-webkit-transition-property","presto":"-o-transition-property","trident":"transition-property","status":"WD"},
-        {"gecko":"transition-timing-function","webkit":"-webkit-transition-timing-function","presto":"-o-transition-timing-function","trident":"transition-timing-function","status":"WD"},
-        {"gecko":"","webkit":"-webkit-user-drag","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-user-focus","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-user-input","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"-moz-user-modify","webkit":"","presto":"","trident":"","status":""},
-        {"gecko":"-moz-user-select","webkit":"","presto":"","trident":"-ms-user-select","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-balance","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-duration","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-pitch","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-pitch-range","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-rate","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-stress","trident":"","status":""},
-        {"gecko":"","webkit":"","presto":"-xv-voice-volume","trident":"","status":""},
-        {"gecko":"-moz-window-shadow","webkit":"","presto":"","trident":"","status":"P"},
-        {"gecko":"word-break","webkit":"-epub-word-break","presto":"","trident":"-ms-word-break","status":"WD"},
-        {"gecko":"word-wrap","webkit":"","presto":"word-wrap","trident":"-ms-word-wrap","status":"WD"},
-        {"gecko":"","webkit":"-webkit-wrap-flow","presto":"","trident":"-ms-wrap-flow","status":""},
-        {"gecko":"","webkit":"","presto":"","trident":"-ms-wrap-margin","status":""},
-        {"gecko":"","webkit":"-webkit-wrap-through","presto":"","trident":"-ms-wrap-through","status":""},
-        {"gecko":"writing-mode","webkit":"-epub-writing-mode","presto":"writing-mode","trident":"-ms-writing-mode","status":"ED"},
-        {"gecko":"","webkit":"zoom","presto":"","trident":"-ms-zoom","status":""}]};
+    {
+        "lastUpdate": 1392220206, "properties": [
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-accelerator", "status": "P"},
+            {"gecko": "", "webkit": "", "presto": "-wap-accesskey", "trident": "", "status": ""},
+            {"gecko": "align-content", "webkit": "-webkit-align-content", "presto": "", "trident": "", "status": ""},
+            {"gecko": "align-items", "webkit": "-webkit-align-items", "presto": "", "trident": "", "status": ""},
+            {"gecko": "align-self", "webkit": "-webkit-align-self", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-alt", "presto": "", "trident": "", "status": ""},
+            {"gecko": "animation", "webkit": "-webkit-animation", "presto": "", "trident": "animation", "status": "WD"},
+            {
+                "gecko": "animation-delay",
+                "webkit": "-webkit-animation-delay",
+                "presto": "",
+                "trident": "animation-delay",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-direction",
+                "webkit": "-webkit-animation-direction",
+                "presto": "",
+                "trident": "animation-direction",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-duration",
+                "webkit": "-webkit-animation-duration",
+                "presto": "",
+                "trident": "animation-duration",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-fill-mode",
+                "webkit": "-webkit-animation-fill-mode",
+                "presto": "",
+                "trident": "animation-fill-mode",
+                "status": "ED"
+            },
+            {
+                "gecko": "animation-iteration-count",
+                "webkit": "-webkit-animation-iteration-count",
+                "presto": "",
+                "trident": "animation-iteration-count",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-name",
+                "webkit": "-webkit-animation-name",
+                "presto": "",
+                "trident": "animation-name",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-play-state",
+                "webkit": "-webkit-animation-play-state",
+                "presto": "",
+                "trident": "animation-play-state",
+                "status": "WD"
+            },
+            {
+                "gecko": "animation-timing-function",
+                "webkit": "-webkit-animation-timing-function",
+                "presto": "",
+                "trident": "animation-timing-function",
+                "status": "WD"
+            },
+            {"gecko": "-moz-appearance", "webkit": "-webkit-appearance", "presto": "", "trident": "", "status": "CR"},
+            {
+                "gecko": "backface-visibility",
+                "webkit": "-webkit-backface-visibility",
+                "presto": "",
+                "trident": "backface-visibility",
+                "status": "WD"
+            },
+            {
+                "gecko": "background-clip",
+                "webkit": "-webkit-background-clip",
+                "presto": "background-clip",
+                "trident": "background-clip",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "-webkit-background-composite", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-background-inline-policy", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "background-origin",
+                "webkit": "-webkit-background-origin",
+                "presto": "background-origin",
+                "trident": "background-origin",
+                "status": "WD"
+            },
+            {
+                "gecko": "",
+                "webkit": "background-position-x",
+                "presto": "",
+                "trident": "-ms-background-position-x",
+                "status": ""
+            },
+            {
+                "gecko": "",
+                "webkit": "background-position-y",
+                "presto": "",
+                "trident": "-ms-background-position-y",
+                "status": ""
+            },
+            {
+                "gecko": "background-size",
+                "webkit": "-webkit-background-size",
+                "presto": "background-size",
+                "trident": "background-size",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-behavior", "status": ""},
+            {"gecko": "-moz-binding", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "-webkit-blend-mode", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-block-progression", "status": ""},
+            {"gecko": "", "webkit": "-webkit-border-after", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-after-color", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-after-style", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-after-width", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-before", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-before-color", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-before-style", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-border-before-width", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "-moz-border-bottom-colors", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "border-bottom-left-radius",
+                "webkit": "-webkit-border-bottom-left-radius",
+                "presto": "border-bottom-left-radius",
+                "trident": "border-bottom-left-radius",
+                "status": "WD"
+            },
+            {
+                "gecko": "border-bottom-right-radius",
+                "webkit": "-webkit-border-bottom-right-radius",
+                "presto": "border-bottom-right-radius",
+                "trident": "border-bottom-right-radius",
+                "status": "WD"
+            },
+            {"gecko": "-moz-border-end", "webkit": "-webkit-border-end", "presto": "", "trident": "", "status": "ED"},
+            {
+                "gecko": "-moz-border-end-color",
+                "webkit": "-webkit-border-end-color",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "-moz-border-end-style",
+                "webkit": "-webkit-border-end-style",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "-moz-border-end-width",
+                "webkit": "-webkit-border-end-width",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {"gecko": "", "webkit": "-webkit-border-fit", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "border-image",
+                "webkit": "-webkit-border-image",
+                "presto": "-o-border-image",
+                "trident": "",
+                "status": "WD"
+            },
+            {"gecko": "-moz-border-left-colors", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "border-radius",
+                "webkit": "-webkit-border-radius",
+                "presto": "border-radius",
+                "trident": "border-radius",
+                "status": "WD"
+            },
+            {"gecko": "-moz-border-right-colors", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "-moz-border-start",
+                "webkit": "-webkit-border-start",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "-moz-border-start-color",
+                "webkit": "-webkit-border-start-color",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "-moz-border-start-style",
+                "webkit": "-webkit-border-start-style",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "-moz-border-start-width",
+                "webkit": "-webkit-border-start-width",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {"gecko": "-moz-border-top-colors", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "border-top-left-radius",
+                "webkit": "-webkit-border-top-left-radius",
+                "presto": "border-top-left-radius",
+                "trident": "border-top-left-radius",
+                "status": "WD"
+            },
+            {
+                "gecko": "border-top-right-radius",
+                "webkit": "-webkit-border-top-right-radius",
+                "presto": "border-top-right-radius",
+                "trident": "border-top-right-radius",
+                "status": "WD"
+            },
+            {"gecko": "-moz-box-align", "webkit": "-webkit-box-align", "presto": "", "trident": "", "status": "WD"},
+            {
+                "gecko": "",
+                "webkit": "-webkit-box-decoration-break",
+                "presto": "box-decoration-break",
+                "trident": "",
+                "status": "WD"
+            },
+            {"gecko": "-moz-box-direction", "webkit": "", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "-moz-box-flex", "webkit": "-webkit-box-flex", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-box-flex-group", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-box-lines", "presto": "", "trident": "", "status": "WD"},
+            {
+                "gecko": "-moz-box-ordinal-group",
+                "webkit": "-webkit-box-ordinal-group",
+                "presto": "",
+                "trident": "",
+                "status": "WD"
+            },
+            {"gecko": "-moz-box-orient", "webkit": "-webkit-box-orient", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "-moz-box-pack", "webkit": "-webkit-box-pack", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-box-reflect", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "box-shadow",
+                "webkit": "-webkit-box-shadow",
+                "presto": "box-shadow",
+                "trident": "box-shadow",
+                "status": "WD"
+            },
+            {
+                "gecko": "box-sizing",
+                "webkit": "-webkit-box-sizing",
+                "presto": "box-sizing",
+                "trident": "box-sizing",
+                "status": "CR"
+            },
+            {
+                "gecko": "caption-side",
+                "webkit": "-epub-caption-side",
+                "presto": "caption-side",
+                "trident": "caption-side",
+                "status": ""
+            },
+            {"gecko": "clip-path", "webkit": "-webkit-clip-path", "presto": "clip-path", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-column-axis", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-column-break-after", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-column-break-before", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-column-break-inside", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "-moz-column-count",
+                "webkit": "-webkit-column-count",
+                "presto": "column-count",
+                "trident": "column-count",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-fill",
+                "webkit": "-webkit-column-fill",
+                "presto": "column-fill",
+                "trident": "column-fill",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-gap",
+                "webkit": "-webkit-column-gap",
+                "presto": "column-gap",
+                "trident": "column-gap",
+                "status": "CR"
+            },
+            {"gecko": "", "webkit": "-webkit-column-progression", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "-moz-column-rule",
+                "webkit": "-webkit-column-rule",
+                "presto": "column-rule",
+                "trident": "column-rule",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-rule-color",
+                "webkit": "-webkit-column-rule-color",
+                "presto": "column-rule-color",
+                "trident": "column-rule-color",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-rule-style",
+                "webkit": "-webkit-column-rule-style",
+                "presto": "column-rule-style",
+                "trident": "column-rule-style",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-rule-width",
+                "webkit": "-webkit-column-rule-width",
+                "presto": "column-rule-width",
+                "trident": "column-rule-width",
+                "status": "CR"
+            },
+            {
+                "gecko": "",
+                "webkit": "-webkit-column-span",
+                "presto": "column-span",
+                "trident": "column-span",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-column-width",
+                "webkit": "-webkit-column-width",
+                "presto": "column-width",
+                "trident": "column-width",
+                "status": "CR"
+            },
+            {
+                "gecko": "-moz-columns",
+                "webkit": "-webkit-columns",
+                "presto": "columns",
+                "trident": "columns",
+                "status": "CR"
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-chaining", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-limit", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-limit-max", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-limit-min", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-snap", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-snap-points", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zoom-snap-type", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-content-zooming", "status": ""},
+            {"gecko": "-moz-control-character-visibility", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "",
+                "webkit": "-webkit-dashboard-region",
+                "presto": "-apple-dashboard-region",
+                "trident": "",
+                "status": ""
+            },
+            {"gecko": "", "webkit": "", "presto": "-o-device-pixel-ratio", "trident": "", "status": ""},
+            {"gecko": "filter", "webkit": "-webkit-filter", "presto": "filter", "trident": "-ms-filter", "status": ""},
+            {"gecko": "flex", "webkit": "-webkit-flex", "presto": "", "trident": "-ms-flex", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-flex-align", "status": ""},
+            {"gecko": "flex-basis", "webkit": "-webkit-flex-basis", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "flex-direction",
+                "webkit": "-webkit-flex-direction",
+                "presto": "",
+                "trident": "-ms-flex-direction",
+                "status": ""
+            },
+            {"gecko": "flex-flow", "webkit": "-webkit-flex-flow", "presto": "", "trident": "", "status": ""},
+            {"gecko": "flex-grow", "webkit": "-webkit-flex-grow", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-flex-order", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-flex-pack", "status": ""},
+            {"gecko": "flex-shrink", "webkit": "-webkit-flex-shrink", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "flex-wrap",
+                "webkit": "-webkit-flex-wrap",
+                "presto": "",
+                "trident": "-ms-flex-wrap",
+                "status": ""
+            },
+            {"gecko": "-moz-float-edge", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "-webkit-flow-from", "presto": "", "trident": "-ms-flow-from", "status": ""},
+            {"gecko": "", "webkit": "-webkit-flow-into", "presto": "", "trident": "-ms-flow-into", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-o-focus-opacity", "trident": "", "status": ""},
+            {
+                "gecko": "-moz-font-feature-settings",
+                "webkit": "",
+                "presto": "",
+                "trident": "font-feature-settings",
+                "status": ""
+            },
+            {"gecko": "-moz-font-language-override", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-font-size-delta", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-force-broken-image-icon", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-area", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-auto-columns", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-auto-flow", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-auto-rows", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-column", "presto": "", "trident": "-ms-grid-column", "status": "WD"},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-column-align", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-column-end", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-column-span", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-column-start", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-columns", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-row", "presto": "", "trident": "-ms-grid-row", "status": "WD"},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-row-align", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-row-end", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-row-span", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-row-start", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-grid-rows", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-template", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-grid-template-columns", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-grid-template-rows", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-high-contrast-adjust", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-hyphenate-limit-chars", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-hyphenate-limit-lines", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-hyphenate-limit-zone", "status": ""},
+            {
+                "gecko": "-moz-hyphens",
+                "webkit": "-epub-hyphens",
+                "presto": "",
+                "trident": "-ms-hyphens",
+                "status": "WD"
+            },
+            {"gecko": "-moz-image-region", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "ime-mode", "webkit": "", "presto": "", "trident": "-ms-ime-mode", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-wap-input-format", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-wap-input-required", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-interpolation-mode", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-interpret-as", "trident": "", "status": ""},
+            {
+                "gecko": "justify-content",
+                "webkit": "-webkit-justify-content",
+                "presto": "",
+                "trident": "",
+                "status": ""
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-flow", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-grid", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-grid-char", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-grid-line", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-grid-mode", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-layout-grid-type", "status": ""},
+            {"gecko": "", "webkit": "-webkit-line-clamp", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-o-link", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-o-link-source", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-logical-height", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-logical-width", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-margin-after", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-margin-after-collapse", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-margin-before", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-margin-before-collapse", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-margin-bottom-collapse", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-margin-collapse", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-margin-end", "webkit": "-webkit-margin-end", "presto": "", "trident": "", "status": "ED"},
+            {
+                "gecko": "-moz-margin-start",
+                "webkit": "-webkit-margin-start",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {"gecko": "", "webkit": "-webkit-margin-top-collapse", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-marquee", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-wap-marquee-dir", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-marquee-direction", "presto": "", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-marquee-increment", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-wap-marquee-loop", "trident": "", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-marquee-repetition", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "",
+                "webkit": "-webkit-marquee-speed",
+                "presto": "-wap-marquee-speed",
+                "trident": "",
+                "status": "WD"
+            },
+            {
+                "gecko": "",
+                "webkit": "-webkit-marquee-style",
+                "presto": "-wap-marquee-style",
+                "trident": "",
+                "status": "WD"
+            },
+            {"gecko": "mask", "webkit": "-webkit-mask", "presto": "mask", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image-outset", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image-repeat", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image-slice", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image-source", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-box-image-width", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-clip", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-composite", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-image", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-origin", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-position", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-position-x", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-position-y", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-repeat", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-repeat-x", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-repeat-y", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-size", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-mask-source-type", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-math-display", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-math-variant", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-max-logical-height", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-max-logical-width", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-min-logical-height", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-min-logical-width", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "", "presto": "-o-mini-fold", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "object-fit", "presto": "-o-object-fit", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "", "presto": "-o-object-position", "trident": "", "status": "ED"},
+            {
+                "gecko": "opacity",
+                "webkit": "-webkit-opacity",
+                "presto": "opacity",
+                "trident": "opacity",
+                "status": "WD"
+            },
+            {"gecko": "order", "webkit": "-webkit-order", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-orient", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-osx-font-smoothing", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-outline-radius", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-outline-radius-bottomleft", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-outline-radius-bottomright", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-outline-radius-topleft", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-outline-radius-topright", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-overflow-style", "status": "CR"},
+            {
+                "gecko": "overflow-x",
+                "webkit": "overflow-x",
+                "presto": "overflow-x",
+                "trident": "-ms-overflow-x",
+                "status": "WD"
+            },
+            {
+                "gecko": "overflow-y",
+                "webkit": "overflow-y",
+                "presto": "overflow-y",
+                "trident": "-ms-overflow-y",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "-webkit-padding-after", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "", "webkit": "-webkit-padding-before", "presto": "", "trident": "", "status": "ED"},
+            {"gecko": "-moz-padding-end", "webkit": "-webkit-padding-end", "presto": "", "trident": "", "status": "ED"},
+            {
+                "gecko": "-moz-padding-start",
+                "webkit": "-webkit-padding-start",
+                "presto": "",
+                "trident": "",
+                "status": "ED"
+            },
+            {
+                "gecko": "perspective",
+                "webkit": "-webkit-perspective",
+                "presto": "",
+                "trident": "perspective",
+                "status": "WD"
+            },
+            {
+                "gecko": "perspective-origin",
+                "webkit": "-webkit-perspective-origin",
+                "presto": "",
+                "trident": "perspective-origin",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "-webkit-perspective-origin-x", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-perspective-origin-y", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-phonemes", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-progress-appearance", "status": ""},
+            {"gecko": "", "webkit": "-webkit-region-break-after", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-region-break-before", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-region-break-inside", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-region-fragment", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-script-level", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-script-min-size", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-script-size-multiplier", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-chaining", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-limit", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-limit-x-max", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-limit-x-min", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-limit-y-max", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-limit-y-min", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-rails", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-snap-points-x", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-snap-points-y", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-snap-type", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-snap-x", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-snap-y", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-scroll-translation", "status": ""},
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-arrow-color",
+                "trident": "-ms-scrollbar-arrow-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-base-color",
+                "trident": "-ms-scrollbar-base-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-darkshadow-color",
+                "trident": "-ms-scrollbar-darkshadow-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-face-color",
+                "trident": "-ms-scrollbar-face-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-highlight-color",
+                "trident": "-ms-scrollbar-highlight-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-shadow-color",
+                "trident": "-ms-scrollbar-shadow-color",
+                "status": "P"
+            },
+            {
+                "gecko": "",
+                "webkit": "",
+                "presto": "scrollbar-track-color",
+                "trident": "-ms-scrollbar-track-color",
+                "status": "P"
+            },
+            {"gecko": "", "webkit": "-webkit-shape-image-threshold", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-shape-inside", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-shape-margin", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-shape-outside", "presto": "", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-shape-padding", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-stack-sizing", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "-webkit-svg-shadow", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-tab-size", "webkit": "", "presto": "-o-tab-size", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-o-table-baseline", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "-webkit-tap-highlight-color", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "-moz-text-align-last",
+                "webkit": "",
+                "presto": "",
+                "trident": "-ms-text-align-last",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-text-autospace", "status": "WD"},
+            {"gecko": "", "webkit": "-epub-text-combine", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "text-decoration",
+                "webkit": "-webkit-text-decoration",
+                "presto": "text-decoration",
+                "trident": "text-decoration",
+                "status": "WD"
+            },
+            {
+                "gecko": "-moz-text-decoration-color",
+                "webkit": "-webkit-text-decoration-color",
+                "presto": "",
+                "trident": "",
+                "status": ""
+            },
+            {
+                "gecko": "-moz-text-decoration-line",
+                "webkit": "-webkit-text-decoration-line",
+                "presto": "",
+                "trident": "",
+                "status": ""
+            },
+            {
+                "gecko": "-moz-text-decoration-style",
+                "webkit": "-webkit-text-decoration-style",
+                "presto": "",
+                "trident": "",
+                "status": ""
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-text-justify", "status": "WD"},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-text-kashida-space", "status": "P"},
+            {
+                "gecko": "text-orientation",
+                "webkit": "-epub-text-orientation",
+                "presto": "",
+                "trident": "",
+                "status": ""
+            },
+            {
+                "gecko": "text-overflow",
+                "webkit": "text-overflow",
+                "presto": "text-overflow",
+                "trident": "-ms-text-overflow",
+                "status": "WD"
+            },
+            {"gecko": "-moz-text-size-adjust", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {
+                "gecko": "text-transform",
+                "webkit": "-epub-text-transform",
+                "presto": "text-transform",
+                "trident": "text-transform",
+                "status": ""
+            },
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-text-underline-position", "status": "P"},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-touch-action", "status": ""},
+            {"gecko": "", "webkit": "-webkit-touch-callout", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "-moz-transform",
+                "webkit": "-webkit-transform",
+                "presto": "-o-transform",
+                "trident": "transform",
+                "status": "WD"
+            },
+            {
+                "gecko": "transform-origin",
+                "webkit": "-webkit-transform-origin",
+                "presto": "-o-transform-origin",
+                "trident": "transform-origin",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "-webkit-transform-origin-x", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "-webkit-transform-origin-y", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "", "webkit": "-webkit-transform-origin-z", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "transform-style",
+                "webkit": "-webkit-transform-style",
+                "presto": "",
+                "trident": "transform-style",
+                "status": "WD"
+            },
+            {
+                "gecko": "transition",
+                "webkit": "-webkit-transition",
+                "presto": "-o-transition",
+                "trident": "transition",
+                "status": "WD"
+            },
+            {
+                "gecko": "transition-delay",
+                "webkit": "-webkit-transition-delay",
+                "presto": "-o-transition-delay",
+                "trident": "transition-delay",
+                "status": "WD"
+            },
+            {
+                "gecko": "transition-duration",
+                "webkit": "-webkit-transition-duration",
+                "presto": "-o-transition-duration",
+                "trident": "transition-duration",
+                "status": "WD"
+            },
+            {
+                "gecko": "transition-property",
+                "webkit": "-webkit-transition-property",
+                "presto": "-o-transition-property",
+                "trident": "transition-property",
+                "status": "WD"
+            },
+            {
+                "gecko": "transition-timing-function",
+                "webkit": "-webkit-transition-timing-function",
+                "presto": "-o-transition-timing-function",
+                "trident": "transition-timing-function",
+                "status": "WD"
+            },
+            {"gecko": "", "webkit": "-webkit-user-drag", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-user-focus", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-user-input", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {"gecko": "-moz-user-modify", "webkit": "", "presto": "", "trident": "", "status": ""},
+            {"gecko": "-moz-user-select", "webkit": "", "presto": "", "trident": "-ms-user-select", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-balance", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-duration", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-pitch", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-pitch-range", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-rate", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-stress", "trident": "", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "-xv-voice-volume", "trident": "", "status": ""},
+            {"gecko": "-moz-window-shadow", "webkit": "", "presto": "", "trident": "", "status": "P"},
+            {
+                "gecko": "word-break",
+                "webkit": "-epub-word-break",
+                "presto": "",
+                "trident": "-ms-word-break",
+                "status": "WD"
+            },
+            {"gecko": "word-wrap", "webkit": "", "presto": "word-wrap", "trident": "-ms-word-wrap", "status": "WD"},
+            {"gecko": "", "webkit": "-webkit-wrap-flow", "presto": "", "trident": "-ms-wrap-flow", "status": ""},
+            {"gecko": "", "webkit": "", "presto": "", "trident": "-ms-wrap-margin", "status": ""},
+            {"gecko": "", "webkit": "-webkit-wrap-through", "presto": "", "trident": "-ms-wrap-through", "status": ""},
+            {
+                "gecko": "writing-mode",
+                "webkit": "-epub-writing-mode",
+                "presto": "writing-mode",
+                "trident": "-ms-writing-mode",
+                "status": "ED"
+            },
+            {"gecko": "", "webkit": "zoom", "presto": "", "trident": "-ms-zoom", "status": ""}]
+    };
 
 var PrefixHelper = {
 
     mVENDOR_PREFIXES: null,
 
-    kEXPORTS_FOR_GECKO:   true,
-    kEXPORTS_FOR_WEBKIT:  true,
-    kEXPORTS_FOR_PRESTO:  true,
+    kEXPORTS_FOR_GECKO: true,
+    kEXPORTS_FOR_WEBKIT: true,
+    kEXPORTS_FOR_PRESTO: true,
     kEXPORTS_FOR_TRIDENT: true,
 
-    cleanPrefixes: function()
-    {
+    cleanPrefixes: function () {
         this.mVENDOR_PREFIXES = null;
     },
 
-    prefixesForProperty: function(aProperty)
-    {
+    prefixesForProperty: function (aProperty) {
         if (!this.mVENDOR_PREFIXES) {
 
             this.mVENDOR_PREFIXES = {};
@@ -638,8 +1004,8 @@ var PrefixHelper = {
                 if (p.gecko && (p.webkit || p.presto || p.trident)) {
                     var o = {};
                     if (this.kEXPORTS_FOR_GECKO) o[p.gecko] = true;
-                    if (this.kEXPORTS_FOR_WEBKIT && p.webkit)  o[p.webkit] = true;
-                    if (this.kEXPORTS_FOR_PRESTO && p.presto)  o[p.presto] = true;
+                    if (this.kEXPORTS_FOR_WEBKIT && p.webkit) o[p.webkit] = true;
+                    if (this.kEXPORTS_FOR_PRESTO && p.presto) o[p.presto] = true;
                     if (this.kEXPORTS_FOR_TRIDENT && p.trident) o[p.trident] = true;
                     this.mVENDOR_PREFIXES[p.gecko] = [];
                     for (var j in o)
@@ -654,7 +1020,7 @@ var PrefixHelper = {
 };
 
 function ParseURL(buffer) {
-    var result = { };
+    var result = {};
     result.protocol = "";
     result.user = "";
     result.password = "";
@@ -667,109 +1033,109 @@ function ParseURL(buffer) {
     var start = 0;
     var wasSlash = false;
 
-    while(start < buffer.length) {
-        if(section == "PROTOCOL") {
-            if(buffer.charAt(start) == ':') {
+    while (start < buffer.length) {
+        if (section == "PROTOCOL") {
+            if (buffer.charAt(start) == ':') {
                 section = "AFTER_PROTOCOL";
                 start++;
-            } else if(buffer.charAt(start) == '/' && result.protocol.length() == 0) {
+            } else if (buffer.charAt(start) == '/' && result.protocol.length() == 0) {
                 section = PATH;
             } else {
                 result.protocol += buffer.charAt(start++);
             }
-        } else if(section == "AFTER_PROTOCOL") {
-            if(buffer.charAt(start) == '/') {
-                if(!wasSlash) {
+        } else if (section == "AFTER_PROTOCOL") {
+            if (buffer.charAt(start) == '/') {
+                if (!wasSlash) {
                     wasSlash = true;
                 } else {
                     wasSlash = false;
                     section = "USER";
                 }
-                start ++;
+                start++;
             } else {
                 throw new ParseException("Protocol shell be separated with 2 slashes");
             }
-        } else if(section == "USER") {
-            if(buffer.charAt(start) == '/') {
+        } else if (section == "USER") {
+            if (buffer.charAt(start) == '/') {
                 result.host = result.user;
                 result.user = "";
                 section = "PATH";
-            } else if(buffer.charAt(start) == '?') {
+            } else if (buffer.charAt(start) == '?') {
                 result.host = result.user;
                 result.user = "";
                 section = "QUERY";
                 start++;
-            } else if(buffer.charAt(start) == ':') {
+            } else if (buffer.charAt(start) == ':') {
                 section = "PASSWORD";
                 start++;
-            } else if(buffer.charAt(start) == '@') {
+            } else if (buffer.charAt(start) == '@') {
                 section = "HOST";
                 start++;
             } else {
                 result.user += buffer.charAt(start++);
             }
-        } else if(section == "PASSWORD") {
-            if(buffer.charAt(start) == '/') {
+        } else if (section == "PASSWORD") {
+            if (buffer.charAt(start) == '/') {
                 result.host = result.user;
                 result.port = result.password;
                 result.user = "";
                 result.password = "";
                 section = "PATH";
-            } else if(buffer.charAt(start) == '?') {
+            } else if (buffer.charAt(start) == '?') {
                 result.host = result.user;
                 result.port = result.password;
                 result.user = "";
                 result.password = "";
                 section = "QUERY";
-                start ++;
-            } else if(buffer.charAt(start) == '@') {
+                start++;
+            } else if (buffer.charAt(start) == '@') {
                 section = "HOST";
                 start++;
             } else {
                 result.password += buffer.charAt(start++);
             }
-        } else if(section == "HOST") {
-            if(buffer.charAt(start) == '/') {
+        } else if (section == "HOST") {
+            if (buffer.charAt(start) == '/') {
                 section = "PATH";
-            } else if(buffer.charAt(start) == ':') {
+            } else if (buffer.charAt(start) == ':') {
                 section = "PORT";
                 start++;
-            } else if(buffer.charAt(start) == '?') {
+            } else if (buffer.charAt(start) == '?') {
                 section = "QUERY";
                 start++;
             } else {
                 result.host += buffer.charAt(start++);
             }
-        } else if(section == "PORT") {
-            if(buffer.charAt(start) == '/') {
+        } else if (section == "PORT") {
+            if (buffer.charAt(start) == '/') {
                 section = "PATH";
-            } else if(buffer.charAt(start) == '?') {
+            } else if (buffer.charAt(start) == '?') {
                 section = "QUERY";
                 start++;
             } else {
                 result.port += buffer.charAt(start++);
             }
-        } else if(section == "PATH") {
-            if(buffer.charAt(start) == '?') {
+        } else if (section == "PATH") {
+            if (buffer.charAt(start) == '?') {
                 section = "QUERY";
-                start ++;
+                start++;
             } else {
                 result.path += buffer.charAt(start++);
             }
-        } else if(section == "QUERY") {
+        } else if (section == "QUERY") {
             result.query += buffer.charAt(start++);
         }
     }
 
-    if(section == "PROTOCOL") {
+    if (section == "PROTOCOL") {
         result.host = result.protocol;
         result.protocol = "http";
-    } else if(section == "AFTER_PROTOCOL") {
+    } else if (section == "AFTER_PROTOCOL") {
         throw new ParseException("Invalid url");
-    } else if(section == "USER") {
+    } else if (section == "USER") {
         result.host = result.user;
         result.user = "";
-    } else if(section == "PASSWORD") {
+    } else if (section == "PASSWORD") {
         result.host = result.user;
         result.port = result.password;
         result.user = "";
@@ -783,17 +1149,15 @@ function ParseException(description) {
     this.description = description;
 }
 
-function CountLF(s)
-{
-    var nCR = s.match( /\n/g );
+function CountLF(s) {
+    var nCR = s.match(/\n/g);
     return nCR ? nCR.length + 1 : 1;
 }
 
-function DisposablePartialParsing(aStringToParse, aMethodName)
-{
+function DisposablePartialParsing(aStringToParse, aMethodName) {
     var parser = new CSSParser();
     parser._init();
-    parser.mPreserveWS       = false;
+    parser.mPreserveWS = false;
     parser.mPreserveComments = false;
     parser.mPreservedTokens = [];
     parser.mScanner.init(aStringToParse);
@@ -801,8 +1165,7 @@ function DisposablePartialParsing(aStringToParse, aMethodName)
     return parser[aMethodName]();
 }
 
-function FilterLinearGradient(aValue, aEngine)
-{
+function FilterLinearGradient(aValue, aEngine) {
     var d = DisposablePartialParsing(aValue, "parseBackgroundImages");
     if (!d)
         return null;
@@ -812,7 +1175,7 @@ function FilterLinearGradient(aValue, aEngine)
 
     var str = "";
     var position = ("position" in g.value) ? g.value.position.toLowerCase() : "";
-    var angle    = ("angle" in g.value) ? g.value.angle.toLowerCase() : "";
+    var angle = ("angle" in g.value) ? g.value.angle.toLowerCase() : "";
 
     if ("webkit20110101" == aEngine) {
         var cancelled = false;
@@ -821,11 +1184,16 @@ function FilterLinearGradient(aValue, aEngine)
         if (angle) {
             var match = angle.match(/^([0-9\-\.\\+]+)([a-z]*)/);
             var angle = parseFloat(match[1]);
-            var unit  = match[2];
+            var unit = match[2];
             switch (unit) {
-                case "grad": angle = angle * 90 / 100; break;
-                case "rad":  angle = angle * 180 / Math.PI; break;
-                default: break;
+                case "grad":
+                    angle = angle * 90 / 100;
+                    break;
+                case "rad":
+                    angle = angle * 180 / Math.PI;
+                    break;
+                default:
+                    break;
             }
             while (angle < 0)
                 angle += 360;
@@ -842,15 +1210,21 @@ function FilterLinearGradient(aValue, aEngine)
             if (angle == "" && angle != 0) {
                 // no angle, then we just turn the point 180 degrees around center
                 switch (startpoint[0]) {
-                    case "left":   endpoint.push("right"); break;
-                    case "center": endpoint.push("center"); break;
-                    case "right":  endpoint.push("left"); break;
+                    case "left":
+                        endpoint.push("right");
+                        break;
+                    case "center":
+                        endpoint.push("center");
+                        break;
+                    case "right":
+                        endpoint.push("left");
+                        break;
                     default: {
                         var match = startpoint[0].match(/^([0-9\-\.\\+]+)([a-z]*)/);
-                        var v     = parseFloat(match[0]);
-                        var unit  = match[1];
+                        var v = parseFloat(match[0]);
+                        var unit = match[1];
                         if (unit == "%") {
-                            endpoint.push((100-v) + "%");
+                            endpoint.push((100 - v) + "%");
                         }
                         else
                             cancelled = true;
@@ -859,15 +1233,21 @@ function FilterLinearGradient(aValue, aEngine)
                 }
                 if (!cancelled)
                     switch (startpoint[1]) {
-                        case "top":    endpoint.push("bottom"); break;
-                        case "center": endpoint.push("center"); break;
-                        case "bottom": endpoint.push("top"); break;
+                        case "top":
+                            endpoint.push("bottom");
+                            break;
+                        case "center":
+                            endpoint.push("center");
+                            break;
+                        case "bottom":
+                            endpoint.push("top");
+                            break;
                         default: {
                             var match = startpoint[1].match(/^([0-9\-\.\\+]+)([a-z]*)/);
-                            var v     = parseFloat(match[0]);
-                            var unit  = match[1];
+                            var v = parseFloat(match[0]);
+                            var unit = match[1];
                             if (unit == "%") {
-                                endpoint.push((100-v) + "%");
+                                endpoint.push((100 - v) + "%");
                             }
                             else
                                 cancelled = true;
@@ -877,11 +1257,25 @@ function FilterLinearGradient(aValue, aEngine)
             }
             else {
                 switch (angle) {
-                    case 0:    endpoint.push("right"); endpoint.push(startpoint[1]); break;
-                    case 90:   endpoint.push(startpoint[0]); endpoint.push("top"); break;
-                    case 180:  endpoint.push("left"); endpoint.push(startpoint[1]); break;
-                    case 270:  endpoint.push(startpoint[0]); endpoint.push("bottom"); break;
-                    default:     cancelled = true; break;
+                    case 0:
+                        endpoint.push("right");
+                        endpoint.push(startpoint[1]);
+                        break;
+                    case 90:
+                        endpoint.push(startpoint[0]);
+                        endpoint.push("top");
+                        break;
+                    case 180:
+                        endpoint.push("left");
+                        endpoint.push(startpoint[1]);
+                        break;
+                    case 270:
+                        endpoint.push(startpoint[0]);
+                        endpoint.push("bottom");
+                        break;
+                    default:
+                        cancelled = true;
+                        break;
                 }
             }
         }
@@ -890,11 +1284,25 @@ function FilterLinearGradient(aValue, aEngine)
             if (angle == "")
                 angle = 270;
             switch (angle) {
-                case 0:    startpoint= ["left", "center"];   endpoint = ["right", "center"]; break;
-                case 90:   startpoint= ["center", "bottom"]; endpoint = ["center", "top"]; break;
-                case 180:  startpoint= ["right", "center"];  endpoint = ["left", "center"]; break;
-                case 270:  startpoint= ["center", "top"];    endpoint = ["center", "bottom"]; break;
-                default:     cancelled = true; break;
+                case 0:
+                    startpoint = ["left", "center"];
+                    endpoint = ["right", "center"];
+                    break;
+                case 90:
+                    startpoint = ["center", "bottom"];
+                    endpoint = ["center", "top"];
+                    break;
+                case 180:
+                    startpoint = ["right", "center"];
+                    endpoint = ["left", "center"];
+                    break;
+                case 270:
+                    startpoint = ["center", "top"];
+                    endpoint = ["center", "bottom"];
+                    break;
+                default:
+                    cancelled = true;
+                    break;
             }
         }
 
@@ -904,8 +1312,8 @@ function FilterLinearGradient(aValue, aEngine)
         str += startpoint.join(" ") + ", " + endpoint.join(" ");
         if (!g.value.stops[0].position)
             g.value.stops[0].position = "0%";
-        if (!g.value.stops[g.value.stops.length-1].position)
-            g.value.stops[g.value.stops.length-1].position = "100%";
+        if (!g.value.stops[g.value.stops.length - 1].position)
+            g.value.stops[g.value.stops.length - 1].position = "100%";
         var current = 0;
         for (var i = 0; i < g.value.stops.length && !cancelled; i++) {
             var s = g.value.stops[i];
@@ -940,23 +1348,31 @@ function FilterLinearGradient(aValue, aEngine)
             var s = g.value.stops[i];
             str += s.color
                 + (s.position ? " " + s.position : "")
-                + ((i != g.value.stops.length -1) ? ", " : "");
+                + ((i != g.value.stops.length - 1) ? ", " : "");
         }
     }
     str += ")";
 
     switch (aEngine) {
-        case "webkit":     str = "-webkit-"  + str; break;
-        case "gecko1.9.2": str = "-moz-"  + str; break;
-        case "presto":     str = "-o-"  + str; break;
-        case "trident":    str = "-ms-"  + str; break;
-        default:           break;
+        case "webkit":
+            str = "-webkit-" + str;
+            break;
+        case "gecko1.9.2":
+            str = "-moz-" + str;
+            break;
+        case "presto":
+            str = "-o-" + str;
+            break;
+        case "trident":
+            str = "-ms-" + str;
+            break;
+        default:
+            break;
     }
     return str;
 }
 
-function FilterRadialGradient(aValue, aEngine)
-{
+function FilterRadialGradient(aValue, aEngine) {
     var d = DisposablePartialParsing(aValue, "parseBackgroundImages");
     if (!d)
         return null;
@@ -970,7 +1386,7 @@ function FilterRadialGradient(aValue, aEngine)
 
     var str = (g.value.isRepeating ? "repeating-" : "") + "radial-gradient(";
     var shape = ("shape" in g.value) ? g.value.shape : "";
-    var extent  = ("extent"  in g.value) ? g.value.extent : "";
+    var extent = ("extent" in g.value) ? g.value.extent : "";
     var lengths = "";
     switch (g.value.positions.length) {
         case 1:
@@ -995,36 +1411,44 @@ function FilterRadialGradient(aValue, aEngine)
         var s = g.value.stops[i];
         str += s.color
             + (s.position ? " " + s.position : "")
-            + ((i != g.value.stops.length -1) ? ", " : "");
+            + ((i != g.value.stops.length - 1) ? ", " : "");
     }
     str += ")";
 
     switch (aEngine) {
-        case "webkit":     str = "-webkit-"  + str; break;
-        case "gecko1.9.2": str = "-moz-"  + str; break;
-        case "presto":     str = "-o-"  + str; break;
-        case "trident":    str = "-ms-"  + str; break;
-        default:           break;
+        case "webkit":
+            str = "-webkit-" + str;
+            break;
+        case "gecko1.9.2":
+            str = "-moz-" + str;
+            break;
+        case "presto":
+            str = "-o-" + str;
+            break;
+        case "trident":
+            str = "-ms-" + str;
+            break;
+        default:
+            break;
     }
     return str;
 }
 
-var CSS_ESCAPE  = '\\';
+var CSS_ESCAPE = '\\';
 
-var IS_HEX_DIGIT  = 1;
-var START_IDENT   = 2;
-var IS_IDENT      = 4;
+var IS_HEX_DIGIT = 1;
+var START_IDENT = 2;
+var IS_IDENT = 4;
 var IS_WHITESPACE = 8;
 
-var W   = IS_WHITESPACE;
-var I   = IS_IDENT;
-var S   =          START_IDENT;
-var SI  = IS_IDENT|START_IDENT;
-var XI  = IS_IDENT            |IS_HEX_DIGIT;
-var XSI = IS_IDENT|START_IDENT|IS_HEX_DIGIT;
+var W = IS_WHITESPACE;
+var I = IS_IDENT;
+var S = START_IDENT;
+var SI = IS_IDENT | START_IDENT;
+var XI = IS_IDENT | IS_HEX_DIGIT;
+var XSI = IS_IDENT | START_IDENT | IS_HEX_DIGIT;
 
-function CSSScanner(aString)
-{
+function CSSScanner(aString) {
     this.init(aString);
 }
 
@@ -1032,27 +1456,27 @@ CSSScanner.prototype = {
 
     kLexTable: [
         //                                     TAB LF      FF  CR
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  W,  W,  0,  W,  W,  0,  0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, W, W, 0, W, W, 0, 0,
         //
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         // SPC !   "   #   $   %   &   '   (   )   *   +   ,   -   .   /
-        W,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  I,  0,  0,
+        W, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, I, 0, 0,
         // 0   1   2   3   4   5   6   7   8   9   :   ;   <   =   >   ?
-        XI, XI, XI, XI, XI, XI, XI, XI, XI, XI, 0,  0,  0,  0,  0,  0,
+        XI, XI, XI, XI, XI, XI, XI, XI, XI, XI, 0, 0, 0, 0, 0, 0,
         // @   A   B   C   D   E   F   G   H   I   J   K   L   M   N   O
-        0,  XSI,XSI,XSI,XSI,XSI,XSI,SI, SI, SI, SI, SI, SI, SI, SI, SI,
+        0, XSI, XSI, XSI, XSI, XSI, XSI, SI, SI, SI, SI, SI, SI, SI, SI, SI,
         // P   Q   R   S   T   U   V   W   X   Y   Z   [   \   ]   ^   _
-        SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, 0,  S,  0,  0,  SI,
+        SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, 0, S, 0, 0, SI,
         // `   a   b   c   d   e   f   g   h   i   j   k   l   m   n   o
-        0,  XSI,XSI,XSI,XSI,XSI,XSI,SI, SI, SI, SI, SI, SI, SI, SI, SI,
+        0, XSI, XSI, XSI, XSI, XSI, XSI, SI, SI, SI, SI, SI, SI, SI, SI, SI,
         // p   q   r   s   t   u   v   w   x   y   z   {   |   }   ~
-        SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, 0,  0,  0,  0,  0,
+        SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, 0, 0, 0, 0, 0,
         //
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         //
-        0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         //     ¡   ¢   £   ¤   ¥   ¦   §   ¨   ©   ª   «   ¬   ­   ®   ¯
-        0,  SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI,
+        0, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI,
         // °   ±   ²   ³   ´   µ   ¶   ·   ¸   ¹   º   »   ¼   ½   ¾   ¿
         SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI, SI,
         // À   Á   Â   Ã   Ä   Å   Æ   Ç   È   É   Ê   Ë   Ì   Í   Î   Ï
@@ -1070,79 +1494,78 @@ CSSScanner.prototype = {
         "a": 10, "b": 11, "c": 12, "d": 13, "e": 14, "f": 15
     },
 
-    mString : "",
-    mPos : 0,
-    mPreservedPos : [],
+    mString: "",
+    mPos: 0,
+    mPreservedPos: [],
 
-    init: function(aString) {
+    init: function (aString) {
         this.mString = aString;
         this.mPos = 0;
         this.mPreservedPos = [];
     },
 
-    getCurrentPos: function() {
+    getCurrentPos: function () {
         return this.mPos;
     },
 
-    getAlreadyScanned: function()
-    {
+    getAlreadyScanned: function () {
         return this.mString.substr(0, this.mPos);
     },
 
-    preserveState: function() {
+    preserveState: function () {
         this.mPreservedPos.push(this.mPos);
     },
 
-    restoreState: function() {
+    restoreState: function () {
         if (this.mPreservedPos.length) {
             this.mPos = this.mPreservedPos.pop();
         }
     },
 
-    forgetState: function() {
+    forgetState: function () {
         if (this.mPreservedPos.length) {
             this.mPreservedPos.pop();
         }
     },
 
-    read: function() {
+    read: function () {
         if (this.mPos < this.mString.length)
             return this.mString.charAt(this.mPos++);
         return -1;
     },
 
-    peek: function() {
+    peek: function () {
         if (this.mPos < this.mString.length)
             return this.mString.charAt(this.mPos);
         return -1;
     },
 
-    isHexDigit: function(c) {
+    isHexDigit: function (c) {
         var code = c.charCodeAt(0);
         return (code < 256 && (this.kLexTable[code] & IS_HEX_DIGIT) != 0);
     },
 
-    isIdentStart: function(c) {
+    isIdentStart: function (c) {
         var code = c.charCodeAt(0);
         return (code >= 256 || (this.kLexTable[code] & START_IDENT) != 0);
     },
 
-    startsWithIdent: function(aFirstChar, aSecondChar) {
+    startsWithIdent: function (aFirstChar, aSecondChar) {
         var code = aFirstChar.charCodeAt(0);
         return this.isIdentStart(aFirstChar) ||
             (aFirstChar == "-" && this.isIdentStart(aSecondChar));
     },
 
-    isIdent: function(c) {
+    isIdent: function (c) {
         var code = c.charCodeAt(0);
         return (code >= 256 || (this.kLexTable[code] & IS_IDENT) != 0);
     },
 
-    pushback: function() {
+    pushback: function () {
         this.mPos--;
     },
 
-    nextHexValue: function() {
+    nextHexValue: function () {
         var c = this.read();
         if (c == -1 || !this.isHexDigit(c))
             return new jscsspToken(jscsspToken.NULL_TYPE, null);
@@ -1157,7 +1580,7 @@ CSSScanner.prototype = {
         return new jscsspToken(jscsspToken.HEX_TYPE, s);
     },
 
-    gatherEscape: function() {
+    gatherEscape: function () {
         var c = this.peek();
         if (c == -1)
             return "";
@@ -1187,7 +1610,7 @@ CSSScanner.prototype = {
         return "";
     },
 
-    gatherIdent: function(c) {
+    gatherIdent: function (c) {
         var s = "";
         if (c == CSS_ESCAPE)
             s += this.gatherEscape();
@@ -1207,7 +1630,7 @@ CSSScanner.prototype = {
         return s;
     },
 
-    parseIdent: function(c) {
+    parseIdent: function (c) {
         var value = this.gatherIdent(c);
         var nextChar = this.peek();
         if (nextChar == "(") {
@@ -1217,11 +1640,11 @@ CSSScanner.prototype = {
         return new jscsspToken(jscsspToken.IDENT_TYPE, value);
     },
 
-    isDigit: function(c) {
+    isDigit: function (c) {
         return (c >= '0') && (c <= '9');
     },
 
-    parseComment: function(c) {
+    parseComment: function (c) {
         var s = c;
         while ((c = this.read()) != -1) {
             s += c;
@@ -1239,7 +1662,7 @@ CSSScanner.prototype = {
         return new jscsspToken(jscsspToken.COMMENT_TYPE, s);
     },
 
-    parseNumber: function(c) {
+    parseNumber: function (c) {
         var s = c;
         var foundDot = false;
         while ((c = this.read()) != -1) {
@@ -1270,7 +1693,7 @@ CSSScanner.prototype = {
         return new jscsspToken(jscsspToken.NUMBER_TYPE, s);
     },
 
-    parseString: function(aStop) {
+    parseString: function (aStop) {
         var s = aStop;
         var previousChar = aStop;
         var c;
@@ -1309,12 +1732,12 @@ CSSScanner.prototype = {
         return new jscsspToken(jscsspToken.STRING_TYPE, s);
     },
 
-    isWhiteSpace: function(c) {
+    isWhiteSpace: function (c) {
         var code = c.charCodeAt(0);
         return code < 256 && (this.kLexTable[code] & IS_WHITESPACE) != 0;
     },
 
-    eatWhiteSpace: function(c) {
+    eatWhiteSpace: function (c) {
         var s = c;
         while ((c = this.read()) != -1) {
             if (!this.isWhiteSpace(c))
@@ -1326,11 +1749,11 @@ CSSScanner.prototype = {
         return s;
     },
 
-    parseAtKeyword: function(c) {
+    parseAtKeyword: function (c) {
         return new jscsspToken(jscsspToken.ATRULE_TYPE, this.gatherIdent(c));
     },
 
-    nextToken: function() {
+    nextToken: function () {
         var c = this.read();
         if (c == -1)
             return new jscsspToken(jscsspToken.NULL_TYPE, null);
@@ -1401,15 +1824,14 @@ CSSScanner.prototype = {
     }
 };
 
-CSSParser.prototype.parseBackgroundImages = function()
-{
+CSSParser.prototype.parseBackgroundImages = function () {
     var backgrounds = [];
     var token = this.getToken(true, true);
     while (token.isNotNull()) {
         if (token.isFunction("url(")) {
             token = this.getToken(true, true);
             var urlContent = this.parseURL(token);
-            backgrounds.push( { type: "image", value: "url(" + urlContent });
+            backgrounds.push({type: "image", value: "url(" + urlContent});
             token = this.getToken(true, true);
         }
         else if (token.isFunction("linear-gradient(")
@@ -1431,7 +1853,7 @@ CSSParser.prototype.parseBackgroundImages = function()
         else if (token.isIdent("none")
             || token.isIdent("inherit")
             || token.isIdent("initial")) {
-            backgrounds.push( { type: token.value });
+            backgrounds.push({type: token.value});
             token = this.getToken(true, true);
         }
         else
@@ -1446,22 +1868,21 @@ CSSParser.prototype.parseBackgroundImages = function()
     return backgrounds;
 };
 
-CSSParser.prototype.parseBackgroundShorthand = function(token, aDecl, aAcceptPriority)
-{
+CSSParser.prototype.parseBackgroundShorthand = function (token, aDecl, aAcceptPriority) {
     var kHPos = {
-        "left" : true,
-        "right" : true
+        "left": true,
+        "right": true
     };
     var kVPos = {
-        "top" : true,
-        "bottom" : true
+        "top": true,
+        "bottom": true
     };
     var kPos = {
-        "left" : true,
-        "right" : true,
-        "top" : true,
-        "bottom" : true,
-        "center" : true
+        "left": true,
+        "right": true,
+        "top": true,
+        "bottom": true,
+        "center": true
     };
 
     var bgColor = null;
@@ -1504,9 +1925,9 @@ CSSParser.prototype.parseBackgroundShorthand = function(token, aDecl, aAcceptPri
 
             else if (!bgPosition
                 && ((token.isIdent() && token.value in kPos)
-                || token.isDimension()
-                || token.isNumber("0")
-                || token.isPercentage())) {
+                    || token.isDimension()
+                    || token.isNumber("0")
+                    || token.isPercentage())) {
                 bgPosition = token.value;
                 token = this.getToken(true, true);
                 if (token.isDimension()
@@ -1526,9 +1947,9 @@ CSSParser.prototype.parseBackgroundShorthand = function(token, aDecl, aAcceptPri
 
             else if (!bgRepeat
                 && (token.isIdent("repeat")
-                || token.isIdent("repeat-x")
-                || token.isIdent("repeat-y")
-                || token.isIdent("no-repeat"))) {
+                    || token.isIdent("repeat-x")
+                    || token.isIdent("repeat-y")
+                    || token.isIdent("no-repeat"))) {
                 bgRepeat = token.value;
             }
 
@@ -1547,8 +1968,8 @@ CSSParser.prototype.parseBackgroundShorthand = function(token, aDecl, aAcceptPri
 
             else if (!bgImage
                 && (token.isFunction("linear-gradient(")
-                || token.isFunction("radial-gradient(")
-                || token.isFunction("repeating-linear-gradient(") || token.isFunction("repeating-radial-gradient("))) {
+                    || token.isFunction("radial-gradient(")
+                    || token.isFunction("repeating-linear-gradient(") || token.isFunction("repeating-radial-gradient("))) {
                 this.ungetToken();
                 var gradient = this.parseGradient();
                 if (gradient)
@@ -1586,8 +2007,7 @@ CSSParser.prototype.parseBackgroundShorthand = function(token, aDecl, aAcceptPri
 
     return bgColor + " " + bgImage + " " + bgRepeat + " " + bgAttachment + " " + bgPosition;
 };
-CSSParser.prototype.parseBorderColorShorthand = function(token, aDecl, aAcceptPriority)
-{
+CSSParser.prototype.parseBorderColorShorthand = function (token, aDecl, aAcceptPriority) {
     var top = null;
     var bottom = null;
     var left = null;
@@ -1661,8 +2081,7 @@ CSSParser.prototype.parseBorderColorShorthand = function(token, aDecl, aAcceptPr
     return top + " " + right + " " + bottom + " " + left;
 };
 
-CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function(token, aDecl, aAcceptPriority, aProperty)
-{
+CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function (token, aDecl, aAcceptPriority, aProperty) {
     var bWidth = null;
     var bStyle = null;
     var bColor = null;
@@ -1690,8 +2109,8 @@ CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function(token, aDecl, a
 
         else if (!bWidth &&
             (token.isDimension()
-            || (token.isIdent() && token.value in this.kBORDER_WIDTH_NAMES)
-            || token.isNumber("0"))) {
+                || (token.isIdent() && token.value in this.kBORDER_WIDTH_NAMES)
+                || token.isNumber("0"))) {
             bWidth = token.value;
         }
 
@@ -1734,8 +2153,7 @@ CSSParser.prototype.parseBorderEdgeOrOutlineShorthand = function(token, aDecl, a
     return bWidth + " " + bStyle + " " + bColor;
 };
 
-CSSParser.prototype.parseBorderImage = function()
-{
+CSSParser.prototype.parseBorderImage = function () {
     var borderImage = {url: "", offsets: [], widths: [], sizes: []};
     var token = this.getToken(true, true);
     if (token.isFunction("url(")) {
@@ -1760,7 +2178,7 @@ CSSParser.prototype.parseBorderImage = function()
     else
         return null;
     var i;
-    for (i= 0; i < 3; i++) {
+    for (i = 0; i < 3; i++) {
         token = this.getToken(true, true);
         if (token.isNumber()
             || token.isPercentage())
@@ -1810,8 +2228,7 @@ CSSParser.prototype.parseBorderImage = function()
     return null;
 };
 
-CSSParser.prototype.parseBorderStyleShorthand = function(token, aDecl, aAcceptPriority)
-{
+CSSParser.prototype.parseBorderStyleShorthand = function (token, aDecl, aAcceptPriority) {
     var top = null;
     var bottom = null;
     var left = null;
@@ -1881,8 +2298,7 @@ CSSParser.prototype.parseBorderStyleShorthand = function(token, aDecl, aAcceptPr
     return top + " " + right + " " + bottom + " " + left;
 };
 
-CSSParser.prototype.parseBorderWidthShorthand = function(token, aDecl, aAcceptPriority)
-{
+CSSParser.prototype.parseBorderWidthShorthand = function (token, aDecl, aAcceptPriority) {
     var top = null;
     var bottom = null;
     var left = null;
@@ -1954,15 +2370,14 @@ CSSParser.prototype.parseBorderWidthShorthand = function(token, aDecl, aAcceptPr
     return top + " " + right + " " + bottom + " " + left;
 };
 
-CSSParser.prototype.parseBoxShadows = function()
-{
+CSSParser.prototype.parseBoxShadows = function () {
     var shadows = [];
     var token = this.getToken(true, true);
     var color = "", blurRadius = "0px", offsetX = "0px", offsetY = "0px", spreadRadius = "0px";
     var inset = false;
     while (token.isNotNull()) {
         if (token.isIdent("none")) {
-            shadows.push( { none: true } );
+            shadows.push({none: true});
             token = this.getToken(true, true);
         }
         else {
@@ -2062,13 +2477,14 @@ CSSParser.prototype.parseBoxShadows = function()
                 token = this.getToken(true, true);
             }
 
-            shadows.push( { none: false,
+            shadows.push({
+                none: false,
                 color: color,
                 offsetX: offsetX, offsetY: offsetY,
                 blurRadius: blurRadius,
                 spreadRadius: spreadRadius,
                 inset: inset
-            } );
+            });
 
             if (token.isSymbol(",")) {
                 inset = false;
@@ -2088,7 +2504,7 @@ CSSParser.prototype.parseBoxShadows = function()
     return shadows;
 };
 
-CSSParser.prototype.parseCharsetRule = function(aSheet) {
+CSSParser.prototype.parseCharsetRule = function (aSheet) {
     var token = this.getToken(false, false);
     if (token.isAtRule("@charset") && token.value == "@charset") { // lowercase check
         var s = token.value;
@@ -2123,8 +2539,7 @@ CSSParser.prototype.parseCharsetRule = function(aSheet) {
     return false;
 };
 
-CSSParser.prototype.parseColor = function(token)
-{
+CSSParser.prototype.parseColor = function (token) {
     var color = "";
     if (token.isFunction("rgb(")
         || token.isFunction("rgba(")) {
@@ -2227,7 +2642,7 @@ CSSParser.prototype.parseColor = function(token)
         var length = token.value.length;
         if (length != 3 && length != 6)
             return "";
-        if (token.value.match( /[a-fA-F0-9]/g ).length != length)
+        if (token.value.match(/[a-fA-F0-9]/g).length != length)
             return "";
         color = "#" + token.value;
     }
@@ -2537,8 +2952,7 @@ CSSParser.prototype.kLIST_STYLE_TYPE_NAMES = {
     "parenthesised-lower-latin": true
 };
 
-CSSParser.prototype.parseCueShorthand = function(token, declarations, aAcceptPriority)
-{
+CSSParser.prototype.parseCueShorthand = function (token, declarations, aAcceptPriority) {
     var before = "";
     var after = "";
 
@@ -2597,7 +3011,7 @@ CSSParser.prototype.parseCueShorthand = function(token, declarations, aAcceptPri
     return before + " " + after;
 };
 
-CSSParser.prototype.parseDeclaration = function(aToken, aDecl, aAcceptPriority, aExpandShorthands, aSheet) {
+CSSParser.prototype.parseDeclaration = function (aToken, aDecl, aAcceptPriority, aExpandShorthands, aSheet) {
     this.preserveState();
     var blocks = [];
     if (aToken.isIdent()) {
@@ -2669,7 +3083,7 @@ CSSParser.prototype.parseDeclaration = function(aToken, aDecl, aAcceptPriority, 
                     }
                     else return "";
                 }
-                else if  (token.isNotNull() && !token.isSymbol(";") && !token.isSymbol("}"))
+                else if (token.isNotNull() && !token.isSymbol(";") && !token.isSymbol("}"))
                     return "";
                 for (var i = 0; i < declarations.length; i++) {
                     declarations[i].priority = priority;
@@ -2722,18 +3136,17 @@ CSSParser.prototype.parseDeclaration = function(aToken, aDecl, aAcceptPriority, 
     return "";
 };
 
-CSSParser.prototype.reportError = function(aMsg) {
+CSSParser.prototype.reportError = function (aMsg) {
     this.mError = aMsg;
 };
 
-CSSParser.prototype.consumeError = function() {
+CSSParser.prototype.consumeError = function () {
     var e = this.mError;
     this.mError = null;
     return e;
 };
 
-function CSSParser(aString)
-{
+function CSSParser(aString) {
     this.mToken = null;
     this.mLookAhead = null;
     this.mScanner = new CSSScanner(aString);
@@ -2746,12 +3159,12 @@ function CSSParser(aString)
     this.mError = null;
 }
 
-CSSParser.prototype._init = function() {
+CSSParser.prototype._init = function () {
     this.mToken = null;
     this.mLookAhead = null;
 };
 
-CSSParser.prototype.parseFontFaceRule = function(aToken, aSheet) {
+CSSParser.prototype.parseFontFaceRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     var valid = false;
@@ -2790,19 +3203,29 @@ CSSParser.prototype.parseFontFaceRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parseFontShorthand = function(token, aDecl, aAcceptPriority)
-{
-    var kStyle = {"italic": true, "oblique": true };
-    var kVariant = {"small-caps": true };
-    var kWeight = { "bold": true, "bolder": true, "lighter": true,
+CSSParser.prototype.parseFontShorthand = function (token, aDecl, aAcceptPriority) {
+    var kStyle = {"italic": true, "oblique": true};
+    var kVariant = {"small-caps": true};
+    var kWeight = {
+        "bold": true, "bolder": true, "lighter": true,
         "100": true, "200": true, "300": true, "400": true,
         "500": true, "600": true, "700": true, "800": true,
-        "900": true };
-    var kSize = { "xx-small": true, "x-small": true, "small": true, "medium": true,
+        "900": true
+    };
+    var kSize = {
+        "xx-small": true, "x-small": true, "small": true, "medium": true,
         "large": true, "x-large": true, "xx-large": true,
-        "larger": true, "smaller": true };
-    var kValues = { "caption": true, "icon": true, "menu": true, "message-box": true, "small-caption": true, "status-bar": true };
-    var kFamily = { "serif": true, "sans-serif": true, "cursive": true, "fantasy": true, "monospace": true };
+        "larger": true, "smaller": true
+    };
+    var kValues = {
+        "caption": true,
+        "icon": true,
+        "menu": true,
+        "message-box": true,
+        "small-caption": true,
+        "status-bar": true
+    };
+    var kFamily = {"serif": true, "sans-serif": true, "cursive": true, "fantasy": true, "monospace": true};
 
     var fStyle = null;
     var fVariant = null;
@@ -2867,8 +3290,8 @@ CSSParser.prototype.parseFontShorthand = function(token, aDecl, aAcceptPriority)
 
                 else if (!fSize
                     && ((token.isIdent() && (token.value in kSize))
-                    || token.isDimension()
-                    || token.isPercentage())) {
+                        || token.isDimension()
+                        || token.isPercentage())) {
                     fSize = token.value;
                     token = this.getToken(false, false);
                     if (token.isSymbol("/")) {
@@ -2892,7 +3315,7 @@ CSSParser.prototype.parseFontShorthand = function(token, aDecl, aAcceptPriority)
 
                 else if (!fFamily && // *MUST* be last to be tested here
                     (token.isString()
-                    || token.isIdent())) {
+                        || token.isIdent())) {
                     var lastWasComma = false;
                     while (true) {
                         if (!token.isNotNull())
@@ -2959,18 +3382,15 @@ CSSParser.prototype.parseFontShorthand = function(token, aDecl, aAcceptPriority)
     return fStyle + " " + fVariant + " " + fWeight + " " + fSize + "/" + fLineHeight + " " + fFamily;
 };
 
-CSSParser.prototype.parseFunctionArgument = function(token)
-{
+CSSParser.prototype.parseFunctionArgument = function (token) {
     var value = "";
-    if (token.isString())
-    {
+    if (token.isString()) {
         value += token.value;
         token = this.getToken(true, true);
     }
     else {
         var parenthesis = 1;
-        while (true)
-        {
+        while (true) {
             if (!token.isNotNull())
                 return "";
             if (token.isFunction() || token.isSymbol("("))
@@ -2990,8 +3410,7 @@ CSSParser.prototype.parseFunctionArgument = function(token)
     return "";
 };
 
-CSSParser.prototype.parseColorStop = function(token)
-{
+CSSParser.prototype.parseColorStop = function (token) {
     var color = this.parseColor(token);
     var position = "";
     if (!color)
@@ -3001,17 +3420,16 @@ CSSParser.prototype.parseColorStop = function(token)
         position = token.value;
         token = this.getToken(true, true);
     }
-    return { color: color, position: position }
+    return {color: color, position: position}
 };
 
-CSSParser.prototype.parseGradient = function ()
-{
-    var kHPos = {"left": true, "right": true };
-    var kVPos = {"top": true, "bottom": true };
+CSSParser.prototype.parseGradient = function () {
+    var kHPos = {"left": true, "right": true};
+    var kVPos = {"top": true, "bottom": true};
     var kPos = {"left": true, "right": true, "top": true, "bottom": true, "center": true};
 
     var isRadial = false;
-    var gradient = { isRepeating: false };
+    var gradient = {isRepeating: false};
     var token = this.getToken(true, true);
     if (token.isNotNull()) {
         if (token.isFunction("linear-gradient(") ||
@@ -3080,13 +3498,13 @@ CSSParser.prototype.parseGradient = function ()
                     }
                     else if (!gradient.extent
                         && (token.isIdent("closest-corner")
-                        || token.isIdent("closes-side")
-                        || token.isIdent("farthest-corner")
-                        || token.isIdent("farthest-corner"))) {
+                            || token.isIdent("closes-side")
+                            || token.isIdent("farthest-corner")
+                            || token.isIdent("farthest-corner"))) {
                         gradient.extent = token.value;
                         token = this.getToken(true, true);
                     }
-                    else if (gradient.positions.length < 2 && token.isLength()){
+                    else if (gradient.positions.length < 2 && token.isLength()) {
                         gradient.positions.push(token.value);
                         token = this.getToken(true, true);
                     }
@@ -3101,16 +3519,16 @@ CSSParser.prototype.parseGradient = function ()
                     || (!gradient.positions.length && !gradient.extent)) {
                     // shape ok
                 }
-                else  {
+                else {
                     return null;
                 }
 
                 if (token.isIdent("at")) {
                     token = this.getToken(true, true);
                     if (((token.isIdent() && token.value in kPos)
-                        || token.isDimension()
-                        || token.isNumber("0")
-                        || token.isPercentage())) {
+                            || token.isDimension()
+                            || token.isNumber("0")
+                            || token.isPercentage())) {
                         gradient.at = token.value;
                         token = this.getToken(true, true);
                         if (token.isDimension() || token.isNumber("0") || token.isPercentage()) {
@@ -3174,13 +3592,12 @@ CSSParser.prototype.parseGradient = function ()
     return null;
 };
 
-CSSParser.prototype.serializeGradient = function(gradient)
-{
+CSSParser.prototype.serializeGradient = function (gradient) {
     var s = gradient.isRadial
-        ? (gradient.isRepeating ? "repeating-radial-gradient(" : "radial-gradient(" )
-        : (gradient.isRepeating ? "repeating-linear-gradient(" : "linear-gradient(" );
+        ? (gradient.isRepeating ? "repeating-radial-gradient(" : "radial-gradient(")
+        : (gradient.isRepeating ? "repeating-linear-gradient(" : "linear-gradient(");
     if (gradient.angle || gradient.position)
-        s += (gradient.angle ? gradient.angle: "") +
+        s += (gradient.angle ? gradient.angle : "") +
             (gradient.position ? "to " + gradient.position : "") +
             ", ";
 
@@ -3194,7 +3611,7 @@ CSSParser.prototype.serializeGradient = function(gradient)
     for (var i = 0; i < gradient.stops.length; i++) {
         var colorstop = gradient.stops[i];
         s += colorstop.color + (colorstop.position ? " " + colorstop.position : "");
-        if (i != gradient.stops.length -1)
+        if (i != gradient.stops.length - 1)
             s += ", ";
     }
     s += ")";
@@ -3202,7 +3619,7 @@ CSSParser.prototype.serializeGradient = function(gradient)
 };
 
 
-CSSParser.prototype.parseImportRule = function(aToken, aSheet) {
+CSSParser.prototype.parseImportRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     this.preserveState();
@@ -3264,7 +3681,7 @@ CSSParser.prototype.parseImportRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parseKeyframesRule = function(aToken, aSheet) {
+CSSParser.prototype.parseKeyframesRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     var valid = false;
@@ -3335,7 +3752,7 @@ CSSParser.prototype.parseKeyframesRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parseKeyframeRule = function(aToken, aOwner) {
+CSSParser.prototype.parseKeyframeRule = function (aToken, aOwner) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     this.preserveState();
     var token = aToken;
@@ -3356,8 +3773,7 @@ CSSParser.prototype.parseKeyframeRule = function(aToken, aOwner) {
                 this.ungetToken();
                 break;
             }
-            else
-            if (token.isSymbol(",")) {
+            else if (token.isSymbol(",")) {
                 key += ", ";
             }
             else {
@@ -3417,9 +3833,8 @@ CSSParser.prototype.parseKeyframeRule = function(aToken, aOwner) {
     return "";
 };
 
-CSSParser.prototype.parseListStyleShorthand = function(token, aDecl, aAcceptPriority)
-{
-    var kPosition = { "inside": true, "outside": true };
+CSSParser.prototype.parseListStyleShorthand = function (token, aDecl, aAcceptPriority) {
+    var kPosition = {"inside": true, "outside": true};
 
     var lType = null;
     var lPosition = null;
@@ -3438,7 +3853,7 @@ CSSParser.prototype.parseListStyleShorthand = function(token, aDecl, aAcceptPrio
             break;
         }
 
-        else if (!lType && !lPosition && ! lImage
+        else if (!lType && !lPosition && !lImage
             && token.isIdent(this.kINHERIT)) {
             lType = this.kINHERIT;
             lPosition = this.kINHERIT;
@@ -3482,11 +3897,11 @@ CSSParser.prototype.parseListStyleShorthand = function(token, aDecl, aAcceptPrio
     return lType + " " + lPosition + " " + lImage;
 };
 
-CSSParser.prototype.parse = function(aString, aTryToPreserveWhitespaces, aTryToPreserveComments) {
+CSSParser.prototype.parse = function (aString, aTryToPreserveWhitespaces, aTryToPreserveComments) {
     if (!aString)
         return null; // early way out if we can
 
-    this.mPreserveWS       = aTryToPreserveWhitespaces;
+    this.mPreserveWS = aTryToPreserveWhitespaces;
     this.mPreserveComments = aTryToPreserveComments;
     this.mPreservedTokens = [];
     this.mScanner.init(aString);
@@ -3508,14 +3923,12 @@ CSSParser.prototype.parse = function(aString, aTryToPreserveWhitespaces, aTryToP
     while (true) {
         if (!token.isNotNull())
             break;
-        if (token.isWhiteSpace())
-        {
+        if (token.isWhiteSpace()) {
             if (aTryToPreserveWhitespaces)
                 this.addWhitespace(sheet, token.value);
         }
 
-        else if (token.isComment())
-        {
+        else if (token.isComment()) {
             if (this.mPreserveComments)
                 this.addComment(sheet, token.value);
         }
@@ -3592,8 +4005,7 @@ CSSParser.prototype.parse = function(aString, aTryToPreserveWhitespaces, aTryToP
 
     return sheet;
 };
-CSSParser.prototype.parseMarginOrPaddingShorthand = function(token, aDecl, aAcceptPriority, aProperty)
-{
+CSSParser.prototype.parseMarginOrPaddingShorthand = function (token, aDecl, aAcceptPriority, aProperty) {
     var top = null;
     var bottom = null;
     var left = null;
@@ -3668,8 +4080,7 @@ CSSParser.prototype.parseMarginOrPaddingShorthand = function(token, aDecl, aAcce
     return top + " " + right + " " + bottom + " " + left;
 };
 
-CSSParser.prototype.parseMediaQuery = function()
-{
+CSSParser.prototype.parseMediaQuery = function () {
     var kCONSTRAINTS = {
         "width": true,
         "min-width": true,
@@ -3808,7 +4219,7 @@ CSSParser.prototype.parseMediaQuery = function()
     return m;
 };
 
-CSSParser.prototype.parseMediaRule = function(aToken, aSheet) {
+CSSParser.prototype.parseMediaRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     var valid = false;
@@ -3880,7 +4291,7 @@ CSSParser.prototype.parseMediaRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parseNamespaceRule = function(aToken, aSheet) {
+CSSParser.prototype.parseNamespaceRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     var valid = false;
@@ -3933,7 +4344,7 @@ CSSParser.prototype.parseNamespaceRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parsePageRule = function(aToken, aSheet) {
+CSSParser.prototype.parsePageRule = function (aToken, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = aToken.value;
     var valid = false;
@@ -3985,8 +4396,7 @@ CSSParser.prototype.parsePageRule = function(aToken, aSheet) {
     return false;
 };
 
-CSSParser.prototype.parsePauseShorthand = function(token, declarations, aAcceptPriority)
-{
+CSSParser.prototype.parsePauseShorthand = function (token, declarations, aAcceptPriority) {
     var before = "";
     var after = "";
 
@@ -4039,7 +4449,7 @@ CSSParser.prototype.parsePauseShorthand = function(token, declarations, aAcceptP
     return before + " " + after;
 };
 
-CSSParser.prototype.parseDefaultPropertyValue = function(token, aDecl, aAcceptPriority, descriptor, aSheet) {
+CSSParser.prototype.parseDefaultPropertyValue = function (token, aDecl, aAcceptPriority, descriptor, aSheet) {
     var valueText = "";
     var blocks = [];
     var foundPriority = false;
@@ -4047,8 +4457,8 @@ CSSParser.prototype.parseDefaultPropertyValue = function(token, aDecl, aAcceptPr
     while (token.isNotNull()) {
 
         if ((token.isSymbol(";")
-            || token.isSymbol("}")
-            || token.isSymbol("!"))
+                || token.isSymbol("}")
+                || token.isSymbol("!"))
             && !blocks.length) {
             if (token.isSymbol("}"))
                 this.ungetToken();
@@ -4147,7 +4557,7 @@ CSSParser.prototype.parseDefaultPropertyValue = function(token, aDecl, aAcceptPr
     return "";
 };
 
-CSSParser.prototype.parseSelector = function(aToken, aParseSelectorOnly) {
+CSSParser.prototype.parseSelector = function (aToken, aParseSelectorOnly) {
     var s = "";
     var specificity = {a: 0, b: 0, c: 0, d: 0}; // CSS 2.1 section 6.4.3
     var isFirstInChain = true;
@@ -4157,7 +4567,7 @@ CSSParser.prototype.parseSelector = function(aToken, aParseSelectorOnly) {
     while (true) {
         if (!token.isNotNull()) {
             if (aParseSelectorOnly)
-                return {selector: s, specificity: specificity };
+                return {selector: s, specificity: specificity};
             return "";
         }
 
@@ -4180,15 +4590,15 @@ CSSParser.prototype.parseSelector = function(aToken, aParseSelectorOnly) {
         // now combinators and grouping...
         else if (!combinatorFound
             && (token.isWhiteSpace()
-            || token.isSymbol(">")
-            || token.isSymbol("+")
-            || token.isSymbol("~"))) {
+                || token.isSymbol(">")
+                || token.isSymbol("+")
+                || token.isSymbol("~"))) {
             if (token.isWhiteSpace()) {
                 s += " ";
                 var nextToken = this.lookAhead(true, true);
                 if (!nextToken.isNotNull()) {
                     if (aParseSelectorOnly)
-                        return {selector: s, specificity: specificity };
+                        return {selector: s, specificity: specificity};
                     return "";
                 }
                 if (nextToken.isSymbol(">")
@@ -4223,13 +4633,12 @@ CSSParser.prototype.parseSelector = function(aToken, aParseSelectorOnly) {
     }
 
     if (valid) {
-        return {selector: s, specificity: specificity };
+        return {selector: s, specificity: specificity};
     }
     return "";
 };
 
-CSSParser.prototype.isPseudoElement = function(aIdent)
-{
+CSSParser.prototype.isPseudoElement = function (aIdent) {
     switch (aIdent) {
         case "first-letter":
         case "first-line":
@@ -4244,8 +4653,7 @@ CSSParser.prototype.isPseudoElement = function(aIdent)
     return false;
 };
 
-CSSParser.prototype.parseSimpleSelector = function(token, isFirstInChain, canNegate)
-{
+CSSParser.prototype.parseSimpleSelector = function (token, isFirstInChain, canNegate) {
     var s = "";
     var specificity = {a: 0, b: 0, c: 0, d: 0}; // CSS 2.1 section 6.4.3
 
@@ -4415,14 +4823,14 @@ CSSParser.prototype.parseSimpleSelector = function(token, isFirstInChain, canNeg
             return ""
     }
     if (s)
-        return {selector: s, specificity: specificity };
+        return {selector: s, specificity: specificity};
     return null;
 };
 
-CSSParser.prototype.trim11 = function(str) {
+CSSParser.prototype.trim11 = function (str) {
     str = str.replace(/^\s+/, '');
     for (var i = str.length - 1; i >= 0; i--) {
-        if (/\S/.test( str.charAt(i) )) { // XXX charat
+        if (/\S/.test(str.charAt(i))) { // XXX charat
             str = str.substring(0, i + 1);
             break;
         }
@@ -4430,8 +4838,7 @@ CSSParser.prototype.trim11 = function(str) {
     return str;
 };
 
-CSSParser.prototype.parseStyleRule = function(aToken, aOwner, aIsInsideMediaRule)
-{
+CSSParser.prototype.parseStyleRule = function (aToken, aOwner, aIsInsideMediaRule) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     this.preserveState();
     // first let's see if we have a selector here...
@@ -4485,14 +4892,13 @@ CSSParser.prototype.parseStyleRule = function(aToken, aOwner, aIsInsideMediaRule
     return "";
 };
 
-CSSParser.prototype.parseTextShadows = function()
-{
+CSSParser.prototype.parseTextShadows = function () {
     var shadows = [];
     var token = this.getToken(true, true);
     var color = "", blurRadius = "0px", offsetX = "0px", offsetY = "0px";
     while (token.isNotNull()) {
         if (token.isIdent("none")) {
-            shadows.push( { none: true } );
+            shadows.push({none: true});
             token = this.getToken(true, true);
         }
         else {
@@ -4547,19 +4953,21 @@ CSSParser.prototype.parseTextShadows = function()
             }
             if (!color &&
                 (token.isFunction("rgb(") ||
-                token.isFunction("rgba(") ||
-                token.isFunction("hsl(") ||
-                token.isFunction("hsla(") ||
-                token.isSymbol("#") ||
-                token.isIdent())) {
+                    token.isFunction("rgba(") ||
+                    token.isFunction("hsl(") ||
+                    token.isFunction("hsla(") ||
+                    token.isSymbol("#") ||
+                    token.isIdent())) {
                 var color = this.parseColor(token);
                 token = this.getToken(true, true);
             }
 
-            shadows.push( { none: false,
+            shadows.push({
+                none: false,
                 color: color,
                 offsetX: offsetX, offsetY: offsetY,
-                blurRadius: blurRadius } );
+                blurRadius: blurRadius
+            });
 
             if (token.isSymbol(",")) {
                 color = "";
@@ -4577,16 +4985,16 @@ CSSParser.prototype.parseTextShadows = function()
     return shadows;
 };
 
-CSSParser.prototype.currentToken = function() {
+CSSParser.prototype.currentToken = function () {
     return this.mToken;
 };
 
-CSSParser.prototype.getHexValue = function() {
+CSSParser.prototype.getHexValue = function () {
     this.mToken = this.mScanner.nextHexValue();
     return this.mToken;
 };
 
-CSSParser.prototype.getToken = function(aSkipWS, aSkipComment) {
+CSSParser.prototype.getToken = function (aSkipWS, aSkipComment) {
     if (this.mLookAhead) {
         this.mToken = this.mLookAhead;
         this.mLookAhead = null;
@@ -4596,12 +5004,12 @@ CSSParser.prototype.getToken = function(aSkipWS, aSkipComment) {
     this.mToken = this.mScanner.nextToken();
     while (this.mToken &&
     ((aSkipWS && this.mToken.isWhiteSpace()) ||
-    (aSkipComment && this.mToken.isComment())))
+        (aSkipComment && this.mToken.isComment())))
         this.mToken = this.mScanner.nextToken();
     return this.mToken;
 };
 
-CSSParser.prototype.lookAhead = function(aSkipWS, aSkipComment) {
+CSSParser.prototype.lookAhead = function (aSkipWS, aSkipComment) {
     var preservedToken = this.mToken;
     this.mScanner.preserveState();
     var token = this.getToken(aSkipWS, aSkipComment);
@@ -4611,26 +5019,25 @@ CSSParser.prototype.lookAhead = function(aSkipWS, aSkipComment) {
     return token;
 };
 
-CSSParser.prototype.ungetToken = function() {
+CSSParser.prototype.ungetToken = function () {
     this.mLookAhead = this.mToken;
 };
 
-CSSParser.prototype.addWhitespace = function(aSheet, aString) {
+CSSParser.prototype.addWhitespace = function (aSheet, aString) {
     var rule = new jscsspWhitespace();
     rule.parsedCssText = aString;
     rule.parentStyleSheet = aSheet;
     aSheet.cssRules.push(rule);
 };
 
-CSSParser.prototype.addComment = function(aSheet, aString) {
+CSSParser.prototype.addComment = function (aSheet, aString) {
     var rule = new jscsspComment();
     rule.parsedCssText = aString;
     rule.parentStyleSheet = aSheet;
     aSheet.cssRules.push(rule);
 };
 
-CSSParser.prototype._createJscsspDeclaration = function(property, value)
-{
+CSSParser.prototype._createJscsspDeclaration = function (property, value) {
     var decl = new jscsspDeclaration();
     decl.property = property;
     decl.value = this.trim11(value);
@@ -4638,8 +5045,7 @@ CSSParser.prototype._createJscsspDeclaration = function(property, value)
     return decl;
 };
 
-CSSParser.prototype._createJscsspDeclarationFromValue = function(property, valueText)
-{
+CSSParser.prototype._createJscsspDeclarationFromValue = function (property, valueText) {
     var decl = new jscsspDeclaration();
     decl.property = property;
     var value = new jscsspVariable(kJscsspPRIMITIVE_VALUE, null);
@@ -4650,8 +5056,7 @@ CSSParser.prototype._createJscsspDeclarationFromValue = function(property, value
     return decl;
 };
 
-CSSParser.prototype._createJscsspDeclarationFromValuesArray = function(property, values, valueText)
-{
+CSSParser.prototype._createJscsspDeclarationFromValuesArray = function (property, values, valueText) {
     var decl = new jscsspDeclaration();
     decl.property = property;
     decl.values = values;
@@ -4660,26 +5065,26 @@ CSSParser.prototype._createJscsspDeclarationFromValuesArray = function(property,
     return decl;
 };
 
-CSSParser.prototype.preserveState = function() {
+CSSParser.prototype.preserveState = function () {
     this.mPreservedTokens.push(this.currentToken());
     this.mScanner.preserveState();
 };
 
-CSSParser.prototype.restoreState = function() {
+CSSParser.prototype.restoreState = function () {
     if (this.mPreservedTokens.length) {
         this.mScanner.restoreState();
         this.mToken = this.mPreservedTokens.pop();
     }
 };
 
-CSSParser.prototype.forgetState = function() {
+CSSParser.prototype.forgetState = function () {
     if (this.mPreservedTokens.length) {
         this.mScanner.forgetState();
         this.mPreservedTokens.pop();
     }
 };
 
-CSSParser.prototype.addUnknownAtRule = function(aSheet, aString) {
+CSSParser.prototype.addUnknownAtRule = function (aSheet, aString) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var blocks = [];
     var token = this.getToken(false, false);
@@ -4712,7 +5117,7 @@ CSSParser.prototype.addUnknownAtRule = function(aSheet, aString) {
     this.addUnknownRule(aSheet, aString, currentLine);
 };
 
-CSSParser.prototype.addUnknownRule = function(aSheet, aString, aCurrentLine) {
+CSSParser.prototype.addUnknownRule = function (aSheet, aString, aCurrentLine) {
     var errorMsg = this.consumeError();
     var rule = new jscsspErrorRule(errorMsg);
     rule.currentLine = aCurrentLine;
@@ -4721,17 +5126,14 @@ CSSParser.prototype.addUnknownRule = function(aSheet, aString, aCurrentLine) {
     aSheet.cssRules.push(rule);
 };
 
-CSSParser.prototype.parseURL = function(token)
-{
+CSSParser.prototype.parseURL = function (token) {
     var value = "";
-    if (token.isString())
-    {
+    if (token.isString()) {
         value += token.value;
         token = this.getToken(true, true);
     }
     else
-        while (true)
-        {
+        while (true) {
             if (!token.isNotNull()) {
                 this.reportError(kURL_EOF);
                 return "";
@@ -4758,7 +5160,7 @@ CSSParser.prototype.parseURL = function(token)
     return "";
 };
 
-CSSParser.prototype.parseVariablesRule = function(token, aSheet) {
+CSSParser.prototype.parseVariablesRule = function (token, aSheet) {
     var currentLine = CountLF(this.mScanner.getAlreadyScanned());
     var s = token.value;
     var declarations = [];
@@ -4828,8 +5230,7 @@ CSSParser.prototype.parseVariablesRule = function(token, aSheet) {
     return false;
 };
 
-function jscsspToken(aType, aValue, aUnit)
-{
+function jscsspToken(aType, aValue, aUnit) {
     this.type = aType;
     this.value = aValue;
     this.unit = aUnit;
@@ -4856,126 +5257,104 @@ jscsspToken.HEX_TYPE = 16;
 
 jscsspToken.prototype = {
 
-    isNotNull: function ()
-    {
+    isNotNull: function () {
         return this.type;
     },
 
-    _isOfType: function (aType, aValue)
-    {
+    _isOfType: function (aType, aValue) {
         return (this.type == aType && (!aValue || this.value.toLowerCase() == aValue));
     },
 
-    isWhiteSpace: function(w)
-    {
+    isWhiteSpace: function (w) {
         return this._isOfType(jscsspToken.WHITESPACE_TYPE, w);
     },
 
-    isString: function()
-    {
+    isString: function () {
         return this._isOfType(jscsspToken.STRING_TYPE);
     },
 
-    isComment: function()
-    {
+    isComment: function () {
         return this._isOfType(jscsspToken.COMMENT_TYPE);
     },
 
-    isNumber: function(n)
-    {
+    isNumber: function (n) {
         return this._isOfType(jscsspToken.NUMBER_TYPE, n);
     },
 
-    isIdent: function(i)
-    {
+    isIdent: function (i) {
         return this._isOfType(jscsspToken.IDENT_TYPE, i);
     },
 
-    isFunction: function(f)
-    {
+    isFunction: function (f) {
         return this._isOfType(jscsspToken.FUNCTION_TYPE, f);
     },
 
-    isAtRule: function(a)
-    {
+    isAtRule: function (a) {
         return this._isOfType(jscsspToken.ATRULE_TYPE, a);
     },
 
-    isIncludes: function()
-    {
+    isIncludes: function () {
         return this._isOfType(jscsspToken.INCLUDES_TYPE);
     },
 
-    isDashmatch: function()
-    {
+    isDashmatch: function () {
         return this._isOfType(jscsspToken.DASHMATCH_TYPE);
     },
 
-    isBeginsmatch: function()
-    {
+    isBeginsmatch: function () {
         return this._isOfType(jscsspToken.BEGINSMATCH_TYPE);
     },
 
-    isEndsmatch: function()
-    {
+    isEndsmatch: function () {
         return this._isOfType(jscsspToken.ENDSMATCH_TYPE);
     },
 
-    isContainsmatch: function()
-    {
+    isContainsmatch: function () {
         return this._isOfType(jscsspToken.CONTAINSMATCH_TYPE);
     },
 
-    isSymbol: function(c)
-    {
+    isSymbol: function (c) {
         return this._isOfType(jscsspToken.SYMBOL_TYPE, c);
     },
 
-    isDimension: function()
-    {
+    isDimension: function () {
         return this._isOfType(jscsspToken.DIMENSION_TYPE);
     },
 
-    isPercentage: function()
-    {
+    isPercentage: function () {
         return this._isOfType(jscsspToken.PERCENTAGE_TYPE);
     },
 
-    isHex: function()
-    {
+    isHex: function () {
         return this._isOfType(jscsspToken.HEX_TYPE);
     },
 
-    isDimensionOfUnit: function(aUnit)
-    {
+    isDimensionOfUnit: function (aUnit) {
         return (this.isDimension() && this.unit == aUnit);
     },
 
-    isLength: function()
-    {
+    isLength: function () {
         return (this.isPercentage() ||
-        this.isDimensionOfUnit("cm") ||
-        this.isDimensionOfUnit("mm") ||
-        this.isDimensionOfUnit("in") ||
-        this.isDimensionOfUnit("pc") ||
-        this.isDimensionOfUnit("px") ||
-        this.isDimensionOfUnit("em") ||
-        this.isDimensionOfUnit("ex") ||
-        this.isDimensionOfUnit("pt"));
+            this.isDimensionOfUnit("cm") ||
+            this.isDimensionOfUnit("mm") ||
+            this.isDimensionOfUnit("in") ||
+            this.isDimensionOfUnit("pc") ||
+            this.isDimensionOfUnit("px") ||
+            this.isDimensionOfUnit("em") ||
+            this.isDimensionOfUnit("ex") ||
+            this.isDimensionOfUnit("pt"));
     },
 
-    isAngle: function()
-    {
+    isAngle: function () {
         return (this.isDimensionOfUnit("deg") ||
-        this.isDimensionOfUnit("rad") ||
-        this.isDimensionOfUnit("grad"));
+            this.isDimensionOfUnit("rad") ||
+            this.isDimensionOfUnit("grad"));
     }
 }
 
 /* kJscsspCHARSET_RULE */
 
-function jscsspCharsetRule()
-{
+function jscsspCharsetRule() {
     this.type = kJscsspCHARSET_RULE;
     this.encoding = null;
     this.parsedCssText = null;
@@ -4985,11 +5364,11 @@ function jscsspCharsetRule()
 
 jscsspCharsetRule.prototype = {
 
-    cssText: function() {
+    cssText: function () {
         return "@charset " + this.encoding + ";";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         if (parser.parseCharsetRule(sheet)) {
@@ -5004,8 +5383,7 @@ jscsspCharsetRule.prototype = {
 
 /* kJscsspCOMMENT */
 
-function jscsspComment()
-{
+function jscsspComment() {
     this.type = kJscsspCOMMENT;
     this.parsedCssText = null;
     this.parentStyleSheet = null;
@@ -5013,11 +5391,11 @@ function jscsspComment()
 }
 
 jscsspComment.prototype = {
-    cssText: function() {
+    cssText: function () {
         return this.parsedCssText;
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var parser = new CSSParser(val);
         var token = parser.getToken(true, false);
         if (token.isComment())
@@ -5029,8 +5407,7 @@ jscsspComment.prototype = {
 
 /* kJscsspSTYLE_DECLARATION */
 
-function jscsspDeclaration()
-{
+function jscsspDeclaration() {
     this.type = kJscsspSTYLE_DECLARATION;
     this.property = null;
     this.values = [];
@@ -5061,7 +5438,7 @@ jscsspDeclaration.prototype = {
         "-moz-font-feature-settings": true
     },
 
-    cssText: function() {
+    cssText: function () {
         var prefixes = PrefixHelper.prefixesForProperty(this.property);
 
         var rv = "";
@@ -5072,7 +5449,7 @@ jscsspDeclaration.prototype = {
                     var property = prefixes[propertyIndex];
                     rv += (propertyIndex ? gTABS : "") + property + ": ";
                     rv += this.valueText + (this.priority ? " !important" : "") + ";";
-                    rv += ((prefixes.length > 1 && propertyIndex != prefixes.length -1) ? "\n" : "");
+                    rv += ((prefixes.length > 1 && propertyIndex != prefixes.length - 1) ? "\n" : "");
                 }
                 return rv;
             }
@@ -5092,13 +5469,13 @@ jscsspDeclaration.prototype = {
                     else
                         return null;
                 rv += (this.priority ? " !important" : "") + ";" +
-                    ((prefixes.length > 1 && propertyIndex != prefixes.length -1) ? "\n" : "");
+                    ((prefixes.length > 1 && propertyIndex != prefixes.length - 1) ? "\n" : "");
             }
             return rv;
         }
 
         var separator = (this.property in this.kCOMMA_SEPARATED) ? ", " : " ";
-        var extras = {"webkit": false, "presto": false, "trident": false, "gecko1.9.2": false, "generic": false }
+        var extras = {"webkit": false, "presto": false, "trident": false, "gecko1.9.2": false, "generic": false}
         for (var i = 0; i < this.values.length; i++) {
             var v = this.values[i].cssText();
             if (v != null) {
@@ -5118,7 +5495,7 @@ jscsspDeclaration.prototype = {
 
         for (var j in extras) {
             if (extras[j]) {
-                var str = "\n" + gTABS +  this.property + ": ";
+                var str = "\n" + gTABS + this.property + ": ";
                 for (var i = 0; i < this.values.length; i++) {
                     var v = this.values[i].cssText();
                     if (v != null) {
@@ -5160,7 +5537,7 @@ jscsspDeclaration.prototype = {
         return rv;
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var declarations = [];
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5180,8 +5557,7 @@ jscsspDeclaration.prototype = {
 
 /* kJscsspUNKNOWN_RULE */
 
-function jscsspErrorRule(aErrorMsg)
-{
+function jscsspErrorRule(aErrorMsg) {
     this.error = aErrorMsg ? aErrorMsg : "INVALID";
     this.type = kJscsspUNKNOWN_RULE;
     this.parsedCssText = null;
@@ -5190,15 +5566,14 @@ function jscsspErrorRule(aErrorMsg)
 }
 
 jscsspErrorRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         return this.parsedCssText;
     }
 };
 
 /* kJscsspFONT_FACE_RULE */
 
-function jscsspFontFaceRule()
-{
+function jscsspFontFaceRule() {
     this.type = kJscsspFONT_FACE_RULE;
     this.parsedCssText = null;
     this.descriptors = [];
@@ -5207,7 +5582,7 @@ function jscsspFontFaceRule()
 }
 
 jscsspFontFaceRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = gTABS + "@font-face {\n";
         var preservedGTABS = gTABS;
         gTABS += "  ";
@@ -5217,7 +5592,7 @@ jscsspFontFaceRule.prototype = {
         return rv + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5235,8 +5610,7 @@ jscsspFontFaceRule.prototype = {
 
 /* kJscsspIMPORT_RULE */
 
-function jscsspImportRule()
-{
+function jscsspImportRule() {
     this.type = kJscsspIMPORT_RULE;
     this.parsedCssText = null;
     this.href = null;
@@ -5246,14 +5620,14 @@ function jscsspImportRule()
 }
 
 jscsspImportRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var mediaString = this.media.join(", ");
         return "@import " + this.href
             + ((mediaString && mediaString != "all") ? mediaString + " " : "")
             + ";";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5271,8 +5645,7 @@ jscsspImportRule.prototype = {
 };
 
 /* kJscsspKEYFRAME_RULE */
-function jscsspKeyframeRule()
-{
+function jscsspKeyframeRule() {
     this.type = kJscsspKEYFRAME_RULE;
     this.parsedCssText = null;
     this.declarations = []
@@ -5282,7 +5655,7 @@ function jscsspKeyframeRule()
 }
 
 jscsspKeyframeRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = this.keyText + " {\n";
         var preservedGTABS = gTABS;
         gTABS += "  ";
@@ -5295,7 +5668,7 @@ jscsspKeyframeRule.prototype = {
         return rv + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5313,8 +5686,7 @@ jscsspKeyframeRule.prototype = {
 };
 
 /* kJscsspKEYFRAMES_RULE */
-function jscsspKeyframesRule()
-{
+function jscsspKeyframesRule() {
     this.type = kJscsspKEYFRAMES_RULE;
     this.parsedCssText = null;
     this.cssRules = [];
@@ -5324,7 +5696,7 @@ function jscsspKeyframesRule()
 }
 
 jscsspKeyframesRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = "";
         var prefixes = ["moz", "webkit", "ms", "o", ""];
         for (var p = 0; p < prefixes.length; p++) {
@@ -5341,7 +5713,7 @@ jscsspKeyframesRule.prototype = {
         return rv;
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5360,8 +5732,7 @@ jscsspKeyframesRule.prototype = {
 
 /* kJscsspMEDIA_RULE */
 
-function jscsspMediaRule()
-{
+function jscsspMediaRule() {
     this.type = kJscsspMEDIA_RULE;
     this.parsedCssText = null;
     this.cssRules = [];
@@ -5371,7 +5742,7 @@ function jscsspMediaRule()
 }
 
 jscsspMediaRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = gTABS + "@media " + this.media.join(", ") + " {\n";
         var preservedGTABS = gTABS;
         gTABS += "  ";
@@ -5381,7 +5752,7 @@ jscsspMediaRule.prototype = {
         return rv + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5400,8 +5771,7 @@ jscsspMediaRule.prototype = {
 
 /* kJscsspNAMESPACE_RULE */
 
-function jscsspNamespaceRule()
-{
+function jscsspNamespaceRule() {
     this.type = kJscsspNAMESPACE_RULE;
     this.parsedCssText = null;
     this.prefix = null;
@@ -5411,13 +5781,13 @@ function jscsspNamespaceRule()
 }
 
 jscsspNamespaceRule.prototype = {
-    cssText: function() {
-        return "@namespace " + (this.prefix ? this.prefix + " ": "")
+    cssText: function () {
+        return "@namespace " + (this.prefix ? this.prefix + " " : "")
             + this.url
             + ";";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5436,8 +5806,7 @@ jscsspNamespaceRule.prototype = {
 
 /* kJscsspPAGE_RULE */
 
-function jscsspPageRule()
-{
+function jscsspPageRule() {
     this.type = kJscsspPAGE_RULE;
     this.parsedCssText = null;
     this.pageSelector = null;
@@ -5447,9 +5816,9 @@ function jscsspPageRule()
 }
 
 jscsspPageRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = gTABS + "@page "
-            + (this.pageSelector ? this.pageSelector + " ": "")
+            + (this.pageSelector ? this.pageSelector + " " : "")
             + "{\n";
         var preservedGTABS = gTABS;
         gTABS += "  ";
@@ -5459,7 +5828,7 @@ jscsspPageRule.prototype = {
         return rv + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5478,8 +5847,7 @@ jscsspPageRule.prototype = {
 
 /* kJscsspSTYLE_RULE */
 
-function jscsspStyleRule()
-{
+function jscsspStyleRule() {
     this.type = kJscsspSTYLE_RULE;
     this.parsedCssText = null;
     this.declarations = []
@@ -5489,20 +5857,20 @@ function jscsspStyleRule()
 }
 
 jscsspStyleRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = gTABS + this.mSelectorText + " {";
         var preservedGTABS = gTABS;
         gTABS += "  ";
         for (var i = 0; i < this.declarations.length; i++) {
             var declText = this.declarations[i].cssText();
             if (declText)
-                rv += gTABS + this.declarations[i].cssText() ;
+                rv += gTABS + this.declarations[i].cssText();
         }
         gTABS = preservedGTABS;
         return rv + "\n" + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5518,11 +5886,11 @@ jscsspStyleRule.prototype = {
         throw DOMException.SYNTAX_ERR;
     },
 
-    selectorText: function() {
+    selectorText: function () {
         return this.mSelectorText;
     },
 
-    setSelectorText: function(val) {
+    setSelectorText: function (val) {
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
         if (!token.isNotNull()) {
@@ -5536,30 +5904,29 @@ jscsspStyleRule.prototype = {
     }
 };
 
-function jscsspStylesheet()
-{
+function jscsspStylesheet() {
     this.cssRules = [];
     this.variables = {};
 }
 
 jscsspStylesheet.prototype = {
-    insertRule: function(aRule, aIndex) {
+    insertRule: function (aRule, aIndex) {
         try {
             this.cssRules.splice(aIndex, 1, aRule);
         }
-        catch(e) {
+        catch (e) {
         }
     },
 
-    deleteRule: function(aIndex) {
+    deleteRule: function (aIndex) {
         try {
             this.cssRules.splice(aIndex);
         }
-        catch(e) {
+        catch (e) {
         }
     },
 
-    cssText: function() {
+    cssText: function () {
         var rv = "";
         for (var i = 0; i < this.cssRules.length; i++)
             rv += this.cssRules[i].cssText() + "\n\n";
@@ -5571,40 +5938,37 @@ var kJscsspINHERIT_VALUE = 0;
 var kJscsspPRIMITIVE_VALUE = 1;
 var kJscsspVARIABLE_VALUE = 4;
 
-function jscsspVariable(aType, aSheet)
-{
+function jscsspVariable(aType, aSheet) {
     this.value = "";
     this.type = aType;
-    this.name  = null;
+    this.name = null;
     this.parentRule = null;
     this.parentStyleSheet = aSheet;
 }
 
 jscsspVariable.prototype = {
-    cssText: function() {
+    cssText: function () {
         if (this.type == kJscsspVARIABLE_VALUE)
             return this.resolveVariable(this.name, this.parentRule, this.parentStyleSheet);
         else
             return this.value;
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         if (this.type == kJscsspVARIABLE_VALUE)
             throw DOMException.SYNTAX_ERR;
         else
             this.value = val;
     },
 
-    resolveVariable: function(aName, aRule, aSheet)
-    {
+    resolveVariable: function (aName, aRule, aSheet) {
         return "var(" + aName + ")";
     }
 };
 
 /* kJscsspVARIABLES_RULE */
 
-function jscsspVariablesRule()
-{
+function jscsspVariablesRule() {
     this.type = kJscsspVARIABLES_RULE;
     this.parsedCssText = null;
     this.declarations = [];
@@ -5614,7 +5978,7 @@ function jscsspVariablesRule()
 }
 
 jscsspVariablesRule.prototype = {
-    cssText: function() {
+    cssText: function () {
         var rv = gTABS + "@variables " +
             (this.media.length ? this.media.join(", ") + " " : "") +
             "{\n";
@@ -5626,7 +5990,7 @@ jscsspVariablesRule.prototype = {
         return rv + gTABS + "}";
     },
 
-    setCssText: function(val) {
+    setCssText: function (val) {
         var sheet = {cssRules: []};
         var parser = new CSSParser(val);
         var token = parser.getToken(true, true);
@@ -5644,8 +6008,7 @@ jscsspVariablesRule.prototype = {
 
 /* kJscsspWHITE_SPACE */
 
-function jscsspWhitespace()
-{
+function jscsspWhitespace() {
     this.type = kJscsspWHITE_SPACE;
     this.parsedCssText = null;
     this.parentStyleSheet = null;
@@ -5653,25 +6016,25 @@ function jscsspWhitespace()
 }
 
 jscsspWhitespace.prototype = {
-    cssText: function() {
+    cssText: function () {
         return this.parsedCssText;
     }
 };
 
-var kJscsspUNKNOWN_RULE   = 0;
-var kJscsspSTYLE_RULE     = 1
-var kJscsspCHARSET_RULE   = 2;
-var kJscsspIMPORT_RULE    = 3;
-var kJscsspMEDIA_RULE     = 4;
+var kJscsspUNKNOWN_RULE = 0;
+var kJscsspSTYLE_RULE = 1
+var kJscsspCHARSET_RULE = 2;
+var kJscsspIMPORT_RULE = 3;
+var kJscsspMEDIA_RULE = 4;
 var kJscsspFONT_FACE_RULE = 5;
-var kJscsspPAGE_RULE      = 6;
+var kJscsspPAGE_RULE = 6;
 
 var kJscsspKEYFRAMES_RULE = 7;
-var kJscsspKEYFRAME_RULE  = 8;
+var kJscsspKEYFRAME_RULE = 8;
 
 var kJscsspNAMESPACE_RULE = 100;
-var kJscsspCOMMENT        = 101;
-var kJscsspWHITE_SPACE    = 102;
+var kJscsspCOMMENT = 101;
+var kJscsspWHITE_SPACE = 102;
 
 var kJscsspVARIABLES_RULE = 200;
 
