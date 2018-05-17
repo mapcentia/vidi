@@ -88,9 +88,7 @@ module.exports = {
         for (var key in layers) {
             if (layers[key].baseLayer !== true) {
                 if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                    if (typeof layers[key]._tiles === "object") {
-                        layerArr.push(layers[key].id);
-                    } else if (layers[key].id && layers[key].id.startsWith('v:')) {
+                    if (typeof layers[key]._tiles === "object" || layers[key].id && layers[key].id.startsWith('v:')) {
                         layerArr.push(layers[key].id);
                     }
                 }
@@ -99,8 +97,7 @@ module.exports = {
 
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
-        }
-        else {
+        } else {
             return false;
         }
     },
@@ -156,13 +153,11 @@ module.exports = {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             $.each(metaData.data, function (i, v) {
-
                 var layer = v.f_table_schema + "." + v.f_table_name,
                     singleTiled = (v.meta !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
                 if (layer === l) {
                     isBaseLayer = !!v.baselayer;
-                    console.log('### addLayer', layer, host, singleTiled);
                     layers[[layer]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [layer],
@@ -192,13 +187,13 @@ module.exports = {
 
                     layers[[layer]][0].setZIndex(v.sort_id + 10000);
 
+                    console.info(l + " was added to the map.");
                     resolve();
                 }
             });
 
+            console.info(l + " was not added to the map.");
             reject();
-
-            console.info(l + " not added to the map.");
-        })
+        });
     }
 };

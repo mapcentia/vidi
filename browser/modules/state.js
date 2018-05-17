@@ -132,6 +132,20 @@ module.exports = {
         hash = decodeURIComponent(window.location.hash);
         hashArr = hash.replace("#", "").split("/");
 
+        const removeDuplicates = (inputArray) => {
+            var temp = {};
+            for (var i = 0; i < inputArray.length; i++) {
+                temp[inputArray[i]] = true;
+            }
+
+            var result = [];
+            for (var key in temp) {
+                result.push(key);
+            }
+
+            return result;
+        };
+
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
@@ -139,6 +153,10 @@ module.exports = {
                 setBaseLayer.init(hashArr[0]);
                 if (hashArr[4]) {
                     arr = hashArr[4].split(",");
+
+                    // Removing duplicates as we do not trust user input
+                    arr = removeDuplicates(arr);
+
                     let metaData = meta.getMetaDataLatestLoaded();
                     for (i = 0; i < arr.length; i++) {
                         let correspondingMetaLayer = false;

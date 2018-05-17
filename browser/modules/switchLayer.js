@@ -124,7 +124,7 @@ module.exports = module.exports = {
                     tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
                     tileLayer.redraw();
 
-                    cloud.get().map.addLayer(tileLayer);
+                    //cloud.get().map.addLayer(tileLayer);
                 }, () => {
                     console.log("Layer " + name + " not in Meta");
                     meta.init(name, true).then(() => {
