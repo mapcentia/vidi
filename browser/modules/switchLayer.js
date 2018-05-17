@@ -47,6 +47,8 @@ var backboneEvents;
  */
 var layerTree;
 
+var tries = 0;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -101,7 +103,14 @@ module.exports = module.exports = {
                             console.log("Layer " + name + " not in Meta");
                             meta.init(name, true).then(
                                 function () {
+
+                                    if (tries > 0) {
+                                        alert("Could not add layer")
+                                        return;
+                                    }
+
                                     layerTree.init();
+                                    tries = 1
                                     me.init(name, true); // recursive
                                 }
                             );
