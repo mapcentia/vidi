@@ -319,7 +319,11 @@ class Queue {
         let result = false;
         for (let i = offset; i < _self._queue.length; i++) {
             if (!_self._queue[i].skip) {
-                result = _self._queue[i];
+                result = {
+                    item: _self._queue[i],
+                    index: i
+                };
+
                 break;
             }
         }
@@ -350,15 +354,15 @@ class Queue {
                 _self._saveState();
 
                 new Promise((localResolve, localReject) => {
-                    let itemToProcess = _self._getOldestNonSkippedItem(queueSearchOffset);
-                    if (itemToProcess === false) {
+                    let itemToProcessData = _self._getOldestNonSkippedItem(queueSearchOffset);
+                    if (itemToProcessData === false) {
 
                         if (LOG) console.log('Queue: no queue items to process');
 
                         resolve();
                     } else {
 
-                        let oldestNonSkippedItem = Object.assign({}, itemToProcess);
+                        let oldestNonSkippedItem = Object.assign({}, itemToProcessData.item);
 
                         if (LOG) console.log('Queue: processing oldest non-skipped item', oldestNonSkippedItem);
 
@@ -384,10 +388,10 @@ class Queue {
                             if (LOG) console.log('Queue: item was processed');
                             if (LOG) console.log('Queue: items left to process', (_self._queue.length - queueSearchOffset));
 
-                            let oldestNonSkippedItem = _self._getOldestNonSkippedItem(queueSearchOffset);
+                            let oldestNonSkippedItemData = _self._getOldestNonSkippedItem(queueSearchOffset);
 
                             _self._saveState();
-                            if (oldestNonSkippedItem) {
+                            if (oldestNonSkippedItemData) {
                                 // There are still items to process
                                 _self._onUpdateListener(_self._generateCurrentStatistics());
                                 localResolve();
@@ -402,11 +406,11 @@ class Queue {
 
                             if (error && error.rejectedByServer) {
 
-                                if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[queueSearchOffset]);
+                                if (LOG) console.log('Queue: item was rejected by server, setting as skipped', _self._queue[itemToProcessData.index]);
 
-                                _self._queue[queueSearchOffset].skip = true;
+                                _self._queue[itemToProcessData.index].skip = true;
                                 if (error.serverErrorMessage) {
-                                    _self._queue[queueSearchOffset].serverErrorMessage = error.serverErrorMessage;
+                                    _self._queue[itemToProcessData.index].serverErrorMessage = error.serverErrorMessage;
                                 }
 
                                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
