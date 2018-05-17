@@ -218,8 +218,15 @@ module.exports = {
 
                     if (totalRequests > 0) {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
+                        
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
                             apiBridgeInstance.removeByLayerId($(event.target).parent().data('gc2-id'));
+                        });
+
+                        $(layerControlContainer).find('.js-clear').hover(event => {
+                            $(event.currentTarget).parent().find('.js-statistics-field').css('opacity', '0.2');
+                        }, event => {
+                            $(event.currentTarget).parent().find('.js-statistics-field').css('opacity', '1');
                         });
                     }
                 }
@@ -420,30 +427,30 @@ module.exports = {
                                 </div>
                                 <div style="display: inline-block;">
                                     <span>${text}${lockedLayer}</span>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
                                         <i class="fa fa-edit"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
                                         <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
                                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
                                         <i class="fa fa-edit"></i> <span class="js-value"></span>
                                     </button>
-                                    <button type="button" class="hidden btn btn-sm btn-secondary js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
                                         <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
                                     </button>
                                     <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
-                                        <i class="fa fa-trash"></i>
+                                        <i class="fa fa-undo"></i>
                                     </button>
                                 </div>
                                 <div style="display: inline-block;">
-                                    <button style="padding: 8px;" type="button" data-gc2-key="${layerKeyWithGeom}"
+                                    <button type="button" data-gc2-key="${layerKeyWithGeom}" style="padding: 8px;" 
                                         data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
                                         <i class="fa fa-plus"></i>
                                     </button>

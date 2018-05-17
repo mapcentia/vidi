@@ -1,8 +1,8 @@
 'use strict';
 
-const LOG = true;
-
 const Queue = require('./Queue');
+
+const LOG = false;
 
 const errorCodes = {
     "UNAUTHORIZED": 0,
