@@ -132,6 +132,10 @@ module.exports = {
         hash = decodeURIComponent(window.location.hash);
         hashArr = hash.replace("#", "").split("/");
 
+        var maxBounds = setting.getMaxBounds();
+        console.log(maxBounds)
+        cloud.get().setMaxBounds(maxBounds);
+
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
@@ -155,11 +159,7 @@ module.exports = {
                 setBaseLayer.init(baseLayer.getBaseLayer()[0]);
                 var extent = setting.getExtent();
                 if (extent !== null) {
-                    if (BACKEND === "cartodb") {
-                        cloud.get().map.fitBounds(extent);
-                    } else {
-                        cloud.get().zoomToExtent(extent);
-                    }
+                    cloud.get().zoomToExtent(extent);
                 } else {
                     cloud.get().zoomToExtent();
                 }
