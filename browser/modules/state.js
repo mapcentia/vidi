@@ -133,7 +133,9 @@ module.exports = {
         hashArr = hash.replace("#", "").split("/");
 
         var maxBounds = setting.getMaxBounds();
-        cloud.get().setMaxBounds(maxBounds);
+        if (maxBounds !== null) {
+            cloud.get().setMaxBounds(maxBounds);
+        }
 
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
@@ -164,6 +166,7 @@ module.exports = {
                 }
             }
         }
+
         else {
             var parr, v, l, t, GeoJsonAdded = false;
             parr = urlVars.k.split("#");
