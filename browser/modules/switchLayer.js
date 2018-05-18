@@ -110,6 +110,9 @@ module.exports = module.exports = {
         }
 
         if (enable) {
+            // Only one layer at a time, so using the tile layer identifier
+            layers.incrementCountLoading(tileLayerId);
+
             if (layerType === 'tile') {
                 el.data('gc2-layer-type', 'tile');
                 el.closest('.layer-item').find('.js-dropdown-label').first().html('Tile');
@@ -123,8 +126,6 @@ module.exports = module.exports = {
 
                     tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
                     tileLayer.redraw();
-
-                    //cloud.get().map.addLayer(tileLayer);
                 }, () => {
                     console.log("Layer " + name + " not in Meta");
                     meta.init(name, true).then(() => {
@@ -145,15 +146,14 @@ module.exports = module.exports = {
                 cloud.get().map.addLayer(existingLayer);
                 store[vectorLayerId].load();
 
-                layers.incrementCountLoading(vectorLayerId);
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
             }
 
-            me.update(doNotLegend, el);
             el.prop('checked', true);
-        } else {
             me.update(doNotLegend, el);
+        } else {
             el.prop('checked', false);
+            me.update(doNotLegend, el);
         }
     },
 
@@ -169,6 +169,7 @@ module.exports = module.exports = {
             }
         });
 
+        console.log('### c', c);
         el.parents(".panel-layertree").find("span:eq(0)").html(c);
 
         pushState.init();
