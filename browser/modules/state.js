@@ -133,7 +133,6 @@ module.exports = {
         hashArr = hash.replace("#", "").split("/");
 
         var maxBounds = setting.getMaxBounds();
-        console.log(maxBounds)
         cloud.get().setMaxBounds(maxBounds);
 
         var setLayers = function () {
