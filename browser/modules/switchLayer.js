@@ -78,6 +78,7 @@ module.exports = module.exports = {
 
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 me.update(doNotLegend, el);
+                tries = 0;
 
             } catch (e) {
 
@@ -86,7 +87,7 @@ module.exports = module.exports = {
                     .then(
 
                         function () {
-
+                            tries = 0;
                             cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                             me.update(doNotLegend, el);
 
@@ -98,6 +99,7 @@ module.exports = module.exports = {
                             }
 
                         },
+
                         // If layer is not in Meta we load meta from GC2 and init again in a recursive call
                         function () {
                             console.log("Layer " + name + " not in Meta");
@@ -110,7 +112,7 @@ module.exports = module.exports = {
                                     }
 
                                     layerTree.init();
-                                    tries = 1
+                                    tries = 1;
                                     me.init(name, true); // recursive
                                 }
                             );
