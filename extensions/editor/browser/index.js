@@ -40,6 +40,8 @@ var markers;
 
 var editor;
 
+var switchLayer;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -70,6 +72,7 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         layerTree = o.layerTree;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -133,7 +136,7 @@ module.exports = {
                     let popup = L.popup({
                         autoPan: false
                     });
-
+ 
                     layer.on("click", function (e) {
                         popup.setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
@@ -146,7 +149,7 @@ module.exports = {
                             me.edit(layer, layerName + ".the_geom", null, true);
                         });
 
-                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", function () {
+                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
                             if (window.confirm("Are you sure? Changes will not be saved!")) {
                                 me.delete(layer, layerName + ".the_geom", null, true);
                             }
@@ -245,9 +248,10 @@ module.exports = {
                 editor = cloud.get().map.editTools.startPolygon();
             } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
                 editor = cloud.get().map.editTools.startPolyline();
-            }
-            else if (type === "POINT" || type === "MULTIPOINT") {
+            } else if (type === "POINT" || type === "MULTIPOINT") {
                 editor = cloud.get().map.editTools.startMarker();
+            } else {
+                throw new Error(`Unable to detect type`);
             }
 
             /**
@@ -255,7 +259,6 @@ module.exports = {
              * @param formData
              */
             const onSubmit = function (formData) {
-
                 let featureCollection, geoJson = editor.toGeoJSON();
 
                 // Promote MULTI geom
@@ -286,14 +289,8 @@ module.exports = {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
 
                     sqlQuery.reset(qstore);
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    if (isVectorLayer) {
-                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
-                    } else {
-                        layerTree.reloadLayer(schemaQualifiedName, true);
-                    }
-                    
-                    me.stopEdit(l);
+
+                    me.stopEdit();
 
                     jquery.snackbar({
                         id: "snackbar-conflict",
@@ -352,13 +349,13 @@ module.exports = {
             });
 
             // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").off();
             $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
-
                 if (window.confirm("Are you sure? Changes will not be saved!")) {
                     me.stopEdit(e);
+
                     sqlQuery.reset(qstore);
                     $(".slide-right .close").unbind("click.edit");
-
                 } else {
                     return false;
                 }
@@ -438,7 +435,6 @@ module.exports = {
                         />
                     </div>
                 ), document.getElementById("info-modal-body"));
-
             });
 
             /**
@@ -576,11 +572,22 @@ module.exports = {
      * Stop editing and clean up
      * @param e
      */
-    stopEdit: function (e) {
+    stopEdit: function (editedFeature) {
         let me = this;
+        
+        console.log('# e', editedFeature, editor);
+
         cloud.get().map.editTools.stopDrawing();
 
-        if (editor) cloud.get().map.removeLayer(editor);
+        if (editor) {
+            cloud.get().map.removeLayer(editor);
+        }
+
+        // If feature was edited, then reload the layer
+        if (editedFeature) {
+            switchLayer.init(editedFeature.id, false);
+            switchLayer.init(editedFeature.id, true);
+        }
 
         if (markers) {
             markers.map(function (v, i) {
