@@ -132,10 +132,10 @@ module.exports = {
         hash = decodeURIComponent(window.location.hash);
         hashArr = hash.replace("#", "").split("/");
 
-        var maxBounds = setting.getMaxBounds();
-        if (maxBounds !== null) {
-            cloud.get().setMaxBounds(maxBounds);
-        }
+        // var maxBounds = setting.getMaxBounds();
+        // if (maxBounds !== null) {
+        //     cloud.get().setMaxBounds(maxBounds);
+        // }
 
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
