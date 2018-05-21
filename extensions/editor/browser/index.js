@@ -546,12 +546,14 @@ module.exports = {
                 }
             };
 
-            if (!gid) {
-                gid = GeoJSON.properties.gid;
-                console.log('GeoJSON', GeoJSON);
-            }
+            let featureCollection = {
+                "type": "FeatureCollection",
+                "features": [
+                    GeoJSON
+                ]
+            };
 
-            apiBridgeInstance.deleteFeature(gid, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
+            apiBridgeInstance.deleteFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
                 console.log('Editor: error occured while performing deleteFeature()');
                 throw new Error(error);
             });
@@ -574,8 +576,6 @@ module.exports = {
      */
     stopEdit: function (editedFeature) {
         let me = this;
-        
-        console.log('# e', editedFeature, editor);
 
         cloud.get().map.editTools.stopDrawing();
 

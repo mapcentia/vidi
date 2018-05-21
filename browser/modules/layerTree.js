@@ -70,37 +70,6 @@ var theStatisticsPanelWasDrawn = false;
 
 /**
  *
- * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
- */
-var dict = {
-    "Force offline mode": {
-        "da_DK": "# Force offline mode",
-        "en_US": "# Force offline mode"
-    },
-    "Tile": {
-        "da_DK": "# Tile",
-        "en_US": "# Tile"
-    },
-    "Vector": {
-        "da_DK": "# Vector",
-        "en_US": "# Vector"
-    },
-    "Pending": {
-        "da_DK": "# Pending",
-        "en_US": "# Pending"
-    },
-    "Cancel feature changes": {
-        "da_DK": "# Cancel feature changes",
-        "en_US": "# Cancel feature changes"
-    },
-    "This browser does not support Service Workers, some features may be unavailable": {
-        "da_DK": "# This browser does not support Service Workers, some features may be unavailable",
-        "en_US": "# This browser does not support Service Workers, some features may be unavailable"
-    }
-};
-
-/**
- *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = {
@@ -482,7 +451,7 @@ module.exports = {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'tile');
                                 $(switcher).prop('checked', true);
-                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text('tile');
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text(__('Tile'));
                                 _self.reloadLayer($(switcher).data('gc2-id'));
                             });
 
@@ -490,7 +459,7 @@ module.exports = {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'vector');
                                 $(switcher).prop('checked', true);
-                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text('vector');
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text(__('Vector'));
                                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
                             });
 

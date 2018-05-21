@@ -4,12 +4,6 @@ const Queue = require('./Queue');
 
 const LOG = true;
 
-const errorCodes = {
-    "UNAUTHORIZED": 0,
-    "NOT_FOUND": 1,
-    "ANOTHER_API_SPECIFIC_ERROR": 1703
-};
-
 const DISPATCH_INTERVAL = 1000;
 
 let singletoneInstance = false;
@@ -59,15 +53,6 @@ class APIBridge {
                         resolve();
                     },
                     error: (error) => {
-                        /*
-                        Ensure that there is only one element with the specific identifier in the queue (run check on every
-                        queue run)
-                        Add special "skip" flag to this elements
-                        Mention these rejected elements in transform response
-                        When these element are pushed to the queue again, find their old buddies and replace them
-                        What if onlye n-th queue item was rejected? Got to keep queue rolling
-                        */
-
                         let itemWasReqectedByServer = false;
                         let serverErrorMessage = '';
                         if (error.status === 500 && error.responseJSON) {
@@ -75,6 +60,10 @@ class APIBridge {
                                 itemWasReqectedByServer = true;
                                 if (error.responseJSON.message.message.ServiceException) {
                                     serverErrorMessage = error.responseJSON.message.message.ServiceException;
+                                } else if (error.responseJSON.message.code === 403) {
+                                    serverErrorMessage = __(`Not authorized to perform this action`);
+                                } else if (typeof error.responseJSON.message.message === 'string') {
+                                    serverErrorMessage = error.responseJSON.message.message;
                                 }
                             }
                         }
@@ -245,11 +234,6 @@ class APIBridge {
 
             let features;
 
-            /*
-                @todo Refactor, as the similar functionality is already in
-                queue - make the queue smarter, not the processor
-            */
-
             // Deleting regular features from response
             let currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
@@ -260,7 +244,7 @@ class APIBridge {
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
                                 if (features[i].properties.gid === item.feature.features[0].properties.gid) {
-                                    
+
                                     if (LOG) console.log('APIBridge: ## DELETE', item);
 
                                     features.splice(i, 1);
@@ -296,6 +280,9 @@ class APIBridge {
 
             currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
+
+console.log('## item', item);
+
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
 
                 let itemColor = 'orange';
@@ -357,7 +344,7 @@ class APIBridge {
         let copiedFeature = JSON.parse(JSON.stringify(feature));
         let date = new Date();
         let timestamp = date.getTime();
-        
+
         copiedFeature.features[0].properties['gid'] = (-1 * timestamp);
 
         this._validateFeatureData(db, meta, copiedFeature);
@@ -379,13 +366,9 @@ class APIBridge {
      * 
      * @param {Object} data Complete feature data
      */
-    deleteFeature(gid, db, meta) {
-        if (gid === undefined) {
-            throw new Error('Invalid gid');
-        }
-
-        this._validateFeatureData(db, meta);
-        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature: { features: [{ properties: { gid }}]}, db, meta });
+    deleteFeature(feature, db, meta) {
+        this._validateFeatureData(db, meta, feature);
+        return this._queue.pushAndProcess({ type: Queue.DELETE_REQUEST, feature, db, meta });
     }
 
     /**

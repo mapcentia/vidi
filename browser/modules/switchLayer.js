@@ -169,7 +169,6 @@ module.exports = module.exports = {
             }
         });
 
-        console.log('### c', c);
         el.parents(".panel-layertree").find("span:eq(0)").html(c);
 
         pushState.init();
