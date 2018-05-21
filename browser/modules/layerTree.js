@@ -185,7 +185,14 @@ module.exports = {
                             $(errorRecord).find('.js-center-map-on-item').click((event) => {
                                 let geometry = $(event.currentTarget).data(`feature-geometry`);
                                 if (geometry) {
-                                    cloud.get().map.panTo(new L.LatLng(geometry.coordinates[1], geometry.coordinates[0]));
+                                    // Centering on non-point feature
+                                    if (geometry.coordinates.length > 1) {
+                                        let geojsonLayer = L.geoJson(geometry);
+                                        let bounds = geojsonLayer.getBounds();
+                                        cloud.get().map.panTo(bounds.getCenter());
+                                    } else {
+                                        cloud.get().map.panTo(new L.LatLng(geometry.coordinates[1], geometry.coordinates[0]));
+                                    }
                                 }
                             });
 

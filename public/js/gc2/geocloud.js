@@ -101,10 +101,15 @@ geocloud = (function () {
         projection: (MAPLIB === "leaflet") ? "4326" : "900913",
         //Only leaflet
         pointToLayer: function (feature, latlng) {
-            return (feature.style ? L.circleMarker(latlng, feature.style) : L.circleMarker(latlng));
+            return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function () {
+        onEachFeature: function (feature, layer) {
+            if (feature.meta) {
+                console.log('### feature', feature);
+            }
+
+            return feature.bindPopup('aaa');
         },
         onLoad: function () {
         },

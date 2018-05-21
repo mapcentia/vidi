@@ -2,7 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = true;
+const LOG = false;
 
 const DISPATCH_INTERVAL = 1000;
 
@@ -280,16 +280,16 @@ class APIBridge {
 
             currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
-
-console.log('## item', item);
-
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
 
                 let itemColor = 'orange';
+                item.feature.features[0].meta = {};
+                item.feature.features[0].meta.apiRecognitionStatus = 'pending';
                 if (item.skip) {
 
                     if (LOG) console.log('APIBridge: skipped item was detected');
 
+                    item.feature.features[0].meta.apiRecognitionStatus = 'rejected_by_server';
                     itemColor = 'red';
                 }
 
