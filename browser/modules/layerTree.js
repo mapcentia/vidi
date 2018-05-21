@@ -92,6 +92,10 @@ var dict = {
     "Cancel feature changes": {
         "da_DK": "# Cancel feature changes",
         "en_US": "# Cancel feature changes"
+    },
+    "This browser does not support Service Workers, some features may be unavailable": {
+        "da_DK": "# This browser does not support Service Workers, some features may be unavailable",
+        "en_US": "# This browser does not support Service Workers, some features may be unavailable"
     }
 };
 
@@ -255,30 +259,38 @@ module.exports = {
 
         $("#layers").empty();
 
-        let toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-            <div class="panel-body">
-                <div class="togglebutton">
-                    <label>
-                        <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                        <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                        <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                        <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                    </label>
+        let toggleOfllineOnlineMode = false;
+        if (`serviceWorker` in navigator) {
+            toggleOfllineOnlineMode = $(`<div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="togglebutton">
+                        <label>
+                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
+                            <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
+                            <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
+                            <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
+                        </label>
+                    </div>
                 </div>
-            </div>
-        </div>`);
+            </div>`);
 
-        if (apiBridgeInstance.offlineModeIsEnforced()) {
-            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
-        }
-
-        $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
-            if ($(event.target).is(':checked')) {
-                apiBridgeInstance.setOfflineMode(true);
-            } else {
-                apiBridgeInstance.setOfflineMode(false);
+            if (apiBridgeInstance.offlineModeIsEnforced()) {
+                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
             }
-        });
+
+            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+                if ($(event.target).is(':checked')) {
+                    apiBridgeInstance.setOfflineMode(true);
+                } else {
+                    apiBridgeInstance.setOfflineMode(false);
+                }
+            });
+        } else {
+           toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                ${__('This browser does not support Service Workers, some features may be unavailable')}
+            </div>`);
+        }
 
         $("#layers").append(toggleOfllineOnlineMode);
 

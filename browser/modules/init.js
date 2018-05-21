@@ -267,9 +267,12 @@ module.exports = {
         }, 0));
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.bundle.js');
+            navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
+            }).catch(error => {
+                console.warn(`Unable to register the service worker`);
+            });
         } else {
-            console.warn('Service workers are not supported in this browser');
+            console.warn(`Service workers are not supported in this browser, some features can be unavailable`);
         }
 
         if (window.localforage) {
@@ -283,26 +286,34 @@ module.exports = {
                 } else {
                     if (parseInt(window.vidiConfig.appVersion) !== parseInt(value)) {
                         if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
+                            let unregisteringRequests = [];
+
                             // Unregister service worker
                             navigator.serviceWorker.getRegistrations().then((registrations) => {
                                 for(let registration of registrations) {
                                     console.log(`Versioning: unregistering service worker`, registration);
+                                    unregisteringRequests.push(registration.unregister());
+alert(`unregistering`);
                                     registration.unregister();
                                 }
                             });
 
-                            // Clear caches
-                            caches.keys().then(function(names) {
-                                for (let name of names) {
-                                    console.log(`Versioning: clearing cache`, name);
-                                    caches.delete(name);
-                                }
-                            });
+                            Promise.all(unregisteringRequests).then((values) => {
+alert(values);
 
-                            // Remove current app version
-                            localforage.removeItem('appVersion').then(() => {
-                                location.reload();
-                            })
+                                // Clear caches
+                                caches.keys().then(function(names) {
+                                    for (let name of names) {
+                                        console.log(`Versioning: clearing cache`, name);
+                                        caches.delete(name);
+                                    }
+                                });
+
+                                // Remove current app version
+                                localforage.removeItem('appVersion').then(() => {
+                                    location.reload();
+                                });
+                            });
                         }
                     } else {
                         console.log('Versioning: new application version is not available');
