@@ -71,7 +71,8 @@ module.exports = {
                         var firstSchema = schemataStr.split(",").length > 1 ? schemataStr.split(",")[0] : schemataStr;
                         if (typeof response.data.extents[firstSchema] === "object") {
                             extent = response.data.extents[firstSchema];
-                        }if (typeof response.data.extentrestricts !== undefined && typeof response.data.extentrestricts[firstSchema] === "object") {
+                        }
+                        if (typeof response.data.extentrestricts === "object" && typeof response.data.extentrestricts[firstSchema] === "object") {
                             maxBounds = response.data.extentrestricts[firstSchema];
                         }
                     }
