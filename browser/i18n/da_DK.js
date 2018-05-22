@@ -165,5 +165,9 @@ module.exports = {
     
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
+
+        // Editor
+        "Feature have not been sent to the server yet": "# Feature have not been sent to the server yet",
+        "Error occured while saving feature": "# Error occured while saving feature",
     }
 };

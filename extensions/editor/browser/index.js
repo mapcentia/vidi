@@ -133,12 +133,36 @@ module.exports = {
 
                 // Set popup with Edit and Delete buttons
                 layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
-                    let popup = L.popup({
-                        autoPan: false
-                    });
- 
+                    if (feature.meta) {
+                        let popupContent = false;
+                        let popupSettings = { autoClose: false };
+                        if (feature.meta.apiRecognitionStatus === 'pending') {
+                            popupContent = `<span>${__(`Feature have not been sent to the server yet`)}</span>`;
+                            popupSettings.className = `api-bridge-popup-warning`;
+                        } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+                            popupContent = `<span>${__(`Error occured while saving feature`)}</span>`;
+                            popupSettings.className = `api-bridge-popup-error`;
+                        } else {
+                            throw new Error(`Invalid API recognition status value`);
+                        }
+
+                        layer.on("add", function (e) {
+                            let latLng = false;
+                            if (feature.geometry && feature.geometry.type === 'Point') {
+                                latLng = layer.getLatLng();
+                            } else {
+                                let bounds = layer.getBounds();
+                                latLng = bounds.getCenter()
+                            }
+
+                            let popup = L.popup(popupSettings).setLatLng(latLng).setContent(popupContent).openOn(cloud.get().map);
+                        });
+                    }
+
                     layer.on("click", function (e) {
-                        popup.setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                        L.popup({
+                            autoPan: false
+                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </button>
                         <button class="btn btn-primary btn-xs ge-delete">
@@ -153,7 +177,7 @@ module.exports = {
                             if (window.confirm("Are you sure? Changes will not be saved!")) {
                                 me.delete(layer, layerName + ".the_geom", null, true);
                             }
-                        })
+                        });
                     });
                 });
 

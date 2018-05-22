@@ -104,13 +104,7 @@ geocloud = (function () {
             return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function (feature, layer) {
-            if (feature.meta) {
-                console.log('### feature', feature);
-            }
-
-            return feature.bindPopup('aaa');
-        },
+        onEachFeature: function (feature, layer) {},
         onLoad: function () {
         },
         transformResponse: (response) => {

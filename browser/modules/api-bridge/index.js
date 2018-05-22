@@ -282,7 +282,6 @@ class APIBridge {
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
 
-                let itemColor = 'orange';
                 item.feature.features[0].meta = {};
                 item.feature.features[0].meta.apiRecognitionStatus = 'pending';
                 if (item.skip) {
@@ -290,16 +289,9 @@ class APIBridge {
                     if (LOG) console.log('APIBridge: skipped item was detected');
 
                     item.feature.features[0].meta.apiRecognitionStatus = 'rejected_by_server';
-                    itemColor = 'red';
                 }
 
-                let feature = Object.assign({}, item.feature.features[0], {
-                    'style':{
-                        fillColor: itemColor,
-                        color: itemColor
-                    }
-                });
-
+                let feature = Object.assign({}, item.feature.features[0]);
                 if (itemParentTable === tableId) {
                     switch (item.type) {
                         case Queue.ADD_REQUEST:

@@ -23,8 +23,6 @@ const browser = detect();
  * app version in the configuration file.
  */
 
-console.log('I am new guy on the block');
-
 /**
  * 
  */
@@ -273,10 +271,9 @@ const normalizeTheURLForFetch = (event) => {
     let URL = event.request.url;
     let result = new Promise((resolve, reject) => {
         let cleanedRequestURL = normalizeTheURL(URL);
-
         if (event && event.request.method === 'POST' && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
-            if (browser.name === 'safari') {
+            if (browser.name === 'safari' || browser.name === 'ios') {
                 let rawResult = "";
                 let reader = clonedRequest.body.getReader();
                 reader.read().then(function processText({ done, value }) {
@@ -391,7 +388,6 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
-    
     if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
 
     /**
