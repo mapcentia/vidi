@@ -126,13 +126,16 @@ module.exports = {
                 </div>`;
 
         $.each(layers, function (index, value) {
+            if (value.indexOf('v:') === 0) {
+                value = value.replace('v:', '');
+            }
+
             if (layers[0] === "") {
                 return false;
             }
 
             if (!metaDataKeys[value]) {
-                console.warn(`metaDataKeys[${value}] is undefined`);
-                return false;
+                throw new Error(`metaDataKeys[${value}] is undefined`);
             }
 
             var isEmpty = true;
@@ -158,13 +161,13 @@ module.exports = {
                     1.19432856696, 0.597164283478, 0.298582141739, 0.149291, 0.074645535];
                 distance = 10 * res[cloud.get().getZoom()];
             }
+
             if (!callBack) {
                 onLoad = function () {
                     var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
-
 
                     isEmpty = layerObj.isEmpty();
 

@@ -34,6 +34,8 @@ module.exports = {
             }
             var event = new geocloud.clickEvent(e, cloud.get());
 
+            console.log(event);
+
             if (clicktimer) {
                 clearTimeout(clicktimer);
             }
