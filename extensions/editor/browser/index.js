@@ -42,6 +42,8 @@ var editor;
 
 var switchLayer;
 
+var managePopups = [];
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -81,10 +83,27 @@ module.exports = {
      *
      */
     init: function () {
+
+        cloud.get().map.closePopup = () => {
+            console.log(`closePopup is called`);
+            console.trace(`closePopup`);
+
+        };
+
         let me = this, metaDataKeys, metaData, styleFn;
         apiBridgeInstance = APIBridgeSingletone();
 
         isInit = true;
+
+        const clearManagementPopups = () => {
+            managePopups.map((item, index) => {
+                if (item) {
+                    console.log(`removing management popups from map ${index}`);
+                    managePopups[index] = false;
+                    item.remove();
+                }
+            });
+        }
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
@@ -134,13 +153,36 @@ module.exports = {
                 // Set popup with Edit and Delete buttons
                 layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
                     if (feature.meta) {
+
+                        /*
+                            Displaying non-committed or rejected features with popups - yellow ones for
+                            features that were not committed yet, red ones for those that were rejected
+                            by server and need resubmition.
+
+                            Popups are destroyed and displayed on every load of the layer, including
+                            toggling layer visibility.
+                            Popups can not be closed by user.
+                            Popups can be closed only by clicking the actual feature in order to call
+                            the popup with edit/delete buttons.
+
+                            There are two types of popups:
+                            1. Action popups that come with edit/delete buttons (one popup at a time on map)
+                            2. Notification popups that signal if there is something wrong with feature (all
+                                popups at a time on one map)
+                        */
+
                         let popupContent = false;
-                        let popupSettings = { autoClose: false };
+                        let popupSettings = {
+                            autoClose: false,
+                            closeButton: false,
+                            minWidth: 5
+                        };
+
                         if (feature.meta.apiRecognitionStatus === 'pending') {
-                            popupContent = `<span>${__(`Feature have not been sent to the server yet`)}</span>`;
+                            popupContent = `<span title="${__(`Feature have not been sent to the server yet`)}"><i class="fa fa-exclamation"></i></span>`;
                             popupSettings.className = `api-bridge-popup-warning`;
                         } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
-                            popupContent = `<span>${__(`Error occured while saving feature`)}</span>`;
+                            popupContent = `<span title="${__(`Error occured while saving feature`)}"><i class="fa fa-exclamation"></i></span>`;
                             popupSettings.className = `api-bridge-popup-error`;
                         } else {
                             throw new Error(`Invalid API recognition status value`);
@@ -160,14 +202,19 @@ module.exports = {
                     }
 
                     layer.on("click", function (e) {
-                        L.popup({
+                        let managePopup = L.popup({
+                            autoClose: false,
                             autoPan: false
                         }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </button>
                         <button class="btn btn-primary btn-xs ge-delete">
                             <i class="fa fa-trash" aria-hidden="true"></i>
-                        </button>`).openOn(cloud.get().map);
+                        </button>`);
+
+                        clearManagementPopups();
+                        managePopups.push(managePopup);
+                        managePopup.openOn(cloud.get().map);
 
                         $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
                             me.edit(layer, layerName + ".the_geom", null, true);
@@ -177,6 +224,10 @@ module.exports = {
                             if (window.confirm("Are you sure? Changes will not be saved!")) {
                                 me.delete(layer, layerName + ".the_geom", null, true);
                             }
+                        });
+
+                        $(".leaflet-popup-close-button").unbind("click.leaflet-popup-close-button").bind("click.leaflet-popup-close-button", (e) => {
+                            clearManagementPopups();
                         });
                     });
                 });
@@ -315,6 +366,12 @@ module.exports = {
                     sqlQuery.reset(qstore);
 
                     me.stopEdit();
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
 
                     jquery.snackbar({
                         id: "snackbar-conflict",
@@ -561,6 +618,7 @@ module.exports = {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
 
                 sqlQuery.reset(qstore);
+
                 cloud.get().map.closePopup();
                 
                 if (isVectorLayer) {

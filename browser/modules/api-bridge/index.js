@@ -2,7 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = true;
+const LOG = false;
 
 const DISPATCH_INTERVAL = 1000;
 
@@ -318,7 +318,7 @@ class APIBridge {
                 }
             });
 
-            if (LOG) console.log('APIBridge: # Result of transformResponse handler', response.features.length, response.features);
+            if (LOG) console.log('APIBridge: # Result of transformResponse handler', response.features.length);
         }
 
         return response;

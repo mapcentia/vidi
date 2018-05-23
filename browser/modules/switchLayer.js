@@ -109,10 +109,13 @@ module.exports = module.exports = {
             store[vectorLayerId].reset();
         }
 
-        if (enable) {
-            console.log('Closing popups');
-            cloud.get().map.closePopup();
+        if (vectorLayer) {
+            console.log('NOT WORKING Closing popups for specific layer', vectorLayerId);
+            //vectorLayer.closePopup();
+            //cloud.get().map.closePopup();
+        }
 
+        if (enable) {
             // Only one layer at a time, so using the tile layer identifier
             layers.incrementCountLoading(tileLayerId);
 
