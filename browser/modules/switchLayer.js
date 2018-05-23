@@ -107,7 +107,8 @@ module.exports = module.exports = {
                                 function () {
 
                                     if (tries > 0) {
-                                        alert("Could not add layer")
+                                        alert("Could not add layer");
+                                        tries = 0;
                                         return;
                                     }
 
