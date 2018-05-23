@@ -160,14 +160,11 @@ module.exports = {
         "Tile": "# Tile",
         "Vector": "# Vector",
         "Pending": "# Pending",
+        "Error": "# Error",
         "Cancel feature changes": "# Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "# This browser does not support Service Workers, some features may be unavailable",
     
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
-
-        // Editor
-        "Feature have not been sent to the server yet": "# Feature have not been sent to the server yet",
-        "Error occured while saving feature": "# Error occured while saving feature",
     }
 };

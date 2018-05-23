@@ -961,20 +961,34 @@ h4 small {
   display: inline;
 }
 
-.api-bridge-popup-warning .leaflet-popup-content-wrapper {
+.api-bridge-popup-warning {
   background-color: #f0ad4e;
   color: white;
+  border: #f0ad4e;
+  min-width: 25px;
+  text-align: center;
 }
 
-.api-bridge-popup-warning .leaflet-popup-tip {
-  background: #f0ad4e;
-}
-
-.api-bridge-popup-error .leaflet-popup-content-wrapper {
+.api-bridge-popup-error {
   background-color: #d9534f;
   color: white;
+  border: #d9534f;
+  min-width: 25px;
+  text-align: center;
 }
 
-.api-bridge-popup-error .leaflet-popup-tip {
-  background: #d9534f;
+.leaflet-tooltip-right.api-bridge-popup-warning::before {
+  border-right-color: #f0ad4e;
+}
+
+.leaflet-tooltip-left.api-bridge-popup-warning::before {
+  border-left-color: #f0ad4e;
+}
+
+.leaflet-tooltip-right.api-bridge-popup-error::before {
+  border-right-color: #d9534f;
+}
+
+.leaflet-tooltip-left.api-bridge-popup-error::before {
+  border-left-color: #d9534f;
 }
