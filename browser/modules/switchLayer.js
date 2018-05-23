@@ -101,7 +101,7 @@ module.exports = module.exports = {
                         },
 
                         // If layer is not in Meta we load meta from GC2 and init again in a recursive call
-                        function () {
+                        function (err) {
                             console.log("Layer " + name + " not in Meta");
                             meta.init(name, true).then(
                                 function () {

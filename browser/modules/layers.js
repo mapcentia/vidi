@@ -167,10 +167,13 @@ module.exports = {
 
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
+            console.log(metaData);
+            console.log(l);
+
             $.each(metaData.data, function (i, v) {
 
                 var layer = v.f_table_schema + "." + v.f_table_name,
-                    singleTiled = (v.meta !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+                    singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
                 if (layer === l) {
                     isBaseLayer = !!v.baselayer;
