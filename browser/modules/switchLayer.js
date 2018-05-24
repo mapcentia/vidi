@@ -137,14 +137,12 @@ module.exports = module.exports = {
                 el.data('gc2-layer-type', 'vector');
                 el.closest('.layer-item').find('.js-dropdown-label').first().html('Vector');
 
-                if (vectorLayerId in store === false) {
-                    throw new Error('No specified layer in store');
+                if (vectorLayerId in store) {
+                    cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
+                    let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                    cloud.get().map.addLayer(existingLayer);
+                    store[vectorLayerId].load();
                 }
-
-                cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
-                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                store[vectorLayerId].load();
 
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
             }

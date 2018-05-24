@@ -502,7 +502,6 @@ module.exports = {
      * @param {String} layerId Layer identifier
      */
     reloadLayer: (layerId, forceTileRedraw = false) => {
-        console.log('reloadLayer', layerId, forceTileRedraw);
         switchLayer.init(layerId, false, false, forceTileRedraw);
         switchLayer.init(layerId, true, false, forceTileRedraw);
     },
