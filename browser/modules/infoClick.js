@@ -32,14 +32,15 @@ module.exports = {
            if (active === false) {
                 return;
             }
+
             var event = new geocloud.clickEvent(e, cloud.get());
 
-            console.log(event);
+            console.log(`clicked e`, e.layer);
+            console.log(`clicked event`, event);
 
             if (clicktimer) {
                 clearTimeout(clicktimer);
-            }
-            else {
+            } else {
                 clicktimer = setTimeout(function (e) {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
