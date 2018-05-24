@@ -167,9 +167,6 @@ module.exports = {
 
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
-            console.log(metaData);
-            console.log(l);
-
             $.each(metaData.data, function (i, v) {
 
                 var layer = v.f_table_schema + "." + v.f_table_name,
