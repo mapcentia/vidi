@@ -257,10 +257,14 @@ module.exports = {
             me.stopEdit();
 
             // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
             $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
                 e.stopPropagation();
                 if (window.confirm("Are you sure? Changes will not be saved!")) {
                     me.stopEdit();
+
+                    $(".slide-right .close").unbind("click.add");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 } else {
                     return false;
                 }
@@ -348,6 +352,8 @@ module.exports = {
                     });
                 };
 
+                $(".slide-right .close").unbind("click.add");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
                     console.log('Editor: error occured while performing addFeature()');
                     throw new Error(error);
@@ -385,7 +391,11 @@ module.exports = {
                 properties;
             me.stopEdit();
 
-            e.id = "v:" + metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
+            e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
+            if (isVectorLayer) {
+                e.id = "v:" + e.id;
+            }
+
             e.initialFeatureJSON = e.toGeoJSON();
 
             markers = []; // Holds marker(s) for Point and MultiPoints layers
@@ -397,13 +407,14 @@ module.exports = {
             });
 
             // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").off();
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
             $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
                 if (window.confirm("Are you sure? Changes will not be saved!")) {
                     me.stopEdit(e);
 
                     sqlQuery.reset(qstore);
                     $(".slide-right .close").unbind("click.edit");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 } else {
                     return false;
                 }
@@ -543,6 +554,8 @@ module.exports = {
                     }
                 };
 
+                $(".slide-right .close").unbind("click.edit");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
                     throw new Error(error);

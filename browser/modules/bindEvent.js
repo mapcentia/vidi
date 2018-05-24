@@ -160,11 +160,12 @@ module.exports = module.exports = {
             reset.init();
         });
 
-
         $("#info-modal button").on("click", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                $("#info-modal").animate({
+                    right: "-" + $("#myNavmenu").width() + "px"
+                }, 200);
+            }
         });
 
         $("#searchclear").on("click", function () {
