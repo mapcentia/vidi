@@ -29,15 +29,11 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.get().on("click", function (e) {
-           if (active === false) {
+           if (active === false || e.originalEvent.clickedOnFeature) {
                 return;
             }
 
             var event = new geocloud.clickEvent(e, cloud.get());
-
-            console.log(`clicked e`, e.layer);
-            console.log(`clicked event`, event);
-
             if (clicktimer) {
                 clearTimeout(clicktimer);
             } else {

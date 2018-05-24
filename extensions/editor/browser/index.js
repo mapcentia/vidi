@@ -176,6 +176,8 @@ module.exports = {
                     }
 
                     layer.on("click", function (e) {
+                        e.originalEvent.clickedOnFeature = true;
+
                         let managePopup = L.popup({
                             autoPan: false
                         }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
