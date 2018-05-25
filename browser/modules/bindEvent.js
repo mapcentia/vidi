@@ -69,6 +69,18 @@ var reset;
  *
  * @type {*|exports|module.exports}
  */
+let APIBridgeSingletone = require('./api-bridge');
+
+/**
+ *
+ * @type {APIBridge}
+ */
+var apiBridgeInstance = false;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
 
 /**
@@ -123,6 +135,8 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
+        apiBridgeInstance = APIBridgeSingletone();
+
         var doneL, doneB, loadingL = false, loadingB = false;
 
         cloud.get().on("dragend", function () {
@@ -325,6 +339,10 @@ module.exports = module.exports = {
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+        });
+
+        backboneEvents.get().on("refresh:auth", function (response) {
+            apiBridgeInstance.resubmitSkippedFeatures();
         });
 
         // Refresh browser state. E.g. after a session start

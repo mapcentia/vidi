@@ -2,7 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = true;
+const LOG = false;
 
 const DISPATCH_INTERVAL = 1000;
 
@@ -327,6 +327,7 @@ class APIBridge {
 
     /**
      * Adds feature to specific vector layer
+     * Proxy method for Queue.pushAndProcess()
      * 
      * @param {Object} feature Feature collection data
      * @param {String} db      Database name
@@ -345,6 +346,7 @@ class APIBridge {
 
     /**
      * Updates feature from specific vector layer
+     * Proxy method for Queue.pushAndProcess()
      * 
      * @param {Object} data Complete feature data
      */
@@ -355,6 +357,7 @@ class APIBridge {
 
     /**
      * Updates feature from specific vector layer
+     * Proxy method for Queue.pushAndProcess()
      * 
      * @param {Object} data Complete feature data
      */
@@ -364,12 +367,19 @@ class APIBridge {
     }
 
     /**
-     * Removes all requests by layer identifier
+     * Proxy method for Queue.removeByLayerId()
      * 
      * @param {String} layerId 
      */
     removeByLayerId(layerId) {
         return this._queue.removeByLayerId(layerId);
+    }
+
+    /**
+     * Proxy method for Queue.resubmitSkippedFeatures()
+     */
+    resubmitSkippedFeatures() {
+        return this._queue.resubmitSkippedFeatures();
     }
 
     // @todo Do not need to abstract following methods yet

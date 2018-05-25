@@ -158,9 +158,7 @@ module.exports = {
                             me.setState({alertClass: "alert-danger"});
                         }
                     });
-                }
-
-                else {
+                } else {
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/stop",
@@ -269,8 +267,8 @@ module.exports = {
     },
 
     update: function () {
+        backboneEvents.get().trigger("refresh:auth");
         backboneEvents.get().trigger("refresh:meta");
-
     }
 };
 

@@ -3,7 +3,7 @@
 const QUEUE_PROCESSING_INTERVAL = 5000;
 const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
-const LOG = true;
+const LOG = false;
 
 // Types of queue items
 const ADD_REQUEST = 0;
@@ -528,6 +528,18 @@ class Queue {
 
         if (this._queue.length !== (initialNumberOfItems - gids.length)) {
             throw new Error('Some queue elements have not been deleted');
+        }
+
+        this._saveState();
+        this._onUpdateListener(this._generateCurrentStatistics());
+    }
+
+    /**
+     * Makes queue try to push skipped items as well 
+     */
+    resubmitSkippedFeatures() {
+        for (let i = 0; i < this._queue.length; i++) {
+            this._queue[i].skip = false;
         }
 
         this._saveState();
