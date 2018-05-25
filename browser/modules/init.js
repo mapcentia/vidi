@@ -293,14 +293,11 @@ module.exports = {
                                 for(let registration of registrations) {
                                     console.log(`Versioning: unregistering service worker`, registration);
                                     unregisteringRequests.push(registration.unregister());
-alert(`unregistering`);
                                     registration.unregister();
                                 }
                             });
 
                             Promise.all(unregisteringRequests).then((values) => {
-alert(values);
-
                                 // Clear caches
                                 caches.keys().then(function(names) {
                                     for (let name of names) {

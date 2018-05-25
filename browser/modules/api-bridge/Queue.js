@@ -383,7 +383,7 @@ class Queue {
                         });
 
                         _self._processor(oldestNonSkippedItem, _self).then((result) => {
-                            _self._queue.shift();
+                            _self._queue.splice(itemToProcessData.index, 1);
 
                             if (LOG) console.log('Queue: item was processed');
                             if (LOG) console.log('Queue: items left to process', (_self._queue.length - queueSearchOffset));
@@ -414,13 +414,17 @@ class Queue {
                                 }
 
                                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
+                                _self._saveState();
+
+                                // The current item is skipped, the queue tries to push other elements
+                                localResolve();
                             } else {
                                 _self._onUpdateListener(_self._generateCurrentStatistics());
-                            }
-                            
-                            _self._saveState();
+                                _self._saveState();
 
-                            localReject();
+                                // Network or backend are probably down, no point in tying further
+                                localReject();
+                            }
                         });
 
                         } catch(e) {
