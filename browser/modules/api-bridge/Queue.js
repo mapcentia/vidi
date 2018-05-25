@@ -3,7 +3,7 @@
 const QUEUE_PROCESSING_INTERVAL = 5000;
 const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
-const LOG = false;
+const LOG = true;
 
 // Types of queue items
 const ADD_REQUEST = 0;
@@ -366,9 +366,6 @@ class Queue {
 
                         if (LOG) console.log('Queue: processing oldest non-skipped item', oldestNonSkippedItem);
 
-                        // @todo Remove as soon as possible
-                        try {
-
                         let queueItems = _self.getItems();
 
                         let numberOfItemsWithCurrentGid = 0;
@@ -426,11 +423,6 @@ class Queue {
                                 localReject();
                             }
                         });
-
-                        } catch(e) {
-                            console.warn('Queue: error occured');
-                            console.log(e);
-                        }
                     }
                 }).then(processOldestItem.bind(null)).catch(reject);
             };
