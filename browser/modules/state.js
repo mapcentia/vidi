@@ -145,11 +145,18 @@ module.exports = {
                 if (hashArr[4]) {
                     arr = hashArr[4].split(",");
                     for (i = 0; i < arr.length; i++) {
-                        switchLayer.init(arr[i], true, false);
+                        switchLayer.init(arr[i], true, true);
                     }
                 }
             }
-            legend.init();
+
+            // When all layers are loaded, when load legend and when set "all_loaded" for print
+            backboneEvents.get().once("allDoneLoading:layers", function (e) {
+                legend.init().then(function(){
+                    console.log("Vidi is now loaded");
+                    window.status = "all_loaded";
+                });
+            });
         };
 
         if (urlVars.k === undefined) {

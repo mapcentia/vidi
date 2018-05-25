@@ -27,58 +27,64 @@ module.exports = module.exports = {
         return this;
     },
     init: function (layerArr, el) {
-        var metaDataKeys = meta.getMetaDataKeys();
+        return new Promise(function (resolve, reject) {
+            var metaDataKeys = meta.getMetaDataKeys();
 
-        var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
+            var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
 
-        if (layerArr) {
-            layers = layerArr.join(";");
-        } else {
-            layers = visibleLayers;
-        }
-        var param = 'l=' + layers + '&db=' + db;
-        $.ajax({
-            url: '/api/legend/' + db + '?' + param,
-            success: function (response) {
-                var list = $('<ul class="list-group"/>'), li, classUl, title, className;
-                $.each(response, function (i, v) {
-                    if (typeof v.id !== "undefined") {
-                        title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
-                    }
-                    var u, showLayer = false;
-                    if (typeof v === "object" && v.classes !== undefined) {
-
-                        for (u = 0; u < v.classes.length; u = u + 1) {
-                            if (v.classes[u].name !== "") {
-                                showLayer = true;
-                            }
+            if (layerArr) {
+                layers = layerArr.join(";");
+            } else {
+                layers = visibleLayers;
+            }
+            var param = 'l=' + layers + '&db=' + db;
+            $.ajax({
+                url: '/api/legend/' + db + '?' + param,
+                success: function (response) {
+                    var list = $('<ul class="list-group"/>'), li, classUl, title, className;
+                    $.each(response, function (i, v) {
+                        if (typeof v.id !== "undefined") {
+                            title = metaDataKeys[v.id].f_table_title ? metaDataKeys[v.id].f_table_title : metaDataKeys[v.id].f_table_name;
                         }
-                        if (showLayer) {
-                            li = $("<li class=''/>");
-                            classUl = $('<ul />');
+                        var u, showLayer = false;
+                        if (typeof v === "object" && v.classes !== undefined) {
+
                             for (u = 0; u < v.classes.length; u = u + 1) {
-                                if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
-                                    className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
-                                    if (v.classes[u].name === "_gc2_wms_legend") {
-                                        title = "<img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>";
-                                    } else {
-                                        classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
-                                    }
+                                if (v.classes[u].name !== "") {
+                                    showLayer = true;
                                 }
                             }
-                            layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
-                            checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                            list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
-                            list.append(li.append(classUl));
-                        }
+                            if (showLayer) {
+                                li = $("<li class=''/>");
+                                classUl = $('<ul />');
+                                for (u = 0; u < v.classes.length; u = u + 1) {
+                                    if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
+                                        className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
+                                        if (v.classes[u].name === "_gc2_wms_legend") {
+                                            title = "<img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>";
+                                        } else {
+                                            classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
+                                        }
+                                    }
+                                }
+                                layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
+                                checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
+                                list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
+                                list.append(li.append(classUl));
+                            }
 
-                    }
-                });
-                $(el ? el : '#legend').html(list);
-            }
-        });
+                        }
+                    });
+                    $(el ? el : '#legend').html(list);
+                    resolve();
+                },
+                error: function (err) {
+                    reject(err);
+                }
+            });
+        })
     }
-}
+};
 
 /* ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1

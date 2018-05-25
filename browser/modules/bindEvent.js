@@ -268,8 +268,8 @@ module.exports = module.exports = {
                 if ((doneL && doneB) || loadingB === false) {
                     console.log("Setting timeout to " + window.vidiTimeout + "ms");
                     setTimeout(function () {
-                        window.status = "all_loaded";
                         console.info("Layers all loaded L");
+                        backboneEvents.get().trigger("allDoneLoading:layers");
                         doneB = doneL = false;
                         $(".loadingIndicator").fadeOut(200);
                     }, window.vidiTimeout)
@@ -284,8 +284,8 @@ module.exports = module.exports = {
             if ((doneL && doneB) || loadingL === false) {
                 console.log("Setting timeout to " + window.vidiTimeout + "ms");
                 setTimeout(function () {
-                    window.status = "all_loaded";
                     console.info("Layers all loaded B");
+                    backboneEvents.get().trigger("allDoneLoading:layers");
                     doneB = doneL = false;
                     $(".loadingIndicator").fadeOut(200);
                 }, window.vidiTimeout)
