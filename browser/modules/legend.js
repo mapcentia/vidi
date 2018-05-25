@@ -54,17 +54,19 @@ module.exports = module.exports = {
                             }
                         }
                         if (showLayer) {
+                            var isWms = false;
                             li = $("<li class=''/>");
                             classUl = $('<ul />');
                             for (u = 0; u < v.classes.length; u = u + 1) {
                                 if (v.classes[u].name !== "" || v.classes[u].name === "_gc2_wms_legend") {
                                     className = (v.classes[u].name !== "_gc2_wms_legend") ? "<span class='legend-text'>" + v.classes[u].name + "</span>" : "";
-                                    classUl.append("<li><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
+                                    classUl.append("<li" + (v.classes[u].name === "_gc2_wms_legend" ?  " style='position: relative; top: -34px;'" : "") + "><img class='legend-img' src='data:image/png;base64, " + v.classes[u].img + "' />" + className + "</li>");
+                                    isWms = v.classes[u].name === "_gc2_wms_legend" ?  true : false;
                                 }
                             }
                             layerName = metaDataKeys[v.id].f_table_schema + "." + metaDataKeys[v.id].f_table_name;
                             checked = ($.inArray(layerName, visibleLayers ? visibleLayers.split(";") : "") > -1) ? "checked" : "";
-                            list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + title + "</label></div></li>"));
+                            list.append($("<li class='list-group-item'><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + layerName + "' " + checked + ">" + (isWms ? "" : title) + "</label></div></li>"));
                             list.append(li.append(classUl));
                         }
 
