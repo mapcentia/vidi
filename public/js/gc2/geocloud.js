@@ -107,7 +107,7 @@ geocloud = (function () {
         onEachFeature: function (feature, layer) {},
         onLoad: function () {
         },
-        transformResponse: (response) => {
+        transformResponse: function (response) {
             return response;
         },
         loading: function () {
