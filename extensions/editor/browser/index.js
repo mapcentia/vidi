@@ -563,18 +563,23 @@ module.exports = {
             };
         };
 
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             editFeature();
         } else {
-            if (isVectorLayer) {
-                addFeature();
-            } else {
-                this.checkIfAppIsOnline().then(editFeature).catch(() => {
-                    if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
                         editFeature();
                     }
-                });
-            }
+                } else {
+                    editFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
+                    editFeature();
+                }
+            });
         }
     },
 
@@ -621,11 +626,20 @@ module.exports = {
             });
         };
 
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             deleteFeature();
         } else {
-            this.checkIfAppIsOnline().then(deleteFeature).catch(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        deleteFeature();
+                    }
+                } else {
+                    deleteFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
                     deleteFeature();
                 }
             });

@@ -163,5 +163,8 @@ module.exports = {
 
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
+
+        //Editor
+        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
     }
 };
