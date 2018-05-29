@@ -126,8 +126,9 @@ module.exports = {
                 </div>`;
 
         $.each(layers, function (index, value) {
+            // No need to search in the already displayed vector layer
             if (value.indexOf('v:') === 0) {
-                value = value.replace('v:', '');
+                return true;
             }
 
             if (layers[0] === "") {
@@ -384,9 +385,11 @@ module.exports = {
      */
     reset: function (qstore) {
         $.each(qstore, function (index, store) {
-            store.abort();
-            store.reset();
-            cloud.get().removeGeoJsonStore(store);
+            if (store) {
+                store.abort();
+                store.reset();
+                cloud.get().removeGeoJsonStore(store);
+            }
         });
         $("#info-tab").empty();
         $("#info-pane").empty();
