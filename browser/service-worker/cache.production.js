@@ -32,7 +32,6 @@ let urlsToCache = [
     '/locale',
     '/api/config/vidi.json',
     `/js/build/all.min.js`,
-    `/js/build/all.min.js.map`,
     `/css/build/all.min.css`
 ];
 
