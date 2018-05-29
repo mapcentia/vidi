@@ -137,7 +137,7 @@ module.exports = function (grunt) {
                 },
                 options: {
                     alias: {
-                        './cache.js': './browser/service-worker/cache.production.js'
+                        'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
                 }
@@ -148,7 +148,7 @@ module.exports = function (grunt) {
                 },
                 options: {
                     alias: {
-                        './cache.js': './browser/service-worker/cache.development.js'
+                        'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
                 }
