@@ -153,7 +153,7 @@ module.exports = {
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
                 legend.init().then(function(){
-                    console.log("Vidi is now loaded");
+                    console.log("Vidi is now loaded");// Vidi is now fully loaded
                     window.status = "all_loaded";
                 });
             });

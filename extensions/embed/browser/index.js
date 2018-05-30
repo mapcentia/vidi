@@ -22,6 +22,8 @@ var meta;
 
 var legend;
 
+var editor;
+
 var metaDataKeys;
 
 var jquery = require('jquery');
@@ -42,6 +44,7 @@ module.exports = {
         print = o.print;
         meta = o.meta;
         legend = o.legend;
+        editor = o.extensions.editor.index;
         return this;
     },
     init: function () {
@@ -120,6 +123,11 @@ module.exports = {
             if ($(this).data('module') === "print") {
                 $("#print-btn").prop("checked", false);
                 print.activate();
+            }
+
+            // If editor when deactivate
+            if ($(this).data('module') === "editor") {
+                editor.stopEdit();
             }
 
             $("#" + id).animate({
