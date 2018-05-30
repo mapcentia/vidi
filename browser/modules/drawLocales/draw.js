@@ -33,6 +33,11 @@ module.exports = {
                     start: __('Click map to place marker.')
                 }
             },
+            circlemarker: {
+                tooltip: {
+                    start: 'Click map to place circle marker.'
+                }
+            },
             polygon: {
                 tooltip: {
                     start: __('Click to start drawing shape.'),
@@ -72,6 +77,10 @@ module.exports = {
                     text: __('Cancel')
                 },
                 finish: {
+                    title: __('Cancel editing, discards all changes.'),
+                    text: __('Cancel')
+                },
+                clearAll: {
                     title: __('Cancel editing, discards all changes.'),
                     text: __('Cancel')
                 }

@@ -25,7 +25,7 @@ var urlVars = urlparser.urlVars;
  * The full meta dat object
  * @type {{data: Array}}
  */
-var metaData = {data: []};
+window.metaData = {data: []};
 
 /**
  * Object that holds the latest loaded meta data
@@ -85,36 +85,42 @@ module.exports = {
 
     /**
      *
+     * @param str
+     * @param doNotLoadExisting
+     * @returns {Promise<any>}
      */
-    init: function (str) {
+    init: function (str, doNotLoadExisting) {
         var me = this,
             schemataStr = urlparser.schema;
 
         // Reset
-        metaData = {data: []};
-        metaDataKeys = [];
-        metaDataKeysTitle = [];
         ready = false;
-
 
         return new Promise(function (resolve, reject) {
             var schemata;
-            if (str) {
-                schemataStr = str;
-            } else {
-                schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-            }
-            if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                if (schemataStr !== "") {
-                    schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+
+            if (!doNotLoadExisting) {
+                if (str) {
+                    schemataStr = str;
                 } else {
-                    schemata = window.vidiConfig.schemata;
+                    schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
                 }
-                schemataStr = schemata.join(",")
-            }
-            if (!schemataStr) {
-                reject(new Error('No schemata'));
-                return;
+
+                if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                    if (schemataStr !== "") {
+                        schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                    } else {
+                        schemata = window.vidiConfig.schemata;
+                    }
+                    schemataStr = schemata.join(",")
+                }
+
+                if (!schemataStr) {
+                    reject(new Error('No schemata'));
+                    return;
+                }
+            } else {
+                schemataStr = str;
             }
 
             $.ajax({
@@ -133,9 +139,10 @@ module.exports = {
         })
     },
 
+
     /**
-     *
-     * @param data
+     * Add a meta data objects layers
+     * @param data {object}
      */
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
@@ -164,7 +171,7 @@ module.exports = {
     },
 
     /**
-     * Get the raw full meta data object
+     * Get a clone of the full meta data object
      * @returns {Object}
      */
     getMetaData: function () {
@@ -172,7 +179,7 @@ module.exports = {
     },
 
     /**
-     * Get the raw meta data from latest loaded
+     * Get a clone of meta data from latest loaded
      * @returns {Object}
      */
     getMetaDataLatestLoaded: function () {

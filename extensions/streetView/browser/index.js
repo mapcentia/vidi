@@ -193,6 +193,14 @@ module.exports = {
             componentDidMount() {
                 var me = this;
 
+                // Listen and reacting to the global Reset ALL event
+                backboneEvents.get().on("reset:all", function () {
+                    me.setState({
+                        active: false
+                    });
+                    utils.cursorStyle().reset();
+                });
+
                 // Handle click events on map
                 // ==========================
 
@@ -246,7 +254,7 @@ module.exports = {
                                 <div className="form-group">
                                     <div className="togglebutton">
                                         <label><input id="streetview-btn" type="checkbox"
-                                                      defaultChecked={ this.state.active }
+                                                      checked={ this.state.active }
                                                       onChange={this.onActive}/>{__("Activate")}
                                         </label>
 

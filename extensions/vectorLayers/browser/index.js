@@ -68,7 +68,7 @@ var cm = [];
 
 var styles = [];
 
-var  store = [];
+var store = [];
 
 var automatic = true;
 
@@ -160,7 +160,8 @@ module.exports = {
     },
 
     createLayerTree: function () {
-        var base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr;
+
+        let base64name, arr, groups = [], metaData, i, l, displayInfo, subOrderHeader, icon, dataAttr, styleFn;
 
         metaData = meta.getMetaData();
 
@@ -180,10 +181,20 @@ module.exports = {
                 $("#vectorlayers").append('<div class="panel panel-default" id="vectorlayer-panel-' + base64name + '"><div class="panel-heading" role="tab"><h4 class="panel-title"><div class="layer-count badge"><span>0</span> / <span></span></div><a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#vectorlayers" href="#vectorcollapse' + base64name + '"> ' + arr[i] + ' </a></h4></div><ul class="list-group" id="vectorgroup-' + base64name + '" role="tabpanel"></ul></div>');
                 $("#vectorgroup-" + base64name).append('<div id="vectorcollapse' + base64name + '" class="accordion-body collapse"></div>');
 
-                for (var u = 0; u < metaData.data.length; ++u) {
+                for (let u = 0; u < metaData.data.length; ++u) {
                     if (metaData.data[u].layergroup == arr[i]) {
 
-                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title, id;
+                        // if (JSON.parse(metaData.data[u].meta) !== null && typeof JSON.parse(metaData.data[u].meta).vectorstyle !== "undefined") {
+                        //     try {
+                        //         styleFn = eval("(" + JSON.parse(metaData.data[u].meta).vectorstyle + ")");
+                        //     } catch (e) {
+                        //         styleFn = function () {
+                        //         };
+                        //     }
+                        // }
+
+                        var text = (metaData.data[u].f_table_title === null || metaData.data[u].f_table_title === "") ? metaData.data[u].f_table_name : metaData.data[u].f_table_title,
+                            id;
 
                         try {
                             icon = "<img style='width: 20px;vertical-align: text-bottom;' src='https://webkort.syddjurs.dk/images/custom/map-icons/" + JSON.parse(metaData.data[u].meta).oplev_ikon + "'> ";
@@ -228,12 +239,15 @@ module.exports = {
                                         }
                                         layers.decrementCountLoading(me.id);
                                         backboneEvents.get().trigger("doneLoading:layers", me.id);
-                                        onLoad[me.id](l);
+                                        if (onLoad[me.id] !== undefined) {
+                                            onLoad[me.id](l);
+                                        }
                                     },
 
                                     onEachFeature: onEachFeature[id],
 
                                     pointToLayer: pointToLayer[id]
+
                                 });
                             }
                         }
@@ -262,15 +276,17 @@ module.exports = {
 
                 // Open the first panel
                 // ====================
-                //$("#vectorlayers div:first").find("a").trigger("click");
+                // $("#vectorlayers div:first").find("a").trigger("click");
             }
         }
         backboneEvents.get().trigger("ready:vectorLayers");
     },
 
+    // Turn layers on/off
+    // ==================
     switchLayer: function (id, visible) {
 
-         var el = $('*[data-gc2-id-vec="' + id + '"]');
+        let el = $('*[data-gc2-id-vec="' + id + '"]');
 
         if (visible) {
 
@@ -281,6 +297,7 @@ module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(id));
 
             }
+
             catch (e) {
 
                 console.info(id + " added to the map.");
@@ -289,14 +306,16 @@ module.exports = {
                 cloud.get().map.addLayer(cloud.get().getLayersByName(id));
 
             }
+
             finally {
 
-                store[id].load();
                 el.prop('checked', true);
                 layers.incrementCountLoading(id);
                 backboneEvents.get().trigger("startLoading:layers", id);
-            }
 
+            }
+            // XHR promise, so with call back ".done()"
+            return store[id].load();
 
         } else {
 
@@ -304,6 +323,11 @@ module.exports = {
             store[id].reset();
             cloud.get().map.removeLayer(cloud.get().getLayersByName(id));
             el.prop('checked', false);
+            // Return dummy ".done()"
+            return {
+                done: function () {
+                }
+            };
 
         }
 
@@ -342,5 +366,13 @@ module.exports = {
 
     setAutomatic: function (b) {
         automatic = b;
+    },
+
+    getStores: function () {
+        return store;
+    },
+
+    load: function (id) {
+        store[id].load();
     }
 };

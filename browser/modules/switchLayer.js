@@ -31,6 +31,26 @@ var pushState;
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var meta;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var backboneEvents;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var layerTree;
+
+var tries = 0;
+
+/**
+ *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = module.exports = {
@@ -39,6 +59,9 @@ module.exports = module.exports = {
         legend = o.legend;
         layers = o.layers;
         pushState = o.pushState;
+        meta = o.meta;
+        backboneEvents = o.backboneEvents;
+        layerTree = o.layerTree;
         return this;
     },
     /**
@@ -55,23 +78,47 @@ module.exports = module.exports = {
 
                 cloud.get().map.addLayer(cloud.get().getLayersByName(name));
                 me.update(doNotLegend, el);
+                tries = 0;
 
             } catch (e) {
 
                 layers.addLayer(name)
 
-                    .then(function () {
+                    .then(
 
-                        cloud.get().map.addLayer(cloud.get().getLayersByName(name));
-                        me.update(doNotLegend, el);
+                        function () {
+                            tries = 0;
+                            cloud.get().map.addLayer(cloud.get().getLayersByName(name));
+                            me.update(doNotLegend, el);
 
-                        try {
-                            cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
-                            el.prop('checked', true);
-                        } catch (e) {
-                            //console.error(e.message);
+                            try {
+                                cloud.get().map.addLayer(cloud.get().getLayersByName(name + "_vidi_utfgrid"));
+                                el.prop('checked', true);
+                            } catch (e) {
+                                //console.error(e.message);
+                            }
+
+                        },
+
+                        // If layer is not in Meta we load meta from GC2 and init again in a recursive call
+                        function (err) {
+                            console.log("Layer " + name + " not in Meta");
+                            meta.init(name, true).then(
+                                function () {
+
+                                    if (tries > 0) {
+                                        console.error("Could not add layer");
+                                        tries = 0;
+                                        return;
+                                    }
+
+                                    layerTree.init();
+                                    tries = 1;
+                                    me.init(name, true); // recursive
+                                }
+                            );
                         }
-                });
+                    );
 
             } finally {
                 el.prop('checked', true);

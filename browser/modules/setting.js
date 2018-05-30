@@ -32,6 +32,8 @@ var ready = false;
  */
 var extent;
 
+var maxBounds;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -70,6 +72,9 @@ module.exports = {
                         if (typeof response.data.extents[firstSchema] === "object") {
                             extent = response.data.extents[firstSchema];
                         }
+                        if (typeof response.data.extentrestricts === "object" && typeof response.data.extentrestricts[firstSchema] === "object") {
+                            maxBounds = response.data.extentrestricts[firstSchema];
+                        }
                     }
                     ready = true;
                     backboneEvents.get().trigger("ready:settings");
@@ -88,10 +93,18 @@ module.exports = {
     },
 
     /**
-     * Get the saved extent from the first schema or viz
+     * Get the saved extent from the first schema
      * @returns {array}
      */
     getExtent: function () {
         return extent;
+    },
+
+    /**
+     * Get the saved maxBounds from the first schema
+     * @returns {array}
+     */
+    getMaxBounds: function () {
+        return maxBounds;
     }
 };

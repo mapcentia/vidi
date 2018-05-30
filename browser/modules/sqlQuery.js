@@ -55,6 +55,8 @@ const Form = JSONSchemaForm.default;
  */
 var BACKEND = require('../../config/config.js').backend;
 
+var extensions;
+
 
 /**
  *
@@ -71,8 +73,8 @@ module.exports = {
         meta = o.meta;
         advancedInfo = o.advancedInfo;
         backboneEvents = o.backboneEvents;
-        editor = o.editor;
         _layers = o.layers;
+        extensions = o.extensions;
         return this;
     },
 
@@ -88,6 +90,11 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
+        try {
+            editor = extensions.editor.index;
+        } catch (e) {
+        }
+
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
 
@@ -98,29 +105,30 @@ module.exports = {
             }
         }
 
+        backboneEvents.get().trigger("start:sqlQuery");
+
         /**
          * A default template for GC2, with a loop
          * @type {string}
          */
         var defaultTemplate =
-            '<div class="cartodb-popup-content">' +
-            '<!--<button id="popup-edit-btn">Edit</button>-->' +
-            '   {{#_vidi_content.fields}}' +
-            '       {{#title}}<h4>{{title}}</h4>{{/title}}' +
-            '       {{#value}}' +
-            '           <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>' +
-            '       {{/value}}' +
-            '       {{^value}}' +
-            '           <p class="empty">null</p>' +
-            '       {{/value}}' +
-            '   {{/_vidi_content.fields}}' +
-            '</div>';
+            `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="visibility: hidden"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
+                  {{#_vidi_content.fields}}
+                     {{#title}}<h4>{{title}}</h4>{{/title}}
+                     {{#value}}
+                       <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                     {{/value}}
+                     {{^value}}
+                       <p class="empty">null</p>
+                     {{/value}}
+                  {{/_vidi_content.fields}}
+                </div>`;
 
         $.each(layers, function (index, value) {
             if (layers[0] === "") {
                 return false;
             }
-
 
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
@@ -131,12 +139,12 @@ module.exports = {
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
+            var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
             var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             _layers.incrementCountLoading(key);
-            backboneEvents.get().trigger("startLoading:layers");
-
+            backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
                 var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -150,7 +158,7 @@ module.exports = {
                     var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
-                    backboneEvents.get().trigger("doneLoading:layers");
+                    backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
 
 
                     isEmpty = layerObj.isEmpty();
@@ -227,9 +235,15 @@ module.exports = {
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
-                            $("#popup-edit-btn").on("click", function () {
-                                editor.startEdit(e, _key_);
-                            })
+                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                editor.edit(e, _key_, qstore);
+                            });
+
+                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                    editor.delete(e, _key_, qstore);
+                                }
+                            });
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
@@ -246,7 +260,6 @@ module.exports = {
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
                         })
-
 
 
                     } else {
@@ -286,7 +299,6 @@ module.exports = {
                 // so they can be recreated as query layers
                 // after serialization
                 // ========================================
-
                 onEachFeature: function (f, l) {
                     if (typeof l._layers !== "undefined") {
                         $.each(l._layers, function (i, v) {
@@ -296,25 +308,42 @@ module.exports = {
                         l._vidi_type = "query_result";
                     }
 
+                    l.on("click", function (e) {
+
+
+                        setTimeout(function () {
+                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                editor.edit(l, _key_, qstore);
+
+                            });
+
+                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                    editor.delete(l, _key_, qstore);
+                                }
+                            });
+                        }, 500)
+                    });
+
                 }
             });
             cloud.get().addGeoJsonStore(qstore[index]);
 
-            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fields = [], fieldStr;
+            var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
 
-            if (fieldConf) {
-                $.each(fieldConf, function (i, v) {
+            if (fields) {
+                $.each(fields, function (i, v) {
                     if (v.type === "bytea") {
-                        fields.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
-                    } else if (i !== f_geometry_column) {
-                        fields.push("\"" + i + "\"");
+                        fieldNames.push("encode(\"" + i + "\",'escape') as \"" + i + "\"");
+                    } else {
+                        fieldNames.push("\"" + i + "\"");
                     }
                 });
-                fieldStr = fields.join(",") + ",\"" + f_geometry_column + "\"";
+                fieldStr = fieldNames.join(",");
+                console.log(fieldStr)
             } else {
                 fieldStr = "*";
             }
-
             if (geoType === "RASTER") {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
@@ -372,5 +401,5 @@ var sortObject = function (obj) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array
-}
+};
 

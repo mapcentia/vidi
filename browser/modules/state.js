@@ -132,6 +132,11 @@ module.exports = {
         hash = decodeURIComponent(window.location.hash);
         hashArr = hash.replace("#", "").split("/");
 
+        // var maxBounds = setting.getMaxBounds();
+        // if (maxBounds !== null) {
+        //     cloud.get().setMaxBounds(maxBounds);
+        // }
+
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
@@ -140,11 +145,18 @@ module.exports = {
                 if (hashArr[4]) {
                     arr = hashArr[4].split(",");
                     for (i = 0; i < arr.length; i++) {
-                        switchLayer.init(arr[i], true, false);
+                        switchLayer.init(arr[i], true, true);
                     }
                 }
             }
-            legend.init();
+
+            // When all layers are loaded, when load legend and when set "all_loaded" for print
+            backboneEvents.get().once("allDoneLoading:layers", function (e) {
+                legend.init().then(function(){
+                    console.log("Vidi is now loaded");// Vidi is now fully loaded
+                    window.status = "all_loaded";
+                });
+            });
         };
 
         if (urlVars.k === undefined) {
@@ -155,16 +167,13 @@ module.exports = {
                 setBaseLayer.init(baseLayer.getBaseLayer()[0]);
                 var extent = setting.getExtent();
                 if (extent !== null) {
-                    if (BACKEND === "cartodb") {
-                        cloud.get().map.fitBounds(extent);
-                    } else {
-                        cloud.get().zoomToExtent(extent);
-                    }
+                    cloud.get().zoomToExtent(extent);
                 } else {
                     cloud.get().zoomToExtent();
                 }
             }
         }
+
         else {
             var parr, v, l, t, GeoJsonAdded = false;
             parr = urlVars.k.split("#");
@@ -217,8 +226,8 @@ module.exports = {
                                         scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
 
                                     $("#container1").css("transform", "scale(" + scaleFactor + ")");
-                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
-                                    $(".leaflet-control-graphicscale").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
+                                    $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                    $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
                                     $("#scale").html("1 : " + response.data.scale);
                                     $("#title").html(decodeURIComponent(urlVars.t));
                                     parr = urlVars.c.split("#");
@@ -230,9 +239,7 @@ module.exports = {
                                     if (hashArr[0]) {
                                         setLayers()
                                     }
-
                                     cloud.get().map.removeLayer(g);
-
                                 }, 0)
                             }
                         });
@@ -280,6 +287,20 @@ module.exports = {
                                 l.addLayer(g);
                             }
 
+                            // If circle marker
+                            // ================
+                            if (m.type === "CircleMarker") {
+                                g = L.marker(m._latlng, m.style);
+                                g.feature = m.feature;
+
+                                // Add label
+                                if (m._vidi_marker_text) {
+                                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                                    }).openTooltip();
+                                }
+                                l.addLayer(g);
+                            }
+
                             // If marker
                             // =========
                             if (m.type === "Marker") {
@@ -288,8 +309,8 @@ module.exports = {
 
                                 // Add label
                                 if (m._vidi_marker_text) {
-                                    g.bindLabel(m._vidi_marker_text, {noHide: true}).on("click", function () {
-                                    }).showLabel();
+                                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                                    }).openTooltip();
                                 }
                                 l.addLayer(g);
 

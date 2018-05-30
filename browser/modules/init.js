@@ -186,8 +186,6 @@ module.exports = {
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
-        modules.editor.init();
-
         modules.meta.init()
 
             .then(function () {
@@ -228,6 +226,7 @@ module.exports = {
         //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
            require('./../../extensions/*/browser/*.js', {glob: true});
+           require('./../../extensions/*/browser/*/*.js', {glob: true});
         }
 
         if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {

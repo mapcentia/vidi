@@ -4,6 +4,10 @@ var app = express();
 var bulk = require('bulk-require');
 var bodyParser = require('body-parser');
 var session = require('express-session');
+var cors = require('cors');
+
+var app = express();
+app.use(cors());
 
 app.use(bodyParser.json({
         limit: '50mb'

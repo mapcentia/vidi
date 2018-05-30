@@ -1,3 +1,4 @@
+"use strict";
 function detailFormatter(index, row) {
     var html = [];
     $.each(row, function (key, value) {
@@ -157,10 +158,11 @@ var Base64 = {
 
     // private method for UTF-8 decoding
     _utf8_decode: function (utftext) {
-        var string = "", i, c1, c2, c;
+        var string = "", i, c1, c2, c3, c;
         c = 0;
         c1 = 0;
         c2 = 0;
+        c3 = 0;
 
         while (i < utftext.length) {
             c = utftext.charCodeAt(i);

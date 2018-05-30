@@ -28,6 +28,7 @@ var backboneEvents;
 var legend;
 var moment = require('moment');
 var meta;
+var uriJs = require('urijs');
 var callBack= function () {};
 
 /**
@@ -189,7 +190,7 @@ module.exports = {
      *
      */
     print: function (endEventName, customData) {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null;
+        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
         if (isNaN(scale) || scale < 200) {
             alert(__("Not a valid scale. Must be over 200."));
@@ -303,7 +304,8 @@ module.exports = {
             customData: customData || null,
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
-            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1]
+            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
+            queryString: uriObj.search()
         };
 
         if (urlVars.config) {

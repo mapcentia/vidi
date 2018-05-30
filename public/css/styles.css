@@ -773,7 +773,11 @@ body {
   width: calc(100% - 50px);
 }
 .info-label {
-  display: none;
+  visibility: hidden;
+  cursor: pointer;
+}
+.edit-label {
+  visibility: hidden;
   cursor: pointer;
 }
 .close {
@@ -889,14 +893,6 @@ input[type=text]::-ms-clear {
 }
 .control-label {
   white-space: nowrap;
-}
-.leaflet-measure-path-measurement {
-  font-size: 10px;
-  padding: 2px;
-  border-radius: 2px;
-  text-align: center;
-  color: black;
-  text-shadow: -1px 0 0 white, -1px -1px 0 white, 0 -1px 0 white, 1px -1px 0 white, 1px 0 0 white, 1px 1px 0 white, 0 1px 0 white, -1px 1px 0 white;
 }
 h4 small {
   font-size: 65%;
