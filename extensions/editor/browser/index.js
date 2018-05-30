@@ -296,20 +296,6 @@ module.exports = {
             properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
         };
 
-        // Slide panel with attributes in and render form component
-        $("#info-modal.slide-right").animate({
-            right: "0"
-        }, 200, function () {
-            ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form schema={schema}
-                          formData={e.feature.properties}
-                          onSubmit={onSubmit}
-                    />
-                </div>
-            ), document.getElementById("info-modal-body"));
-
-        });
 
         /**
          * Commit to GC2
@@ -377,6 +363,23 @@ module.exports = {
                 }
             });
         };
+
+        // Slide panel with attributes in and render form component
+        ReactDOM.render((
+            <div style={{"padding": "15px"}}>
+                <Form schema={schema}
+                      formData={e.feature.properties}
+                      onSubmit={onSubmit}
+                />
+            </div>
+        ), document.getElementById("editor-attr-form"));
+
+        $("#editor-attr-dialog").animate({
+            bottom: "0"
+        }, 500, function () {
+            $("#editor-attr-dialog" + " .expand-less").show();
+            $("#editor-attr-dialog" + " .expand-more").hide();
+        });
     },
 
     /**
@@ -410,19 +413,6 @@ module.exports = {
             type: "object",
             properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
         };
-
-        // Slide panel with attributes in and render form component
-        $("#info-modal.slide-right").animate({
-            right: "0"
-        }, 200, function () {
-            ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form schema={schema}
-                          onSubmit={onSubmit}
-                    />
-                </div>
-            ), document.getElementById("info-modal-body"));
-        });
 
         // Start editor with the right type
         if (type === "POLYGON" || type === "MULTIPOLYGON") {
@@ -495,6 +485,21 @@ module.exports = {
                 }
             });
         };
+
+        ReactDOM.render((
+            <div style={{"padding": "15px"}}>
+                <Form schema={schema}
+                      onSubmit={onSubmit}
+                />
+            </div>
+        ), document.getElementById("editor-attr-form"));
+
+        $("#editor-attr-dialog").animate({
+            bottom: "0"
+        }, 500, function () {
+            $("#editor-attr-dialog" + " .expand-less").show();
+            $("#editor-attr-dialog" + " .expand-more").hide();
+        });
     },
 
     /**
