@@ -216,24 +216,35 @@ module.exports = {
      * @returns {{}}
      */
     createFormObj: function (fieldConf, pkey, f_geometry_column) {
-
         let properties = {};
 
+console.log(`## `, fieldConf);
+
         Object.keys(fieldConf).map(function (key) {
+            if (key !== pkey && key !== f_geometry_column) {
+                let type = `string`;
+                let format = ``;
+                if (fieldConf[key]) {
+                    switch (fieldConf[key].type) {
+                        case `int`:
+                            type = `integer`;
+                            break;
+                        case `date`:
+                            format = `date-time`;
+                            break;
+                        case `boolean`:
+                            type = `boolean`;
+                            break;
+                    }
+                }
 
-            if (key !== pkey && key !== f_geometry_column)
+                console.log(`# `, key, type);
                 properties[key] = {
-                    type:
-                        (fieldConf[key] !== undefined && fieldConf[key].type === "string") ? "string" :
-                            (fieldConf[key] !== undefined && fieldConf[key].type === "int") ? "integer" :
-                                "string",
-                    title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key
+                    title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key,
+                    type,
+                    format
                 };
-
-            if (fieldConf[key] !== undefined && fieldConf[key].type === "date") {
-                properties[key].format = "date-time";
             }
-
         });
 
         return properties;
