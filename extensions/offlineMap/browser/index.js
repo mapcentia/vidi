@@ -63,7 +63,7 @@ var transformPoint;
  *
  * @type {string}
  */
-var exId = "offlineMap";
+var exId = "offline-map-form";
 
 /**
  *

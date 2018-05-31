@@ -156,6 +156,8 @@ var id = "conflict-custom-search";
 
 var searchStr = "";
 
+var searchLoadedLayers = true;
+
 /**
  *
  */
@@ -279,6 +281,24 @@ module.exports = module.exports = {
             getProperty = config.extensionConfig.conflictSearch.getProperty;
         } catch (e) {
             getProperty = false;
+        }
+
+        try {
+            searchStr = config.extensionConfig.conflictSearch.searchString;
+            if (searchStr === undefined) {
+                searchStr = "";
+            }
+        } catch (e) {
+            searchStr = "";
+        }
+
+        try {
+            searchLoadedLayers = config.extensionConfig.conflictSearch.searchLoadedLayers;
+            if (searchLoadedLayers === undefined) {
+                searchLoadedLayers = true;
+            }
+        } catch (e) {
+            searchLoadedLayers = true;
         }
 
         cloud.map.addLayer(drawnItems);
@@ -610,7 +630,7 @@ module.exports = module.exports = {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + schemataStr + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
                     scriptCharset: "utf-8",
                     success: function (response) {
                         var hitsCount = 0, noHitsCount = 0, errorCount = 0;

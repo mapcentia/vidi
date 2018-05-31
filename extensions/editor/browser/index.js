@@ -36,7 +36,7 @@ var JSONSchemaForm = require("react-jsonschema-form");
 
 var Form = JSONSchemaForm.default;
 
-var markers;
+var markers = [];
 
 var editor;
 
@@ -277,16 +277,19 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-                ReactDOM.render((
-                    <div style={{"padding": "15px"}}>
-                        <Form schema={schema}
-                            onSubmit={onSubmit}
-                        />
-                    </div>
-                ), document.getElementById("info-modal-body"));
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
             });
 
             // Start editor with the right type
@@ -388,6 +391,7 @@ module.exports = {
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
                 fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
+                type = metaDataKeys[schemaQualifiedName].type,
                 properties;
             me.stopEdit();
 
@@ -398,9 +402,6 @@ module.exports = {
 
             e.initialFeatureJSON = e.toGeoJSON();
 
-            markers = []; // Holds marker(s) for Point and MultiPoints layers
-
-            cloud.get().map.closePopup();
 
             backboneEvents.get().on("start:sqlQuery", function () {
                 //me.stopEdit(e);
@@ -482,19 +483,14 @@ module.exports = {
                 properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
             };
 
-            // Slide panel with attributes in and render form component
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-                ReactDOM.render((
-                    <div style={{"padding": "15px"}}>
-                        <Form schema={schema}
-                            formData={e.feature.properties}
-                            onSubmit={onSubmit}
-                        />
-                    </div>
-                ), document.getElementById("info-modal-body"));
-            });
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            }
+            else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            }
 
             /**
              * Commit to GC2
@@ -561,6 +557,22 @@ module.exports = {
                     throw new Error(error);
                 });
             };
+
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          formData={e.feature.properties}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
+            });
         };
 
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);

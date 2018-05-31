@@ -711,6 +711,21 @@ geocloud = (function () {
                     break;
             }
         };
+
+        this.setMaxBounds = function (extent) {
+            var p1, p2;
+            switch (MAPLIB) {
+                case "leaflet":
+                    p1 = transformPoint(extent[0], extent[1], "EPSG:900913", "EPSG:4326");
+                    p2 = transformPoint(extent[2], extent[3], "EPSG:900913", "EPSG:4326");
+                    this.map.setMaxBounds([
+                        [p1.y, p1.x],
+                        [p2.y, p2.x]
+                    ]);
+                    break;
+            }
+        };
+
         this.zoomToExtentOfgeoJsonStore = function (store, maxZoom) {
             switch (MAPLIB) {
                 case "ol2":

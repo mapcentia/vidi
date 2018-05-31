@@ -55,6 +55,8 @@ var backboneEvents;
  */
 var layerTree;
 
+var tries = 0;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}

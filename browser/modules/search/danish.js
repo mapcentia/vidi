@@ -484,7 +484,24 @@ module.exports = {
                                                 }
                                             }
                                         }
-                                    }
+                                    },
+                                    "sort": [
+                                        {
+                                            "properties.nummer": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.litra": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.ejerlavsnavn": {
+                                                "order": "asc"
+                                            }
+                                        }
+                                    ]
                                 };
                                 break;
                             case "ejerlav":
