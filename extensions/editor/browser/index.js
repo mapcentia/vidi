@@ -215,35 +215,36 @@ module.exports = {
      * @param f_geometry_column
      * @returns {{}}
      */
-    createFormObj: function (fieldConf, pkey, f_geometry_column) {
+    createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
         let properties = {};
-
-console.log(`## `, fieldConf);
-
-        Object.keys(fieldConf).map(function (key) {
+        Object.keys(fields).map(function (key) {
             if (key !== pkey && key !== f_geometry_column) {
-                let type = `string`;
-                let format = ``;
-                if (fieldConf[key]) {
-                    switch (fieldConf[key].type) {
+                properties[key] = {
+                    title: (fields[key] !== undefined && fields[key].alias) || key,
+                    type: `string`
+                };
+
+                if (fields[key]) {
+                    switch (fields[key].type) {
                         case `int`:
-                            type = `integer`;
+                            properties[key].type = `integer`;
                             break;
                         case `date`:
-                            format = `date-time`;
+                            properties[key].format = `date-time`;
                             break;
                         case `boolean`:
-                            type = `boolean`;
+                            properties[key].type = `boolean`;
                             break;
                     }
                 }
 
-                console.log(`# `, key, type);
-                properties[key] = {
-                    title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key,
-                    type,
-                    format
-                };
+                // Properties have priority over default types
+                if (fieldConf[key] && fieldConf[key].properties) {
+                    let parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
+                    if (parsedProperties && parsedProperties.length > 0) {
+                        properties[key].enum = parsedProperties;
+                    }
+                }
             }
         });
 
@@ -261,8 +262,19 @@ console.log(`## `, fieldConf);
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
             type = metaDataKeys[schemaQualifiedName].type;
+
+        let fields = false;
+        if (metaDataKeys[schemaQualifiedName].fields) {
+            fields = metaDataKeys[schemaQualifiedName].fields;
+        } else {
+            throw new Error(`Meta property "fields" can not be empty`);
+        }
+
+        let fieldconf = false;
+        if (metaDataKeys[schemaQualifiedName].fieldconf) {
+            fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+        }
 
         const addFeature = () => {
             me.stopEdit();
@@ -284,7 +296,7 @@ console.log(`## `, fieldConf);
             // Create schema for attribute form
             const schema = {
                 type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
+                properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
             };
 
             // Slide panel with attributes in and render form component
@@ -401,9 +413,21 @@ console.log(`## `, fieldConf);
 
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
-                fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
                 type = metaDataKeys[schemaQualifiedName].type,
                 properties;
+
+            let fields = false;
+            if (metaDataKeys[schemaQualifiedName].fields) {
+                fields = metaDataKeys[schemaQualifiedName].fields;
+            } else {
+                throw new Error(`Meta property "fields" can not be empty`);
+            }
+
+            let fieldconf = false;
+            if (metaDataKeys[schemaQualifiedName].fieldconf) {
+                fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+            }
+
             me.stopEdit();
 
             e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
@@ -491,7 +515,7 @@ console.log(`## `, fieldConf);
             // Create schema for attribute form
             const schema = {
                 type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
+                properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
             };
 
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
