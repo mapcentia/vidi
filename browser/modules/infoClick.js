@@ -29,15 +29,14 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.get().on("click", function (e) {
-           if (active === false) {
+           if (active === false || e.originalEvent.clickedOnFeature) {
                 return;
             }
-            var event = new geocloud.clickEvent(e, cloud.get());
 
+            var event = new geocloud.clickEvent(e, cloud.get());
             if (clicktimer) {
                 clearTimeout(clicktimer);
-            }
-            else {
+            } else {
                 clicktimer = setTimeout(function (e) {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;

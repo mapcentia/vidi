@@ -512,7 +512,9 @@
             <a href="#print-dialog" id="print-dialog-btn" data-module="print"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">print</i></a>
-
+            <a href="#offline-map-dialog" id="offline-map-btn" data-module="offline-map"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">save_alt</i></a>
             <!--<a href="#info-dialog" id="info-dialog-btn" data-module="info"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">print</i></a>-->
@@ -572,6 +574,21 @@
         </div>
         <div class="modal-body">
             <div class="form-group" id="editor-attr-form"></div>
+        </div>
+    </div>
+
+    <div id="offline-map-dialog" class="dialog-bottom fade-then-dragging">
+        <div class="modal-header">
+            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i class="material-icons">close</i>
+            </button>
+            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+            </button>
+            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+            </button>
+            <h3 class="modal-title">Attributes</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group" id="offline-map-form"></div>
         </div>
     </div>
 

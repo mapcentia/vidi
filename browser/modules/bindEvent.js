@@ -69,6 +69,18 @@ var reset;
  *
  * @type {*|exports|module.exports}
  */
+let APIBridgeSingletone = require('./api-bridge');
+
+/**
+ *
+ * @type {APIBridge}
+ */
+var apiBridgeInstance = false;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var urlparser = require('./urlparser');
 
 /**
@@ -123,6 +135,8 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
+        apiBridgeInstance = APIBridgeSingletone();
+
         var doneL, doneB, loadingL = false, loadingB = false;
 
         cloud.get().on("dragend", function () {
@@ -160,11 +174,12 @@ module.exports = module.exports = {
             reset.init();
         });
 
-
         $("#info-modal button").on("click", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                $("#info-modal").animate({
+                    right: "-" + $("#myNavmenu").width() + "px"
+                }, 200);
+            }
         });
 
         $("#searchclear").on("click", function () {
@@ -326,6 +341,10 @@ module.exports = module.exports = {
             $("#start-print-btn").button('reset');
         });
 
+        backboneEvents.get().on("refresh:auth", function (response) {
+            apiBridgeInstance.resubmitSkippedFeatures();
+        });
+
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on("refresh:meta", function (response) {
@@ -344,7 +363,7 @@ module.exports = module.exports = {
                     })
 
                 .then(function () {
-                    layerTree.init();
+                    layerTree.create();
                     state.init();
                 });
 
@@ -358,10 +377,16 @@ module.exports = module.exports = {
         if (!urlVars.px && !urlVars.py) {
             $(document).arrive('[data-gc2-id]', function () {
                 $(this).on("change", function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
+                    let prefix = '';
+                    if ($(this).data('gc2-layer-type') === 'vector') {
+                        prefix = 'v:';
+                    }
+
+                    switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, true);
                     e.stopPropagation();
                 });
             });
+
             $(document).arrive('[data-gc2-base-id]', function () {
                 $(this).on("change", function (e) {
                     setBaseLayer.init($(this).data('gc2-base-id'));
@@ -369,21 +394,19 @@ module.exports = module.exports = {
                     $(this).css("background-color", "white");
                 });
             });
+
             $(document).arrive('[data-toggle="tooltip"]', function () {
                 $(this).tooltip()
             });
+
             $(document).arrive('.info-label', function () {
                 $(this).on("click", function (e) {
-                    var t = ($(this).data('gc2-id')), html,
-                        meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                        name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                        title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                        abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
+                    var t = ($(this).prev().children("input").data('gc2-id')), html, meta = $.parseJSON(metaDataKeys[t].meta);
 
-                    html = (meta !== null
+                    html = (metaDataKeys[t].meta !== null && meta !== null
                         && typeof meta.meta_desc !== "undefined"
                         && meta.meta_desc !== "") ?
-                        converter.makeHtml(meta.meta_desc) : abstract;
+                        converter.makeHtml(meta.meta_desc) : metaDataKeys[t].f_table_abstract;
 
                     moment.locale('da');
 
@@ -396,7 +419,7 @@ module.exports = module.exports = {
                         }
                     }
 
-                    html = html ? Mustache.render(html, metaDataKeys[t]) : "";
+                    html =Mustache.render(html, metaDataKeys[t]);
 
                     $("#info-modal.slide-right").animate({right: "0"}, 200);
                     $("#info-modal .modal-title").html(title || name);
@@ -404,10 +427,7 @@ module.exports = module.exports = {
                     legend.init([t], "#info-modal-legend");
                     e.stopPropagation();
                 });
-
             });
-
-
 
             $(document).arrive('[data-scale-ul]', function () {
                 $(this).on("click", function (e) {

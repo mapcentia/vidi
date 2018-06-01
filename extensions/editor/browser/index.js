@@ -9,9 +9,19 @@
  *
  * @type {*|exports|module.exports}
  */
+let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var utils;
 
 var backboneEvents;
+
+var layerTree;
+
+var apiBridgeInstance = false;
 
 var meta;
 var cloud;
@@ -26,11 +36,13 @@ var JSONSchemaForm = require("react-jsonschema-form");
 
 var Form = JSONSchemaForm.default;
 
-var markers;
-
-var vectorLayers;
+var markers = [];
 
 var editor;
+
+var switchLayer;
+
+var managePopups = [];
 
 /**
  *
@@ -44,7 +56,6 @@ var urlparser = require('./../../../browser/modules/urlparser');
 var db = urlparser.db;
 
 var isInit = false;
-
 
 /**
  *
@@ -62,8 +73,9 @@ module.exports = {
         meta = o.meta;
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
+        layerTree = o.layerTree;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
-        vectorLayers = o.extensions.vectorLayers.index;
         return this;
     },
 
@@ -71,23 +83,23 @@ module.exports = {
      *
      */
     init: function () {
-
         let me = this, metaDataKeys, metaData, styleFn;
+        apiBridgeInstance = APIBridgeSingletone();
 
         isInit = true;
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
             $(this).on("click", function (e) {
-                var t = ($(this).data('gc2-key'));
-                if (($(this).data('vector'))) {
-                    me.add(t, null, true);
-                } else {
-                    me.add(t);
+                let isVectorLayer = false;
+                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
+                    isVectorLayer = true;
                 }
+
+                var t = ($(this).data('gc2-key'));
+                me.add(t, null, true, isVectorLayer);
                 e.stopPropagation();
             });
-
         });
 
         // When editing is disabled, close the slide panel with attribute form
@@ -104,14 +116,12 @@ module.exports = {
         });
 
         // Don't init layer tree automatic. Let this module activate it
-        vectorLayers.setAutomatic(false);
+        layerTree.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
-
             metaDataKeys = meta.getMetaDataKeys();
             metaData = meta.getMetaData();
-            metaData.data.map(function (v) {
-
+            metaData.data.map(v => {
                 let layerName = v.f_table_schema + "." + v.f_table_name;
 
                 if (JSON.parse(v.meta) !== null && typeof JSON.parse(v.meta).vectorstyle !== "undefined") {
@@ -124,43 +134,78 @@ module.exports = {
                 }
 
                 // Set popup with Edit and Delete buttons
-                vectorLayers.setOnEachFeature("v:" + layerName, function (feature, layer) {
+                layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
+                    if (feature.meta) {
+                        let content = false;
+                        let tooltipSettings = {
+                            autoClose: false,
+                            minWidth: 25,
+                            permanent: true
+                        };
 
-                    let popup = L.popup({
-                        autoPan: false
-                    });
+                        if (feature.meta.apiRecognitionStatus === 'pending') {
+                            content = `<div class="js-feature-notification-tooltip">
+                                <i class="fa fa-exclamation"></i> ${__(`Pending`)}
+                                <span class="js-tooltip-content"></span>
+                            </div>`;
+
+                            tooltipSettings.className = `api-bridge-popup-warning`;
+                        } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+                            content = `<div class="js-feature-notification-tooltip">
+                                <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                <span class="js-tooltip-content"></span>
+                            </div>`;
+
+                            tooltipSettings.className = `api-bridge-popup-error`;
+                        } else {
+                            throw new Error(`Invalid API recognition status value`);
+                        }
+
+                        layer.on("add", function (e) {
+                            let latLng = false;
+                            if (feature.geometry && feature.geometry.type === 'Point') {
+                                latLng = layer.getLatLng();
+                            } else {
+                                let bounds = layer.getBounds();
+                                latLng = bounds.getCenter()
+                            }
+
+                            let tooltip = L.tooltip(tooltipSettings).setContent(content);
+                            layer.bindTooltip(tooltip);
+                        });
+                    }
 
                     layer.on("click", function (e) {
+                        e.originalEvent.clickedOnFeature = true;
 
-                        popup
-                            .setLatLng(e.latlng)
-                            .setContent('<button class="btn btn-primary btn-xs ge-start-edit"><i class="fa fa-pencil" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs ge-delete"><i class="fa fa-trash" aria-hidden="true"></i></button>')
-                            .openOn(cloud.get().map);
+                        let managePopup = L.popup({
+                            autoPan: false
+                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-primary btn-xs ge-delete">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>`).openOn(cloud.get().map);
 
                         $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                            me.edit(layer, layerName + ".the_geom");
+                            me.edit(layer, layerName + ".the_geom", null, true);
                         });
 
-                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", function () {
+                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
                             if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                me.delete(layer, layerName + ".the_geom");
+                                me.delete(layer, layerName + ".the_geom", null, true);
                             }
-                        })
+                        });
                     });
                 });
 
-                vectorLayers.setStyle(layerName, styleFn);
-
+                layerTree.setStyle(layerName, styleFn);
             });
 
-            backboneEvents.get().on("ready:vectorLayers", function () {
+            backboneEvents.get().on("ready:layerTree", () => {});
 
-            });
-
-            vectorLayers.createLayerTree();
-
+            layerTree.create();
         });
-
     },
 
     /**
@@ -194,71 +239,195 @@ module.exports = {
         return properties;
     },
 
+
+    /**
+     * Add new features to layer
+     * @param k
+     * @param qstore
+     * @param doNotRemoveEditor
+     */
+    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        let me = this, React = require('react'), ReactDOM = require('react-dom'),
+            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
+            type = metaDataKeys[schemaQualifiedName].type;
+
+        const addFeature = () => {
+            me.stopEdit();
+
+            // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
+            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
+                e.stopPropagation();
+                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                    me.stopEdit();
+
+                    $(".slide-right .close").unbind("click.add");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                } else {
+                    return false;
+                }
+            });
+
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
+            };
+
+            // Slide panel with attributes in and render form component
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
+            });
+
+            // Start editor with the right type
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            } else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            } else {
+                throw new Error(`Unable to detect type`);
+            }
+
+            /**
+             * Commit to GC2
+             * @param formData
+             */
+            const onSubmit = function (formData) {
+                let featureCollection, geoJson = editor.toGeoJSON();
+
+                // Promote MULTI geom
+                if (type.substring(0, 5) === "MULTI") {
+                    geoJson = multiply([geoJson]);
+                }
+
+                Object.keys(formData.formData).map(function (key, index) {
+                    geoJson.properties[key] = formData.formData[key];
+                    if (geoJson.properties[key] === undefined) {
+                        geoJson.properties[key] = null;
+                    }
+                });
+
+                featureCollection = {
+                    "type": "FeatureCollection",
+                    "features": [
+                        geoJson
+                    ]
+                };
+
+                /**
+                 * Feature saving callback
+                 * 
+                 * @param {Object} result Saving result
+                 */
+                const featureIsSaved = (result) => {
+                    console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
+
+                    sqlQuery.reset(qstore);
+
+                    me.stopEdit();
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
+
+                    jquery.snackbar({
+                        id: "snackbar-conflict",
+                        content: "Entity  stedfæstet",
+                        htmlAllowed: true,
+                        timeout: 5000
+                    });
+                };
+
+                $(".slide-right .close").unbind("click.add");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
+                    console.log('Editor: error occured while performing addFeature()');
+                    throw new Error(error);
+                });
+            };
+        };
+
+        if (isVectorLayer) {
+            addFeature();
+        } else {
+            this.checkIfAppIsOnline().then(addFeature).catch(() => {
+                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+                    addFeature();
+                }
+            });
+        }
+    },
+
+
     /**
      * Change existing feature
      * @param e
      * @param k
      * @param qstore
      */
-    edit: function (e, k, qstore) {
+    edit: function (e, k, qstore, isVectorLayer = false) {
+        const editFeature = () => {
+            let React = require('react');
 
-        let React = require('react');
+            let ReactDOM = require('react-dom');
 
-        let ReactDOM = require('react-dom');
+            let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+                metaDataKeys = meta.getMetaDataKeys(),
+                fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
+                type = metaDataKeys[schemaQualifiedName].type,
+                properties;
+            me.stopEdit();
 
-        let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-            metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
-            properties, oldGeom = jQuery.extend(true, {}, e.feature.geometry);
-
-        me.stopEdit();
-
-        markers = []; // Holds marker(s) for Point and MultiPoints layers
-
-        cloud.get().map.closePopup();
-
-        backboneEvents.get().on("start:sqlQuery", function () {
-            //me.stopEdit(e);
-        });
-
-        // Bind cancel of editing to close of slide panel with attribute form
-        $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
-
-            if (window.confirm("Are you sure? Changes will not be saved!")) {
-                me.stopEdit(e);
-                sqlQuery.reset(qstore);
-                $(".slide-right .close").unbind("click.edit");
-
-            } else {
-                return false;
+            e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
+            if (isVectorLayer) {
+                e.id = "v:" + e.id;
             }
-        });
 
-        // Hack to edit (Multi)Point layers
-        // Create markers, which can be dragged
-        switch (e.feature.geometry.type) {
+            e.initialFeatureJSON = e.toGeoJSON();
 
-            case "Point":
-                markers[0] = L.marker(
-                    e.getLatLng(),
-                    {
-                        icon: L.AwesomeMarkers.icon({
-                                icon: 'arrows',
-                                markerColor: 'blue',
-                                prefix: 'fa'
-                            }
-                        )
-                    }
-                ).addTo(cloud.get().map);
-                sqlQuery.reset();
-                markers[0].enableEdit();
-                sqlQuery.reset(qstore);
-                break;
 
-            case "MultiPoint":
-                e.feature.geometry.coordinates.map(function (v, i) {
-                    markers[i] = L.marker(
-                        [v[1], v[0]],
+            backboneEvents.get().on("start:sqlQuery", function () {
+                //me.stopEdit(e);
+            });
+
+            // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
+            $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
+                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                    me.stopEdit(e);
+
+                    sqlQuery.reset(qstore);
+                    $(".slide-right .close").unbind("click.edit");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                } else {
+                    return false;
+                }
+            });
+
+            // Hack to edit (Multi)Point layers
+            // Create markers, which can be dragged
+            switch (e.feature.geometry.type) {
+
+                case "Point":
+                    markers[0] = L.marker(
+                        e.getLatLng(),
                         {
                             icon: L.AwesomeMarkers.icon({
                                     icon: 'arrows',
@@ -268,239 +437,164 @@ module.exports = {
                             )
                         }
                     ).addTo(cloud.get().map);
-                    markers[i].enableEdit();
-
-                });
-                sqlQuery.reset(qstore);
-                break;
-
-            default:
-                editor = e.enableEdit();
-                break;
-        }
-
-        // Delete som system attributes
-        delete e.feature.properties._vidi_content;
-        delete e.feature.properties._id;
-
-        // Set NULL values to undefined, because NULL is a type
-        Object.keys(e.feature.properties).map(function (key) {
-            if (e.feature.properties[key] === null) {
-                e.feature.properties[key] = undefined;
-            }
-        });
-
-        // Create schema for attribute form
-        const schema = {
-            type: "object",
-            properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-        };
-
-
-        /**
-         * Commit to GC2
-         * @param formData
-         */
-        const onSubmit = function (formData) {
-
-            let GeoJSON = e.toGeoJSON(), featureCollection;
-
-            // HACK to handle (Multi)Point layers
-            // Update the GeoJSON from markers
-            switch (e.feature.geometry.type) {
-                case "Point":
-                    GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
+                    sqlQuery.reset();
+                    markers[0].enableEdit();
+                    sqlQuery.reset(qstore);
                     break;
 
                 case "MultiPoint":
-                    markers.map(function (v, i) {
-                        GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
+                    e.feature.geometry.coordinates.map(function (v, i) {
+                        markers[i] = L.marker(
+                            [v[1], v[0]],
+                            {
+                                icon: L.AwesomeMarkers.icon({
+                                        icon: 'arrows',
+                                        markerColor: 'blue',
+                                        prefix: 'fa'
+                                    }
+                                )
+                            }
+                        ).addTo(cloud.get().map);
+                        markers[i].enableEdit();
+
                     });
+                    sqlQuery.reset(qstore);
                     break;
 
                 default:
-                    //pass
+                    editor = e.enableEdit();
                     break;
             }
 
-            // Set GeoJSON properties from form values
+            // Delete som system attributes
+            delete e.feature.properties._vidi_content;
+            delete e.feature.properties._id;
+
+            // Set NULL values to undefined, because NULL is a type
             Object.keys(e.feature.properties).map(function (key) {
-                GeoJSON.properties[key] = formData.formData[key];
-                // Set undefined values back to NULL
-                if (GeoJSON.properties[key] === undefined) {
-                    GeoJSON.properties[key] = null;
+                if (e.feature.properties[key] === null) {
+                    e.feature.properties[key] = undefined;
                 }
             });
 
-            // Set the GeoJSON FeatureCollection
-            // This is committed to GC2
-            featureCollection = {
-                "type": "FeatureCollection",
-                "features": [
-                    GeoJSON
-                ]
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
             };
 
-            // Commit using XHR
-            $.ajax({
-                url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
-                type: "PUT",
-                dataType: 'json',
-                contentType: 'application/json',
-                scriptCharset: "utf-8",
-                data: JSON.stringify(featureCollection),
-                success: function (response) {
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            }
+            else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            }
+
+            /**
+             * Commit to GC2
+             * @param formData
+             */
+            const onSubmit = function (formData) {
+
+                let GeoJSON = e.toGeoJSON(), featureCollection;
+
+                // HACK to handle (Multi)Point layers
+                // Update the GeoJSON from markers
+                switch (e.feature.geometry.type) {
+                    case "Point":
+                        GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
+                        break;
+
+                    case "MultiPoint":
+                        markers.map(function (v, i) {
+                            GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
+                        });
+                        break;
+
+                    default:
+                        //pass
+                        break;
+                }
+
+                // Set GeoJSON properties from form values
+                Object.keys(e.feature.properties).map(function (key) {
+                    GeoJSON.properties[key] = formData.formData[key];
+                    // Set undefined values back to NULL
+                    if (GeoJSON.properties[key] === undefined) {
+                        GeoJSON.properties[key] = null;
+                    }
+                });
+
+                // Set the GeoJSON FeatureCollection
+                // This is committed to GC2
+                featureCollection = {
+                    "type": "FeatureCollection",
+                    "features": [
+                        GeoJSON
+                    ]
+                };
+
+                const featureIsUpdated = () => {
+                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
+
+                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
                     me.stopEdit(e);
                     sqlQuery.reset(qstore);
-                    try {
-                        let l = cloud.get().getLayersByName(schemaQualifiedName);
-                        l.redraw();
-                    } catch (e) {
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
                     }
-                },
-                error: function (response) {
-                    alert(response.responseText);
-                }
-            });
-        };
+                };
 
-        // Slide panel with attributes in and render form component
-        ReactDOM.render((
-            <div style={{"padding": "15px"}}>
-                <Form schema={schema}
-                      formData={e.feature.properties}
-                      onSubmit={onSubmit}
-                />
-            </div>
-        ), document.getElementById("editor-attr-form"));
-
-        $("#editor-attr-dialog").animate({
-            bottom: "0"
-        }, 500, function () {
-            $("#editor-attr-dialog" + " .expand-less").show();
-            $("#editor-attr-dialog" + " .expand-more").hide();
-        });
-    },
-
-    /**
-     * Add new features to layer
-     * @param k
-     * @param qstore
-     * @param doNotRemoveEditor
-     */
-    add: function (k, qstore, doNotRemoveEditor) {
-
-        let me = this, React = require('react'), ReactDOM = require('react-dom'),
-            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
-            metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf),
-            type = metaDataKeys[schemaQualifiedName].type;
-
-        me.stopEdit();
-
-        // Bind cancel of editing to close of slide panel with attribute form
-        $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
-            e.stopPropagation();
-            if (window.confirm("Are you sure? Changes will not be saved!")) {
-                me.stopEdit();
-            } else {
-                return false;
-            }
-        });
-
-        // Create schema for attribute form
-        const schema = {
-            type: "object",
-            properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-        };
-
-        // Start editor with the right type
-        if (type === "POLYGON" || type === "MULTIPOLYGON") {
-            editor = cloud.get().map.editTools.startPolygon();
-        } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-            editor = cloud.get().map.editTools.startPolyline();
-        }
-        else if (type === "POINT" || type === "MULTIPOINT") {
-            editor = cloud.get().map.editTools.startMarker();
-        }
-
-        /**
-         * Commit to GC2
-         * @param formData
-         */
-        const onSubmit = function (formData) {
-
-            let featureCollection, geoJson = editor.toGeoJSON();
-
-            // Promote MULTI geom
-            if (type.substring(0, 5) === "MULTI") {
-                geoJson = multiply([geoJson]);
-            }
-
-            Object.keys(formData.formData).map(function (key, index) {
-                geoJson.properties[key] = formData.formData[key];
-                if (geoJson.properties[key] === undefined) {
-                    geoJson.properties[key] = null;
-                }
-            });
-
-            featureCollection = {
-                "type": "FeatureCollection",
-                "features": [
-                    geoJson
-                ]
+                $(".slide-right .close").unbind("click.edit");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
+                    console.log('Editor: error occured while performing updateFeature()');
+                    throw new Error(error);
+                });
             };
 
-            $.ajax({
-                url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/4326",
-                type: "POST",
-                dataType: 'json',
-                contentType: 'application/json',
-                scriptCharset: "utf-8",
-                data: JSON.stringify(featureCollection),
-                success: function (response) {
-                    sqlQuery.reset(qstore);
-
-                    try {
-                        let l = cloud.get().getLayersByName(schemaQualifiedName);
-                        l.redraw();
-                    } catch (e) {
-                    }
-
-                    if (!doNotRemoveEditor) {
-                        cloud.get().map.removeLayer(editor);
-                    } else {
-                        me.stopEdit();
-                    }
-
-                    jquery.snackbar({
-                        id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
-                        htmlAllowed: true,
-                        timeout: 5000
-                    });
-                },
-                error: function (response) {
-                    alert(response.responseText);
-                }
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          formData={e.feature.properties}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
             });
         };
 
-        ReactDOM.render((
-            <div style={{"padding": "15px"}}>
-                <Form schema={schema}
-                      onSubmit={onSubmit}
-                />
-            </div>
-        ), document.getElementById("editor-attr-form"));
-
-        $("#editor-attr-dialog").animate({
-            bottom: "0"
-        }, 500, function () {
-            $("#editor-attr-dialog" + " .expand-less").show();
-            $("#editor-attr-dialog" + " .expand-more").hide();
-        });
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
+        if (isVectorLayer) {
+            editFeature();
+        } else {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        editFeature();
+                    }
+                } else {
+                    editFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
+                    editFeature();
+                }
+            });
+        }
     },
+
 
     /**
      * Delete feature from layer
@@ -508,56 +602,111 @@ module.exports = {
      * @param k
      * @param qstore
      */
-    delete: function (e, k, qstore) {
+    delete: function (e, k, qstore, isVectorLayer = false) {
+        let me = this;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
             GeoJSON = e.toGeoJSON(),
             gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
 
-        // Commit using XHR
-        $.ajax({
-            url: "/api/feature/" + db + "/" + schemaQualifiedName + "." + metaDataKeys[schemaQualifiedName].f_geometry_column + "/" + gid,
-            type: "DELETE",
-            dataType: 'json',
-            contentType: 'application/json',
-            scriptCharset: "utf-8",
-            success: function (response) {
+        const deleteFeature = () => {
+            const featureIsDeleted = () => {
+                console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
+
                 sqlQuery.reset(qstore);
-                try {
-                    let l = cloud.get().getLayersByName(schemaQualifiedName);
-                    l.redraw();
-                } catch (e) {
+
+                cloud.get().map.closePopup();
+                
+                if (isVectorLayer) {
+                    layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                } else {
+                    layerTree.reloadLayer(schemaQualifiedName, true);
                 }
-            },
-            error: function (response) {
-                alert(response.responseText);
-            }
-        });
+            };
+
+            let featureCollection = {
+                "type": "FeatureCollection",
+                "features": [
+                    GeoJSON
+                ]
+            };
+
+            apiBridgeInstance.deleteFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
+                console.log('Editor: error occured while performing deleteFeature()');
+                throw new Error(error);
+            });
+        };
+
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
+        if (isVectorLayer) {
+            deleteFeature();
+        } else {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        deleteFeature();
+                    }
+                } else {
+                    deleteFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
+                    deleteFeature();
+                }
+            });
+        }
     },
 
     /**
      * Stop editing and clean up
      * @param e
      */
-    stopEdit: function () {
+    stopEdit: function (editedFeature) {
+        let me = this;
 
-        try {
-            cloud.get().map.editTools.stopDrawing();
-            editor.disableEdit();
+        cloud.get().map.editTools.stopDrawing();
+
+        if (editor) {
             cloud.get().map.removeLayer(editor);
-        } catch (e) {
         }
 
-        try {
+        // If feature was edited, then reload the layer
+        if (editedFeature) {
+            switchLayer.init(editedFeature.id, false);
+            switchLayer.init(editedFeature.id, true);
+        }
+
+        if (markers) {
             markers.map(function (v, i) {
                 markers[i].disableEdit();
                 cloud.get().map.removeLayer(markers[i]);
-
             });
-        } catch (e) {
         }
-    }
+    },
+
+    /**
+     * Checks if application is online.
+     */
+    checkIfAppIsOnline: () => {
+        let result = new Promise((resolve, reject) => {
+            $.ajax({
+                method: 'GET',
+                url: '/connection-check.ico'
+            }).done((data, textStatus, jqXHR) => {
+                if (jqXHR.statusText === 'ONLINE') {
+                    resolve();
+                } else if (jqXHR.statusText === 'OFFLINE') {
+                    reject();
+                } else {
+                    console.warn(`Unable the determine the online status`);
+                    reject();
+                }
+            });
+        });
+
+        return result;
+    },
 };
 
 

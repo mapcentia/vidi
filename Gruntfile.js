@@ -55,7 +55,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
                         'public/css/jasny-bootstrap.css',
-                        //custon
+                        //custom
                         'public/css/styles.min.css'
                     ]
                 }
@@ -125,9 +125,31 @@ module.exports = function (grunt) {
         browserify: {
             publish: {
                 files: {
-                    'public/js/bundle.js': ['browser/index.js']
+                    'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                }
+            },
+            publish_sw: {
+                files: {
+                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+                },
+                options: {
+                    alias: {
+                        'urls-to-cache': './browser/service-worker/cache.production.js'
+                    },
+                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                }
+            },
+            publish_sw_dev: {
+                files: {
+                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+                },
+                options: {
+                    alias: {
+                        'urls-to-cache': './browser/service-worker/cache.development.js'
+                    },
                     transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
                 }
             },
@@ -178,6 +200,7 @@ module.exports = function (grunt) {
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
+                        'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap-table/bootstrap-table.js',
@@ -191,6 +214,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-select/bootstrap-select.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
+                        'public/js/leaflet-easybutton/easy-button.js',
                         'public/js/proj4js-combined.js',
                         'public/js/jasny-bootstrap.js',
                         'public/js/bundle.js',
@@ -270,12 +294,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
+    grunt.loadNpmTasks('grunt-watchify');
 
-    grunt.registerTask('default', ['browserify:publish', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
+    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
-
-
-
-

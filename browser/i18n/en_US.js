@@ -150,6 +150,21 @@ module.exports = {
         "Languages": "Languages",
 
         "Finish": "Finish",
-        "Finish drawing": "Finish drawing"
+        "Finish drawing": "Finish drawing",
+
+        // LayerTree
+        "Force offline mode": "# Force offline mode",
+        "Tile": "# Tile",
+        "Vector": "# Vector",
+        "Pending": "# Pending",
+        "Error": "# Error",
+        "Cancel feature changes": "# Cancel feature changes",
+        "This browser does not support Service Workers, some features may be unavailable": "# This browser does not support Service Workers, some features may be unavailable",
+
+        // APIBridge
+        "Not authorized to perform this action": "# Not authorized to perform this action",
+
+        //Editor
+        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
     }
 };

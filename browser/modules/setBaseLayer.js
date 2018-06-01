@@ -21,6 +21,7 @@ var baseLayer;
 
 var backboneEvents;
 
+var activeBaseLayer;
 
 /**
  *
@@ -55,6 +56,7 @@ module.exports = module.exports = {
 
             $.each(window.setBaseLayers, function (i, v) {
                 if (v.id === str) {
+                    activeBaseLayer = v;
                     if (typeof v.overlays === "object") {
                         for (u = 0; u < v.overlays.length; u = u + 1) {
                             const layerName = v.overlays[u].id;
@@ -93,5 +95,9 @@ module.exports = module.exports = {
         $('*[data-gc2-base-id="' + str + '"] input').prop('checked', true);
 
         pushState.init();
+    },
+
+    getActiveBaseLayer: () => {
+        return activeBaseLayer;
     }
 };

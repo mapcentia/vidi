@@ -96,6 +96,12 @@ module.exports = {
         // Reset
         ready = false;
 
+        /*
+            Reset, otherwise it gets duplicated via addMetaData() - adding same meta
+            to the array which already contains this meta
+        */
+        window.metaData = {data: []};
+
         return new Promise(function (resolve, reject) {
             var schemata;
 

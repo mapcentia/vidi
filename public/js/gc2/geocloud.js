@@ -104,9 +104,11 @@ geocloud = (function () {
             return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function () {
-        },
+        onEachFeature: function (feature, layer) {},
         onLoad: function () {
+        },
+        transformResponse: function (response) {
+            return response;
         },
         loading: function () {
         },
@@ -210,6 +212,7 @@ geocloud = (function () {
         this.db = this.defaults.db;
         this.host = this.defaults.host.replace("cdn.", "");
         this.onLoad = this.defaults.onLoad;
+        this.transformResponse = this.defaults.transformResponse;
         this.loading = this.defaults.loading;
         this.dataType = this.defaults.dataType;
         this.async = this.defaults.async;
@@ -251,6 +254,8 @@ geocloud = (function () {
                     }
                     if (response.success === true) {
                         if (response.features !== null) {
+                            response = me.transformResponse(response, me.id);
+
                             me.geoJSON = response;
                             switch (MAPLIB) {
                                 case "ol2":

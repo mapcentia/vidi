@@ -30,12 +30,6 @@ var ready = false;
 
 /**
  *
- * @type {boolean}
- */
-var cartoDbLayersready = false;
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -73,7 +67,6 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
-        switchLayer = o.switchLayer;
         return this;
     },
 
@@ -82,36 +75,29 @@ module.exports = {
      */
     init: function () {
 
-
     },
 
     ready: function () {
-        // If CartoDB, we wait for cartodb.createLayer to finish
-        if (BACKEND === "cartodb") {
-            return (ready && cartoDbLayersready);
-        }
-        // GC2 layers are direct tile request
-        else {
-            return ready;
-        }
+        return ready;
     },
 
     getLayers: function (separator, includeHidden) {
         var layerArr = [];
         var layers = cloud.get().map._layers;
+
         for (var key in layers) {
-            if (layers.hasOwnProperty(key)) {
-                if (layers[key].baseLayer !== true && (typeof layers[key]._tiles === "object" || typeof layers[key].wmsParams === "object")) {
-                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
+            if (layers[key].baseLayer !== true) {
+                if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
+                    if (typeof layers[key]._tiles === "object" || layers[key].id && layers[key].id.startsWith('v:')) {
                         layerArr.push(layers[key].id);
                     }
                 }
             }
         }
+
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
-        }
-        else {
+        } else {
             return false;
         }
     },
@@ -126,10 +112,10 @@ module.exports = {
             }
         }
     },
-    resetCount: function (i) {
-        ready = cartoDbLayersready = false;
-    },
 
+    resetCount: function () {
+        ready = false;
+    },
 
     incrementCountLoading: function (i) {
         if (array.indexOf(i) === -1) {
@@ -164,11 +150,9 @@ module.exports = {
         var me = this;
 
         return new Promise(function (resolve, reject) {
-
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             $.each(metaData.data, function (i, v) {
-
                 var layer = v.f_table_schema + "." + v.f_table_name,
                     singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
@@ -181,7 +165,8 @@ module.exports = {
                         isBaseLayer: isBaseLayer,
                         tileCached: !singleTiled,
                         singleTile: singleTiled,
-                        visibility: false,
+                        // @todo Was somehow set to false
+                        //visibility: false,
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: v.f_table_name,
@@ -202,12 +187,13 @@ module.exports = {
 
                     layers[[layer]][0].setZIndex(v.sort_id + 10000);
 
+                    console.info(l + " was added to the map.");
                     resolve();
-
                 }
             });
+
+            console.info(l + " was not added to the map.");
             reject();
-            console.info(l + " added to the map.");
-        })
+        });
     }
 };

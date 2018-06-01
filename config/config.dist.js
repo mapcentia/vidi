@@ -19,7 +19,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "http://gc2.mapcentia.com"
+        "host": "https://gc2.mapcentia.com"
     },
 
 
@@ -128,11 +128,14 @@ module.exports = {
             //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             //{"layerSearch": ["index", "controller"]},
             {"streetView": ["index"]},
-            {"coordinates": ["index"]}
+            {"coordinates": ["index"]},
+            {"offlineMap": ["index"]},
+            {"session": ["index"]}
         ],
         "server": [
             /*{conflictSearch: ["index"]},*/
             /*{layerSearch: ["index", "indexInEs"]},*/
+            {"session": ["index"]}
         ]
     },
 

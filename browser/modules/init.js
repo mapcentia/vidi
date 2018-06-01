@@ -35,7 +35,7 @@ module.exports = {
 
         var loadConfig = function () {
             $.getJSON( "/api/config/" + configFile, function (data) {
-                console.info("Started with config: " + configFile);
+                window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -186,23 +186,17 @@ module.exports = {
         modules.advancedInfo.init();
         modules.draw.init();
         modules.print.init();
-        modules.meta.init()
-
-            .then(function () {
-                    return modules.setting.init();
-                },
-
-                function (error) {
-                    console.log(error); // Stacktrace
-                    alert("Vidi is loaded without schema. Can't set extent or add layers");
-                    backboneEvents.get().trigger("ready:meta");
-                    modules.state.init();
-                })
-
-            .then(function () {
-                modules.layerTree.init();
-                modules.state.init();
-            });
+        modules.layerTree.init();
+        modules.meta.init().then(() => {
+            return modules.setting.init();
+        }, (error) => {
+            console.log(error); // Stacktrace
+            alert("Vidi is loaded without schema. Can't set extent or add layers");
+            backboneEvents.get().trigger("ready:meta");
+            modules.state.init();
+        }).then(() => {
+            modules.state.init();
+        });
 
         // Require search module
         // =====================
@@ -270,7 +264,61 @@ module.exports = {
             setTimeout(function () {
                 modules.cloud.get().map.invalidateSize();
             }, 100);
-
         }, 0));
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
+            }).catch(error => {
+                console.warn(`Unable to register the service worker`);
+            });
+        } else {
+            console.warn(`Service workers are not supported in this browser, some features can be unavailable`);
+        }
+
+        if (window.localforage) {
+            localforage.getItem('appVersion').then(value => {
+                if (value === null) {
+                    localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
+                        console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion})`);
+                    }).catch(error => {
+                        throw new Error(`Unable to store current application version`);
+                    });
+                } else {
+                    if (parseInt(window.vidiConfig.appVersion) !== parseInt(value)) {
+                        if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
+                            let unregisteringRequests = [];
+
+                            // Unregister service worker
+                            navigator.serviceWorker.getRegistrations().then((registrations) => {
+                                for(let registration of registrations) {
+                                    console.log(`Versioning: unregistering service worker`, registration);
+                                    unregisteringRequests.push(registration.unregister());
+                                    registration.unregister();
+                                }
+                            });
+
+                            Promise.all(unregisteringRequests).then((values) => {
+                                // Clear caches
+                                caches.keys().then(function(names) {
+                                    for (let name of names) {
+                                        console.log(`Versioning: clearing cache`, name);
+                                        caches.delete(name);
+                                    }
+                                });
+
+                                // Remove current app version
+                                localforage.removeItem('appVersion').then(() => {
+                                    location.reload();
+                                });
+                            });
+                        }
+                    } else {
+                        console.log('Versioning: new application version is not available');
+                    }
+                }
+            });
+        } else {
+            throw new Error(`localforage is not available`);
+        }
     }
 };

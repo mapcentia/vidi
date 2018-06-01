@@ -132,10 +132,19 @@ module.exports = {
         hash = decodeURIComponent(window.location.hash);
         hashArr = hash.replace("#", "").split("/");
 
-        // var maxBounds = setting.getMaxBounds();
-        // if (maxBounds !== null) {
-        //     cloud.get().setMaxBounds(maxBounds);
-        // }
+        const removeDuplicates = (inputArray) => {
+            var temp = {};
+            for (var i = 0; i < inputArray.length; i++) {
+                temp[inputArray[i]] = true;
+            }
+
+            var result = [];
+            for (var key in temp) {
+                result.push(key);
+            }
+
+            return result;
+        };
 
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
@@ -144,12 +153,55 @@ module.exports = {
                 setBaseLayer.init(hashArr[0]);
                 if (hashArr[4]) {
                     arr = hashArr[4].split(",");
+
+                    // Removing duplicates as we do not trust user input
+                    arr = removeDuplicates(arr);
+
+                    let metaData = meta.getMetaDataLatestLoaded();
                     for (i = 0; i < arr.length; i++) {
-                        switchLayer.init(arr[i], true, true);
+                        let correspondingMetaLayer = false;
+                        for (let j = 0; j < metaData.data.length; j++) {
+                            if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === arr[i].replace('v:', '')) {
+                                correspondingMetaLayer = metaData.data[j];
+                                break;
+                            }
+                        }
+
+                        if (correspondingMetaLayer) {
+                            let displayLayer = true;
+
+                            let layer = correspondingMetaLayer;
+                            let isVectorLayer = true;
+                            let isTileLayer = true;
+    
+                            if (layer && layer.meta) {
+                                let parsedMeta = JSON.parse(layer.meta);
+                                if (parsedMeta.vidi_layer_type) {
+                                    if (parsedMeta.vidi_layer_type === 't') isVectorLayer = false;
+                                    if (parsedMeta.vidi_layer_type === 'v') isTileLayer = false;
+                                }
+                            }
+
+                            if (isVectorLayer === false && arr[i].startsWith('v:')) {
+                                displayLayer = false;
+                                console.warn(`The ${arr[i]} layer is requested, but there is only tile view available`);
+                            }
+    
+                            if (isTileLayer === false && !arr[i].startsWith('v:')) {
+                                displayLayer = false;
+                                console.warn(`The ${arr[i]} layer is requested, but there is only vector view available`);
+                            }
+    
+                            if (displayLayer) switchLayer.init(arr[i], true, false);
+                        } else {
+                            console.warn(`No meta layer was found for ${arr[i]}`);
+                        }
                     }
                 }
             }
 
+            legend.init();
+            
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
                 legend.init().then(function(){

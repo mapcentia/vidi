@@ -51,6 +51,7 @@
     "d3": "^4.13.0",
     "q-cluster": "https://github.com/spatialdev/q-cluster.git",
     "es5-shim": "^4.5.10",
+    "localforage": "^1.6.0",
     "leaflet.toolbar": "https://github.com/mapcentia/Leaflet.toolbar.git#^0.3.0"
   },
   "resolutions": {

@@ -214,6 +214,7 @@ module.exports = {
                 }
 
                 drawnItems.addLayer(drawLayer);
+                drawLayer.openTooltip();
 
                 me.setStyle(drawLayer, type);
 
