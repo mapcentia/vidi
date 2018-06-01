@@ -1,397 +1,779 @@
-const CACHE_NAME = 'vidi-static-cache';
-const API_ROUTES_START = 'api';
-const LOG = false;
-
 /**
- * Browser detection
- */
-const { detect } = require('detect-browser');
-const browser = detect();
-
-/**
- * ServiceWorker. Caches all requests, some requests are processed in specific way:
- * 1. API calls are always performed, the cached response is retured only if the app is offline or 
- * there is a API-related problem;
- * 2. Files with {extensionsIgnoredForCaching} are not cached, unless it is forced externally using
- * the 'message' event.
- *
- * Update mechanism. There should be an API method that returns the current application version. If it differs
- * from the previous one that is stored in localforage, then user should be notified about the update. If
- * user agrees to the update, then the current service worker is unregistered, cache wiped out and page
- * is reloaded (as well as all assets). This way the application update will not be dependent on the
- * actual service worker file change. The update will be centralized and performed by setting the different 
- * app version in the configuration file.
+ * @fileoverview Description of file, its uses and information
+ * about its dependencies.
  */
 
-/**
- * 
- */
-let ignoredExtensionsRegExps = [];
+'use strict';
 
 /**
  *
+ * @type {*|exports|module.exports}
  */
-let forceIgnoredExtensionsCaching = false;
-
-let urlsToCache = require(`urls-to-cache`);
-
-const urlSubstitution = [{
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.ttf?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.ttf'
-}, {
-    requested: 'https://themes.googleusercontent.com/static/fonts/opensans/v8/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff',
-    local: '/fonts/cJZKeOuBrn4kERxqtaUH3bO3LdcAZYWl9Si6vvxL-qU.woff'
-}, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff'
-}, {
-    requested: 'https://netdna.bootstrapcdn.com/font-awesome/4.5.0/fonts/fontawesome-webfont.woff2?v=4.5.0',
-    local: '/fonts/fontawesome-webfont.woff2'
-}, {
-    requested: '/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
-}, {
-    requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
-    local: '/favicon.ico'
-}, {
-    requested: 'https://maps.google.com/maps/api/js',
-    local: '/js/google-maps/index.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/common.js',
-    local: '/js/google-maps/common.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/util.js',
-    local: '/js/google-maps/util.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/controls.js',
-    local: '/js/google-maps/controls.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/places_impl.js',
-    local: '/js/google-maps/places_impl.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/stats.js',
-    local: '/js/google-maps/stats.js'
-}, {
-    requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
-    local: '/js/google-maps/stats.js'
-}, {
-    requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
-    local: '/js/gc2/gc2table.js'
-}, {
-    requested: 'https://js-agent.newrelic.com/nr-1071.min.js',
-    local: '/js/nr-1071.min.js'
-}, {
-    regExp: true,
-    requested: '/[\\w]*/[\\w]*/[\\w]*/#',
-    local: '/index.html'
-}, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-icon.png',
-    local: '/js/lib/leaflet/images/marker-icon.png'
-}, {
-    regExp: true,
-    requested: '/js/lib/leaflet/images/marker-shadow.png',
-    local: '/js/lib/leaflet/images/marker-shadow.png'
-}];
-
-let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
-
-let urlsIgnoredForCaching = [{
-    regExp: true,
-    requested: 'bam.nr-data.net',
-}];
+let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
 /**
- * Cleaning up and substituting with local URLs provided address
- * 
- * @param {String} URL
- * 
- * @return {String}
+ *
+ * @type {*|exports|module.exports}
  */
-const normalizeTheURL = (URL) => {
-    let cleanedRequestURL = URL;
-    if (URL.indexOf('_=') !== -1) {
-        cleanedRequestURL = URL.split("?")[0];
+var utils;
 
-        if (LOG) console.log(`Service worker: URL was cleaned up: ${cleanedRequestURL} (${URL})`);
-    }
+var backboneEvents;
 
-    urlSubstitution.map(item => {
-        if (item.regExp) {
-            let re = new RegExp(item.requested);
-            if (re.test(URL)) {
+var layerTree;
 
-                if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (regular expression)`);
+var apiBridgeInstance = false;
 
-                cleanedRequestURL = item.local;
+var meta;
+var cloud;
+var sqlQuery;
+
+var jquery = require('jquery');
+require('snackbarjs');
+
+var multiply = require('geojson-multiply');
+
+var JSONSchemaForm = require("react-jsonschema-form");
+
+var Form = JSONSchemaForm.default;
+
+var markers = [];
+
+var editor;
+
+var switchLayer;
+
+var managePopups = [];
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var urlparser = require('./../../../browser/modules/urlparser');
+
+/**
+ * @type {string}
+ */
+var db = urlparser.db;
+
+var isInit = false;
+
+/**
+ *
+ * @type {{set: module.exports.set, init: module.exports.init}}
+ */
+module.exports = {
+
+    /**
+     *
+     * @param o
+     * @returns {exports}
+     */
+    set: function (o) {
+        utils = o.utils;
+        meta = o.meta;
+        cloud = o.cloud;
+        sqlQuery = o.sqlQuery;
+        layerTree = o.layerTree;
+        switchLayer = o.switchLayer;
+        backboneEvents = o.backboneEvents;
+        return this;
+    },
+
+    /**
+     *
+     */
+    init: function () {
+        let me = this, metaDataKeys, metaData, styleFn;
+        apiBridgeInstance = APIBridgeSingletone();
+
+        isInit = true;
+
+        // Listen to arrival of add-feature buttons
+        $(document).arrive('.gc2-add-feature', function () {
+            $(this).on("click", function (e) {
+                let isVectorLayer = false;
+                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
+                    isVectorLayer = true;
+                }
+
+                var t = ($(this).data('gc2-key'));
+                me.add(t, null, true, isVectorLayer);
+                e.stopPropagation();
+            });
+        });
+
+        // When editing is disabled, close the slide panel with attribute form
+        cloud.get().map.on("editable:disable", function () {
+            $("#info-modal").animate({
+                right: "-" + $("#myNavmenu").width() + "px"
+            }, 200)
+        });
+
+        // Listen to arrival of edit-tools
+        $(document).arrive('.gc2-edit-tools', function () {
+            $(this).css("visibility", "visible")
+
+        });
+
+        // Don't init layer tree automatic. Let this module activate it
+        layerTree.setAutomatic(false);
+
+        backboneEvents.get().on("ready:meta", function () {
+            metaDataKeys = meta.getMetaDataKeys();
+            metaData = meta.getMetaData();
+            metaData.data.map(v => {
+                let layerName = v.f_table_schema + "." + v.f_table_name;
+
+                if (JSON.parse(v.meta) !== null && typeof JSON.parse(v.meta).vectorstyle !== "undefined") {
+                    try {
+                        styleFn = eval("(" + JSON.parse(v.meta).vectorstyle + ")");
+                    } catch (e) {
+                        styleFn = function () {
+                        };
+                    }
+                }
+
+                // Set popup with Edit and Delete buttons
+                layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
+                    if (feature.meta) {
+                        let content = false;
+                        let tooltipSettings = {
+                            autoClose: false,
+                            minWidth: 25,
+                            permanent: true
+                        };
+
+                        if (feature.meta.apiRecognitionStatus === 'pending') {
+                            content = `<div class="js-feature-notification-tooltip">
+                                <i class="fa fa-exclamation"></i> ${__(`Pending`)}
+                                <span class="js-tooltip-content"></span>
+                            </div>`;
+
+                            tooltipSettings.className = `api-bridge-popup-warning`;
+                        } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+                            content = `<div class="js-feature-notification-tooltip">
+                                <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                <span class="js-tooltip-content"></span>
+                            </div>`;
+
+                            tooltipSettings.className = `api-bridge-popup-error`;
+                        } else {
+                            throw new Error(`Invalid API recognition status value`);
+                        }
+
+                        layer.on("add", function (e) {
+                            let latLng = false;
+                            if (feature.geometry && feature.geometry.type === 'Point') {
+                                latLng = layer.getLatLng();
+                            } else {
+                                let bounds = layer.getBounds();
+                                latLng = bounds.getCenter()
+                            }
+
+                            let tooltip = L.tooltip(tooltipSettings).setContent(content);
+                            layer.bindTooltip(tooltip);
+                        });
+                    }
+
+                    layer.on("click", function (e) {
+                        e.originalEvent.clickedOnFeature = true;
+
+                        let managePopup = L.popup({
+                            autoPan: false
+                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-primary btn-xs ge-delete">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>`).openOn(cloud.get().map);
+
+                        $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                            me.edit(layer, layerName + ".the_geom", null, true);
+                        });
+
+                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                            if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                me.delete(layer, layerName + ".the_geom", null, true);
+                            }
+                        });
+                    });
+                });
+
+                layerTree.setStyle(layerName, styleFn);
+            });
+
+            backboneEvents.get().on("ready:layerTree", () => {});
+
+            layerTree.create();
+        });
+    },
+
+    /**
+     * Create the attribute form
+     * @param fieldConf
+     * @param pkey
+     * @param f_geometry_column
+     * @returns {{}}
+     */
+    createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
+        let properties = {};
+        Object.keys(fields).map(function (key) {
+            if (key !== pkey && key !== f_geometry_column) {
+                properties[key] = {
+                    title: (fields[key] !== undefined && fields[key].alias) || key,
+                    type: `string`
+                };
+
+                console.log('#', fields[key]);
+                if (fields[key]) {
+                    switch (fields[key].type) {
+                        case `int`:
+                            properties[key].type = `integer`;
+                            break;
+                        case `date`:
+                            properties[key].format = `date-time`;
+                            break;
+                        case `boolean`:
+                            properties[key].type = `boolean`;
+                            break;
+                    }
+                }
+
+                // Properties have priority over default types
+                if (fieldConf[key] && fieldConf[key].properties) {
+                    let parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
+                    if (parsedProperties && parsedProperties.length > 0) {
+                        properties[key].enum = parsedProperties;
+                    }
+                }
             }
-        } else if (item.requested.indexOf(cleanedRequestURL) === 0 || cleanedRequestURL.indexOf(item.requested) === 0) {
+        });
 
-            if (LOG) console.log(`Service worker: Requested the ${cleanedRequestURL} but fetching the ${item.local} (normal string rule)`);
+        return properties;
+    },
 
-            cleanedRequestURL = item.local;
+
+    /**
+     * Add new features to layer
+     * @param k
+     * @param qstore
+     * @param doNotRemoveEditor
+     */
+    add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        let me = this, React = require('react'), ReactDOM = require('react-dom'),
+            schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            type = metaDataKeys[schemaQualifiedName].type;
+
+        let fields = false;
+        if (metaDataKeys[schemaQualifiedName].fields) {
+            fields = metaDataKeys[schemaQualifiedName].fields;
+        } else {
+            throw new Error(`Meta property "fields" can not be empty`);
         }
-    });
 
-    return cleanedRequestURL;
+        let fieldconf = false;
+        if (metaDataKeys[schemaQualifiedName].fieldconf) {
+            fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+        }
+
+        const addFeature = () => {
+            me.stopEdit();
+
+            // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
+            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
+                e.stopPropagation();
+                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                    me.stopEdit();
+
+                    $(".slide-right .close").unbind("click.add");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                } else {
+                    return false;
+                }
+            });
+
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
+            };
+
+            // Slide panel with attributes in and render form component
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
+            });
+
+            // Start editor with the right type
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            } else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            } else {
+                throw new Error(`Unable to detect type`);
+            }
+
+            /**
+             * Commit to GC2
+             * @param formData
+             */
+            const onSubmit = function (formData) {
+                let featureCollection, geoJson = editor.toGeoJSON();
+
+                // Promote MULTI geom
+                if (type.substring(0, 5) === "MULTI") {
+                    geoJson = multiply([geoJson]);
+                }
+
+                Object.keys(formData.formData).map(function (key, index) {
+                    geoJson.properties[key] = formData.formData[key];
+                    if (geoJson.properties[key] === undefined) {
+                        geoJson.properties[key] = null;
+                    }
+                });
+
+                featureCollection = {
+                    "type": "FeatureCollection",
+                    "features": [
+                        geoJson
+                    ]
+                };
+
+                /**
+                 * Feature saving callback
+                 * 
+                 * @param {Object} result Saving result
+                 */
+                const featureIsSaved = (result) => {
+                    console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
+
+                    sqlQuery.reset(qstore);
+
+                    me.stopEdit();
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
+
+                    jquery.snackbar({
+                        id: "snackbar-conflict",
+                        content: "Entity  stedfæstet",
+                        htmlAllowed: true,
+                        timeout: 5000
+                    });
+                };
+
+                $(".slide-right .close").unbind("click.add");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
+                    console.log('Editor: error occured while performing addFeature()');
+                    throw new Error(error);
+                });
+            };
+        };
+
+        if (isVectorLayer) {
+            addFeature();
+        } else {
+            this.checkIfAppIsOnline().then(addFeature).catch(() => {
+                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+                    addFeature();
+                }
+            });
+        }
+    },
+
+
+    /**
+     * Change existing feature
+     * @param e
+     * @param k
+     * @param qstore
+     */
+    edit: function (e, k, qstore, isVectorLayer = false) {
+        const editFeature = () => {
+            let React = require('react');
+
+            let ReactDOM = require('react-dom');
+
+            let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+                metaDataKeys = meta.getMetaDataKeys(),
+                type = metaDataKeys[schemaQualifiedName].type,
+                properties;
+
+            let fields = false;
+            if (metaDataKeys[schemaQualifiedName].fields) {
+                fields = metaDataKeys[schemaQualifiedName].fields;
+            } else {
+                throw new Error(`Meta property "fields" can not be empty`);
+            }
+
+            let fieldconf = false;
+            if (metaDataKeys[schemaQualifiedName].fieldconf) {
+                fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+            }
+
+            me.stopEdit();
+
+            e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
+            if (isVectorLayer) {
+                e.id = "v:" + e.id;
+            }
+
+            e.initialFeatureJSON = e.toGeoJSON();
+
+
+            backboneEvents.get().on("start:sqlQuery", function () {
+                //me.stopEdit(e);
+            });
+
+            // Bind cancel of editing to close of slide panel with attribute form
+            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
+            $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
+                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                    me.stopEdit(e);
+
+                    sqlQuery.reset(qstore);
+                    $(".slide-right .close").unbind("click.edit");
+                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                } else {
+                    return false;
+                }
+            });
+
+            // Hack to edit (Multi)Point layers
+            // Create markers, which can be dragged
+            switch (e.feature.geometry.type) {
+
+                case "Point":
+                    markers[0] = L.marker(
+                        e.getLatLng(),
+                        {
+                            icon: L.AwesomeMarkers.icon({
+                                    icon: 'arrows',
+                                    markerColor: 'blue',
+                                    prefix: 'fa'
+                                }
+                            )
+                        }
+                    ).addTo(cloud.get().map);
+                    sqlQuery.reset();
+                    markers[0].enableEdit();
+                    sqlQuery.reset(qstore);
+                    break;
+
+                case "MultiPoint":
+                    e.feature.geometry.coordinates.map(function (v, i) {
+                        markers[i] = L.marker(
+                            [v[1], v[0]],
+                            {
+                                icon: L.AwesomeMarkers.icon({
+                                        icon: 'arrows',
+                                        markerColor: 'blue',
+                                        prefix: 'fa'
+                                    }
+                                )
+                            }
+                        ).addTo(cloud.get().map);
+                        markers[i].enableEdit();
+
+                    });
+                    sqlQuery.reset(qstore);
+                    break;
+
+                default:
+                    editor = e.enableEdit();
+                    break;
+            }
+
+            // Delete som system attributes
+            delete e.feature.properties._vidi_content;
+            delete e.feature.properties._id;
+
+            // Set NULL values to undefined, because NULL is a type
+            Object.keys(e.feature.properties).map(function (key) {
+                if (e.feature.properties[key] === null) {
+                    e.feature.properties[key] = undefined;
+                }
+            });
+
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
+            };
+
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            }
+            else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            }
+
+            /**
+             * Commit to GC2
+             * @param formData
+             */
+            const onSubmit = function (formData) {
+
+                let GeoJSON = e.toGeoJSON(), featureCollection;
+
+                // HACK to handle (Multi)Point layers
+                // Update the GeoJSON from markers
+                switch (e.feature.geometry.type) {
+                    case "Point":
+                        GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
+                        break;
+
+                    case "MultiPoint":
+                        markers.map(function (v, i) {
+                            GeoJSON.geometry.coordinates[i] = [markers[i].getLatLng().lng, markers[i].getLatLng().lat];
+                        });
+                        break;
+
+                    default:
+                        //pass
+                        break;
+                }
+
+                // Set GeoJSON properties from form values
+                Object.keys(e.feature.properties).map(function (key) {
+                    GeoJSON.properties[key] = formData.formData[key];
+                    // Set undefined values back to NULL
+                    if (GeoJSON.properties[key] === undefined) {
+                        GeoJSON.properties[key] = null;
+                    }
+                });
+
+                // Set the GeoJSON FeatureCollection
+                // This is committed to GC2
+                featureCollection = {
+                    "type": "FeatureCollection",
+                    "features": [
+                        GeoJSON
+                    ]
+                };
+
+                const featureIsUpdated = () => {
+                    console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
+
+                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
+                    me.stopEdit(e);
+                    sqlQuery.reset(qstore);
+
+                    if (isVectorLayer) {
+                        layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                    } else {
+                        layerTree.reloadLayer(schemaQualifiedName, true);
+                    }
+                };
+
+                $(".slide-right .close").unbind("click.edit");
+                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
+                apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
+                    console.log('Editor: error occured while performing updateFeature()');
+                    throw new Error(error);
+                });
+            };
+
+
+
+            // Define a custom component for handling the root position object
+            class GeoPosition extends React.Component {
+                constructor(props) {
+                super(props);
+                    this.state = {...props.formData};
+                }
+            
+                onChange(name) {
+                    return (event) => {
+                        this.setState({
+                        [name]: parseFloat(event.target.value)
+                        }, () => this.props.onChange(this.state));
+                    };
+                }
+            
+                render() {
+                    const {lat, lon} = this.state;
+                    return (
+                        <div>
+                        <input type="number" value={lat} onChange={this.onChange("lat")} />
+                        <input type="number" value={lon} onChange={this.onChange("lon")} />
+                        </div>
+                    );
+                }
+            }
+
+            const fields = {geo: GeoPosition};
+
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                        fields={fields}
+                        formData={e.feature.properties}
+                        onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
+    
+            $("#editor-attr-dialog").animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#editor-attr-dialog" + " .expand-less").show();
+                $("#editor-attr-dialog" + " .expand-more").hide();
+            });
+        };
+
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
+        if (isVectorLayer) {
+            editFeature();
+        } else {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        editFeature();
+                    }
+                } else {
+                    editFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
+                    editFeature();
+                }
+            });
+        }
+    },
+
+
+    /**
+     * Delete feature from layer
+     * @param e
+     * @param k
+     * @param qstore
+     */
+    delete: function (e, k, qstore, isVectorLayer = false) {
+        let me = this;
+
+        let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
+            metaDataKeys = meta.getMetaDataKeys(),
+            GeoJSON = e.toGeoJSON(),
+            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
+
+        const deleteFeature = () => {
+            const featureIsDeleted = () => {
+                console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
+
+                sqlQuery.reset(qstore);
+
+                cloud.get().map.closePopup();
+                
+                if (isVectorLayer) {
+                    layerTree.reloadLayer("v:" + schemaQualifiedName, true);
+                } else {
+                    layerTree.reloadLayer(schemaQualifiedName, true);
+                }
+            };
+
+            let featureCollection = {
+                "type": "FeatureCollection",
+                "features": [
+                    GeoJSON
+                ]
+            };
+
+            apiBridgeInstance.deleteFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsDeleted).catch(error => {
+                console.log('Editor: error occured while performing deleteFeature()');
+                throw new Error(error);
+            });
+        };
+
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
+        if (isVectorLayer) {
+            deleteFeature();
+        } else {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        deleteFeature();
+                    }
+                } else {
+                    deleteFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
+                    deleteFeature();
+                }
+            });
+        }
+    },
+
+    /**
+     * Stop editing and clean up
+     * @param e
+     */
+    stopEdit: function (editedFeature) {
+        let me = this;
+
+        cloud.get().map.editTools.stopDrawing();
+
+        if (editor) {
+            cloud.get().map.removeLayer(editor);
+        }
+
+        // If feature was edited, then reload the layer
+        if (editedFeature) {
+            switchLayer.init(editedFeature.id, false);
+            switchLayer.init(editedFeature.id, true);
+        }
+
+        if (markers) {
+            markers.map(function (v, i) {
+                markers[i].disableEdit();
+                cloud.get().map.removeLayer(markers[i]);
+            });
+        }
+    },
+
+    /**
+     * Checks if application is online.
+     */
+    checkIfAppIsOnline: () => {
+        let result = new Promise((resolve, reject) => {
+            $.ajax({
+                method: 'GET',
+                url: '/connection-check.ico'
+            }).done((data, textStatus, jqXHR) => {
+                if (jqXHR.statusText === 'ONLINE') {
+                    resolve();
+                } else if (jqXHR.statusText === 'OFFLINE') {
+                    reject();
+                } else {
+                    console.warn(`Unable the determine the online status`);
+                    reject();
+                }
+            });
+        });
+
+        return result;
+    },
 };
 
 
-/**
- * Cleaning up and substituting with local URLs provided address
- * 
- * @param {FetchEvent} event
- * 
- * @return {Promise}
- */
-const normalizeTheURLForFetch = (event) => {
-    let URL = event.request.url;
-    let result = new Promise((resolve, reject) => {
-        let cleanedRequestURL = normalizeTheURL(URL);
-        if (event && event.request.method === 'POST' && event.request.url.indexOf('/api/sql') !== -1) {
-            let clonedRequest = event.request.clone();
-            if (browser.name === 'safari' || browser.name === 'ios') {
-                let rawResult = "";
-                let reader = clonedRequest.body.getReader();
-                reader.read().then(function processText({ done, value }) {
-                    if (done) {
-                        cleanedRequestURL += '/' + btoa(rawResult);
-                        resolve(cleanedRequestURL);
-                        return;
-                    }
-    
-                    rawResult += value;
-                    return reader.read().then(processText);
-                });
-            } else {
-                clonedRequest.formData().then((formdata) => {
-                    let payload = '';
-                    for (var p of formdata) {
-                        payload += p.toString();
-                    }
-    
-                    cleanedRequestURL += '/' + btoa(payload);
-    
-                    resolve(cleanedRequestURL);
-                });
-            }
-        } else {
-            resolve(cleanedRequestURL);
-        }
-    });
-
-    return result;
-}
-
-
-/**
- * "install" event handler
- */
-self.addEventListener('install', event => {
-    if (LOG) console.log('Service worker: is being installed, caching specified resources');
-
-    extensionsIgnoredForCaching.map(item => {
-        let localRegExp = new RegExp(`.${item}[\?]?`, 'i');
-        ignoredExtensionsRegExps.push(localRegExp);
-    });
-
-    event.waitUntil(caches.open(CACHE_NAME).then((cache) => {
-        let urlsToCacheAliased = urlsToCache;
-        for (let i = 0; i < urlsToCacheAliased.length; i++) {
-            urlsToCacheAliased[i] = normalizeTheURL(urlsToCacheAliased[i]);
-        }
-
-        let cachingRequests = [];
-        urlsToCacheAliased.map(item => {
-            let result = new Promise((resolve, reject) => {
-                cache.add(item).then(() => {
-                    resolve();
-                }).catch(error => {
-                    console.log('Service worker: failed to fetch during install', item, error);
-                    reject();
-                });
-            });
-
-            cachingRequests.push(result);
-        });
-
-        let result = new Promise((resolve, reject) => {
-            Promise.all(cachingRequests).then(() => {
-                if (LOG) console.log('Service worker: all resources have been fetched and cached');
-                resolve();
-            }).catch(error => {
-                if (LOG) console.warn('Service worker: failed to load initial resources');
-                reject();
-            });
-        });
-
-        return self.skipWaiting();
-    }).catch(error => {
-        console.log(error);
-    }));
-    
-});
-
-/**
- * "activate" event handler
- */
-self.addEventListener('activate', event => {
-
-    if (LOG) console.log('Service worker: service worker is ready to handle fetches');
-
-    event.waitUntil(clients.claim());
-});
- 
-
-/**
- * "message" event handler
- */
-self.addEventListener('message', (event) => {
-    if (event.data && event.data.force) {
-
-        if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');
-
-        forceIgnoredExtensionsCaching = true;
-    } else {
-
-        if (LOG) console.log('Service worker: not forcing caching of files with ignored extensions');
-
-        forceIgnoredExtensionsCaching = false;
-    }
-});
-
-
-/**
- * "fetch" event handler
- */
-self.addEventListener('fetch', (event) => {
-    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
-
-    /**
-     * Wrapper for API calls - the API responses should be as relevant as possible.
-     * 
-     * @param {*} event Fetch event
-     * @param {*} cachedResponse Already cached response
-     * 
-     * @return {Promise}
-     */
-    const queryAPI = (cleanedRequestURL, event, cachedResponse) => {
-
-        if (LOG) console.log('Service worker: API call detected', cleanedRequestURL);
-
-        if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
-            return fetch(event.request);
-        } else {
-            let result = new Promise((resolve, reject) => {
-                return caches.open(CACHE_NAME).then((cache) => {
-                    return fetch(event.request).then(apiResponse => {
-                        if (LOG) console.log('Service worker: API request was performed despite the existence of cached request');
-                        // Caching the API request in case if app will go offline aftewards
-                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                            resolve(apiResponse);
-                        }).catch(error => {
-                            throw new Error('Unable to put the response in cache');
-                            reject();
-                        });
-                    }).catch(error => {
-                        if (LOG) console.log('Service worker: API request failed, using the cached response');
-                        resolve(cachedResponse);
-                    });
-                }).catch(error => {
-                    throw new Error('Unable to open cache');
-                    reject();
-                });
-            });
-
-            return result;
-        }
-    };
-
-    let requestShouldBeBypassed = false;
-    urlsIgnoredForCaching.map(item => {
-        if (item.regExp) {
-            let regExp = new RegExp(item.requested);
-            if (regExp.test(event.request.url)) {
-                requestShouldBeBypassed = true;
-                return false;
-            }
-        } else if (event.request.url === item.requested) {
-            requestShouldBeBypassed = true;
-            return false;
-        }
-    });
-
-    if (requestShouldBeBypassed) {
-        if (LOG) console.log(`Service worker: bypassing the ${event.request.url} request`);
-
-        event.respondWith(fetch(event.request));
-    } else {
-        event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
-            return caches.match(cleanedRequestURL).then((response) => {
-                if (response) {
-                    // The request was found in cache
-                    let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-                    // API requests should not use the probably stalled cached copy if it is possible
-                    if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                        return queryAPI(cleanedRequestURL, event, response);
-                    } else {
-                        if (LOG) console.log(`Service worker: in cache ${event.request.url}`);
-                        return response;
-                    }
-                } else {
-                    // The request was not found in cache
-
-                    let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
-                    // API requests should not use the probably stalled cached copy if it is possible
-                    if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
-                        return queryAPI(cleanedRequestURL, event, response);
-                    } else {
-                        // Checking if the request is eligible for caching 
-                        let requestHasToBeCached = true;
-                        if (forceIgnoredExtensionsCaching === false) {
-                            ignoredExtensionsRegExps.map(item => {
-                                if (item.test(cleanedRequestURL)) {
-                                    requestHasToBeCached = false;
-                                    return false;
-                                }
-                            });
-                        }
-
-                        let requestToMake = new Request(cleanedRequestURL);
-                        if (cleanedRequestURL.indexOf('/connection-check.ico') !== -1) {
-                            var result = new Promise((resolve, reject) => {
-                                fetch(requestToMake).then(() => {
-                                    let dummyResponse = new Response(null, { statusText: 'ONLINE' });
-                                    resolve(dummyResponse);
-                                }).catch(() => {
-                                    let dummyResponse = new Response(null, { statusText: 'OFFLINE' });
-                                    resolve(dummyResponse);
-                                });
-                            });
-
-                            return result;
-                        } else if (requestHasToBeCached) {
-                            if (LOG) console.log(`Service worker: caching ${requestToMake.url}`);
-                            return caches.open(CACHE_NAME).then((cache) => {
-                                return fetch(requestToMake).then(response => {
-                                    return cache.put(requestToMake.url, response.clone()).then(() => {
-                                        return response;
-                                    });
-                                }).catch(error => {
-                                    console.warn(`Service worker: unable the fetch ${requestToMake.url}`);
-                                });
-                            });
-                        } else {
-                            return fetch(requestToMake);
-                        }
-                    }
-                }
-            });
-        }));
-    }
-});
