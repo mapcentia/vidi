@@ -39,7 +39,11 @@ module.exports = {
                         dataTr = $("<tr></tr>");
                         for (m = 0; m < v.data[u].length; m++) {
                             if (!v.data[u][m].key) {
-                                dataTr.append("<td>" + v.data[u][m].value + "</td>");
+                                if (!v.data[u][m].link) {
+                                    dataTr.append("<td>" + v.data[u][m].value + "</td>");
+                                } else {
+                                    dataTr.append("<td>" + "<a target='_blank' rel='noopener' href='" + (v.data[u][m].linkprefix ? v.data[u][m].linkprefix : "") + v.data[u][m].value + "'>Link</a>" + "</td>");
+                                }
                             }
                         }
                         dataTable.append(dataTr);
