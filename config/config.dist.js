@@ -145,7 +145,7 @@ module.exports = {
 
 
     //=============================================================================
-    // An URL where configurations can be downloaded online for
+    // An URL (or URLs) where configurations can be downloaded online for
     // overriding build-time configurations. Any HTTP(S) server can host config files
     // Example of a config:
     // https://github.com/mapcentia/mapcentia.github.io/blob/master/vidi.json
@@ -153,6 +153,14 @@ module.exports = {
     //=============================================================================
 
     "configUrl": "https://mapcentia.github.io",
+
+    // Database depend URLs
+
+    //"configUrl": {
+    //    "a_database": "https://mapcentia.github.io",
+    //    "an_other_database": "https://example.github.io",
+    //    "_default": "https://fall_back.github.io"
+    //},
 
 
     // ==========================================================
