@@ -3,21 +3,18 @@
  */
 
 const { expect } = require("chai");
+const helpers = require("./helpers");
 
 const PAGE_URL = `https://vidi.alexshumilov.ru/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`;
 
-function sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
-
 const PAGE_LOAD_TIMEOUT = 10000;
 
-describe("API Bridge and Queue", () => {
+describe("Application", () => {
     describe("(general tests)", () => {
         it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
             const page = await browser.newPage();
             await page.goto(PAGE_URL);
-            await sleep(PAGE_LOAD_TIMEOUT);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
             expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
             expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
@@ -79,7 +76,7 @@ describe("API Bridge and Queue", () => {
         it('should load layers from page URL', async () => {
             const page = await browser.newPage();
             await page.goto(`${PAGE_URL}v:public.test,public.test_poly`);
-            await sleep(PAGE_LOAD_TIMEOUT);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
             await page.click(`#burger-btn`);
             await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
@@ -92,7 +89,7 @@ describe("API Bridge and Queue", () => {
         it('should load vector and tile layers', async () => {
             const page = await browser.newPage();
             await page.goto(PAGE_URL);
-            await sleep(PAGE_LOAD_TIMEOUT);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
             await page.click(`#burger-btn`);
             await page._client.send('Network.enable');
@@ -119,7 +116,7 @@ describe("API Bridge and Queue", () => {
         it('should load vector layers', async () => {
             const page = await browser.newPage();
             await page.goto(PAGE_URL);
-            await sleep(PAGE_LOAD_TIMEOUT);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
             await page.click(`#burger-btn`);
             await page._client.send('Network.enable');
@@ -138,7 +135,7 @@ describe("API Bridge and Queue", () => {
         it('should load tile layers', async () => {
             const page = await browser.newPage();
             await page.goto(PAGE_URL);
-            await sleep(PAGE_LOAD_TIMEOUT);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
             await page.click(`#burger-btn`);
             await page._client.send('Network.enable');

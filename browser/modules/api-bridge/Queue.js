@@ -28,6 +28,7 @@ class Queue {
         }
 
         let _self = this;
+        this._terminated = false;
         this._online = false;
         this._locked = false;
         this._onUpdateListener = () => {};
@@ -39,9 +40,11 @@ class Queue {
             if (LOG) console.log(`Queue interval, total items in queue: ${_self._queue.length}, locked: ${_self._locked}`);
 
             const scheduleNextQueueProcessingRun = () => {
-                setTimeout(() => {
-                    processQueue();
-                }, QUEUE_PROCESSING_INTERVAL);
+                if (_self._terminated !== true) {
+                    setTimeout(() => {
+                        processQueue();
+                    }, QUEUE_PROCESSING_INTERVAL);
+                }
             };
 
             if (queueStateUndefined) {
@@ -471,7 +474,7 @@ class Queue {
                 }).catch(error => {
                     _self._locked = false;
 
-                    console.warn('Request failed and was postponed');
+                    if (LOG) console.warn('Request failed and was postponed');
                     resolve();
                 });
             } else {
@@ -515,8 +518,9 @@ class Queue {
      */
     removeByGID(gids = []) {
         let initialNumberOfItems = this._queue.length;
-        for (let i = 0; i < this._queue.length; i++) {
-            for (let j = 0; j < gids.length; j++) {
+        for (let j = 0; j < gids.length; j++) {
+            let i = this._queue.length;
+            while (i--) {
                 if (this._queue[i].feature.features[0].properties.gid === gids[j]) {
 
                     if (LOG) console.log('Queue: deleting item by gid', gids[j], this._queue[i]);
@@ -575,6 +579,13 @@ class Queue {
         return this._queue.length;
     }
 
+    /**
+     * Terminates the forever running loop
+     */
+    terminate() {
+        this._terminated = true;
+
+    }
 };
 
 module.exports = Queue;
