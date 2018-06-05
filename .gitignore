@@ -5,6 +5,8 @@
 
 # Code coverage files
 .nyc_output
+coverage
+coverageQueue
 
 ## Build files
 public/js/build

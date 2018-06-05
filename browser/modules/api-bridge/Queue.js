@@ -24,7 +24,7 @@ class Queue {
 
     constructor(processor) {
         if (!processor) {
-            throw new Error('No processor for queue was specified');
+            throw new Error('Queue: no processor was specified');
         }
 
         let _self = this;
@@ -175,9 +175,9 @@ class Queue {
                 }
 
                 if (itemsHaveToBeMerged) {
-                    
+
                     if (LOG) console.log(`Queue: more than one queue item with gid ${itemGid}, items have to be merged`);
-                    
+
                     // Giving the item another chance
                     initialItemImage.skip = false;
                     initialItemImage.feature.features[0].geometry = latestItemImage.feature.features[0].geometry;
@@ -193,7 +193,6 @@ class Queue {
 
                     _self._queue.push(latestItemImage);
                 } else {
-                    console.log(`Items: `, initialItemImage, latestItemImage);
                     throw new Error(`Queue: no action was selected`);
                 }
 
@@ -255,11 +254,9 @@ class Queue {
                     case DELETE_REQUEST:
                         stats[layer][category].DELETE++;
                         break;
-                    default:
-                        throw new Error('Invalid request type');
                 }
             } else {
-                throw new Error('Invalid meta object');
+                throw new Error('Queue: invalid meta object');
             }
         }
 
@@ -288,7 +285,7 @@ class Queue {
                 if (LOG) console.log('Queue: after getting state');
 
                 if (error) {
-                    throw new Error('Error occured while accessing the store');
+                    throw new Error('Queue: error occured while accessing the store');
                 }
 
                 if (value) {
@@ -311,7 +308,7 @@ class Queue {
             if (LOG) console.log('Queue: saving state');
 
             if (error) {
-                throw new Error('Error occured while storing the queue');
+                throw new Error('Queue: error occured while storing the queue');
             }
         });
     }
@@ -378,7 +375,7 @@ class Queue {
                             }
 
                             if (numberOfItemsWithCurrentGid > 1) {
-                                throw new Error('Multiple queue element with the same gid');
+                                throw new Error('Queue: multiple queue element with the same gid');
                             }
                         });
 
@@ -447,7 +444,7 @@ class Queue {
         if (LOG) console.log('Queue: pushAndProcess', item);
 
         if (!('type' in item) || [ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST].indexOf(item.type) === -1) {
-            throw new Error('Queue item has to have a certain type');
+            throw new Error('Queue: item has to have a certain type');
         }
 
         let _self = this;
@@ -531,7 +528,7 @@ class Queue {
         }
 
         if (this._queue.length !== (initialNumberOfItems - gids.length)) {
-            throw new Error('Some queue elements have not been deleted');
+            throw new Error('Queue: some elements have not been deleted');
         }
 
         this._saveState();

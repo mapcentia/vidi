@@ -55,9 +55,9 @@ global.$.ajax = jQueryAJAXMock;
 describe("Queue", () => {
     it("throws an Error if no processor() is specified", async () => {
         try {
-            let queue = new Queue();
+			let queue = new Queue();
         } catch(e) {
-            expect(e.message.indexOf('No processor for queue was specified')).to.equal(0);
+            expect(e.message.indexOf('Queue: no processor was specified')).to.equal(0);
         }
 	});
 
@@ -81,6 +81,102 @@ describe("Queue", () => {
 		queue.terminate();
 	});
 
+    it("throws an Error if submitted request type if invalid", async () => {
+		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+			let result = new Promise((resolve, reject) => { reject(); });
+			return result;
+		});
+
+		let item = false;
+
+		try {
+			// Adding add feature request
+			item = helpers.duplicate(dummyRequest);
+			item.type = 100;
+			queue.pushAndProcess(item);
+        } catch(e) {
+            expect(e.message.indexOf('Queue: item has to have a certain type')).to.equal(0);
+		}
+
+		queue.terminate();
+	});
+
+    it("throws an Error if requests submission order is wrong (delete, then update)", async () => {
+		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+			let result = new Promise((resolve, reject) => { reject(); });
+			return result;
+		});
+
+		let item = false;
+		try {
+			// Adding delete feature request
+			item = helpers.duplicate(dummyRequest);
+			item.type = Queue.DELETE_REQUEST;
+			queue.pushAndProcess(item);
+
+			// Adding update feature request
+			item = helpers.duplicate(dummyRequest);
+			item.type = Queue.UPDATE_REQUEST;
+			queue.pushAndProcess(item);
+
+        } catch(e) {
+            expect(e.message.indexOf('Queue: erroneous queue item pairs')).to.equal(0);
+		}
+
+		queue.terminate();
+	});
+
+    it("throws an Error if requests submission order is wrong (update feature with virtual gid, then update)", async () => {
+		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+			let result = new Promise((resolve, reject) => { reject(); });
+			return result;
+		});
+
+		let item = false;
+		try {
+			// Adding update feature request
+			item = helpers.duplicate(dummyRequest);
+			item.type = Queue.UPDATE_REQUEST;
+			item.feature.features[0].properties.gid = -2;
+			queue.pushAndProcess(item);
+
+			// Adding update feature request
+			item = helpers.duplicate(dummyRequest);
+			item.type = Queue.UPDATE_REQUEST;
+			item.feature.features[0].properties.gid = -2;
+			queue.pushAndProcess(item);
+        } catch(e) {
+            expect(e.message.indexOf('Queue: cannot update item that does not exists on backend')).to.equal(0);
+		}
+
+		queue.terminate();
+	});
+
+    it("throws an Error if is not able to store data", async () => {
+		let queueWasRestoredOnStartup = false;
+		global.localforage = {
+			getItem: () => {
+				queueWasRestoredOnStartup = true;
+			},
+			setItem: (key, value, callback) => {
+				callback({ status: 'error' });
+			}
+		};
+
+		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+			let result = new Promise((resolve, reject) => { reject(); });
+			return result;
+		});
+
+		// Adding delete feature request
+		let item = helpers.duplicate(dummyRequest);
+		item.type = Queue.UPDATE_REQUEST;
+		item.feature.features[0].properties.gid = -2;
+		queue.pushAndProcess(item);
+
+		global.localforage = localforageMock;
+		queue.terminate();
+	});
 
     it("removes items by layer identifier", async () => {
 		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
@@ -93,7 +189,7 @@ describe("Queue", () => {
 
 		await helpers.sleep(1000);
 
-		expect(queue.getItems().length).to.equal(1);
+		expect(queue.length).to.equal(1);
 		queue.removeByLayerId('another_schema.table');
 		expect(queue.getItems().length).to.equal(1);
 		queue.removeByLayerId('schema.table');
@@ -165,10 +261,87 @@ describe("Queue", () => {
 		expect(queue.getItems().length).to.equal(1);
 		expect(queue.getItems()[0].skip).to.equal(true);
 		expect(queue.getItems()[0].serverErrorMessage).to.equal('Test rejection message');
+
+		queue.resubmitSkippedFeatures();
+
+		expect(queue.getItems().length).to.equal(1);
+		expect(queue.getItems()[0].skip).to.equal(false);
+
+		queue.terminate();
+	});
+
+    it("processes feature management requests", async () => {
+		let process = false;
+		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+			let result = new Promise((resolve, reject) => {
+				if (process) {
+					resolve();
+				} else {
+					reject();
+				}
+			});
+
+			return result;
+		});
+
+		// Adding add feature request
+		queue.pushAndProcess(helpers.duplicate(dummyRequest));
+
+		// Adding update feature request
+		let updateRequest = helpers.duplicate(dummyRequest);
+		updateRequest.type = Queue.UPDATE_REQUEST;
+		updateRequest.feature.features[0].properties.gid = 1;
+		queue.pushAndProcess(updateRequest);
+
+		await helpers.sleep(4000);
+
+		process = true;
+
+		await helpers.sleep(8000);
+
+		expect(queue.getItems().length).to.equal(0);
 		queue.terminate();
 	});
 
     describe("reports", () => {
+		it("number of pending features", async () => {
+			let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
+				let result = new Promise((resolve, reject) => {
+					reject();
+				});
+
+				return result;
+			});
+
+			let featurePendingRequestsWereAdded = false;
+			queue.setOnUpdate((statistics) => {
+				if (statistics['schema.table.the_geom'].failed.ADD + statistics['schema.table.the_geom'].failed.UPDATE + 
+					statistics['schema.table.the_geom'].failed.DELETE === 3) {
+					featurePendingRequestsWereAdded = true;
+				}
+			});
+
+	    	// Adding add feature request
+			queue.pushAndProcess(helpers.duplicate(dummyRequest));
+
+			// Adding update feature request
+			let updateRequest = helpers.duplicate(dummyRequest);
+			updateRequest.type = Queue.UPDATE_REQUEST;
+			updateRequest.feature.features[0].properties.gid = 1;
+			queue.pushAndProcess(updateRequest);
+
+			// Adding delete feature request
+			let deleteRequest = helpers.duplicate(dummyRequest);
+			deleteRequest.type = Queue.DELETE_REQUEST;
+			deleteRequest.feature.features[0].properties.gid = 2;
+			queue.pushAndProcess(deleteRequest);
+
+			await helpers.sleep(1000);
+
+			expect(featurePendingRequestsWereAdded).to.be.true;
+			queue.terminate();
+		});
+
         it("whenever app goes online or offline", async () => {
             let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
 				let result = new Promise((resolve, reject) => {
@@ -193,6 +366,21 @@ describe("Queue", () => {
 				return {
 					done: (callback) => {
 						callback(null, null, { statusText: 'OFFLINE' });
+						return {
+							always: (callback) => {
+								callback();
+							}
+						}
+					}
+				}
+			};
+
+			await helpers.sleep(4000);
+
+			global.$.ajax = () => {
+				return {
+					done: (callback) => {
+						callback(null, null, { statusText: false });
 						return {
 							always: (callback) => {
 								callback();
@@ -257,6 +445,22 @@ describe("Queue", () => {
 			expect(queue.getItems().length).to.equal(1);
 			expect(queue.getItems()[0].type).to.equal(Queue.ADD_REQUEST);
 			expect(queue.getItems()[0].feature.features[0].properties.name).to.equal('test_test_test');
+
+			await helpers.sleep(1000);
+
+			updateRequest = helpers.duplicate(dummyRequest);
+			updateRequest.type = Queue.UPDATE_REQUEST;
+			updateRequest.feature.features[0].properties.gid = 2;
+			queue.pushAndProcess(updateRequest);
+
+			let deleteRequest = helpers.duplicate(dummyRequest);
+			deleteRequest.type = Queue.DELETE_REQUEST;
+			deleteRequest.feature.features[0].properties.gid = 2;
+			queue.pushAndProcess(deleteRequest);
+
+			expect(queue.getItems().length).to.equal(2);
+			expect(queue.getItems()[1].type).to.equal(Queue.DELETE_REQUEST);
+
 			queue.terminate();
 		});
 		
