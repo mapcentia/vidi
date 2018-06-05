@@ -3,6 +3,9 @@
 
 *.iml
 
+# Code coverage files
+.nyc_output
+
 ## Build files
 public/js/build
 public/css/build
