@@ -5,8 +5,6 @@
 
 'use strict';
 
-import Dropzone from 'react-dropzone';
-
 /**
  *
  * @type {*|exports|module.exports}
@@ -45,6 +43,10 @@ var editor;
 var switchLayer;
 
 var managePopups = [];
+
+const ImageUploadWidget = require('./ImageUploadWidget');
+
+const widgets = { 'imageupload': ImageUploadWidget };
 
 /**
  *
@@ -308,13 +310,12 @@ module.exports = {
                     return false;
                 }
             });
-
+  
             // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
-            };
-    
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            const schema = formBuildInformation.schema;
+            const uiSchema = formBuildInformation.uiSchema;
+
             $("#editor-attr-dialog").animate({
                 bottom: "0"
             }, 500, function () {
@@ -397,7 +398,9 @@ module.exports = {
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
-                          onSubmit={onSubmit}
+                        uiSchema={uiSchema}
+                        widgets={widgets}
+                        onSubmit={onSubmit}
                     />
                 </div>
             ), document.getElementById("editor-attr-form"));
@@ -606,70 +609,6 @@ module.exports = {
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
-            // Define a custom component for handling the root position object
-            class ImageUploadWidget extends React.Component {
-                constructor(props) {
-                    super(props);
-
-                    this.state = {
-                        loadedImageData: (props.value ? props.value : false)
-                    };
-
-                    this.deleteImage = this.deleteImage.bind(this);
-                }
-
-                onDrop(files) {
-                    let _self = this;
-                    $.canvasResize(files[0], {
-                        width: 300,
-                        height: 0,
-                        crop: false,
-                        quality: 80,
-                        //rotate: 90,
-                        callback: function(data, width, height) {
-                            _self.setState({
-                                loadedImageData: data
-                            });
-
-                            _self.props.onChange(data);
-                        }
-                    });
-                }
-
-                deleteImage() {
-                    this.setState({
-                        loadedImageData: false
-                    });
-                }
-
-                render() {
-                    let control = false;
-                    if (this.state.loadedImageData) {
-                        control = (<div>
-                            <div>
-                                <img src={this.state.loadedImageData}/>
-                            </div>
-                            <div>
-                                <button type="button" className="btn btn-secondary btn-block" onClick={this.deleteImage}>
-                                    <i className="material-icons">delete</i>
-                                </button>
-                            </div>
-                        </div>);
-                    } else {
-                        control = (<div>
-                            <Dropzone onDrop={this.onDrop.bind(this)} style={{width: '100%', height: '50px', padding: '5px', border: '1px green dashed'}}>
-                                <p>Drop files here, or click to select files to upload</p>
-                            </Dropzone>
-                        </div>);
-                    }
-
-                    return (control);
-                }
-            };
-
-            const widgets = {
-                'imageupload': ImageUploadWidget
-            };
             cloud.get().map.closePopup();
 
             ReactDOM.render((
