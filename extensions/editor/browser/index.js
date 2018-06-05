@@ -531,16 +531,9 @@ module.exports = {
                 editor = cloud.get().map.editTools.startPolygon();
             } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
                 editor = cloud.get().map.editTools.startPolyline();
-            }
-            else if (type === "POINT" || type === "MULTIPOINT") {
+            } else if (type === "POINT" || type === "MULTIPOINT") {
                 editor = cloud.get().map.editTools.startMarker();
             }
-
-            // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
 
             /**
              * Commit to GC2
