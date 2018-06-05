@@ -314,15 +314,6 @@ module.exports = {
                 type: "object",
                 properties: this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf)
             };
-
-            // Slide panel with attributes in and render form component
-            ReactDOM.render((
-                <div style={{"padding": "15px"}}>
-                    <Form schema={schema}
-                          onSubmit={onSubmit}
-                    />
-                </div>
-            ), document.getElementById("editor-attr-form"));
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
@@ -401,6 +392,15 @@ module.exports = {
                     throw new Error(error);
                 });
             };
+
+            // Slide panel with attributes in and render form component
+            ReactDOM.render((
+                <div style={{"padding": "15px"}}>
+                    <Form schema={schema}
+                          onSubmit={onSubmit}
+                    />
+                </div>
+            ), document.getElementById("editor-attr-form"));
         };
 
         if (isVectorLayer) {
@@ -453,7 +453,6 @@ module.exports = {
 
             e.initialFeatureJSON = e.toGeoJSON();
 
-
             backboneEvents.get().on("start:sqlQuery", function () {
                 //me.stopEdit(e);
             });
@@ -489,7 +488,7 @@ module.exports = {
                         }
                     ).addTo(cloud.get().map);
                     sqlQuery.reset();
-                    markers[0].enableEdit();
+                    editor = markers[0].enableEdit();
                     sqlQuery.reset(qstore);
                     break;
 
@@ -506,7 +505,7 @@ module.exports = {
                                 )
                             }
                         ).addTo(cloud.get().map);
-                        markers[i].enableEdit();
+                        editor = markers[i].enableEdit();
 
                     });
                     sqlQuery.reset(qstore);
@@ -536,6 +535,12 @@ module.exports = {
             else if (type === "POINT" || type === "MULTIPOINT") {
                 editor = cloud.get().map.editTools.startMarker();
             }
+
+            // Create schema for attribute form
+            const schema = {
+                type: "object",
+                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
+            };
 
             /**
              * Commit to GC2
@@ -672,6 +677,7 @@ module.exports = {
             const widgets = {
                 'imageupload': ImageUploadWidget
             };
+            cloud.get().map.closePopup();
 
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
