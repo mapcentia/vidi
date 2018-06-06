@@ -530,13 +530,13 @@ module.exports = {
                 }
             });
 
-            if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
-            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
-            } else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
-            }
+            // if (type === "POLYGON" || type === "MULTIPOLYGON") {
+            //     editor = cloud.get().map.editTools.startPolygon();
+            // } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+            //     editor = cloud.get().map.editTools.startPolyline();
+            // } else if (type === "POINT" || type === "MULTIPOINT") {
+            //     editor = cloud.get().map.editTools.startMarker();
+            // }
 
             /**
              * Commit to GC2
