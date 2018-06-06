@@ -380,7 +380,7 @@ module.exports = {
 
                     jquery.snackbar({
                         id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
+                        content: "Feature  stedfæstet",
                         htmlAllowed: true,
                         timeout: 5000
                     });
@@ -738,6 +738,14 @@ module.exports = {
                 cloud.get().map.removeLayer(markers[i]);
             });
         }
+
+        // Close the attribut dialog
+        $("#editor-attr-dialog").animate({
+            bottom: "-100%"
+        }, 500, function () {
+            $("#editor-attr-dialog .expand-less").show();
+            $("#editor-attr-dialog .expand-more").hide();
+        });
     },
 
     /**
