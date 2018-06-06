@@ -44,6 +44,10 @@ var switchLayer;
 
 var managePopups = [];
 
+const ImageUploadWidget = require('./ImageUploadWidget');
+
+const widgets = { 'imageupload': ImageUploadWidget };
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -215,28 +219,54 @@ module.exports = {
      * @param f_geometry_column
      * @returns {{}}
      */
-    createFormObj: function (fieldConf, pkey, f_geometry_column) {
-
+    createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
         let properties = {};
+        let uiSchema = {};
 
-        Object.keys(fieldConf).map(function (key) {
-
-            if (key !== pkey && key !== f_geometry_column)
+        Object.keys(fields).map(function (key) {
+            if (key !== pkey && key !== f_geometry_column) {
                 properties[key] = {
-                    type:
-                        (fieldConf[key] !== undefined && fieldConf[key].type === "string") ? "string" :
-                            (fieldConf[key] !== undefined && fieldConf[key].type === "int") ? "integer" :
-                                "string",
-                    title: (fieldConf[key] !== undefined && fieldConf[key].alias) || key
+                    title: (fields[key] !== undefined && fields[key].alias) || key,
+                    type: `string`
                 };
 
-            if (fieldConf[key] !== undefined && fieldConf[key].type === "date") {
-                properties[key].format = "date-time";
-            }
+                if (fields[key]) {
+                    switch (fields[key].type) {
+                        case `int`:
+                            properties[key].type = `integer`;
+                            break;
+                        case `date`:
+                            properties[key].format = `date-time`;
+                            break;
+                        case `boolean`:
+                            properties[key].type = `boolean`;
+                            break;
+                        case `bytea`:
+                            uiSchema[key] = {
+                                'ui:widget': 'imageupload'
+                            };
 
+                            break;
+                    }
+                }
+
+                // Properties have priority over default types
+                if (fieldConf[key] && fieldConf[key].properties) {
+                    let parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
+                    if (parsedProperties && parsedProperties.length > 0) {
+                        properties[key].enum = parsedProperties;
+                    }
+                }
+            }
         });
 
-        return properties;
+        return {
+            schema: {
+                type: "object",
+                properties
+            },
+            uiSchema
+        }
     },
 
 
@@ -250,8 +280,19 @@ module.exports = {
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
             type = metaDataKeys[schemaQualifiedName].type;
+
+        let fields = false;
+        if (metaDataKeys[schemaQualifiedName].fields) {
+            fields = metaDataKeys[schemaQualifiedName].fields;
+        } else {
+            throw new Error(`Meta property "fields" can not be empty`);
+        }
+
+        let fieldconf = false;
+        if (metaDataKeys[schemaQualifiedName].fieldconf) {
+            fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+        }
 
         const addFeature = () => {
             me.stopEdit();
@@ -269,13 +310,12 @@ module.exports = {
                     return false;
                 }
             });
-
+  
             // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
-    
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            const schema = formBuildInformation.schema;
+            const uiSchema = formBuildInformation.uiSchema;
+
             $("#editor-attr-dialog").animate({
                 bottom: "0"
             }, 500, function () {
@@ -358,7 +398,9 @@ module.exports = {
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
-                          onSubmit={onSubmit}
+                        uiSchema={uiSchema}
+                        widgets={widgets}
+                        onSubmit={onSubmit}
                     />
                 </div>
             ), document.getElementById("editor-attr-form"));
@@ -390,9 +432,20 @@ module.exports = {
 
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
-                fieldConf = ((metaDataKeys[schemaQualifiedName].fields) ? metaDataKeys[schemaQualifiedName].fields : JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf)),
                 type = metaDataKeys[schemaQualifiedName].type,
                 properties;
+
+            let fields = false;
+            if (metaDataKeys[schemaQualifiedName].fields) {
+                fields = metaDataKeys[schemaQualifiedName].fields;
+            } else {
+                throw new Error(`Meta property "fields" can not be empty`);
+            }
+
+            let fieldconf = false;
+            if (metaDataKeys[schemaQualifiedName].fieldconf) {
+                fieldconf = JSON.parse(metaDataKeys[schemaQualifiedName].fieldconf);
+            }
 
             me.stopEdit();
 
@@ -477,11 +530,13 @@ module.exports = {
                 }
             });
 
-            // Create schema for attribute form
-            const schema = {
-                type: "object",
-                properties: this.createFormObj(fieldConf, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column)
-            };
+            if (type === "POLYGON" || type === "MULTIPOLYGON") {
+                editor = cloud.get().map.editTools.startPolygon();
+            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+                editor = cloud.get().map.editTools.startPolyline();
+            } else if (type === "POINT" || type === "MULTIPOINT") {
+                editor = cloud.get().map.editTools.startMarker();
+            }
 
             /**
              * Commit to GC2
@@ -549,13 +604,20 @@ module.exports = {
                 });
             };
 
+            // Create schema for attribute form
+            let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
+            const schema = formBuildInformation.schema;
+            const uiSchema = formBuildInformation.uiSchema;
+
             cloud.get().map.closePopup();
 
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
-                          formData={e.feature.properties}
-                          onSubmit={onSubmit}
+                        widgets={widgets}
+                        uiSchema={uiSchema}
+                        formData={e.feature.properties}
+                        onSubmit={onSubmit}
                     />
                 </div>
             ), document.getElementById("editor-attr-form"));
