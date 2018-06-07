@@ -48,6 +48,8 @@ const ImageUploadWidget = require('./ImageUploadWidget');
 
 const widgets = { 'imageupload': ImageUploadWidget };
 
+const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -395,6 +397,7 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
+            $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
@@ -403,7 +406,7 @@ module.exports = {
                         onSubmit={onSubmit}
                     />
                 </div>
-            ), document.getElementById("editor-attr-form"));
+            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
         };
 
         if (isVectorLayer) {
@@ -611,6 +614,10 @@ module.exports = {
 
             cloud.get().map.closePopup();
 
+console.log('###', e.feature.properties);
+
+
+            $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
@@ -620,7 +627,7 @@ module.exports = {
                         onSubmit={onSubmit}
                     />
                 </div>
-            ), document.getElementById("editor-attr-form"));
+            ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
