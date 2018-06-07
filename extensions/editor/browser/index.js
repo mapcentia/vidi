@@ -380,7 +380,7 @@ module.exports = {
 
                     jquery.snackbar({
                         id: "snackbar-conflict",
-                        content: "Entity  stedfæstet",
+                        content: "Feature  stedfæstet",
                         htmlAllowed: true,
                         timeout: 5000
                     });
@@ -530,13 +530,13 @@ module.exports = {
                 }
             });
 
-            if (type === "POLYGON" || type === "MULTIPOLYGON") {
-                editor = cloud.get().map.editTools.startPolygon();
-            } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-                editor = cloud.get().map.editTools.startPolyline();
-            } else if (type === "POINT" || type === "MULTIPOINT") {
-                editor = cloud.get().map.editTools.startMarker();
-            }
+            // if (type === "POLYGON" || type === "MULTIPOLYGON") {
+            //     editor = cloud.get().map.editTools.startPolygon();
+            // } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
+            //     editor = cloud.get().map.editTools.startPolyline();
+            // } else if (type === "POINT" || type === "MULTIPOINT") {
+            //     editor = cloud.get().map.editTools.startMarker();
+            // }
 
             /**
              * Commit to GC2
@@ -738,6 +738,14 @@ module.exports = {
                 cloud.get().map.removeLayer(markers[i]);
             });
         }
+
+        // Close the attribut dialog
+        $("#editor-attr-dialog").animate({
+            bottom: "-100%"
+        }, 500, function () {
+            $("#editor-attr-dialog .expand-less").show();
+            $("#editor-attr-dialog .expand-more").hide();
+        });
     },
 
     /**

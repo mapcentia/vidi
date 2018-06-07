@@ -43,8 +43,6 @@ module.exports = {
         var ReactDOM = require('react-dom');
 
 
-        $('<li><a href="javascript:void(0)" id="' + exId + '"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>').appendTo('#main-navbar');
-
         // Check if signed in
         //===================
 
@@ -65,23 +63,6 @@ module.exports = {
             error: function (error) {
                 console.error(error.responseJSON);
             }
-        });
-
-
-        $("#" + exId).on("click", function () {
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-
-                // Render
-                //=======
-
-                ReactDOM.render(
-                    <Session/>,
-                    document.getElementById("info-modal-body")
-                );
-
-            });
         });
 
         class Status extends React.Component {
@@ -263,6 +244,10 @@ module.exports = {
             }
         }
 
+        ReactDOM.render(
+            <Session/>,
+            document.getElementById("login-modal-body")
+        );
 
     },
 

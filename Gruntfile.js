@@ -193,6 +193,8 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
                         'public/js/lib/jquery/jquery.js',
+                        'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
+                        'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
@@ -297,6 +299,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
 
     grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
