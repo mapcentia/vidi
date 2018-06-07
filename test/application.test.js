@@ -10,157 +10,161 @@ const PAGE_URL = `https://vidi.alexshumilov.ru/app/aleksandrshumilov/public/#osm
 const PAGE_LOAD_TIMEOUT = 10000;
 
 describe("Application", () => {
-    describe("(general tests)", () => {
-        it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
-            const page = await browser.newPage();
-            await page.goto(PAGE_URL);
-            await helpers.sleep(PAGE_LOAD_TIMEOUT);
+    it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
+        const page = await browser.newPage();
+        await page.goto(PAGE_URL);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
-            expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
-            expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
+        expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
+        expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
 
-            let forceOfflineModeIndicator;
-            forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            expect(forceOfflineModeIndicator).to.be.false;
+        let forceOfflineModeIndicator;
+        forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+        expect(forceOfflineModeIndicator).to.be.false;
 
-            await page.evaluate(`$('.js-toggle-offline-mode').parent().find('.toggle').trigger('click')`);
+        await page.evaluate(`$('.js-toggle-offline-mode').parent().find('.toggle').trigger('click')`);
 
-            forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            expect(forceOfflineModeIndicator).to.be.true;
+        forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+        expect(forceOfflineModeIndicator).to.be.true;
 
-            /*
-            // @todo Enable logging in separate function
-            page.on("console", msg => {
-                console.log("PAGE LOG:", msg.text());
-                if (['log', 'info', 'debug'].indexOf(msg.type()) === -1) {
-                    console.log("ARGS:", msg.args());
-                }
-            });
-
-            await page.screenshot({ path: 'test.png' });
-            */
-
-            // @todo Check the indicator change when app goes offline
-            /*
-            await page._client.send('Network.enable');
-            await page._client.on('Network.requestWillBeSent', event => {
-                console.log('Network.requestWillBeSent', event.requestId, event.request.url);
-            });
-            await page._client.on('Network.loadingFinished', event => {
-                console.log('Network.loadingFinished', event.requestId);
-            });
-
-            await page._client.send('Network.emulateNetworkConditions', {
-                offline: true,
-                latency: 100,
-                downloadThroughput: 0,
-                uploadThroughput: 0
-            });
-
-            await page.evaluate(`$.getJSON('https://jsonplaceholder.typicode.com/posts/1', function() {
-                console.log("success");
-            }).done(function() {
-                console.log("second success" );
-            }).fail(function() {
-                console.log("error");
-            }).always(function() {
-                console.log("complete");
-            });`);
-
-            await timeout(10000);
-            */
+        /*
+        // @todo Enable logging in separate function
+        page.on("console", msg => {
+            console.log("PAGE LOG:", msg.text());
+            if (['log', 'info', 'debug'].indexOf(msg.type()) === -1) {
+                console.log("ARGS:", msg.args());
+            }
         });
+
+        await page.screenshot({ path: 'test.png' });
+        */
+
+        // @todo Check the indicator change when app goes offline
+        /*
+        await page._client.send('Network.enable');
+        await page._client.on('Network.requestWillBeSent', event => {
+            console.log('Network.requestWillBeSent', event.requestId, event.request.url);
+        });
+        await page._client.on('Network.loadingFinished', event => {
+            console.log('Network.loadingFinished', event.requestId);
+        });
+
+        await page._client.send('Network.emulateNetworkConditions', {
+            offline: true,
+            latency: 100,
+            downloadThroughput: 0,
+            uploadThroughput: 0
+        });
+
+        await page.evaluate(`$.getJSON('https://jsonplaceholder.typicode.com/posts/1', function() {
+            console.log("success");
+        }).done(function() {
+            console.log("second success" );
+        }).fail(function() {
+            console.log("error");
+        }).always(function() {
+            console.log("complete");
+        });`);
+
+        await timeout(10000);
+        */
+    });
+});
+
+describe('Layer tree', () => {
+    it('should load layers from page URL', async () => {
+        const page = await browser.newPage();
+        await page.goto(`${PAGE_URL}v:public.test,public.test_poly`);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+        await page.click(`#burger-btn`);
+        await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
+
+        expect(await page.evaluate(`$('[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
     });
 
-    describe('(layer tree)', () => {
-        it('should load layers from page URL', async () => {
-            const page = await browser.newPage();
-            await page.goto(`${PAGE_URL}v:public.test,public.test_poly`);
-            await helpers.sleep(PAGE_LOAD_TIMEOUT);
+    it('should load vector and tile layers', async () => {
+        const page = await browser.newPage();
+        await page.goto(PAGE_URL);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
 
-            await page.click(`#burger-btn`);
-            await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
+        await page.click(`#burger-btn`);
+        await page._client.send('Network.enable');
 
-            expect(await page.evaluate(`$('[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
-            expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
-            expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+        let apiWasRequested = false;
+        await page._client.on('Network.requestWillBeSent', event => {
+            if (event.request.url.indexOf(`/api/legend/aleksandrshumilov?l=v:public.test&db=aleksandrshumilov`) !== -1) {
+                apiWasRequested = true;
+            }
         });
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
+        expect(apiWasRequested).to.be.true;
 
-        it('should load vector and tile layers', async () => {
-            const page = await browser.newPage();
-            await page.goto(PAGE_URL);
-            await helpers.sleep(PAGE_LOAD_TIMEOUT);
-
-            await page.click(`#burger-btn`);
-            await page._client.send('Network.enable');
-
-            let apiWasRequested = false;
-            await page._client.on('Network.requestWillBeSent', event => {
-                if (event.request.url.indexOf(`/api/legend/aleksandrshumilov?l=v:public.test&db=aleksandrshumilov`) !== -1) {
-                    apiWasRequested = true;
-                }
-            });
-            await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
-            expect(apiWasRequested).to.be.true;
-
-            let tilesWereRequested = false;
-            await page._client.on('Network.requestWillBeSent', event => {
-                if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test`) !== -1) {
-                    tilesWereRequested = true;
-                }
-            });
-            await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-tile').trigger('click')`);
-            expect(tilesWereRequested).to.be.true;
+        let tilesWereRequested = false;
+        await page._client.on('Network.requestWillBeSent', event => {
+            if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test`) !== -1) {
+                tilesWereRequested = true;
+            }
         });
-
-        it('should load vector layers', async () => {
-            const page = await browser.newPage();
-            await page.goto(PAGE_URL);
-            await helpers.sleep(PAGE_LOAD_TIMEOUT);
-
-            await page.click(`#burger-btn`);
-            await page._client.send('Network.enable');
-
-            let apiWasRequested = false;
-            await page._client.on('Network.requestWillBeSent', event => {
-                if (event.request.url.indexOf(`/api/legend/aleksandrshumilov?l=v:public.test_line&db=aleksandrshumilov`) !== -1) {
-                    apiWasRequested = true;
-                }
-            });
-
-            await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
-            expect(apiWasRequested).to.be.true;
-        });
-
-        it('should load tile layers', async () => {
-            const page = await browser.newPage();
-            await page.goto(PAGE_URL);
-            await helpers.sleep(PAGE_LOAD_TIMEOUT);
-
-            await page.click(`#burger-btn`);
-            await page._client.send('Network.enable');
-
-            let tilesWereRequested = false;
-            await page._client.on('Network.requestWillBeSent', event => {
-                if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly`) !== -1) {
-                    tilesWereRequested = true;
-                }
-            });
-
-            await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
-            expect(tilesWereRequested).to.be.true;
-        });
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-tile').trigger('click')`);
+        expect(tilesWereRequested).to.be.true;
     });
 
-    describe('(online mode)', () => {
+    it('should load vector layers', async () => {
+        const page = await browser.newPage();
+        await page.goto(PAGE_URL);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+        await page.click(`#burger-btn`);
+        await page._client.send('Network.enable');
+
+        let apiWasRequested = false;
+        await page._client.on('Network.requestWillBeSent', event => {
+            if (event.request.url.indexOf(`/api/legend/aleksandrshumilov?l=v:public.test_line&db=aleksandrshumilov`) !== -1) {
+                apiWasRequested = true;
+            }
+        });
+
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
+        expect(apiWasRequested).to.be.true;
+    });
+
+    it('should load tile layers', async () => {
+        const page = await browser.newPage();
+        await page.goto(PAGE_URL);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+        await page.click(`#burger-btn`);
+        await page._client.send('Network.enable');
+
+        let tilesWereRequested = false;
+        await page._client.on('Network.requestWillBeSent', event => {
+            if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly`) !== -1) {
+                tilesWereRequested = true;
+            }
+        });
+
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
+        expect(tilesWereRequested).to.be.true;
+    });
+});
+
+describe('Editor', () => {
+    describe('(if user is authorized)', () => {
         it('should add features', async () => {});
         it('should update features', async () => {});
         it('should delete features', async () => {});
     });
 
-    describe('should store unsuccessfull requests in internal queue', () => {});
+    describe('(if user is not authorized)', () => {
+        it('should put add feature request to queue', async () => {});
+        it('should put update feature request to queue', async () => {});
+        it('should put delete feature request to queue', async () => {});
+    });
+
     describe('should transform feature requests responses when offline', () => {});
     describe('should react to Force offline mode setting', () => {});
     describe('should dispatch feature requests in correct order', () => {});
-    describe('should cleanup requests depending on their order', () => {});
 });
