@@ -207,6 +207,7 @@ module.exports = {
         "streetView",
         "layerSearch",
         "coordinates",
+        "session",
         "editor",
         "embed",
         "offlineMap"
