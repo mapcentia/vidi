@@ -614,9 +614,6 @@ module.exports = {
 
             cloud.get().map.closePopup();
 
-console.log('###', e.feature.properties);
-
-
             $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>

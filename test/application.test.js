@@ -8,6 +8,13 @@ const helpers = require("./helpers");
 const PAGE_URL = `https://vidi.alexshumilov.ru/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`;
 
 const PAGE_LOAD_TIMEOUT = 10000;
+const EMULATED_SCREEN = {
+    viewport: {
+	width: 1920,
+        height: 1080
+    },
+    userAgent: 'Puppeteer'
+};
 
 describe("Application", () => {
     it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
@@ -159,9 +166,98 @@ describe('Editor', () => {
     });
 
     describe('(if user is not authorized)', () => {
-        it('should put add feature request to queue', async () => {});
-        it('should put update feature request to queue', async () => {});
-        it('should put delete feature request to queue', async () => {});
+        it('should put add feature request to the queue', async () => {
+            const page = await browser.newPage();
+            await page.goto(`${PAGE_URL}v:public.test,public.test_poly`);
+            await page.emulate(EMULATED_SCREEN);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+            // Selecting point on map and open the attribute editing dialog
+            await page.click(`#burger-btn`);
+            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
+            await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
+            await page.click(`#map`);
+
+            await helpers.sleep(1000);
+
+            // Filling in attributes of the added feature
+            await page.evaluate(`$('#root_id').val('111')`);
+            await helpers.sleep(1000);
+            await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
+
+            await helpers.sleep(2000);
+
+            // Checking if the queue indicator shows that element was added to the queue
+            expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
+        });
+
+	/*
+	// @todo First resolve the https://github.com/sashuk/vidi/issues/33
+        it('should put update feature request to the queue', async () => {
+	    const page = await browser.newPage();
+            await page.goto(`${PAGE_URL}v:public.test`);
+            await page.emulate(EMULATED_SCREEN);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+            // Selecting first already existing point on map and trying to edit it
+            const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
+            let mouse = page.mouse;
+            await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
+            await helpers.sleep(500);
+            await mouse.click(markerPosition.left + 10 - 24, markerPosition.top + 10 - 48);
+
+            // Editing attributes of the selected feature
+            await helpers.sleep(2000);
+            await page.evaluate(`$('#root_id').val('111')`);
+            await helpers.sleep(500);
+            await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
+            await helpers.sleep(500);
+            await page.evaluate(`$('#root_id').val('112')`);
+	    await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
+            await helpers.sleep(500);
+
+            // Checking if the queue indicator shows that element was added to the queue
+            await page.click(`#burger-btn`);
+            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
+
+            await helpers.sleep(2000);
+
+            //expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
+
+            await page.screenshot({ path: 'test.png' });
+        });
+        */
+
+        it('should put delete feature request to the queue', async () => {
+	    const page = await browser.newPage();
+            await page.goto(`${PAGE_URL}v:public.test`);
+            await page.emulate(EMULATED_SCREEN);
+            await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+            // Accepting the dialog
+            page.on("dialog", (dialog) => {
+                dialog.accept();
+            });
+
+            await page.click(`#burger-btn`);
+            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
+            await helpers.sleep(1000);
+            await page.evaluate(`$('.js-clear').trigger('click')`);
+            await helpers.sleep(2000);
+
+            // Selecting first already existing point on map and deleting it
+            const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
+            let mouse = page.mouse;
+
+            await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
+            await helpers.sleep(500);
+            await mouse.click(markerPosition.left + 10 + 24, markerPosition.top + 10 - 48);
+
+            // Checking if the queue indicator shows that element was added to the queue
+            await helpers.sleep(2000);
+
+            expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete"]').is(':visible')`)).to.be.true;
+        });
     });
 
     describe('should transform feature requests responses when offline', () => {});
