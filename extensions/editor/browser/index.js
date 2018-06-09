@@ -617,8 +617,15 @@ module.exports = {
             $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
 
             for (let key in schema.properties) {
-                if (key in e.feature.properties && e.feature.properties[key] && schema.properties[key].type === `string`) {
-                    e.feature.properties[key] = `` + e.feature.properties[key];
+                if (key in e.feature.properties && e.feature.properties[key]) {
+                    if (schema.properties[key].type === `string` && schema.properties[key].format === `date-time`) {
+                        if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(e.feature.properties[key])) {
+                            let dateObject = new Date(e.feature.properties[key]);
+                            e.feature.properties[key] = dateObject.toISOString();
+                        }                       
+                    } else if (schema.properties[key].type === `string`) {
+                        e.feature.properties[key] = `` + e.feature.properties[key];
+                    }
                 }
             }
 
