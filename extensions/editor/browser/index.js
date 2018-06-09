@@ -622,7 +622,7 @@ module.exports = {
                         if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(e.feature.properties[key])) {
                             let dateObject = new Date(e.feature.properties[key]);
                             e.feature.properties[key] = dateObject.toISOString();
-                        }                       
+                        }
                     } else if (schema.properties[key].type === `string`) {
                         e.feature.properties[key] = `` + e.feature.properties[key];
                     }
