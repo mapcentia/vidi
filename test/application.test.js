@@ -191,8 +191,6 @@ describe('Editor', () => {
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
         });
 
-	/*
-	// @todo First resolve the https://github.com/sashuk/vidi/issues/33
         it('should put update feature request to the queue', async () => {
 	    const page = await browser.newPage();
             await page.goto(`${PAGE_URL}v:public.test`);
@@ -210,9 +208,6 @@ describe('Editor', () => {
             await helpers.sleep(2000);
             await page.evaluate(`$('#root_id').val('111')`);
             await helpers.sleep(500);
-            await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(500);
-            await page.evaluate(`$('#root_id').val('112')`);
 	    await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
             await helpers.sleep(500);
 
@@ -222,11 +217,10 @@ describe('Editor', () => {
 
             await helpers.sleep(2000);
 
-            //expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
+            expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
 
             await page.screenshot({ path: 'test.png' });
         });
-        */
 
         it('should put delete feature request to the queue', async () => {
 	    const page = await browser.newPage();
@@ -260,7 +254,46 @@ describe('Editor', () => {
         });
     });
 
+    it('should react to Force offline mode setting', async () => {
+        const page = await browser.newPage();
+        await page.goto(`${PAGE_URL}v:public.test,public.test_poly`);
+        await page.emulate(EMULATED_SCREEN);
+        await helpers.sleep(PAGE_LOAD_TIMEOUT);
+
+        // Selecting point on map and open the attribute editing dialog
+        await page.click(`#burger-btn`);
+        await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
+        await page.evaluate(`$('.toggle').trigger('click');`);
+
+        await helpers.sleep(1000);
+
+        await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
+        await page.click(`#map`);
+
+        await helpers.sleep(1000);
+
+        // Filling in attributes of the added feature
+        await page.evaluate(`$('#root_id').val('111')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
+
+        await helpers.sleep(2000);
+
+        // Created feature is not rejected by server yet, so checking the failed indicator
+        expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.true;
+	expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.false;
+
+	await helpers.sleep(1000);
+
+	await page.evaluate(`$('.toggle').trigger('click');`);
+
+	await helpers.sleep(4000);
+
+	// Created feature is already rejected by server, so checking corresponding indicator
+        expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.false;
+	expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
+    });
+
     describe('should transform feature requests responses when offline', () => {});
-    describe('should react to Force offline mode setting', () => {});
     describe('should dispatch feature requests in correct order', () => {});
 });
