@@ -615,6 +615,13 @@ module.exports = {
             cloud.get().map.closePopup();
 
             $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
+
+            for (let key in schema.properties) {
+                if (key in e.feature.properties && e.feature.properties[key] && schema.properties[key].type === `string`) {
+                    e.feature.properties[key] = `` + e.feature.properties[key];
+                }
+            }
+
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form schema={schema}
