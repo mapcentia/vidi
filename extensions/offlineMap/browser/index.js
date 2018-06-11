@@ -600,17 +600,17 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <h4>{__("Comment")}</h4>
-                                                    <textarea className="form-control" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
+                                                    <textarea className="form-control" id="offline-map-comment" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
                                                     <h4>{__("Zoom")} {required}</h4>
                                                     <div className="container-fluid">
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <select className="form-control" onChange={this.setMinZoom} value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
+                                                                <select className="form-control" id="offline-map-zoom_min" onChange={this.setMinZoom} value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
                                                             </div>
                                                             <div className="col-md-6">
-                                                                <select className="form-control" onChange={this.setMaxZoom} defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
+                                                                <select className="form-control" id="offline-map-zoom_max" onChange={this.setMaxZoom} defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
                                                             </div>
                                                         </div>
                                                     </div>
