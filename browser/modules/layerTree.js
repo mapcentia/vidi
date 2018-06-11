@@ -204,8 +204,13 @@ module.exports = {
                         $(layerControlContainer).find('.js-clear').removeClass('hidden');
 
                         $(layerControlContainer).find('.js-clear').on('click', (event) => {
+                            let gc2Id = $(event.target).data('gc2-id');
+                            if (!gc2Id) {
+                                gc2Id = $(event.target).parent().data('gc2-id');
+                            }
+
                             if (confirm(`${__('Cancel feature changes')}?`)) {
-                                apiBridgeInstance.removeByLayerId($(event.target).parent().data('gc2-id'));
+                                apiBridgeInstance.removeByLayerId(gc2Id);
                             }
                         });
 

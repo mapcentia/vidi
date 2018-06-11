@@ -37,6 +37,8 @@ class ImageUploadWidget extends React.Component {
         this.setState({
             loadedImageData: false
         });
+
+        this.props.onChange(undefined);
     }
 
     render() {

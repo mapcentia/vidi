@@ -81,12 +81,11 @@ class Queue {
                     console.warn(`Unable the determine the online status`);
                 }
             }).always(() => {
-
                 if (_self._queue.length > 0 && _self._locked === false) {
                     _self._locked = true;
 
                     if (LOG) console.log(`Queue: not empty, trying to push changes`);
-    
+
                     _self._dispatch().then(() => {
                         _self._locked = false;
                         scheduleNextQueueProcessingRun();
@@ -196,7 +195,8 @@ class Queue {
                     throw new Error(`Queue: no action was selected`);
                 }
 
-                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were managed, (${initialNumberOfItemsInQueue} queue items before, ${_self._queue.length} now, ${numberOfItemsRemoved} removed)`);
+                if (LOG) console.log(`Queue: queue items with gid ${itemGid} were managed,
+                    (${initialNumberOfItemsInQueue} queue items before, ${_self._queue.length} now, ${numberOfItemsRemoved} removed)`);
             } else if (itemsClassifiedByGid[key].length > 2) {
                 throw new Error('Queue: more than 2 queue items with same gid');
             }
@@ -553,6 +553,10 @@ class Queue {
      * @param {String} layerId 
      */
     removeByLayerId(layerId) {
+        if (!layerId) {
+            throw new Error(`Queue: layer identifier can not be empty`);
+        }
+
         let i = this._queue.length;
         while (i--) {
             if ((this._queue[i].meta.f_table_schema + '.' + this._queue[i].meta.f_table_name) === layerId) {

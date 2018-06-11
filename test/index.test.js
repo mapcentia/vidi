@@ -1,6 +1,6 @@
 /**
- * Test cases to cover.
- */
+ * Test cases to cover:
+
 describe('Service worker', () => {
     describe('should handle lifecycle events', () => {});
     describe('should detect available space', () => {});
@@ -41,3 +41,4 @@ describe('Layers', () => {
     describe('should restore original feature data after editing cancellation', () => {});
     describe('should correctly show layer and forced offline mode status after the layers panel reaload', () => {});
 });
+*/
