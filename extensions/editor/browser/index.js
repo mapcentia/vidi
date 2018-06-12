@@ -63,7 +63,9 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
-        vectorLayers = o.extensions.vectorLayers.index;
+        try {
+            vectorLayers = o.extensions.vectorLayers.index;
+        } catch(e) {}
         return this;
     },
 
