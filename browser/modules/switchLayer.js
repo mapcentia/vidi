@@ -120,6 +120,7 @@ module.exports = module.exports = {
                 el.closest('.layer-item').find('.js-dropdown-label').first().html('Tile');
 
                 layers.addLayer(name).then(() => {
+                    tries = 0;
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
 
                     if (forceTileReload) {
@@ -131,7 +132,13 @@ module.exports = module.exports = {
                 }, () => {
                     console.log("Layer " + name + " not in Meta");
                     meta.init(name, true).then(() => {
+                        if (tries > 0) {
+                            console.error("Could not add layer");
+                            tries = 0;
+                            return;
+                        }
                         layerTree.init();
+                        tries = 1;
                         me.init(name, true); // recursive
                     });
                 });
