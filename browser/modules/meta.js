@@ -89,7 +89,7 @@ module.exports = {
      * @param doNotLoadExisting
      * @returns {Promise<any>}
      */
-    init: function (str, doNotLoadExisting) {
+    init: function (str, doNotLoadExisting, doNotReset) {
         var me = this,
             schemataStr = urlparser.schema;
 
@@ -100,7 +100,9 @@ module.exports = {
             Reset, otherwise it gets duplicated via addMetaData() - adding same meta
             to the array which already contains this meta
         */
-        window.metaData = {data: []};
+        if (!doNotReset) {
+            window.metaData = {data: []};
+        }
 
         return new Promise(function (resolve, reject) {
             var schemata;

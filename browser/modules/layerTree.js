@@ -278,7 +278,7 @@ module.exports = {
         groups = [];
 
         // Getting set of all loaded vectors
-        metaData = meta.getMetaDataLatestLoaded();
+        metaData = meta.getMetaData();
         for (i = 0; i < metaData.data.length; ++i) {
             groups[i] = metaData.data[i].layergroup;
         }

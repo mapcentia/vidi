@@ -195,6 +195,8 @@ module.exports = {
                             if (displayLayer) switchLayer.init(arr[i], true, false);
                         } else {
                             console.warn(`No meta layer was found for ${arr[i]}`);
+                            // Add the requested in run-time
+                            switchLayer.init(arr[i], true, false)
                         }
                     }
                 }

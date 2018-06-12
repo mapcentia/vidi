@@ -131,7 +131,7 @@ module.exports = module.exports = {
                     tileLayer.redraw();
                 }, () => {
                     console.log("Layer " + name + " not in Meta");
-                    meta.init(name, true).then(() => {
+                    meta.init(name, true, true).then(() => {
                         if (tries > 0) {
                             console.error("Could not add layer");
                             tries = 0;
@@ -151,6 +151,18 @@ module.exports = module.exports = {
                     let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                     cloud.get().map.addLayer(existingLayer);
                     store[vectorLayerId].load();
+                }
+                 else {
+                    meta.init(tileLayerId, true, true).then(() => {
+                        if (tries > 0) {
+                            console.error("Could not add v:layer");
+                            tries = 0;
+                            return;
+                        }
+                        layerTree.init();
+                        tries = 1;
+                        me.init(name, true); // recursive
+                    });
                 }
 
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
