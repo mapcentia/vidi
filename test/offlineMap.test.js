@@ -7,8 +7,12 @@ const helpers = require("./helpers");
 
 describe("OfflineMap", () => {
     it("should make the map area available offline", async () => {
-        const page = await browser.newPage();
+        const isTileRequest = (message) => {
+            return (message.indexOf('a.tile.openstreetmap') !== -1 || message.indexOf('b.tile.openstreetmap') !== -1
+            || message.indexOf('c.tile.openstreetmap') !== -1);
+        }
 
+        const page = await browser.newPage();
         await page.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
         await page.emulate(helpers.EMULATED_SCREEN);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
@@ -28,8 +32,7 @@ describe("OfflineMap", () => {
 
         page.on(`console`, msg => {
             let message = msg.text();
-            if (message.indexOf('a.tile.openstreetmap') !== -1 || message.indexOf('b.tile.openstreetmap') !== -1
-                || message.indexOf('c.tile.openstreetmap') !== -1) {
+            if (isTileRequest(message)) {
                 if (countingAlreadyCachedTiles) {
                     numberOfAlreadyCachedTiles++;
                 } else if (countingNewlyCachedTiles) {
@@ -46,7 +49,7 @@ describe("OfflineMap", () => {
 
         // Open and fill the form
         await page.click(`#offline-map-btn`);
-        await helpers.sleep(1000);
+        await helpers.sleep(2000);
         await page.evaluate(`$('[href="#collapseOfflineMap1"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.evaluate(`$($('#offline-map-dialog').find('.btn-primary')[0]).trigger('click')`);
@@ -109,7 +112,7 @@ describe("OfflineMap", () => {
         await page.evaluate(`$('[href="#collapseOfflineMap1"]').trigger('click')`);
         await helpers.sleep(1000);
         expect(await page.evaluate(`$('#collapseOfflineMap2').find('td').length`)).to.equal(3);
-        expect(await page.evaluate(`$($('#collapseOfflineMap2').find('td')[1]).text()`)).to.equal(`Test offline map`);;
+        expect(await page.evaluate(`$($('#collapseOfflineMap2').find('td')[1]).text()`)).to.equal(`Test offline map`);
 
         // Check if map tiles are stored in cache
         countingAlreadyCachedTiles = false;
@@ -119,20 +122,78 @@ describe("OfflineMap", () => {
         expect(numberOfAlreadyCachedTiles).to.equal(0);
         expect(numberOfCachedTiles > 0).to.be.true;
 
-        // @todo Should show saved maps in new tab
-        /*
-        //await page.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
-        await page.reload();
-        await page.emulate(helpers.EMULATED_SCREEN);
+        // Checking if map is truly stored across all tabs
+        const newPage = await browser.newPage();
+        await newPage.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
+        await newPage.emulate(helpers.EMULATED_SCREEN);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
         // Check if previously saved map is restored
-        await page.click(`#offline-map-btn`);
+        await newPage.click(`#offline-map-btn`);
+        await helpers.sleep(2000);
+        await newPage.screenshot({ path: 'test.png' });
+        expect(await newPage.evaluate(`$('#collapseOfflineMap2').find('td').length`)).to.equal(3);
+        expect(await newPage.evaluate(`$($('#collapseOfflineMap2').find('td')[1]).text()`)).to.equal(`Test offline map`);
+
+        // Check if stored area can be displayed on map
+        await newPage.evaluate(`$($('#collapseOfflineMap2').find('button')[0]).trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('[href="#collapseOfflineMap2"]').trigger('click')`);
+        expect(await newPage.evaluate(`$('.leaflet-interactive').length`)).to.equal(1);
+        await helpers.sleep(1000);
+        await newPage.evaluate(`$($('#collapseOfflineMap2').find('button')[0]).trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await newPage.evaluate(`$('.leaflet-interactive').length`)).to.equal(0);
         await helpers.sleep(1000);
 
-        await page.screenshot({ path: 'test.png' });
-        */
+        // Accepting the dialog
+        newPage.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
+        // Check if stored area can be refreshed
+        let numberOfRequestedTiles = 0;
+        await newPage._client.on('Network.requestWillBeSent', event => {
+            if (isTileRequest(event.request.url)) {
+                numberOfRequestedTiles++;
+            }
+        });
+
+        await newPage.evaluate(`$($('#collapseOfflineMap2').find('button')[1]).trigger('click')`);
+        await helpers.sleep(4000);
+        collectStats = false;
+        expect(numberOfRequestedTiles > 0).to.be.true;
+
+        // Check if stored area can be deleted
+        let numberOfAlreadyCachedTilesForNewPage = 0;
+        let numberOfCachedTilesForNewPage = 0;
+        let countingAlreadyCachedTilesForNewPage = false;
+        let countingNewlyCachedTilesForNewPage = false;
+
+        newPage.on(`console`, msg => {
+            let message = msg.text();
+            if (isTileRequest(message)) {
+                if (countingAlreadyCachedTilesForNewPage) {
+                    numberOfAlreadyCachedTilesForNewPage++;
+                } else if (countingNewlyCachedTilesForNewPage) {
+                    numberOfCachedTilesForNewPage++;
+                }
+            }
+        });
+
+        countingAlreadyCachedTilesForNewPage = true;
+        await newPage.evaluate(logAllCachedTiles);
+        await helpers.sleep(1000);
+
+        await newPage.evaluate(`$($('#collapseOfflineMap2').find('button')[2]).trigger('click')`);
+        await helpers.sleep(4000);
+        expect(await newPage.evaluate(`$('#collapseOfflineMap2').find('td').length`)).to.equal(0);
+
+        countingAlreadyCachedTilesForNewPage = false;
+        countingNewlyCachedTilesForNewPage = true;
+        await newPage.evaluate(logAllCachedTiles);
+        await helpers.sleep(1000);
+
+        expect(numberOfAlreadyCachedTilesForNewPage > 0).to.be.true;
+        expect(numberOfCachedTilesForNewPage).to.equal(0);
     });
 });

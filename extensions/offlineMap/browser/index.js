@@ -279,36 +279,67 @@ module.exports = {
                 fetchTileQueue.push(tileURLs, (err) => {});
             };
 
+            checkAllURLsAreNotCached(item) {
+                let result = new Promise((resolve, reject) => {
+                    caches.open(CACHE_NAME).then((cache) => {
+                        let promises = [];
+                        for (let i = 0; i < item.data.tileURLs.length; i++) {
+                            promises.push(cache.match(item.data.tileURLs[i]));
+                        }
+    
+                        Promise.all(promises).then(values => {
+                            let allURLsAreNotCached = true;
+                            values.map(item => {
+                                if (item) {
+                                    allURLsAreNotCached = false;
+                                    return false;
+                                }
+                            });
+
+                            resolve(allURLsAreNotCached);
+                        });
+                    });
+                });
+
+                return result;
+            };
+
             onMapAreaRefresh(item) {
                 for (let key in this.state.existingCachedAreas) {
                     if (key === item.id) {
                         if (confirm(__("Refresh map area") + "?")) {
                             this.deleteMapArea(item).then(() => {
-                                this.setState({
-                                    mapAreasTilesLoaded: 0,
-                                    mapAreasTilesLeftToLoad: item.data.tileURLs.length
-                                });
-
-                                const checkRefreshStatus = () => {
-                                    if (this.state.mapAreasTilesLoaded === this.state.mapAreasTilesLeftToLoad) {
-                                        navigator.serviceWorker.controller.postMessage({force: false});
-                                        setTimeout(() => {
-                                            this.setState({
-                                                mapAreasTilesLoaded: 0,
-                                                mapAreasTilesLeftToLoad: 0
-                                            });
-                                        }, 1000);
+                                this.checkAllURLsAreNotCached(item).then(result => {
+                                    if (result === false) {
+                                        console.warn(`Some tiles still exist in cache`);
                                     }
-                                }
 
-                                navigator.serviceWorker.controller.postMessage({force: true});
-                                this.fetchAndCacheTiles(item.data.tileURLs, () => {
-                                    this.setState({ mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1) });
-                                    checkRefreshStatus();
-                                }, () => {
-                                    console.log('Unable to fetch tile');
-                                    this.setState({ mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad-- });
-                                    checkRefreshStatus();
+                                    this.setState({
+                                        mapAreasTilesLoaded: 0,
+                                        mapAreasTilesLeftToLoad: item.data.tileURLs.length
+                                    });
+
+                                    const checkRefreshStatus = () => {
+                                        if (this.state.mapAreasTilesLoaded === this.state.mapAreasTilesLeftToLoad) {
+                                            navigator.serviceWorker.controller.postMessage({force: false});
+                                            setTimeout(() => {
+                                                this.setState({
+                                                    mapAreasTilesLoaded: 0,
+                                                    mapAreasTilesLeftToLoad: 0
+                                                });
+                                            }, 1000);
+                                        }
+                                    }
+
+                                    navigator.serviceWorker.controller.postMessage({force: true});
+                                    this.fetchAndCacheTiles(item.data.tileURLs, () => {
+                                        this.setState({ mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1) });
+                                        checkRefreshStatus();
+                                    }, () => {
+                                        console.log('Unable to fetch tile');
+                                        this.setState({ mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad-- });
+                                        checkRefreshStatus();
+                                    });
                                 });
                             });
                         }
@@ -423,15 +454,15 @@ module.exports = {
                     this.setState({ existingCachedAreas });
                 });
 
-                if (browser.name !== 'safari') {
-                    const bytesToSize = (bytes) => {
-                        var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-                        if (bytes == 0) return '0 Byte';
-    
-                        let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
-                        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
-                    };
+                const bytesToSize = (bytes) => {
+                    var sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+                    if (bytes == 0) return '0 Byte';
 
+                    let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+                    return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+                };
+
+                if (browser && browser.name !== 'safari') {
                     navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
                         this.setState({
                             storageUsed: bytesToSize(usedBytes),
@@ -439,6 +470,11 @@ module.exports = {
                         });
                     }, (e) => {
                         console.log('Error', e);
+                    });
+                } else {
+                    this.setState({
+                        storageUsed: bytesToSize(0),
+                        storageAvailable: bytesToSize(0)
                     });
                 }
             }
@@ -584,6 +620,7 @@ module.exports = {
                                         className="accordion-toggle"
                                         data-toggle="collapse"
                                         data-parent="#layers"
+                                        id="collapseOfflineMap1-trigger"
                                         href="#collapseOfflineMap1"
                                         aria-expanded="true"><i className="material-icons">&#xE906;</i> {__("Store map area")}</a>
                                 </h4>
@@ -637,6 +674,7 @@ module.exports = {
                                         className="accordion-toggle"
                                         data-toggle="collapse"
                                         data-parent="#layers"
+                                        id="collapseOfflineMap2-trigger"
                                         href="#collapseOfflineMap2"
                                         aria-expanded="true"><i className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
                                 </h4>
