@@ -22,8 +22,6 @@ var meta;
 
 var legend;
 
-var editor;
-
 var metaDataKeys;
 
 var jquery = require('jquery');
@@ -44,7 +42,6 @@ module.exports = {
         print = o.print;
         meta = o.meta;
         legend = o.legend;
-        editor = o.extensions.editor.index;
         return this;
     },
     init: function () {
@@ -86,7 +83,7 @@ module.exports = {
                 }
 
                 html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-
+                $("#info-modal-top.slide-left").show();
                 $("#info-modal-top.slide-left").animate({left: "0"}, 200);
                 $("#info-modal-top .modal-title").html(title || name);
                 $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
@@ -102,14 +99,20 @@ module.exports = {
         });
 
         $("#burger-btn").on("click", function () {
-            $("#info-modal.slide-left").animate({
+            $("#layer-slide.slide-left").animate({
                 left: "0"
             }, 500)
         });
 
 
-        $("#info-modal.slide-left .close").on("click", function () {
-            $("#info-modal.slide-left").animate({
+        $("#layer-slide.slide-left .close").on("click", function () {
+            $("#layer-slide.slide-left").animate({
+                left: "-100%"
+            }, 500)
+        });
+
+        $("#info-modal-top.slide-left .close").on("click", function () {
+            $("#info-modal-top.slide-left").animate({
                 left: "-100%"
             }, 500)
         });
@@ -123,11 +126,6 @@ module.exports = {
             if ($(this).data('module') === "print") {
                 $("#print-btn").prop("checked", false);
                 print.activate();
-            }
-
-            // If editor when deactivate
-            if ($(this).data('module') === "editor") {
-                editor.stopEdit();
             }
 
             $("#" + id).animate({
@@ -183,15 +181,7 @@ module.exports = {
         });
 
 
-        $("#info-modal-top.slide-left .close").on("click", function () {
-            $("#info-modal-top.slide-left").animate({
-                left: "-100%"
-            }, 500)
-        });
 
-        $("#todo-btn").on("click", function () {
-            $("#todo-list-modal").modal({});
-        });
 
         $("#zoom-in-btn").on("click", function () {
             map.zoomIn();
