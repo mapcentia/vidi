@@ -192,18 +192,16 @@ module.exports = {
                                 console.warn(`The ${arr[i]} layer is requested, but there is only vector view available`);
                             }
     
-                            if (displayLayer) switchLayer.init(arr[i], true, false);
+                            if (displayLayer) switchLayer.init(arr[i], true, true);
                         } else {
                             console.warn(`No meta layer was found for ${arr[i]}`);
                             // Add the requested in run-time
-                            switchLayer.init(arr[i], true, false)
+                            if (displayLayer) switchLayer.init(arr[i], true, true);
                         }
                     }
                 }
             }
 
-            legend.init();
-            
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
                 legend.init().then(function(){

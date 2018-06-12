@@ -92,9 +92,9 @@ module.exports = {
 
     /**
      * Displays current state of APIBridge feature management
-     * 
-     * @param {*} statistics 
-     * @param {*} forceLayerUpdate 
+     *
+     * @param {*} statistics
+     * @param {*} forceLayerUpdate
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
@@ -124,7 +124,7 @@ module.exports = {
             if ($('.js-app-is-online-badge').length === 1) {
                 theStatisticsPanelWasDrawn = true;
             }
-            
+
             if (statistics.online) {
                 $('.js-toggle-offline-mode').prop('disabled', false);
 
@@ -226,8 +226,8 @@ module.exports = {
 
         if (forceLayerUpdate) {
             _self.getActiveLayers().map(item => {
-                switchLayer.init(item, false);
-                switchLayer.init(item, true);
+                switchLayer.init(item, false, true);
+                switchLayer.init(item, true, true);
             });
         }
     },
@@ -267,7 +267,7 @@ module.exports = {
                 }
             });
         } else {
-           toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+            toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
                 <button type="button" class="close" data-dismiss="alert">×</button>
                 ${__('This browser does not support Service Workers, some features may be unavailable')}
             </div>`);
@@ -330,7 +330,7 @@ module.exports = {
                         } else {
                             let layerIsTheTileOne = true;
                             let layerIsTheVectorOne = true;
-                                                        
+
                             let isDisabledAttribute = '';
                             let selectorLabel = __('Tile');
                             let defaultLayerType = 'tile';
@@ -503,7 +503,7 @@ module.exports = {
 
     /**
      * Reloading provided layer.
-     * 
+     *
      * @param {String} layerId Layer identifier
      */
     reloadLayer: (layerId, forceTileRedraw = false) => {
