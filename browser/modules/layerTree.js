@@ -243,8 +243,8 @@ module.exports = {
 
         if (forceLayerUpdate) {
             _self.getActiveLayers().map(item => {
-                switchLayer.init(item, false);
-                switchLayer.init(item, true);
+                switchLayer.init(item, false, true);
+                switchLayer.init(item, true, true);
             });
         }
     },
