@@ -503,11 +503,21 @@ module.exports = {
                             });
 
                             $("#collapse" + base64GroupName).append(layerControlRecord);
-
                             l.push({});
                         }
                     }
                 }
+
+                $("#collapse" + base64GroupName).sortable({
+                    axis: 'y',
+                    containment: 'parent',
+                    start: () => {
+                        // initialize the order if it is not defined
+                    },
+                    change: (event, ui) => {
+                        console.log(ui);
+                    }
+                });
 
                 if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
                     count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
