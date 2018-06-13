@@ -40,6 +40,8 @@ var markers = [];
 
 var editor;
 
+var editedFeature = false;
+
 var switchLayer;
 
 var managePopups = [];
@@ -112,7 +114,7 @@ module.exports = {
         $(".close-hide").on("click", function (e) {
             // If editor when deactivate
             if ($(this).data('module') === "editor") {
-                me.stopEdit();
+                me.stopEdit(editedFeature);
             }
         });
 
@@ -280,6 +282,8 @@ module.exports = {
      * @param doNotRemoveEditor
      */
     add: function (k, qstore, doNotRemoveEditor, isVectorLayer = false) {
+        editedFeature = false;
+
         let me = this, React = require('react'), ReactDOM = require('react-dom'),
             schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
@@ -413,6 +417,8 @@ module.exports = {
      * @param qstore
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
+        editedFeature = e;
+
         const editFeature = () => {
             let React = require('react');
 
@@ -645,6 +651,8 @@ module.exports = {
      * @param qstore
      */
     delete: function (e, k, qstore, isVectorLayer = false) {
+        editedFeature = false;
+
         let me = this;
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],

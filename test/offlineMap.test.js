@@ -131,7 +131,6 @@ describe("OfflineMap", () => {
         // Check if previously saved map is restored
         await newPage.click(`#offline-map-btn`);
         await helpers.sleep(2000);
-        await newPage.screenshot({ path: 'test.png' });
         expect(await newPage.evaluate(`$('#collapseOfflineMap2').find('td').length`)).to.equal(3);
         expect(await newPage.evaluate(`$($('#collapseOfflineMap2').find('td')[1]).text()`)).to.equal(`Test offline map`);
 

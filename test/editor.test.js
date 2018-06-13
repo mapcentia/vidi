@@ -150,8 +150,6 @@ describe('Editor', () => {
             await helpers.sleep(4000);
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
-
-            await page.screenshot({ path: 'test.png' });
         });
 
         it('should put delete feature request to the queue', async () => {
