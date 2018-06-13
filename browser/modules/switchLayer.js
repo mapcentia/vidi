@@ -116,8 +116,7 @@ module.exports = module.exports = {
             layers.incrementCountLoading(tileLayerId);
 
             if (layerType === 'tile') {
-                el.data('gc2-layer-type', 'tile');
-                el.closest('.layer-item').find('.js-dropdown-label').first().html('Tile');
+                layerTree.setSelectorValue(name, 'tile');
 
                 layers.addLayer(name).then(() => {
                     tries = 0;
@@ -143,8 +142,7 @@ module.exports = module.exports = {
                     });
                 });
             } else {
-                el.data('gc2-layer-type', 'vector');
-                el.closest('.layer-item').find('.js-dropdown-label').first().html('Vector');
+                layerTree.setSelectorValue(name, 'vector');
 
                 if (vectorLayerId in store) {
                     cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);

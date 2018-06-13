@@ -68,6 +68,10 @@ var lastStatistics = false;
 
 var theStatisticsPanelWasDrawn = false;
 
+const tileLayerIcon = `<i class="material-icons">border_all</i>`;
+
+const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -88,6 +92,19 @@ module.exports = {
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
+    },
+
+    setSelectorValue: (name, type) => {
+        let el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
+        if (type === 'tile') {
+            el.data('gc2-layer-type', 'tile');
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(tileLayerIcon);
+        } else if (type === 'vector') {
+            el.data('gc2-layer-type', 'vector');
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(vectorLayerIcon);
+        } else {
+            throw new Error('Invalid type was provided');
+        }
     },
 
     /**
@@ -329,30 +346,26 @@ module.exports = {
                             </div>`);
                         } else {
                             let layerIsTheTileOne = true;
-                            let layerIsTheVectorOne = true;
+                            let layerIsTheVectorOne = false;
                                                         
-                            let isDisabledAttribute = '';
-                            let selectorLabel = __('Tile');
+                            let singleTypeLayer = true;
+                            let selectorLabel = tileLayerIcon;
                             let defaultLayerType = 'tile';
 
                             if (layer && layer.meta) {
                                 let parsedMeta = JSON.parse(layer.meta);
-
                                 if (parsedMeta) {
                                     displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
                                 }
 
-                                if (parsedMeta.vidi_layer_type) {
-                                    if (parsedMeta.vidi_layer_type === 't') {
-                                        selectorLabel = __('Tile');
-                                        isDisabledAttribute = 'disabled';
-                                        layerIsTheVectorOne = false;
-                                    }
+                                if (parsedMeta.vidi_layer_type && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                                    layerIsTheVectorOne = true;
+                                    singleTypeLayer = false;
 
                                     if (parsedMeta.vidi_layer_type === 'v') {
                                         defaultLayerType = 'vector';
-                                        selectorLabel = __('Vector');
-                                        isDisabledAttribute = 'disabled';
+                                        selectorLabel = vectorLayerIcon;
+                                        singleTypeLayer = true;
                                         layerIsTheTileOne = false;
                                     }
                                 }
@@ -395,6 +408,36 @@ module.exports = {
                             let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
                             let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
                             let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
+
+                            let layerTypeSelector = false;
+                            if (singleTypeLayer) {
+                                if (layerIsTheTileOne) {
+                                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                                        ${tileLayerIcon}
+                                    </div>`;
+                                } else if (layerIsTheVectorOne) {
+                                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                                        ${vectorLayerIcon}
+                                    </div>`;
+                                }
+                            } else {
+                                layerTypeSelector = `<div class="dropdown">
+                                    <button style="padding: 8px;" class="btn btn-default dropdown-toggle" type="button"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                        <span class="js-dropdown-label">${selectorLabel}</span>
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="js-layer-type-selector-tile" href="javascript:void(0)">${tileLayerIcon} ${__('Tile')}</a>
+                                        </li>
+                                        <li>
+                                            <a class="js-layer-type-selector-vector" href="javascript:void(0)">${vectorLayerIcon} ${__('Vector')}</a>
+                                        </li>
+                                    </ul>
+                                </div>`;
+                            }
+
                             let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
                                 <div style="display: inline-block;">
                                     <div class="checkbox" style="width: 34px;">
@@ -407,23 +450,7 @@ module.exports = {
                                         </label>
                                     </div>
                                 </div>
-                                <div style="display: inline-block;">
-                                    <div class="dropdown">
-                                        <button style="padding: 8px;" class="btn btn-default dropdown-toggle" type="button"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" ${isDisabledAttribute}>
-                                            <span class="js-dropdown-label">${selectorLabel}</span>
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="js-layer-type-selector-tile" href="javascript:void(0)">${__('Tile')}</a>
-                                            </li>
-                                            <li>
-                                                <a class="js-layer-type-selector-vector" href="javascript:void(0)">${__('Vector')}</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
+                                <div style="display: inline-block;">${layerTypeSelector}</div>
                                 <div style="display: inline-block;">
                                     <span>${text}${lockedLayer}</span>
                                     <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
@@ -463,24 +490,34 @@ module.exports = {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'tile');
                                 $(switcher).prop('checked', true);
-                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text(__('Tile'));
                                 _self.reloadLayer($(switcher).data('gc2-id'));
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
                             });
 
                             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
                                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                 $(switcher).data('gc2-layer-type', 'vector');
                                 $(switcher).prop('checked', true);
-                                $(e.target).closest('.layer-item').find('.js-dropdown-label').text(__('Vector'));
                                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
+                                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                             });
 
                             $("#collapse" + base64GroupName).append(layerControlRecord);
-
                             l.push({});
                         }
                     }
                 }
+
+                $("#collapse" + base64GroupName).sortable({
+                    axis: 'y',
+                    containment: 'parent',
+                    start: () => {
+                        // initialize the order if it is not defined
+                    },
+                    change: (event, ui) => {
+                        console.log(ui);
+                    }
+                });
 
                 if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
                     count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
