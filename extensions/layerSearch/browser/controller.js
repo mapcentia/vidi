@@ -34,14 +34,14 @@ module.exports = {
                 '<div id="layer-search-list" style="height: calc(100% - 38px); overflow: auto; padding: 4px"></div>' +
                 '</div>');
 
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function() {
-                $("input[name=layer-search]").focus();
-
-                layerSearch.matchAll();
-
-            });
+            // $("#info-modal.slide-right").animate({
+            //     right: "0"
+            // }, 200, function() {
+            //     $("input[name=layer-search]").focus();
+            //
+            //     layerSearch.matchAll();
+            //
+            // });
 
             $("input[name=layer-search]").on('input', _.debounce(function (e) {
                 if (e.target.value === "") {

@@ -739,7 +739,7 @@ module.exports = module.exports = {
     }
 };
 
-var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="panel-body">' +
+var dom = '<div role="tabpanel">' +
     '<div class="togglebutton">' +
     '<label>' +
     '<input id="conflict-btn" type="checkbox">Aktiver konfliktsøgning' +
@@ -750,8 +750,6 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<label for="conflict-buffer-value" class="control-label">Buffer</label>' +
     '<input id="conflict-buffer-value" class="form-control">' +
     '<div id="conflict-buffer-slider" class="slider shor"></div>' +
-    '</div>' +
-    '</div>' +
     '</div>' +
     '</div>' +
     '<div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">' +

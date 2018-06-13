@@ -230,82 +230,81 @@ module.exports = {
             render() {
                 return (
                     <div role="tabpanel">
-                        <div className="panel panel-default">
-                            <div className="panel-body">
 
-                                <h3>{utils.__("Choose coordinate system", dict)}</h3>
-                                <div className="radio">
-                                    <label>
-                                        <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dd" name="coordinates-system" value="dd" defaultChecked="1"/>
-                                        {utils.__("Latitude/Longitude, decimal degrees", dict)}
-                                    </label>
+                        <h3>{utils.__("Choose coordinate system", dict)}</h3>
+                        <div className="radio">
+                            <label>
+                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dd"
+                                       name="coordinates-system" value="dd" defaultChecked="1"/>
+                                {utils.__("Latitude/Longitude, decimal degrees", dict)}
+                            </label>
+                        </div>
+
+                        <div className="radio">
+                            <label>
+                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dms"
+                                       name="coordinates-system" value="dms"/>
+                                {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
+                            </label>
+                        </div>
+
+                        <div className="radio">
+                            <label>
+                                <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-utm"
+                                       name="coordinates-system" value="utm"/>
+                                UTM
+                            </label>
+                        </div>
+
+                        <h3>{utils.__("Cursor position", dict)}</h3>
+
+                        <div>
+                            <div><strong>{this.state.zone}</strong></div>
+                            <div><strong>{this.state.lat}</strong></div>
+                            <div><strong>{this.state.lng}</strong></div>
+                        </div>
+
+
+                        <h3>{utils.__("Extent", dict)}</h3>
+                        <div>
+
+                            <div>
+                                <div style={this.center}>
+                                    <strong>{this.state.north}</strong>
                                 </div>
-
-                                <div className="radio">
-                                    <label>
-                                        <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-dms" name="coordinates-system" value="dms"/>
-                                        {utils.__("Latitude/Longitude, degrees, minutes and seconds", dict)}
-                                    </label>
-                                </div>
-
-                                <div className="radio">
-                                    <label>
-                                        <input onClick={this.onCoordinatesSystemClick} type="radio" id="coordinates-system-utm" name="coordinates-system" value="utm"/>
-                                        UTM
-                                    </label>
-                                </div>
-
-                                <h3>{utils.__("Cursor position", dict)}</h3>
-
-                                <div>
-                                    <div><strong>{this.state.zone}</strong></div>
-                                    <div><strong>{this.state.lat}</strong></div>
-                                    <div><strong>{this.state.lng}</strong></div>
-                                </div>
-
-
-                                <h3>{utils.__("Extent", dict)}</h3>
-                                <div>
-
-                                    <div>
-                                        <div style={this.center}>
-                                            <strong>{this.state.north}</strong>
-                                        </div>
-                                        <div style={this.center}>
-                                            <strong>↑</strong>
-                                        </div>
-                                    </div>
-
-                                    <div>
-
-                                        <div style={this.left}>
-                                            <strong>{this.state.west}</strong>
-                                        </div>
-
-                                        <div style={this.right}>
-                                            <strong>{this.state.east}</strong>
-                                        </div>
-
-                                        <div style={this.centerFloat}>
-                                            <strong>
-                                                <div style={this.left}>←</div>
-                                                <div style={this.right}>→</div>
-                                            </strong>
-                                        </div>
-
-                                    </div>
-
-                                    <div>
-                                        <div style={this.center}>
-                                            <strong>↓</strong>
-                                        </div>
-                                        <div style={this.center}>
-                                            <strong>{this.state.south}</strong>
-                                        </div>
-                                    </div>
-
+                                <div style={this.center}>
+                                    <strong>↑</strong>
                                 </div>
                             </div>
+
+                            <div>
+
+                                <div style={this.left}>
+                                    <strong>{this.state.west}</strong>
+                                </div>
+
+                                <div style={this.right}>
+                                    <strong>{this.state.east}</strong>
+                                </div>
+
+                                <div style={this.centerFloat}>
+                                    <strong>
+                                        <div style={this.left}>←</div>
+                                        <div style={this.right}>→</div>
+                                    </strong>
+                                </div>
+
+                            </div>
+
+                            <div>
+                                <div style={this.center}>
+                                    <strong>↓</strong>
+                                </div>
+                                <div style={this.center}>
+                                    <strong>{this.state.south}</strong>
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 );
@@ -314,7 +313,7 @@ module.exports = {
 
         try {
             ReactDOM.render(
-                <Coordinates />,
+                <Coordinates/>,
                 document.getElementById(exId)
             );
         } catch (e) {

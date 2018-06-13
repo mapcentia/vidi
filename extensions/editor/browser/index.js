@@ -108,11 +108,12 @@ module.exports = {
             });
         });
 
-        // When editing is disabled, close the slide panel with attribute form
-        cloud.get().map.on("editable:disable", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
+        // Listen to close of attr box
+        $(".close-hide").on("click", function (e) {
+            // If editor when deactivate
+            if ($(this).data('module') === "editor") {
+                me.stopEdit();
+            }
         });
 
         // Listen to arrival of edit-tools
@@ -298,20 +299,6 @@ module.exports = {
 
         const addFeature = () => {
             me.stopEdit();
-
-            // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
-            $(".slide-right .close").unbind("click.add").bind("click.add", function (e) {
-                e.stopPropagation();
-                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                    me.stopEdit();
-
-                    $(".slide-right .close").unbind("click.add");
-                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
-                } else {
-                    return false;
-                }
-            });
   
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
@@ -388,8 +375,6 @@ module.exports = {
                     });
                 };
 
-                $(".slide-right .close").unbind("click.add");
-                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 apiBridgeInstance.addFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsSaved).catch(error => {
                     console.log('Editor: error occured while performing addFeature()');
                     throw new Error(error);
@@ -461,20 +446,6 @@ module.exports = {
 
             backboneEvents.get().on("start:sqlQuery", function () {
                 //me.stopEdit(e);
-            });
-
-            // Bind cancel of editing to close of slide panel with attribute form
-            $(".slide-right .close").data("extraClickHandlerIsEnabled", true);
-            $(".slide-right .close").unbind("click.edit").bind("click.edit", function () {
-                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                    me.stopEdit(e);
-
-                    sqlQuery.reset(qstore);
-                    $(".slide-right .close").unbind("click.edit");
-                    $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
-                } else {
-                    return false;
-                }
             });
 
             // Hack to edit (Multi)Point layers
@@ -599,8 +570,6 @@ module.exports = {
                     }
                 };
 
-                $(".slide-right .close").unbind("click.edit");
-                $(".slide-right .close").data("extraClickHandlerIsEnabled", false);
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
                     throw new Error(error);

@@ -1,4 +1,9 @@
 <style>
+
+    #pane {
+        right: 0;
+    }
+
     #list {
         position: absolute;
         height: 100%;
@@ -286,6 +291,7 @@
         max-width: 568px;
 
         position: fixed;
+        left: auto;
         right: 56px;
         bottom: -100%;
 
@@ -379,7 +385,7 @@
         display: inline;
     }
 
-    #info-modal {
+    #layer-slide {
         display: inline;
     }
 
@@ -395,12 +401,41 @@
         font-size: 10pt;
     }
 
+    #layer-slide, #info-modal-top {
+        position: fixed;
+        max-width: 650px;
+        z-index: 3000;
+        min-width: 350px;
+        width: 30%;
+        height: 100%;
+        background-color: white;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        display: block;
+    }
+
+    @media (max-width: 450px) {
+        .navmenu,
+        .navbar-offcanvas,
+        #layer-slide, #info-modal-top {
+            width: 75%;
+            min-width: 240px;
+        }
+        #layer-slide, #info-modal-top {
+            right: -75%;
+        }
+        .export {
+            display: none !important;
+        }
+    }
+
     @media (max-width: 767px) {
         .dialog-bottom {
             min-width: 100%;
             border-radius: 0;
             margin-bottom: 0;
             right: 0;
+            left: 0;
         }
 
         .dialog-bottom .modal-body {
@@ -540,7 +575,9 @@
             <div class="collapse navbar-collapse">
                 <ul id="main-navbar" class="nav navbar-nav navbar-right">
                     <li><a id="btn-about" href="#" data-toggle="modal" data-target="#about-modal">{{About}}</a></li>
-                    <li><a id="session" href="#" data-toggle="modal" data-target="#login-modal"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>
+                    <li><a id="session" href="#" data-toggle="modal" data-target="#login-modal"><i
+                            class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i
+                            class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>
                 </ul>
 
             </div>
@@ -564,7 +601,8 @@
 
     <div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i class="material-icons">close</i>
+            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
+                    class="material-icons">close</i>
             </button>
             <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
             </button>
@@ -579,7 +617,8 @@
 
     <div id="offline-map-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i class="material-icons">close</i>
+            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
+                    class="material-icons">close</i>
             </button>
             <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
             </button>
@@ -693,43 +732,12 @@
         </div>
     </div>
 
-<!--    <div id="info-dialog" class="dialog-bottom fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" aria-hidden="true"><i class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Info</h3>
-        </div>
-        <div class="modal-body">
-
-            <div id="buffer" style="display: none">
-                <div>
-                    <label for="buffer-value" class="control-label">{{Buffer}}</label>
-                    <input id="buffer-value" class="form-control">
-                    <div id="buffer-slider" class="slider shor"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="info-box">
-            <div id="modal-info-body">
-                <ul class="nav nav-tabs" id="info-tab"></ul>
-                <div class="tab-content" id="info-pane"></div>
-            </div>
-        </div>
-        <table id="dtable" data-show-toggle="true"></table>
-    </div>-->
-
-
-    <div id="info-modal" class="slide-left fade-then-dragging">
+    <div id="layer-slide" class="slide-left fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close" aria-hidden="true">×</button>
             <h3 class="modal-title"></h3>
         </div>
-        <div id="info-modal-body-wrapper">
+        <div id="layer-slide-body-wrapper">
             <div class="modal-body">
                 <div class="form-group" id="layers"></div>
             </div>

@@ -259,13 +259,6 @@ module.exports = {
             }, 200);
         }
 
-        $(window).resize(_.debounce(function () {
-            $("#myNavmenu").offcanvas('hide');
-            setTimeout(function () {
-                modules.cloud.get().map.invalidateSize();
-            }, 100);
-        }, 0));
-
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
             }).catch(error => {

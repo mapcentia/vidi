@@ -127,9 +127,6 @@ module.exports = {
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Log out"});
                             me.setState({auth: true});
-                            setTimeout(function () {
-                                $("#info-modal button.close").trigger("click");
-                            }, 1000);
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                             parent.update();
@@ -149,9 +146,6 @@ module.exports = {
                             me.setState({alertClass: "alert-info"});
                             me.setState({btnText: "Sign in"});
                             me.setState({auth: false});
-                            setTimeout(function () {
-                                $("#info-modal button.close").trigger("click");
-                            }, 1000);
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                             parent.update();
