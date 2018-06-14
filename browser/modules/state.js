@@ -126,7 +126,11 @@ module.exports = {
         }
     },
     init: function () {
-        var arr, i;
+        var arr, i, maxBounds = setting.getMaxBounds(), setLayers;
+
+        if (maxBounds) {
+            cloud.get().setMaxBounds(maxBounds);
+        }
 
         // Reset hash. Needed if state is invoked after start up
         hash = decodeURIComponent(window.location.hash);
@@ -137,7 +141,7 @@ module.exports = {
         //     cloud.get().setMaxBounds(maxBounds);
         // }
 
-        var setLayers = function () {
+        setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
             if (hashArr[1] && hashArr[2] && hashArr[3]) {
