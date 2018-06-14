@@ -303,6 +303,8 @@ module.exports = {
         arr = array_unique(groups.reverse());
         metaData.data.reverse();
 
+        $("#layers").append(`<div id="layers_list"></div>`);
+
         // Filling up groups and underlying layers (except ungrouped ones)
         for (i = 0; i < arr.length; ++i) {
             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
@@ -313,7 +315,7 @@ module.exports = {
                 // Only if container doesn't exist
                 // ===============================
                 if ($("#layer-panel-" + base64GroupName).length === 0) {
-                    $("#layers").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+                    $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
                         <div class="panel-heading" role="tab">
                             <h4 class="panel-title">
                                 <div class="layer-count badge">
@@ -515,7 +517,7 @@ module.exports = {
                         // initialize the order if it is not defined
                     },
                     change: (event, ui) => {
-                        console.log(ui);
+                        console.log('##', ui);
                     }
                 });
 
@@ -532,6 +534,17 @@ module.exports = {
                 }
             }
         }
+
+        $(`#layers_list`).sortable({
+            axis: 'y',
+            containment: 'parent',
+            start: () => {
+                // initialize the order if it is not defined
+            },
+            change: (event, ui) => {
+                console.log('#', ui);
+            }
+        });
 
         if (lastStatistics) {
             _self.statisticsHandler(lastStatistics, false, true);
