@@ -10,6 +10,12 @@ const ADD_REQUEST = 0;
 const UPDATE_REQUEST = 1;
 const DELETE_REQUEST = 2;
 
+/*
+Specifies if the first and only element of the queue should
+be processed without timeout.
+*/
+const PROCESS_FIRST_ELEMENT_IMMEDIATELY = false;
+
 let queueStateUndefined = true;
 
 /**
@@ -459,7 +465,7 @@ class Queue {
                 then older elements have to be processed first.
             */
 
-            if (_self._queue.length === 1 && _self._locked === false) {
+            if (_self._queue.length === 1 && _self._locked === false && PROCESS_FIRST_ELEMENT_IMMEDIATELY) {
                 
                 if (LOG) console.log('Queue: processing pushAndProcess item right away');
 
