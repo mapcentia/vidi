@@ -5,6 +5,9 @@
 
 'use strict';
 
+const STATE_STORE_NAME = `vidi-state-store`;
+const LOG = false;
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -85,11 +88,63 @@ var BACKEND = require('../../config/config.js').backend;
 
 var layers;
 
+var _self;
+
 var backboneEvents;
 
 var layerTree;
 
+var listened = {};
+
 var p, hashArr = hash.replace("#", "").split("/");
+
+/**
+ * Returns internaly stored global state
+ * 
+ * @returns {Promise}
+ */
+const _getInternalState = () => {
+    let result = new Promise((resolve, reject) => {
+        localforage.getItem(STATE_STORE_NAME, (error, value) => {
+
+            if (LOG) console.log('State: after getting state');
+
+            if (error) {
+                throw new Error('State: error occured while accessing the store');
+            }
+
+            let localState = {};
+            if (value) {
+                localState = JSON.parse(value);
+            }
+
+            resolve(localState);
+        });
+    });
+
+    return result;
+};
+
+/**
+ * Sets internaly stored global state
+ * 
+ * @returns {Promise}
+ */
+const _setInternalState = (value) => {
+    let result = new Promise((resolve, reject) => {
+        localforage.setItem(STATE_STORE_NAME, JSON.stringify(value), (error) => {
+
+            if (LOG) console.log('State: saving state');
+
+            if (error) {
+                throw new Error('State: error occured while storing the state');
+            }
+        });
+    });
+
+    return result;
+};
+
 
 /**
  *
@@ -115,17 +170,23 @@ module.exports = {
         meta = o.meta;
         layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
+
+        listened['layerTree'] = layerTree;
+
         return this;
     },
-    setExtent: function () {
-        if (hashArr[1] && hashArr[2] && hashArr[3]) {
-            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
-            cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
-        } else {
-            cloud.get().zoomToExtent();
-        }
-    },
+
+    /**
+     * @todo Most of the functionality from this method should be moved to the 
+     * corresponding modules and extensions
+     */
     init: function () {
+        _self = this;
+
+        if ('localforage' in window === false) {
+            throw new Error('localforage is not defined');
+        }
+
         var arr, i;
 
         // Reset hash. Needed if state is invoked after start up
@@ -519,7 +580,73 @@ module.exports = {
         }
         backboneEvents.get().trigger("end:state");
     },
+
+    /**
+     * Returns current state
+     * 
+     * @param {String} name Name of the module or extension
+     * 
+     * @returns {Promise}
+     */
+    getState: (name = false) => {
+        let result = new Promise((resolve, reject) => {
+            _getInternalState().then(localState => {
+                if (name) {
+                    resolve(localState[name]);
+                } else {
+                    resolve(localState);
+                }
+            });
+        });
+
+        return result;
+    },
+
+    /**
+     * Listens to specific events of modules and extensions, then gets their state and updates
+     * and saves the overall state locally, so next reload will keep all changes
+     */
+    listen: (name, eventId) => {
+        backboneEvents.get().on(name + ':' + eventId, () => {
+            _self._updateState(name);
+        });
+    },
+
+    /**
+     * Pushes the current saved state to the server (GC2), then displays the link with saved state identifier (bookmark)
+     */
+    bookmarkState: () => {},
+
+    setExtent: function () {
+        if (hashArr[1] && hashArr[2] && hashArr[3]) {
+            p = geocloud.transformPoint(hashArr[2], hashArr[3], "EPSG:4326", "EPSG:900913");
+            cloud.get().zoomToPoint(p.x, p.y, hashArr[1]);
+        } else {
+            cloud.get().zoomToExtent();
+        }
+    },
+
     setBaseLayer: function (b) {
         setBaseLayer = b;
+    },
+
+    /**
+     * Retrieves state of all registered modules and extensions
+     * 
+     * @param {String} name Module or extension name
+     */
+    _updateState: (name) => {
+        if (name in listened === false) {
+            throw new Error(`Module or extension ${name} does not exist`);
+        }
+
+        if ('getState' in listened[name] === false) {
+            throw new Error(`Module or extension has to implement getState() method in order to support state`);
+        }
+
+        _getInternalState().then(localState => {
+            localState[name] = listened[name].getState();
+            _setInternalState(localState);
+        });
     }
 };

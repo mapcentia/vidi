@@ -5,6 +5,8 @@
 
 'use strict';
 
+const MODULE_NAME = `layerTree`;
+
 var meta;
 var layers;
 
@@ -14,7 +16,11 @@ var cloud;
 
 var layers;
 
+var state;
+
 var backboneEvents;
+
+var layerTreeOrder = false;
 
 var onEachFeature = [];
 
@@ -81,6 +87,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         layers = o.layers;
+        state = o.state;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
@@ -253,90 +260,169 @@ module.exports = {
      * Builds actual layer tree.
      */
     create: () => {
-        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
+        state.getState(MODULE_NAME).then(initialState => {
+            var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
-        $("#layers").empty();
+            $("#layers").empty();
 
-        let toggleOfllineOnlineMode = false;
-        if (`serviceWorker` in navigator) {
-            toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="togglebutton">
-                        <label>
-                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                            <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                            <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                            <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                        </label>
+            let toggleOfllineOnlineMode = false;
+            if (`serviceWorker` in navigator) {
+                toggleOfllineOnlineMode = $(`<div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="togglebutton">
+                            <label>
+                                <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
+                                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
+                                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
+                                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-            </div>`);
+                </div>`);
 
-            if (apiBridgeInstance.offlineModeIsEnforced()) {
-                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+                }
+
+                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+                    if ($(event.target).is(':checked')) {
+                        apiBridgeInstance.setOfflineMode(true);
+                    } else {
+                        apiBridgeInstance.setOfflineMode(false);
+                    }
+                });
+            } else {
+            toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    ${__('This browser does not support Service Workers, some features may be unavailable')}
+                </div>`);
             }
 
-            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
-                if ($(event.target).is(':checked')) {
-                    apiBridgeInstance.setOfflineMode(true);
-                } else {
-                    apiBridgeInstance.setOfflineMode(false);
+            $("#layers").append(toggleOfllineOnlineMode);
+
+            groups = [];
+
+            // Getting set of all loaded vectors
+            metaData = meta.getMetaData();
+            for (i = 0; i < metaData.data.length; ++i) {
+                groups[i] = metaData.data[i].layergroup;
+            }
+
+            let notSortedGroupsArray = array_unique(groups.reverse());
+            let arr = [];
+            metaData.data.reverse();
+
+            if (initialState) {
+                if ('order' in initialState) {
+                    for (let key in initialState.order) {
+                        let item = initialState.order[key];
+                        let sortedElement = false;
+                        for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
+                            if (item.id === notSortedGroupsArray[i]) {
+                                sortedElement = notSortedGroupsArray.splice(i, 1);
+                                break;
+                            }
+                        }
+
+                        if (sortedElement) {
+                            arr.push(item.id);
+                        }
+                    }
                 }
-            });
-        } else {
-           toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                ${__('This browser does not support Service Workers, some features may be unavailable')}
-            </div>`);
-        }
 
-        $("#layers").append(toggleOfllineOnlineMode);
+                if (notSortedGroupsArray.length > 0) {
+                    for (let j = 0; j < notSortedGroupsArray.length; j++) {
+                        arr.push(notSortedGroupsArray[j]);
+                    }
+                }
+            } else {
+                arr = notSortedGroupsArray;
+            }
 
-        groups = [];
+            $("#layers").append(`<div id="layers_list"></div>`);
 
-        // Getting set of all loaded vectors
-        metaData = meta.getMetaData();
-        for (i = 0; i < metaData.data.length; ++i) {
-            groups[i] = metaData.data[i].layergroup;
-        }
+            // Filling up groups and underlying layers (except ungrouped ones)
+            for (i = 0; i < arr.length; ++i) {
+                if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                    l = [];
+                    base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
-        arr = array_unique(groups.reverse());
-        metaData.data.reverse();
-
-        $("#layers").append(`<div id="layers_list"></div>`);
-
-        // Filling up groups and underlying layers (except ungrouped ones)
-        for (i = 0; i < arr.length; ++i) {
-            if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                l = [];
-                base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
-
-                // Add group container
-                // Only if container doesn't exist
-                // ===============================
-                if ($("#layer-panel-" + base64GroupName).length === 0) {
-                    $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-                        <div class="panel-heading" role="tab">
-                            <h4 class="panel-title">
-                                <div class="layer-count badge">
-                                    <span>0</span> / <span></span>
-                                </div>
-                                <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
-                            </h4>
-                        </div>
-                        <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
-                    </div>`);
-
-                    // Append to inner group container
+                    // Add group container
+                    // Only if container doesn't exist
                     // ===============================
-                    $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
-                }
+                    if ($("#layer-panel-" + base64GroupName).length === 0) {
+                        $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <div class="layer-count badge">
+                                        <span>0</span> / <span></span>
+                                    </div>
+                                    <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
+                                </h4>
+                            </div>
+                            <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                        </div>`);
 
-                // Add layers
-                // ==========
-                for (var u = 0; u < metaData.data.length; ++u) {
-                    let layer = metaData.data[u];
-                    if (layer.layergroup == arr[i]) {
+                        // Append to inner group container
+                        // ===============================
+                        $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
+                    }
+
+                    try {
+                    // Get layers that belong to the current layer group
+                    let notSortedLayersForCurrentGroup = [];
+                    for (let u = 0; u < metaData.data.length; ++u) {
+                        if (metaData.data[u].layergroup == arr[i]) {
+                            notSortedLayersForCurrentGroup.push(metaData.data[u]);
+                        }
+                    }
+
+                    // Sort layers if there is available order
+                    let layersForCurrentGroup = false;
+                    let sortedLayers = [];
+                    if (initialState && 'order' in initialState) {
+                        let currentGroupLayersOrder = false;
+                        for (let key in initialState.order) {
+                            if (initialState.order[key].id === arr[i] && 'layers' in initialState.order[key]) {
+                                currentGroupLayersOrder = initialState.order[key].layers;
+                            }
+                        }
+
+                        if (currentGroupLayersOrder) {
+                            for (let key in currentGroupLayersOrder) {
+                                let item = currentGroupLayersOrder[key];
+                                let sortedElement = false;
+                                for (let i = (notSortedLayersForCurrentGroup.length - 1); i >= 0; i--) {
+                                    let layerId = notSortedLayersForCurrentGroup[i].f_table_schema + '.' + notSortedLayersForCurrentGroup[i].f_table_name;
+                                    if (item.id === layerId) {
+                                        sortedElement = notSortedLayersForCurrentGroup.splice(i, 1);
+                                        break;
+                                    }
+                                }
+
+                                if (sortedElement) {
+                                    sortedLayers.push(sortedElement.pop());
+                                }
+                            }
+
+                            if (notSortedLayersForCurrentGroup.length > 0) {
+                                for (let j = 0; j < notSortedLayersForCurrentGroup.length; j++) {
+                                    sortedLayers.push(notSortedLayersForCurrentGroup[j]);
+                                }
+                            }
+                        }
+                    }
+
+                    if (sortedLayers.length > 0) {
+                        layersForCurrentGroup = sortedLayers;
+                    } else {
+                        layersForCurrentGroup = notSortedLayersForCurrentGroup;
+                    }
+
+                    // Add layers
+                    // ==========
+                    for (var u = 0; u < layersForCurrentGroup.length; ++u) {
+                        let layer = layersForCurrentGroup[u];
                         var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
                         if (layer.baselayer) {
                             $("#base-layer-list").append(`<div class='list-group-item'>
@@ -508,47 +594,80 @@ module.exports = {
                             l.push({});
                         }
                     }
-                }
 
-                $("#collapse" + base64GroupName).sortable({
-                    axis: 'y',
-                    containment: 'parent',
-                    start: () => {
-                        // initialize the order if it is not defined
-                    },
-                    change: (event, ui) => {
-                        console.log('##', ui);
+                }catch(e){ console.log(e); }
+
+                    $("#collapse" + base64GroupName).sortable({
+                        axis: 'y',
+                        containment: 'parent',
+                        stop: (event, ui) => {
+                            _self.calculateOrder();
+                            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                        }
+                    });
+
+                    
+                    if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+                        count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
+                    } else {
+                        count = l.length;
                     }
-                });
 
-                if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                    count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
-                } else {
-                    count = l.length;
-                }
-
-                $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
-                // Remove the group if empty
-                if (l.length === 0) {
-                    $("#layer-panel-" + base64GroupName).remove();
+                    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+                    // Remove the group if empty
+                    if (l.length === 0) {
+                        $("#layer-panel-" + base64GroupName).remove();
+                    }
                 }
             }
-        }
 
-        $(`#layers_list`).sortable({
-            axis: 'y',
-            containment: 'parent',
-            start: () => {
-                // initialize the order if it is not defined
-            },
-            change: (event, ui) => {
-                console.log('#', ui);
+            $(`#layers_list`).sortable({
+                axis: 'y',
+                containment: 'parent',
+                stop: (event, ui) => {
+                    _self.calculateOrder();
+                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                }
+            });
+
+            if (lastStatistics) {
+                _self.statisticsHandler(lastStatistics, false, true);
+            }
+
+            state.listen(MODULE_NAME, `sorted`);
+        });
+    },
+
+    calculateOrder: () => {
+        layerTreeOrder = [];
+
+        $(`[id^="layer-panel-"]`).each((index, element) => {
+            let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
+            let layers = [];
+            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+                let layerKey = $(layerElement).data(`gc2-layer-key`);
+                let splitLayerKey = layerKey.split('.');
+                if (splitLayerKey.length !== 3) {
+                    throw new Error(`Invalid layer key (${layerKey})`);
+                }
+
+                layers.push({ id: `${splitLayerKey[0]}.${splitLayerKey[1]}` });
+            });
+
+            let readableId = atob(id);
+            if (readableId) {
+                layerTreeOrder.push({ id: readableId, layers });
+            } else {
+                throw new Error(`Unable to decode the layer group identifier (${id})`);
             }
         });
+    },
 
-        if (lastStatistics) {
-            _self.statisticsHandler(lastStatistics, false, true);
-        }
+    /**
+     * Returns current module state
+     */
+    getState: () => {
+        return { order: layerTreeOrder };
     },
 
     /**
