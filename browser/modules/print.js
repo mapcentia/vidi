@@ -28,8 +28,9 @@ var backboneEvents;
 var legend;
 var moment = require('moment');
 var meta;
+var state;
 var uriJs = require('urijs');
-var callBack= function () {};
+var callBack= () => {};
 
 /**
  * @private
@@ -62,6 +63,7 @@ module.exports = {
         serializeLayers = o.serializeLayers;
         anchor = o.anchor;
         meta = o.meta;
+        state = o.state;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -187,6 +189,136 @@ module.exports = {
     },
 
     /**
+     *
+     */
+    print: (endEventName = "end:print", customData) => {
+        state.bookmarkState().then(response => {
+            backboneEvents.get().trigger(endEventName, response);
+            callBack(response.responseJSON);
+        }).catch(response => {
+            backboneEvents.get().trigger(endEventName, response);
+            callBack(response.responseJSON);
+        });
+
+        return true;
+    },
+
+    /**
+     *
+     */
+    control: function (p, s, t, pa, o, l) {
+        if ($("#print-btn").is(':checked') || p) {
+            printC = p ? p : printC;
+            scales = s ? s : scales;
+            tmpl = t ? t : tmpl;
+            pageSize = pa ? pa : pageSize;
+            orientation = o ? o : orientation;
+            legend = l ? l : null;
+
+
+            var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
+            var _getScale = function (scaleObject) {
+                var bounds = scaleObject.getBounds(),
+                    sw = bounds.getSouthWest(),
+                    ne = bounds.getNorthEast(),
+                    halfLat = (sw.lat + ne.lat) / 2,
+                    midLeft = L.latLng(halfLat, sw.lng),
+                    midRight = L.latLng(halfLat, ne.lng),
+                    mwidth = midLeft.distanceTo(midRight),
+                    closest = Number.POSITIVE_INFINITY,
+                    i = scales.length,
+                    diff,
+                    mscale = mwidth * 1000 / ps[0];
+                curScale = scale;
+                while (i--) {
+                    diff = Math.abs(mscale - scales[i]);
+                    if (diff < closest) {
+                        closest = diff;
+                        scale = parseInt(scales[i], 10);
+                    }
+                }
+                newScale = scale;
+                newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+
+                // Get utm zone
+                var zone = require('./utmZone.js').getZone(sw.lat, sw.lng);
+                Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+                return scale;
+            };
+
+            var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
+                scale = initScale || _getScale(scaleObject);
+                $("#select-scale").val(scale);
+                if (isFirst) {
+                    var scaleIndex = scales.indexOf(scale);
+                    if (scaleIndex > 1) {
+                        scaleIndex = scaleIndex - 2;
+                    } else if (scaleIndex > 0) {
+                        scaleIndex = scaleIndex - 1;
+                    }
+                    scale = scales[scaleIndex];
+                }
+                var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
+                var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
+                var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
+                var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
+                var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
+                var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
+                var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
+                    color: color,
+                    fillOpacity: 0,
+                    aspectRatio: (ps[0] / ps[1])
+                });
+                center = rectangle.getBounds().getCenter();
+                return rectangle;
+            };
+
+            var first = center ? false : true;
+            center = center || cloud.get().map.getCenter(); // Init center as map center
+            recEdit = rectangle(center, cloud.get().map, "yellow", scale, first);
+            recEdit._vidi_type = "printHelper";
+            printItems.addLayer(recEdit);
+            recEdit.editing.enable();
+
+            recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+            recScale._vidi_type = "print";
+            printItems.addLayer(recScale);
+
+            var sw = recEdit.getBounds().getSouthWest(),
+                ne = recEdit.getBounds().getNorthEast();
+
+            curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+
+            recEdit.on('edit', function (e) {
+                    rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+
+                    if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
+
+                        scales = config.print.scales;
+                        console.log(scales)
+
+                        cloud.get().map.removeLayer(recScale);
+                        recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+                        recScale._vidi_type = "print";
+                        printItems.addLayer(recScale);
+                        $("#get-print-fieldset").prop("disabled", true);
+                    }
+                    recEdit.editing.disable();
+                    recEdit.setBounds(recScale.getBounds());
+                    recEdit.editing.enable();
+
+                    var sw = recEdit.getBounds().getSouthWest(),
+                        ne = recEdit.getBounds().getNorthEast();
+                    curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+                }
+            );
+
+        } else {
+            _cleanUp();
+        }
+    },
+
+    /**
      * Gathers current application state
      * 
      * @todo
@@ -195,7 +327,7 @@ module.exports = {
      * 
      * @returns {Object}
      */
-    getApplicationData: () => {
+    getPrintData: (customData) => {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
         if (isNaN(scale) || scale < 200) {
@@ -325,155 +457,6 @@ module.exports = {
         return data;
     },
 
-    /**
-     *
-     */
-    print: function (endEventName, customData) {
-        let data = this.getApplicationData();
-
-        $.ajax({
-            dataType: "json",
-            method: "post",
-            url: '/api/print/',
-            contentType: "application/json",
-            data: JSON.stringify(data),
-            scriptCharset: "utf-8",
-            success: function (response) {
-                if (!endEventName) {
-                    backboneEvents.get().trigger("end:print", response);
-                } else {
-                    backboneEvents.get().trigger(endEventName, response);
-                }
-            },
-            error: function (response) {
-                if (!endEventName) {
-                    backboneEvents.get().trigger("end:print", response);
-                } else {
-                    backboneEvents.get().trigger(endEventName, response);
-                }
-            },
-            complete: function (response) {
-                callBack(response.responseJSON);
-            }
-        });
-
-        return true;
-    },
-
-    /**
-     *
-     */
-    control: function (p, s, t, pa, o, l) {
-        if ($("#print-btn").is(':checked') || p) {
-            printC = p ? p : printC;
-            scales = s ? s : scales;
-            tmpl = t ? t : tmpl;
-            pageSize = pa ? pa : pageSize;
-            orientation = o ? o : orientation;
-            legend = l ? l : null;
-
-
-            var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
-            var _getScale = function (scaleObject) {
-                var bounds = scaleObject.getBounds(),
-                    sw = bounds.getSouthWest(),
-                    ne = bounds.getNorthEast(),
-                    halfLat = (sw.lat + ne.lat) / 2,
-                    midLeft = L.latLng(halfLat, sw.lng),
-                    midRight = L.latLng(halfLat, ne.lng),
-                    mwidth = midLeft.distanceTo(midRight),
-                    closest = Number.POSITIVE_INFINITY,
-                    i = scales.length,
-                    diff,
-                    mscale = mwidth * 1000 / ps[0];
-                curScale = scale;
-                while (i--) {
-                    diff = Math.abs(mscale - scales[i]);
-                    if (diff < closest) {
-                        closest = diff;
-                        scale = parseInt(scales[i], 10);
-                    }
-                }
-                newScale = scale;
-                newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
-
-                // Get utm zone
-                var zone = require('./utmZone.js').getZone(sw.lat, sw.lng);
-                Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
-                return scale;
-            };
-
-            var rectangle = function (initCenter, scaleObject, color, initScale, isFirst) {
-                scale = initScale || _getScale(scaleObject);
-                $("#select-scale").val(scale);
-                if (isFirst) {
-                    var scaleIndex = scales.indexOf(scale);
-                    if (scaleIndex > 1) {
-                        scaleIndex = scaleIndex - 2;
-                    } else if (scaleIndex > 0) {
-                        scaleIndex = scaleIndex - 1;
-                    }
-                    scale = scales[scaleIndex];
-                }
-                var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
-                var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
-                var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
-                var printNeM = [centerM.x + (printSizeM[0] / 2), centerM.y + (printSizeM[1] / 2)];
-                var printSwG = geocloud.transformPoint(printSwM[0], printSwM[1], "EPSG:32632", "EPSG:4326");
-                var printNeG = geocloud.transformPoint(printNeM[0], printNeM[1], "EPSG:32632", "EPSG:4326");
-                var rectangle = L.rectangle([[printSwG.y, printSwG.x], [printNeG.y, printNeG.x]], {
-                    color: color,
-                    fillOpacity: 0,
-                    aspectRatio: (ps[0] / ps[1])
-                });
-                center = rectangle.getBounds().getCenter();
-                return rectangle;
-            };
-
-            var first = center ? false : true;
-            center = center || cloud.get().map.getCenter(); // Init center as map center
-            recEdit = rectangle(center, cloud.get().map, "yellow", scale, first);
-            recEdit._vidi_type = "printHelper";
-            printItems.addLayer(recEdit);
-            recEdit.editing.enable();
-
-            recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
-            recScale._vidi_type = "print";
-            printItems.addLayer(recScale);
-
-            var sw = recEdit.getBounds().getSouthWest(),
-                ne = recEdit.getBounds().getNorthEast();
-
-            curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
-
-            recEdit.on('edit', function (e) {
-                    rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
-
-                    if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-
-                        scales = config.print.scales;
-                        console.log(scales)
-
-                        cloud.get().map.removeLayer(recScale);
-                        recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
-                        recScale._vidi_type = "print";
-                        printItems.addLayer(recScale);
-                        $("#get-print-fieldset").prop("disabled", true);
-                    }
-                    recEdit.editing.disable();
-                    recEdit.setBounds(recScale.getBounds());
-                    recEdit.editing.enable();
-
-                    var sw = recEdit.getBounds().getSouthWest(),
-                        ne = recEdit.getBounds().getNorthEast();
-                    curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
-                }
-            );
-
-        } else {
-            _cleanUp();
-        }
-    },
     cleanUp: function (hard) {
         _cleanUp(hard);
     }

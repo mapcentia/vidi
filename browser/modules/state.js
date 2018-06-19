@@ -314,7 +314,6 @@ module.exports = {
                         backboneEvents.get().trigger("on:customData", response.data.customData);
                     }
 
-
                     // Recreate print
                     // ==============
                     if (response.data.print !== null) {
@@ -614,8 +613,32 @@ module.exports = {
 
     /**
      * Pushes the current saved state to the server (GC2), then displays the link with saved state identifier (bookmark)
+     * 
+     * @returns {Promise}
      */
-    bookmarkState: () => {},
+    bookmarkState: (data) => {
+        // Getting the print data
+        let printData = print.getPrintData(customData);
+
+        // Getting modules and extensions state
+        let modulesData = {};
+
+        let overallData = Object.assign({}, printData, modulesData);
+        let result = new Promise((resolve, reject) => {
+            $.ajax({
+                dataType: `json`,
+                method: `POST`,
+                url: `/api/print/`,
+                contentType: `application/json`,
+                data: JSON.stringify(overallData),
+                scriptCharset: `utf-8`,
+                success: resolve,
+                error: reject
+            });
+        });
+
+        return result;
+    },
 
     setExtent: function () {
         if (hashArr[1] && hashArr[2] && hashArr[3]) {
