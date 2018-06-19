@@ -16,7 +16,7 @@ var backboneEvents;
 var jquery = require('jquery');
 require('snackbarjs');
 
-var exId = "session";
+var exId = `login-modal-body`;
 
 /**
  *
@@ -238,11 +238,14 @@ module.exports = {
             }
         }
 
-        ReactDOM.render(
-            <Session/>,
-            document.getElementById("login-modal-body")
-        );
-
+        if (document.getElementById(exId)) {
+            ReactDOM.render(
+                <Session/>,
+                document.getElementById("")
+            );
+        } else {
+            console.warn(`Unable to find the container for session extension (element id: ${exId})`);
+        }
     },
 
     update: function () {

@@ -737,14 +737,18 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Offline map"), __("Block description"), require('./../../../browser/modules/height')().max);
-        try {
-            ReactDOM.render(
-                <OfflineMap />,
-                document.getElementById(exId)
-            );
-        } catch (e) {
-            console.log(e);
+        if (document.getElementById(exId)) {
+            utils.createMainTab(exId, __("Offline map"), __("Block description"), require('./../../../browser/modules/height')().max);
+            try {
+                ReactDOM.render(
+                    <OfflineMap />,
+                    document.getElementById(exId)
+                );
+            } catch (e) {
+                console.log(e);
+            }
+        } else {
+            console.warn(`Unable to find the container for offlineMap extension (element id: ${exId})`);
         }
     }
 

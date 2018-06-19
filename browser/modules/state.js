@@ -295,6 +295,9 @@ module.exports = {
             if (parr.length > 1) {
                 parr.pop();
             }
+
+            console.log('###', parr);
+
             $.ajax({
                 dataType: "json",
                 method: "get",
