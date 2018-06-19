@@ -187,9 +187,15 @@ module.exports = {
     },
 
     /**
-     *
+     * Gathers current application state
+     * 
+     * @todo
+     * Most of the gathered properties should be fetched using the getState() of corresponding modules and
+     * merged together as a global application state representation.
+     * 
+     * @returns {Object}
      */
-    print: function (endEventName, customData) {
+    getApplicationData: () => {
         var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
         if (isNaN(scale) || scale < 200) {
@@ -316,6 +322,14 @@ module.exports = {
             data.config = parr.join();
         }
 
+        return data;
+    },
+
+    /**
+     *
+     */
+    print: function (endEventName, customData) {
+        let data = this.getApplicationData();
 
         $.ajax({
             dataType: "json",

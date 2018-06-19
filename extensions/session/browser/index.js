@@ -239,10 +239,7 @@ module.exports = {
         }
 
         if (document.getElementById(exId)) {
-            ReactDOM.render(
-                <Session/>,
-                document.getElementById("")
-            );
+            ReactDOM.render(<Session/>, document.getElementById(exId));
         } else {
             console.warn(`Unable to find the container for session extension (element id: ${exId})`);
         }

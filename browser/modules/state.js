@@ -296,8 +296,6 @@ module.exports = {
                 parr.pop();
             }
 
-            console.log('###', parr);
-
             $.ajax({
                 dataType: "json",
                 method: "get",
@@ -307,12 +305,11 @@ module.exports = {
                 },
                 scriptCharset: "utf-8",
                 success: function (response) {
-
-
                     if (response.data.bounds !== null) {
                         var bounds = response.data.bounds;
                         cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                     }
+
                     if (response.data.customData !== null) {
                         backboneEvents.get().trigger("on:customData", response.data.customData);
                     }
