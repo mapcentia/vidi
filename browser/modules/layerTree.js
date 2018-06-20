@@ -257,10 +257,26 @@ module.exports = {
     },
 
     /**
+     * Returns layers order in corresponding groups
+     * 
+     * @return {Promise}
+     */
+    getLayersOrder: () => {
+        let result = new Promise((resolve, reject) => {
+            state.getState(MODULE_NAME).then(initialState => {
+                let order = ((initialState && `order` in initialState) ? initialState.order : false);
+                resolve(order);
+            });
+        });
+
+        return result;
+    },
+
+    /**
      * Builds actual layer tree.
      */
     create: () => {
-        state.getState(MODULE_NAME).then(initialState => {
+        _self.getLayersOrder().then(order => {
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
             $("#layers").empty();
@@ -292,7 +308,7 @@ module.exports = {
                     }
                 });
             } else {
-            toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+                toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
                     <button type="button" class="close" data-dismiss="alert">×</button>
                     ${__('This browser does not support Service Workers, some features may be unavailable')}
                 </div>`);
@@ -312,21 +328,19 @@ module.exports = {
             let arr = [];
             metaData.data.reverse();
 
-            if (initialState) {
-                if ('order' in initialState) {
-                    for (let key in initialState.order) {
-                        let item = initialState.order[key];
-                        let sortedElement = false;
-                        for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
-                            if (item.id === notSortedGroupsArray[i]) {
-                                sortedElement = notSortedGroupsArray.splice(i, 1);
-                                break;
-                            }
+            if (order) {
+                for (let key in order) {
+                    let item = order[key];
+                    let sortedElement = false;
+                    for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
+                        if (item.id === notSortedGroupsArray[i]) {
+                            sortedElement = notSortedGroupsArray.splice(i, 1);
+                            break;
                         }
+                    }
 
-                        if (sortedElement) {
-                            arr.push(item.id);
-                        }
+                    if (sortedElement) {
+                        arr.push(item.id);
                     }
                 }
 
@@ -380,11 +394,11 @@ module.exports = {
                     // Sort layers if there is available order
                     let layersForCurrentGroup = false;
                     let sortedLayers = [];
-                    if (initialState && 'order' in initialState) {
+                    if (order) {
                         let currentGroupLayersOrder = false;
-                        for (let key in initialState.order) {
-                            if (initialState.order[key].id === arr[i] && 'layers' in initialState.order[key]) {
-                                currentGroupLayersOrder = initialState.order[key].layers;
+                        for (let key in order) {
+                            if (order[key].id === arr[i] && 'layers' in order[key]) {
+                                currentGroupLayersOrder = order[key].layers;
                             }
                         }
 

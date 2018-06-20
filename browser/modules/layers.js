@@ -47,7 +47,7 @@ var backboneEvents;
 
 var host = require("./connection").getHost();
 
-var switchLayer;
+var layerTree;
 
 var array = [];
 
@@ -66,6 +66,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -150,50 +151,72 @@ module.exports = {
         var me = this;
 
         return new Promise(function (resolve, reject) {
-            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+            layerTree.getLayersOrder().then(order => {
+                var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
-            $.each(metaData.data, function (i, v) {
-                var layer = v.f_table_schema + "." + v.f_table_name,
-                    singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+                $.each(metaData.data, function (i, v) {
+                    var layer = v.f_table_schema + "." + v.f_table_name,
+                        singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
-                if (layer === l) {
-                    isBaseLayer = !!v.baselayer;
-                    layers[[layer]] = cloud.get().addTileLayers({
-                        host: host,
-                        layers: [layer],
-                        db: db,
-                        isBaseLayer: isBaseLayer,
-                        tileCached: !singleTiled,
-                        singleTile: singleTiled,
-                        // @todo Was somehow set to false
-                        //visibility: false,
-                        wrapDateLine: false,
-                        displayInLayerSwitcher: true,
-                        name: v.f_table_name,
-                        // Single tile option
-                        type: !singleTiled ? "tms" : "wms",
-                        format: "image/png",
-                        uri: uri,
-                        loadEvent: function () {
-                            me.decrementCountLoading(layer);
-                            backboneEvents.get().trigger("doneLoading:layers", layer);
-                        },
-                        loadingEvent: function () {
-                            me.incrementCountLoading(layer);
-                            backboneEvents.get().trigger("startLoading:layers", layer);
-                        },
-                        subdomains: window.gc2Options.subDomainsForTiles
-                    });
+                    if (layer === l) {
+                        isBaseLayer = !!v.baselayer;
+                        layers[[layer]] = cloud.get().addTileLayers({
+                            host: host,
+                            layers: [layer],
+                            db: db,
+                            isBaseLayer: isBaseLayer,
+                            tileCached: !singleTiled,
+                            singleTile: singleTiled,
+                            // @todo Was somehow set to false
+                            //visibility: false,
+                            wrapDateLine: false,
+                            displayInLayerSwitcher: true,
+                            name: v.f_table_name,
+                            // Single tile option
+                            type: !singleTiled ? "tms" : "wms",
+                            format: "image/png",
+                            uri: uri,
+                            loadEvent: function () {
+                                me.decrementCountLoading(layer);
+                                backboneEvents.get().trigger("doneLoading:layers", layer);
+                            },
+                            loadingEvent: function () {
+                                me.incrementCountLoading(layer);
+                                backboneEvents.get().trigger("startLoading:layers", layer);
+                            },
+                            subdomains: window.gc2Options.subDomainsForTiles
+                        });
 
-                    layers[[layer]][0].setZIndex(v.sort_id + 10000);
+                        let groupLayersOrder = false;
+                        let groupIndex = 0;
+                        order.map((orderItem, orderIndex) => {
+                            if (orderItem.id === v.layergroup && orderItem.layers) {
+                                groupLayersOrder = orderItem.layers;
+                                groupIndex = orderIndex;
+                                return false;
+                            }
+                        });
 
-                    console.info(l + " was added to the map.");
-                    resolve();
-                }
+                        if (groupLayersOrder) {
+                            // Client-enforced layers order is available, setting index according to it
+                            groupLayersOrder.map((item, index) => {
+                                if (item.id in layers) {
+                                    layers[[item.id]][0].setZIndex(index + (groupIndex + 1) * 10000);
+                                    console.log('##', item.id, index + (groupIndex + 1) * 10000);
+                                }
+                            });
+                        } else {
+                            layers[[layer]][0].setZIndex(v.sort_id + 10000);
+                        }
+
+                        console.info(`${l} was added to the map`);
+                        resolve();
+                    }
+                });
+
+                console.info(`${l} was not added to the map`);
+                reject();
             });
-
-            console.info(l + " was not added to the map.");
-            reject();
         });
     }
 };
