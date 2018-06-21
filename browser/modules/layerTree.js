@@ -273,6 +273,15 @@ module.exports = {
     },
 
     /**
+     * Returns last available layers order
+     * 
+     * @return {Promise}
+     */
+    getLatestLayersOrder: () => {
+        return layerTreeOrder;
+    },
+
+    /**
      * Builds actual layer tree.
      */
     create: () => {
@@ -614,6 +623,7 @@ module.exports = {
                         stop: (event, ui) => {
                             _self.calculateOrder();
                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                            layers.reorderLayers();
                         }
                     });
 
@@ -638,6 +648,7 @@ module.exports = {
                 stop: (event, ui) => {
                     _self.calculateOrder();
                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                    layers.reorderLayers();
                 }
             });
 
@@ -696,9 +707,6 @@ module.exports = {
      * Returns list of currently enabled layers
      */
     getActiveLayers: () => {
-        
-        console.log('# getActiveLayers');
-
         let activeLayerIds = [];
         $('*[data-gc2-layer-type]').each((index, item) => {
             let isEnabled = $(item).is(':checked');
