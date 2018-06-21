@@ -398,11 +398,26 @@ module.exports = {
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
         };
 
+
+
+
+
+
+
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             addFeature();
         } else {
-            this.checkIfAppIsOnline().then(addFeature).catch(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        addFeature();
+                    }
+                } else {
+                    addFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
                     addFeature();
                 }
             });

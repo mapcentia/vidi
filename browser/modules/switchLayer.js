@@ -82,9 +82,6 @@ module.exports = module.exports = {
      * @param layerType {string}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
-
-        console.log('#', name, enable);
-
         let store = layerTree.getStores();
         var me = this, el = $('input[data-gc2-id="' + name.replace('v:', '') + '"]');
         if (!el || el.length !== 1) {
