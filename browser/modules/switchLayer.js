@@ -82,10 +82,13 @@ module.exports = module.exports = {
      * @param layerType {string}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+
+        console.log('#', name, enable);
+
         let store = layerTree.getStores();
-        var me = this, el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
-        if (!el) {
-            throw new Error('Unable to find layer switch control');
+        var me = this, el = $('input[data-gc2-id="' + name.replace('v:', '') + '"]');
+        if (!el || el.length !== 1) {
+            console.error(`Unable to find layer switch control`);
         }
 
         let layer = cloud.get().getLayersByName(name);

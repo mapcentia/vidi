@@ -8,6 +8,7 @@
 const MODULE_NAME = `layerTree`;
 
 var meta;
+
 var layers;
 
 var switchLayer;
@@ -64,6 +65,16 @@ let APIBridgeSingletone = require('./api-bridge');
  * @type {APIBridge}
  */
 var apiBridgeInstance = false;
+
+/**
+ * Specifies if layer tree is ready
+ */
+let layerTreeIsReady = false;
+
+/**
+ * Fires when the layer tree is built
+ */
+let _onReady = false;
 
 /**
  * Stores the last value of application online status
@@ -281,16 +292,20 @@ module.exports = {
         return layerTreeOrder;
     },
 
+    isReady: () => {
+        return layerTreeIsReady;
+    },
+
     /**
      * Builds actual layer tree.
      */
     create: () => {
+        layerTreeIsReady = false;
+        $("#layers").empty();
         _self.getLayersOrder().then(order => {
             layerTreeOrder = order;
 
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
-
-            $("#layers").empty();
 
             let toggleOfllineOnlineMode = false;
             if (`serviceWorker` in navigator) {
@@ -659,6 +674,8 @@ module.exports = {
 
             layers.reorderLayers();
             state.listen(MODULE_NAME, `sorted`);
+            layerTreeIsReady = true;
+            backboneEvents.get().trigger(`layerTree:ready`);
         });
     },
 

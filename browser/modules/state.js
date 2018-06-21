@@ -210,6 +210,7 @@ module.exports = {
         var setLayers = function () {
             $(".base-map-button").removeClass("active");
             $("#" + hashArr[0]).addClass("active");
+            let layersToActivate = [];
             if (hashArr[1] && hashArr[2] && hashArr[3]) {
                 setBaseLayer.init(hashArr[0]);
                 if (hashArr[4]) {
@@ -253,18 +254,32 @@ module.exports = {
                                 console.warn(`The ${arr[i]} layer is requested, but there is only vector view available`);
                             }
     
-                            if (displayLayer) switchLayer.init(arr[i], true, false);
+                            if (displayLayer) {
+                                layersToActivate.push([arr[i], true, false]);
+                            }
                         } else {
                             console.warn(`No meta layer was found for ${arr[i]}`);
                             // Add the requested in run-time
-                            switchLayer.init(arr[i], true, false)
+                            layersToActivate.push([arr[i], true, false]);
                         }
                     }
                 }
             }
 
+            const initializeLayersFromURL = () => {
+                layersToActivate.map(item => {
+                    switchLayer.init(item[0], item[1], item[2]);
+                });    
+            };
+
+            if (layerTree.isReady()) {
+                initializeLayersFromURL();
+            } else {
+                backboneEvents.get().once(`layerTree:ready`, initializeLayersFromURL);
+            }
+
             legend.init();
-            
+
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
                 legend.init().then(function(){
