@@ -185,6 +185,7 @@ module.exports = {
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();
+        modules.stateSnapshots.init();
         modules.print.init();
         modules.layerTree.init();
         modules.meta.init().then(() => {

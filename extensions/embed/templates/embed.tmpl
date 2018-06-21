@@ -550,6 +550,9 @@
             <a href="#offline-map-dialog" id="offline-map-btn" data-module="offline-map"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">save_alt</i></a>
+            <a href="#state-snapshots-dialog" id="state-snapshots-dialog-btn" data-module="state-snapshots"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">camera</i></a>
             <!--<a href="#info-dialog" id="info-dialog-btn" data-module="info"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">print</i></a>-->
@@ -596,6 +599,21 @@
         </div>
         <div class="modal-body">
             <div class="form-group" id="base-layer-list"></div>
+        </div>
+    </div>
+
+    <div id="state-snapshots-dialog" class="dialog-bottom fade-then-dragging">
+        <div class="modal-header">
+            <button type="button" class="close close-hide" aria-hidden="true"><i class="material-icons">close</i>
+            </button>
+            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+            </button>
+            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+            </button>
+            <h3 class="modal-title">State snapshots</h3>
+        </div>
+        <div class="modal-body">
+            <div class="form-group" id="state-snapshots-dialog-content"></div>
         </div>
     </div>
 
