@@ -166,7 +166,7 @@ module.exports = {
                 orderItem.layers.map((item, index) => {
                     layers.map(layer => {
                         if (layer.id && (layer.id === item.id)) {
-                            let zIndex = ((orderItem.layers.length - index) + (groupIndex + 1) * 10000);
+                            let zIndex = ((orderItem.layers.length - index) + ((order.length - groupIndex) + 1) * 10000);
                             layer.setZIndex(zIndex);
                         }
                     });

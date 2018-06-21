@@ -286,6 +286,8 @@ module.exports = {
      */
     create: () => {
         _self.getLayersOrder().then(order => {
+            layerTreeOrder = order;
+
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
             $("#layers").empty();
@@ -626,7 +628,6 @@ module.exports = {
                             layers.reorderLayers();
                         }
                     });
-
                     
                     if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
                         count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
@@ -656,6 +657,7 @@ module.exports = {
                 _self.statisticsHandler(lastStatistics, false, true);
             }
 
+            layers.reorderLayers();
             state.listen(MODULE_NAME, `sorted`);
         });
     },
