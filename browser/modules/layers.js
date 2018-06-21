@@ -96,7 +96,6 @@ module.exports = {
             }
         }
 
-        console.log('# getLayers', layerArr);
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
         } else {
@@ -151,10 +150,11 @@ module.exports = {
     addLayer: function (l) {
         var me = this;
 
-        return new Promise(function (resolve, reject) {
+        let result = new Promise(function (resolve, reject) {
             layerTree.getLayersOrder().then(order => {
                 var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
+                let layerWasAdded = false;
                 $.each(metaData.data, function (i, v) {
                     var layer = v.f_table_schema + "." + v.f_table_name,
                         singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
@@ -190,6 +190,7 @@ module.exports = {
 
                         let groupLayersOrder = false;
                         let groupIndex = 0;
+
                         order.map((orderItem, orderIndex) => {
                             if (orderItem.id === v.layergroup && orderItem.layers) {
                                 groupLayersOrder = orderItem.layers;
@@ -211,13 +212,19 @@ module.exports = {
                         }
 
                         console.info(`${l} was added to the map`);
+                        layerWasAdded = true;
                         resolve();
+                        return false;
                     }
                 });
 
-                console.info(`${l} was not added to the map`);
-                reject();
+                if (layerWasAdded === false) {
+                    console.info(`${l} was not added to the map`);
+                    reject();
+                }
             });
         });
+
+        return result;
     }
 };
