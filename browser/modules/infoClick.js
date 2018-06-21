@@ -62,6 +62,14 @@ module.exports = {
             this.reset();
         }
         active = a;
+    },
+
+    activate: () => {
+        active = true;
+    },
+
+    deactivate: () => {
+        active = false;
     }
 };
 

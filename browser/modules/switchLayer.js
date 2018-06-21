@@ -84,9 +84,9 @@ module.exports = module.exports = {
     init: function (name, enable, doNotLegend, forceTileReload) {
 
         let store = layerTree.getStores();
-        var me = this, el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
-        if (!el) {
-            throw new Error('Unable to find layer switch control');
+        var me = this, el = $('input[data-gc2-id="' + name.replace('v:', '') + '"]');
+        if (!el || el.length !== 1) {
+            console.error(`Unable to find layer switch control`);
         }
 
         let layer = cloud.get().getLayersByName(name);
@@ -120,6 +120,9 @@ module.exports = module.exports = {
                 layerTree.setSelectorValue(name, 'tile');
 
                 layers.addLayer(name).then(() => {
+                    el.prop('checked', true);
+                    me.update(doNotLegend, el);
+
                     tries = 0;
                     tileLayer = cloud.get().getLayersByName(tileLayerId);
 
@@ -133,10 +136,11 @@ module.exports = module.exports = {
                     console.log("Layer " + name + " not in Meta");
                     meta.init(name, true, true).then(() => {
                         if (tries > 0) {
-                            console.error("Could not add layer");
+                            console.error(`Could not add ${name} layer`);
                             tries = 0;
                             return;
                         }
+
                         layerTree.init();
                         tries = 1;
                         me.init(name, true); // recursive
@@ -150,14 +154,14 @@ module.exports = module.exports = {
                     let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                     cloud.get().map.addLayer(existingLayer);
                     store[vectorLayerId].load();
-                }
-                 else {
+                } else {
                     meta.init(tileLayerId, true, true).then(() => {
                         if (tries > 0) {
-                            console.error("Could not add v:layer");
+                            console.error(`Could not add ${tileLayerId} layer`);
                             tries = 0;
                             return;
                         }
+
                         layerTree.init();
                         tries = 1;
                         me.init(name, true); // recursive
@@ -165,10 +169,10 @@ module.exports = module.exports = {
                 }
 
                 backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-            }
 
-            el.prop('checked', true);
-            me.update(doNotLegend, el);
+                el.prop('checked', true);
+                me.update(doNotLegend, el);
+            }
         } else {
             el.prop('checked', false);
             me.update(doNotLegend, el);

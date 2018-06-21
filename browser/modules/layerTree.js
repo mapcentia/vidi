@@ -5,7 +5,10 @@
 
 'use strict';
 
+const MODULE_NAME = `layerTree`;
+
 var meta;
+
 var layers;
 
 var switchLayer;
@@ -14,7 +17,11 @@ var cloud;
 
 var layers;
 
+var state;
+
 var backboneEvents;
+
+var layerTreeOrder = false;
 
 var onEachFeature = [];
 
@@ -60,13 +67,28 @@ let APIBridgeSingletone = require('./api-bridge');
 var apiBridgeInstance = false;
 
 /**
+ * Specifies if layer tree is ready
+ */
+let layerTreeIsReady = false;
+
+/**
+ * Fires when the layer tree is built
+ */
+let _onReady = false;
+
+/**
  * Stores the last value of application online status
  */
-var applicationIsOnline = -1;
+let applicationIsOnline = -1;
 
-var lastStatistics = false;
+let lastStatistics = false;
 
-var theStatisticsPanelWasDrawn = false;
+let theStatisticsPanelWasDrawn = false;
+
+/**
+ * Keeps track of changed layers
+ */
+let accumulatedDiff = [];
 
 const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
@@ -81,6 +103,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         layers = o.layers;
+        state = o.state;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
@@ -108,6 +131,59 @@ module.exports = {
     },
 
     /**
+     * Detects what layers changed theirs statistics
+     */
+    getStatisticsDiff: (newStatistics, oldStatistics) => {
+        let changedLayers = [];
+
+        const compareStatisticsObjects = (newStatistics, oldStatistics) => {
+            if (newStatistics) {
+                for (let key in newStatistics) {
+                    if (key !== `online`) {
+                        if (oldStatistics) {
+                            if (key in oldStatistics === false) {
+                                changedLayers.push(key);
+                            } else {
+                                if (newStatistics[key] && oldStatistics[key]) {
+                                    let actions = ['failed', 'rejectedByServer'];
+                                    let actionTypes = ['ADD', 'UPDATE', 'DELETE'];
+                                    actions.map(action => {
+                                        actionTypes.map(actionType => {
+                                            if (newStatistics[key][action][actionType] !== oldStatistics[key][action][actionType]) {
+                                                changedLayers.push(key);
+                                            }
+                                        });
+                                    });
+                                } else {
+                                    changedLayers.push(key);
+                                }
+                            }
+                        } else {
+                            changedLayers.push(key);
+                        }
+                    }
+                }
+            }
+        };
+
+        compareStatisticsObjects(newStatistics, oldStatistics);
+        compareStatisticsObjects(oldStatistics, newStatistics);
+
+        let uniqueLayers = changedLayers.filter((v, i, a) => a.indexOf(v) === i);
+        let result = [];
+        uniqueLayers.map(item => {
+            let splitItem = item.split('.');
+            if (splitItem.length === 3) {
+                result.push(`${splitItem[0]}.${splitItem[1]}`);
+            } else {
+                throw new Error(`Invalid layer name is provided ${item}`);
+            }
+        });
+
+        return result;
+    },
+
+    /**
      * Displays current state of APIBridge feature management
      * 
      * @param {*} statistics 
@@ -116,7 +192,15 @@ module.exports = {
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
+
         if (skipLastStatisticsCheck || (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false)) {
+            let diff = _self.getStatisticsDiff(statistics, lastStatistics);
+            diff.map(item => {
+                if (accumulatedDiff.indexOf(item) === -1) {
+                    accumulatedDiff.push(item);
+                }
+            });
+
             lastStatistics = statistics;
 
             let actions = ['add', 'update', 'delete'];
@@ -241,100 +325,218 @@ module.exports = {
             }
         }
 
-        if (forceLayerUpdate) {
-            _self.getActiveLayers().map(item => {
-                switchLayer.init(item, false, true);
-                switchLayer.init(item, true, true);
+     if (forceLayerUpdate) {
+            accumulatedDiff.map(item => {
+                let layerName = item;
+                _self.getActiveLayers().map(activeLayerName => {
+                    if (activeLayerName === ('v:' + layerName) || ('v:' + activeLayerName) === layerName) {
+                        layerName = activeLayerName;
+                    }
+                });
+
+                switchLayer.init(layerName, false, true);
+                switchLayer.init(layerName, true, true);
             });
+
+            accumulatedDiff = [];
         }
+    },
+
+    /**
+     * Returns layers order in corresponding groups
+     * 
+     * @return {Promise}
+     */
+    getLayersOrder: () => {
+        let result = new Promise((resolve, reject) => {
+            state.getState(MODULE_NAME).then(initialState => {
+                let order = ((initialState && `order` in initialState) ? initialState.order : false);
+                resolve(order);
+            });
+        });
+
+        return result;
+    },
+
+    /**
+     * Returns last available layers order
+     * 
+     * @return {Promise}
+     */
+    getLatestLayersOrder: () => {
+        return layerTreeOrder;
+    },
+
+    isReady: () => {
+        return layerTreeIsReady;
     },
 
     /**
      * Builds actual layer tree.
      */
     create: () => {
-        var base64GroupName, arr, groups, metaData, i, l, count, displayInfo, tooltip;
-
+        layerTreeIsReady = false;
         $("#layers").empty();
+        _self.getLayersOrder().then(order => {
+            layerTreeOrder = order;
 
-        let toggleOfllineOnlineMode = false;
-        if (`serviceWorker` in navigator) {
-            toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="togglebutton">
-                        <label>
-                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                            <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                            <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                            <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                        </label>
+            var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
+
+            let toggleOfllineOnlineMode = false;
+            if (`serviceWorker` in navigator) {
+                toggleOfllineOnlineMode = $(`<div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="togglebutton">
+                            <label>
+                                <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
+                                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
+                                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
+                                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
+                            </label>
+                        </div>
                     </div>
-                </div>
-            </div>`);
+                </div>`);
 
-            if (apiBridgeInstance.offlineModeIsEnforced()) {
-                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+                }
+
+                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+                    if ($(event.target).is(':checked')) {
+                        apiBridgeInstance.setOfflineMode(true);
+                    } else {
+                        apiBridgeInstance.setOfflineMode(false);
+                    }
+                });
+            } else {
+                toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+                    <button type="button" class="close" data-dismiss="alert">×</button>
+                    ${__('This browser does not support Service Workers, some features may be unavailable')}
+                </div>`);
             }
 
-            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
-                if ($(event.target).is(':checked')) {
-                    apiBridgeInstance.setOfflineMode(true);
-                } else {
-                    apiBridgeInstance.setOfflineMode(false);
+            $("#layers").append(toggleOfllineOnlineMode);
+
+            groups = [];
+
+            // Getting set of all loaded vectors
+            metaData = meta.getMetaData();
+            for (i = 0; i < metaData.data.length; ++i) {
+                groups[i] = metaData.data[i].layergroup;
+            }
+
+            let notSortedGroupsArray = array_unique(groups.reverse());
+            let arr = [];
+            metaData.data.reverse();
+
+            if (order) {
+                for (let key in order) {
+                    let item = order[key];
+                    let sortedElement = false;
+                    for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
+                        if (item.id === notSortedGroupsArray[i]) {
+                            sortedElement = notSortedGroupsArray.splice(i, 1);
+                            break;
+                        }
+                    }
+
+                    if (sortedElement) {
+                        arr.push(item.id);
+                    }
                 }
-            });
-        } else {
-           toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                ${__('This browser does not support Service Workers, some features may be unavailable')}
-            </div>`);
-        }
 
-        $("#layers").append(toggleOfllineOnlineMode);
+                if (notSortedGroupsArray.length > 0) {
+                    for (let j = 0; j < notSortedGroupsArray.length; j++) {
+                        arr.push(notSortedGroupsArray[j]);
+                    }
+                }
+            } else {
+                arr = notSortedGroupsArray;
+            }
 
-        groups = [];
+            $("#layers").append(`<div id="layers_list"></div>`);
 
-        // Getting set of all loaded vectors
-        metaData = meta.getMetaData();
-        for (i = 0; i < metaData.data.length; ++i) {
-            groups[i] = metaData.data[i].layergroup;
-        }
+            // Filling up groups and underlying layers (except ungrouped ones)
+            for (i = 0; i < arr.length; ++i) {
+                if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                    l = [];
+                    base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
-        arr = array_unique(groups.reverse());
-        metaData.data.reverse();
-
-        // Filling up groups and underlying layers (except ungrouped ones)
-        for (i = 0; i < arr.length; ++i) {
-            if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                l = [];
-                base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
-
-                // Add group container
-                // Only if container doesn't exist
-                // ===============================
-                if ($("#layer-panel-" + base64GroupName).length === 0) {
-                    $("#layers").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-                        <div class="panel-heading" role="tab">
-                            <h4 class="panel-title">
-                                <div class="layer-count badge">
-                                    <span>0</span> / <span></span>
-                                </div>
-                                <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
-                            </h4>
-                        </div>
-                        <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
-                    </div>`);
-
-                    // Append to inner group container
+                    // Add group container
+                    // Only if container doesn't exist
                     // ===============================
-                    $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
-                }
+                    if ($("#layer-panel-" + base64GroupName).length === 0) {
+                        $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <div class="layer-count badge">
+                                        <span>0</span> / <span></span>
+                                    </div>
+                                    <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
+                                </h4>
+                            </div>
+                            <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                        </div>`);
 
-                // Add layers
-                // ==========
-                for (var u = 0; u < metaData.data.length; ++u) {
-                    let layer = metaData.data[u];
-                    if (layer.layergroup == arr[i]) {
+                        // Append to inner group container
+                        // ===============================
+                        $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
+                    }
+
+                    // Get layers that belong to the current layer group
+                    let notSortedLayersForCurrentGroup = [];
+                    for (let u = 0; u < metaData.data.length; ++u) {
+                        if (metaData.data[u].layergroup == arr[i]) {
+                            notSortedLayersForCurrentGroup.push(metaData.data[u]);
+                        }
+                    }
+
+                    // Sort layers if there is available order
+                    let layersForCurrentGroup = false;
+                    let sortedLayers = [];
+                    if (order) {
+                        let currentGroupLayersOrder = false;
+                        for (let key in order) {
+                            if (order[key].id === arr[i] && 'layers' in order[key]) {
+                                currentGroupLayersOrder = order[key].layers;
+                            }
+                        }
+
+                        if (currentGroupLayersOrder) {
+                            for (let key in currentGroupLayersOrder) {
+                                let item = currentGroupLayersOrder[key];
+                                let sortedElement = false;
+                                for (let i = (notSortedLayersForCurrentGroup.length - 1); i >= 0; i--) {
+                                    let layerId = notSortedLayersForCurrentGroup[i].f_table_schema + '.' + notSortedLayersForCurrentGroup[i].f_table_name;
+                                    if (item.id === layerId) {
+                                        sortedElement = notSortedLayersForCurrentGroup.splice(i, 1);
+                                        break;
+                                    }
+                                }
+
+                                if (sortedElement) {
+                                    sortedLayers.push(sortedElement.pop());
+                                }
+                            }
+
+                            if (notSortedLayersForCurrentGroup.length > 0) {
+                                for (let j = 0; j < notSortedLayersForCurrentGroup.length; j++) {
+                                    sortedLayers.push(notSortedLayersForCurrentGroup[j]);
+                                }
+                            }
+                        }
+                    }
+
+                    if (sortedLayers.length > 0) {
+                        layersForCurrentGroup = sortedLayers;
+                    } else {
+                        layersForCurrentGroup = notSortedLayersForCurrentGroup;
+                    }
+
+                    // Add layers
+                    // ==========
+                    for (var u = 0; u < layersForCurrentGroup.length; ++u) {
+                        let layer = layersForCurrentGroup[u];
                         var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
                         if (layer.baselayer) {
                             $("#base-layer-list").append(`<div class='list-group-item'>
@@ -506,36 +708,82 @@ module.exports = {
                             l.push({});
                         }
                     }
-                }
 
-                $("#collapse" + base64GroupName).sortable({
-                    axis: 'y',
-                    containment: 'parent',
-                    start: () => {
-                        // initialize the order if it is not defined
-                    },
-                    change: (event, ui) => {
-                        console.log(ui);
+                    $("#collapse" + base64GroupName).sortable({
+                        axis: 'y',
+                        containment: 'parent',
+                        stop: (event, ui) => {
+                            _self.calculateOrder();
+                            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                            layers.reorderLayers();
+                        }
+                    });
+                    
+                    if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+                        count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
+                    } else {
+                        count = l.length;
                     }
-                });
 
-                if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                    count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
-                } else {
-                    count = l.length;
-                }
-
-                $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
-                // Remove the group if empty
-                if (l.length === 0) {
-                    $("#layer-panel-" + base64GroupName).remove();
+                    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+                    // Remove the group if empty
+                    if (l.length === 0) {
+                        $("#layer-panel-" + base64GroupName).remove();
+                    }
                 }
             }
-        }
 
-        if (lastStatistics) {
-            _self.statisticsHandler(lastStatistics, false, true);
-        }
+            $(`#layers_list`).sortable({
+                axis: 'y',
+                containment: 'parent',
+                stop: (event, ui) => {
+                    _self.calculateOrder();
+                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                    layers.reorderLayers();
+                }
+            });
+
+            if (lastStatistics) {
+                _self.statisticsHandler(lastStatistics, false, true);
+            }
+
+            layers.reorderLayers();
+            state.listen(MODULE_NAME, `sorted`);
+            layerTreeIsReady = true;
+            backboneEvents.get().trigger(`layerTree:ready`);
+        });
+    },
+
+    calculateOrder: () => {
+        layerTreeOrder = [];
+
+        $(`[id^="layer-panel-"]`).each((index, element) => {
+            let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
+            let layers = [];
+            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+                let layerKey = $(layerElement).data(`gc2-layer-key`);
+                let splitLayerKey = layerKey.split('.');
+                if (splitLayerKey.length !== 3) {
+                    throw new Error(`Invalid layer key (${layerKey})`);
+                }
+
+                layers.push({ id: `${splitLayerKey[0]}.${splitLayerKey[1]}` });
+            });
+
+            let readableId = atob(id);
+            if (readableId) {
+                layerTreeOrder.push({ id: readableId, layers });
+            } else {
+                throw new Error(`Unable to decode the layer group identifier (${id})`);
+            }
+        });
+    },
+
+    /**
+     * Returns current module state
+     */
+    getState: () => {
+        return { order: layerTreeOrder };
     },
 
     /**

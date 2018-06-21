@@ -24,7 +24,11 @@ var layerTree;
 var apiBridgeInstance = false;
 
 var meta;
+
 var cloud;
+
+var infoClick;
+
 var sqlQuery;
 
 var jquery = require('jquery');
@@ -81,6 +85,7 @@ module.exports = {
         meta = o.meta;
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
+        infoClick = o.infoClick;
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -303,6 +308,7 @@ module.exports = {
 
         const addFeature = () => {
             me.stopEdit();
+            infoClick.deactivate();
   
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
@@ -365,10 +371,9 @@ module.exports = {
 
                     me.stopEdit();
 
+                    // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
-                    } else {
-                        layerTree.reloadLayer(schemaQualifiedName, true);
                     }
 
                     jquery.snackbar({
@@ -398,11 +403,20 @@ module.exports = {
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
         };
 
+        let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
         if (isVectorLayer) {
             addFeature();
         } else {
-            this.checkIfAppIsOnline().then(addFeature).catch(() => {
-                if (confirm('Application is offline, tiles will not be updated. Proceed?')) {
+            this.checkIfAppIsOnline().then(() => {
+                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                    if (confirm(confirmMessage)) {
+                        addFeature();
+                    }
+                } else {
+                    addFeature();
+                }
+            }).catch(() => {
+                if (confirm(confirmMessage)) {
                     addFeature();
                 }
             });
@@ -420,6 +434,8 @@ module.exports = {
         editedFeature = e;
 
         const editFeature = () => {
+            
+
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -442,6 +458,7 @@ module.exports = {
             }
 
             me.stopEdit();
+            infoClick.deactivate();
 
             e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
             if (isVectorLayer) {
@@ -510,20 +527,11 @@ module.exports = {
                 }
             });
 
-            // if (type === "POLYGON" || type === "MULTIPOLYGON") {
-            //     editor = cloud.get().map.editTools.startPolygon();
-            // } else if (type === "LINESTRING" || type === "MULTILINESTRING") {
-            //     editor = cloud.get().map.editTools.startPolyline();
-            // } else if (type === "POINT" || type === "MULTIPOINT") {
-            //     editor = cloud.get().map.editTools.startMarker();
-            // }
-
             /**
              * Commit to GC2
              * @param formData
              */
             const onSubmit = function (formData) {
-
                 let GeoJSON = e.toGeoJSON(), featureCollection;
 
                 // HACK to handle (Multi)Point layers
@@ -564,15 +572,13 @@ module.exports = {
 
                 const featureIsUpdated = () => {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
-
-                    let l = cloud.get().getLayersByName("v:" + schemaQualifiedName);
-                    me.stopEdit(e);
+ 
                     sqlQuery.reset(qstore);
+                    me.stopEdit();
 
+                    // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
-                    } else {
-                        layerTree.reloadLayer(schemaQualifiedName, true);
                     }
                 };
 
@@ -668,10 +674,9 @@ module.exports = {
 
                 cloud.get().map.closePopup();
                 
+                // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                 if (isVectorLayer) {
                     layerTree.reloadLayer("v:" + schemaQualifiedName, true);
-                } else {
-                    layerTree.reloadLayer(schemaQualifiedName, true);
                 }
             };
 
@@ -713,6 +718,8 @@ module.exports = {
      * @param e
      */
     stopEdit: function (editedFeature) {
+        infoClick.activate();
+
         let me = this;
 
         cloud.get().map.editTools.stopDrawing();
