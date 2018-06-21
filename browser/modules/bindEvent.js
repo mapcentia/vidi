@@ -384,7 +384,7 @@ module.exports = module.exports = {
                         prefix = 'v:';
                     }
 
-                    switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, true);
+                    switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, false);
                     e.stopPropagation();
                 });
             });

@@ -34,7 +34,7 @@ module.exports = {
         var me = this, configFile, stop = false;
 
         var loadConfig = function () {
-            $.getJSON( "/api/config/" + configFile, function (data) {
+            $.getJSON( "/api/config/" + urlparser.db + "/" + configFile, function (data) {
                 window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
@@ -219,8 +219,8 @@ module.exports = {
 
         //Hack to compile Glob files. Don´t call this function!
         function ಠ_ಠ() {
-           require('./../../extensions/*/browser/*.js', {glob: true});
-           require('./../../extensions/*/browser/*/*.js', {glob: true});
+            require('./../../extensions/*/browser/*.js', {glob: true});
+            require('./../../extensions/*/browser/*/*.js', {glob: true});
         }
 
         if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {

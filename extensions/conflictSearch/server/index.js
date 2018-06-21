@@ -126,6 +126,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                                             alias: queryables[prop].alias || prop,
                                             value: result.features[i].properties[prop],
                                             sort_id: queryables[prop].sort_id,
+                                            link: queryables[prop].link,
+                                            linkprefix: queryables[prop].linkprefix,
                                             key: false
                                         })
                                     }

@@ -325,7 +325,7 @@ module.exports = {
             }
         }
 
-        if (forceLayerUpdate) {
+     if (forceLayerUpdate) {
             accumulatedDiff.map(item => {
                 let layerName = item;
                 _self.getActiveLayers().map(activeLayerName => {
@@ -334,8 +334,8 @@ module.exports = {
                     }
                 });
 
-                switchLayer.init(layerName, false);
-                switchLayer.init(layerName, true);
+                switchLayer.init(layerName, false, true);
+                switchLayer.init(layerName, true, true);
             });
 
             accumulatedDiff = [];
