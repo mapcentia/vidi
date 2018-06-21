@@ -79,11 +79,16 @@ let _onReady = false;
 /**
  * Stores the last value of application online status
  */
-var applicationIsOnline = -1;
+let applicationIsOnline = -1;
 
-var lastStatistics = false;
+let lastStatistics = false;
 
-var theStatisticsPanelWasDrawn = false;
+let theStatisticsPanelWasDrawn = false;
+
+/**
+ * Keeps track of changed layers
+ */
+let accumulatedDiff = [];
 
 const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
@@ -126,6 +131,59 @@ module.exports = {
     },
 
     /**
+     * Detects what layers changed theirs statistics
+     */
+    getStatisticsDiff: (newStatistics, oldStatistics) => {
+        let changedLayers = [];
+
+        const compareStatisticsObjects = (newStatistics, oldStatistics) => {
+            if (newStatistics) {
+                for (let key in newStatistics) {
+                    if (key !== `online`) {
+                        if (oldStatistics) {
+                            if (key in oldStatistics === false) {
+                                changedLayers.push(key);
+                            } else {
+                                if (newStatistics[key] && oldStatistics[key]) {
+                                    let actions = ['failed', 'rejectedByServer'];
+                                    let actionTypes = ['ADD', 'UPDATE', 'DELETE'];
+                                    actions.map(action => {
+                                        actionTypes.map(actionType => {
+                                            if (newStatistics[key][action][actionType] !== oldStatistics[key][action][actionType]) {
+                                                changedLayers.push(key);
+                                            }
+                                        });
+                                    });
+                                } else {
+                                    changedLayers.push(key);
+                                }
+                            }
+                        } else {
+                            changedLayers.push(key);
+                        }
+                    }
+                }
+            }
+        };
+
+        compareStatisticsObjects(newStatistics, oldStatistics);
+        compareStatisticsObjects(oldStatistics, newStatistics);
+
+        let uniqueLayers = changedLayers.filter((v, i, a) => a.indexOf(v) === i);
+        let result = [];
+        uniqueLayers.map(item => {
+            let splitItem = item.split('.');
+            if (splitItem.length === 3) {
+                result.push(`${splitItem[0]}.${splitItem[1]}`);
+            } else {
+                throw new Error(`Invalid layer name is provided ${item}`);
+            }
+        });
+
+        return result;
+    },
+
+    /**
      * Displays current state of APIBridge feature management
      * 
      * @param {*} statistics 
@@ -134,7 +192,15 @@ module.exports = {
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
+
         if (skipLastStatisticsCheck || (currentStatisticsHash !== lastStatisticsHash || theStatisticsPanelWasDrawn === false)) {
+            let diff = _self.getStatisticsDiff(statistics, lastStatistics);
+            diff.map(item => {
+                if (accumulatedDiff.indexOf(item) === -1) {
+                    accumulatedDiff.push(item);
+                }
+            });
+
             lastStatistics = statistics;
 
             let actions = ['add', 'update', 'delete'];
@@ -260,10 +326,19 @@ module.exports = {
         }
 
         if (forceLayerUpdate) {
-            _self.getActiveLayers().map(item => {
-                switchLayer.init(item, false);
-                switchLayer.init(item, true);
+            accumulatedDiff.map(item => {
+                let layerName = item;
+                _self.getActiveLayers().map(activeLayerName => {
+                    if (activeLayerName === ('v:' + layerName) || ('v:' + activeLayerName) === layerName) {
+                        layerName = activeLayerName;
+                    }
+                });
+
+                switchLayer.init(layerName, false);
+                switchLayer.init(layerName, true);
             });
+
+            accumulatedDiff = [];
         }
     },
 
