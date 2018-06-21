@@ -382,7 +382,6 @@ module.exports = {
                         $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
                     }
 
-                    try {
                     // Get layers that belong to the current layer group
                     let notSortedLayersForCurrentGroup = [];
                     for (let u = 0; u < metaData.data.length; ++u) {
@@ -609,8 +608,6 @@ module.exports = {
                         }
                     }
 
-                }catch(e){ console.log(e); }
-
                     $("#collapse" + base64GroupName).sortable({
                         axis: 'y',
                         containment: 'parent',
@@ -699,6 +696,9 @@ module.exports = {
      * Returns list of currently enabled layers
      */
     getActiveLayers: () => {
+        
+        console.log('# getActiveLayers');
+
         let activeLayerIds = [];
         $('*[data-gc2-layer-type]').each((index, item) => {
             let isEnabled = $(item).is(':checked');

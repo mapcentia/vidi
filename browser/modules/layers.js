@@ -96,6 +96,7 @@ module.exports = {
             }
         }
 
+        console.log('# getLayers', layerArr);
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
         } else {
