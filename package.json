@@ -76,6 +76,7 @@
     "jsts": "^1.1.2",
     "localforage": "^1.7.1",
     "lz-string": "^1.4.4",
+    "md5": "^2.2.1",
     "moment": "^2.17.0",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.2",

@@ -48,8 +48,10 @@ const appendToSnapshots = (snapshot) => {
             let hash = crypto.randomBytes(20).toString('hex');
             if (`id` in snapshot) {
                 reject(`SNAPSHOT_ID_ALREADY_EXISTS`);
-            } else {           
+            } else {
+                let currentDate = new Date();
                 snapshot.id = hash;
+                snapshot.created_at = currentDate.toISOString();
                 data.push(snapshot);
 
                 saveSnapshots(data).then(() => {

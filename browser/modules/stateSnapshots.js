@@ -7,6 +7,8 @@
 
 'use strict';
 
+const md5 = require(`md5`);
+
 const translations = {
     "State snapshots": {
         "da_DK": "# State snapshots",
@@ -28,6 +30,22 @@ const translations = {
         "da_DK": "# Create one",
         "en_US": "# Create one"
     },
+    "Save current application state": {
+        "da_DK": "# Save current application state",
+        "en_US": "# Save current application state"
+    },
+    "Delete state": {
+        "da_DK": "# Delete state",
+        "en_US": "# Delete state"
+    },
+    "Import all local states to server": {
+        "da_DK": "# Import all local states to server",
+        "en_US": "# Import all local states to server"
+    },
+    "Import local state to server": {
+        "da_DK": "# Import local state to server",
+        "en_US": "# Import local state to server"
+    },
 };
 
 /**
@@ -42,6 +60,12 @@ var cloud;
 var utils;
 
 /**
+ *
+ * @type {*|exports|module.exports}
+ */
+var state;
+
+/**
  * @type {*|exports|module.exports}
  */
 var urlparser;
@@ -49,6 +73,8 @@ var urlparser;
 let _self = false;
 
 const exId = `state-snapshots-dialog-content`;
+
+const STORAGE_KEY = `vidi-state-snapshots`;
 
 /**
  *
@@ -62,6 +88,7 @@ module.exports = module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
+        state = o.state;
         urlparser = o.urlparser;
         utils = o.utils;
 
@@ -115,10 +142,18 @@ module.exports = module.exports = {
 
                 this.state = {
                     localSnapshots: [],
-                    remoteSnapshots: []
+                    remoteSnapshots: [],
+                    loading: false
                 };
 
-                //this.setExtent = this.setExtent.bind(this);
+                this.apiUrl = `/api/state-snapshots`;
+
+                this.onCreateLocalHandler = this.onCreateLocalHandler.bind(this);
+                this.onCreateRemoteHandler = this.onCreateRemoteHandler.bind(this);
+                this.onImporHandler = this.onImporHandler.bind(this);
+                this.onImporAllHandler = this.onImporAllHandler.bind(this);
+                this.onDeleteLocalHandler = this.onDeleteLocalHandler.bind(this);
+                this.onDeleteRemoteHandler = this.onDeleteRemoteHandler.bind(this);
             }
 
             /**
@@ -126,41 +161,177 @@ module.exports = module.exports = {
              */
             componentDidMount() {
                 let _self = this;
-                setTimeout(() => {
-                    let date = new Date('10-4-2018');
-                    this.setState({
-                        localSnapshots: [{
-                            id: `p08rjw3mj2m05d75z9z0`,
-                            created_at: date.toISOString()
-                        }, {
-                            id: `pb018r5cvwxnsumwv8zb`,
-                            created_at: date.toISOString()
-                        }],
-                        remoteSnapshots: [{
-                            id: `i4fq3gwj1kevdau2lxnj`,
-                            created_at: date.toISOString()
-                        }, {
-                            id: `vot9ag2gix9lwkn0dht8`,
-                            created_at: date.toISOString()
-                        }]
+                this.refreshSnapshotsList();
+            }
 
+            createRemoteSnapshot(snapshot) {
+                let _self = this;
+                $.ajax({
+                    url: this.apiUrl,
+                    method: 'POST',
+                    dataType: 'json',
+                    data: { snapshot }
+                }).then(data => {
+                    _self.refreshSnapshotsList();
+                });
+            }
+
+            createLocalSnapshot(snapshot) {
+                let _self = this;
+                localforage.getItem(STORAGE_KEY).then((data) => {
+                    let currentDateTime = new Date();
+                    let timestamp = Math.round(currentDateTime.getTime() / 1000);
+                    let hash = md5(timestamp);
+                    data.push({
+                        id: hash,
+                        created_at: currentDateTime.toISOString(),
+                        snapshot
                     });
-                }, 1000);
+
+                    localforage.setItem(STORAGE_KEY, data).then(() => {
+                        _self.refreshSnapshotsList();
+                    }).catch(error => {
+                        throw new Error(error);
+                    });
+                });
+            }
+
+            getCurrentApplicationState() {
+                return new Promise((resolve, reject) => {
+                    if (confirm(`${__(`Save current application state`)}?`)) {
+                        state.getState().then(state => {
+                            console.log('###', state);
+                            resolve(state);
+                        });
+                    } else {
+                        reject();
+                    }
+                });
+            }
+
+            onCreateLocalHandler() {
+                this.getCurrentApplicationState().then((state) => this.createLocalSnapshot(state));
+            }
+
+            onCreateRemoteHandler() {
+                this.getCurrentApplicationState().then((state) => this.createRemoteSnapshot(state));
+            }
+
+            onDeleteLocalHandler(id, ask = true) {
+                let _self = this;
+                let result = false;
+                if (ask === false || confirm(`${__(`Delete state`)}?`)) {
+                    result = new Promise((resolve, reject) => {
+                        localforage.getItem(STORAGE_KEY).then((data) => {
+                            for (let i = (data.length); i--; i >= 0) {
+                                if (data[i].id === id) {
+                                    data.splice(i, 1);
+                                }
+                            }
+
+                            localforage.setItem(STORAGE_KEY, data).then(() => {
+                                _self.refreshSnapshotsList();
+                            }).catch(error => {
+                                throw new Error(error);
+                            });
+                        });
+                    });
+                }
+
+                return result;
+            }
+
+            onDeleteRemoteHandler(id) {
+                if (confirm(`${__(`Delete state`)}?`)) {
+                    let _self = this;
+                    $.ajax({
+                        url: `${this.apiUrl}/${id}`,
+                        method: 'DELETE',
+                        dataType: 'json'
+                    }).then(data => {
+                        _self.refreshSnapshotsList();
+                    });
+                }
+            }
+
+            onImporHandler(item) {
+                let _self = this;
+                if (confirm(`${__(`Import local state to server`)}?`)) {
+                    $.ajax({
+                        url: this.apiUrl,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: { snapshot: item.snapshot }
+                    }).then(data => {
+                        _self.onDeleteLocalHandler(item.id, false).then(() => {
+                            _self.refreshSnapshotsList();
+                        });
+                    });
+                }
+            }
+
+            onImporAllHandler() {
+                if (confirm(`${__(`Import all local states to server`)}?`)) {
+                    let _self = this;
+                    let promises = [];
+                    this.state.localSnapshots.map(item => {
+                        console.log(`## import`, item);
+                        promises.push($.ajax({
+                            url: this.apiUrl,
+                            method: 'POST',
+                            dataType: 'json',
+                            data: { snapshot: item.snapshot }
+                        }));
+                    });
+
+                    Promise.all(promises).then(() => {
+                        _self.resetLocalSnapshotStorage().then(() => {
+                            _self.refreshSnapshotsList();
+                        });
+                    });
+                }
+            }
+
+            resetLocalSnapshotStorage() {
+                return localforage.setItem(STORAGE_KEY, []);
+            }
+
+            refreshSnapshotsList() {
+                let _self = this;
+
+                this.setState({ loading: true });
+
+                // Getting locally stored snapshots
+                localforage.getItem(STORAGE_KEY).then((data) => {
+                    let localSnapshots = false;
+                    if (data) {
+                        localSnapshots = data;
+                    } else {
+                        this.resetLocalSnapshotStorage();
+                    }
+
+                    let remoteSnapshots = false;
+                    $.getJSON(this.apiUrl).then(data => {
+                        if (data) {
+                            remoteSnapshots = data;
+                        }
+
+                        _self.setState({ localSnapshots, remoteSnapshots, loading: false });
+                    });
+                }).catch(error => {
+                    throw new Error(error);
+                });
             }
 
             /**
-             *
-             */
-            componentWillUnmount() {
-            }
-
-            /**
-             *
+             * Renders the component
+             * 
              * @returns {XML}
              */
             render() {
                 let snapshotIdStyle = {
-                    fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`
+                    fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`,
+                    marginRight: `10px`
                 };
 
                 let snapshotRecordRecordStyle = {
@@ -169,29 +340,65 @@ module.exports = module.exports = {
                     border: '1px solid grey'
                 };
 
-                const drawSnapshotRecord = (item, index) => {
-                    let date = new Date(item.created_at.toString());
-                    let dateFormatted = (date.getMonth() + 1) + "-" + date.getDate() + "-" + date.getFullYear();
+                let buttonStyle = {
+                    padding: `4px`,
+                    margin: `0px`
+                };
+
+                const createSnapshotRecord = (item, index, local = false) => {
+                    let date = new Date(item.created_at);
+                    let dateFormatted = (`${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
+
+                    let importButton = false;
+                    if (local) {
+                        importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.onImporHandler(item)} style={buttonStyle}>
+                            <i className="material-icons">save</i>
+                        </button>);
+                    }
+
+                    let deleteHandler = (local ? () => this.onDeleteLocalHandler(item.id) : () => this.onDeleteRemoteHandler(item.id));
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
-                        <div className="panel-body" style={{padding: '5px'}}>
-                            <span style={snapshotIdStyle}>{item.id}</span> {item.created_at}
+                        <div className="panel-body" style={{padding: '8px'}}>
+                            <span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 10)}</span>
+                            <span className="label label-default">{dateFormatted}</span>
+                            <button
+                                type="button"
+                                className="btn btn-xs btn-primary"
+                                style={buttonStyle}>
+                                <i className="material-icons">play_arrow</i>
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-xs btn-primary"
+                                onClick={deleteHandler}
+                                style={buttonStyle}>
+                                <i className="material-icons">delete</i>
+                            </button>
+                            {importButton}
                         </div>
                     </div>);
                 };
 
-                let localSnapshots = (<div><p>{__(`No snapshots`)}</p><p>{__(`Create one`)}?</p></div>);
+                let localSnapshots = (<div style={{textAlign: `center`}}>
+                    <a onClick={this.onCreateLocalHandler}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                </div>);
+
+                let importAllIsDisabled = true;
                 if (this.state.localSnapshots && this.state.localSnapshots.length > 0) {
+                    importAllIsDisabled = false;
                     localSnapshots = [];
                     this.state.localSnapshots.map((item, index) => {
-                        localSnapshots.push(drawSnapshotRecord(item, index));
+                        localSnapshots.push(createSnapshotRecord(item, index, true));
                     });
                 }
 
-                let remoteSnapshots = (<div><p>{__(`No snapshots`)}</p><p>{__(`Create one`)}?</p></div>);
+                let remoteSnapshots = (<div style={{textAlign: `center`}}>
+                    <a onClick={this.onCreateRemoteHandler}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                </div>);
                 if (this.state.remoteSnapshots && this.state.remoteSnapshots.length > 0) {
                     remoteSnapshots = [];
                     this.state.remoteSnapshots.map((item, index) => {
-                        remoteSnapshots.push(drawSnapshotRecord(item, index));
+                        remoteSnapshots.push(createSnapshotRecord(item, index));
                     });
                 }
 
@@ -200,10 +407,10 @@ module.exports = module.exports = {
                         <div>
                             <h4>
                                 {__(`Local snapshots`)} 
-                                <button className="btn btn-xs btn-primary">
+                                <button className="btn btn-xs btn-primary" onClick={this.onCreateLocalHandler} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
-                                <button className="btn btn-xs btn-primary">
+                                <button className="btn btn-xs btn-primary" onClick={this.onImporAllHandler} disabled={importAllIsDisabled} style={buttonStyle}>
                                     <i className="material-icons">save</i>
                                 </button>
                             </h4>
@@ -216,7 +423,7 @@ module.exports = module.exports = {
                         <div>
                             <h4>
                                 {__(`Remote snapshots`)}
-                                <button className="btn btn-xs btn-primary">
+                                <button className="btn btn-xs btn-primary" onClick={this.onCreateRemoteHandler} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
                             </h4>
