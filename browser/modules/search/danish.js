@@ -64,13 +64,13 @@ module.exports = {
         // adjust search text
         var searchTxt = "Adresse, matr. nr.";
         if (sfeSearchActive) {
-            $("#custom-search").attr("placeholder", 
+            $("#custom-search").attr("placeholder",
                 searchTxt
                 + (esrSearchActive ? ", ESR nr. " : "")
-                + " eller SFE nr."); 
+                + " eller SFE nr.");
         } else if (esrSearchActive) {
             $("#custom-search").attr("placeholder",
-                searchTxt + " eller ESR nr."); 
+                searchTxt + " eller ESR nr.");
         }
 
 
@@ -137,21 +137,23 @@ module.exports = {
             onLoad: onLoad
         });
 
-        if (typeof komKode === "string") {
-            komKode = [komKode];
+        if (komKode !== "*") {
+            if (typeof komKode === "string") {
+                komKode = [komKode];
+            }
+            $.each(komKode, function (i, v) {
+                shouldA.push({
+                    "term": {
+                        "properties.kommunekode": "0" + v
+                    }
+                });
+                shouldM.push({
+                    "term": {
+                        "properties.kommunekode": "" + v
+                    }
+                });
+            });
         }
-        $.each(komKode, function (i, v) {
-            shouldA.push({
-                "term": {
-                    "properties.kommunekode": "0" + v
-                }
-            });
-            shouldM.push({
-                "term": {
-                    "properties.kommunekode": "" + v
-                }
-            });
-        });
 
         $("#" + el).typeahead({
             highlight: false
@@ -593,10 +595,12 @@ module.exports = {
                     if (!onlyAddress) {
                         (function ca() {
                             var qry = "";
-                            $.each(komKode, function (i, v) {
-                                qry += (qry.length < 1 ? "" : " OR ");
-                                qry += (query.startsWith(v) ? query.toLowerCase() : v + "*" + query.toLowerCase());
-                            });
+                            if (komKode !== "*") {
+                                $.each(komKode, function (i, v) {
+                                    qry += (qry.length < 1 ? "" : " OR ");
+                                    qry += (query.startsWith(v) ? query.toLowerCase() : v + "*" + query.toLowerCase());
+                                });
+                            }
                             switch (type3) {
                                 case "esr_nr":
                                     dslM = {

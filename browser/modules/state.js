@@ -187,7 +187,11 @@ module.exports = {
             throw new Error('localforage is not defined');
         }
 
-        var arr, i;
+        var arr, i, maxBounds = setting.getMaxBounds(), setLayers;
+
+        if (maxBounds) {
+            cloud.get().setMaxBounds(maxBounds);
+        }
 
         // Reset hash. Needed if state is invoked after start up
         hash = decodeURIComponent(window.location.hash);
@@ -266,7 +270,7 @@ module.exports = {
                 }
             }
 
-            const initializeLayersFromURL = () => {
+          const initializeLayersFromURL = () => {
                 layersToActivate.map(item => {
                     switchLayer.init(item[0], item[1], item[2]);
                 });    

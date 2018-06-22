@@ -666,14 +666,18 @@ module.exports = module.exports = {
                                                 table2 = $("<table class='table'/>");
                                                 $.each(row, function (n, field) {
                                                     if (!field.key) {
-                                                        table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>")
+                                                        if (!field.link) {
+                                                            table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>");
+                                                        } else {
+                                                            table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
+                                                        }
                                                     } else {
                                                         key = field.name;
                                                         fid = field.value;
                                                     }
                                                 });
                                                 td.append(table2);
-                                                tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + (BACKEND === "cartodb" ? v.sql : i) + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
                                                 tr.append(td);
                                                 table1.append(tr);
                                             });
