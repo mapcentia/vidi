@@ -70,6 +70,11 @@ var state;
  */
 var urlparser;
 
+/**
+ * @type {*|exports|module.exports}
+ */
+var backboneEvents;
+
 let _self = false;
 
 const exId = `state-snapshots-dialog-content`;
@@ -90,6 +95,7 @@ module.exports = module.exports = {
         cloud = o.cloud;
         state = o.state;
         urlparser = o.urlparser;
+        backboneEvents = o.backboneEvents;
         utils = o.utils;
 
         _self = this;
@@ -143,7 +149,8 @@ module.exports = module.exports = {
                 this.state = {
                     localSnapshots: [],
                     remoteSnapshots: [],
-                    loading: false
+                    loading: false,
+                    authenticated: false
                 };
 
                 this.apiUrl = `/api/state-snapshots`;
@@ -162,6 +169,12 @@ module.exports = module.exports = {
             componentDidMount() {
                 let _self = this;
                 this.refreshSnapshotsList();
+
+                backboneEvents.get().on(`session:authChange`, (authenticated) => {
+                    if (this.state.authenticated !== authenticated) {
+                        this.setState({ authenticated });
+                    }
+                });
             }
 
             createRemoteSnapshot(snapshot) {
@@ -311,13 +324,17 @@ module.exports = module.exports = {
                     }
 
                     let remoteSnapshots = false;
-                    $.getJSON(this.apiUrl).then(data => {
-                        if (data) {
-                            remoteSnapshots = data;
-                        }
+                    if (this.state.authenticated) {
+                        $.getJSON(this.apiUrl).then(data => {
+                            if (data) {
+                                remoteSnapshots = data;
+                            }
 
-                        _self.setState({ localSnapshots, remoteSnapshots, loading: false });
-                    });
+                            _self.setState({ localSnapshots, remoteSnapshots, loading: false });
+                        });
+                    } else {
+                        _self.setState({ localSnapshots, remoteSnapshots: [], loading: false });
+                    }
                 }).catch(error => {
                     throw new Error(error);
                 });
@@ -402,6 +419,23 @@ module.exports = module.exports = {
                     });
                 }
 
+                let remoteSnapshotsPanel = false;
+                if (this.state.authenticated) {
+                    remoteSnapshotsPanel = (<div>
+                        <div>
+                            <h4>
+                                {__(`Remote snapshots`)}
+                                <button className="btn btn-xs btn-primary" onClick={this.onCreateRemoteHandler} style={buttonStyle}>
+                                    <i className="material-icons">add</i>
+                                </button>
+                            </h4>
+                        </div>
+                        <div>
+                            <div>{remoteSnapshots}</div>
+                        </div>
+                    </div>);
+                }
+
                 return (<div>
                     <div>
                         <div>
@@ -419,19 +453,7 @@ module.exports = module.exports = {
                             <div>{localSnapshots}</div>
                         </div>
                     </div>
-                    <div>
-                        <div>
-                            <h4>
-                                {__(`Remote snapshots`)}
-                                <button className="btn btn-xs btn-primary" onClick={this.onCreateRemoteHandler} style={buttonStyle}>
-                                    <i className="material-icons">add</i>
-                                </button>
-                            </h4>
-                        </div>
-                        <div>
-                            <div>{remoteSnapshots}</div>
-                        </div>
-                    </div>
+                    {remoteSnapshotsPanel}
                 </div>);
             }
         }
