@@ -46,6 +46,10 @@ const translations = {
         "da_DK": "# Import local state to server",
         "en_US": "# Import local state to server"
     },
+    "copy link": {
+        "da_DK": "# copy link",
+        "en_US": "# copy link"
+    }
 };
 
 const API_URL = `/api/state-snapshots`;
@@ -167,6 +171,7 @@ module.exports = module.exports = {
                 this.onApplyHandler = this.onApplyHandler.bind(this);
                 this.onDeleteLocalHandler = this.onDeleteLocalHandler.bind(this);
                 this.onDeleteRemoteHandler = this.onDeleteRemoteHandler.bind(this);
+                this.copyToClipboard = this.copyToClipboard.bind(this);
             }
 
             /**
@@ -193,7 +198,7 @@ module.exports = module.exports = {
                     method: 'POST',
                     dataType: 'json',
                     data: { snapshot }
-                }).then(data => {
+                }).then(() => {
                     _self.refreshSnapshotsList();
                 });
             }
@@ -214,7 +219,14 @@ module.exports = module.exports = {
                     });
 
                     localforage.setItem(STORAGE_KEY, data).then(() => {
-                        _self.refreshSnapshotsList();
+                        $.ajax({
+                            url: API_URL,
+                            method: 'POST',
+                            dataType: 'json',
+                            data: { anonymous: true, snapshot }
+                        }).then(() => {
+                            _self.refreshSnapshotsList();
+                        });
                     }).catch(error => {
                         throw new Error(error);
                     });
@@ -352,6 +364,15 @@ module.exports = module.exports = {
                 });
             }
 
+            copyToClipboard (str) {
+                const el = document.createElement('textarea');
+                el.value = str;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+            }
+
             /**
              * Renders the component
              * 
@@ -375,36 +396,48 @@ module.exports = module.exports = {
                 };
 
                 const createSnapshotRecord = (item, index, local = false) => {
+                    console.log('### item', item);
+
                     let date = new Date(item.created_at);
                     let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
                     let importButton = false;
                     if (local) {
                         importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.onImporHandler(item)} style={buttonStyle}>
-                            <i className="material-icons">save</i>
+                            <i className="material-icons">person_add</i>
                         </button>);
                     }
+
+                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
 
                     let deleteHandler = (local ? () => this.onDeleteLocalHandler(item.id) : () => this.onDeleteRemoteHandler(item.id));
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                         <div className="panel-body" style={{padding: '8px'}}>
-                            <span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 10)}</span>
-                            <span className="label label-default">{dateFormatted}</span>
-                            <button
-                                type="button"
-                                className="btn btn-xs btn-primary"
-                                onClick={() => { this.onApplyHandler(item); }}
-                                style={buttonStyle}>
-                                <i className="material-icons">play_arrow</i>
-                            </button>
-                            <button
-                                type="button"
-                                className="btn btn-xs btn-primary"
-                                onClick={deleteHandler}
-                                style={buttonStyle}>
-                                <i className="material-icons">delete</i>
-                            </button>
-                            {importButton}
+                            <div>
+                                <span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 10)}</span>
+                                <span className="label label-default">{dateFormatted}</span>
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-primary"
+                                    onClick={() => { this.onApplyHandler(item); }}
+                                    style={buttonStyle}>
+                                    <i className="material-icons">play_arrow</i>
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-xs btn-primary"
+                                    onClick={deleteHandler}
+                                    style={buttonStyle}>
+                                    <i className="material-icons">delete</i>
+                                </button>
+                                {importButton}
+                            </div>
+                            <div>
+                                <div className="input-group">
+                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
+                                    <input className="form-control" type="text" defaultValue={permaLink}/>
+                                </div>
+                            </div>
                         </div>
                     </div>);
                 };
@@ -458,7 +491,7 @@ module.exports = module.exports = {
                                     <i className="material-icons">add</i>
                                 </button>
                                 <button className="btn btn-xs btn-primary" onClick={this.onImporAllHandler} disabled={importAllIsDisabled} style={buttonStyle}>
-                                    <i className="material-icons">save</i>
+                                    <i className="material-icons">person_add</i>
                                 </button>
                             </h4>
                         </div>

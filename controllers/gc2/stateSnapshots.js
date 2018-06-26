@@ -3,12 +3,7 @@ let crypto = require('crypto');
 let express = require('express');
 let router = express.Router();
 
-/*
-var config = require('../../config/config.js').gc2;
-var request = require('request');
-var utf8 = require('utf8');
-*/
-
+const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 const storage = `./temporary-state-storage.json`;
 const throwError = (response, errorCode) => {
     response.status(400);
@@ -42,7 +37,7 @@ const saveSnapshots = (snapshots) => {
     });
 };
 
-const appendToSnapshots = (snapshot) => {
+const appendToSnapshots = (snapshot, browserId) => {
     return new Promise((resolve, reject) => {
         getSnapshots().then(data => {
             let hash = crypto.randomBytes(20).toString('hex');
@@ -52,6 +47,12 @@ const appendToSnapshots = (snapshot) => {
                 let currentDate = new Date();
                 snapshot.id = hash;
                 snapshot.created_at = currentDate.toISOString();
+                if (browserId) {
+                    snapshot.browserId = browserId;
+                } else {
+                    snapshot.userId = 100; // @todo Provide GC2 user id (owner's)
+                }
+
                 data.push(snapshot);
 
                 saveSnapshots(data).then(() => {
@@ -78,15 +79,31 @@ router.get('/api/state-snapshots', (request, response, next) => {
     });
 });
 
+
+// @todo Method for returning specific state by id for any user
+
 router.post('/api/state-snapshots', (request, response, next) => {
     // Check if snapshot data was provided
     if (`snapshot` in request.body) {
-        // By this moment user has to be authorized, otherwise 403 will be returned
-        appendToSnapshots(request.body).then(id => {
-            response.json({ id, status: 'success' });
-        }).catch(errorCode => {
-            throwError(response, errorCode);
-        });       
+        if (request.body.anonymous) {
+            if (TRACKER_COOKIE_NAME in request.cookies) {
+                appendToSnapshots(request.body, request.cookies[TRACKER_COOKIE_NAME]).then(id => {
+                    response.json({ id, status: 'success' });
+                }).catch(errorCode => {
+                    throwError(response, errorCode);
+                });
+            } else {
+                throw new Error(`Cannot find ${TRACKER_COOKIE_NAME} in cookies`);
+            }
+        } else {
+            // @todo Push to GC2
+            // By this moment user has to be authorized, otherwise 403 will be returned
+            appendToSnapshots(request.body).then(id => {
+                response.json({ id, status: 'success' });
+            }).catch(errorCode => {
+                throwError(response, errorCode);
+            });
+        }
     } else {
         throwError(response, 'MISSING_DATA');
     }
