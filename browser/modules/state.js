@@ -82,6 +82,14 @@ var base64 = require('base64-url');
 
 /**
  *
+ * @type {exports|module.exports}
+ */
+const uuidv4 = require('uuid/v4');
+
+const cookie = require('js-cookie');
+
+/**
+ *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -185,6 +193,14 @@ module.exports = {
 
         if ('localforage' in window === false) {
             throw new Error('localforage is not defined');
+        }
+
+        // Setting unique cookie if it have not been set yet
+        let trackingCookie = uuidv4();
+        if (cookie.get('vidi-state-tracker')) {
+            trackingCookie = cookie.get('vidi-state-tracker');
+        } else {
+            cookie.set('vidi-state-tracker', trackingCookie);
         }
 
         var arr, i;
@@ -628,8 +644,6 @@ module.exports = {
         let result = new Promise((resolve, reject) => {
             let promises = [];
             for (let name in state) {
-                console.log(`### applying state for ${name} module`, listened);
-
                 if (name in listened === false) {
                     throw new Error(`Module or extension ${name} does not exist`);
                 }
@@ -638,7 +652,6 @@ module.exports = {
             }
 
             Promise.all(promises).then(() => {
-                console.log('## new state was propagated');
                 resolve();
             });
         });
@@ -693,9 +706,7 @@ module.exports = {
      * and saves the overall state locally, so next reload will keep all changes
      */
     listen: (name, eventId) => {
-        console.log('## listener created', name + ':' +  eventId);
         backboneEvents.get().on(name + ':' + eventId, () => {
-            console.log('## updating state');
             _self._updateState(name);
         });
     },
