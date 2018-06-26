@@ -369,7 +369,7 @@ module.exports = module.exports = {
 
                 const createSnapshotRecord = (item, index, local = false) => {
                     let date = new Date(item.created_at);
-                    let dateFormatted = (`${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
+                    let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
                     let importButton = false;
                     if (local) {

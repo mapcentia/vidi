@@ -382,10 +382,10 @@ module.exports = {
         $("#layers").empty();
         _self.getLayersOrder().then(order => {
             if (forcedState) {
-                layerTreeOrder = forcedState.order;
-            } else {
-                layerTreeOrder = order;
+                order = forcedState.order;
             }
+
+            layerTreeOrder = order;
 
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
