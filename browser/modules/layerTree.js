@@ -374,11 +374,18 @@ module.exports = {
     /**
      * Builds actual layer tree.
      */
-    create: () => {
+    create: (forcedState = false) => {
+
+        console.log('### creating layerTree with state', forcedState);
+
         layerTreeIsReady = false;
         $("#layers").empty();
         _self.getLayersOrder().then(order => {
-            layerTreeOrder = order;
+            if (forcedState) {
+                layerTreeOrder = forcedState.order;
+            } else {
+                layerTreeOrder = order;
+            }
 
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
@@ -784,6 +791,19 @@ module.exports = {
      */
     getState: () => {
         return { order: layerTreeOrder };
+    },
+
+    /**
+     * Applies externally provided state
+     */
+    applyState: (newState) => {
+        let result = new Promise((resolve, reject) => {
+            console.log('### about to apply new state', newState);
+            _self.create(newState);
+            resolve();
+        });
+
+        return result;
     },
 
     /**

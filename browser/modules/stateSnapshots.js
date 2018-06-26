@@ -159,6 +159,7 @@ module.exports = module.exports = {
                 this.onCreateRemoteHandler = this.onCreateRemoteHandler.bind(this);
                 this.onImporHandler = this.onImporHandler.bind(this);
                 this.onImporAllHandler = this.onImporAllHandler.bind(this);
+                this.onApplyHandler = this.onApplyHandler.bind(this);
                 this.onDeleteLocalHandler = this.onDeleteLocalHandler.bind(this);
                 this.onDeleteRemoteHandler = this.onDeleteRemoteHandler.bind(this);
             }
@@ -228,6 +229,10 @@ module.exports = module.exports = {
 
             onCreateRemoteHandler() {
                 this.getCurrentApplicationState().then((state) => this.createRemoteSnapshot(state));
+            }
+
+            onApplyHandler(item) {
+                state.applyState(item.snapshot).then(() => {});
             }
 
             onDeleteLocalHandler(id, ask = true) {
@@ -381,6 +386,7 @@ module.exports = module.exports = {
                             <button
                                 type="button"
                                 className="btn btn-xs btn-primary"
+                                onClick={() => { this.onApplyHandler(item); }}
                                 style={buttonStyle}>
                                 <i className="material-icons">play_arrow</i>
                             </button>

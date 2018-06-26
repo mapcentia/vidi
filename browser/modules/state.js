@@ -6,7 +6,7 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = false;
+const LOG = true;
 
 /**
  * @type {*|exports|module.exports}
@@ -187,11 +187,7 @@ module.exports = {
             throw new Error('localforage is not defined');
         }
 
-        var arr, i, maxBounds = setting.getMaxBounds(), setLayers;
-
-        if (maxBounds) {
-            cloud.get().setMaxBounds(maxBounds);
-        }
+        var arr, i;
 
         // Reset hash. Needed if state is invoked after start up
         hash = decodeURIComponent(window.location.hash);
@@ -270,7 +266,7 @@ module.exports = {
                 }
             }
 
-          const initializeLayersFromURL = () => {
+            const initializeLayersFromURL = () => {
                 layersToActivate.map(item => {
                     switchLayer.init(item[0], item[1], item[2]);
                 });    
@@ -620,14 +616,34 @@ module.exports = {
         return result;
     },
 
+
     /**
-     * Listens to specific events of modules and extensions, then gets their state and updates
-     * and saves the overall state locally, so next reload will keep all changes
+     * Applies state
+     * 
+     * @param {Object} state Applied state
+     * 
+     * @returns {Promise}
      */
-    listen: (name, eventId) => {
-        backboneEvents.get().on(name + ':' + eventId, () => {
-            _self._updateState(name);
+    applyState: (state) => {
+        let result = new Promise((resolve, reject) => {
+            let promises = [];
+            for (let name in state) {
+                console.log(`### applying state for ${name} module`, listened);
+
+                if (name in listened === false) {
+                    throw new Error(`Module or extension ${name} does not exist`);
+                }
+
+                promises.push(listened[name].applyState(state[name]));
+            }
+
+            Promise.all(promises).then(() => {
+                console.log('## new state was propagated');
+                resolve();
+            });
         });
+
+        return result;
     },
 
     /**
@@ -673,6 +689,18 @@ module.exports = {
     },
 
     /**
+     * Listens to specific events of modules and extensions, then gets their state and updates
+     * and saves the overall state locally, so next reload will keep all changes
+     */
+    listen: (name, eventId) => {
+        console.log('## listener created', name + ':' +  eventId);
+        backboneEvents.get().on(name + ':' + eventId, () => {
+            console.log('## updating state');
+            _self._updateState(name);
+        });
+    },
+
+    /**
      * Retrieves state of all registered modules and extensions
      * 
      * @param {String} name Module or extension name
@@ -682,8 +710,8 @@ module.exports = {
             throw new Error(`Module or extension ${name} does not exist`);
         }
 
-        if ('getState' in listened[name] === false) {
-            throw new Error(`Module or extension has to implement getState() method in order to support state`);
+        if ('getState' in listened[name] === false || 'applyState' in listened[name] === false) {
+            throw new Error(`Module or extension has to implement getState() and applyState() methods in order to support state`);
         }
 
         _getInternalState().then(localState => {
