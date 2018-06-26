@@ -621,17 +621,17 @@ module.exports = {
         };
 
         if (urlVars.state) {
-            /*
             stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
 
                 console.log(`### Retrieved state with id ${urlVars.state}`, state);
 
+                initializeFromHashPart();
             }).catch(error => {
                 console.warn(`Unable to find valid state snapshot with id ${urlVars.state}`);
-            });
-            */
 
-            initializeFromHashPart();
+                initializeFromHashPart();
+            });
+            
         } else {
             initializeFromHashPart();
         }

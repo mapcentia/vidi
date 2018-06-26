@@ -67,6 +67,9 @@ const appendToSnapshots = (snapshot, browserId) => {
     });
 };
 
+/**
+ * Listing available states
+ */
 router.get('/api/state-snapshots', (request, response, next) => {
     fs.stat(storage, (error, stats) => {
         if (error) fs.writeFileSync(storage, `[]`);
@@ -79,8 +82,33 @@ router.get('/api/state-snapshots', (request, response, next) => {
     });
 });
 
+/**
+ * Returning specific state
+ */
+router.get('/api/state-snapshots/:id', (request, response, next) => {
+    fs.stat(storage, (error, stats) => {
+        if (error) fs.writeFileSync(storage, `[]`);
+        getSnapshots().then(data => {
+            let result = false;
+            data.map(item => {
+                if (item.id === request.params.id) {
+                    result = item;
+                    return false;
+                }
+            });
 
-// @todo Method for returning specific state by id for any user
+            if (result) {
+                response.json(result);
+            } else {
+                throwError(response, 'INVALID_SNAPSHOT_ID');
+            }
+        }).catch(error => {
+            console.log(error);
+            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
+        }); 
+    });
+});
+
 
 router.post('/api/state-snapshots', (request, response, next) => {
     // Check if snapshot data was provided

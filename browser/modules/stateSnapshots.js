@@ -208,6 +208,9 @@ module.exports = module.exports = {
              */
             createBrowserOwnedSnapshot(snapshot) {
                 let _self = this;
+                /**
+                 * @todo Get rid of the localforage usage, as it creates inconsistency between server and client
+                 */
                 localforage.getItem(STORAGE_KEY).then((data) => {
                     let currentDateTime = new Date();
                     let timestamp = Math.round(currentDateTime.getTime() / 1000);
