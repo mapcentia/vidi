@@ -10,27 +10,8 @@ var db = urlparser.db;
 var schema = urlparser.schema;
 var cloud;
 var layers;
+let _self = false;
 
-/**
- * @private
- * @returns {string}
- */
-var anchor = function (s) {
-    var layerStr, newArr = [], p;
-
-    if (layers.getLayers() && s) {
-        let arr = layers.getLayers().split(",");
-        $.each(arr, function (i, v) {
-            newArr.push(s + "." + v.split(".")[1])
-        });
-        layerStr = newArr.reverse().join(",");
-    } else {
-        layerStr = (layers.getLayers()) ? layers.getLayers().split(",").reverse().join(",") : ""
-    }
-
-    p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
-    return "#" + cloud.get().getBaseLayerName() + "/" + Math.round(cloud.get().getZoom()).toString() + "/" + (Math.round(p.x * 10000) / 10000).toString() + "/" + (Math.round(p.y * 10000) / 10000).toString() + "/" + layerStr;
-};
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, getAnchor: module.exports.getAnchor}}
@@ -42,6 +23,8 @@ module.exports = {
         return this;
     },
     init: function () {
+        _self = this;
+
         var param = [], paramStr, parr;
 
         $.each(this.urlVars(), function (i, v) {
@@ -51,8 +34,9 @@ module.exports = {
             }
             param.push(i + "=" + parr.join());
         });
+
         paramStr = param.join("&");
-        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + _self.anchor();
     },
 
     urlVars: function getUrlVars() {
@@ -61,6 +45,49 @@ module.exports = {
             mapvars[key] = value;
         });
         return mapvars;
+    },
+
+    /**
+     * @returns {Object}
+     */
+    getCurrentMapParameters: () => {
+        let p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
+        return {
+            layers: (layers.getLayers() ? layers.getLayers().split(",") : []),
+            baseLayer: cloud.get().getBaseLayerName(),
+            zoom: Math.round(cloud.get().getZoom()).toString(),
+            x: (Math.round(p.x * 10000) / 10000).toString(),
+            y: (Math.round(p.y * 10000) / 10000).toString()
+        };
+    },
+
+    applyMapParameters: (parameters) => {
+        if (parameters.x && parameters.y && parameters.zoom) {
+            cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+        }
+
+        console.log('### applying parameters', parameters);
+    },
+
+    /**
+     * @private
+     * @returns {string}
+     */
+    anchor: (scheme) => {
+        let mapParameters = _self.getCurrentMapParameters();
+        var layerStr;
+        if (layers.getLayers() && scheme) {
+            let newArr = [];
+            let arr = mapParameters.layers;
+            $.each(arr, function (i, v) {
+                newArr.push(scheme + "." + v.split(".")[1])
+            });
+            layerStr = newArr.reverse().join(",");
+        } else {
+            layerStr = (mapParameters.layers) ? mapParameters.layers.reverse().join(",") : ""
+        }
+
+        return `#${mapParameters.baseLayer}/${mapParameters.zoom}/${mapParameters.x}/${mapParameters.y}/${layerStr}`;
     },
 
     /**
@@ -90,6 +117,6 @@ module.exports = {
      * @returns {string}
      */
     getAnchor: function (s) {
-        return anchor(s);
+        return _self.anchor(s);
     }
 };

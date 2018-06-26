@@ -48,10 +48,17 @@ const translations = {
     },
 };
 
+const API_URL = `/api/state-snapshots`;
+
 /**
  * @type {*|exports|module.exports}
  */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var anchor;
 
 /**
  *
@@ -92,6 +99,7 @@ module.exports = module.exports = {
      * @returns {exports}
      */
     set: function (o) {
+        anchor = o.anchor;
         cloud = o.cloud;
         state = o.state;
         urlparser = o.urlparser;
@@ -153,10 +161,7 @@ module.exports = module.exports = {
                     authenticated: false
                 };
 
-                this.apiUrl = `/api/state-snapshots`;
-
-                this.onCreateLocalHandler = this.onCreateLocalHandler.bind(this);
-                this.onCreateRemoteHandler = this.onCreateRemoteHandler.bind(this);
+                this.createSnapshot = this.createSnapshot.bind(this);
                 this.onImporHandler = this.onImporHandler.bind(this);
                 this.onImporAllHandler = this.onImporAllHandler.bind(this);
                 this.onApplyHandler = this.onApplyHandler.bind(this);
@@ -178,10 +183,13 @@ module.exports = module.exports = {
                 });
             }
 
-            createRemoteSnapshot(snapshot) {
+            /**
+             * Creates user-owned snapshot
+             */
+            createUserOwnedSnapshot(snapshot) {
                 let _self = this;
                 $.ajax({
-                    url: this.apiUrl,
+                    url: API_URL,
                     method: 'POST',
                     dataType: 'json',
                     data: { snapshot }
@@ -190,7 +198,10 @@ module.exports = module.exports = {
                 });
             }
 
-            createLocalSnapshot(snapshot) {
+            /**
+             * Creates browser-owned snapshot
+             */
+            createBrowserOwnedSnapshot(snapshot) {
                 let _self = this;
                 localforage.getItem(STORAGE_KEY).then((data) => {
                     let currentDateTime = new Date();
@@ -210,25 +221,21 @@ module.exports = module.exports = {
                 });
             }
 
-            getCurrentApplicationState() {
-                return new Promise((resolve, reject) => {
-                    if (confirm(`${__(`Save current application state`)}?`)) {
-                        state.getState().then(state => {
-                            console.log('###', state);
-                            resolve(state);
-                        });
-                    } else {
-                        reject();
-                    }
-                });
-            }
+            createSnapshot(browserOwned = false) {
+                if (confirm(`${__(`Save current application state`)}?`)) {
+                    state.getState().then(state => {
+                        if ('modules' in state === false) {
+                            throw new Error(`No modules data in state`);
+                        }
 
-            onCreateLocalHandler() {
-                this.getCurrentApplicationState().then((state) => this.createLocalSnapshot(state));
-            }
-
-            onCreateRemoteHandler() {
-                this.getCurrentApplicationState().then((state) => this.createRemoteSnapshot(state));
+                        state.map = anchor.getCurrentMapParameters();
+                        if (browserOwned) {
+                            this.createBrowserOwnedSnapshot(state);
+                        } else {
+                            this.createUserOwnedSnapshot(state);
+                        }
+                    });
+                }
             }
 
             onApplyHandler(item) {
@@ -263,7 +270,7 @@ module.exports = module.exports = {
                 if (confirm(`${__(`Delete state`)}?`)) {
                     let _self = this;
                     $.ajax({
-                        url: `${this.apiUrl}/${id}`,
+                        url: `${API_URL}/${id}`,
                         method: 'DELETE',
                         dataType: 'json'
                     }).then(data => {
@@ -276,7 +283,7 @@ module.exports = module.exports = {
                 let _self = this;
                 if (confirm(`${__(`Import local state to server`)}?`)) {
                     $.ajax({
-                        url: this.apiUrl,
+                        url: API_URL,
                         method: 'POST',
                         dataType: 'json',
                         data: { snapshot: item.snapshot }
@@ -295,7 +302,7 @@ module.exports = module.exports = {
                     this.state.localSnapshots.map(item => {
                         console.log(`## import`, item);
                         promises.push($.ajax({
-                            url: this.apiUrl,
+                            url: API_URL,
                             method: 'POST',
                             dataType: 'json',
                             data: { snapshot: item.snapshot }
@@ -330,7 +337,7 @@ module.exports = module.exports = {
 
                     let remoteSnapshots = false;
                     if (this.state.authenticated) {
-                        $.getJSON(this.apiUrl).then(data => {
+                        $.getJSON(API_URL).then(data => {
                             if (data) {
                                 remoteSnapshots = data;
                             }
@@ -403,7 +410,7 @@ module.exports = module.exports = {
                 };
 
                 let localSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={this.onCreateLocalHandler}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                    <a onClick={() => { this.createSnapshot(true) }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
                 </div>);
 
                 let importAllIsDisabled = true;
@@ -416,7 +423,7 @@ module.exports = module.exports = {
                 }
 
                 let remoteSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={this.onCreateRemoteHandler}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                    <a onClick={() => { this.createSnapshot() }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
                 </div>);
                 if (this.state.remoteSnapshots && this.state.remoteSnapshots.length > 0) {
                     remoteSnapshots = [];
@@ -431,7 +438,7 @@ module.exports = module.exports = {
                         <div>
                             <h4>
                                 {__(`Remote snapshots`)}
-                                <button className="btn btn-xs btn-primary" onClick={this.onCreateRemoteHandler} style={buttonStyle}>
+                                <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot() }} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
                             </h4>
@@ -447,7 +454,7 @@ module.exports = module.exports = {
                         <div>
                             <h4>
                                 {__(`Local snapshots`)} 
-                                <button className="btn btn-xs btn-primary" onClick={this.onCreateLocalHandler} style={buttonStyle}>
+                                <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot(true) }} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
                                 <button className="btn btn-xs btn-primary" onClick={this.onImporAllHandler} disabled={importAllIsDisabled} style={buttonStyle}>
@@ -476,4 +483,20 @@ module.exports = module.exports = {
         }
     },
 
+    getSnapshotByID: (id) => {
+        if (!id) {
+            throw new Error(`Snapshot identifier was not provided`);
+        }
+
+        let result = new Promise((resolve, reject) => {
+            $.getJSON(`${API_URL}/${id}`).then(data => {
+
+                console.log('###', data);
+
+            });
+        });
+
+        return result;
+
+    }
 };
