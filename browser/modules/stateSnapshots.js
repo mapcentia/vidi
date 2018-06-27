@@ -18,9 +18,9 @@ const translations = {
         "da_DK": "# Local snapshots",
         "en_US": "# Local snapshots"
     },
-    "Remote snapshots": {
-        "da_DK": "# Remote snapshots",
-        "en_US": "# Remote snapshots"
+    "User snapshots": {
+        "da_DK": "# User snapshots",
+        "en_US": "# User snapshots"
     },
     "No snapshots": {
         "da_DK": "# No snapshots",
@@ -34,17 +34,17 @@ const translations = {
         "da_DK": "# Save current application state",
         "en_US": "# Save current application state"
     },
-    "Delete state": {
-        "da_DK": "# Delete state",
-        "en_US": "# Delete state"
+    "Delete snapshot": {
+        "da_DK": "# Delete snapshot",
+        "en_US": "# Delete snapshot"
     },
-    "Import all local states to server": {
-        "da_DK": "# Import all local states to server",
-        "en_US": "# Import all local states to server"
+    "Add local state snapshots to user's ones": {
+        "da_DK": "# Add local state snapshots to user's ones",
+        "en_US": "# Add local state snapshots to user's ones"
     },
-    "Import local state to server": {
-        "da_DK": "# Import local state to server",
-        "en_US": "# Import local state to server"
+    "Add local state snapshot to user's ones": {
+        "da_DK": "# Add local state snapshot to user's ones",
+        "en_US": "# Add local state snapshot to user's ones"
     },
     "copy link": {
         "da_DK": "# copy link",
@@ -57,40 +57,11 @@ const API_URL = `/api/state-snapshots`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var anchor;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var utils;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var state;
-
-/**
- * @type {*|exports|module.exports}
- */
-var urlparser;
-
-/**
- * @type {*|exports|module.exports}
- */
-var backboneEvents;
+var cloud, anchor, utils, state, urlparser, backboneEvents;
 
 let _self = false;
 
 const exId = `state-snapshots-dialog-content`;
-
-const STORAGE_KEY = `vidi-state-snapshots`;
 
 /**
  *
@@ -118,8 +89,6 @@ module.exports = module.exports = {
      * Module initialization
      */
     init: function () {
-        console.log('State snapshots manager was initialized');
-
         /**
          *
          */
@@ -159,18 +128,17 @@ module.exports = module.exports = {
                 super(props);
 
                 this.state = {
-                    localSnapshots: [],
-                    remoteSnapshots: [],
+                    browserOwnerSnapshots: [],
+                    userOwnerSnapshots: [],
                     loading: false,
                     authenticated: false
                 };
 
+                this.applySnapshot = this.applySnapshot.bind(this);
                 this.createSnapshot = this.createSnapshot.bind(this);
-                this.onImporHandler = this.onImporHandler.bind(this);
-                this.onImporAllHandler = this.onImporAllHandler.bind(this);
-                this.onApplyHandler = this.onApplyHandler.bind(this);
-                this.onDeleteLocalHandler = this.onDeleteLocalHandler.bind(this);
-                this.onDeleteRemoteHandler = this.onDeleteRemoteHandler.bind(this);
+                this.deleteSnapshot = this.deleteSnapshot.bind(this);
+                this.seizeSnapshot = this.seizeSnapshot.bind(this);               
+                this.seizeAllSnapshots = this.seizeAllSnapshots.bind(this);
                 this.copyToClipboard = this.copyToClipboard.bind(this);
             }
 
@@ -189,53 +157,10 @@ module.exports = module.exports = {
             }
 
             /**
-             * Creates user-owned snapshot
+             * Creates snapshot
+             * 
+             * @param {Boolean} browserOwned Specifies if the created snapshot belongs to browser or user
              */
-            createUserOwnedSnapshot(snapshot) {
-                let _self = this;
-                $.ajax({
-                    url: API_URL,
-                    method: 'POST',
-                    dataType: 'json',
-                    data: { snapshot }
-                }).then(() => {
-                    _self.refreshSnapshotsList();
-                });
-            }
-
-            /**
-             * Creates browser-owned snapshot
-             */
-            createBrowserOwnedSnapshot(snapshot) {
-                let _self = this;
-                /**
-                 * @todo Get rid of the localforage usage, as it creates inconsistency between server and client
-                 */
-                localforage.getItem(STORAGE_KEY).then((data) => {
-                    let currentDateTime = new Date();
-                    let timestamp = Math.round(currentDateTime.getTime() / 1000);
-                    let hash = md5(timestamp);
-                    data.push({
-                        id: hash,
-                        created_at: currentDateTime.toISOString(),
-                        snapshot
-                    });
-
-                    localforage.setItem(STORAGE_KEY, data).then(() => {
-                        $.ajax({
-                            url: API_URL,
-                            method: 'POST',
-                            dataType: 'json',
-                            data: { anonymous: true, snapshot }
-                        }).then(() => {
-                            _self.refreshSnapshotsList();
-                        });
-                    }).catch(error => {
-                        throw new Error(error);
-                    });
-                });
-            }
-
             createSnapshot(browserOwned = false) {
                 if (confirm(`${__(`Save current application state`)}?`)) {
                     state.getState().then(state => {
@@ -244,45 +169,39 @@ module.exports = module.exports = {
                         }
 
                         state.map = anchor.getCurrentMapParameters();
-                        if (browserOwned) {
-                            this.createBrowserOwnedSnapshot(state);
-                        } else {
-                            this.createUserOwnedSnapshot(state);
-                        }
-                    });
-                }
-            }
 
-            onApplyHandler(item) {
-                state.applyState(item.snapshot).then(() => {});
-            }
-
-            onDeleteLocalHandler(id, ask = true) {
-                let _self = this;
-                let result = false;
-                if (ask === false || confirm(`${__(`Delete state`)}?`)) {
-                    result = new Promise((resolve, reject) => {
-                        localforage.getItem(STORAGE_KEY).then((data) => {
-                            for (let i = (data.length); i--; i >= 0) {
-                                if (data[i].id === id) {
-                                    data.splice(i, 1);
-                                }
+                        let _self = this;
+                        $.ajax({
+                            url: API_URL,
+                            method: 'POST',
+                            dataType: 'json',
+                            data: {
+                                anonymous: browserOwned,
+                                snapshot: state
                             }
-
-                            localforage.setItem(STORAGE_KEY, data).then(() => {
-                                _self.refreshSnapshotsList();
-                            }).catch(error => {
-                                throw new Error(error);
-                            });
+                        }).then(() => {
+                            _self.refreshSnapshotsList();
                         });
                     });
                 }
-
-                return result;
             }
 
-            onDeleteRemoteHandler(id) {
-                if (confirm(`${__(`Delete state`)}?`)) {
+            /**
+             * Applies snapshot
+             * 
+             * @param {Object} item Applies snapshot
+             */
+            applySnapshot(item) {
+                state.applyState(item.snapshot);
+            }
+
+            /**
+             * Deletes snapshot
+             * 
+             * @param {String} id Snapshot identifier
+             */
+            deleteSnapshot(id) {
+                if (confirm(`${__(`Delete snapshot`)}?`)) {
                     let _self = this;
                     $.ajax({
                         url: `${API_URL}/${id}`,
@@ -294,76 +213,68 @@ module.exports = module.exports = {
                 }
             }
 
-            onImporHandler(item) {
+            /**
+             * Makes state snapshot belong to user, not browser
+             */
+            seizeSnapshot(item) {
                 let _self = this;
-                if (confirm(`${__(`Import local state to server`)}?`)) {
+                if (confirm(`${__(`Add local state snapshot to user's ones`)}?`)) {
                     $.ajax({
-                        url: API_URL,
-                        method: 'POST',
+                        url: `${API_URL}/${item.id}`,
+                        method: 'PUT',
                         dataType: 'json',
-                        data: { snapshot: item.snapshot }
+                        data: { anonymous: false }
                     }).then(data => {
-                        _self.onDeleteLocalHandler(item.id, false).then(() => {
-                            _self.refreshSnapshotsList();
-                        });
+                        _self.refreshSnapshotsList();
                     });
                 }
             }
 
-            onImporAllHandler() {
-                if (confirm(`${__(`Import all local states to server`)}?`)) {
+            /**
+             * Makes all state snapshots belong to user, not browser
+             */
+            seizeAllSnapshots() {
+                if (confirm(`${__(`Add local state snapshots to user's ones`)}?`)) {
                     let _self = this;
                     let promises = [];
-                    this.state.localSnapshots.map(item => {
-                        console.log(`## import`, item);
+                    this.state.browserOwnerSnapshots.map(item => {
                         promises.push($.ajax({
-                            url: API_URL,
-                            method: 'POST',
+                            url: `${API_URL}/${item.id}`,
+                            method: 'PUT',
                             dataType: 'json',
-                            data: { snapshot: item.snapshot }
+                            data: { anonymous: false }
                         }));
                     });
 
                     Promise.all(promises).then(() => {
-                        _self.resetLocalSnapshotStorage().then(() => {
-                            _self.refreshSnapshotsList();
-                        });
+                        _self.refreshSnapshotsList();
                     });
                 }
             }
 
-            resetLocalSnapshotStorage() {
-                return localforage.setItem(STORAGE_KEY, []);
-            }
 
+            /**
+             * Retrives state snapshots list from server
+             */
             refreshSnapshotsList() {
                 let _self = this;
 
                 this.setState({ loading: true });
+                
+                $.getJSON(API_URL).then(data => {
+                    let browserOwnerSnapshots = [];
+                    let userOwnerSnapshots = [];
+                    data.map(item => {
+                        if (item.browserId) {
+                            browserOwnerSnapshots.push(item);
+                        } else if (item.userId) {
+                            userOwnerSnapshots.push(item);
+                        } else {
+                            throw new Error(`Invalid state snapshot`);
+                        }
+                    });
 
-                // Getting locally stored snapshots
-                localforage.getItem(STORAGE_KEY).then((data) => {
-                    let localSnapshots = false;
-                    if (data) {
-                        localSnapshots = data;
-                    } else {
-                        this.resetLocalSnapshotStorage();
-                    }
-
-                    let remoteSnapshots = false;
-                    if (this.state.authenticated) {
-                        $.getJSON(API_URL).then(data => {
-                            if (data) {
-                                remoteSnapshots = data;
-                            }
-
-                            _self.setState({ localSnapshots, remoteSnapshots, loading: false });
-                        });
-                    } else {
-                        _self.setState({ localSnapshots, remoteSnapshots: [], loading: false });
-                    }
-                }).catch(error => {
-                    throw new Error(error);
+                    _self.setState({ browserOwnerSnapshots, userOwnerSnapshots, loading: false });
                 });
             }
 
@@ -399,21 +310,18 @@ module.exports = module.exports = {
                 };
 
                 const createSnapshotRecord = (item, index, local = false) => {
-                    console.log('### item', item);
-
                     let date = new Date(item.created_at);
                     let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
 
                     let importButton = false;
-                    if (local) {
-                        importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.onImporHandler(item)} style={buttonStyle}>
+                    if (local && this.state.authenticated) {
+                        importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)} style={buttonStyle}>
                             <i className="material-icons">person_add</i>
                         </button>);
                     }
 
                     let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
 
-                    let deleteHandler = (local ? () => this.onDeleteLocalHandler(item.id) : () => this.onDeleteRemoteHandler(item.id));
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                         <div className="panel-body" style={{padding: '8px'}}>
                             <div>
@@ -422,14 +330,14 @@ module.exports = module.exports = {
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-primary"
-                                    onClick={() => { this.onApplyHandler(item); }}
+                                    onClick={() => { this.applySnapshot(item); }}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-primary"
-                                    onClick={deleteHandler}
+                                    onClick={() => this.deleteSnapshot(item.id)}
                                     style={buttonStyle}>
                                     <i className="material-icons">delete</i>
                                 </button>
@@ -445,64 +353,80 @@ module.exports = module.exports = {
                     </div>);
                 };
 
-                let localSnapshots = (<div style={{textAlign: `center`}}>
+                let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
                     <a onClick={() => { this.createSnapshot(true) }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
                 </div>);
 
                 let importAllIsDisabled = true;
-                if (this.state.localSnapshots && this.state.localSnapshots.length > 0) {
-                    importAllIsDisabled = false;
-                    localSnapshots = [];
-                    this.state.localSnapshots.map((item, index) => {
-                        localSnapshots.push(createSnapshotRecord(item, index, true));
+                if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
+                    if (this.state.authenticated) importAllIsDisabled = false;
+
+                    browserOwnerSnapshots = [];
+                    this.state.browserOwnerSnapshots.map((item, index) => {
+                        browserOwnerSnapshots.push(createSnapshotRecord(item, index, true));
                     });
                 }
 
-                let remoteSnapshots = (<div style={{textAlign: `center`}}>
+                let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
                     <a onClick={() => { this.createSnapshot() }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
                 </div>);
-                if (this.state.remoteSnapshots && this.state.remoteSnapshots.length > 0) {
-                    remoteSnapshots = [];
-                    this.state.remoteSnapshots.map((item, index) => {
-                        remoteSnapshots.push(createSnapshotRecord(item, index));
+                if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
+                    userOwnerSnapshots = [];
+                    this.state.userOwnerSnapshots.map((item, index) => {
+                        userOwnerSnapshots.push(createSnapshotRecord(item, index));
                     });
                 }
 
-                let remoteSnapshotsPanel = false;
+                let userOwnerSnapshotsPanel = false;
                 if (this.state.authenticated) {
-                    remoteSnapshotsPanel = (<div>
+                    userOwnerSnapshotsPanel = (<div>
                         <div>
                             <h4>
-                                {__(`Remote snapshots`)}
+                                {__(`User snapshots`)}
                                 <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot() }} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
                             </h4>
                         </div>
                         <div>
-                            <div>{remoteSnapshots}</div>
+                            <div>{userOwnerSnapshots}</div>
                         </div>
                     </div>);
                 }
 
+                let overlay = false;
+                if (this.state.loading) {
+                    overlay = (<div style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'white',
+                        opacity: '0.7',
+                        zIndex:  '1000'
+                    }}></div>);
+                }
+
                 return (<div>
+                    {overlay}
                     <div>
                         <div>
-                            <h4>
-                                {__(`Local snapshots`)} 
-                                <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot(true) }} style={buttonStyle}>
-                                    <i className="material-icons">add</i>
-                                </button>
-                                <button className="btn btn-xs btn-primary" onClick={this.onImporAllHandler} disabled={importAllIsDisabled} style={buttonStyle}>
-                                    <i className="material-icons">person_add</i>
-                                </button>
-                            </h4>
+                            <div>
+                                <h4>
+                                    {__(`Local snapshots`)} 
+                                    <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot(true) }} style={buttonStyle}>
+                                        <i className="material-icons">add</i>
+                                    </button>
+                                    <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
+                                        <i className="material-icons">person_add</i>
+                                    </button>
+                                </h4>
+                            </div>
+                            <div>
+                                <div>{browserOwnerSnapshots}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div>{localSnapshots}</div>
-                        </div>
+                        {userOwnerSnapshotsPanel}
                     </div>
-                    {remoteSnapshotsPanel}
                 </div>);
             }
         }
