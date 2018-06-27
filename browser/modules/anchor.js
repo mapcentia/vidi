@@ -8,8 +8,7 @@
 var urlparser = require('./urlparser');
 var db = urlparser.db;
 var schema = urlparser.schema;
-var cloud;
-var layers;
+var cloud, layers, setBaseLayer;
 let _self = false;
 
 /**
@@ -20,6 +19,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         layers = o.layers;
+        setBaseLayer = o.setBaseLayer;
         return this;
     },
     init: function () {
@@ -65,6 +65,8 @@ module.exports = {
         if (parameters.x && parameters.y && parameters.zoom) {
             cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
         }
+
+        setBaseLayer.init(parameters.baseLayer);
 
         console.log('### applying parameters', parameters);
     },

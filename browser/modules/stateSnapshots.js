@@ -448,15 +448,6 @@ module.exports = module.exports = {
             throw new Error(`Snapshot identifier was not provided`);
         }
 
-        let result = new Promise((resolve, reject) => {
-            $.getJSON(`${API_URL}/${id}`).then(data => {
-
-                console.log('###', data);
-
-            });
-        });
-
-        return result;
-
+        return $.getJSON(`${API_URL}/${id}`);
     }
 };
