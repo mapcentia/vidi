@@ -82,12 +82,29 @@ router.get('/api/state-snapshots', (request, response, next) => {
             Get all state snapshots that have current browserId (taken from
             cookies) and (if user is authorized) userId
         */
-        getSnapshots().then(data => {
-            response.json(data);
-        }).catch(error => {
-            console.log(error);
-            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-        });
+
+        // Mock code <--
+        let browserId = false;
+        if (TRACKER_COOKIE_NAME in request.cookies) {
+            browserId = request.cookies[TRACKER_COOKIE_NAME];
+        }
+
+        let userId = false;
+        if (`connect.gc2` in request.cookies) {
+            userId = 100;
+        }
+        // -->
+
+        if (browserId || userId) {
+            getSnapshots().then(data => {
+                response.json(data);
+            }).catch(error => {
+                console.log(error);
+                throwError(response, 'UNABLE_TO_OPEN_DATABASE');
+            });
+        } else {
+            throwError(response, 'NO_BROWSER_OR_USER_ID');
+        }
     });
 });
 

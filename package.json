@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha test/bootstrap.js -t 100000 --recursive test",
-    "test-verbose": "env DEBUG=\"puppeteer:*\" mocha test/bootstrap.js -t 100000 --recursive test"
+    "test-verbose": "env DEBUG=\"puppeteer:*\" mocha test/bootstrap.js -t 100000 --recursive test --grep \"State snapshot management\""
   },
   "repository": {
     "type": "git",
