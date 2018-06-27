@@ -349,7 +349,7 @@ module.exports = {
      */
     getLayersOrder: () => {
         let result = new Promise((resolve, reject) => {
-            state.getState(MODULE_NAME).then(initialState => {
+            state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 resolve(order);
             });
@@ -374,10 +374,14 @@ module.exports = {
     /**
      * Builds actual layer tree.
      */
-    create: () => {
+    create: (forcedState = false) => {
         layerTreeIsReady = false;
         $("#layers").empty();
         _self.getLayersOrder().then(order => {
+            if (forcedState) {
+                order = forcedState.order;
+            }
+
             layerTreeOrder = order;
 
             var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
@@ -784,6 +788,18 @@ module.exports = {
      */
     getState: () => {
         return { order: layerTreeOrder };
+    },
+
+    /**
+     * Applies externally provided state
+     */
+    applyState: (newState) => {
+        let result = new Promise((resolve, reject) => {
+            _self.create(newState);
+            resolve();
+        });
+
+        return result;
     },
 
     /**

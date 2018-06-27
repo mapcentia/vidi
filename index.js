@@ -3,6 +3,7 @@ var path = require('path');
 var app = express();
 var bulk = require('bulk-require');
 var bodyParser = require('body-parser');
+var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var cors = require('cors');
 
@@ -18,6 +19,8 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     extended: true,
     limit: '50mb'
 }));
+
+app.use(cookieParser());
 
 app.set('trust proxy', 1) // trust first proxy
 

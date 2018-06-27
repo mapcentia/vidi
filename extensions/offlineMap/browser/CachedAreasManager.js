@@ -82,7 +82,6 @@ class CachedAreasManager {
         let result = new Promise((resolve, reject) => {
             localforage.getItem(STORAGE_KEY).then((data) => {
                 if (data[id]) {
-                    console.log(id);
                     delete data[id];
                     localforage.setItem(STORAGE_KEY, data).then(() => {
                         resolve();
