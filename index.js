@@ -1,11 +1,10 @@
 var express = require('express');
 var path = require('path');
-var app = express();
-var bulk = require('bulk-require');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var cors = require('cors');
+var config = require('./config/config.js');
 
 var app = express();
 app.use(cors());
@@ -29,12 +28,21 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     name: "connect.gc2",
-    cookie: { secure: false }
+    cookie: {secure: false}
 }));
 
-app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
+app.use('/app/:db/:schema', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
-app.use('/', express.static(path.join(__dirname, 'public'),    {maxage: '1h'}));
+if (config.staticRoutes) {
+    for (var key in config.staticRoutes) {
+        if (config.staticRoutes.hasOwnProperty(key)) {
+            console.log(key + " -> " + config.staticRoutes[key]);
+            app.use('/app/:db/:schema/' + key, express.static(path.join(__dirname, config.staticRoutes[key]), {maxage: '60s'}));
+        }
+    }
+}
+
+app.use('/', express.static(path.join(__dirname, 'public'), {maxage: '1h'}));
 
 app.use(require('./controllers'));
 
