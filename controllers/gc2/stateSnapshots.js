@@ -77,6 +77,11 @@ const appendToSnapshots = (snapshot, browserId) => {
 router.get('/api/state-snapshots', (request, response, next) => {
     fs.stat(storage, (error, stats) => {
         if (error) fs.writeFileSync(storage, `[]`);
+
+        /*
+            Get all state snapshots that have current browserId (taken from
+            cookies) and (if user is authorized) userId
+        */
         getSnapshots().then(data => {
             response.json(data);
         }).catch(error => {
@@ -92,6 +97,10 @@ router.get('/api/state-snapshots', (request, response, next) => {
 router.get('/api/state-snapshots/:id', (request, response, next) => {
     fs.stat(storage, (error, stats) => {
         if (error) fs.writeFileSync(storage, `[]`);
+
+        /*
+            Get specific state snapshot with identifier
+        */
         getSnapshots().then(data => {
             let result = false;
             data.map(item => {
@@ -120,6 +129,10 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
     fs.stat(storage, (error, stats) => {
         if (error) fs.writeFileSync(storage, `[]`);
 
+        /*
+            Update specific state snapshot with identifier, clear the browserId
+            field and set userId field with the authorized user identifier
+        */
         getSnapshots().then(data => {
             let searched = false;
             for (let i = 0; i < data.length; i++) {
@@ -145,9 +158,13 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
 });
 
 router.post('/api/state-snapshots', (request, response, next) => {
-    // Check if snapshot data was provided
     if (`snapshot` in request.body) {
-        console.log('request.body', request.body);
+
+        /*
+            If "anonymous" parameter is set to "true", then stored state snapshot should belong
+            to the browser, so the browserId should be set. Otherwise, the created state snapshot
+            belongs to current user and has its userId field set.
+        */
         if (request.body.anonymous === 'true') {
             if (TRACKER_COOKIE_NAME in request.cookies) {
                 appendToSnapshots(request.body, request.cookies[TRACKER_COOKIE_NAME]).then(id => {
@@ -175,6 +192,9 @@ router.post('/api/state-snapshots', (request, response, next) => {
 });
 
 router.delete('/api/state-snapshots/:id', (request, response, next) => {
+    /*
+        Delete specific state snapshot with identifier
+    */
     getSnapshots().then(data => {
         let snapshotIndex = -1;
         data.map((item, index) => {
