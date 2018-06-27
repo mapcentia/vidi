@@ -99,6 +99,7 @@ window.Vidi = function () {
         baseLayer: require('./modules/baseLayer'),
         legend: require('./modules/legend'),
         state: require('./modules/state'),
+        stateSnapshots: require('./modules/stateSnapshots'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
         bindEvent: require('./modules/bindEvent'),
@@ -131,6 +132,7 @@ window.Vidi = function () {
     modules.baseLayer.set(modules);
     modules.legend.set(modules);
     modules.state.set(modules);
+    modules.stateSnapshots.set(modules);
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
     modules.bindEvent.set(modules);

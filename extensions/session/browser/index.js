@@ -52,13 +52,14 @@ module.exports = {
             type: "GET",
             success: function (data) {
                 if (data.status.authenticated) {
+                    backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
                 } else {
+                    backboneEvents.get().trigger(`session:authChange`, false);
                     $(".gc2-session-lock").hide();
                     $(".gc2-session-unlock").show();
                 }
-
             },
             error: function (error) {
                 console.error(error.responseJSON);
@@ -123,6 +124,8 @@ module.exports = {
                         type: "POST",
                         data: "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public",
                         success: function (data) {
+                            backboneEvents.get().trigger(`session:authChange`, true);
+
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Log out"});
@@ -142,6 +145,8 @@ module.exports = {
                         url: "/api/session/stop",
                         type: "GET",
                         success: function (data) {
+                            backboneEvents.get().trigger(`session:authChange`, false);
+
                             me.setState({statusText: "Not signed in"});
                             me.setState({alertClass: "alert-info"});
                             me.setState({btnText: "Sign in"});
@@ -166,6 +171,8 @@ module.exports = {
                     type: "GET",
                     success: function (data) {
                         if (data.status.authenticated) {
+                            backboneEvents.get().trigger(`session:authChange`, true);
+
                             me.setState({sessionEmail: data.status.userName});
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
@@ -174,6 +181,8 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                         } else {
+                            backboneEvents.get().trigger(`session:authChange`, false);
+
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                         }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha test/bootstrap.js -t 100000 --recursive test",
-    "test-verbose": "env DEBUG=\"puppeteer:*\" mocha test/bootstrap.js -t 100000 --recursive test"
+    "test-verbose": "env DEBUG=\"puppeteer:*\" mocha test/bootstrap.js -t 100000 --recursive test --grep \"State snapshot management\""
   },
   "repository": {
     "type": "git",
@@ -58,6 +58,7 @@
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",
     "crypto-browserify": "^3.11.0",
     "detect-browser": "^2.4.0",
@@ -73,9 +74,11 @@
     "ipaddr.js": "^1.5.4",
     "jquery": "^3.0.0",
     "jrespond": "^1.0.0",
+    "js-cookie": "^2.2.0",
     "jsts": "^1.1.2",
     "localforage": "^1.7.1",
     "lz-string": "^1.4.4",
+    "md5": "^2.2.1",
     "moment": "^2.17.0",
     "mustache": "^2.3.0",
     "mutationobserver-shim": "^0.3.2",
