@@ -198,9 +198,11 @@ var gc2table = (function () {
                 });
                 click = function (e) {
                     var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
-                    $(ns + " .fixed-table-body").animate({
-                        scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
-                    }, 300);
+                    try {
+                        $(ns + " .fixed-table-body").animate({
+                            scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
+                        }, 300);
+                    } catch (e) {}
                     object.trigger("selected" + "_" + uid, e.target._leaflet_id);
                 };
                 $(el).append("<thead><tr></tr></thead>");
