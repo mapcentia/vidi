@@ -179,14 +179,21 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
                 }
             }
 
-            searched.browserId = false;
-            searched.userId = 100;
-            data.push(searched);
-            saveSnapshots(data).then(() => {
-                response.json({ status: 'success' });
-            }).catch(errorCode => {
-                throwError(response, errorCode);
-            });
+            if (searched) {
+                let newElement = JSON.parse(JSON.stringify(searched));
+                newElement.anonymous = false;
+                newElement.browserId = false;
+                newElement.userId = 100;
+                data.push(newElement);
+
+                saveSnapshots(data).then(() => {
+                    response.json({ status: 'success' });
+                }).catch(errorCode => {
+                    throwError(response, errorCode);
+                });
+            } else {
+                throwError(response, 'SNAPSHOT_WAS_NOT_FOUND');
+            }
         }).catch(error => {
             console.log(error);
             throwError(response, 'UNABLE_TO_OPEN_DATABASE');
