@@ -1,1 +1,97 @@
-[{"anonymous":"true","snapshot":{"modules":{"layerTree":{"order":[{"id":"Dar es Salaam Land Use and Informal Settlement Data Set","layers":[{"id":"public.urbanspatial_dar_es_salaam_luse_2002"},{"id":"public.roads"}]},{"id":"Test group","layers":[{"id":"public.test"},{"id":"public.test_line"}]}]}},"map":{"baseLayer":"osm","zoom":"13","x":"39.2963","y":"-6.8335"}},"id":"1fec93be6db36996fdf7bd44f989a6950e4ef5bc","created_at":"2018-06-27T07:45:22.673Z","browserId":false,"userId":100},{"anonymous":true,"snapshot":{"modules":[],"map":{"x":1,"y":2,"zoom":3}},"id":"ea89663e23c76d8b654344c2a423a6f1efaac2c7","created_at":"2018-06-28T07:09:57.478Z","browserId":"1b0c07a6-2db0-49ad-860b-aa50c64887f0"},{"anonymous":true,"snapshot":{"modules":[],"map":{"x":1,"y":2,"zoom":3}},"id":"e7f9ee000c973adecd61c2ca94da9a631aa622fd","created_at":"2018-06-28T07:09:58.204Z","browserId":"1b0c07a6-2db0-49ad-860b-aa50c64887f0"}]
+[{
+	"anonymous": "true",
+	"snapshot": {
+		"modules": {
+			"layerTree": {
+				"order": [{
+					"id": "Dar es Salaam Land Use and Informal Settlement Data Set",
+					"layers": [{
+						"id": "public.urbanspatial_dar_es_salaam_luse_2002"
+					}, {
+						"id": "public.roads"
+					}]
+				}, {
+					"id": "Test group",
+					"layers": [{
+						"id": "public.test"
+					}, {
+						"id": "public.test_line"
+					}]
+				}]
+			}
+		},
+		"map": {
+			"baseLayer": "osm",
+			"zoom": "13",
+			"x": "39.2963",
+			"y": "-6.8335"
+		}
+	},
+	"id": "1fec93be6db36996fdf7bd44f989a6950e4ef5bc",
+	"created_at": "2018-06-27T07:45:22.673Z",
+	"browserId": "1b0c07a6-2db0-49ad-860b-aa50c64887f0"
+}, {
+	"anonymous": "false",
+	"snapshot": {
+		"modules": {
+			"layerTree": {
+				"order": [{
+					"id": "Dar es Salaam Land Use and Informal Settlement Data Set",
+					"layers": [{
+						"id": "public.urbanspatial_dar_es_salaam_luse_2002"
+					}, {
+						"id": "public.roads"
+					}]
+				}, {
+					"id": "Test group",
+					"layers": [{
+						"id": "public.test"
+					}, {
+						"id": "public.test_line"
+					}]
+				}]
+			}
+		},
+		"map": {
+			"baseLayer": "stamenTonerLite",
+			"zoom": "13",
+			"x": "39.2963",
+			"y": "-6.8335"
+		}
+	},
+	"id": "1e2bca05bec5833a693dc4378026c74377d214a2",
+	"created_at": "2018-06-27T07:45:24.945Z",
+    "userId": 100
+}, {
+    "anonymous": "false",
+	"snapshot": {
+		"modules": {
+			"layerTree": {
+				"order": [{
+					"id": "Dar es Salaam Land Use and Informal Settlement Data Set",
+					"layers": [{
+						"id": "public.urbanspatial_dar_es_salaam_luse_2002"
+					}, {
+						"id": "public.roads"
+					}]
+				}, {
+					"id": "Test group",
+					"layers": [{
+						"id": "public.test"
+					}, {
+						"id": "public.test_line"
+					}]
+				}]
+			}
+		},
+		"map": {
+			"baseLayer": "stamenTonerLite",
+			"zoom": "13",
+			"x": "39.2963",
+			"y": "-6.8335"
+		}
+	},
+	"id": "1e2bca05bec5833a693dc4378026c74377d214a3",
+	"created_at": "2018-06-27T07:45:24.945Z",
+	"userId": 200
+}]
