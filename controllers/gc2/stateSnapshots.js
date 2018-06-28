@@ -10,21 +10,34 @@ const throwError = (response, errorCode) => {
     response.json({ error: errorCode });
 };
 
-const getSnapshots = () => {
+const getSnapshots = (onlyBrowser = false, browserId = false, userId = 100) => {
     return new Promise((resolve, reject) => {
         fs.readFile(storage, (error, data) => {
             if (error) {
                 console.log(error);
                 reject(`UNABLE_TO_READ_FILE`);
             } else {
+                let result = [];
                 let parsedData = JSON.parse(data.toString());
                 parsedData.map(item => {
                     if (!item.userId && !item.browserId) {
                         throw new Error(`Unable to detect to whom snapshot belongs`);
                     }
+
+                    if (onlyBrowser) {
+                        if (item.browserId && item.browserId.length > 0) {
+                            result.push(item);
+                        }
+                    } else {
+                        if (item.userId && item.userId === 100) {
+                            result.push(item);
+                        } else if (item.browserId) {
+                            result.push(item);
+                        }
+                    }
                 });
 
-                resolve(parsedData);
+                resolve(result);
             }
         });
     });
@@ -95,7 +108,14 @@ router.get('/api/state-snapshots', (request, response, next) => {
         }
         // -->
 
-        if (browserId || userId) {
+        if (browserId && userId === false) {
+            getSnapshots(browserId).then(data => {
+                response.json(data);
+            }).catch(error => {
+                console.log(error);
+                throwError(response, 'UNABLE_TO_OPEN_DATABASE');
+            });
+        } else if (browserId || userId) {
             getSnapshots().then(data => {
                 response.json(data);
             }).catch(error => {
@@ -159,14 +179,21 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
                 }
             }
 
-            searched.browserId = false;
-            searched.userId = 100;
-            data.push(searched);
-            saveSnapshots(data).then(() => {
-                response.json({ status: 'success' });
-            }).catch(errorCode => {
-                throwError(response, errorCode);
-            });
+            if (searched) {
+                let newElement = JSON.parse(JSON.stringify(searched));
+                newElement.anonymous = false;
+                newElement.browserId = false;
+                newElement.userId = 100;
+                data.push(newElement);
+
+                saveSnapshots(data).then(() => {
+                    response.json({ status: 'success' });
+                }).catch(errorCode => {
+                    throwError(response, errorCode);
+                });
+            } else {
+                throwError(response, 'SNAPSHOT_WAS_NOT_FOUND');
+            }
         }).catch(error => {
             console.log(error);
             throwError(response, 'UNABLE_TO_OPEN_DATABASE');
@@ -182,7 +209,7 @@ router.post('/api/state-snapshots', (request, response, next) => {
             to the browser, so the browserId should be set. Otherwise, the created state snapshot
             belongs to current user and has its userId field set.
         */
-        if (request.body.anonymous === 'true') {
+        if (request.body.anonymous === 'true' || request.body.anonymous === true) {
             if (TRACKER_COOKIE_NAME in request.cookies) {
                 appendToSnapshots(request.body, request.cookies[TRACKER_COOKIE_NAME]).then(id => {
                     response.json({ id, status: 'success' });
@@ -192,7 +219,7 @@ router.post('/api/state-snapshots', (request, response, next) => {
             } else {
                 throw new Error(`Cannot find ${TRACKER_COOKIE_NAME} in cookies`);
             }
-        } else if (request.body.anonymous === 'false') {
+        } else if (request.body.anonymous === 'false' || request.body.anonymous === false) {
             // @todo Push to GC2
             // By this moment user has to be authorized, otherwise 403 will be returned
             appendToSnapshots(request.body).then(id => {
@@ -209,6 +236,18 @@ router.post('/api/state-snapshots', (request, response, next) => {
 });
 
 router.delete('/api/state-snapshots/:id', (request, response, next) => {
+    // Mock code <--
+    let browserId = false;
+    if (TRACKER_COOKIE_NAME in request.cookies) {
+        browserId = request.cookies[TRACKER_COOKIE_NAME];
+    }
+
+    let userId = false;
+    if (`connect.gc2` in request.cookies) {
+        userId = 100;
+    }
+    // -->
+
     /*
         Delete specific state snapshot with identifier
     */
@@ -216,8 +255,17 @@ router.delete('/api/state-snapshots/:id', (request, response, next) => {
         let snapshotIndex = -1;
         data.map((item, index) => {
             if (item.id === request.params.id) {
-                snapshotIndex = index;
-                return false;
+                if (item.browserId && item.browserId.length > 0) {
+                    if (item.browserId === browserId) {
+                        snapshotIndex = index;
+                        return false;
+                    }
+                } else {
+                    if (item.userId === userId) {
+                        snapshotIndex = index;
+                        return false;
+                    }
+                }
             }
         });
 

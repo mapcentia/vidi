@@ -376,10 +376,18 @@ module.exports = {
      */
     create: (forcedState = false) => {
         layerTreeIsReady = false;
+        if (forcedState) {
+            _self.getActiveLayers().map(item => {
+                switchLayer.init(item, false, false, false);
+            });
+        }
+
         $("#layers").empty();
         _self.getLayersOrder().then(order => {
+            let activeLayers = [];
             if (forcedState) {
                 order = forcedState.order;
+                activeLayers = forcedState.activeLayers;
             }
 
             layerTreeOrder = order;
@@ -754,7 +762,16 @@ module.exports = {
             layers.reorderLayers();
             state.listen(MODULE_NAME, `sorted`);
             layerTreeIsReady = true;
+            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
             backboneEvents.get().trigger(`layerTree:ready`);
+
+            setTimeout(() => {
+                if (activeLayers) {
+                    activeLayers.map(layerName => {
+                        $(`input[data-gc2-id="${layerName}"]`).trigger('click');
+                    });
+                }
+            }, 1000);
         });
     },
 
@@ -787,7 +804,11 @@ module.exports = {
      * Returns current module state
      */
     getState: () => {
-        return { order: layerTreeOrder };
+        let activeLayers = _self.getActiveLayers();
+        return {
+            order: layerTreeOrder,
+            activeLayers
+        };
     },
 
     /**

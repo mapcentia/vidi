@@ -622,9 +622,11 @@ module.exports = {
 
         if (urlVars.state) {
             stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
-                this.applyState(state.snapshot);
-
-                //initializeFromHashPart();
+                if (state) {
+                    this.applyState(state.snapshot);
+                } else {
+                    initializeFromHashPart();
+                }
             }).catch(error => {
                 console.warn(`Unable to find valid state snapshot with id ${urlVars.state}`);
                 initializeFromHashPart();
@@ -681,7 +683,8 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state) => {
-         let result = new Promise((resolve, reject) => {
+        history.pushState(``, document.title, window.location.pathname + window.location.search);
+        let result = new Promise((resolve, reject) => {
             let promises = [];
             if ('map' in state) {
                 anchor.applyMapParameters(state.map);
@@ -771,7 +774,7 @@ module.exports = {
             throw new Error(`Module or extension has to implement getState() and applyState() methods in order to support state`);
         }
 
-        _getInternalState().then(localState => {            
+        _getInternalState().then(localState => {        
             localState.modules[name] = listened[name].getState();
             _setInternalState(localState);
         }).catch(error => {

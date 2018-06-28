@@ -445,11 +445,26 @@ module.exports = module.exports = {
         }
     },
 
+    /**
+     * Fetches state snapshot by its identifier
+     * 
+     * @param {String} id State snapshot identifier
+     * 
+     * @return {Promise}
+     */
     getSnapshotByID: (id) => {
         if (!id) {
             throw new Error(`Snapshot identifier was not provided`);
         }
 
-        return $.getJSON(`${API_URL}/${id}`);
+        let result = new Promise((resolve, reject) => {
+            $.getJSON(`${API_URL}/${id}`).done((data) => {
+                resolve(data);
+            }).fail(() => {
+                resolve(false);
+            });
+        });
+
+        return result;
     }
 };
