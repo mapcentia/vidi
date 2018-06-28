@@ -202,7 +202,6 @@ router.post('/api/state-snapshots', (request, response, next) => {
             to the browser, so the browserId should be set. Otherwise, the created state snapshot
             belongs to current user and has its userId field set.
         */
-       console.log('### request.body', request.body);
         if (request.body.anonymous === 'true' || request.body.anonymous === true) {
             if (TRACKER_COOKIE_NAME in request.cookies) {
                 appendToSnapshots(request.body, request.cookies[TRACKER_COOKIE_NAME]).then(id => {
