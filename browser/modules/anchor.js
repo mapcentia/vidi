@@ -67,8 +67,6 @@ module.exports = {
         }
 
         setBaseLayer.init(parameters.baseLayer);
-
-        console.log('### applying parameters', parameters);
     },
 
     /**
