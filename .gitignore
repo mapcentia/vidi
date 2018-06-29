@@ -3,6 +3,9 @@
 
 *.iml
 
+# Mock snapshot database, should be removed when state snapshot management is moved to GC2
+temporary-state-storage.json
+
 # Code coverage files
 .nyc_output
 coverage
