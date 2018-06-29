@@ -47,6 +47,9 @@ describe("OfflineMap", () => {
         await page.evaluate(logAllCachedTiles);
         await helpers.sleep(1000);
 
+        await page.reload();
+        await helpers.sleep(5000);
+
         // Open and fill the form
         await page.click(`#offline-map-btn`);
         await helpers.sleep(2000);
