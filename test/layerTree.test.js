@@ -61,7 +61,7 @@ describe('Layer tree', () => {
             }
         });
 
-        await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-show-layer-control').trigger('click')`);
         expect(apiWasRequested).to.be.true;
     });
 
