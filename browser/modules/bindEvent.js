@@ -450,10 +450,10 @@ module.exports = module.exports = {
                     right: '0'
                 }, 500, function () {
                     $("#pane").animate({
-                        right: '450px'
+                        right: '550px'
                     }, 500);
 
-                    $('#map').animate({ "width": "-=225px" }, 500);
+                    $('#map').animate({ "width": "-=275px" }, 500);
                 });
 
                 searchPanelOpen = true;
@@ -467,7 +467,7 @@ module.exports = module.exports = {
                     width: '100%'
                 }, 500, function () {
                     $("#search-ribbon").animate({
-                        right: '-410px'
+                        right: '-510px'
                     }, 500);
                 });
 

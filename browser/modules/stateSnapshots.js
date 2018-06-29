@@ -119,6 +119,8 @@ module.exports = module.exports = {
             }
         };
 
+        utils.createMainTab(exId, "Snap shots", "", require('./../../browser/modules/height')().max);
+
         /**
          *
          */

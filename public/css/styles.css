@@ -596,7 +596,7 @@ body {
   position: absolute;
   top: 0;
   z-index: 3000;
-  width: 410px;
+  width: 510px;
   height: 100%;
   background-color: white;
   -webkit-box-sizing: border-box;
@@ -999,8 +999,8 @@ h4 small {
 }
 #search-ribbon {
   min-width: 100px;
-  width: 450px;
-  right: -410px;
+  width: 550px;
+  right: -510px;
   top: 0;
   position: absolute;
   height: 100%;
