@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./helpers");
+const helpers = require("./../helpers");
 
 describe("Application", () => {
     it("should constantly check for connection status and keep Force offline mode selector updated", async () => {

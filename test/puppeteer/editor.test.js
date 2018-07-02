@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./helpers");
+const helpers = require("./../helpers");
 
 describe('Editor', () => {
     describe('(if user is authorized)', () => {
@@ -18,10 +18,6 @@ describe('Editor', () => {
             // Accepting the dialog
             page.on('dialog', (dialog) => {
                 dialog.accept();
-            });
-
-            page.on('console', msg => {
-                //console.log('PAGE LOG:', msg.text());
             });
 
             // Sign in

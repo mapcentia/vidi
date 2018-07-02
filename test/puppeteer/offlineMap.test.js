@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./helpers");
+const helpers = require("./../helpers");
 
 describe("OfflineMap", () => {
     it("should make the map area available offline", async () => {
