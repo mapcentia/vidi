@@ -13,15 +13,15 @@ const opts = {
 };
 
 // expose variables
-before(async function() {
+beforeEach(async () => {
   global.expect = expect;
   global.localforage = localforage;
   global.browser = await puppeteer.launch(opts);
 });
 
 // close browser and reset global variables
-after(function() {
-  browser.close();
+afterEach(async () => {
+  await browser.close();
 
   global.browser = globalVariables.browser;
   global.localforage = globalVariables.localforage;

@@ -10,6 +10,8 @@ describe("Application", () => {
         const page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        await page.reload();
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
         expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
