@@ -24,47 +24,5 @@ describe("Application", () => {
 
         forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
         expect(forceOfflineModeIndicator).to.be.true;
-
-        /*
-        // @todo Enable logging in separate function
-        page.on("console", msg => {
-            console.log("PAGE LOG:", msg.text());
-            if (['log', 'info', 'debug'].indexOf(msg.type()) === -1) {
-                console.log("ARGS:", msg.args());
-            }
-        });
-
-        await page.screenshot({ path: 'test.png' });
-        */
-
-        // @todo Check the indicator change when app goes offline
-        /*
-        await page._client.send('Network.enable');
-        await page._client.on('Network.requestWillBeSent', event => {
-            console.log('Network.requestWillBeSent', event.requestId, event.request.url);
-        });
-        await page._client.on('Network.loadingFinished', event => {
-            console.log('Network.loadingFinished', event.requestId);
-        });
-
-        await page._client.send('Network.emulateNetworkConditions', {
-            offline: true,
-            latency: 100,
-            downloadThroughput: 0,
-            uploadThroughput: 0
-        });
-
-        await page.evaluate(`$.getJSON('https://jsonplaceholder.typicode.com/posts/1', function() {
-            console.log("success");
-        }).done(function() {
-            console.log("second success" );
-        }).fail(function() {
-            console.log("error");
-        }).always(function() {
-            console.log("complete");
-        });`);
-
-        await timeout(10000);
-        */
     });
 });
