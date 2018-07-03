@@ -10,7 +10,7 @@ const throwError = (response, errorCode) => {
     response.json({ error: errorCode });
 };
 
-const getSnapshots = (onlyBrowser = false, browserId = false, userId = 100) => {
+const getSnapshots = (browserId = false, userId = false, all = false) => {
     return new Promise((resolve, reject) => {
         fs.readFile(storage, (error, data) => {
             if (error) {
@@ -24,14 +24,12 @@ const getSnapshots = (onlyBrowser = false, browserId = false, userId = 100) => {
                         throw new Error(`Unable to detect to whom snapshot belongs`);
                     }
 
-                    if (onlyBrowser) {
-                        if (item.browserId && item.browserId.length > 0) {
-                            result.push(item);
-                        }
+                    if (all) {
+                        result.push(item);
                     } else {
-                        if (item.userId && item.userId === 100) {
+                        if (browserId && item.browserId && item.browserId === browserId) {
                             result.push(item);
-                        } else if (item.browserId) {
+                        } else if (userId && item.userId && item.userId === userId) {
                             result.push(item);
                         }
                     }
@@ -58,7 +56,7 @@ const saveSnapshots = (snapshots) => {
 
 const appendToSnapshots = (snapshot, browserId) => {
     return new Promise((resolve, reject) => {
-        getSnapshots().then(data => {
+        getSnapshots(false, false, true).then(data => {
             let hash = crypto.randomBytes(20).toString('hex');
             snapshot.id = hash;
 
@@ -108,23 +106,12 @@ router.get('/api/state-snapshots', (request, response, next) => {
         }
         // -->
 
-        if (browserId && userId === false) {
-            getSnapshots(browserId).then(data => {
-                response.json(data);
-            }).catch(error => {
-                console.log(error);
-                throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-            });
-        } else if (browserId || userId) {
-            getSnapshots().then(data => {
-                response.json(data);
-            }).catch(error => {
-                console.log(error);
-                throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-            });
-        } else {
-            throwError(response, 'NO_BROWSER_OR_USER_ID');
-        }
+        getSnapshots(browserId, userId).then(data => {
+            response.json(data);
+        }).catch(error => {
+            console.log(error);
+            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
+        });
     });
 });
 
@@ -138,7 +125,7 @@ router.get('/api/state-snapshots/:id', (request, response, next) => {
         /*
             Get specific state snapshot with identifier
         */
-        getSnapshots().then(data => {
+        getSnapshots(false, false, true).then(data => {
             let result = false;
             data.map(item => {
                 if (item.id === request.params.id) {
@@ -170,7 +157,7 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
             Update specific state snapshot with identifier, clear the browserId
             field and set userId field with the authorized user identifier
         */
-        getSnapshots().then(data => {
+        getSnapshots(false, false, true).then(data => {
             let searched = false;
             for (let i = 0; i < data.length; i++) {
                 if (data[i].id === request.params.id) {
@@ -251,7 +238,7 @@ router.delete('/api/state-snapshots/:id', (request, response, next) => {
     /*
         Delete specific state snapshot with identifier
     */
-    getSnapshots().then(data => {
+    getSnapshots(false, false, true).then(data => {
         let snapshotIndex = -1;
         data.map((item, index) => {
             if (item.id === request.params.id) {
