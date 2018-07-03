@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./helpers");
+const helpers = require("./../helpers");
 
 describe("OfflineMap", () => {
     it("should make the map area available offline", async () => {
@@ -46,6 +46,9 @@ describe("OfflineMap", () => {
         countingAlreadyCachedTiles = true;
         await page.evaluate(logAllCachedTiles);
         await helpers.sleep(1000);
+
+        await page.reload();
+        await helpers.sleep(5000);
 
         // Open and fill the form
         await page.click(`#offline-map-btn`);

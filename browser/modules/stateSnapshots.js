@@ -59,6 +59,14 @@ const API_URL = `/api/state-snapshots`;
  */
 var cloud, anchor, utils, state, urlparser, backboneEvents;
 
+/**
+ *
+ * @type {exports|module.exports}
+ */
+const uuidv4 = require('uuid/v4');
+
+const cookie = require('js-cookie');
+
 let _self = false;
 
 const exId = `state-snapshots-dialog-content`;
@@ -142,6 +150,14 @@ module.exports = module.exports = {
                 this.seizeSnapshot = this.seizeSnapshot.bind(this);               
                 this.seizeAllSnapshots = this.seizeAllSnapshots.bind(this);
                 this.copyToClipboard = this.copyToClipboard.bind(this);
+
+                // Setting unique cookie if it have not been set yet
+                let trackingCookie = uuidv4();
+                if (cookie.get('vidi-state-tracker')) {
+                    trackingCookie = cookie.get('vidi-state-tracker');
+                } else {
+                    cookie.set('vidi-state-tracker', trackingCookie);
+                }
             }
 
             /**
@@ -149,11 +165,10 @@ module.exports = module.exports = {
              */
             componentDidMount() {
                 let _self = this;
-                this.refreshSnapshotsList();
-
                 backboneEvents.get().on(`session:authChange`, (authenticated) => {
                     if (this.state.authenticated !== authenticated) {
                         this.setState({ authenticated });
+                        this.refreshSnapshotsList();
                     }
                 });
             }
@@ -381,7 +396,7 @@ module.exports = module.exports = {
 
                 let userOwnerSnapshotsPanel = false;
                 if (this.state.authenticated) {
-                    userOwnerSnapshotsPanel = (<div>
+                    userOwnerSnapshotsPanel = (<div className="js-user-owned">
                         <div>
                             <h4>
                                 {__(`User snapshots`)}
@@ -411,7 +426,7 @@ module.exports = module.exports = {
                 return (<div>
                     {overlay}
                     <div>
-                        <div>
+                        <div className="js-browser-owned">
                             <div>
                                 <h4>
                                     {__(`Local snapshots`)} 

@@ -82,14 +82,6 @@ var base64 = require('base64-url');
 
 /**
  *
- * @type {exports|module.exports}
- */
-const uuidv4 = require('uuid/v4');
-
-const cookie = require('js-cookie');
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -198,14 +190,6 @@ module.exports = {
 
         if ('localforage' in window === false) {
             throw new Error('localforage is not defined');
-        }
-
-        // Setting unique cookie if it have not been set yet
-        let trackingCookie = uuidv4();
-        if (cookie.get('vidi-state-tracker')) {
-            trackingCookie = cookie.get('vidi-state-tracker');
-        } else {
-            cookie.set('vidi-state-tracker', trackingCookie);
         }
 
         var arr, i;

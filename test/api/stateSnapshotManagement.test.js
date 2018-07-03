@@ -13,9 +13,9 @@ let nonAnonymousStateSnapshotId = false;
 describe('State snapshot management API', () => {
     it('should fail if browser does not have a tracker cookie and user is not authorized', (done) => {
         request(`${helpers.API_URL}/state-snapshots`, (error, response, body) => {
-            expect(response.statusCode).to.equal(400);
+            expect(response.statusCode).to.equal(200);
             let parsedBody = JSON.parse(body);
-            expect(parsedBody.error).to.equal(`NO_BROWSER_OR_USER_ID`);
+            expect(parsedBody.length).to.equal(0);
             done();
         });
     });

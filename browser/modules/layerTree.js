@@ -761,9 +761,10 @@ module.exports = {
 
             layers.reorderLayers();
             state.listen(MODULE_NAME, `sorted`);
+            state.listen(MODULE_NAME, `activeLayersChange`);
             layerTreeIsReady = true;
             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-            backboneEvents.get().trigger(`layerTree:ready`);
+            backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
 
             setTimeout(() => {
                 if (activeLayers) {
@@ -832,7 +833,6 @@ module.exports = {
         switchLayer.init(layerId, false, false, forceTileRedraw);
         switchLayer.init(layerId, true, false, forceTileRedraw);
     },
-
 
     /**
      * Returns list of currently enabled layers

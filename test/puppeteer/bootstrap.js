@@ -8,22 +8,21 @@ const globalVariables = _.pick(global, ["browser", "expect", "localforage"]);
 const opts = {
   headless: true,
   timeout: 10000,
-  //executablePath: '/usr/bin/google-chrome',
   args: ["--no-sandbox"]
 };
 
 // expose variables
-before(async function() {
-  global.expect = expect;
-  global.localforage = localforage;
-  global.browser = await puppeteer.launch(opts);
+beforeEach(async () => {
+    global.expect = expect;
+    global.localforage = localforage;
+    global.browser = await puppeteer.launch(opts);
 });
 
 // close browser and reset global variables
-after(function() {
-  browser.close();
+afterEach(async () => {
+    await browser.close();
 
-  global.browser = globalVariables.browser;
-  global.localforage = globalVariables.localforage;
-  global.expect = globalVariables.expect;
+    global.browser = globalVariables.browser;
+    global.localforage = globalVariables.localforage;
+    global.expect = globalVariables.expect;
 });

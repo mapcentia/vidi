@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./helpers");
+const helpers = require("./../helpers");
 
 describe('Editor', () => {
     describe('(if user is authorized)', () => {
@@ -11,6 +11,8 @@ describe('Editor', () => {
             const page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
+            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            await page.reload();
             await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
             // Accepting the dialog
@@ -27,25 +29,30 @@ describe('Editor', () => {
     	    await page.keyboard.type('qewadszcx');
     	    await helpers.sleep(1000);
     	    await page.evaluate(`$('.login').find('[type="submit"]').trigger('click')`);
-    	    await helpers.sleep(2000);
+            await helpers.sleep(2000);
     	    await page.evaluate(`$('#login-modal').find('.close').trigger('click')`);
             await helpers.sleep(1000);
-            
+
             // Check if feature already exists on the map, if it does - delete
             await page.click(`#map`);
             await helpers.sleep(1000);
-            if (await page.evaluate(`$('.ge-delete').is(':visible')`)) {
+            while (await page.evaluate(`$('.ge-delete').is(':visible')`)) {
                 await page.evaluate(`$('.ge-delete').trigger('click')`);
                 await helpers.sleep(4000);
-            }
 
-            // Ensure that the feature was deleted
-            await page.click(`#map`);
-            await helpers.sleep(1000);
-            expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.false;
+                await page.click(`#map`);
+                await helpers.sleep(1000);
+            }
 
             // Adding feature
             await page.click(`#burger-btn`);
+            await helpers.sleep(1000);
+            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+            if (offlineModeIsForced) {
+                await page.evaluate(`$('.toggle').trigger('click');`);
+                await helpers.sleep(1000);
+            }
+
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
@@ -58,22 +65,24 @@ describe('Editor', () => {
 
             // Ensure that the feature was added
             await page.click(`#map`);
-            await helpers.sleep(1000);
+            await helpers.sleep(4000);
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
-
+            
             // Updating feature
             await page.evaluate(`$('.ge-start-edit').trigger('click')`);
             await helpers.sleep(1000);
             await page.focus('#root_id');
             await page.keyboard.type('2000');
             await helpers.sleep(1000);
+            expect(await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').length`)).to.equal(1);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(4000);
+            await helpers.sleep(6000);
 
-            // Ensure that the feature was added
+            // Ensure that the feature was updated
             await page.click(`#map`);
             await helpers.sleep(1000);
             await page.evaluate(`$('.ge-start-edit').trigger('click')`);
+            await helpers.sleep(1000);
             expect(await page.evaluate(`$('#root_id').val()`)).to.equal('20001000');
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('.close-hide').trigger('click')`);
@@ -103,20 +112,33 @@ describe('Editor', () => {
             await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
             await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            await page.reload();
+            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+            // Accepting the dialog
+            page.on('dialog', (dialog) => {
+                dialog.accept();
+            });
 
             // Selecting point on map and open the attribute editing dialog
             await page.click(`#burger-btn`);
+            await helpers.sleep(1000);
+
+            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+            if (offlineModeIsForced) {
+                await page.evaluate(`$('.toggle').trigger('click');`);
+                await helpers.sleep(1000);
+            }
+
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
 
             await helpers.sleep(1000);
-
             // Filling in attributes of the added feature
             await page.evaluate(`$('#root_id').val('111')`);
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-
             await helpers.sleep(4000);
 
             // Checking if the queue indicator shows that element was added to the queue
@@ -124,10 +146,29 @@ describe('Editor', () => {
         });
 
         it('should put update feature request to the queue', async () => {
-	    const page = await browser.newPage();
+	        const page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            await page.reload();
+            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+            // Accepting the dialog
+            page.on('dialog', (dialog) => {
+                dialog.accept();
+            });
+
+            await page.click(`#burger-btn`);
+            await helpers.sleep(1000);
+
+            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+            if (offlineModeIsForced) {
+                await page.evaluate(`$('.toggle').trigger('click');`);
+                await helpers.sleep(1000);
+            }
+
+            await page.evaluate(`$('#layer-slide .close').trigger('click')`);
+            await helpers.sleep(1000);
 
             // Selecting first already existing point on map and trying to edit it
             const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
@@ -150,12 +191,18 @@ describe('Editor', () => {
             await helpers.sleep(4000);
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
+
+            // Cleanup
+            await page.evaluate(`$('.js-clear').trigger('click')`);
+            await helpers.sleep(2000);
         });
 
         it('should put delete feature request to the queue', async () => {
-	    const page = await browser.newPage();
+	        const page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
+            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            await page.reload();
             await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
             // Accepting the dialog
@@ -164,6 +211,17 @@ describe('Editor', () => {
             });
 
             await page.click(`#burger-btn`);
+            await helpers.sleep(1000);
+
+            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+            if (offlineModeIsForced) {
+                await page.evaluate(`$('.toggle').trigger('click');`);
+                await helpers.sleep(1000);
+            }
+
+            await page.evaluate(`$('#layer-slide .close').trigger('click')`);
+            await helpers.sleep(1000);
+
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await helpers.sleep(1000);
             await page.evaluate(`$('.js-clear').trigger('click')`);
@@ -172,15 +230,18 @@ describe('Editor', () => {
             // Selecting first already existing point on map and deleting it
             const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
             let mouse = page.mouse;
-
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
             await mouse.click(markerPosition.left + 10 + 24, markerPosition.top + 10 - 48);
 
             // Checking if the queue indicator shows that element was added to the queue
-            await helpers.sleep(4000);
+            await helpers.sleep(10000);
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete"]').is(':visible')`)).to.be.true;
+
+            // Cleanup
+            await page.evaluate(`$('.js-clear').trigger('click')`);
+            await helpers.sleep(2000);
         });
     });
 
@@ -190,10 +251,19 @@ describe('Editor', () => {
         await page.emulate(helpers.EMULATED_SCREEN);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
         // Selecting point on map and open the attribute editing dialog
         await page.click(`#burger-btn`);
         await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-        await page.evaluate(`$('.toggle').trigger('click');`);
+
+        let offlineModeIsOn = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
+        if (offlineModeIsOn === false) {
+            await page.evaluate(`$('.toggle').trigger('click');`);
+        }
 
         await helpers.sleep(1000);
 
@@ -207,9 +277,10 @@ describe('Editor', () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
 
-        await helpers.sleep(2000);
+        await helpers.sleep(4000);
 
         // Created feature is not rejected by server yet, so checking the failed indicator
+        
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.true;
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.false;
 
@@ -221,7 +292,11 @@ describe('Editor', () => {
 
 	    // Created feature is already rejected by server, so checking corresponding indicator
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.false;
-	    expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
+        expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
+
+        // Cleanup
+        await page.evaluate(`$('.js-clear').trigger('click')`);
+        await helpers.sleep(2000);
     });
 
     describe('should transform feature requests responses when offline', () => {});

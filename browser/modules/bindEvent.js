@@ -385,6 +385,7 @@ module.exports = module.exports = {
                     }
 
                     switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, false);
+                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                     e.stopPropagation();
                 });
             });

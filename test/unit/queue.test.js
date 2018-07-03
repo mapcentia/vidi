@@ -4,8 +4,8 @@
 
 const { expect } = require('chai');
 const util = require('util');
-const Queue = require('./../browser/modules/api-bridge/Queue');
-const helpers = require('./helpers');
+const Queue = require('./../../browser/modules/api-bridge/Queue');
+const helpers = require('./../helpers');
 
 // Dummy request
 const dummyRequest = {
