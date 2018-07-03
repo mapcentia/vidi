@@ -381,7 +381,7 @@ module.exports = module.exports = {
 
                 let userOwnerSnapshotsPanel = false;
                 if (this.state.authenticated) {
-                    userOwnerSnapshotsPanel = (<div>
+                    userOwnerSnapshotsPanel = (<div className="js-user-owned">
                         <div>
                             <h4>
                                 {__(`User snapshots`)}
@@ -411,7 +411,7 @@ module.exports = module.exports = {
                 return (<div>
                     {overlay}
                     <div>
-                        <div>
+                        <div className="js-browser-owned">
                             <div>
                                 <h4>
                                     {__(`Local snapshots`)} 
