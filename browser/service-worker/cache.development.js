@@ -62,6 +62,7 @@ let urlsToCache = [
     '/js/lib/jquery.canvasResize.js/jquery.exif.js',
     '/js/lib/q-cluster/src/clustering.js',
     '/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+    '/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
     '/js/lib/leaflet-plugins/Bing.js',
     '/js/lib/leaflet-plugins/Yandex.js',
     '/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
