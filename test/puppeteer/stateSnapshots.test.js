@@ -68,8 +68,10 @@ describe("State snapshots", () => {
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
 
-        await page.screenshot({ path: 'test.png' });
-
+        // Check if browser-owned state snapshots were loaded
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
+        let numberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        expect(numberOfStateSnapshots > 0).to.be.true;
     });
 
     it("should capture current state and save it as user-owned", async () => {
