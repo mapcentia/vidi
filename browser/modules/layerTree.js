@@ -816,16 +816,22 @@ module.exports = {
      */
     getState: () => {
         let activeLayers = _self.getActiveLayers();
-        return {
+        let state = {
             order: layerTreeOrder,
             activeLayers
         };
+
+        return state;
     },
 
     /**
      * Applies externally provided state
      */
     applyState: (newState) => {
+        if (newState.order && newState.order === 'false') {
+            newState.order = false;
+        }
+
         let result = new Promise((resolve, reject) => {
             _self.create(newState);
             resolve();
