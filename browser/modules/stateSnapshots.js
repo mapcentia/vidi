@@ -9,7 +9,7 @@
 
 const md5 = require(`md5`);
 
-const translations = {
+const dict = {
     "State snapshots": {
         "da_DK": "# State snapshots",
         "en_US": "# State snapshots"
@@ -49,6 +49,10 @@ const translations = {
     "copy link": {
         "da_DK": "# copy link",
         "en_US": "# copy link"
+    },
+    "Description": {
+        "da_DK": "# Save and share the current state of the application",
+        "en_US": "# Save and share the current state of the application",
     }
 };
 
@@ -107,27 +111,7 @@ module.exports = module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        /**
-         *
-         * @type {{Info: {da_DK: string, en_US: string}}}
-         */
-        var dict = translations;
-
-        /**
-         *
-         * @param txt
-         * @returns {*}
-         * @private
-         */
-        var __ = function (txt) {
-            if (dict[txt][window._vidiLocale]) {
-                return dict[txt][window._vidiLocale];
-            } else {
-                return txt;
-            }
-        };
-
-        utils.createMainTab(exId, "Snap shots", "", require('./../../browser/modules/height')().max);
+        utils.createMainTab(exId, utils.__("State snapshots", dict), utils.__("Description", dict), require('./../../browser/modules/height')().max);
 
         /**
          *
@@ -179,7 +163,7 @@ module.exports = module.exports = {
              * @param {Boolean} browserOwned Specifies if the created snapshot belongs to browser or user
              */
             createSnapshot(browserOwned = false) {
-                if (confirm(`${__(`Save current application state`)}?`)) {
+                if (confirm(`${utils.__(`Save current application state`, dict)}?`)) {
                     state.getState().then(state => {
                         if ('modules' in state === false) {
                             throw new Error(`No modules data in state`);
@@ -218,7 +202,7 @@ module.exports = module.exports = {
              * @param {String} id Snapshot identifier
              */
             deleteSnapshot(id) {
-                if (confirm(`${__(`Delete snapshot`)}?`)) {
+                if (confirm(`${utils.__(`Delete snapshot`, dict)}?`)) {
                     let _self = this;
                     $.ajax({
                         url: `${API_URL}/${id}`,
@@ -235,7 +219,7 @@ module.exports = module.exports = {
              */
             seizeSnapshot(item) {
                 let _self = this;
-                if (confirm(`${__(`Add local state snapshot to user's ones`)}?`)) {
+                if (confirm(`${utils.__(`Add local state snapshot to user's ones`, dict)}?`)) {
                     $.ajax({
                         url: `${API_URL}/${item.id}`,
                         method: 'PUT',
@@ -251,7 +235,7 @@ module.exports = module.exports = {
              * Makes all state snapshots belong to user, not browser
              */
             seizeAllSnapshots() {
-                if (confirm(`${__(`Add local state snapshots to user's ones`)}?`)) {
+                if (confirm(`${utils.__(`Add local state snapshots to user's ones`, dict)}?`)) {
                     let _self = this;
                     let promises = [];
                     this.state.browserOwnerSnapshots.map(item => {
@@ -362,7 +346,7 @@ module.exports = module.exports = {
                             </div>
                             <div>
                                 <div className="input-group">
-                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
+                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{utils.__(`copy link`, dict)}</a>
                                     <input className="form-control" type="text" defaultValue={permaLink}/>
                                 </div>
                             </div>
@@ -371,7 +355,7 @@ module.exports = module.exports = {
                 };
 
                 let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={() => { this.createSnapshot(true) }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                    <a onClick={() => { this.createSnapshot(true) }}>{utils.__(`No snapshots`, dict)}. {utils.__(`Create one`, dict)}?</a>
                 </div>);
 
                 let importAllIsDisabled = true;
@@ -385,7 +369,7 @@ module.exports = module.exports = {
                 }
 
                 let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={() => { this.createSnapshot() }}>{__(`No snapshots`)}. {__(`Create one`)}?</a>
+                    <a onClick={() => { this.createSnapshot() }}>{utils.__(`No snapshots`, dict)}. {utils.__(`Create one`, dict)}?</a>
                 </div>);
                 if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
                     userOwnerSnapshots = [];
@@ -399,7 +383,7 @@ module.exports = module.exports = {
                     userOwnerSnapshotsPanel = (<div className="js-user-owned">
                         <div>
                             <h4>
-                                {__(`User snapshots`)}
+                                {utils.__(`User snapshots`, dict)}
                                 <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot() }} style={buttonStyle}>
                                     <i className="material-icons">add</i>
                                 </button>
@@ -429,7 +413,7 @@ module.exports = module.exports = {
                         <div className="js-browser-owned">
                             <div>
                                 <h4>
-                                    {__(`Local snapshots`)} 
+                                    {utils.__(`Local snapshots`, dict)} 
                                     <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot(true) }} style={buttonStyle}>
                                         <i className="material-icons">add</i>
                                     </button>
@@ -449,7 +433,6 @@ module.exports = module.exports = {
         }
 
         if (document.getElementById(exId)) {
-            utils.createMainTab(exId, __("State snapshots"), __("State snapshots"), require('./height')().max);
             try {
                 ReactDOM.render(<StateSnapshots/>, document.getElementById(exId));
             } catch (e) {
