@@ -779,7 +779,7 @@ module.exports = {
             setTimeout(() => {
                 if (activeLayers) {
                     activeLayers.map(layerName => {
-                        $(`input[data-gc2-id="${layerName}"]`).trigger('click');
+                        $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click');
                     });
                 }
             }, 1000);
