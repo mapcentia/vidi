@@ -59,6 +59,17 @@ describe("State snapshots", () => {
         let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
 
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
+
+        // Snapshot is displayed after the browser reload
+        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        // Open state snapshot manager
+        await page.click(`#state-snapshots-dialog-btn`);
+        await helpers.sleep(2000);
+
+        await page.screenshot({ path: 'test.png' });
+
     });
 
     it("should capture current state and save it as user-owned", async () => {

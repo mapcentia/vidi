@@ -155,6 +155,8 @@ module.exports = module.exports = {
                         this.refreshSnapshotsList();
                     }
                 });
+
+                this.refreshSnapshotsList();
             }
 
             /**
