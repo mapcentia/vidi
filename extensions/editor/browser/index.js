@@ -125,8 +125,7 @@ module.exports = {
 
         // Listen to arrival of edit-tools
         $(document).arrive('.gc2-edit-tools', function () {
-            $(this).css("visibility", "visible")
-
+            $(this).css("visibility", "visible");
         });
 
         // Don't init layer tree automatic. Let this module activate it
@@ -138,80 +137,90 @@ module.exports = {
             metaData.data.map(v => {
                 let layerName = v.f_table_schema + "." + v.f_table_name;
 
-                if (JSON.parse(v.meta) !== null && typeof JSON.parse(v.meta).vectorstyle !== "undefined") {
+                let layerMeta = false;
+                if (v.meta) {
                     try {
-                        styleFn = eval("(" + JSON.parse(v.meta).vectorstyle + ")");
+                        layerMeta = JSON.parse(v.meta);
                     } catch (e) {
-                        styleFn = function () {
-                        };
+                        console.warn(`Unable to parse meta for ${layerName}`);
                     }
                 }
 
-                // Set popup with Edit and Delete buttons
-                layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
-                    if (feature.meta) {
-                        let content = false;
-                        let tooltipSettings = {
-                            autoClose: false,
-                            minWidth: 25,
-                            permanent: true
-                        };
+                if (layerMeta && layerMeta.vidi_layer_editable) {
+                    // Set popup with Edit and Delete buttons
+                    layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
+                        if (feature.meta) {
+                            let content = false;
+                            let tooltipSettings = {
+                                autoClose: false,
+                                minWidth: 25,
+                                permanent: true
+                            };
 
-                        if (feature.meta.apiRecognitionStatus === 'pending') {
-                            content = `<div class="js-feature-notification-tooltip">
-                                <i class="fa fa-exclamation"></i> ${__(`Pending`)}
-                                <span class="js-tooltip-content"></span>
-                            </div>`;
+                            if (feature.meta.apiRecognitionStatus === 'pending') {
+                                content = `<div class="js-feature-notification-tooltip">
+                                    <i class="fa fa-exclamation"></i> ${__(`Pending`)}
+                                    <span class="js-tooltip-content"></span>
+                                </div>`;
 
-                            tooltipSettings.className = `api-bridge-popup-warning`;
-                        } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
-                            content = `<div class="js-feature-notification-tooltip">
-                                <i class="fa fa-exclamation"></i> ${__(`Error`)}
-                                <span class="js-tooltip-content"></span>
-                            </div>`;
+                                tooltipSettings.className = `api-bridge-popup-warning`;
+                            } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+                                content = `<div class="js-feature-notification-tooltip">
+                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <span class="js-tooltip-content"></span>
+                                </div>`;
 
-                            tooltipSettings.className = `api-bridge-popup-error`;
-                        } else {
-                            throw new Error(`Invalid API recognition status value`);
+                                tooltipSettings.className = `api-bridge-popup-error`;
+                            } else {
+                                throw new Error(`Invalid API recognition status value`);
+                            }
+
+                            layer.on("add", function (e) {
+                                let latLng = false;
+                                if (feature.geometry && feature.geometry.type === 'Point') {
+                                    latLng = layer.getLatLng();
+                                } else {
+                                    let bounds = layer.getBounds();
+                                    latLng = bounds.getCenter()
+                                }
+
+                                let tooltip = L.tooltip(tooltipSettings).setContent(content);
+                                layer.bindTooltip(tooltip);
+                            });
                         }
 
-                        layer.on("add", function (e) {
-                            let latLng = false;
-                            if (feature.geometry && feature.geometry.type === 'Point') {
-                                latLng = layer.getLatLng();
-                            } else {
-                                let bounds = layer.getBounds();
-                                latLng = bounds.getCenter()
-                            }
+                        layer.on("click", function (e) {
+                            e.originalEvent.clickedOnFeature = true;
 
-                            let tooltip = L.tooltip(tooltipSettings).setContent(content);
-                            layer.bindTooltip(tooltip);
-                        });
-                    }
+                            let managePopup = L.popup({
+                                autoPan: false
+                            }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-primary btn-xs ge-delete">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>`).openOn(cloud.get().map);
 
-                    layer.on("click", function (e) {
-                        e.originalEvent.clickedOnFeature = true;
+                            $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                                me.edit(layer, layerName + ".the_geom", null, true);
+                            });
 
-                        let managePopup = L.popup({
-                            autoPan: false
-                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-primary btn-xs ge-delete">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                        </button>`).openOn(cloud.get().map);
-
-                        $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                            me.edit(layer, layerName + ".the_geom", null, true);
-                        });
-
-                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                            if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                me.delete(layer, layerName + ".the_geom", null, true);
-                            }
+                            $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                    me.delete(layer, layerName + ".the_geom", null, true);
+                                }
+                            });
                         });
                     });
-                });
+                }
+
+                if (layerMeta && layerMeta.vectorstyle !== "undefined") {
+                    try {
+                        styleFn = eval("(" + layerMeta.vectorstyle + ")");
+                    } catch (e) {
+                        styleFn = () => {};
+                    }
+                }
 
                 layerTree.setStyle(layerName, styleFn);
             });

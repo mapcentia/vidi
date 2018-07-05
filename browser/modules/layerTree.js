@@ -566,8 +566,13 @@ module.exports = {
                             let selectorLabel = tileLayerIcon;
                             let defaultLayerType = 'tile';
 
+                            let layerIsEditable = false;
                             if (layer && layer.meta) {
                                 let parsedMeta = JSON.parse(layer.meta);
+                                if (parsedMeta && parsedMeta.vidi_layer_editable) {
+                                    layerIsEditable = true;
+                                }
+
                                 if (parsedMeta) {
                                     displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
                                 }
@@ -619,7 +624,7 @@ module.exports = {
 
                             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
-                            let regularButtonStyle = `padding: 2px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+                            let regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
                             let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
                             let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
 
@@ -636,7 +641,7 @@ module.exports = {
                                 }
                             } else {
                                 layerTypeSelector = `<div class="dropdown">
-                                    <button style="padding: 8px;" class="btn btn-default dropdown-toggle" type="button"
+                                    <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                                         <span class="js-dropdown-label">${selectorLabel}</span>
                                         <span class="caret"></span>
@@ -652,7 +657,15 @@ module.exports = {
                                 </div>`;
                             }
 
-                            let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}">
+                            let addButton = ``;
+                            if (layerIsEditable) {
+                                addButton = `<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
+                                    data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
+                                    <i class="fa fa-plus"></i>
+                                </button>`;
+                            }
+
+                            let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
                                 <div style="display: inline-block;">
                                     <div class="checkbox" style="width: 34px;">
                                         <label>
@@ -690,10 +703,7 @@ module.exports = {
                                     </button>
                                 </div>
                                 <div style="display: inline-block;">
-                                    <button type="button" data-gc2-key="${layerKeyWithGeom}" style="padding: 8px;" 
-                                        data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
-                                        <i class="fa fa-plus"></i>
-                                    </button>
+                                    ${addButton}
                                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                 </div>
