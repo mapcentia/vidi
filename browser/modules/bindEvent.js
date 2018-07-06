@@ -390,14 +390,6 @@ module.exports = module.exports = {
                 });
             });
 
-            $(document).arrive('[data-gc2-base-id]', function () {
-                $(this).on("change", function (e) {
-                    setBaseLayer.init($(this).data('gc2-base-id'));
-                    e.stopPropagation();
-                    $(this).css("background-color", "white");
-                });
-            });
-
             $(document).arrive('[data-toggle="tooltip"]', function () {
                 $(this).tooltip()
             });

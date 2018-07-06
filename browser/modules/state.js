@@ -176,6 +176,7 @@ module.exports = {
         backboneEvents = o.backboneEvents;
 
         listened['layerTree'] = layerTree;
+        listened['baseLayer'] = baseLayer;
 
         _self = this;
         return this;

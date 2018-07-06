@@ -828,6 +828,8 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        console.log('### layerTree', newState);
+
         if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
