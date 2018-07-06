@@ -12,20 +12,12 @@ const dict = {
     }
 };
 
-/**
- * @type {*|exports|module.exports}
- */
-var cloud;
+const MODULE_NAME = `baseLayer`;
 
 /**
  * @type {*|exports|module.exports}
  */
-var urlparser;
-
-/**
- * @type {*|exports|module.exports}
- */
-var utils;
+var cloud, utils, layers, setBaseLayer, urlparser, backboneEvents, state;
 
 /**
  * List with base layers added to the map. Can be got through API.
@@ -34,6 +26,14 @@ var utils;
 var baseLayers = [];
 
 let _self = false;
+
+let sideBySideControl = false;
+
+let activeBaseLayer = false;
+
+let activeSideBySideLayer = false;
+
+let sideBySideEnabled = false;
 
 /**
  *
@@ -48,6 +48,10 @@ module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
         urlparser = o.urlparser;
+        layers = o.layers;
+        setBaseLayer = o.setBaseLayer;
+        state = o.state;
+        backboneEvents = o.backboneEvents;
         utils = o.utils;
 
         _self = this;
@@ -71,10 +75,12 @@ module.exports = module.exports = {
             window.setBaseLayers = window.vidiConfig.baseLayers;
         }
 
+        // Setting keys
         cloud.get().bingApiKey = window.bingApiKey;
         cloud.get().digitalGlobeKey = window.digitalGlobeKey;
 
-        let sideBySideSwitcher = `<div class="panel panel-default">
+        // Creating side-by-side mode toggle
+        $("#base-layer-list").append(`<div class="panel panel-default">
             <div class="panel-body">
                 <div class="togglebutton">
                     <label>
@@ -82,114 +88,179 @@ module.exports = module.exports = {
                     </label>
                 </div>
             </div>
-        </div>`;
-
-        $("#base-layer-list").append(sideBySideSwitcher);
+        </div>`);
 
         $(`.js-toggle-side-by-side-mode`).change((event) => {
-            if ($(event.target).is(':checked')) {
-                _self.drawBaseLayersControl(true);
+            sideBySideEnabled = $(event.target).is(':checked');
+            if (sideBySideEnabled) {
+                activeSideBySideLayer = false;
             } else {
-                _self.drawBaseLayersControl(false);
+                _self.destroySideBySideControl(true);
+            }
+
+            _self.drawBaseLayersControl();
+            backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+        });
+
+        _self.getSideBySideModeStatus().then(sideBySideModeStatus => {
+            if (sideBySideModeStatus && sideBySideModeStatus.length === 2) {
+                $(`.js-toggle-side-by-side-mode`).trigger(`click`);
+                setTimeout(() => {
+                    this.drawBaseLayersControl().then(() => {
+                        $(`[name="baselayers"][value="${sideBySideModeStatus[0]}"]`).trigger('click');
+                        setTimeout(() => {
+                            $(`[name="side-by-side-baselayers"][value="${sideBySideModeStatus[1]}"]`).trigger('click');
+                        }, 1000);
+                    });
+                }, 1000);
             }
         });
 
-        this.drawBaseLayersControl();
+        state.listen(MODULE_NAME, `side-by-side-mode-change`);
     },
 
-    drawBaseLayersControl: (enableSideBySide = false) => {
-        // Delete current layers
-        let alreadySelectedLayerId = $('input[name="baselayers"]:checked').closest('.base-layer-item').data('gc2-base-id');
-        $(`.js-base-layer-control`).remove();
-        baseLayers = [];
+    destroySideBySideControl: (revert = false) => {
+        sideBySideControl.remove();
+        sideBySideControl = false;
 
-        // Add base layers controls
-        let appendedCode = ``;
-        for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
-            let bl = window.setBaseLayers[i];
-
-            let layerId = false;
-            let layerName = false;
-            if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
-                baseLayers.push(bl.id);
-                layerId = bl.id;
-                layerName = bl.name;
-            } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
-                || window.setBaseLayers[i].restrictTo.filter((n) => { return schemas.indexOf(n) != -1; }).length > 0) {
-                baseLayers.push(window.setBaseLayers[i].id);
-                layerId = window.setBaseLayers[i].id;
-                layerName = window.setBaseLayers[i].name;
-            }
-
-            let sideBySideLayerControl = ``;
-            if (enableSideBySide) {
-                sideBySideLayerControl = `<div class='radio radio-primary base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
-                    <label class='side-by-side-baselayer-label'>
-                        <input type='radio' name='side-by-side-baselayer'>
-                    </label>
-                </div>`;
-            }
-
-            appendedCode += `<div class='list-group-item js-base-layer-control'>
-                <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
-                    <label class='baselayer-label'>
-                        <input type='radio' name='baselayers'> 
-                    </label>
-                </div>
-                ${sideBySideLayerControl}
-                <div>${layerName}</div>
-            </div>
-            <div class='list-group-separator'></div>`;
+        if (revert) {
+            setBaseLayer.init(activeBaseLayer);
         }
+    },
 
-        $("#base-layer-list").append(appendedCode).promise().then(() => {
-            setTimeout(() => {
-                $(`[data-gc2-base-id="${alreadySelectedLayerId}"]`).trigger('change');
+    redraw: (newBaseLayerName) => {
+        activeBaseLayer = newBaseLayerName;
+        _self.drawBaseLayersControl();
+    },
+
+    drawBaseLayersControl: () => {
+        let result = new Promise((resolve, reject) => {
+            // Delete current layers
+            $(`.js-base-layer-control`).remove();
+            baseLayers = [];
+
+            // Add base layers controls
+            let appendedCode = ``;
+            for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
+                let bl = window.setBaseLayers[i];
+
+                let layerId = false;
+                let layerName = false;
+                if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
+                    baseLayers.push(bl.id);
+                    layerId = bl.id;
+                    layerName = bl.name;
+                } else if (typeof window.setBaseLayers[i].restrictTo === "undefined"
+                    || window.setBaseLayers[i].restrictTo.filter((n) => { return schemas.indexOf(n) != -1; }).length > 0) {
+                    baseLayers.push(window.setBaseLayers[i].id);
+                    layerId = window.setBaseLayers[i].id;
+                    layerName = window.setBaseLayers[i].name;
+                }
+
+                let sideBySideLayerControl = ``;
+                if (sideBySideEnabled) {
+                    sideBySideLayerControl = `<div class='radio radio-primary base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
+                        <label class='side-by-side-baselayers-label'>
+                            <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeSideBySideLayer ? `checked=""` : ``}>
+                        </label>
+                    </div>`;
+                }
+
+                appendedCode += `<div class='list-group-item js-base-layer-control'>
+                    <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
+                        <label class='baselayer-label'>
+                            <input type='radio' name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+                        </label>
+                    </div>
+                    ${sideBySideLayerControl}
+                    <div>${layerName}</div>
+                </div>
+                <div class='list-group-separator'></div>`;
+            }
+
+            $("#base-layer-list").append(appendedCode).promise().then(() => {
+                $(`[name="baselayers"]`).change(event => {
+                    activeBaseLayer = $(event.target).val();
+                    event.stopPropagation();
+                    setBaseLayer.init(activeBaseLayer);
+                });
+
+                // Disabling inputs
+                $('[name="side-by-side-baselayers"]').prop('disabled', false);
+                $(`[data-gc2-side-by-side-base-id="${activeBaseLayer}"]`).find('[name="side-by-side-baselayers"]').prop('disabled', true);
 
                 $('[data-gc2-side-by-side-base-id]').off();
                 $('[data-gc2-side-by-side-base-id]').change(event => {
-                    let layer1Id = alreadySelectedLayerId;
-                    let layer2Id = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
-                    if (layer1Id && layer2Id) {
-                        console.log(layer1Id, layer2Id);
-                        let layer1Description = _self.getBaseLayerDescriptionById(layer1Id);
-                        let layer1 = _self.createBaseLayerObjectFromDescription(layer1Description);
-                        let layer2Description = _self.getBaseLayerDescriptionById(layer2Id);
-                        let layer2 = _self.createBaseLayerObjectFromDescription(layer2Description);
+                    activeSideBySideLayer = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
 
-                        let control = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+                    // Disabling inputs
+                    $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
+                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
+
+                    if (activeBaseLayer && activeSideBySideLayer) {
+                        if (sideBySideControl) {
+                            _self.destroySideBySideControl();
+                        }
+
+                        let layer1 = cloud.get().addBaseLayer(activeBaseLayer).addTo(cloud.get().map);
+                        let layer2 = cloud.get().addBaseLayer(activeSideBySideLayer).addTo(cloud.get().map);
+                        cloud.get().map.invalidateSize();
+                        sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+
+                        backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                     }
                 });
-            }, 0);
+
+                resolve();
+            });
         });
-    },
-
-    getBaseLayerDescriptionById: (id) => {
-        var result = false, bl;
-        for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
-
-            bl = window.setBaseLayers[i];
-
-            if (bl.id === id) {
-                result = bl;
-            }
-        }
 
         return result;
     },
 
-    createBaseLayerObjectFromDescription: (description) => {
-        let result = new L.TileLayer(description.url, {
-            attribution: description.attribution,
-            // Set zoom levels from config, if they are there, else default
-            // to [0-18] (native), [0-20] (interpolated)
-            minZoom: typeof description.minZoom !== "undefined" ? description.minZoom : 0,
-            maxZoom: typeof description.maxZoom !== "undefined" ? description.maxZoom : 20,
-            maxNativeZoom: typeof description.maxNativeZoom !== "undefined" ? description.maxNativeZoom : 18
+    /**
+     * Returns layers order in corresponding groups
+     * 
+     * @return {Promise}
+     */
+    getSideBySideModeStatus: () => {
+        let result = new Promise((resolve, reject) => {
+            state.getModuleState(MODULE_NAME).then(initialState => {
+                let sideBySideMode = ((initialState && `sideBySideMode` in initialState) ? initialState.sideBySideMode : false);
+                resolve(sideBySideMode);
+            });
         });
 
-        result.baseLayer = true;
-        result.id = description.id;
+        return result;
+    },
+
+    /**
+     * Returns current module state
+     */
+    getState: () => {
+        let state = { sideBySideMode: false };
+        if (sideBySideControl) {
+            let layer1Id = $('input[name=baselayers]:checked').val();
+            let layer2Id = $('input[name=side-by-side-baselayers]:checked').val();
+            if (!layer1Id || !layer2Id) {
+                throw new Error(`Unable to detect layer identifiers`);
+            } else {
+                state = {
+                    sideBySideMode: [layer1Id, layer2Id]
+                }
+            }           
+        } 
+
+        return state;
+    },
+
+    /**
+     * Applies externally provided state
+     */
+    applyState: (newState) => {
+        let result = new Promise((resolve, reject) => {
+            resolve();
+        });
 
         return result;
     },

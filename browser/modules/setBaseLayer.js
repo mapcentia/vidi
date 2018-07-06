@@ -53,7 +53,6 @@ module.exports = module.exports = {
         }
 
         if (typeof window.setBaseLayers !== "undefined") {
-
             $.each(window.setBaseLayers, function (i, v) {
                 if (v.id === str) {
                     activeBaseLayer = v;
@@ -83,16 +82,13 @@ module.exports = module.exports = {
             });
         }
 
-        cloud.get().setBaseLayer(str,
-            function () {
-                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-            },
-            function () {
-                backboneEvents.get().trigger("startLoading:setBaselayer", str);
-            }
-        );
+        cloud.get().setBaseLayer(str, () => {
+            backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+        }, () => {
+            backboneEvents.get().trigger("startLoading:setBaselayer", str);
+        });
 
-        $('*[data-gc2-base-id="' + str + '"] input').prop('checked', true);
+        baseLayer.redraw(str);
 
         pushState.init();
     },
