@@ -60,7 +60,7 @@ module.exports = module.exports = {
     /**
      *
      */
-    init: function () {
+    init: () => {
         var schemas;
         schemas = urlparser.schema.split(",");
         if (typeof window.setBaseLayers !== 'object') {
@@ -104,19 +104,45 @@ module.exports = module.exports = {
 
         _self.getSideBySideModeStatus().then(sideBySideModeStatus => {
             if (sideBySideModeStatus && sideBySideModeStatus.length === 2) {
-                $(`.js-toggle-side-by-side-mode`).trigger(`click`);
-                setTimeout(() => {
-                    this.drawBaseLayersControl().then(() => {
-                        $(`[name="baselayers"][value="${sideBySideModeStatus[0]}"]`).trigger('click');
-                        setTimeout(() => {
-                            $(`[name="side-by-side-baselayers"][value="${sideBySideModeStatus[1]}"]`).trigger('click');
-                        }, 1000);
-                    });
-                }, 1000);
+                _self.toggleSideBySideControl(sideBySideModeStatus);
             }
         });
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
+    },
+
+    /**
+     * 
+     */
+    toggleSideBySideControl: (layers) => {
+        let result = false;
+        if (layers === false || layers === `false`) {
+            result = new Promise((resolve, reject) => {
+                if ($('.js-toggle-side-by-side-mode').is(':checked')) {
+                    $(`.js-toggle-side-by-side-mode`).trigger(`click`);
+                    resolve();
+                } else {
+                    resolve();
+                }
+            });
+        } else if (layers && layers.length === 2) {
+            result = new Promise((resolve, reject) => {
+                $(`.js-toggle-side-by-side-mode`).trigger(`click`);
+                setTimeout(() => {
+                    _self.drawBaseLayersControl().then(() => {
+                        $(`[name="baselayers"][value="${layers[0]}"]`).trigger('click');
+                        setTimeout(() => {
+                            $(`[name="side-by-side-baselayers"][value="${layers[1]}"]`).trigger('click');
+                            resolve();
+                        }, 1000);
+                    });
+                }, 1000);
+            });
+
+            return result;
+        } else {
+            throw new Error(`Invalid set of layers`);
+        }
     },
 
     destroySideBySideControl: (revert = false) => {
@@ -258,11 +284,8 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        let result = new Promise((resolve, reject) => {
-            resolve();
-        });
-
-        return result;
+        //return new Promise((resolve, reject) => { resolve(); });
+        return _self.toggleSideBySideControl(newState.sideBySideMode);
     },
 
     /**

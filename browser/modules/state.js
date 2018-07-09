@@ -645,15 +645,20 @@ module.exports = {
         }
 
         let result = new Promise((resolve, reject) => {
-            _getInternalState().then(state => {
-                if ('modules' in state && name in state.modules) {
-                    resolve(state.modules[name]);
-                } else {
-                    resolve(false);
-                }
-            }).catch(error => {
-                console.error(error);
-            });
+            // If the state parameter is provided, then locally stored state for module is ignored
+            if (urlVars.state) {
+                resolve(false);
+            } else {
+                _getInternalState().then(state => {
+                    if ('modules' in state && name in state.modules) {
+                        resolve(state.modules[name]);
+                    } else {
+                        resolve(false);
+                    }
+                }).catch(error => {
+                    console.error(error);
+                });
+            }
         });
 
         return result;
@@ -670,24 +675,30 @@ module.exports = {
     applyState: (state) => {
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {
-            let promises = [];
-            if ('map' in state) {
-                anchor.applyMapParameters(state.map);
-            }
-
-            if ('modules' in state) {
-                for (let name in state.modules) {
-                    if (name in listened === false) {
-                        throw new Error(`Module or extension ${name} does not exist`);
+            const applyStateToModules = () => {
+                let promises = [];
+                if ('modules' in state) {
+                    for (let name in state.modules) {
+                        if (name in listened === false) {
+                            throw new Error(`Module or extension ${name} does not exist`);
+                        }
+    
+                        promises.push(listened[name].applyState(state.modules[name]));
                     }
-
-                    promises.push(listened[name].applyState(state.modules[name]));
                 }
-            }
+    
+                Promise.all(promises).then(() => {
+                    resolve();
+                });
+            };
 
-            Promise.all(promises).then(() => {
-                resolve();
-            });
+            if ('map' in state) {
+                anchor.applyMapParameters(state.map).then(() => {
+                    applyStateToModules();
+                });
+            } else {
+                applyStateToModules();
+            }
         });
 
         return result;
