@@ -213,7 +213,8 @@ module.exports = {
              * @param {*} map Leaflet map instance
              * @param {*} bounds bounds object
              * @param {*} tileLayer tile layer
-             * @param {*} currentZoom current map zoom
+             * @param {*} minZoom minimum map zoom
+             * @param {*} maxZoom maximum map zoom
              */
             getTileUrls (map, bounds, tileLayer, minZoom, maxZoom) {
                 if (!tileLayer) throw new Error('Tile layer is undefined');
@@ -223,11 +224,18 @@ module.exports = {
                 for (let localZoom = minZoom; localZoom <= maxZoom; localZoom++) {
                     let min = map.project(bounds.getNorthWest(), localZoom).divideBy(256).floor();
                     let max = map.project(bounds.getSouthEast(), localZoom).divideBy(256).floor();
+                    const max_y = (Math.pow(2, localZoom) - 1);
+
                     for (let i = min.x; i <= max.x; i++) {
                         for (let j = min.y; j <= max.y; j++) {
                             let coords = new L.Point(i, j);
                             coords.z = localZoom;
-                            urls.push(L.TileLayer.prototype.getTileUrl.call(tileLayer, coords));
+                            if (tileLayer.options.tms) {
+                                coords.y = max_y - coords.y;
+                            }
+
+                            let url = L.Util.template(tileLayer._url, coords);
+                            urls.push(url);
                         }
                     }
                 }
