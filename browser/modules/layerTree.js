@@ -779,7 +779,16 @@ module.exports = {
             setTimeout(() => {
                 if (activeLayers) {
                     activeLayers.map(layerName => {
-                        $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click');
+                        if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                            if (layerName.indexOf(`v:`) === 0) {
+                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`);
+                            } else {
+                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`);
+                            }
+                        } else {
+                            $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click');
+                        }
                     });
                 }
             }, 1000);
@@ -828,8 +837,6 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        console.log('### layerTree', newState);
-
         if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
