@@ -5,7 +5,7 @@ Vidi (View) is a new map viewer for GC2 and CartoDB.
 
 ---
 
-# Testing
+# Testing ![alt text](https://api.travis-ci.org/sashuk/vidi.svg?branch=develop "Current build status")
 
 The `test` folder contains
 
