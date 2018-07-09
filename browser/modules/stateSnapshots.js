@@ -125,7 +125,8 @@ module.exports = module.exports = {
                     browserOwnerSnapshots: [],
                     userOwnerSnapshots: [],
                     loading: false,
-                    authenticated: false
+                    authenticated: false,
+                    stateApplyingIsBlocked: false
                 };
 
                 this.applySnapshot = this.applySnapshot.bind(this);
@@ -195,7 +196,10 @@ module.exports = module.exports = {
              * @param {Object} item Applies snapshot
              */
             applySnapshot(item) {
-                state.applyState(item.snapshot);
+                this.setState({ stateApplyingIsBlocked: true });
+                state.applyState(item.snapshot).then(() => {
+                    this.setState({ stateApplyingIsBlocked: false });
+                });
             }
 
             /**
@@ -334,6 +338,7 @@ module.exports = module.exports = {
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => { this.applySnapshot(item); }}
+                                    disabled={this.state.stateApplyingIsBlocked}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>
