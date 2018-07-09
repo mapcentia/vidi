@@ -120,7 +120,7 @@ module.exports = module.exports = {
     },
 
     destroySideBySideControl: (revert = false) => {
-        sideBySideControl.remove();
+        if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
 
         if (revert) {
