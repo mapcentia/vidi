@@ -38,7 +38,8 @@ describe('Editor', () => {
             await helpers.sleep(1000);
             while (await page.evaluate(`$('.ge-delete').is(':visible')`)) {
                 await page.evaluate(`$('.ge-delete').trigger('click')`);
-                await helpers.sleep(4000);
+                await helpers.sleep(6000);
+                console.log('Feature was deleted');
 
                 await page.click(`#map`);
                 await helpers.sleep(1000);
@@ -50,7 +51,7 @@ describe('Editor', () => {
             let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
             if (offlineModeIsForced) {
                 await page.evaluate(`$('.toggle').trigger('click');`);
-                await helpers.sleep(1000);
+                await helpers.sleep(2000);
             }
 
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
@@ -61,28 +62,42 @@ describe('Editor', () => {
             await page.keyboard.type('1000');
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(4000);
+            await helpers.sleep(6000);
 
             // Ensure that the feature was added
             await page.click(`#map`);
-            await helpers.sleep(4000);
+            await helpers.sleep(1000);
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
             
             // Updating feature
             await page.evaluate(`$('.ge-start-edit').trigger('click')`);
-            await helpers.sleep(1000);
+            await helpers.sleep(2000);
             await page.focus('#root_id');
             await page.keyboard.type('2000');
             await helpers.sleep(1000);
+
+            await page.setRequestInterception(true);
+            let requestWasSent = false;
+            page.on('request', interceptedRequest => {
+                if (interceptedRequest.url().indexOf(`api/feature/aleksandrshumilov/public.test.the_geom/4326`) !== -1) {
+                    requestWasSent = true;
+                }
+    
+                interceptedRequest.continue();
+            });
+
             expect(await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').length`)).to.equal(1);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
             await helpers.sleep(6000);
+
+            expect(requestWasSent).to.be.true;
 
             // Ensure that the feature was updated
             await page.click(`#map`);
             await helpers.sleep(1000);
             await page.evaluate(`$('.ge-start-edit').trigger('click')`);
             await helpers.sleep(1000);
+
             expect(await page.evaluate(`$('#root_id').val()`)).to.equal('20001000');
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('.close-hide').trigger('click')`);
@@ -95,8 +110,8 @@ describe('Editor', () => {
             await helpers.sleep(4000);
 
             // Ensure that the feature was deleted
-            await page.click(`#map`);
             await helpers.sleep(1000);
+            await page.click(`#map`);
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.false;
 
             // Sign out
