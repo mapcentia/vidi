@@ -104,8 +104,7 @@ describe("OfflineMap", () => {
 
         // Save map
         await page.evaluate(`$($('#offline-map-dialog').find('.btn-primary')[2]).trigger('click')`);
-        await helpers.sleep(5000);
-        await helpers.sleep(5000);
+        await helpers.sleep(10000);
 
         // Check if all tiles were saved
         let result = await page.evaluate(`$('#offline-map-dialog').find('h4').text()`);

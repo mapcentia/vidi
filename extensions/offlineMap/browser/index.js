@@ -230,6 +230,11 @@ module.exports = {
                         for (let j = min.y; j <= max.y; j++) {
                             let coords = new L.Point(i, j);
                             coords.z = localZoom;
+
+                            if (tileLayer.options.subdomains) {
+                                coords.s = tileLayer.options.subdomains[Math.floor(Math.random() * tileLayer.options.subdomains.length)];
+                            }
+
                             if (tileLayer.options.tms) {
                                 coords.y = max_y - coords.y;
                             }
