@@ -41,6 +41,11 @@ var legend;
 /**
  * @type {*|exports|module.exports}
  */
+var print;
+
+/**
+ * @type {*|exports|module.exports}
+ */
 var draw;
 
 /**
@@ -168,16 +173,13 @@ module.exports = {
         baseLayer = o.baseLayer;
         switchLayer = o.switchLayer;
         legend = o.legend;
+        print = o.print;
         draw = o.draw;
         layers = o.layers;
         advancedInfo = o.advancedInfo;
         meta = o.meta;
         layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
-
-        listened['layerTree'] = layerTree;
-        listened['baseLayer'] = baseLayer;
-
         _self = this;
         return this;
     },
@@ -623,6 +625,10 @@ module.exports = {
         backboneEvents.get().trigger("end:state");
     },
 
+    listenTo: (moduleName, module) => {
+        listened[moduleName] = module;
+    },
+
     /**
      * Returns current state
      * 
@@ -711,7 +717,7 @@ module.exports = {
      */
     bookmarkState: (data) => {
         // Getting the print data
-        let printData = print.getPrintData(customData);
+        let printData = print.getPrintData();
 
         // Getting modules and extensions state
         let modulesData = {};

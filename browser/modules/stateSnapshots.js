@@ -61,7 +61,7 @@ const API_URL = `/api/state-snapshots`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, anchor, utils, state, urlparser, backboneEvents;
+var cloud, anchor, utils, state, print, urlparser, serializeLayers, backboneEvents;
 
 /**
  *
@@ -89,7 +89,9 @@ module.exports = module.exports = {
         anchor = o.anchor;
         cloud = o.cloud;
         state = o.state;
+        print = o.print;
         urlparser = o.urlparser;
+        serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
 
@@ -171,6 +173,33 @@ module.exports = module.exports = {
                         if ('modules' in state === false) {
                             throw new Error(`No modules data in state`);
                         }
+
+
+
+
+
+
+                        let layerDraw = [];
+                        let e = serializeLayers.serialize({
+                            "printHelper": true,
+                            "query_draw": true,
+                            "query_buffer": true,
+                            "query_result": true,
+                            "print": true,
+                            "draw": false
+                        });
+                
+                        $.each(e, (i, v) => {
+                            if (v.type === "Vector") {
+                                layerDraw.push({geojson: v.geoJson})
+                            }
+                        });
+
+                        console.log('###', layerDraw);
+
+
+
+
 
                         state.map = anchor.getCurrentMapParameters();
 

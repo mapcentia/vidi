@@ -30,6 +30,7 @@ module.exports = module.exports = {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
                 for (var key = v.geoJson.features.length - 1; key > -1; key--) {
+                    console.log('### _vidi_type', v.geoJson.features[key]._vidi_type);
                     if (filters[v.geoJson.features[key]._vidi_type]) {
                         v.geoJson.features.splice(key, 1);
                     }

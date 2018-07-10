@@ -61,6 +61,8 @@ module.exports = module.exports = {
      *
      */
     init: () => {
+        state.listenTo('baseLayer', _self);
+
         var schemas;
         schemas = urlparser.schema.split(",");
         if (typeof window.setBaseLayers !== 'object') {

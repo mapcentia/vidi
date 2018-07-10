@@ -115,6 +115,8 @@ module.exports = {
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
+
+        state.listenTo('layerTree', _self);
     },
 
     setSelectorValue: (name, type) => {
