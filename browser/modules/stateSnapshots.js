@@ -174,33 +174,6 @@ module.exports = module.exports = {
                             throw new Error(`No modules data in state`);
                         }
 
-
-
-
-
-
-                        let layerDraw = [];
-                        let e = serializeLayers.serialize({
-                            "printHelper": true,
-                            "query_draw": true,
-                            "query_buffer": true,
-                            "query_result": true,
-                            "print": true,
-                            "draw": false
-                        });
-                
-                        $.each(e, (i, v) => {
-                            if (v.type === "Vector") {
-                                layerDraw.push({geojson: v.geoJson})
-                            }
-                        });
-
-                        console.log('###', layerDraw);
-
-
-
-
-
                         state.map = anchor.getCurrentMapParameters();
 
                         let _self = this;

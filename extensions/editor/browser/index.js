@@ -5,8 +5,6 @@
 
 'use strict';
 
-const MODULE_NAME = `editor`;
-
 /**
  *
  * @type {*|exports|module.exports}
@@ -92,9 +90,6 @@ module.exports = {
      *
      */
     init: function () {
-        state.listenTo(MODULE_NAME, _self);
-        state.listen(MODULE_NAME, `editedFeatureChange`);
-
         let me = this, metaDataKeys, metaData, styleFn;
         apiBridgeInstance = APIBridgeSingletone();
 
@@ -443,38 +438,9 @@ module.exports = {
         nonCommitedEditedFeature = {};
 
         const editFeature = () => {
-            backboneEvents.get().trigger(`${MODULE_NAME}:editedFeatureChange`);
-
             let React = require('react');
 
             let ReactDOM = require('react-dom');
-
-            // Tracking ongoing not-commited changes
-            const localChangeProcessor = (event) => {
-                nonCommitedEditedFeature = Object.assign({}, nonCommitedEditedFeature, {
-                    featureType,
-                    geojson: event.layer.toGeoJSON()
-                });
-
-                backboneEvents.get().trigger(`${MODULE_NAME}:editedFeatureChange`);
-            };
-
-            let featureType = e.feature.geometry.type;
-            switch (featureType) {
-                case `Point`:
-                case `MultiPoint`:
-                    cloud.get().map.on('editable:dragend', localChangeProcessor);
-                    break;
-                case `LineString`:
-                case `Polygon`:
-                    cloud.get().map.on('editable:vertex:new', localChangeProcessor);
-                    cloud.get().map.on('editable:vertex:deleted', localChangeProcessor);
-                    cloud.get().map.on('editable:vertex:dragend', localChangeProcessor);
-                    break;
-                default:
-                    throw new Error(`Unable to find suitable change processor for ${featureType}`);
-                    break;
-            }
     
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
@@ -559,19 +525,6 @@ module.exports = {
             });
 
             /**
-             * Capturing form data change event
-             */
-            const onChange = (properties) => {
-                if (nonCommitedEditedFeature) {
-                    nonCommitedEditedFeature = Object.assign({}, nonCommitedEditedFeature, { formData: properties.formData });
-                } else {
-                    nonCommitedEditedFeature = { formData: properties.formData };
-                }
-
-                backboneEvents.get().trigger(`${MODULE_NAME}:editedFeatureChange`);
-            };
-
-            /**
              * Commit to GC2
              * @param formData
              */
@@ -620,11 +573,6 @@ module.exports = {
                     sqlQuery.reset(qstore);
                     me.stopEdit();
 
-                    cloud.get().map.on(`editable:dragend`, () => {})
-                    cloud.get().map.on(`editable:vertex:new`, () => {})
-                    cloud.get().map.on(`editable:vertex:deleted`, () => {})
-                    cloud.get().map.on(`editable:vertex:dragend`, () => {})
-
                     // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                     if (isVectorLayer) {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
@@ -665,7 +613,6 @@ module.exports = {
                         widgets={widgets}
                         uiSchema={uiSchema}
                         formData={e.feature.properties}
-                        onChange={onChange}
                         onSubmit={onSubmit}
                     />
                 </div>
@@ -673,7 +620,7 @@ module.exports = {
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
-            }, 500, function () {
+            }, 500, () => {
                 $("#editor-attr-dialog" + " .expand-less").show();
                 $("#editor-attr-dialog" + " .expand-more").hide();
             });
@@ -761,31 +708,6 @@ module.exports = {
                 }
             });
         }
-    },
-
-    /**
-     * Returns current module state
-     */
-    getState: () => {
-        let state = { editedFeature: false };
-        if (nonCommitedEditedFeature) {
-            state.editedFeature = JSON.parse(JSON.stringify(nonCommitedEditedFeature));
-            console.log('### nonCommitedEditedFeature', nonCommitedEditedFeature);
-        }
-
-        return state;
-    },
-
-    /**
-     * Applies externally provided state
-     */
-    applyState: (newState) => {
-        console.log(`### applyState for editor`, newState);
-        let result = new Promise((resolve, reject) => {
-            resolve();
-        });
-
-        return result;
     },
 
     /**

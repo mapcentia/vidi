@@ -5,10 +5,22 @@
 
 'use strict';
 
+const MODULE_NAME = `draw`;
+
 /**
  * @type {*|exports|module.exports}
  */
 var cloud;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var state;
+
+/**
+ * @type {*|exports|module.exports}
+ */
+var serializeLayers;
 
 /**
  *
@@ -83,6 +95,8 @@ var _getArea = function (e) {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
 };
 
+let _self = false;
+
 /**
  *
  * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getDrawOn: module.exports.getDrawOn, getLayer: module.exports.getLayer, getTable: module.exports.getTable, setDestruct: module.exports.setDestruct}}
@@ -90,203 +104,290 @@ var _getArea = function (e) {
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        state = o.state;
+        serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
+
+        _self = this;
         return this;
     },
-    control: function () {
 
-        var me = this;
+    init: () => {
+        state.listenTo(MODULE_NAME, _self);
+        state.listen(MODULE_NAME, `update`);
 
-        if ($("#draw-btn").is(':checked')) {
-            backboneEvents.get().trigger("on:drawing");
+        var me = _self;
 
-            // Turn info click off
-            backboneEvents.get().trigger("off:infoClick");
+        // Bind events
+        $("#draw-btn").on("click", () => {
+            if ($("#draw-btn").is(':checked')) {
+                me.control(true);
+            } else {
+                me.control(false);
+            }
+        });
 
-            L.drawLocal = require('./drawLocales/draw.js');
+        $("#draw-line-extremity").on("change", function () {
+            var b = $("#draw-line-extremity").val() === "none";
+            $("#draw-line-extremity-size").prop("disabled", b);
+            $("#draw-line-extremity-where").prop("disabled", b);
+        });
 
-            drawControl = new L.Control.Draw({
-                position: 'topright',
-                draw: {
-                    polygon: {
-                        allowIntersection: true,
-                        shapeOptions: {
+        $("#draw-measure").on("change", function () {
+            var b = $("#draw-measure").is(":checked");
+            $("#draw-line-total-dist").prop("disabled", !b);
+        });
+        //
+
+        cloud.get().map.addLayer(drawnItems);
+        store.layer = drawnItems;
+        $("#draw-colorpicker").colorpicker({
+            container: $("#draw-colorpicker")
+        });
+        $("#draw-table").append("<table class='table'></table>");
+        (function poll() {
+            if (gc2table.isLoaded()) {
+                table = gc2table.init({
+                    el: "#draw-table table",
+                    geocloud2: cloud.get(),
+                    locale: window._vidiLocale.replace("_", "-"),
+                    store: store,
+                    cm: [
+                        {
+                            header: __("Type"),
+                            dataIndex: "type",
+                            sortable: true
                         },
-                        showArea: true
+                        {
+                            header: __("Area"),
+                            dataIndex: "area",
+                            sortable: true
+                        },
+                        {
+                            header: __("Distance/Radius"),
+                            dataIndex: "distance",
+                            sortable: true
+                        }
+                    ],
+                    autoUpdate: false,
+                    loadData: false,
+                    height: 400,
+                    setSelectedStyle: false,
+                    responsive: false,
+                    openPopUp: false
+                });
+
+            } else {
+                setTimeout(poll, 30);
+            }
+        }());
+    },
+
+    /**
+     * Adds drawings control to the map
+     */
+    control: (enable = false) => {
+        var me = _self;
+
+        if (enable) {
+            if (!drawControl) {
+                backboneEvents.get().trigger("on:drawing");
+
+                // Turn info click off
+                backboneEvents.get().trigger("off:infoClick");
+
+                L.drawLocal = require('./drawLocales/draw.js');
+
+                drawControl = new L.Control.Draw({
+                    position: 'topright',
+                    draw: {
+                        polygon: {
+                            allowIntersection: true,
+                            shapeOptions: {
+                            },
+                            showArea: true
+                        },
+                        polyline: {
+                            metric: true,
+                            shapeOptions: {
+                            }
+                        },
+                        rectangle: {
+                            shapeOptions: {
+                            }
+                        },
+                        circle: {
+                            shapeOptions: {
+                            }
+                        },
+                        marker: true,
+                        circlemarker: true
+                    },
+
+                    edit: {
+                        featureGroup: drawnItems
+                    }
+
+                });
+
+                drawControl.setDrawingOptions({
+                    polygon: {
+                        icon: cloud.iconSmall
                     },
                     polyline: {
-                        metric: true,
-                        shapeOptions: {
-                        }
+                        icon: cloud.iconSmall
                     },
                     rectangle: {
-                        shapeOptions: {
-                        }
+                        icon: cloud.iconSmall
                     },
                     circle: {
-                        shapeOptions: {
-                        }
-                    },
-                    marker: true,
-                    circlemarker: true
-                },
-
-                edit: {
-                    featureGroup: drawnItems
-                }
-
-            });
-
-            drawControl.setDrawingOptions({
-                polygon: {
-                    icon: cloud.iconSmall
-                },
-                polyline: {
-                    icon: cloud.iconSmall
-                },
-                rectangle: {
-                    icon: cloud.iconSmall
-                },
-                circle: {
-                    icon: cloud.iconSmall
-                }
-            });
-
-            cloud.get().map.addControl(drawControl);
-            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-commenting-o" aria-hidden="true"></i>').css("background-image", "none");
-
-            drawOn = true;
-
-            // Unbind events
-            cloud.get().map.off('draw:created');
-            cloud.get().map.off('draw:drawstart');
-            cloud.get().map.off('draw:drawstop');
-            cloud.get().map.off('draw:editstart');
-            cloud.get().map.off('draw:editstop');
-            cloud.get().map.off('draw:deletestart');
-            cloud.get().map.off('draw:deletestop');
-            cloud.get().map.off('draw:deleted');
-            cloud.get().map.off('draw:created');
-            cloud.get().map.off('draw:edited');
-
-            // Bind events
-            cloud.get().map.on('draw:editstart', function (e) {
-                editing = true;
-            });
-
-            cloud.get().map.on('draw:editstop', function (e) {
-                editing = false;
-            });
-
-            cloud.get().map.on('draw:deletestart', function (e) {
-                editing = true;
-            });
-
-            cloud.get().map.on('draw:deletestop', function (e) {
-                editing = false;
-            });
-
-            cloud.get().map.on('draw:created', function (e) {
-
-                var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
-
-                if (type === 'marker') {
-                    drawLayer._vidi_marker = true;
-                }
-
-                if (type === 'circlemarker') {
-
-                    drawLayer._vidi_marker = true;
-
-                    var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-
-                    if (text !== null) {
-                        drawLayer.bindTooltip(text, {permanent: true}).on("click", function () {
-                        }).openTooltip();
-
-                        drawLayer._vidi_marker_text = text;
-
-                    } else {
-
-                        drawLayer._vidi_marker_text = null;
-                    }
-
-                }
-
-                drawnItems.addLayer(drawLayer);
-                drawLayer.openTooltip();
-
-                me.setStyle(drawLayer, type);
-
-                if (type !== 'circlemarker') {
-                    drawLayer.on('click', function (event) {
-
-                        me.bindPopup(event);
-
-                    });
-                }
-
-                if (type === "polygon" || type === "rectangle") {
-                    area = _getArea(drawLayer);
-                    //distance = getDistance(drawLayer);
-                }
-                if (type === 'polyline') {
-                    distance = _getDistance(drawLayer);
-
-                }
-                if (type === 'circle') {
-                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
-                }
-
-                drawLayer._vidi_type = "draw";
-
-                drawLayer.feature = {
-                    properties: {
-                        type: type,
-                        area: area,
-                        distance: distance
-                    }
-                };
-                table.loadDataInTable();
-            });
-            cloud.get().map.on('draw:deleted', function (e) {
-                table.loadDataInTable();
-            });
-            cloud.get().map.on('draw:edited', function (e) {
-
-                $.each(e.layers._layers, function (i, v) {
-
-                    if (typeof v._mRadius !== "undefined") {
-                        v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
-                        v.updateMeasurements();
-
-                    }
-                    else if (typeof v._icon !== "undefined") {
-                    } else if (v.feature.properties.distance !== null) {
-                        v.feature.properties.distance = _getDistance(v);
-                        v.updateMeasurements();
-
-                    }
-                    else if (v.feature.properties.area !== null) {
-                        v.feature.properties.area = _getArea(v);
-                        v.updateMeasurements();
-
+                        icon: cloud.iconSmall
                     }
                 });
-                table.loadDataInTable();
-            });
 
-            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
-            po1.popover("show");
-            setTimeout(function () {
-                po1.popover("hide");
-            }, 2500);
+                cloud.get().map.addControl(drawControl);
+                $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-commenting-o" aria-hidden="true"></i>').css("background-image", "none");
 
-            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
-            po2.popover("show");
-            setTimeout(function () {
-                po2.popover("hide");
-            }, 2500);
+                drawOn = true;
+
+                // Unbind events
+                cloud.get().map.off('draw:created');
+                cloud.get().map.off('draw:drawstart');
+                cloud.get().map.off('draw:drawstop');
+                cloud.get().map.off('draw:editstart');
+                cloud.get().map.off('draw:editstop');
+                cloud.get().map.off('draw:deletestart');
+                cloud.get().map.off('draw:deletestop');
+                cloud.get().map.off('draw:deleted');
+                cloud.get().map.off('draw:created');
+                cloud.get().map.off('draw:edited');
+
+                // Bind events
+                cloud.get().map.on('draw:editstart', function (e) {
+                    editing = true;
+                });
+
+                cloud.get().map.on('draw:editstop', function (e) {
+                    editing = false;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                });
+
+                cloud.get().map.on('draw:deletestart', function (e) {
+                    editing = true;
+                });
+
+                cloud.get().map.on('draw:deletestop', function (e) {
+                    editing = false;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                });
+
+                cloud.get().map.on('draw:created', function (e) {
+
+                    var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
+
+                    if (type === 'marker') {
+                        drawLayer._vidi_marker = true;
+                    }
+
+                    if (type === 'circlemarker') {
+
+                        drawLayer._vidi_marker = true;
+
+                        var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
+
+                        if (text !== null) {
+                            drawLayer.bindTooltip(text, {permanent: true}).on("click", function () {
+                            }).openTooltip();
+
+                            drawLayer._vidi_marker_text = text;
+
+                        } else {
+
+                            drawLayer._vidi_marker_text = null;
+                        }
+
+                    }
+
+                    drawnItems.addLayer(drawLayer);
+                    drawLayer.openTooltip();
+
+                    me.setStyle(drawLayer, type);
+
+                    if (type !== 'circlemarker') {
+                        drawLayer.on('click', function (event) {
+
+                            me.bindPopup(event);
+
+                        });
+                    }
+
+                    if (type === "polygon" || type === "rectangle") {
+                        area = _getArea(drawLayer);
+                        //distance = getDistance(drawLayer);
+                    }
+                    if (type === 'polyline') {
+                        distance = _getDistance(drawLayer);
+
+                    }
+                    if (type === 'circle') {
+                        distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                    }
+
+                    drawLayer._vidi_type = "draw";
+
+                    drawLayer.feature = {
+                        properties: {
+                            type: type,
+                            area: area,
+                            distance: distance
+                        }
+                    };
+
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                    table.loadDataInTable();
+                });
+                cloud.get().map.on('draw:deleted', function (e) {
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                    table.loadDataInTable();
+                });
+                cloud.get().map.on('draw:edited', function (e) {
+
+                    $.each(e.layers._layers, function (i, v) {
+
+                        if (typeof v._mRadius !== "undefined") {
+                            v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
+                            v.updateMeasurements();
+
+                        }
+                        else if (typeof v._icon !== "undefined") {
+                        } else if (v.feature.properties.distance !== null) {
+                            v.feature.properties.distance = _getDistance(v);
+                            v.updateMeasurements();
+
+                        }
+                        else if (v.feature.properties.area !== null) {
+                            v.feature.properties.area = _getArea(v);
+                            v.updateMeasurements();
+
+                        }
+                    });
+
+                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                    table.loadDataInTable();
+                });
+
+                var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+                po1.popover("show");
+                setTimeout(function () {
+                    po1.popover("hide");
+                }, 2500);
+
+                var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+                po2.popover("show");
+                setTimeout(function () {
+                    po2.popover("hide");
+                }, 2500);
+            }
         } else {
             backboneEvents.get().trigger("off:drawing");
 
@@ -294,7 +395,145 @@ module.exports = {
             backboneEvents.get().trigger("on:infoClick");
 
             drawOn = false;
+            drawControl = false;
         }
+    },
+
+    /**
+     * Removes drawn features from the map
+     */
+    removeFeatures: () => {
+        let l = _self.getLayer();
+        l.getLayers().map(layer => {
+            l.removeLayer(layer);
+        });
+    },
+
+    /**
+     * Returns current module state
+     */
+    getState: () => {
+        let drawnItems = false;
+        if (_self.getDrawOn()) {
+            drawnItems = JSON.stringify(serializeLayers.serializeDrawnItems(true));
+        }
+
+        return { drawnItems };
+    },
+
+    /**
+     * Applies externally provided state
+     */
+    applyState: (newState) => {
+        return new Promise((resolve, reject) => {
+            _self.control(false);
+            _self.removeFeatures();
+            if (newState.drawnItems && newState.drawnItems !== `false`) {
+                $("#draw-btn").trigger('click');
+                setTimeout(() => {
+                    _self.recreateDrawnings(JSON.parse(newState.drawnItems));
+                    resolve();
+                }, 100);
+            } else {
+                resolve();
+            }
+        });
+    },
+
+
+    /**
+     * Recreates drawnings on the map
+     * 
+     * @param {Object} parr Features to draw
+     * 
+     * @return {void}
+     */
+    recreateDrawnings: (parr) => {
+         let GeoJsonAdded = false;
+        let v = parr;
+        let l = _self.getLayer();
+        let t = _self.getTable();
+
+        $.each(v[0].geojson.features, function (n, m) {
+            // If polyline or polygon
+            // ======================
+            if (m.type === "Feature" && GeoJsonAdded === false) {
+                var json = L.geoJson(m, {
+                    style: function (f) {
+                        return f.style;
+                    }
+                });
+
+                var g = json._layers[Object.keys(json._layers)[0]];
+                l.addLayer(g);
+            }
+
+            // If circle
+            // =========
+            if (m.type === "Circle") {
+                g = L.circle(m._latlng, m._mRadius, m.style);
+                g.feature = m.feature;
+                l.addLayer(g);
+            }
+
+            // If rectangle
+            // ============
+            if (m.type === "Rectangle") {
+                g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                g.feature = m.feature;
+                l.addLayer(g);
+            }
+
+            // If circle marker
+            // ================
+            if (m.type === "CircleMarker") {
+                g = L.marker(m._latlng, m.style);
+                g.feature = m.feature;
+
+                // Add label
+                if (m._vidi_marker_text) {
+                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                    }).openTooltip();
+                }
+                l.addLayer(g);
+            }
+
+            // If marker
+            // =========
+            if (m.type === "Marker") {
+                g = L.marker(m._latlng, m.style);
+                g.feature = m.feature;
+
+                // Add label
+                if (m._vidi_marker_text) {
+                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                    }).openTooltip();
+                }
+                l.addLayer(g);
+
+            } else {
+
+                // Add measure
+                if (m._vidi_measurementLayer) {
+                    g.showMeasurements(m._vidi_measurementOptions);
+                }
+
+                // Add extremities
+                if (m._vidi_extremities) {
+                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+                }
+
+                // Bind popup
+                g.on('click', function (event) {
+
+                    _self.bindPopup(event);
+
+                });
+            }
+        });
+
+        t.loadDataInTable();
+        _self.control(true);
     },
 
     bindPopup: function (event) {
@@ -367,77 +606,13 @@ module.exports = {
         }
     },
 
-    init: function () {
-
-        var me = this;
-
-        // Bind events
-        $("#draw-btn").on("click", function () {
-            me.control();
-        });
-
-        $("#draw-line-extremity").on("change", function () {
-            var b = $("#draw-line-extremity").val() === "none";
-            $("#draw-line-extremity-size").prop("disabled", b);
-            $("#draw-line-extremity-where").prop("disabled", b);
-
-        });
-
-        $("#draw-measure").on("change", function () {
-            var b = $("#draw-measure").is(":checked");
-            $("#draw-line-total-dist").prop("disabled", !b);
-        });
-        //
-
-        cloud.get().map.addLayer(drawnItems);
-        store.layer = drawnItems;
-        $("#draw-colorpicker").colorpicker({
-            container: $("#draw-colorpicker")
-        });
-        $("#draw-table").append("<table class='table'></table>");
-        (function poll() {
-            if (gc2table.isLoaded()) {
-                table = gc2table.init({
-                    el: "#draw-table table",
-                    geocloud2: cloud.get(),
-                    locale: window._vidiLocale.replace("_", "-"),
-                    store: store,
-                    cm: [
-                        {
-                            header: __("Type"),
-                            dataIndex: "type",
-                            sortable: true
-                        },
-                        {
-                            header: __("Area"),
-                            dataIndex: "area",
-                            sortable: true
-                        },
-                        {
-                            header: __("Distance/Radius"),
-                            dataIndex: "distance",
-                            sortable: true
-                        }
-                    ],
-                    autoUpdate: false,
-                    loadData: false,
-                    height: 400,
-                    setSelectedStyle: false,
-                    responsive: false,
-                    openPopUp: false
-                });
-
-            } else {
-                setTimeout(poll, 30);
-            }
-        }());
-    },
-    off: function () {
+    off: () => {
         // Clean up
         try {
             cloud.get().map.removeControl(drawControl);
         } catch (e) {
         }
+
         $("#draw-btn").prop("checked", false);
         // Unbind events
         cloud.get().map.off('draw:created');

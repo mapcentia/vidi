@@ -144,7 +144,7 @@ const _setInternalState = (value) => {
             if (error) {
                 throw new Error('State: error occured while storing the state');
             } else {
-                if (LOG) console.log('State: saved');
+                if (LOG) console.log('State: saved', value);
             }
         });
     });
@@ -391,93 +391,7 @@ module.exports = {
                         // =================
 
                         if (response.data.draw !== null) {
-                            GeoJsonAdded = false;
-                            parr = response.data.draw;
-                            v = parr;
-                            draw.control();
-                            l = draw.getLayer();
-                            t = draw.getTable();
-
-                            $.each(v[0].geojson.features, function (n, m) {
-
-                                // If polyline or polygon
-                                // ======================
-                                if (m.type === "Feature" && GeoJsonAdded === false) {
-                                    var json = L.geoJson(m, {
-                                        style: function (f) {
-                                            return f.style;
-                                        }
-                                    });
-
-                                    var g = json._layers[Object.keys(json._layers)[0]];
-                                    l.addLayer(g);
-                                }
-
-                                // If circle
-                                // =========
-                                if (m.type === "Circle") {
-                                    g = L.circle(m._latlng, m._mRadius, m.style);
-                                    g.feature = m.feature;
-                                    l.addLayer(g);
-                                }
-
-                                // If rectangle
-                                // ============
-                                if (m.type === "Rectangle") {
-                                    g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
-                                    g.feature = m.feature;
-                                    l.addLayer(g);
-                                }
-
-                                // If circle marker
-                                // ================
-                                if (m.type === "CircleMarker") {
-                                    g = L.marker(m._latlng, m.style);
-                                    g.feature = m.feature;
-
-                                    // Add label
-                                    if (m._vidi_marker_text) {
-                                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
-                                        }).openTooltip();
-                                    }
-                                    l.addLayer(g);
-                                }
-
-                                // If marker
-                                // =========
-                                if (m.type === "Marker") {
-                                    g = L.marker(m._latlng, m.style);
-                                    g.feature = m.feature;
-
-                                    // Add label
-                                    if (m._vidi_marker_text) {
-                                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
-                                        }).openTooltip();
-                                    }
-                                    l.addLayer(g);
-
-                                } else {
-
-                                    // Add measure
-                                    if (m._vidi_measurementLayer) {
-                                        g.showMeasurements(m._vidi_measurementOptions);
-                                    }
-
-                                    // Add extremities
-                                    if (m._vidi_extremities) {
-                                        g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
-                                    }
-
-                                    // Bind popup
-                                    g.on('click', function (event) {
-
-                                        draw.bindPopup(event);
-
-                                    });
-                                }
-                            });
-                            t.loadDataInTable();
-                            draw.control();
+                            draw.recreateDrawnings(response.data.draw);
                         }
 
                         // Recreate query draw
@@ -626,6 +540,10 @@ module.exports = {
     },
 
     listenTo: (moduleName, module) => {
+        if ('getState' in module === false || 'applyState' in module === false) {
+            throw new Error(`Module or extension has to implement getState() and applyState() methods in order to support state`);
+        }
+
         listened[moduleName] = module;
     },
 
@@ -685,11 +603,11 @@ module.exports = {
                 let promises = [];
                 if ('modules' in state) {
                     for (let name in state.modules) {
-                        if (name in listened === false) {
-                            throw new Error(`Module or extension ${name} does not exist`);
+                        if (name in listened) {
+                            promises.push(listened[name].applyState(state.modules[name]));
+                        } else {
+                            console.warn(`Module or extension ${name} is not registered in state module, so its state is not applied`);
                         }
-    
-                        promises.push(listened[name].applyState(state.modules[name]));
                     }
                 }
     
