@@ -425,6 +425,7 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        
         return new Promise((resolve, reject) => {
             _self.control(false);
             _self.removeFeatures();
@@ -465,6 +466,10 @@ module.exports = {
                 });
 
                 var g = json._layers[Object.keys(json._layers)[0]];
+
+                // Adding vidi-specific properties
+                g._vidi_type = m._vidi_type;
+
                 l.addLayer(g);
             }
 
@@ -473,6 +478,10 @@ module.exports = {
             if (m.type === "Circle") {
                 g = L.circle(m._latlng, m._mRadius, m.style);
                 g.feature = m.feature;
+
+                // Adding vidi-specific properties
+                g._vidi_type = m._vidi_type;
+
                 l.addLayer(g);
             }
 
@@ -481,6 +490,10 @@ module.exports = {
             if (m.type === "Rectangle") {
                 g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
                 g.feature = m.feature;
+
+                // Adding vidi-specific properties
+                g._vidi_type = m._vidi_type;
+
                 l.addLayer(g);
             }
 
@@ -495,6 +508,12 @@ module.exports = {
                     g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
                     }).openTooltip();
                 }
+
+                // Adding vidi-specific properties
+                g._vidi_marker = true;
+                g._vidi_type = m._vidi_type;
+                g._vidi_marker_text = m._vidi_marker_text;
+
                 l.addLayer(g);
             }
 
@@ -509,6 +528,12 @@ module.exports = {
                     g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
                     }).openTooltip();
                 }
+
+                // Adding vidi-specific properties
+                g._vidi_marker = true;
+                g._vidi_type = m._vidi_type;
+                g._vidi_marker_text = null;
+
                 l.addLayer(g);
 
             } else {
