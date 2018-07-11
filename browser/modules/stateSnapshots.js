@@ -61,7 +61,7 @@ const API_URL = `/api/state-snapshots`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, anchor, utils, state, urlparser, backboneEvents;
+var cloud, anchor, utils, state, print, urlparser, serializeLayers, backboneEvents;
 
 /**
  *
@@ -89,7 +89,9 @@ module.exports = module.exports = {
         anchor = o.anchor;
         cloud = o.cloud;
         state = o.state;
+        print = o.print;
         urlparser = o.urlparser;
+        serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
 
@@ -125,7 +127,8 @@ module.exports = module.exports = {
                     browserOwnerSnapshots: [],
                     userOwnerSnapshots: [],
                     loading: false,
-                    authenticated: false
+                    authenticated: false,
+                    stateApplyingIsBlocked: false
                 };
 
                 this.applySnapshot = this.applySnapshot.bind(this);
@@ -195,7 +198,10 @@ module.exports = module.exports = {
              * @param {Object} item Applies snapshot
              */
             applySnapshot(item) {
-                state.applyState(item.snapshot);
+                this.setState({ stateApplyingIsBlocked: true });
+                state.applyState(item.snapshot).then(() => {
+                    this.setState({ stateApplyingIsBlocked: false });
+                });
             }
 
             /**
@@ -334,6 +340,7 @@ module.exports = module.exports = {
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => { this.applySnapshot(item); }}
+                                    disabled={this.state.stateApplyingIsBlocked}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>

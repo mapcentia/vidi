@@ -328,7 +328,7 @@ module.exports = {
      * @returns {Object}
      */
     getPrintData: (customData) => {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
+        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
         if (isNaN(scale) || scale < 200) {
             alert(__("Not a valid scale. Must be over 200."));
@@ -342,20 +342,7 @@ module.exports = {
         } catch (e) {
         }
 
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": true,
-            "query_buffer": true,
-            "query_result": true,
-            "print": true,
-            "draw": false // Get draw
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerDraw.push({geojson: v.geoJson})
-            }
-        });
+        let layerDraw = serializeLayers.serializeDrawnItems();
 
         e = serializeLayers.serialize({
             "printHelper": true,

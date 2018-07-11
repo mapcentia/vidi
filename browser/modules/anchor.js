@@ -62,11 +62,17 @@ module.exports = {
     },
 
     applyMapParameters: (parameters) => {
-        if (parameters.x && parameters.y && parameters.zoom) {
-            cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
-        }
+        let result = new Promise((resolve, reject) => {
+            if (parameters.x && parameters.y && parameters.zoom) {
+                cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+            }
+    
+            setBaseLayer.init(parameters.baseLayer).then(() => {
+                resolve();
+            });
+        });
 
-        setBaseLayer.init(parameters.baseLayer);
+        return result;
     },
 
     /**

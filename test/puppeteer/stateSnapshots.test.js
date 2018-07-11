@@ -114,7 +114,7 @@ describe("State snapshots", () => {
     });
 
     it("should make browser-owned state snapshots user-owned ones", async () => {
-        const page = await browser.newPage();
+        const page = await browser.newPage();   
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);

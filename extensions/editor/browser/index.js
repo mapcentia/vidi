@@ -15,40 +15,30 @@ let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
  *
  * @type {*|exports|module.exports}
  */
-var utils;
+let utils, state, backboneEvents, layerTree, meta, cloud, infoClick, sqlQuery;
 
-var backboneEvents;
+let apiBridgeInstance = false;
 
-var layerTree;
-
-var apiBridgeInstance = false;
-
-var meta;
-
-var cloud;
-
-var infoClick;
-
-var sqlQuery;
-
-var jquery = require('jquery');
+let jquery = require('jquery');
 require('snackbarjs');
 
-var multiply = require('geojson-multiply');
+let multiply = require('geojson-multiply');
 
-var JSONSchemaForm = require("react-jsonschema-form");
+let JSONSchemaForm = require("react-jsonschema-form");
 
-var Form = JSONSchemaForm.default;
+let Form = JSONSchemaForm.default;
 
-var markers = [];
+let markers = [];
 
-var editor;
+let editor;
 
-var editedFeature = false;
+let editedFeature = false;
 
-var switchLayer;
+let nonCommitedEditedFeature = false;
 
-var managePopups = [];
+let switchLayer;
+
+let managePopups = [];
 
 const ImageUploadWidget = require('./ImageUploadWidget');
 
@@ -60,14 +50,16 @@ const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./../../../browser/modules/urlparser');
+let urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  * @type {string}
  */
-var db = urlparser.db;
+let db = urlparser.db;
 
-var isInit = false;
+let isInit = false;
+
+let _self = false;
 
 /**
  *
@@ -84,11 +76,13 @@ module.exports = {
         utils = o.utils;
         meta = o.meta;
         cloud = o.cloud;
+        state = o.state;
         sqlQuery = o.sqlQuery;
         infoClick = o.infoClick;
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        _self = this;
         return this;
     },
 
@@ -441,14 +435,13 @@ module.exports = {
      */
     edit: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = e;
+        nonCommitedEditedFeature = {};
 
         const editFeature = () => {
-            
-
             let React = require('react');
 
             let ReactDOM = require('react-dom');
-
+    
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
                 type = metaDataKeys[schemaQualifiedName].type,
@@ -476,14 +469,9 @@ module.exports = {
 
             e.initialFeatureJSON = e.toGeoJSON();
 
-            backboneEvents.get().on("start:sqlQuery", function () {
-                //me.stopEdit(e);
-            });
-
             // Hack to edit (Multi)Point layers
             // Create markers, which can be dragged
             switch (e.feature.geometry.type) {
-
                 case "Point":
                     markers[0] = L.marker(
                         e.getLatLng(),
@@ -540,7 +528,7 @@ module.exports = {
              * Commit to GC2
              * @param formData
              */
-            const onSubmit = function (formData) {
+            const onSubmit = (formData) => {
                 let GeoJSON = e.toGeoJSON(), featureCollection;
 
                 // HACK to handle (Multi)Point layers
@@ -632,7 +620,7 @@ module.exports = {
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
-            }, 500, function () {
+            }, 500, () => {
                 $("#editor-attr-dialog" + " .expand-less").show();
                 $("#editor-attr-dialog" + " .expand-more").hide();
             });

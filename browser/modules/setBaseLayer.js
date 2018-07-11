@@ -38,59 +38,64 @@ module.exports = module.exports = {
         return this;
     },
     init: function (str) {
-        var u, l, str;
+        let result = new Promise((resolve, reject) => {
+            var u, l;
+            layers.removeHidden();
 
-        layers.removeHidden();
+            if (!cloud.get().getLayersByName(str)) {
+                baseLayer.addBaseLayer(str);
+                // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
+                if (str.split(".")[1]) {
+                    layers.addLayer(str);
+                }
 
-        if (!cloud.get().getLayersByName(str)) {
-            baseLayer.addBaseLayer(str);
-
-            // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
-            if (str.split(".")[1]) {
-                layers.addLayer(str);
+                console.info(str + " is added as base layer.");
             }
-            console.info(str + " is added as base layer.");
-        }
 
-        if (typeof window.setBaseLayers !== "undefined") {
-            $.each(window.setBaseLayers, function (i, v) {
-                if (v.id === str) {
-                    activeBaseLayer = v;
-                    if (typeof v.overlays === "object") {
-                        for (u = 0; u < v.overlays.length; u = u + 1) {
-                            const layerName = v.overlays[u].id;
-                            l = cloud.get().addTileLayers($.extend({
-                                layers: [v.overlays[u].id],
-                                db: v.overlays[u].db,
-                                host: v.overlays[u].host || "",
-                                type: "tms",
-                                loadEvent: function () {
-                                    layers.decrementCountLoading(layerName);
-                                    backboneEvents.get().trigger("doneLoading:layers", layerName);
-                                },
-                                loadingEvent: function () {
-                                    layers.incrementCountLoading(layerName);
-                                    backboneEvents.get().trigger("startLoading:layers", layerName);
-                                },
+            if (typeof window.setBaseLayers !== "undefined") {
+                $.each(window.setBaseLayers, function (i, v) {
+                    if (v.id === str) {
+                        activeBaseLayer = v;
+                        if (typeof v.overlays === "object") {
+                            for (u = 0; u < v.overlays.length; u = u + 1) {
+                                const layerName = v.overlays[u].id;
+                                l = cloud.get().addTileLayers($.extend({
+                                    layers: [v.overlays[u].id],
+                                    db: v.overlays[u].db,
+                                    host: v.overlays[u].host || "",
+                                    type: "tms",
+                                    loadEvent: function () {
+                                        layers.decrementCountLoading(layerName);
+                                        backboneEvents.get().trigger("doneLoading:layers", layerName);
+                                    },
+                                    loadingEvent: function () {
+                                        layers.incrementCountLoading(layerName);
+                                        backboneEvents.get().trigger("startLoading:layers", layerName);
+                                    },
 
-                            }, v.overlays[u].config));
-                            // Set prefix on id, so the layer will not be returned by layers.getLayers
-                            l[0].id = "__hidden." + v.overlays[u].id;
+                                }, v.overlays[u].config));
+                                // Set prefix on id, so the layer will not be returned by layers.getLayers
+                                l[0].id = "__hidden." + v.overlays[u].id;
+                            }
                         }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        cloud.get().setBaseLayer(str, () => {
-            backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-        }, () => {
-            backboneEvents.get().trigger("startLoading:setBaselayer", str);
+            cloud.get().setBaseLayer(str, () => {
+                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+            }, () => {
+                backboneEvents.get().trigger("startLoading:setBaselayer", str);
+            });
+
+            baseLayer.redraw(str);
+
+            pushState.init();
+
+            resolve();
         });
 
-        baseLayer.redraw(str);
-
-        pushState.init();
+        return result;
     },
 
     getActiveBaseLayer: () => {
