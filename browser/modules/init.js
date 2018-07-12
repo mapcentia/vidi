@@ -251,26 +251,25 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
-        $("[data-toggle=tooltip]").tooltip();
-
-        $.material.init();
-        touchScroll(".tab-pane");
-        touchScroll("#info-modal-body-wrapper");
-        $("#loadscreentext").html(__("Loading data"));
-
-        if (window.vidiConfig.activateMainTab) {
-            setTimeout(function () {
-                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-
-            }, 200);
+        try {
+            $("[data-toggle=tooltip]").tooltip();
+            $.material.init();
+            touchScroll(".tab-pane");
+            touchScroll("#info-modal-body-wrapper");
+            $("#loadscreentext").html(__("Loading data"));
+            if (window.vidiConfig.activateMainTab) {
+                setTimeout(function () {
+                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                }, 200);
+            }
+            $(window).resize(_.debounce(function () {
+                $("#myNavmenu").offcanvas('hide');
+                setTimeout(function () {
+                    modules.cloud.get().map.invalidateSize();
+                }, 100);
+            }, 0));
+        } catch (e) {
+            console.info("Could not init Bootstrap Material Design");
         }
-
-        $(window).resize(_.debounce(function () {
-            $("#myNavmenu").offcanvas('hide');
-            setTimeout(function () {
-                modules.cloud.get().map.invalidateSize();
-            }, 100);
-
-        }, 0));
     }
 };

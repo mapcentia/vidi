@@ -20,6 +20,7 @@ module.exports = {
     hash: decodeURIComponent(geocloud.urlHash),
     db: uriObj.segmentCoded(1),
     schema: uriObj.segmentCoded(2),
+    staticRoute: uriObj.segmentCoded(3),
     urlVars: uriJs.parseQuery(queryStr),
     uriJs: uriJs
 };
