@@ -56,6 +56,7 @@ module.exports = module.exports = {
 
     serialize: function (filters, strictMode = false) {
         var e = _encodeLayers(cloud.get().map);
+
         $.each(e, function (i, v) {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
@@ -104,8 +105,8 @@ var _encodeLayers = function (map) {
             vectors.push(layer);
         }
     }
+
     if (vectors.length) {
-        //console.log(vectors);
         enc.push(_encoders.layers.vector.call(this, vectors));
     }
     return enc;
@@ -299,14 +300,14 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
+                } else if (feature.feature.properties.type === "circlemarker") {
+                    featureGeoJson = {_latlng: feature._latlng};
+                    featureGeoJson.type = "CircleMarker";
+                    featureGeoJson.feature = feature.feature;
+                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else if (feature instanceof L.Marker) {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
-                    featureGeoJson.feature = feature.feature;
-                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
-                }else if (feature.feature.properties.type === "circlemarker") {
-                    featureGeoJson = {_latlng: feature._latlng};
-                    featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
                     featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else {
