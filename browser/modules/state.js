@@ -279,7 +279,7 @@ module.exports = {
 
             const initializeLayersFromURL = () => {
                 layersToActivate.map(item => {
-                    switchLayer.init(item[0], item[1], item[2]);
+                    switchLayer.init(item[0], item[1], true);
                 });    
             };
 
@@ -288,8 +288,6 @@ module.exports = {
             } else {
                 backboneEvents.get().once(`layerTree:ready`, initializeLayersFromURL);
             }
-
-            legend.init();
 
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
