@@ -324,6 +324,7 @@ module.exports = module.exports = {
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         // Refresh browser state. E.g. after a session start
