@@ -206,37 +206,59 @@ module.exports = module.exports = {
                 <div class='list-group-separator'></div>`;
             }
 
+            /**
+             * Shows two layers side by side and reactivates the radio button controls
+             */
+            const showTwoLayersSideBySide = () => {
+                // Disabling inputs of side-by-side base layers
+                if (activeBaseLayer) {
+                    $('[name="side-by-side-baselayers"]').prop('disabled', false);
+                    $(`[data-gc2-side-by-side-base-id="${activeBaseLayer}"]`).find('[name="side-by-side-baselayers"]').prop('disabled', true);
+                }
+
+                // Disabling inputs of base layers
+                if (activeSideBySideLayer) {
+                    $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
+                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
+                }
+
+                if (activeBaseLayer && activeSideBySideLayer) {
+                    if (sideBySideControl) {
+                        _self.destroySideBySideControl();
+                    }
+
+                    let layer1 = _self.addBaseLayer(activeBaseLayer);
+                    if (Array.isArray(layer1)) layer1 = layer1.pop();
+                    layer1.addTo(cloud.get().map);
+                    
+                    let layer2 = _self.addBaseLayer(activeSideBySideLayer);
+                    if (Array.isArray(layer2)) layer2 = layer2.pop();
+                    layer2.addTo(cloud.get().map);
+
+                    cloud.get().map.invalidateSize();
+                    sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+
+                    backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+                }
+            };
+
             $("#base-layer-list").append(appendedCode).promise().then(() => {
                 $(`[name="baselayers"]`).change(event => {
                     activeBaseLayer = $(event.target).val();
                     event.stopPropagation();
-                    setBaseLayer.init(activeBaseLayer);
+
+                    if ($('.js-toggle-side-by-side-mode').is(':checked')) {
+                        showTwoLayersSideBySide();
+                    } else {
+                        setBaseLayer.init(activeBaseLayer);
+                    }
                 });
 
-                // Disabling inputs
-                $('[name="side-by-side-baselayers"]').prop('disabled', false);
-                $(`[data-gc2-side-by-side-base-id="${activeBaseLayer}"]`).find('[name="side-by-side-baselayers"]').prop('disabled', true);
-
-                $('[data-gc2-side-by-side-base-id]').off();
                 $('[data-gc2-side-by-side-base-id]').change(event => {
                     activeSideBySideLayer = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
+                    event.stopPropagation();
 
-                    // Disabling inputs
-                    $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
-                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
-
-                    if (activeBaseLayer && activeSideBySideLayer) {
-                        if (sideBySideControl) {
-                            _self.destroySideBySideControl();
-                        }
-
-                        let layer1 = cloud.get().addBaseLayer(activeBaseLayer).addTo(cloud.get().map);
-                        let layer2 = cloud.get().addBaseLayer(activeSideBySideLayer).addTo(cloud.get().map);
-                        cloud.get().map.invalidateSize();
-                        sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
-
-                        backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
-                    }
+                    showTwoLayersSideBySide();
                 });
 
                 resolve();
@@ -298,8 +320,12 @@ module.exports = module.exports = {
         return baseLayers;
     },
 
+    /**
+     * 
+     * @return {Object} Layer object
+     */
     addBaseLayer: function (id) {
-        var customBaseLayer, bl;
+        var customBaseLayer, bl, result = false;
 
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
 
@@ -325,14 +351,16 @@ module.exports = module.exports = {
                     customBaseLayer.baseLayer = true;
                     customBaseLayer.id = bl.id;
 
-                    cloud.get().addLayer(customBaseLayer, bl.name, true);
+                    result = cloud.get().addLayer(customBaseLayer, bl.name, true);
 
                 } else {
 
-                    cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
+                    result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
 
                 }
             }
         }
+
+        return result;
     }
 };

@@ -92,7 +92,7 @@ module.exports = module.exports = {
 
             pushState.init();
 
-            resolve();
+            resolve(l);
         });
 
         return result;
