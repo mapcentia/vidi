@@ -391,6 +391,10 @@ module.exports = {
         });
         $("#info-tab").empty();
         $("#info-pane").empty();
+    },
+
+    setDownloadFunction: function(fn) {
+        download = fn
     }
 };
 
@@ -417,45 +421,32 @@ var download = function (sql, format) {
     request.open('POST', '/api/sql/' + db, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
     request.responseType = 'blob';
-
     request.onload = function() {
-        // Only handle status code 200
         if(request.status === 200) {
             var filename, type;
-            // The actual download
-
             switch (format) {
                 case "excel":
                     filename = 'file.xlsx';
                     type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
                     break;
-
                 default:
                     filename = 'file.geojson';
                     type = 'application/json';
                     break;
             }
-
-
             var blob = new Blob([request.response], { type: type });
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = filename;
-
             document.body.appendChild(link);
-
             link.click();
-
             document.body.removeChild(link);
         }
-
         // some error handling should be done here...
     };
 
     var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
-
-    console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/api/sql/" + db + "?" + uri);
-
-
     request.send(uri);
 };
+
+
