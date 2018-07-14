@@ -113,6 +113,10 @@ module.exports = module.exports = {
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
     },
 
+    getAvailableBaseLayers: () => {
+        return window.setBaseLayers;
+    },
+
     /**
      * 
      */

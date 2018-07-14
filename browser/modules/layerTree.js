@@ -21,6 +21,8 @@ var state;
 
 var backboneEvents;
 
+var automaticStartup = true;
+
 var layerTreeOrder = false;
 
 var onEachFeature = [];
@@ -120,7 +122,7 @@ module.exports = {
     },
 
     postInit: () => {
-        if (layerTreeWasBuilt === false) {
+        if (layerTreeWasBuilt === false && automaticStartup) {
             _self.create();
         }
     },
@@ -333,7 +335,7 @@ module.exports = {
             }
         }
 
-     if (forceLayerUpdate) {
+        if (forceLayerUpdate) {
             accumulatedDiff.map(item => {
                 let layerName = item;
                 _self.getActiveLayers().map(activeLayerName => {
@@ -384,6 +386,7 @@ module.exports = {
      */
     create: (forcedState = false) => {
         layerTreeWasBuilt = true;
+
         let result = new Promise((resolve, reject) => {
 
             layerTreeIsReady = false;
@@ -783,9 +786,8 @@ module.exports = {
                 layers.reorderLayers();
                 state.listen(MODULE_NAME, `sorted`);
                 state.listen(MODULE_NAME, `activeLayersChange`);
-                layerTreeIsReady = true;
+                
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
 
                 setTimeout(() => {
                     if (activeLayers) {
@@ -803,6 +805,8 @@ module.exports = {
                         });
                     }
 
+                    layerTreeIsReady = true;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
                     resolve();
                 }, 1000);
             });
@@ -886,6 +890,8 @@ module.exports = {
             }
         });
 
+        activeLayerIds = activeLayerIds.filter((v, i, a) => { return a.indexOf(v) === i}); 
+
         return activeLayerIds;
     },
 
@@ -917,6 +923,10 @@ module.exports = {
         pointToLayer[layer] = fn;
     },
 
+    setAutomatic: (value) => {
+        automaticStartup = value;
+    },
+    
     getStores: function () {
         return store;
     },

@@ -94,6 +94,7 @@ module.exports = {
         apiBridgeInstance = APIBridgeSingletone();
 
         isInit = true;
+        layerTree.setAutomatic(false);
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {

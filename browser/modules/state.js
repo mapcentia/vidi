@@ -126,6 +126,8 @@ const _getInternalState = () => {
                 localState = JSON.parse(value);
             }
 
+            if (LOG) console.log('State: ', localState);
+
             resolve(localState);
         });
     });
@@ -304,10 +306,10 @@ module.exports = {
         const initializeFromHashPart = () => {
             if (urlVars.k === undefined) {
                 if (hashArr[0]) {
-                    setLayers()
+                    setLayers();
                 } else {
                     // Set base layer to the first added one
-                    setBaseLayer.init(baseLayer.getBaseLayer()[0]);
+                    setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         cloud.get().zoomToExtent(extent);

@@ -86,7 +86,7 @@ module.exports = module.exports = {
         var me = this, el = $('input[class="js-show-layer-control"][data-gc2-id="' + name.replace('v:', '') + '"]');
         
         if (!el || el.length !== 1) {
-            console.error(`Unable to find layer switch control`);
+            console.error(`Unable to find layer switch control for layer ${name}`);
         }
 
         let layer = cloud.get().getLayersByName(name);
