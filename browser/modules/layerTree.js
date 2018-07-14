@@ -39,8 +39,6 @@ var styles = [];
 
 var store = [];
 
-var automatic = true;
-
 var _self;
 
 /**
@@ -94,6 +92,8 @@ const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
 const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
 
+let layerTreeWasBuilt = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -117,6 +117,12 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+    },
+
+    postInit: () => {
+        if (layerTreeWasBuilt === false) {
+            _self.create();
+        }
     },
 
     setSelectorValue: (name, type) => {
@@ -377,6 +383,7 @@ module.exports = {
      * Builds actual layer tree.
      */
     create: (forcedState = false) => {
+        layerTreeWasBuilt = true;
         let result = new Promise((resolve, reject) => {
 
             layerTreeIsReady = false;
@@ -908,10 +915,6 @@ module.exports = {
 
     setPointToLayer: function (layer, fn) {
         pointToLayer[layer] = fn;
-    },
-
-    setAutomatic: function (b) {
-        automatic = b;
     },
 
     getStores: function () {

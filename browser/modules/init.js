@@ -178,16 +178,15 @@ module.exports = {
 
         modules.cloud.init();
         modules.state.setExtent();
-        modules.backboneEvents.init();
-        modules.socketId.init();
-        modules.bindEvent.init();
-        modules.baseLayer.init();
-        modules.infoClick.init();
-        modules.advancedInfo.init();
-        modules.draw.init();
-        modules.stateSnapshots.init();
-        modules.print.init();
-        modules.layerTree.init();
+
+        let defaultModules = [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+            `advancedInfo`, `draw`, `stateSnapshots`, `print`, `layerTree`];
+
+        // Calling mandatory init method
+        defaultModules.map(name => {
+            modules[name].init();
+        });
+
         modules.meta.init().then(() => {
             return modules.setting.init();
         }, (error) => {
@@ -256,9 +255,15 @@ module.exports = {
         if (window.vidiConfig.activateMainTab) {
             setTimeout(function () {
                 $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-
             }, 200);
         }
+
+        // Calling optional postInit method
+        defaultModules.map(name => {
+            if (`postInit` in modules[name]) {
+                modules[name].postInit();
+            }
+        });
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {

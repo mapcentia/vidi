@@ -122,9 +122,6 @@ module.exports = {
             $(this).css("visibility", "visible");
         });
 
-        // Don't init layer tree automatic. Let this module activate it
-        layerTree.setAutomatic(false);
-
         backboneEvents.get().on("ready:meta", function () {
             metaDataKeys = meta.getMetaDataKeys();
             metaData = meta.getMetaData();
