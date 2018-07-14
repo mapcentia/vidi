@@ -576,11 +576,11 @@ module.exports = {
         $("#btn-draw-apply-style-ok").on("click", function () {
             me.setStyle(event.target, event.target.feature.properties.type);
             cloud.get().map.closePopup(popup);
+            backboneEvents.get().trigger(`${MODULE_NAME}:update`);
         });
 
         $("#btn-draw-apply-style-cancel").on("click", function () {
             cloud.get().map.closePopup(popup);
-
         });
     },
 
