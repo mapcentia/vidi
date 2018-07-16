@@ -309,7 +309,7 @@ class Queue {
     _getCurrentDatabaseAndSchema() {
         let database = `default`;
         let schema = `default`;
-        if (window && window.vidiConfig && window.vidiConfig.appDatabase && window.vidiConfig.appSchema) {
+        if (typeof window !== 'undefined' && window && window.vidiConfig && window.vidiConfig.appDatabase && window.vidiConfig.appSchema) {
             database = window.vidiConfig.appDatabase;
             schema = window.vidiConfig.appSchema;
         }
