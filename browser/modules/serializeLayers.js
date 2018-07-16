@@ -304,6 +304,9 @@ var _encoders = {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
+                    featureGeoJson.options = feature.options;
+                    featureGeoJson._tooltipHandlersAdded = feature._tooltipHandlersAdded;
+                    featureGeoJson._vidi_marker = feature._vidi_marker;
                     featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else if (feature instanceof L.Marker) {
                     featureGeoJson = {_latlng: feature._latlng};
@@ -326,6 +329,7 @@ var _encoders = {
                 if (opacity === null) {
                     opacity = feature.options.opacity || 1.0;
                 }
+
                 encFeatures.push(featureGeoJson);
             }
 

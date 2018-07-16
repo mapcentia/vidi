@@ -290,22 +290,15 @@ module.exports = {
                     }
 
                     if (type === 'circlemarker') {
-
                         drawLayer._vidi_marker = true;
 
                         var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-
                         if (text !== null) {
-                            drawLayer.bindTooltip(text, {permanent: true}).on("click", function () {
-                            }).openTooltip();
-
+                            drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
                             drawLayer._vidi_marker_text = text;
-
                         } else {
-
                             drawLayer._vidi_marker_text = null;
                         }
-
                     }
 
                     drawnItems.addLayer(drawLayer);
@@ -315,9 +308,7 @@ module.exports = {
 
                     if (type !== 'circlemarker') {
                         drawLayer.on('click', function (event) {
-
                             me.bindPopup(event);
-
                         });
                     }
 
@@ -500,13 +491,12 @@ module.exports = {
             // If circle marker
             // ================
             if (m.type === "CircleMarker") {
-                g = L.marker(m._latlng, m.style);
+                g = L.circleMarker(m._latlng, m.options);
                 g.feature = m.feature;
 
                 // Add label
                 if (m._vidi_marker_text) {
-                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
-                    }).openTooltip();
+                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
                 }
 
                 // Adding vidi-specific properties
@@ -590,7 +580,6 @@ module.exports = {
      * @param type
      */
     setStyle: function (l, type) {
-
         if ($("#draw-measure").is(":checked") && type !== 'marker') {
             l.hideMeasurements();
             l.showMeasurements({
