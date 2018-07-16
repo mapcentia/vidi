@@ -332,6 +332,11 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(fetch(event.request));
     } else {
         event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
+            let detectNoSlashPathRegExp = /\/app\/[\w]+\/[\w]+$/;
+            if (cleanedRequestURL.match(detectNoSlashPathRegExp) && cleanedRequestURL.match(detectNoSlashPathRegExp).length === 1) {
+                cleanedRequestURL = cleanedRequestURL + `/`;
+            }
+
             return caches.match(cleanedRequestURL).then((response) => {
                 if (response) {
                     // The request was found in cache
