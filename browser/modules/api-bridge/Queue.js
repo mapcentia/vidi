@@ -286,7 +286,8 @@ class Queue {
         if (LOG) console.log('Queue: before getting state');
 
         let result = new Promise((resolve, reject) => {
-            localforage.getItem(QUEUE_STORE_NAME, (error, value) => {
+            let location = _self._getCurrentDatabaseAndSchema();
+            localforage.getItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, (error, value) => {
 
                 if (LOG) console.log('Queue: after getting state');
 
@@ -305,11 +306,23 @@ class Queue {
         return result;
     }
 
+    _getCurrentDatabaseAndSchema() {
+        let database = `default`;
+        let schema = `default`;
+        if (window && window.vidiConfig && window.vidiConfig.appDatabase && window.vidiConfig.appSchema) {
+            database = window.vidiConfig.appDatabase;
+            schema = window.vidiConfig.appSchema;
+        }
+
+        return { database, schema };
+    }
+
     /**
      * Saves current queue state to disk
      */
     _saveState() {
-        localforage.setItem(QUEUE_STORE_NAME, JSON.stringify(this._queue), (error) => {
+        let location = this._getCurrentDatabaseAndSchema();
+        localforage.setItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, JSON.stringify(this._queue), (error) => {
 
             if (LOG) console.log('Queue: saving state');
 
