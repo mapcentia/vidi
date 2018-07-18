@@ -200,6 +200,10 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
+        if (layerTreeWasBuilt === false) {
+            return;
+        }
+
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
 
