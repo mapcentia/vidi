@@ -18,6 +18,12 @@ const PROCESS_FIRST_ELEMENT_IMMEDIATELY = false;
 
 let queueStateUndefined = true;
 
+/*
+Is set to false when the page protocol is non-HTTPS, so the online status will
+definitely not be retrieved until page reload
+*/
+let onlineStatusCanBeRetrievedAtSomePoint = true;
+
 /**
  * FIFO queue abstraction. Queue items are stored
  * in browser storage and do not depend on page reload
@@ -84,7 +90,14 @@ class Queue {
                         _self._onUpdateListener(_self._generateCurrentStatistics());
                     }
                 } else {
-                    console.warn(`Unable the determine the online status`);
+                    if (location.protocol.indexOf('https') === -1) {
+                        if (onlineStatusCanBeRetrievedAtSomePoint) {
+                            console.warn(`Unable the determine the online status (the service worker is not registered)`);
+                            onlineStatusCanBeRetrievedAtSomePoint = false;
+                        }
+                    } else {
+                        console.warn(`Unable the determine the online status (the service worker is starting up)`);
+                    }
                 }
             }).always(() => {
                 if (_self._queue.length > 0 && _self._locked === false) {
