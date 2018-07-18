@@ -90,7 +90,7 @@ class Queue {
                         _self._onUpdateListener(_self._generateCurrentStatistics());
                     }
                 } else {
-                    if (location.protocol.indexOf('https') === -1) {
+                    if (typeof location !== 'undefined' && location && location.protocol.indexOf('https') === -1) {
                         if (onlineStatusCanBeRetrievedAtSomePoint) {
                             console.warn(`Unable the determine the online status (the service worker is not registered)`);
                             onlineStatusCanBeRetrievedAtSomePoint = false;
