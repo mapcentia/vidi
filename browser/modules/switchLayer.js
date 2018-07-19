@@ -196,6 +196,7 @@ module.exports = module.exports = {
         pushState.init();
 
         if (!doNotLegend) {
+            //console.trace(`aaa`);
             legend.init();
         }
     }

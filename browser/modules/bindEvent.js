@@ -377,19 +377,6 @@ module.exports = module.exports = {
         // =============================================
 
         if (!urlVars.px && !urlVars.py) {
-            $(document).arrive('[data-gc2-id]', function () {
-                $(this).on("change", function (e) {
-                    let prefix = '';
-                    if ($(this).data('gc2-layer-type') === 'vector') {
-                        prefix = 'v:';
-                    }
-
-                    switchLayer.init(prefix + $(this).data('gc2-id'), $(this).context.checked, false);
-                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                    e.stopPropagation();
-                });
-            });
-
             $(document).arrive('[data-toggle="tooltip"]', function () {
                 $(this).tooltip()
             });

@@ -7,19 +7,7 @@
 
 const MODULE_NAME = `layerTree`;
 
-var meta;
-
-var layers;
-
-var switchLayer;
-
-var cloud;
-
-var layers;
-
-var state;
-
-var backboneEvents;
+var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
 
 var automaticStartup = true;
 
@@ -105,6 +93,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         layers = o.layers;
+        legend = o.legend;
         state = o.state;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -396,7 +385,8 @@ module.exports = {
             layerTreeIsReady = false;
             if (forcedState) {
                 _self.getActiveLayers().map(item => {
-                    switchLayer.init(item, false, false, false);
+                    // Disabling active layers
+                    switchLayer.init(item, false, true, false);
                 });
             }
 
@@ -728,20 +718,42 @@ module.exports = {
                                     <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                                 </li>`);
 
-                                $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
+                                $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                                     let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                     $(switcher).data('gc2-layer-type', 'tile');
                                     $(switcher).prop('checked', true);
-                                    _self.reloadLayer($(switcher).data('gc2-id'));
+                                    _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                 });
 
-                                $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
+                                $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
                                     let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                     $(switcher).data('gc2-layer-type', 'vector');
                                     $(switcher).prop('checked', true);
-                                    _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
+                                    _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                });
+
+                                $(layerControlRecord).find('input[data-gc2-id]').first().on(`change`, (e, data) => {
+                                    if (data) {
+                                        if ($(e.target).prop(`checked`)) {
+                                            $(e.target).prop(`checked`, false);
+                                        } else {
+                                            $(e.target).prop(`checked`, true);
+                                        }
+                                    }
+
+                                    let prefix = '';
+                                    if ($(e.target).data('gc2-layer-type') === 'vector') {
+                                        prefix = 'v:';
+                                    }
+                
+                                    switchLayer.init(prefix + $(e.target).data('gc2-id'), $(e.target).prop(`checked`), (data ? data.doNotLegend : false));
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+
+                                    e.stopPropagation();
                                 });
 
                                 $("#collapse" + base64GroupName).append(layerControlRecord);
@@ -799,14 +811,16 @@ module.exports = {
                             if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
                                 $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
                                 if (layerName.indexOf(`v:`) === 0) {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`);
+                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
                                 } else {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`);
+                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                 }
                             } else {
-                                $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click');
+                                $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('change', [{doNotLegend: true}]);
                             }
                         });
+
+                        legend.init();
                     }
 
                     layerTreeIsReady = true;
@@ -873,9 +887,9 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, forceTileRedraw = false) => {
-        switchLayer.init(layerId, false, false, forceTileRedraw);
-        switchLayer.init(layerId, true, false, forceTileRedraw);
+    reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false) => {
+        switchLayer.init(layerId, false, doNotLegend, forceTileRedraw);
+        switchLayer.init(layerId, true, doNotLegend, forceTileRedraw);
     },
 
     /**
