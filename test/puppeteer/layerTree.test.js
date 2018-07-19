@@ -83,4 +83,36 @@ describe('Layer tree', () => {
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
         expect(tilesWereRequested).to.be.true;
     });
+
+    it('should keep layer and layer group order', async () => {
+        const page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        await page.click(`#burger-btn`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Test group`);
+
+        let e = await page.$('#layer-panel-VGVzdCBncm91cA');
+        let box = await e.boundingBox();
+        let x = box.x + box.width / 2;
+        let y = box.y + box.height / 2;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x, y - 60);
+        await page.mouse.up();
+        await page.mouse.click(1, 1);
+        await helpers.sleep(1000);
+
+        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        await page.click(`#burger-btn`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Test group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+    });
 });

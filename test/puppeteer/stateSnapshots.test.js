@@ -113,7 +113,7 @@ describe("State snapshots", () => {
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
     });
 
-    it("should make browser-owned state snapshots user-owned ones", async () => {
+    it("should make browser-owned state snapshots user-owned ones and delete them", async () => {
         const page = await browser.newPage();   
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -154,6 +154,16 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
         currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);       
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
+
+        // Clicking the Add state snapshot button
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(4000);
+        initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').first().find('button').eq(1).trigger('click')`);
+        await helpers.sleep(4000);
+        currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);       
+        console.log(initialNumberOfStateSnapshots, currentNumberOfStateSnapshots);
+        expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots + 1)).to.be.true;
     });
 
     it("should create permalink that will make possible to share state snapshot", async () => {
@@ -196,5 +206,79 @@ describe("State snapshots", () => {
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
         expect(stateWasRequested).to.be.true;
+    });
+
+    it("should restore multiple snapshots", async () => {
+        const page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        // Accepting dialogs
+        page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Turn on two layers
+        await page.click(`#burger-btn`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('.accordion-toggle.collapsed').eq(2).trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test_line"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        // Open state snapshot manager
+        await page.click(`#state-snapshots-dialog-btn`);
+        await helpers.sleep(2000);
+
+        // Clicking the Add state snapshot button
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Turn on another two layers
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test_line"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        // Clicking the Add state snapshot button
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+        
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').length`)).to.equal(2);
+
+        // Applying first state snapshot
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+
+        // Checking if the Apply button is disabled while state snapshot is being activated
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.true;
+
+        await helpers.sleep(4000);
+
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.false;
+
+        expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.false;       
+
+        // Applying second state snapshot
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().trigger('click')`);
+        await helpers.sleep(4000);
+        expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.true;
     });
 });
