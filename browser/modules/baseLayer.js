@@ -210,10 +210,7 @@ module.exports = module.exports = {
                 <div class='list-group-separator'></div>`;
             }
 
-            /**
-             * Shows two layers side by side and reactivates the radio button controls
-             */
-            const showTwoLayersSideBySide = () => {
+            const disableInputs = () => {
                 // Disabling inputs of side-by-side base layers
                 if (activeBaseLayer) {
                     $('[name="side-by-side-baselayers"]').prop('disabled', false);
@@ -225,7 +222,13 @@ module.exports = module.exports = {
                     $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
                     $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
                 }
+            }
 
+            /**
+             * Shows two layers side by side and reactivates the radio button controls
+             */
+            const showTwoLayersSideBySide = () => {
+                disableInputs();
                 if (activeBaseLayer && activeSideBySideLayer) {
                     if (sideBySideControl) {
                         _self.destroySideBySideControl();
@@ -243,10 +246,16 @@ module.exports = module.exports = {
                     sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
 
                     backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+                } else if (activeBaseLayer && !activeSideBySideLayer) {
+                    setBaseLayer.init(activeBaseLayer);
                 }
             };
 
             $("#base-layer-list").append(appendedCode).promise().then(() => {
+                if (sideBySideEnabled) {
+                    disableInputs();
+                }
+
                 $(`[name="baselayers"]`).change(event => {
                     activeBaseLayer = $(event.target).val();
                     event.stopPropagation();
