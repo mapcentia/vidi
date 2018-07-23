@@ -41,7 +41,6 @@ module.exports = module.exports = {
         let result = new Promise((resolve, reject) => {
             var u, l;
             layers.removeHidden();
-
             if (!cloud.get().getLayersByName(str)) {
                 baseLayer.addBaseLayer(str);
                 // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
@@ -72,27 +71,32 @@ module.exports = module.exports = {
                                         layers.incrementCountLoading(layerName);
                                         backboneEvents.get().trigger("startLoading:layers", layerName);
                                     },
-
                                 }, v.overlays[u].config));
                                 // Set prefix on id, so the layer will not be returned by layers.getLayers
                                 l[0].id = "__hidden." + v.overlays[u].id;
+
+                                console.log(`### l`, l);
                             }
                         }
                     }
                 });
             }
 
-            cloud.get().setBaseLayer(str, () => {
-                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-            }, () => {
-                backboneEvents.get().trigger("startLoading:setBaselayer", str);
-            });
+            console.log(`### setBaseLayer`, str);
+
+            setTimeout(() => {
+                cloud.get().setBaseLayer(str, () => {
+                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                }, () => {
+                    backboneEvents.get().trigger("startLoading:setBaselayer", str);
+                });
+            }, (2000));
 
             baseLayer.redraw(str);
 
             pushState.init();
 
-            resolve(l);
+            resolve();
         });
 
         return result;
