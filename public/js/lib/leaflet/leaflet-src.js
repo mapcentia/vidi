@@ -4912,6 +4912,9 @@ var Layers = Control.extend({
 	// @method addBaseLayer(layer: Layer, name: String): this
 	// Adds a base layer (radio button entry) with the given name to the control.
 	addBaseLayer: function (layer, name) {
+
+        console.log(`### LEAFLET addBaseLayer`);
+
 		this._addLayer(layer, name);
 		return (this._map) ? this._update() : this;
 	},
@@ -6532,6 +6535,9 @@ Map.include({
 	// @method addLayer(layer: Layer): this
 	// Adds the given layer to the map
 	addLayer: function (layer) {
+
+        console.log(`### LEAFLET addLayer`);
+
 		if (!layer._layerAdd) {
 			throw new Error('The provided object is not a Layer.');
 		}
@@ -11219,6 +11225,9 @@ var GridLayer = Layer.extend({
 	},
 
 	_addTile: function (coords, container) {
+
+        console.log(`### LEAFLET _addTile`);
+
 		var tilePos = this._getTilePos(coords),
 		    key = this._tileCoordsToKey(coords);
 
@@ -11252,6 +11261,9 @@ var GridLayer = Layer.extend({
 	},
 
 	_tileReady: function (coords, err, tile) {
+
+        
+
 		if (!this._map) { return; }
 
 		if (err) {
@@ -11290,11 +11302,13 @@ var GridLayer = Layer.extend({
 			});
 		}
 
-		if (this._noTilesToLoad()) {
+        console.log(`### LEAFLET _tileReady`, this._noTilesToLoad(), this._loading);
+
+		if (this._noTilesToLoad() && this._loading) {
 			this._loading = false;
 			// @event load: Event
 			// Fired when the grid layer loaded all visible tiles.
-			this.fire('load');
+            this.fire('load');
 
 			if (ielt9 || !this._map._fadeAnimated) {
 				requestAnimFrame(this._pruneTiles, this);
@@ -11461,6 +11475,9 @@ var TileLayer = GridLayer.extend({
 	// callback is called when the tile has been loaded.
 	createTile: function (coords, done) {
 		var tile = document.createElement('img');
+
+        console.log(`### LEAFLET createTile`);
+
 
 		on(tile, 'load', bind(this._tileOnLoad, this, done, tile));
 		on(tile, 'error', bind(this._tileOnError, this, done, tile));

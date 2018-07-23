@@ -1542,11 +1542,11 @@ geocloud = (function () {
         };
         //ol2, ol3 and leaflet
         this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
-
-            console.log(`### setBaseLayer`, baseLayerName, loadEvent, loadingEvent);
-
             var me = this;
             var layers;
+
+            console.log(`### setBaseLayer`, baseLayerName);
+
             (function poll() {
                 if (((baseLayerName.search("google") > -1 && googleMapAdded[baseLayerName] !== undefined)) ||
                     ((baseLayerName.search("yandex") > -1 && yandexMapAdded[baseLayerName] !== undefined)) ||
@@ -1567,38 +1567,50 @@ geocloud = (function () {
                             break;
                         case "leaflet":
                             layers = lControl._layers;
+
+                            console.log(`### layers in layer control`, Object.keys(layers).length, Object.keys(layers));
+
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
-                                    if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
-                                        me.map.removeLayer(layers[key].layer);
-                                    }
+                                    if (layers[key].layer.baseLayer === true) {
+                                        // Remove every base layer from the map
+                                        if (me.map.hasLayer(layers[key].layer)) {
+                                            me.map.removeLayer(layers[key].layer);
 
-                                    if (layers[key].layer.baseLayer === true && layers[key].layer.id === baseLayerName) {
+                                            console.log(`### removing`, layers[key].layer.id);
 
-                                        //console.log(`### base layer was found`, layers[key].layer);
-
-                                        // Move all others than Google maps back
-                                        if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
-                                            layers[key].layer.setZIndex(1);
                                         }
-                                        if (!loadEvent) {
-                                            loadEvent = function () {
+
+                                        // Adding specified layer to map
+                                        if (layers[key].layer.id === baseLayerName) {
+
+                                            console.log(`### adding base layer ${baseLayerName}`);
+
+                                            // Move all others than Google maps back
+                                            if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
+                                                layers[key].layer.setZIndex(1);
                                             }
-                                        }
-                                        if (!loadingEvent) {
-                                            loadingEvent = function () {
+
+                                            if (!loadEvent) {
+                                                loadEvent = function () {
+                                                }
                                             }
+
+                                            if (!loadingEvent) {
+                                                loadingEvent = function () {
+                                                }
+                                            }
+
+                                            layers[key].layer.off("load");
+                                            layers[key].layer.on("load", loadEvent);
+
+                                            layers[key].layer.off("loading");
+                                            layers[key].layer.on("loading", loadingEvent);
+
+                                            console.log(`### adding base layer`, layers[key].layer);
+
+                                            me.map.addLayer(layers[key].layer);
                                         }
-
-                                        layers[key].layer.off("load");
-                                        layers[key].layer.on("load", loadEvent);
-
-                                        layers[key].layer.off("loading");
-                                        layers[key].layer.on("loading", loadingEvent);
-
-                                        console.log(`### adding layer`, layers[key].layer);
-
-                                        me.map.addLayer(layers[key].layer, false);
                                     }
                                 }
                             }
