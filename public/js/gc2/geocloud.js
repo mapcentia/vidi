@@ -1567,25 +1567,16 @@ geocloud = (function () {
                             break;
                         case "leaflet":
                             layers = lControl._layers;
-
-                            console.log(`### layers in layer control`, Object.keys(layers).length, Object.keys(layers));
-
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true) {
                                         // Remove every base layer from the map
                                         if (me.map.hasLayer(layers[key].layer)) {
                                             me.map.removeLayer(layers[key].layer);
-
-                                            console.log(`### removing`, layers[key].layer.id);
-
                                         }
 
                                         // Adding specified layer to map
                                         if (layers[key].layer.id === baseLayerName) {
-
-                                            console.log(`### adding base layer ${baseLayerName}`);
-
                                             // Move all others than Google maps back
                                             if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
                                                 layers[key].layer.setZIndex(1);
@@ -1606,8 +1597,6 @@ geocloud = (function () {
 
                                             layers[key].layer.off("loading");
                                             layers[key].layer.on("loading", loadingEvent);
-
-                                            console.log(`### adding base layer`, layers[key].layer);
 
                                             me.map.addLayer(layers[key].layer);
                                         }

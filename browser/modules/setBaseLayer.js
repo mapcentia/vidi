@@ -82,37 +82,11 @@ module.exports = module.exports = {
                 });
             }
 
-            console.log(`### setBaseLayer`, str);
-
-            setTimeout(() => {
-                cloud.get().setBaseLayer(str, (e) => {
-                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                }, (e) => {
-                    backboneEvents.get().trigger("startLoading:setBaselayer", str);
-                });
-
-                console.log(`
-######################################################################
-`);
-                setTimeout(() => {
-                    cloud.get().setBaseLayer(str, (e) => {
-                        backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                    }, (e) => {
-                        backboneEvents.get().trigger("startLoading:setBaselayer", str);
-                    });
-
-                    console.log(`
-######################################################################
-`);
-                    setTimeout(() => {
-                        cloud.get().setBaseLayer(str, (e) => {
-                            backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                        }, (e) => {
-                            backboneEvents.get().trigger("startLoading:setBaselayer", str);
-                        });
-                    }, (2000));
-                }, (2000));
-            }, (2000));
+            cloud.get().setBaseLayer(str, (e) => {
+                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+            }, (e) => {
+                backboneEvents.get().trigger("startLoading:setBaselayer", str);
+            });
 
             baseLayer.redraw(str);
 

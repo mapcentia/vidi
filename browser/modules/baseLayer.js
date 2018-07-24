@@ -96,8 +96,6 @@ module.exports = module.exports = {
         $(`.js-toggle-side-by-side-mode`).change((event) => {
             sideBySideEnabled = $(event.target).is(':checked');
 
-            console.log(`### sideBySideEnabled`, sideBySideEnabled);
-
             if (sideBySideEnabled) {
                 activeSideBySideLayer = false;
                 //_self.drawBaseLayersControl();
