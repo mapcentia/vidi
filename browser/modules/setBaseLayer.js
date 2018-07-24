@@ -74,8 +74,6 @@ module.exports = module.exports = {
                                 }, v.overlays[u].config));
                                 // Set prefix on id, so the layer will not be returned by layers.getLayers
                                 l[0].id = "__hidden." + v.overlays[u].id;
-
-                                console.log(`### l`, l);
                             }
                         }
                     }

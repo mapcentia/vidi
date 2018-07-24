@@ -98,13 +98,13 @@ module.exports = module.exports = {
 
             if (sideBySideEnabled) {
                 activeSideBySideLayer = false;
-                //_self.drawBaseLayersControl();
+                _self.drawBaseLayersControl();
             } else {
-                //_self.destroySideBySideControl();
+                _self.destroySideBySideControl();
                 setBaseLayer.init(activeBaseLayer);
             }
 
-            //backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+            backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
         });
 
         _self.getSideBySideModeStatus().then(sideBySideModeStatus => {
@@ -124,9 +124,6 @@ module.exports = module.exports = {
      * 
      */
     toggleSideBySideControl: (layers) => {
-
-        console.log(`### toggleSideBySideControl`, toggleSideBySideControl);
-
         let result = false;
         if (layers === false || layers === `false`) {
             result = new Promise((resolve, reject) => {
@@ -161,16 +158,12 @@ module.exports = module.exports = {
         // Delete previously initialized side-by-side layers
         for (let key in cloud.get().map._layers) {
             if (`_vidi_side_by_side` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_side_by_side) {
-                console.log(`### removing`, cloud.get().map._layers[key].id);
                 cloud.get().map.removeLayer(cloud.get().map._layers[key]);
             }
         }
     },
 
     destroySideBySideControl: () => {
-
-        console.log(`### destroy side-by-side control`);
-
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
 
@@ -183,9 +176,6 @@ module.exports = module.exports = {
     },
 
     drawBaseLayersControl: () => {
-
-        console.log(`### drawBaseLayersControl`);
-
         let result = new Promise((resolve, reject) => {
             // Delete current layers
             $(`.js-base-layer-control`).remove();
@@ -248,12 +238,8 @@ module.exports = module.exports = {
              * Shows two layers side by side and reactivates the radio button controls
              */
             const showTwoLayersSideBySide = () => {
-                
-                console.log(`### showTwoLayersSideBySide`);
-
                 disableInputs();
 
-                /*
                 if (activeSideBySideLayer === false) {
                     throw new Error(`Unable to detect the side-by-side layer`);
                 }
@@ -280,24 +266,20 @@ module.exports = module.exports = {
                 sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
 
                 backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
-                */
             };
 
             $("#base-layer-list").append(appendedCode).promise().then(() => {
                 if (sideBySideEnabled) {
-                    //disableInputs();
+                    disableInputs();
                 }
 
                 $(`[name="baselayers"]`).off();
                 $(`[name="baselayers"]`).change(event => {
-
-                    console.log(`### baselayers change`);
-
                     activeBaseLayer = $(event.target).val();
-                    //event.stopPropagation();
+                    event.stopPropagation();
 
                     if ($('.js-toggle-side-by-side-mode').is(':checked') && activeSideBySideLayer !== false) {
-                        //showTwoLayersSideBySide();
+                        showTwoLayersSideBySide();
                     } else {
                         setBaseLayer.init(activeBaseLayer);
                     }
@@ -358,7 +340,6 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        //return new Promise((resolve, reject) => { resolve(); });
         return _self.toggleSideBySideControl(newState.sideBySideMode);
     },
 

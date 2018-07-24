@@ -1544,9 +1544,6 @@ geocloud = (function () {
         this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
             var me = this;
             var layers;
-
-            console.log(`### setBaseLayer`, baseLayerName);
-
             (function poll() {
                 if (((baseLayerName.search("google") > -1 && googleMapAdded[baseLayerName] !== undefined)) ||
                     ((baseLayerName.search("yandex") > -1 && yandexMapAdded[baseLayerName] !== undefined)) ||
@@ -1567,15 +1564,21 @@ geocloud = (function () {
                             break;
                         case "leaflet":
                             layers = lControl._layers;
+
+                            // Remove every base layer from the map and layer control
+                            for (var key in layers) {
+                                if (layers.hasOwnProperty(key)) {
+                                    if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
+                                        me.map.removeLayer(layers[key].layer);
+                                        lControl.removeLayer(layers[key].layer);
+                                    }
+                                }
+                            }
+
+                            // Adding specified layer to map
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true) {
-                                        // Remove every base layer from the map
-                                        if (me.map.hasLayer(layers[key].layer)) {
-                                            me.map.removeLayer(layers[key].layer);
-                                        }
-
-                                        // Adding specified layer to map
                                         if (layers[key].layer.id === baseLayerName) {
                                             // Move all others than Google maps back
                                             if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
