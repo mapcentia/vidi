@@ -135,6 +135,13 @@ module.exports = module.exports = {
                 }
             });
         } else if (layers && layers.length === 2) {
+            // Disable the side-by-side mode
+            _self.destroySideBySideControl();
+
+            activeSideBySideLayer = false;
+            sideBySideEnabled = false;
+            $(`.js-toggle-side-by-side-mode`).prop(`checked`, false);
+
             result = new Promise((resolve, reject) => {
                 $(`.js-toggle-side-by-side-mode`).trigger(`click`);
                 setTimeout(() => {
@@ -154,20 +161,16 @@ module.exports = module.exports = {
         }
     },
 
-    removeSideBySideLayers: () => {
+    destroySideBySideControl: () => {
+        if (sideBySideControl) sideBySideControl.remove();
+        sideBySideControl = false;
+
         // Delete previously initialized side-by-side layers
         for (let key in cloud.get().map._layers) {
             if (`_vidi_side_by_side` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_side_by_side) {
                 cloud.get().map.removeLayer(cloud.get().map._layers[key]);
             }
         }
-    },
-
-    destroySideBySideControl: () => {
-        if (sideBySideControl) sideBySideControl.remove();
-        sideBySideControl = false;
-
-        _self.removeSideBySideLayers();
     },
 
     redraw: (newBaseLayerName) => {
