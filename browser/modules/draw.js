@@ -416,14 +416,15 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        
         return new Promise((resolve, reject) => {
+
+            console.log(`### applying state`, newState);
+
             _self.control(false);
             _self.removeFeatures();
             if (newState.drawnItems && newState.drawnItems !== `false`) {
-                $("#draw-btn").trigger('click');
                 setTimeout(() => {
-                    _self.recreateDrawnings(JSON.parse(newState.drawnItems));
+                    _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
                     resolve();
                 }, 100);
             } else {
@@ -440,8 +441,8 @@ module.exports = {
      * 
      * @return {void}
      */
-    recreateDrawnings: (parr) => {
-         let GeoJsonAdded = false;
+    recreateDrawnings: (parr, enableControl = true) => {
+        let GeoJsonAdded = false;
         let v = parr;
         let l = _self.getLayer();
         let t = _self.getTable();
@@ -548,7 +549,10 @@ module.exports = {
         });
 
         t.loadDataInTable();
-        _self.control(true);
+
+        if (enableControl) {
+            _self.control(true);
+        }
     },
 
     bindPopup: function (event) {
