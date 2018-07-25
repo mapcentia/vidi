@@ -26,9 +26,17 @@ const dict = {
         "da_DK": "# No snapshots",
         "en_US": "# No snapshots"
     },
-    "Delete snapshot": {
-        "da_DK": "# Delete snapshot",
-        "en_US": "# Delete snapshot"
+    "Update state snapshot with current application state": {
+        "da_DK": "# Update state snapshot with current application state",
+        "en_US": "# Update state snapshot with current application state"
+    },
+    "Apply state snapshot": {
+        "da_DK": "# Apply state snapshot",
+        "en_US": "# Apply state snapshot"
+    },
+    "Delete state snapshot": {
+        "da_DK": "# Delete state snapshot",
+        "en_US": "# Delete state snapshot"
     },
     "Add local state snapshots to user's ones": {
         "da_DK": "# Add local state snapshots to user's ones",
@@ -122,8 +130,12 @@ module.exports = module.exports = {
         class StateSnapshotTitleField extends React.Component {
             constructor(props) {
                 super(props);
+                if (props.type !== `userOwned` && props.type !== `browserOwned`) {
+                    throw new Error(`Invalid type options`);
+                }
+                
                 this.state = {
-                    title: ''
+                    title: (props.value ? props.value : ``)
                 }
             }
 
@@ -137,6 +149,16 @@ module.exports = module.exports = {
             }
 
             render() {
+                let cancelControl = false;
+                if (this.props.onCancel) {
+                    cancelControl = (<button
+                        className="btn btn-xs btn-primary"
+                        onClick={this.props.onCancel}
+                        style={buttonStyle}>
+                        <i className="material-icons">cancel</i>
+                    </button>);
+                }
+
                 return (<div className="input-group" style={{ width: '50%', display: 'inline-table', paddingLeft: '8px' }}>
                     <input value={this.state.title} type="text" className="form-control" placeholder={utils.__("New title", dict)} onChange={this.onChange.bind(this)}/>
                     <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
@@ -145,8 +167,9 @@ module.exports = module.exports = {
                             onClick={this.onSave.bind(this)}
                             disabled={!this.state.title}
                             style={buttonStyle}>
-                            <i className="material-icons">add</i>
+                            <i className="material-icons">save</i>
                         </button>
+                        {cancelControl}
                     </span>
                 </div>);
             }
@@ -166,6 +189,7 @@ module.exports = module.exports = {
                     userOwnerSnapshots: [],
                     loading: false,
                     authenticated: false,
+                    updatedItemId: false,
                     stateApplyingIsBlocked: false
                 };
 
@@ -249,7 +273,7 @@ module.exports = module.exports = {
              * @param {String} id Snapshot identifier
              */
             deleteSnapshot(id) {
-                if (confirm(`${utils.__(`Delete snapshot`, dict)}?`)) {
+                if (confirm(`${utils.__(`Delete state snapshot`, dict)}?`)) {
                     let _self = this;
                     $.ajax({
                         url: `${API_URL}/${id}`,
@@ -259,6 +283,28 @@ module.exports = module.exports = {
                         _self.refreshSnapshotsList();
                     });
                 }
+            }
+
+            /**
+             * Updates snapshot
+             * 
+             * @param {String} id Snapshot identifier
+             */
+            updateSnapshot(item, title) {
+
+                console.log(`### ready to send data to server`, item, title);
+
+            }
+
+            /**
+             * Enables updat form for snapshot
+             * 
+             * @param {String} id Snapshot identifier
+             */
+            enableUpdateSnapshotForm(id) {
+                this.setState({
+                    updatedItemId: id
+                });
             }
 
             /**
@@ -370,6 +416,23 @@ module.exports = module.exports = {
                         titleLabel = (<span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
                     }
 
+                    let updateSnapshotControl = (<button
+                        type="button"
+                        className="btn btn-xs btn-primary"
+                        onClick={() => this.enableUpdateSnapshotForm(item.id)}
+                        title={utils.__(`Update state snapshot with current application state`, dict)}
+                        style={buttonStyle}>
+                        <i className="material-icons">autorenew</i>
+                    </button>);
+                    if (this.state.updatedItemId === item.id) {
+                        let type = (local ? 'browserOwned' : 'userOwned')
+                        updateSnapshotControl = (<StateSnapshotTitleField
+                            value={item.title}
+                            onAdd={(newTitle) => { this.updateSnapshot(item, newTitle) }}
+                            onCancel={() => { this.setState({ updatedItemId: false }) }}
+                            type={type}/>);
+                    }
+
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                         <div className="panel-body" style={{padding: '8px'}}>
                             <div>
@@ -380,13 +443,16 @@ module.exports = module.exports = {
                                     className="btn btn-xs btn-primary"
                                     onClick={() => { this.applySnapshot(item); }}
                                     disabled={this.state.stateApplyingIsBlocked}
+                                    title={utils.__(`Apply state snapshot`, dict)}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>
+                                {updateSnapshotControl}
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => this.deleteSnapshot(item.id)}
+                                    title={utils.__(`Delete state snapshot`, dict)}
                                     style={buttonStyle}>
                                     <i className="material-icons">delete</i>
                                 </button>
