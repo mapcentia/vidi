@@ -255,10 +255,155 @@ describe('State snapshot management API', () => {
         });
     });
 
+    it('should update browser-owned state snaphsot for owner', (done) => {
+        let id = false;
+
+        let body = {
+            anonymous: true,
+            title: `test`,
+            snapshot: {
+                modules: [],
+                map: {
+                    x: 1,
+                    y: 2,
+                    zoom: 3
+                }
+            }
+        };
+
+        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let options = {
+            url: `${helpers.API_URL}/state-snapshots`,
+            method: `POST`,
+            headers: { Cookie: cookie },
+            json: true,
+            body
+        };
+
+        request(options, (error, response, body) => {
+            expect(response.statusCode).to.equal(200);
+
+            let id = response.body.id;
+            let getOptions = {
+                url: `${helpers.API_URL}/state-snapshots`,
+                method: `GET`,
+                headers: {
+                    Cookie: cookie
+                }
+            };
+
+            request(getOptions, (error, response, body) => {
+                expect(response.statusCode).to.equal(200);
+                parsedBody = JSON.parse(body);
+
+                let foundItem = false;
+                parsedBody.map(item => {
+                    if (item.id === id) {
+                        foundItem = item;
+                    }
+                });
+
+                foundItem.title = `new test title`;
+                options = {
+                    url: `${helpers.API_URL}/state-snapshots`,
+                    method: `PUT`,
+                    json: true,
+                    headers: { Cookie: cookie },
+                    body: foundItem
+                };
+
+                request(options, (error, response, body) => {
+                    expect(response.statusCode).to.equal(200);
+
+                    request(getOptions, (error, response, body) => {
+                        expect(response.statusCode).to.equal(200);
+                        parsedBody = JSON.parse(body);
+        
+                        let foundItem = false;
+                        parsedBody.map(item => {
+                            if (item.id === id) {
+                                foundItem = item;
+                            }
+                        });
+
+                        expect(foundItem.title).to.be.equal(`new test title`);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
+    it('should not update browser-owned state snaphsot for non-owner', (done) => {
+        let id = false;
+
+        let body = {
+            anonymous: true,
+            title: `test`,
+            snapshot: {
+                modules: [],
+                map: {
+                    x: 1,
+                    y: 2,
+                    zoom: 3
+                }
+            }
+        };
+
+        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let options = {
+            url: `${helpers.API_URL}/state-snapshots`,
+            method: `POST`,
+            headers: { Cookie: cookie },
+            json: true,
+            body
+        };
+
+        request(options, (error, response, body) => {
+            expect(response.statusCode).to.equal(200);
+
+            let id = response.body.id;
+
+            let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+            let getOptions = {
+                url: `${helpers.API_URL}/state-snapshots`,
+                method: `GET`,
+                headers: {
+                    Cookie: cookie
+                }
+            };
+
+            request(getOptions, (error, response, body) => {
+                expect(response.statusCode).to.equal(200);
+                parsedBody = JSON.parse(body);
+
+                let foundItem = false;
+                parsedBody.map(item => {
+                    if (item.id === id) {
+                        foundItem = item;
+                    }
+                });
+
+                let failingCookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c6488000');
+                foundItem.title = `new test title`;
+                options = {
+                    url: `${helpers.API_URL}/state-snapshots`,
+                    method: `PUT`,
+                    headers: { Cookie: failingCookie },
+                    json: true,
+                    body: foundItem
+                };
+
+                request(options, (error, response, body) => {
+                    expect(response.body.error).to.equal(`ACCESS_DENIED`);
+                    expect(response.statusCode).to.equal(400);
+                    done();
+                });
+            });
+        });
+    });
+
     it('should delete browser-owned state snaphsot for owner', (done) => {
-
-
-
         let id = false;
 
         let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');

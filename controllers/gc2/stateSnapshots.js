@@ -82,6 +82,43 @@ const appendToSnapshots = (snapshot, browserId) => {
     });
 };
 
+const updateSnapshot = (snapshot) => {
+    return new Promise((resolve, reject) => {
+        if (`title` in snapshot === false || !snapshot.title
+            || `id` in snapshot === false || !snapshot.id
+            || `snapshot` in snapshot === false || !snapshot.snapshot) {
+            reject(`INCOMPLETE_DATA_WAS_PROVIDED`);
+        } else {
+            getSnapshots(false, false, true).then(data => {
+                let itemWasUpdated = false;
+                for (let i = 0; i < data.length; i++) {
+                    if (data[i].id === snapshot.id) {
+                        let item = data.splice(i, 1).pop();
+                        item.title = snapshot.title;
+                        item.snapshot = snapshot.snapshot;
+
+                        itemWasUpdated = true;
+                        data.push(item);
+                        break;
+                    }
+                }
+
+                if (itemWasUpdated) {
+                    saveSnapshots(data).then(() => {
+                        resolve();
+                    }).catch(errorCode => {
+                        reject(errorCode);
+                    });
+                } else {
+                    reject(`UNABLE_TO_FIND_STATE_SNAPSHOT`);
+                }
+            }).catch(errorCode => {
+                reject(errorCode);
+            });
+        }
+    });
+};
+
 /**
  * Listing available state snapshots
  */
@@ -187,7 +224,6 @@ router.put('/api/state-snapshots/:id', (request, response, next) => {
         }); 
     });
 });
-
 router.post('/api/state-snapshots', (request, response, next) => {
     if (`snapshot` in request.body) {
 
@@ -217,6 +253,62 @@ router.post('/api/state-snapshots', (request, response, next) => {
         } else {
             throwError(response, 'INVALID_SNAPSHOT_OWNERSHIP');
         }
+    } else {
+        throwError(response, 'MISSING_DATA');
+    }
+});
+
+router.put('/api/state-snapshots', (request, response, next) => {
+    // Mock code <--
+    let browserId = false;
+    if (TRACKER_COOKIE_NAME in request.cookies) {
+        browserId = request.cookies[TRACKER_COOKIE_NAME];
+    }
+
+    let userId = false;
+    if (`connect.gc2` in request.cookies) {
+        userId = 100;
+    }
+    // -->
+
+    if (`snapshot` in request.body) {
+        getSnapshots(false, false, true).then(data => {
+            let searched = false;
+            for (let i = 0; i < data.length; i++) {
+                if (data[i].id === request.body.id) {
+                    searched = data.splice(i, 1).pop();
+                    break;
+                }
+            }
+
+            let updateAccessGranted = false;
+            if (searched) {
+                if (searched.browserId && searched.browserId.length > 0) {
+                    if (searched.browserId === browserId) {
+                        updateAccessGranted = true;
+                    }
+                } else {
+                    if (searched.userId === userId) {
+                        updateAccessGranted = true;
+                    }
+                }
+
+                if (updateAccessGranted) {
+                    updateSnapshot(request.body).then(id => {
+                        response.json({ id, status: 'success' });
+                    }).catch(errorCode => {
+                        throwError(response, errorCode);
+                    });
+                } else {
+                    throwError(response, 'ACCESS_DENIED');
+                }
+            } else {
+                throwError(response, 'SNAPSHOT_WAS_NOT_FOUND');
+            }
+        }).catch(error => {
+            console.log(error);
+            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
+        });
     } else {
         throwError(response, 'MISSING_DATA');
     }

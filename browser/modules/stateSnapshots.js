@@ -290,10 +290,32 @@ module.exports = module.exports = {
              * 
              * @param {String} id Snapshot identifier
              */
-            updateSnapshot(item, title) {
+            updateSnapshot(data, title) {
+                let _self = this;
 
-                console.log(`### ready to send data to server`, item, title);
+                _self.setState({ loading: true });
+                state.getState().then(state => {
+                    if ('modules' in state === false) {
+                        throw new Error(`No modules data in state`);
+                    }
 
+                    state.map = anchor.getCurrentMapParameters();
+
+                    data.title = title;
+                    data.snapshot = state;
+                    $.ajax({
+                        url: API_URL,
+                        method: 'PUT',
+                        dataType: 'json',
+                        data
+                    }).then(data => {
+                        _self.refreshSnapshotsList();
+                        _self.setState({
+                            updatedItemId: false,
+                            loading: false
+                        });
+                    });
+                });
             }
 
             /**
