@@ -54,6 +54,8 @@ describe("State snapshots", () => {
         let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
         let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
@@ -106,6 +108,8 @@ describe("State snapshots", () => {
         let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-user-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').eq(1).find('button').first().trigger('click')`);
         await helpers.sleep(3000);
 
@@ -131,6 +135,8 @@ describe("State snapshots", () => {
         let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
         let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
@@ -156,13 +162,15 @@ describe("State snapshots", () => {
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(4000);
         initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').first().find('button').eq(1).trigger('click')`);
         await helpers.sleep(4000);
+
         currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);       
-        console.log(initialNumberOfStateSnapshots, currentNumberOfStateSnapshots);
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots + 1)).to.be.true;
     });
 
@@ -183,10 +191,12 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
-        let linkURL = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('input[type="text"]').val()`);
+        let linkURL = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
 
         const statePage = await browser.newPage();
         await statePage.setRequestInterception(true);
@@ -234,6 +244,8 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
@@ -249,6 +261,8 @@ describe("State snapshots", () => {
         await helpers.sleep(1000);
 
         // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
         

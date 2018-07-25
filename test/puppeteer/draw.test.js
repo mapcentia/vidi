@@ -53,6 +53,8 @@ describe('Draw', () => {
         // Save drawings in snapshot
         await page.evaluate(`$('[href="#state-snapshots-dialog-content-content"]').trigger('click')`);
         await helpers.sleep(1000);
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
