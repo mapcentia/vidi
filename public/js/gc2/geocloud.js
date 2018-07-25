@@ -1570,8 +1570,19 @@ geocloud = (function () {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
                                         me.map.removeLayer(layers[key].layer);
-                                        lControl.removeLayer(layers[key].layer);
                                     }
+                                }
+                            }
+
+                            // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
+                            let existingLayer = [];
+                            for (var key in layers) {
+                                if (layers[key].layer.baseLayer === true) {
+                                    if (existingLayer.indexOf(layers[key].name) === -1) {
+                                        existingLayer.push(layers[key].name);
+                                    } else {
+                                        lControl.removeLayer(layers[key].layer);
+                                    }                                   
                                 }
                             }
 
@@ -1606,6 +1617,9 @@ geocloud = (function () {
                                     }
                                 }
                             }
+
+                            //
+
                             break;
                     }
                 } else {
