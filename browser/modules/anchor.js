@@ -36,7 +36,7 @@ module.exports = {
         });
         var sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
         paramStr = param.join("&");
-        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + (sr ? sr + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
+        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + (sr ? sr + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + this.anchor();
     },
 
     urlVars: function getUrlVars() {
