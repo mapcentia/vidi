@@ -83,6 +83,9 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _self = this;
+        try {
+            vectorLayers = o.extensions.vectorLayers.index;
+        } catch(e) {}
         return this;
     },
 

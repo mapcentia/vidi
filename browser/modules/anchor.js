@@ -34,9 +34,9 @@ module.exports = {
             }
             param.push(i + "=" + parr.join());
         });
-
+        var sr = urlparser.staticRoute !== "" && urlparser.staticRoute !== undefined  ? urlparser.staticRoute : null;
         paramStr = param.join("&");
-        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + _self.anchor();
+        return "/app/" + db + "/" + (schema !== "" ? schema + "/" : "") + (sr ? sr + "/" : "") + ((paramStr === "") ? "" : "?" + paramStr) + anchor();
     },
 
     urlVars: function getUrlVars() {

@@ -32,7 +32,6 @@ module.exports = {
 
         if (window.confirm(__("Do you really want to reset the map?"))) {
             state.resetState().then(() => {
-                
                 location.href = newUrl;
             });
         }

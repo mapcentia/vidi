@@ -71,6 +71,8 @@ module.exports = {
      */
     init: function () {
 
+        var parentThis = this;
+
         /**
          *
          * Native Leaflet object
@@ -233,8 +235,7 @@ module.exports = {
                                     break;
                             }
 
-                            utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
-
+                            parentThis.callBack(url);
 
                         }, 250);
                     }
@@ -302,7 +303,17 @@ module.exports = {
 
         }
 
+    },
+
+    callBack: function (url) {
+        utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
+    },
+
+    setCallBack: function(fn) {
+        this.callBack = fn;
     }
+
+
 
 };
 

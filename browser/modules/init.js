@@ -35,7 +35,11 @@ module.exports = {
 
         var loadConfig = function () {
             $.getJSON( "/api/config/" + urlparser.db + "/" + configFile, function (data) {
+<<<<<<< HEAD
                 window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
+=======
+                console.info("Started with config: " + configFile);
+>>>>>>> upstream/master
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -260,6 +264,7 @@ module.exports = {
 
         // Init some GUI stuff after modules are loaded
         // ============================================
+<<<<<<< HEAD
         $("[data-toggle=tooltip]").tooltip();
 
         $.material.init();
@@ -333,5 +338,27 @@ module.exports = {
         } else {
             throw new Error(`localforage is not available`);
         }
+=======
+        try {
+            $("[data-toggle=tooltip]").tooltip();
+            $.material.init();
+            touchScroll(".tab-pane");
+            touchScroll("#info-modal-body-wrapper");
+            $("#loadscreentext").html(__("Loading data"));
+            if (window.vidiConfig.activateMainTab) {
+                setTimeout(function () {
+                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                }, 200);
+            }
+            $(window).resize(_.debounce(function () {
+                $("#myNavmenu").offcanvas('hide');
+                setTimeout(function () {
+                    modules.cloud.get().map.invalidateSize();
+                }, 100);
+            }, 0));
+        } catch (e) {
+            console.info("Could not init Bootstrap Material Design");
+        }
+>>>>>>> upstream/master
     }
 };

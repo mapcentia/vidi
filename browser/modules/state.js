@@ -197,7 +197,11 @@ module.exports = {
             throw new Error('localforage is not defined');
         }
 
-        var arr, i;
+        var arr, i, maxBounds = setting.getMaxBounds();
+
+        if (maxBounds) {
+            cloud.get().setMaxBounds(maxBounds);
+        }
 
         // Reset hash. Needed if state is invoked after start up
         hash = decodeURIComponent(window.location.hash);
