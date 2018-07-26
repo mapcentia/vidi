@@ -343,7 +343,11 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        return _self.toggleSideBySideControl(newState.sideBySideMode);
+        if (newState === false) {
+            return _self.toggleSideBySideControl(false);
+        } else {
+            return _self.toggleSideBySideControl(newState.sideBySideMode);
+        }
     },
 
     /**

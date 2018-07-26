@@ -557,6 +557,22 @@ module.exports = {
     },
 
     /**
+     * Resets current state
+     * 
+     * @return {Promise}
+     */
+    resetState: () => {
+        let appliedStatePromises = [];
+        for (let key in listened) {
+            appliedStatePromises.push(listened[key].applyState(false));
+        }
+
+        return Promise.all(appliedStatePromises).then(() => {
+            return _setInternalState({});
+        });
+    },
+
+    /**
      * Shortcut for getting specific module or extension state
      * 
      * @param {String} name Name of the module or extension
@@ -694,7 +710,11 @@ module.exports = {
             throw new Error(`Module or extension has to implement getState() and applyState() methods in order to support state`);
         }
 
-        _getInternalState().then(localState => {        
+        _getInternalState().then(localState => {
+            if (`modules` in localState === false || !localState.modules) {
+                localState.modules = {};
+            }
+
             localState.modules[name] = listened[name].getState();
             _setInternalState(localState);
         }).catch(error => {

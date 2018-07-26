@@ -875,7 +875,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        if (newState.order && newState.order === 'false') {
+        if (newState === false) {
+            newState = { order: false };
+        } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
 

@@ -5,7 +5,7 @@
 
 'use strict';
 
-
+let state;
 
 /**
  *
@@ -19,6 +19,7 @@ module.exports = {
      * @returns {exports}
      */
     set: function (o) {
+        state = o.state;
         return this;
     },
 
@@ -30,8 +31,10 @@ module.exports = {
             newUrl = curUrl.split("#")[0];
 
         if (window.confirm(__("Do you really want to reset the map?"))) {
-            location.href = newUrl;
+            state.resetState().then(() => {
+                
+                location.href = newUrl;
+            });
         }
-
     }
 };

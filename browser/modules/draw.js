@@ -417,9 +417,6 @@ module.exports = {
      */
     applyState: (newState) => {
         return new Promise((resolve, reject) => {
-
-            console.log(`### applying state`, newState);
-
             _self.control(false);
             _self.removeFeatures();
             if (newState.drawnItems && newState.drawnItems !== `false`) {
