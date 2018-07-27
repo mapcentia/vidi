@@ -1,6 +1,6 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
 
 /**
  * Browser detection
@@ -234,7 +234,6 @@ self.addEventListener('install', event => {
     }).catch(error => {
         console.log(error);
     }));
-    
 });
 
 /**

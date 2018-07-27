@@ -291,11 +291,13 @@ module.exports = {
         });
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.bundle.js').then(() => {}).catch(error => {
+            navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
+                console.log('Service worker registration succeeded:', registration);
+            }).catch(error => {
                 console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });
         } else {
-            console.warn(`Service workers are not supported in this browser, some features can be unavailable`);
+            console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
 
         if (window.localforage) {

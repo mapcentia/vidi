@@ -24,6 +24,9 @@ definitely not be retrieved until page reload
 */
 let onlineStatusCanBeRetrievedAtSomePoint = true;
 
+let attemptsToCheckOnlineStatus = 0;
+let onlineStatusCheckLimit = 3;
+
 /**
  * FIFO queue abstraction. Queue items are stored
  * in browser storage and do not depend on page reload
@@ -94,6 +97,13 @@ class Queue {
                         if (onlineStatusCanBeRetrievedAtSomePoint) {
                             console.warn(`Unable the determine the online status (the service worker is not registered)`);
                             onlineStatusCanBeRetrievedAtSomePoint = false;
+                        }
+                    } else if (textStatus === `success`) {
+                        attemptsToCheckOnlineStatus++;
+                        if (attemptsToCheckOnlineStatus <= onlineStatusCheckLimit) {
+                            console.warn(`Unable the determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${onlineStatusCheckLimit}`);
+                        } else if (attemptsToCheckOnlineStatus === (onlineStatusCheckLimit + 1)) {
+                            console.warn(`Limit of connection check attempts exceeded`);
                         }
                     } else {
                         console.warn(`Unable the determine the online status (the service worker is starting up)`);
