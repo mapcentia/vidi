@@ -236,7 +236,7 @@ module.exports = {
     createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
         let properties = {};
         let uiSchema = {};
-console.log(`###`, fieldConf);
+
         Object.keys(fields).map(function (key) {
             if (key !== pkey && key !== f_geometry_column) {
                 let title = key;
