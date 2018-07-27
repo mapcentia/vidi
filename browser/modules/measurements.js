@@ -18,7 +18,7 @@ let cloud, state;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawLineControl, drawPolygonControl;
+let drawControl, drawLineControl, drawPolygonControl;
 
 let _self = false;
 
@@ -47,15 +47,15 @@ module.exports = {
                 container.style.backgroundColor = 'white';
                 container.style.width = `30px`;
                 container.style.height = `30px`;
-                //container.style.textAlign = `center`;
-                //container.style.paddingTop = `3px`;
                 container.title = `Measure distance`;
 
                 container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
                     <span class="fa fa-ruler"></span>
                 </a>`)[0];
+
                 container.onclick = function(){
-                    console.log('buttonClicked');
+
+                    _self.toggleLineMeasurements((drawControl ? false : true));
                 }
 
                 return container;
@@ -64,6 +64,51 @@ module.exports = {
 
         drawLineControl = new DistanceMeasurementControl();
         cloud.get().map.addControl(drawLineControl);
+    },
+
+    toggleLineMeasurements: (activate = false) => {
+        /*
+        @todo Disable all feature editing activity in draw and editor
+        */
+
+        if (activate) {
+            L.drawLocal = require('./drawLocales/draw.js');
+
+            drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
+                    polygon: {
+                        allowIntersection: true,
+                        shapeOptions: {},
+                        showArea: true
+                    },
+                    polyline: {
+                        metric: true,
+                        shapeOptions: {}
+                    },
+                    rectangle: false,
+                    circle: false,
+                    marker: false,
+                    circlemarker: false
+                },
+                edit: {
+                    featureGroup: drawnItems
+                }
+            });
+
+            drawControl.setDrawingOptions({
+                polygon: {
+                    icon: cloud.iconSmall
+                },
+                polyline: {
+                    icon: cloud.iconSmall
+                }
+            });
+
+            cloud.get().map.addControl(drawControl);
+        } else {
+
+        }
     },
 
     /**
