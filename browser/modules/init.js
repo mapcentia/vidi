@@ -196,7 +196,7 @@ module.exports = {
         modules.state.setExtent();
 
         let defaultModules = [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `stateSnapshots`, `print`, `layerTree`];
+            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`];
 
         // Calling mandatory init method
         defaultModules.map(name => {

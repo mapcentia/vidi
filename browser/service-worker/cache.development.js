@@ -44,6 +44,14 @@ let urlsToCache = [
     '/fonts/roboto-v18-latin-regular.woff',
     '/fonts/roboto-v18-latin-500.woff',
     '/fonts/roboto-v18-latin-italic.woff2',
+    '/fonts/fa-regular-400.woff',
+    '/fonts/fa-regular-400.woff2',
+    '/fonts/fa-regular-400.ttf',
+    '/fonts/fa-regular-400.svg',
+    '/fonts/fa-solid-900.woff',
+    '/fonts/fa-solid-900.woff2',
+    '/fonts/fa-solid-900.ttf',
+    '/fonts/fa-solid-900.svg',
     '/fonts/fonts.css',
     '/icons/MaterialIcons-Regular.woff2',
     '/icons/MaterialIcons-Regular.woff',
@@ -123,7 +131,9 @@ let urlsToCache = [
     '/css/styles.css',
     '/css/jasny-bootstrap.min.css',
     '/css/styles.css',
-    '/css/jasny-bootstrap.css'
+    '/css/jasny-bootstrap.css',
+    '/css/font-awesome.v520.regular.css',
+    '/css/font-awesome.v520.css',
 ];
 
 module.exports = urlsToCache;

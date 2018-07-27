@@ -83,7 +83,7 @@ const exId = `state-snapshots-dialog-content`;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     /**
      *
      * @param o

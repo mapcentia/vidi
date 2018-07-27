@@ -104,6 +104,7 @@ window.Vidi = function () {
         infoClick: require('./modules/infoClick'),
         bindEvent: require('./modules/bindEvent'),
         draw: require('./modules/draw'),
+        measurements: require('./modules/measurements'),
         tilecache: require('./modules/tileCache'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
@@ -137,6 +138,7 @@ window.Vidi = function () {
     modules.infoClick.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
+    modules.measurements.set(modules);
     modules.tilecache.set(modules);
     modules.print.set(modules);
     modules.advancedInfo.set(modules);

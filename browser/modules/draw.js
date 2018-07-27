@@ -97,17 +97,12 @@ var _getArea = function (e) {
 
 let _self = false;
 
-/**
- *
- * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getDrawOn: module.exports.getDrawOn, getLayer: module.exports.getLayer, getTable: module.exports.getTable, setDestruct: module.exports.setDestruct}}
- */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
-
         _self = this;
         return this;
     },
