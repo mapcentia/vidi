@@ -33,6 +33,33 @@ module.exports = module.exports = {
      * 
      * @return {Array<Object>}
      */
+    serializeMeasurementItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": true,
+            "print": true,
+            "measurement": false,
+            "draw": true
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+
+    /**
+     * Shortcut for serializing drawn items
+     * 
+     * @return {Array<Object>}
+     */
     serializeDrawnItems: (strictMode = false) => {
         let layerDraw = [];
 
@@ -42,6 +69,7 @@ module.exports = module.exports = {
             "query_buffer": true,
             "query_result": true,
             "print": true,
+            "measurement": true,
             "draw": false
         }, strictMode);
 

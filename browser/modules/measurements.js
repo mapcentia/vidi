@@ -12,7 +12,7 @@ const drawTools = require(`./drawTools`);
 /**
  * @type {*|exports|module.exports}
  */
-let cloud, state, backboneEvents;
+let cloud, state, serializeLayers, backboneEvents;
 
 /**
  *
@@ -24,6 +24,8 @@ let drawControl, measurementControlButton;
 
 let editing = false;
 
+let drawOn = false;
+
 let _self = false;
 
 /**
@@ -34,6 +36,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
+        serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         _self = this;
         return this;
@@ -59,8 +62,7 @@ module.exports = {
                 </a>`)[0];
 
                 container.onclick = function(){
-
-                    _self.toggleLineMeasurements((drawControl ? false : true));
+                    _self.toggleMeasurements((drawControl ? false : true));
                 }
 
                 return container;
@@ -72,8 +74,10 @@ module.exports = {
         cloud.get().map.addControl(measurementControlButton);
     },
 
-    toggleLineMeasurements: (activate = false) => {
+    toggleMeasurements: (activate = false) => {
         if (activate) {
+            drawOn = true;
+
             backboneEvents.get().trigger("on:drawing");
             backboneEvents.get().trigger("off:infoClick");
 
@@ -141,7 +145,6 @@ module.exports = {
 
                 drawnItems.addLayer(drawLayer);
                 _self.setStyle(drawLayer, type);
-                drawLayer.openTooltip();
 
                 if (type === `polygon`) {
                     area = drawTools.getArea(drawLayer);
@@ -179,13 +182,15 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
+            drawOn = false;
+
             backboneEvents.get().trigger("off:drawing");
             backboneEvents.get().trigger("on:infoClick");
 
             cloud.get().map.removeControl(drawControl);
+            drawControl = false;
         }
     },
-
 
     /**
      * Set style on layer
@@ -220,17 +225,102 @@ module.exports = {
     },
 
     /**
+     * Recreates drawnings on the map
+     * 
+     * @param {Object} parr Features to draw
+     * 
+     * @return {void}
+     */
+    recreateDrawnings: (parr, enableControl = true) => {
+        let v = parr;
+        $.each(v[0].geojson.features, (n, m) => {
+            console.log(`### m`, m);
+            var json = L.geoJson(m, {
+                style: function (f) {
+                    return f.style;
+                }
+            });
+
+            var g = json._layers[Object.keys(json._layers)[0]];
+
+            // Adding vidi-specific properties
+            g._vidi_type = m._vidi_type;
+
+            drawnItems.addLayer(g);
+
+            g.showMeasurements(m._vidi_measurementOptions);
+
+            // Add extremities
+            if (m._vidi_extremities) {
+                g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+            }
+        });
+    },
+
+
+    /**
      * Returns current module state
      */
     getState: () => {
-        return {};
+        let state = false;
+        if (drawOn) {
+            state = JSON.stringify(serializeLayers.serializeMeasurementItems(true));
+        }
+
+        return { measurements: state };
     },
 
     /**
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+        console.log(`### applying new state`, newState);
+
         return new Promise((resolve, reject) => {
+            try {
+
+            if (drawnItems) {
+                drawnItems.clearLayers();
+            }
+
+            if (newState && `measurements` in newState && newState.measurements) {
+
+                _self.recreateDrawnings(JSON.parse(newState.measurements), false);
+
+
+                /*
+                newState.measurements.features.map(item => {
+
+                
+                    
+
+                    let GeoJSON = {
+                        type: item.type,
+                        geometry: item.geometry,
+                        properties: item.properties
+                    };
+
+                    console.log(`### item`, GeoJSON);
+                    let jsonLayer = L.geoJson(GeoJSON);
+
+                    console.log(`### jsonLayer`, jsonLayer);
+
+                    let g = jsonLayer._layers[Object.keys(jsonLayer._layers)[0]];
+                    g._vidi_type = m._vidi_type;
+
+
+                    console.log(`### g`, g);
+                    drawnItems.addLayer(g);
+
+                    g.showMeasurements(m._vidi_measurementOptions);
+                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+                });
+                */
+            }
+        } catch(e) {
+            console.log(e);
+        }
             resolve();
         });
     },
