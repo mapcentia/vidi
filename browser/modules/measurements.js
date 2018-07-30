@@ -231,26 +231,19 @@ module.exports = {
      * 
      * @return {void}
      */
-    recreateDrawnings: (parr, enableControl = true) => {
+    recreateDrawnings: (parr) => {
         let v = parr;
         $.each(v[0].geojson.features, (n, m) => {
-            console.log(`### m`, m);
-            var json = L.geoJson(m, {
+            let json = L.geoJson(m, {
                 style: function (f) {
                     return f.style;
                 }
             });
 
-            var g = json._layers[Object.keys(json._layers)[0]];
-
-            // Adding vidi-specific properties
+            let g = json._layers[Object.keys(json._layers)[0]];
             g._vidi_type = m._vidi_type;
-
             drawnItems.addLayer(g);
-
             g.showMeasurements(m._vidi_measurementOptions);
-
-            // Add extremities
             if (m._vidi_extremities) {
                 g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
             }
@@ -274,53 +267,15 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-
-        console.log(`### applying new state`, newState);
-
         return new Promise((resolve, reject) => {
-            try {
-
             if (drawnItems) {
                 drawnItems.clearLayers();
             }
 
             if (newState && `measurements` in newState && newState.measurements) {
-
-                _self.recreateDrawnings(JSON.parse(newState.measurements), false);
-
-
-                /*
-                newState.measurements.features.map(item => {
-
-                
-                    
-
-                    let GeoJSON = {
-                        type: item.type,
-                        geometry: item.geometry,
-                        properties: item.properties
-                    };
-
-                    console.log(`### item`, GeoJSON);
-                    let jsonLayer = L.geoJson(GeoJSON);
-
-                    console.log(`### jsonLayer`, jsonLayer);
-
-                    let g = jsonLayer._layers[Object.keys(jsonLayer._layers)[0]];
-                    g._vidi_type = m._vidi_type;
-
-
-                    console.log(`### g`, g);
-                    drawnItems.addLayer(g);
-
-                    g.showMeasurements(m._vidi_measurementOptions);
-                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
-                });
-                */
+                _self.recreateDrawnings(JSON.parse(newState.measurements));
             }
-        } catch(e) {
-            console.log(e);
-        }
+            
             resolve();
         });
     },
