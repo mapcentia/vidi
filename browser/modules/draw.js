@@ -7,6 +7,8 @@
 
 const MODULE_NAME = `draw`;
 
+const drawTools = require(`./drawTools`);
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -64,36 +66,6 @@ var destructFunctions = [];
 var backboneEvents;
 
 var editing = false;
-
-/**
- * Get readable distance of layer
- * @param e
- * @returns {string}
- * @private
- */
-var _getDistance = function (e) {
-    var tempLatLng = null;
-    var totalDistance = 0.00000;
-    $.each(e._latlngs, function (i, latlng) {
-        if (tempLatLng == null) {
-            tempLatLng = latlng;
-            return;
-        }
-        totalDistance += tempLatLng.distanceTo(latlng);
-        tempLatLng = latlng;
-    });
-    return L.GeometryUtil.readableDistance(totalDistance, true);
-};
-
-/**
- * Get readable area of layer
- * @param e
- * @returns {string}
- * @private
- */
-var _getArea = function (e) {
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
-};
 
 let _self = false;
 
@@ -308,11 +280,11 @@ module.exports = {
                     }
 
                     if (type === "polygon" || type === "rectangle") {
-                        area = _getArea(drawLayer);
+                        area = drawTools.getArea(drawLayer);
                         //distance = getDistance(drawLayer);
                     }
                     if (type === 'polyline') {
-                        distance = _getDistance(drawLayer);
+                        distance = drawTools.getDistance(drawLayer);
 
                     }
                     if (type === 'circle') {
@@ -347,12 +319,12 @@ module.exports = {
                         }
                         else if (typeof v._icon !== "undefined") {
                         } else if (v.feature.properties.distance !== null) {
-                            v.feature.properties.distance = _getDistance(v);
+                            v.feature.properties.distance = drawTools.getDistance(v);
                             v.updateMeasurements();
 
                         }
                         else if (v.feature.properties.area !== null) {
-                            v.feature.properties.area = _getArea(v);
+                            v.feature.properties.area = drawTools.getArea(v);
                             v.updateMeasurements();
 
                         }
@@ -608,6 +580,12 @@ module.exports = {
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
             }
+
+            console.log({
+                pattern: $("#draw-line-extremity").val(),
+                size: $("#draw-line-extremity-size").val(),
+                where: $("#draw-line-extremity-where").val()
+            });
         }
 
         if (type === 'circlemarker') {

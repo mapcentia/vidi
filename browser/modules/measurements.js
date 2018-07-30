@@ -7,10 +7,12 @@
 
 const MODULE_NAME = `measurements`;
 
+const drawTools = require(`./drawTools`);
+
 /**
  * @type {*|exports|module.exports}
  */
-let cloud, state;
+let cloud, state, backboneEvents;
 
 /**
  *
@@ -18,7 +20,9 @@ let cloud, state;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawControl, drawLineControl, drawPolygonControl;
+let drawControl, measurementControlButton;
+
+let editing = false;
 
 let _self = false;
 
@@ -30,6 +34,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
+        backboneEvents = o.backboneEvents;
         _self = this;
         return this;
     },
@@ -38,9 +43,9 @@ module.exports = {
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
-        let DistanceMeasurementControl = L.Control.extend({
+        let MeasurementControl = L.Control.extend({
             options: {
-                position: 'topright' 
+                position: 'topright'
             },
             onAdd: function (map) {
                 let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
@@ -62,17 +67,17 @@ module.exports = {
             }
         });
 
-        drawLineControl = new DistanceMeasurementControl();
-        cloud.get().map.addControl(drawLineControl);
+        measurementControlButton = new MeasurementControl();
+        cloud.get().map.addLayer(drawnItems);
+        cloud.get().map.addControl(measurementControlButton);
     },
 
     toggleLineMeasurements: (activate = false) => {
-        /*
-        @todo Disable all feature editing activity in draw and editor
-        */
-
         if (activate) {
-            L.drawLocal = require('./drawLocales/draw.js');
+            backboneEvents.get().trigger("on:drawing");
+            backboneEvents.get().trigger("off:infoClick");
+
+            L.drawLocal = require('./drawLocales/draw.js');            
 
             drawControl = new L.Control.Draw({
                 position: 'topright',
@@ -106,8 +111,111 @@ module.exports = {
             });
 
             cloud.get().map.addControl(drawControl);
-        } else {
 
+            let eventsToUnbind = [`created`, `drawstart`, `drawstop`, `editstart`, `editstop`, `deletestart`, `deletestop`, `deleted`, `created`, `edited`];
+            eventsToUnbind.map(item => {
+                cloud.get().map.off(`draw:${item}`);
+            });
+
+            // Bind events
+            cloud.get().map.on('draw:editstart', e => {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:editstop', e => {
+                editing = false;
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:deletestart', e => {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:deletestop', e => {
+                editing = false;
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:created', e => {
+                let type = e.layerType, area = null, distance = null, drawLayer = e.layer;
+
+                drawnItems.addLayer(drawLayer);
+                _self.setStyle(drawLayer, type);
+                drawLayer.openTooltip();
+
+                if (type === `polygon`) {
+                    area = drawTools.getArea(drawLayer);
+                } else if (type === 'polyline') {
+                    distance = drawTools.getDistance(drawLayer);
+                }
+
+                drawLayer._vidi_type = `measurements`;
+                drawLayer.feature = {
+                    properties: {
+                        type: type,
+                        area: area,
+                        distance: distance
+                    }
+                };
+
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:deleted', function (e) {
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:edited', function (e) {
+                $.each(e.layers._layers, function (i, v) {
+                    if (v.feature.properties.distance !== null) {
+                        v.feature.properties.distance = drawTools.getDistance(v);
+                        v.updateMeasurements();
+                    } else if (v.feature.properties.area !== null) {
+                        v.feature.properties.area = drawTools.getArea(v);
+                        v.updateMeasurements();
+                    }
+                });
+
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+        } else {
+            backboneEvents.get().trigger("off:drawing");
+            backboneEvents.get().trigger("on:infoClick");
+
+            cloud.get().map.removeControl(drawControl);
+        }
+    },
+
+
+    /**
+     * Set style on layer
+     * @param l
+     * @param type
+     */
+    setStyle: (l, type) => {
+        l.hideMeasurements();
+
+        l.showMeasurements({ showTotal: true });
+
+        let defaultMeasurementsStyle = {
+            dashArray: `none`,
+            lineCap: `butt`,
+            color: `#ff0000`,
+            weight: 4,
+            opacity: 1
+        };
+
+        let defaultExtermitiesStyle = {
+            pattern: "stopM",
+            size: "4",
+            where: "3"
+        };
+
+        l.setStyle(defaultMeasurementsStyle);
+
+        if (type === 'polyline') {
+            window.lag = l.showExtremities(defaultExtermitiesStyle.pattern, defaultExtermitiesStyle.size, defaultExtermitiesStyle.where);
+            l._extremities = defaultExtermitiesStyle;
         }
     },
 
