@@ -28,6 +28,8 @@ let drawOn = false;
 
 let _self = false;
 
+let embedModeIsEnabled = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -46,32 +48,119 @@ module.exports = {
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
-        let MeasurementControl = L.Control.extend({
-            options: {
-                position: 'topright'
-            },
-            onAdd: function (map) {
-                let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-                container.style.backgroundColor = 'white';
-                container.style.width = `30px`;
-                container.style.height = `30px`;
-                container.title = `Measure distance`;
+        // Detect if the embed template is used
+        if ($(`#floating-container-secondary`).length === 1) {
+            embedModeIsEnabled = true;
+        }
 
-                container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
-                    <span class="fa fa-ruler"></span>
-                </a>`)[0];
+        console.log(`### embedModeIsEnabled`, embedModeIsEnabled);
 
-                container.onclick = function(){
-                    _self.toggleMeasurements((drawControl ? false : true));
+        if (embedModeIsEnabled) {
+            let buttonClass = `btn btn-default btn-fab btn-fab-mini map-tool-btn`;
+            let buttonStyle = `padding-top: 4px;`;
+            let buttonStyleHidden = `padding-top: 4px; display: none;`;
+
+            let container = `#floating-container-secondary`;
+
+            // Expand measurements control
+            $(container).append(`<a href="javascript:void(0)" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
+                <i class="fa fa-ruler" style="font-size: 20px;"></i>
+            </a>`);
+            $(`#measurements-module-btn`).click((event) => {
+                $(event.currentTarget).hide(0, () => {
+                    $(`#measurements-module-draw-line-btn`).show();
+                    $(`#measurements-module-draw-polygon-btn`).show();
+                    $(`#measurements-module-delete-btn`).show();
+                    $(`#measurements-module-cancel-btn`).show();
+                });
+            });
+
+            // Draw controls
+            $(container).append(`
+            <a href="javascript:void(0)" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+                <i class="fa fa-ban" style="font-size: 20px;"></i>
+            </a>
+            <a href="javascript:void(0)" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+                <i class="fa fa-project-diagram" style="font-size: 20px;"></i>
+            </a>
+            <a href="javascript:void(0)" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+                <i class="fa fa-vector-square" style="font-size: 20px;"></i>
+            </a>
+            <a href="javascript:void(0)" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+                <i class="fa fa-trash" style="font-size: 20px;"></i>
+            </a>`);
+
+            // Distance measurement
+            $(container).find(`#measurements-module-draw-line-btn`).click(() => {
+                _self.toggleMeasurements(true);
+
+                drawnItems.eachLayer(layer => {
+                    if (layer && layer.feature && layer.feature.properties && layer.feature.properties.type ===`polyline`) {
+                        drawnItems.removeLayer(layer);
+                    }
+                });
+
+                let control = new L.Draw.Polyline(cloud.get().map).enable();
+            });
+
+            // Area measurement
+            $(container).find(`#measurements-module-draw-polygon-btn`).click(() => {
+                _self.toggleMeasurements(true);
+
+                drawnItems.eachLayer(layer => {
+                    if (layer && layer.feature && layer.feature.properties && layer.feature.properties.type ===`polygon`) {
+                        drawnItems.removeLayer(layer);
+                    }
+                });
+
+                let control = new L.Draw.Polygon(cloud.get().map).enable();
+            });
+
+            // Area measurement
+            $(container).find(`#measurements-module-delete-btn`).click(() => {
+                if (drawnItems) {
+                    drawnItems.clearLayers();
                 }
+            });
 
-                return container;
-            }
-        });
+            // Collapse measurements control
+            $(container).find(`#measurements-module-cancel-btn`).click(() => {
+                $(`#measurements-module-draw-line-btn`).hide();
+                $(`#measurements-module-draw-polygon-btn`).hide();
+                $(`#measurements-module-delete-btn`).hide();
+                $(`#measurements-module-cancel-btn`).hide();
 
-        measurementControlButton = new MeasurementControl();
+                $(`#measurements-module-btn`).show();
+            });
+        } else {
+            let MeasurementControl = L.Control.extend({
+                options: {
+                    position: 'topright'
+                },
+                onAdd: function (map) {
+                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+                    container.style.backgroundColor = 'white';
+                    container.style.width = `30px`;
+                    container.style.height = `30px`;
+                    container.title = `Measure distance`;
+
+                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
+                        <span class="fa fa-ruler"></span>
+                    </a>`)[0];
+
+                    container.onclick = function(){
+                        _self.toggleMeasurements((drawControl ? false : true));
+                    }
+
+                    return container;
+                }
+            });
+
+            measurementControlButton = new MeasurementControl();
+            cloud.get().map.addControl(measurementControlButton);
+        }
         cloud.get().map.addLayer(drawnItems);
-        cloud.get().map.addControl(measurementControlButton);
+
     },
 
     toggleMeasurements: (activate = false) => {
