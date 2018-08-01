@@ -83,11 +83,12 @@ module.exports = module.exports = {
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
         const getLayerSwitchControl = () => {
-
-console.log(`###`, 'input[class="js-show-layer-control"][data-gc2-id="' + name.replace('v:', '') + '"]')
-
-            let el = $('input[class="js-show-layer-control"][data-gc2-id="' + name.replace('v:', '') + '"]');
-            return el;
+            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + name.replace('v:', '') + '"]');
+            if (!controlElement || controlElement.length !== 1) {
+                return false;
+            } else {
+                return controlElement;
+            }
         };
 
         let store = layerTree.getStores();
@@ -125,7 +126,7 @@ console.log(`###`, 'input[class="js-show-layer-control"][data-gc2-id="' + name.r
 
                 layers.addLayer(name).then(() => {
                     let el = getLayerSwitchControl();
-                    if (!el || el.length !== 1) {
+                    if (el === false) {
                         console.error(`Unable to find layer switch control for layer ${name}`);
                     }
 
@@ -148,53 +149,50 @@ console.log(`###`, 'input[class="js-show-layer-control"][data-gc2-id="' + name.r
                         if (tries > 0) {
                             console.error(`Could not add ${name} layer`);
                             tries = 0;
-                            return;
+                        } else {
+                            // Trying to recreate the layer tree with updated meta and switch layer again
+                            layerTree.create().then(() => {
+                                tries = 1;
+                                me.init(name, true);
+                            });
                         }
-
-                        console.log(`### checking if control now exists`, getLayerSwitchControl());
-
-                        layerTree.create().then(() => {
-                            tries = 1;
-                            me.init(name, true); // recursive
-                        });
                     });
-                    
                 });
             } else {
                 layerTree.setSelectorValue(name, 'vector');
-
                 if (vectorLayerId in store) {
                     cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
                     let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                     cloud.get().map.addLayer(existingLayer);
                     store[vectorLayerId].load();
+
+                    backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+
+                    let el = getLayerSwitchControl();
+                    if (el === false) {
+                        console.error(`Unable to find layer switch control for layer ${name}`);
+                    } else {
+                        el.prop('checked', true);
+                        me.update(doNotLegend, el);
+                    }
                 } else {
                     meta.init(tileLayerId, true, true).then(() => {
                         if (tries > 0) {
                             console.error(`Could not add ${tileLayerId} layer`);
                             tries = 0;
-                            return;
+                        } else {
+                            // Trying to recreate the layer tree with updated meta and switch layer again
+                            layerTree.create().then(() => {
+                                tries = 1;
+                                me.init(name, true);
+                            });
                         }
-
-                        layerTree.init();
-                        tries = 1;
-                        me.init(name, true); // recursive
                     });
-                }
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                let el = getLayerSwitchControl();
-                if (!el || el.length !== 1) {
-                    console.error(`Unable to find layer switch control for layer ${name}`);
-                } else {
-                    el.prop('checked', true);
-                    me.update(doNotLegend, el);
                 }
             }
         } else {
             let el = getLayerSwitchControl();
-            if (!el || el.length !== 1) {
+            if (el === false) {
                 console.error(`Unable to find layer switch control for layer ${name}`);
             } else {
                 el.prop('checked', false);
