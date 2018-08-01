@@ -94,7 +94,7 @@ describe('Layer tree', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Test group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
 
         let e = await page.$('#layer-panel-VGVzdCBncm91cA');
         let box = await e.boundingBox();
@@ -112,7 +112,7 @@ describe('Layer tree', () => {
         await page.click(`#burger-btn`);
         await helpers.sleep(1000);
 
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Test group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Public group`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
     });
 });
