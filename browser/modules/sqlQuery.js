@@ -165,7 +165,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, template;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql, template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -177,7 +177,9 @@ module.exports = {
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body"><table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="true" data-show-columns="true"></table></div></div></div>');
+                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body">' +
+                            '<div>' + __("Download result as: ") + '<a id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)">GeoJson</a> <a id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)">Excel</a></div>' +
+                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div></div></div>');
                         $.each(layerObj.geoJSON.features, function (i, feature) {
                             var fi = [];
                             if (fieldConf === null) {
@@ -268,7 +270,14 @@ module.exports = {
                         // Stop the click on detail icon from bubbling up the DOM tree
                         $(".detail-icon").click(function (event) {
                             event.stopPropagation();
-                        })
+                        });
+
+                        $("#_download_excel_" + storeId ).click(function() {
+                           download(sql,"excel");
+                        });
+                        $("#_download_geojson_" + storeId).click(function() {
+                           download(sql,"geojson");
+                        });
 
 
                     } else {
@@ -393,6 +402,10 @@ module.exports = {
         });
         $("#info-tab").empty();
         $("#info-pane").empty();
+    },
+
+    setDownloadFunction: function(fn) {
+        download = fn
     }
 };
 
@@ -413,4 +426,38 @@ var sortObject = function (obj) {
     });
     return arr; // returns array
 };
+
+var download = function (sql, format) {
+    var request = new XMLHttpRequest();
+    request.open('POST', '/api/sql/' + db, true);
+    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
+    request.responseType = 'blob';
+    request.onload = function() {
+        if(request.status === 200) {
+            var filename, type;
+            switch (format) {
+                case "excel":
+                    filename = 'file.xlsx';
+                    type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+                    break;
+                default:
+                    filename = 'file.geojson';
+                    type = 'application/json';
+                    break;
+            }
+            var blob = new Blob([request.response], { type: type });
+            var link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        // some error handling should be done here...
+    };
+
+    var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
+    request.send(uri);
+};
+
 

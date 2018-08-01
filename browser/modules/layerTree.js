@@ -7,19 +7,9 @@
 
 const MODULE_NAME = `layerTree`;
 
-var meta;
+var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
 
-var layers;
-
-var switchLayer;
-
-var cloud;
-
-var layers;
-
-var state;
-
-var backboneEvents;
+var automaticStartup = true;
 
 var layerTreeOrder = false;
 
@@ -38,8 +28,6 @@ var cm = [];
 var styles = [];
 
 var store = [];
-
-var automatic = true;
 
 var _self;
 
@@ -94,6 +82,8 @@ const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
 const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
 
+let layerTreeWasBuilt = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -103,6 +93,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         layers = o.layers;
+        legend = o.legend;
         state = o.state;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -117,6 +108,12 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+    },
+
+    postInit: () => {
+        if (layerTreeWasBuilt === false && automaticStartup) {
+            _self.create();
+        }
     },
 
     setSelectorValue: (name, type) => {
@@ -192,6 +189,10 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
+        if (layerTreeWasBuilt === false) {
+            return;
+        }
+
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
 
@@ -327,7 +328,7 @@ module.exports = {
             }
         }
 
-     if (forceLayerUpdate) {
+        if (forceLayerUpdate) {
             accumulatedDiff.map(item => {
                 let layerName = item;
                 _self.getActiveLayers().map(activeLayerName => {
@@ -377,12 +378,15 @@ module.exports = {
      * Builds actual layer tree.
      */
     create: (forcedState = false) => {
+        layerTreeWasBuilt = true;
+
         let result = new Promise((resolve, reject) => {
 
             layerTreeIsReady = false;
             if (forcedState) {
                 _self.getActiveLayers().map(item => {
-                    switchLayer.init(item, false, false, false);
+                    // Disabling active layers
+                    switchLayer.init(item, false, true, false);
                 });
             }
 
@@ -714,20 +718,42 @@ module.exports = {
                                     <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                                 </li>`);
 
-                                $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e) => {
+                                $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                                     let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                     $(switcher).data('gc2-layer-type', 'tile');
                                     $(switcher).prop('checked', true);
-                                    _self.reloadLayer($(switcher).data('gc2-id'));
+                                    _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                 });
 
-                                $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e) => {
+                                $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
                                     let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                                     $(switcher).data('gc2-layer-type', 'vector');
                                     $(switcher).prop('checked', true);
-                                    _self.reloadLayer('v:' + $(switcher).data('gc2-id'));
+                                    _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                });
+
+                                $(layerControlRecord).find('input[data-gc2-id]').first().on(`change`, (e, data) => {
+                                    if (data) {
+                                        if ($(e.target).prop(`checked`)) {
+                                            $(e.target).prop(`checked`, false);
+                                        } else {
+                                            $(e.target).prop(`checked`, true);
+                                        }
+                                    }
+
+                                    let prefix = '';
+                                    if ($(e.target).data('gc2-layer-type') === 'vector') {
+                                        prefix = 'v:';
+                                    }
+                
+                                    switchLayer.init(prefix + $(e.target).data('gc2-id'), $(e.target).prop(`checked`), (data ? data.doNotLegend : false));
+                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+
+                                    e.stopPropagation();
                                 });
 
                                 $("#collapse" + base64GroupName).append(layerControlRecord);
@@ -776,9 +802,8 @@ module.exports = {
                 layers.reorderLayers();
                 state.listen(MODULE_NAME, `sorted`);
                 state.listen(MODULE_NAME, `activeLayersChange`);
-                layerTreeIsReady = true;
+                
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
 
                 setTimeout(() => {
                     if (activeLayers) {
@@ -786,16 +811,20 @@ module.exports = {
                             if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
                                 $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
                                 if (layerName.indexOf(`v:`) === 0) {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`);
+                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
                                 } else {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`);
+                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                 }
                             } else {
-                                $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click');
+                                $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('change', [{doNotLegend: true}]);
                             }
                         });
+
+                        legend.init();
                     }
 
+                    layerTreeIsReady = true;
+                    backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
                     resolve();
                 }, 1000);
             });
@@ -846,7 +875,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        if (newState.order && newState.order === 'false') {
+        if (newState === false) {
+            newState = { order: false };
+        } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
 
@@ -858,9 +889,9 @@ module.exports = {
      * 
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, forceTileRedraw = false) => {
-        switchLayer.init(layerId, false, false, forceTileRedraw);
-        switchLayer.init(layerId, true, false, forceTileRedraw);
+    reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false) => {
+        switchLayer.init(layerId, false, doNotLegend, forceTileRedraw);
+        switchLayer.init(layerId, true, doNotLegend, forceTileRedraw);
     },
 
     /**
@@ -878,6 +909,8 @@ module.exports = {
                 }
             }
         });
+
+        activeLayerIds = activeLayerIds.filter((v, i, a) => { return a.indexOf(v) === i}); 
 
         return activeLayerIds;
     },
@@ -910,10 +943,10 @@ module.exports = {
         pointToLayer[layer] = fn;
     },
 
-    setAutomatic: function (b) {
-        automatic = b;
+    setAutomatic: (value) => {
+        automaticStartup = value;
     },
-
+    
     getStores: function () {
         return store;
     },

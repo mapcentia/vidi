@@ -1,6 +1,7 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
+const LOG_FETCH_EVENTS = false;
 
 /**
  * Browser detection
@@ -234,7 +235,6 @@ self.addEventListener('install', event => {
     }).catch(error => {
         console.log(error);
     }));
-    
 });
 
 /**
@@ -270,7 +270,7 @@ self.addEventListener('message', (event) => {
  * "fetch" event handler
  */
 self.addEventListener('fetch', (event) => {
-    if (LOG) console.log(`Reacting to fetch event ${event.request.url}`);
+    if (LOG_FETCH_EVENTS) console.log(`Reacting to fetch event ${event.request.url}`);
 
     /**
      * Wrapper for API calls - the API responses should be as relevant as possible.
@@ -282,7 +282,7 @@ self.addEventListener('fetch', (event) => {
      */
     const queryAPI = (cleanedRequestURL, event, cachedResponse) => {
 
-        if (LOG) console.log('Service worker: API call detected', cleanedRequestURL);
+        if (LOG_FETCH_EVENTS) console.log('Service worker: API call detected', cleanedRequestURL);
 
         if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
             return fetch(event.request);
@@ -290,7 +290,7 @@ self.addEventListener('fetch', (event) => {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
                     return fetch(event.request).then(apiResponse => {
-                        if (LOG) console.log('Service worker: API request was performed despite the existence of cached request');
+                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
                         // Caching the API request in case if app will go offline aftewards
                         return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
                             resolve(apiResponse);
@@ -299,7 +299,7 @@ self.addEventListener('fetch', (event) => {
                             reject();
                         });
                     }).catch(error => {
-                        if (LOG) console.log('Service worker: API request failed, using the cached response');
+                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
                         resolve(cachedResponse);
                     });
                 }).catch(error => {
@@ -327,11 +327,16 @@ self.addEventListener('fetch', (event) => {
     });
 
     if (requestShouldBeBypassed) {
-        if (LOG) console.log(`Service worker: bypassing the ${event.request.url} request`);
+        if (LOG_FETCH_EVENTS) console.log(`Service worker: bypassing the ${event.request.url} request`);
 
         event.respondWith(fetch(event.request));
     } else {
         event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
+            let detectNoSlashPathRegExp = /\/app\/[\w]+\/[\w]+$/;
+            if (cleanedRequestURL.match(detectNoSlashPathRegExp) && cleanedRequestURL.match(detectNoSlashPathRegExp).length === 1) {
+                cleanedRequestURL = cleanedRequestURL + `/`;
+            }
+
             return caches.match(cleanedRequestURL).then((response) => {
                 if (response) {
                     // The request was found in cache
@@ -340,7 +345,7 @@ self.addEventListener('fetch', (event) => {
                     if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
                         return queryAPI(cleanedRequestURL, event, response);
                     } else {
-                        if (LOG) console.log(`Service worker: in cache ${event.request.url}`);
+                        if (LOG_FETCH_EVENTS) console.log(`Service worker: in cache ${event.request.url}`);
                         return response;
                     }
                 } else {
@@ -376,7 +381,7 @@ self.addEventListener('fetch', (event) => {
 
                             return result;
                         } else if (requestHasToBeCached) {
-                            if (LOG) console.log(`Service worker: caching ${requestToMake.url}`);
+                            if (LOG_FETCH_EVENTS) console.log(`Service worker: caching ${requestToMake.url}`);
                             return caches.open(CACHE_NAME).then((cache) => {
                                 return fetch(requestToMake).then(response => {
                                     return cache.put(requestToMake.url, response.clone()).then(() => {

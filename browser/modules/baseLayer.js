@@ -92,15 +92,18 @@ module.exports = module.exports = {
             </div>
         </div>`);
 
+        $(`.js-toggle-side-by-side-mode`).off();
         $(`.js-toggle-side-by-side-mode`).change((event) => {
             sideBySideEnabled = $(event.target).is(':checked');
+
             if (sideBySideEnabled) {
                 activeSideBySideLayer = false;
+                _self.drawBaseLayersControl();
             } else {
-                _self.destroySideBySideControl(true);
+                _self.destroySideBySideControl();
+                setBaseLayer.init(activeBaseLayer);
             }
 
-            _self.drawBaseLayersControl();
             backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
         });
 
@@ -111,6 +114,10 @@ module.exports = module.exports = {
         });
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
+    },
+
+    getAvailableBaseLayers: () => {
+        return window.setBaseLayers;
     },
 
     /**
@@ -128,6 +135,13 @@ module.exports = module.exports = {
                 }
             });
         } else if (layers && layers.length === 2) {
+            // Disable the side-by-side mode
+            _self.destroySideBySideControl();
+
+            activeSideBySideLayer = false;
+            sideBySideEnabled = false;
+            $(`.js-toggle-side-by-side-mode`).prop(`checked`, false);
+
             result = new Promise((resolve, reject) => {
                 $(`.js-toggle-side-by-side-mode`).trigger(`click`);
                 setTimeout(() => {
@@ -147,12 +161,15 @@ module.exports = module.exports = {
         }
     },
 
-    destroySideBySideControl: (revert = false) => {
+    destroySideBySideControl: () => {
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
 
-        if (revert) {
-            setBaseLayer.init(activeBaseLayer);
+        // Delete previously initialized side-by-side layers
+        for (let key in cloud.get().map._layers) {
+            if (`_vidi_side_by_side` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_side_by_side) {
+                cloud.get().map.removeLayer(cloud.get().map._layers[key]);
+            }
         }
     },
 
@@ -206,37 +223,77 @@ module.exports = module.exports = {
                 <div class='list-group-separator'></div>`;
             }
 
+            const disableInputs = () => {
+                // Disabling inputs of side-by-side base layers
+                if (activeBaseLayer) {
+                    $('[name="side-by-side-baselayers"]').prop('disabled', false);
+                    $(`[data-gc2-side-by-side-base-id="${activeBaseLayer}"]`).find('[name="side-by-side-baselayers"]').prop('disabled', true);
+                }
+
+                // Disabling inputs of base layers
+                if (activeSideBySideLayer) {
+                    $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
+                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
+                }
+            }
+
+            /**
+             * Shows two layers side by side and reactivates the radio button controls
+             */
+            const showTwoLayersSideBySide = () => {
+                disableInputs();
+
+                if (activeSideBySideLayer === false) {
+                    throw new Error(`Unable to detect the side-by-side layer`);
+                }
+
+                if (activeBaseLayer === activeSideBySideLayer) {
+                    throw new Error(`Active and side-by-side layers are the same`);
+                }
+
+                if (sideBySideControl) {
+                    _self.destroySideBySideControl();
+                }
+
+                let layer1 = _self.addBaseLayer(activeBaseLayer);
+                if (Array.isArray(layer1)) layer1 = layer1.pop();
+                layer1._vidi_side_by_side = true;
+                layer1.addTo(cloud.get().map);
+
+                let layer2  = _self.addBaseLayer(activeSideBySideLayer);
+                if (Array.isArray(layer2)) layer2 = layer2.pop();
+                layer2._vidi_side_by_side = true;
+                layer2.addTo(cloud.get().map);
+
+                cloud.get().map.invalidateSize();
+                sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+
+                backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+            };
+
             $("#base-layer-list").append(appendedCode).promise().then(() => {
+                if (sideBySideEnabled) {
+                    disableInputs();
+                }
+
+                $(`[name="baselayers"]`).off();
                 $(`[name="baselayers"]`).change(event => {
                     activeBaseLayer = $(event.target).val();
                     event.stopPropagation();
-                    setBaseLayer.init(activeBaseLayer);
-                });
 
-                // Disabling inputs
-                $('[name="side-by-side-baselayers"]').prop('disabled', false);
-                $(`[data-gc2-side-by-side-base-id="${activeBaseLayer}"]`).find('[name="side-by-side-baselayers"]').prop('disabled', true);
+                    if ($('.js-toggle-side-by-side-mode').is(':checked') && activeSideBySideLayer !== false) {
+                        showTwoLayersSideBySide();
+                    } else {
+                        setBaseLayer.init(activeBaseLayer);
+                    }
+                });
 
                 $('[data-gc2-side-by-side-base-id]').off();
                 $('[data-gc2-side-by-side-base-id]').change(event => {
                     activeSideBySideLayer = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
+                    event.stopPropagation();
 
-                    // Disabling inputs
-                    $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
-                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
-
-                    if (activeBaseLayer && activeSideBySideLayer) {
-                        if (sideBySideControl) {
-                            _self.destroySideBySideControl();
-                        }
-
-                        let layer1 = cloud.get().addBaseLayer(activeBaseLayer).addTo(cloud.get().map);
-                        let layer2 = cloud.get().addBaseLayer(activeSideBySideLayer).addTo(cloud.get().map);
-                        cloud.get().map.invalidateSize();
-                        sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
-
-                        backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
-                    }
+                    showTwoLayersSideBySide();
                 });
 
                 resolve();
@@ -271,7 +328,7 @@ module.exports = module.exports = {
             let layer1Id = $('input[name=baselayers]:checked').val();
             let layer2Id = $('input[name=side-by-side-baselayers]:checked').val();
             if (!layer1Id || !layer2Id) {
-                throw new Error(`Unable to detect layer identifiers`);
+                throw new Error(`Unable to detect layer identifiers (${layer1Id}, ${layer2Id}`);
             } else {
                 state = {
                     sideBySideMode: [layer1Id, layer2Id]
@@ -286,8 +343,11 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        //return new Promise((resolve, reject) => { resolve(); });
-        return _self.toggleSideBySideControl(newState.sideBySideMode);
+        if (newState === false) {
+            return _self.toggleSideBySideControl(false);
+        } else {
+            return _self.toggleSideBySideControl(newState.sideBySideMode);
+        }
     },
 
     /**
@@ -298,8 +358,12 @@ module.exports = module.exports = {
         return baseLayers;
     },
 
+    /**
+     * 
+     * @return {Object} Layer object
+     */
     addBaseLayer: function (id) {
-        var customBaseLayer, bl;
+        var customBaseLayer, bl, result = false;
 
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
 
@@ -325,14 +389,16 @@ module.exports = module.exports = {
                     customBaseLayer.baseLayer = true;
                     customBaseLayer.id = bl.id;
 
-                    cloud.get().addLayer(customBaseLayer, bl.name, true);
+                    result = cloud.get().addLayer(customBaseLayer, bl.name, true);
 
                 } else {
 
-                    cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
+                    result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
 
                 }
             }
         }
+
+        return result;
     }
 };

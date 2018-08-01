@@ -7,6 +7,8 @@
 
 const MODULE_NAME = `draw`;
 
+const drawTools = require(`./drawTools`);
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -65,49 +67,14 @@ var backboneEvents;
 
 var editing = false;
 
-/**
- * Get readable distance of layer
- * @param e
- * @returns {string}
- * @private
- */
-var _getDistance = function (e) {
-    var tempLatLng = null;
-    var totalDistance = 0.00000;
-    $.each(e._latlngs, function (i, latlng) {
-        if (tempLatLng == null) {
-            tempLatLng = latlng;
-            return;
-        }
-        totalDistance += tempLatLng.distanceTo(latlng);
-        tempLatLng = latlng;
-    });
-    return L.GeometryUtil.readableDistance(totalDistance, true);
-};
-
-/**
- * Get readable area of layer
- * @param e
- * @returns {string}
- * @private
- */
-var _getArea = function (e) {
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
-};
-
 let _self = false;
 
-/**
- *
- * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getDrawOn: module.exports.getDrawOn, getLayer: module.exports.getLayer, getTable: module.exports.getTable, setDestruct: module.exports.setDestruct}}
- */
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
-
         _self = this;
         return this;
     },
@@ -290,22 +257,15 @@ module.exports = {
                     }
 
                     if (type === 'circlemarker') {
-
                         drawLayer._vidi_marker = true;
 
                         var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-
                         if (text !== null) {
-                            drawLayer.bindTooltip(text, {permanent: true}).on("click", function () {
-                            }).openTooltip();
-
+                            drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
                             drawLayer._vidi_marker_text = text;
-
                         } else {
-
                             drawLayer._vidi_marker_text = null;
                         }
-
                     }
 
                     drawnItems.addLayer(drawLayer);
@@ -315,18 +275,16 @@ module.exports = {
 
                     if (type !== 'circlemarker') {
                         drawLayer.on('click', function (event) {
-
                             me.bindPopup(event);
-
                         });
                     }
 
                     if (type === "polygon" || type === "rectangle") {
-                        area = _getArea(drawLayer);
+                        area = drawTools.getArea(drawLayer);
                         //distance = getDistance(drawLayer);
                     }
                     if (type === 'polyline') {
-                        distance = _getDistance(drawLayer);
+                        distance = drawTools.getDistance(drawLayer);
 
                     }
                     if (type === 'circle') {
@@ -361,12 +319,12 @@ module.exports = {
                         }
                         else if (typeof v._icon !== "undefined") {
                         } else if (v.feature.properties.distance !== null) {
-                            v.feature.properties.distance = _getDistance(v);
+                            v.feature.properties.distance = drawTools.getDistance(v);
                             v.updateMeasurements();
 
                         }
                         else if (v.feature.properties.area !== null) {
-                            v.feature.properties.area = _getArea(v);
+                            v.feature.properties.area = drawTools.getArea(v);
                             v.updateMeasurements();
 
                         }
@@ -425,14 +383,12 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-        
         return new Promise((resolve, reject) => {
             _self.control(false);
             _self.removeFeatures();
             if (newState.drawnItems && newState.drawnItems !== `false`) {
-                $("#draw-btn").trigger('click');
                 setTimeout(() => {
-                    _self.recreateDrawnings(JSON.parse(newState.drawnItems));
+                    _self.recreateDrawnings(JSON.parse(newState.drawnItems), false);
                     resolve();
                 }, 100);
             } else {
@@ -449,8 +405,8 @@ module.exports = {
      * 
      * @return {void}
      */
-    recreateDrawnings: (parr) => {
-         let GeoJsonAdded = false;
+    recreateDrawnings: (parr, enableControl = true) => {
+        let GeoJsonAdded = false;
         let v = parr;
         let l = _self.getLayer();
         let t = _self.getTable();
@@ -500,13 +456,12 @@ module.exports = {
             // If circle marker
             // ================
             if (m.type === "CircleMarker") {
-                g = L.marker(m._latlng, m.style);
+                g = L.circleMarker(m._latlng, m.options);
                 g.feature = m.feature;
 
                 // Add label
                 if (m._vidi_marker_text) {
-                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
-                    }).openTooltip();
+                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
                 }
 
                 // Adding vidi-specific properties
@@ -558,7 +513,10 @@ module.exports = {
         });
 
         t.loadDataInTable();
-        _self.control(true);
+
+        if (enableControl) {
+            _self.control(true);
+        }
     },
 
     bindPopup: function (event) {
@@ -576,11 +534,11 @@ module.exports = {
         $("#btn-draw-apply-style-ok").on("click", function () {
             me.setStyle(event.target, event.target.feature.properties.type);
             cloud.get().map.closePopup(popup);
+            backboneEvents.get().trigger(`${MODULE_NAME}:update`);
         });
 
         $("#btn-draw-apply-style-cancel").on("click", function () {
             cloud.get().map.closePopup(popup);
-
         });
     },
 
@@ -590,7 +548,6 @@ module.exports = {
      * @param type
      */
     setStyle: function (l, type) {
-
         if ($("#draw-measure").is(":checked") && type !== 'marker') {
             l.hideMeasurements();
             l.showMeasurements({
@@ -623,6 +580,12 @@ module.exports = {
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
             }
+
+            console.log({
+                pattern: $("#draw-line-extremity").val(),
+                size: $("#draw-line-extremity-size").val(),
+                where: $("#draw-line-extremity-where").val()
+            });
         }
 
         if (type === 'circlemarker') {

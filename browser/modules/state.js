@@ -6,7 +6,7 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = true;
+const LOG = false;
 
 /**
  * @type {*|exports|module.exports}
@@ -126,6 +126,8 @@ const _getInternalState = () => {
                 localState = JSON.parse(value);
             }
 
+            if (LOG) console.log('State: ', localState);
+
             resolve(localState);
         });
     });
@@ -195,7 +197,11 @@ module.exports = {
             throw new Error('localforage is not defined');
         }
 
-        var arr, i;
+        var arr, i, maxBounds = setting.getMaxBounds();
+
+        if (maxBounds) {
+            cloud.get().setMaxBounds(maxBounds);
+        }
 
         // Reset hash. Needed if state is invoked after start up
         hash = decodeURIComponent(window.location.hash);
@@ -304,10 +310,10 @@ module.exports = {
         const initializeFromHashPart = () => {
             if (urlVars.k === undefined) {
                 if (hashArr[0]) {
-                    setLayers()
+                    setLayers();
                 } else {
                     // Set base layer to the first added one
-                    setBaseLayer.init(baseLayer.getBaseLayer()[0]);
+                    setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
                     var extent = setting.getExtent();
                     if (extent !== null) {
                         cloud.get().zoomToExtent(extent);
@@ -555,6 +561,22 @@ module.exports = {
     },
 
     /**
+     * Resets current state
+     * 
+     * @return {Promise}
+     */
+    resetState: () => {
+        let appliedStatePromises = [];
+        for (let key in listened) {
+            appliedStatePromises.push(listened[key].applyState(false));
+        }
+
+        return Promise.all(appliedStatePromises).then(() => {
+            return _setInternalState({});
+        });
+    },
+
+    /**
      * Shortcut for getting specific module or extension state
      * 
      * @param {String} name Name of the module or extension
@@ -692,7 +714,11 @@ module.exports = {
             throw new Error(`Module or extension has to implement getState() and applyState() methods in order to support state`);
         }
 
-        _getInternalState().then(localState => {        
+        _getInternalState().then(localState => {
+            if (`modules` in localState === false || !localState.modules) {
+                localState.modules = {};
+            }
+
             localState.modules[name] = listened[name].getState();
             _setInternalState(localState);
         }).catch(error => {

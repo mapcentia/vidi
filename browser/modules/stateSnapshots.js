@@ -26,17 +26,17 @@ const dict = {
         "da_DK": "# No snapshots",
         "en_US": "# No snapshots"
     },
-    "Create one": {
-        "da_DK": "# Create one",
-        "en_US": "# Create one"
+    "Update state snapshot with current application state": {
+        "da_DK": "# Update state snapshot with current application state",
+        "en_US": "# Update state snapshot with current application state"
     },
-    "Save current application state": {
-        "da_DK": "# Save current application state",
-        "en_US": "# Save current application state"
+    "Apply state snapshot": {
+        "da_DK": "# Apply state snapshot",
+        "en_US": "# Apply state snapshot"
     },
-    "Delete snapshot": {
-        "da_DK": "# Delete snapshot",
-        "en_US": "# Delete snapshot"
+    "Delete state snapshot": {
+        "da_DK": "# Delete state snapshot",
+        "en_US": "# Delete state snapshot"
     },
     "Add local state snapshots to user's ones": {
         "da_DK": "# Add local state snapshots to user's ones",
@@ -49,6 +49,10 @@ const dict = {
     "copy link": {
         "da_DK": "# copy link",
         "en_US": "# copy link"
+    },
+    "New title": {
+        "da_DK": "# New title",
+        "en_US": "# New title"
     },
     "Description": {
         "da_DK": "# Save and share the current state of the application",
@@ -79,7 +83,7 @@ const exId = `state-snapshots-dialog-content`;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     /**
      *
      * @param o
@@ -115,6 +119,63 @@ module.exports = module.exports = {
 
         utils.createMainTab(exId, utils.__("State snapshots", dict), utils.__("Description", dict), require('./../../browser/modules/height')().max);
 
+        let buttonStyle = {
+            padding: `4px`,
+            margin: `0px`
+        };
+
+        /**
+         * Title field for state snapshot
+         */
+        class StateSnapshotTitleField extends React.Component {
+            constructor(props) {
+                super(props);
+                if (props.type !== `userOwned` && props.type !== `browserOwned`) {
+                    throw new Error(`Invalid type options`);
+                }
+                
+                this.state = {
+                    title: (props.value ? props.value : ``)
+                }
+            }
+
+            onChange(event) {
+                this.setState({ title: event.target.value });
+            }
+
+            onSave(event) {
+                this.props.onAdd(this.state.title);
+                this.setState({ title: '' });
+            }
+
+            render() {
+                let cancelControl = false;
+                if (this.props.onCancel) {
+                    cancelControl = (<button
+                        className="btn btn-xs btn-primary"
+                        onClick={this.props.onCancel}
+                        style={buttonStyle}>
+                        <i className="material-icons">cancel</i>
+                    </button>);
+                }
+
+                return (<div className="input-group" style={{ width: '50%', display: 'inline-table', paddingLeft: '8px' }}>
+                    <input value={this.state.title} type="text" className="form-control" placeholder={utils.__("New title", dict)} onChange={this.onChange.bind(this)}/>
+                    <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
+                        <button
+                            className="btn btn-xs btn-primary"
+                            onClick={this.onSave.bind(this)}
+                            disabled={!this.state.title}
+                            style={buttonStyle}>
+                            <i className="material-icons">save</i>
+                        </button>
+                        {cancelControl}
+                    </span>
+                </div>);
+            }
+        }
+
+
         /**
          *
          */
@@ -128,6 +189,7 @@ module.exports = module.exports = {
                     userOwnerSnapshots: [],
                     loading: false,
                     authenticated: false,
+                    updatedItemId: false,
                     stateApplyingIsBlocked: false
                 };
 
@@ -165,31 +227,32 @@ module.exports = module.exports = {
             /**
              * Creates snapshot
              * 
-             * @param {Boolean} browserOwned Specifies if the created snapshot belongs to browser or user
+             * @param {Boolean} anonymous Specifies if the created snapshot belongs to browser or user
              */
-            createSnapshot(browserOwned = false) {
-                if (confirm(`${utils.__(`Save current application state`, dict)}?`)) {
-                    state.getState().then(state => {
-                        if ('modules' in state === false) {
-                            throw new Error(`No modules data in state`);
+            createSnapshot(title, anonymous = false) {
+                let _self = this;
+
+                _self.setState({ loading: true });
+                state.getState().then(state => {
+                    if ('modules' in state === false) {
+                        throw new Error(`No modules data in state`);
+                    }
+
+                    state.map = anchor.getCurrentMapParameters();
+                    $.ajax({
+                        url: API_URL,
+                        method: 'POST',
+                        dataType: 'json',
+                        data: {
+                            title,
+                            anonymous,
+                            snapshot: state
                         }
-
-                        state.map = anchor.getCurrentMapParameters();
-
-                        let _self = this;
-                        $.ajax({
-                            url: API_URL,
-                            method: 'POST',
-                            dataType: 'json',
-                            data: {
-                                anonymous: browserOwned,
-                                snapshot: state
-                            }
-                        }).then(() => {
-                            _self.refreshSnapshotsList();
-                        });
+                    }).then(() => {
+                        _self.setState({ loading: false });
+                        _self.refreshSnapshotsList();
                     });
-                }
+                });
             }
 
             /**
@@ -210,7 +273,7 @@ module.exports = module.exports = {
              * @param {String} id Snapshot identifier
              */
             deleteSnapshot(id) {
-                if (confirm(`${utils.__(`Delete snapshot`, dict)}?`)) {
+                if (confirm(`${utils.__(`Delete state snapshot`, dict)}?`)) {
                     let _self = this;
                     $.ajax({
                         url: `${API_URL}/${id}`,
@@ -220,6 +283,50 @@ module.exports = module.exports = {
                         _self.refreshSnapshotsList();
                     });
                 }
+            }
+
+            /**
+             * Updates snapshot
+             * 
+             * @param {String} id Snapshot identifier
+             */
+            updateSnapshot(data, title) {
+                let _self = this;
+
+                _self.setState({ loading: true });
+                state.getState().then(state => {
+                    if ('modules' in state === false) {
+                        throw new Error(`No modules data in state`);
+                    }
+
+                    state.map = anchor.getCurrentMapParameters();
+
+                    data.title = title;
+                    data.snapshot = state;
+                    $.ajax({
+                        url: API_URL,
+                        method: 'PUT',
+                        dataType: 'json',
+                        data
+                    }).then(data => {
+                        _self.refreshSnapshotsList();
+                        _self.setState({
+                            updatedItemId: false,
+                            loading: false
+                        });
+                    });
+                });
+            }
+
+            /**
+             * Enables updat form for snapshot
+             * 
+             * @param {String} id Snapshot identifier
+             */
+            enableUpdateSnapshotForm(id) {
+                this.setState({
+                    updatedItemId: id
+                });
             }
 
             /**
@@ -313,11 +420,6 @@ module.exports = module.exports = {
                     border: '1px solid grey'
                 };
 
-                let buttonStyle = {
-                    padding: `4px`,
-                    margin: `0px`
-                };
-
                 const createSnapshotRecord = (item, index, local = false) => {
                     let date = new Date(item.created_at);
                     let dateFormatted = (`${date.getHours()}:${date.getMinutes()} ${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`);
@@ -331,23 +433,48 @@ module.exports = module.exports = {
 
                     let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
 
+                    let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
+                    if (item.title) {
+                        titleLabel = (<span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
+                    }
+
+                    let updateSnapshotControl = (<button
+                        type="button"
+                        className="btn btn-xs btn-primary"
+                        onClick={() => this.enableUpdateSnapshotForm(item.id)}
+                        title={utils.__(`Update state snapshot with current application state`, dict)}
+                        style={buttonStyle}>
+                        <i className="material-icons">autorenew</i>
+                    </button>);
+                    if (this.state.updatedItemId === item.id) {
+                        let type = (local ? 'browserOwned' : 'userOwned')
+                        updateSnapshotControl = (<StateSnapshotTitleField
+                            value={item.title}
+                            onAdd={(newTitle) => { this.updateSnapshot(item, newTitle) }}
+                            onCancel={() => { this.setState({ updatedItemId: false }) }}
+                            type={type}/>);
+                    }
+
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                         <div className="panel-body" style={{padding: '8px'}}>
                             <div>
-                                <span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 10)}</span>
+                                {titleLabel}
                                 <span className="label label-default">{dateFormatted}</span>
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => { this.applySnapshot(item); }}
                                     disabled={this.state.stateApplyingIsBlocked}
+                                    title={utils.__(`Apply state snapshot`, dict)}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>
+                                {updateSnapshotControl}
                                 <button
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => this.deleteSnapshot(item.id)}
+                                    title={utils.__(`Delete state snapshot`, dict)}
                                     style={buttonStyle}>
                                     <i className="material-icons">delete</i>
                                 </button>
@@ -364,7 +491,7 @@ module.exports = module.exports = {
                 };
 
                 let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={() => { this.createSnapshot(true) }}>{utils.__(`No snapshots`, dict)}. {utils.__(`Create one`, dict)}?</a>
+                    {utils.__(`No snapshots`, dict)}
                 </div>);
 
                 let importAllIsDisabled = true;
@@ -378,7 +505,7 @@ module.exports = module.exports = {
                 }
 
                 let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    <a onClick={() => { this.createSnapshot() }}>{utils.__(`No snapshots`, dict)}. {utils.__(`Create one`, dict)}?</a>
+                    {utils.__(`No snapshots`, dict)}
                 </div>);
                 if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
                     userOwnerSnapshots = [];
@@ -393,9 +520,7 @@ module.exports = module.exports = {
                         <div>
                             <h4>
                                 {utils.__(`User snapshots`, dict)}
-                                <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot() }} style={buttonStyle}>
-                                    <i className="material-icons">add</i>
-                                </button>
+                                <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
                             </h4>
                         </div>
                         <div>
@@ -423,9 +548,7 @@ module.exports = module.exports = {
                             <div>
                                 <h4>
                                     {utils.__(`Local snapshots`, dict)} 
-                                    <button className="btn btn-xs btn-primary" onClick={() => { this.createSnapshot(true) }} style={buttonStyle}>
-                                        <i className="material-icons">add</i>
-                                    </button>
+                                    <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
                                     <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
                                         <i className="material-icons">person_add</i>
                                     </button>

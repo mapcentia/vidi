@@ -8,6 +8,8 @@
 /**
  *
  */
+var measurements;
+
 var backboneEvents;
 
 var oplevsyddjurs;
@@ -36,6 +38,7 @@ var converter = new showdown.Converter();
  */
 module.exports = {
     set: function (o) {
+        measurements = o.measurements;
         backboneEvents = o.backboneEvents;
         cloud = o.cloud;
         setting = o.setting;
@@ -180,9 +183,6 @@ module.exports = {
             })
         });
 
-
-
-
         $("#zoom-in-btn").on("click", function () {
             map.zoomIn();
         });
@@ -195,7 +195,11 @@ module.exports = {
             cloud.get().zoomToExtent(setting.getExtent());
         });
 
+        $("#measurements-module-btn").on("click", function () {
+            measurements.toggleMeasurements(true);
 
 
+            
+        });
     }
 };

@@ -113,9 +113,8 @@ module.exports = {
         if (window._vidiLocale === "en_US") {
             localization = "en";
         }
-        /**
-         *
-         */
+
+        /*
         var measureControl = new L.Control.Measure({
             position: 'topright',
             primaryLengthUnit: 'kilometers',
@@ -139,6 +138,7 @@ module.exports = {
 
         });
         measureControl.addTo(map);
+        */
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {

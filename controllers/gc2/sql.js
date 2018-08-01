@@ -2,11 +2,23 @@ var express = require('express');
 var router = express.Router();
 var config = require('../../config/config.js').gc2;
 var request = require('request');
+var fs = require('fs');
 
-router.post('/api/sql/:db', function (req, response) {
-    var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, base64 = req.body.base64, userName;
+router.all('/api/sql/:db', function (req, response) {
+    var db = req.params.db,
+        q = req.body.q || req.query.q,
+        srs = req.body.srs || req.query.srs,
+        lifetime = req.body.lifetime || req.query.lifetime,
+        client_encoding = req.body.client_encoding || req.query.client_encoding,
+        base64 = req.body.base64 || req.query.base64,
+        format = req.body.format || req.query.format,
+        userName,
+        headers;
 
-    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true": "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&key=" +req.session.gc2ApiKey, options;
+    console.log(format)
+
+    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey,
+        options;
 
     // Check if user is a sub user
     if (req.session.gc2UserName && req.session.subUser) {
@@ -25,27 +37,33 @@ router.post('/api/sql/:db', function (req, response) {
         form: postData
     };
 
-    request(options, function (err, res, body) {
-
-        if (err) {
-
-            response.header('content-type', 'application/json');
-            response.status(400).send({
-                success: false,
-                message: "Could not get the sql data."
-            });
-
-            return;
+    if (format === "excel") {
+        headers = {
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition': 'attachment; filename=data.xlsx',
+            'Expires': '0',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'X-Powered-By': 'MapCentia Vidi'
         }
+    } else {
+        headers = {
+            'Content-Type': 'application/json',
+            'Expires': '0',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'X-Powered-By': 'MapCentia Vidi'
+        }
+    }
 
-        response.header('content-type', 'application/json');
-        response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
-        response.header('Expires', '0');
-        response.header('X-Powered-By', 'MapCentia Vidi');
+    response.writeHead(200, headers);
 
-        response.send(body);
+    var rem = request(options);
+
+    rem.on('data', function (chunk) {
+        response.write(chunk);
     });
-
+    rem.on('end', function () {
+        response.end();
+    });
 
 });
 module.exports = router;

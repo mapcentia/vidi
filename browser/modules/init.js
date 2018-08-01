@@ -36,6 +36,7 @@ module.exports = {
         var loadConfig = function () {
             $.getJSON( "/api/config/" + urlparser.db + "/" + configFile, function (data) {
                 window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
+                console.info("Started with config: " + configFile);
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -173,21 +174,35 @@ module.exports = {
         $("body").append('<div id="tail" style="position: fixed; float: left; display: none"></div>');
 
 
+        // Detect the database and schema
+        let splitLocation = window.location.pathname.split(`/`);
+        if (splitLocation.length === 4 || splitLocation.length === 5) {
+            let database = splitLocation[2];
+            let schema = splitLocation[3];
+            if (!database || database.length === 0 || !schema || schema.length === 0) {
+                console.error(`Error detecting the current database and schema`);
+            } else {
+                window.vidiConfig.appDatabase = database;
+                window.vidiConfig.appSchema = schema;
+            }
+        } else {
+            console.error(`Unable to detect the current database and schema`);
+        }
+
         // Init the modules
         // ================
 
         modules.cloud.init();
         modules.state.setExtent();
-        modules.backboneEvents.init();
-        modules.socketId.init();
-        modules.bindEvent.init();
-        modules.baseLayer.init();
-        modules.infoClick.init();
-        modules.advancedInfo.init();
-        modules.draw.init();
-        modules.stateSnapshots.init();
-        modules.print.init();
-        modules.layerTree.init();
+
+        let defaultModules = [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`];
+
+        // Calling mandatory init method
+        defaultModules.map(name => {
+            modules[name].init();
+        });
+
         modules.meta.init().then(() => {
             return modules.setting.init();
         }, (error) => {
@@ -248,25 +263,41 @@ module.exports = {
         // ============================================
         $("[data-toggle=tooltip]").tooltip();
 
-        $.material.init();
-        touchScroll(".tab-pane");
-        touchScroll("#info-modal-body-wrapper");
-        $("#loadscreentext").html(__("Loading data"));
-
-        if (window.vidiConfig.activateMainTab) {
-            setTimeout(function () {
-                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-
-            }, 200);
+        try {
+            $.material.init();
+            touchScroll(".tab-pane");
+            touchScroll("#info-modal-body-wrapper");
+            $("#loadscreentext").html(__("Loading data"));
+            if (window.vidiConfig.activateMainTab) {
+                setTimeout(function () {
+                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                }, 200);
+            }
+            $(window).resize(_.debounce(function () {
+                $("#myNavmenu").offcanvas('hide');
+                setTimeout(function () {
+                    modules.cloud.get().map.invalidateSize();
+                }, 100);
+            }, 0));
+        } catch (e) {
+            console.info("Could not init Bootstrap Material Design");
         }
 
+        // Calling optional postInit method
+        defaultModules.map(name => {
+            if (`postInit` in modules[name]) {
+                modules[name].postInit();
+            }
+        });
+
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.bundle.js').then(registration => {
+            navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
+                console.log('Service worker registration succeeded:', registration);
             }).catch(error => {
-                console.warn(`Unable to register the service worker`);
+                console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });
         } else {
-            console.warn(`Service workers are not supported in this browser, some features can be unavailable`);
+            console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
 
         if (window.localforage) {

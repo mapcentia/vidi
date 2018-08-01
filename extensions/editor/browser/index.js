@@ -83,6 +83,9 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _self = this;
+        try {
+            vectorLayers = o.extensions.vectorLayers.index;
+        } catch(e) {}
         return this;
     },
 
@@ -94,6 +97,7 @@ module.exports = {
         apiBridgeInstance = APIBridgeSingletone();
 
         isInit = true;
+        layerTree.setAutomatic(false);
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
@@ -121,9 +125,6 @@ module.exports = {
         $(document).arrive('.gc2-edit-tools', function () {
             $(this).css("visibility", "visible");
         });
-
-        // Don't init layer tree automatic. Let this module activate it
-        layerTree.setAutomatic(false);
 
         backboneEvents.get().on("ready:meta", function () {
             metaDataKeys = meta.getMetaDataKeys();
@@ -238,10 +239,12 @@ module.exports = {
 
         Object.keys(fields).map(function (key) {
             if (key !== pkey && key !== f_geometry_column) {
-                properties[key] = {
-                    title: (fields[key] !== undefined && fields[key].alias) || key,
-                    type: `string`
-                };
+                let title = key;
+                if (fieldConf[key] !== undefined && fieldConf[key].alias) {
+                    title = fieldConf[key].alias;
+                }
+
+                properties[key] = { title, type: `string` };
 
                 if (fields[key]) {
                     switch (fields[key].type) {
@@ -265,9 +268,29 @@ module.exports = {
 
                 // Properties have priority over default types
                 if (fieldConf[key] && fieldConf[key].properties) {
-                    let parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
-                    if (parsedProperties && parsedProperties.length > 0) {
-                        properties[key].enum = parsedProperties;
+                    let parsedProperties = false;
+                    try {
+                        parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
+                    } catch(e) {
+                        console.warn(`"properties" of the ${key} field is not a valid JSON`);
+                    }
+
+                    if (parsedProperties) {
+                        if (Array.isArray(parsedProperties) && parsedProperties.length > 0) {
+                            properties[key].enum = parsedProperties;
+                        } else {
+                            let enumNames = [];
+                            let enumValues = [];
+                            for (let enumName in parsedProperties) {
+                                enumNames.push(enumName);
+                                enumValues.push(parsedProperties[enumName]);
+                            }
+
+                            if (enumNames.length === enumValues.length) {
+                                properties[key].enumNames = enumNames;
+                                properties[key].enum = enumValues;
+                            }
+                        }
                     }
                 }
             }

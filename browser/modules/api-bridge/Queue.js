@@ -18,6 +18,15 @@ const PROCESS_FIRST_ELEMENT_IMMEDIATELY = false;
 
 let queueStateUndefined = true;
 
+/*
+Is set to false when the page protocol is non-HTTPS, so the online status will
+definitely not be retrieved until page reload
+*/
+let onlineStatusCanBeRetrievedAtSomePoint = true;
+
+let attemptsToCheckOnlineStatus = 0;
+let onlineStatusCheckLimit = 3;
+
 /**
  * FIFO queue abstraction. Queue items are stored
  * in browser storage and do not depend on page reload
@@ -84,7 +93,21 @@ class Queue {
                         _self._onUpdateListener(_self._generateCurrentStatistics());
                     }
                 } else {
-                    console.warn(`Unable the determine the online status`);
+                    if (typeof location !== 'undefined' && location && location.protocol.indexOf('https') === -1) {
+                        if (onlineStatusCanBeRetrievedAtSomePoint) {
+                            console.warn(`Unable the determine the online status (the service worker is not registered)`);
+                            onlineStatusCanBeRetrievedAtSomePoint = false;
+                        }
+                    } else if (textStatus === `success`) {
+                        attemptsToCheckOnlineStatus++;
+                        if (attemptsToCheckOnlineStatus <= onlineStatusCheckLimit) {
+                            console.warn(`Unable the determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${onlineStatusCheckLimit}`);
+                        } else if (attemptsToCheckOnlineStatus === (onlineStatusCheckLimit + 1)) {
+                            console.warn(`Limit of connection check attempts exceeded, please reload page to activate service worker`);
+                        }
+                    } else {
+                        console.warn(`Unable the determine the online status (the service worker is starting up)`);
+                    }
                 }
             }).always(() => {
                 if (_self._queue.length > 0 && _self._locked === false) {
@@ -286,7 +309,8 @@ class Queue {
         if (LOG) console.log('Queue: before getting state');
 
         let result = new Promise((resolve, reject) => {
-            localforage.getItem(QUEUE_STORE_NAME, (error, value) => {
+            let location = _self._getCurrentDatabaseAndSchema();
+            localforage.getItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, (error, value) => {
 
                 if (LOG) console.log('Queue: after getting state');
 
@@ -305,11 +329,23 @@ class Queue {
         return result;
     }
 
+    _getCurrentDatabaseAndSchema() {
+        let database = `default`;
+        let schema = `default`;
+        if (typeof window !== 'undefined' && window && window.vidiConfig && window.vidiConfig.appDatabase && window.vidiConfig.appSchema) {
+            database = window.vidiConfig.appDatabase;
+            schema = window.vidiConfig.appSchema;
+        }
+
+        return { database, schema };
+    }
+
     /**
      * Saves current queue state to disk
      */
     _saveState() {
-        localforage.setItem(QUEUE_STORE_NAME, JSON.stringify(this._queue), (error) => {
+        let location = this._getCurrentDatabaseAndSchema();
+        localforage.setItem(`${QUEUE_STORE_NAME}:${location.database}:${location.schema}`, JSON.stringify(this._queue), (error) => {
 
             if (LOG) console.log('Queue: saving state');
 
