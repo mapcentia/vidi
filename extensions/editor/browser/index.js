@@ -59,6 +59,8 @@ let db = urlparser.db;
 
 let isInit = false;
 
+let layerTreeWasInitialized = false;
+
 let _self = false;
 
 /**
@@ -222,7 +224,10 @@ module.exports = {
 
             backboneEvents.get().on("ready:layerTree", () => {});
 
-            layerTree.create();
+            if (layerTreeWasInitialized === false) {
+                layerTreeWasInitialized = true;
+                layerTree.create();
+            }
         });
     },
 

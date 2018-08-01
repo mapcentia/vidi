@@ -482,6 +482,8 @@ module.exports = {
                         l = [];
                         base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
+                        console.log(`### drawing controls for the ${arr[i]} group`);
+
                         // Add group container
                         // Only if container doesn't exist
                         // ===============================

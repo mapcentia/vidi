@@ -189,7 +189,6 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
-
             metaDataKeys = meta.getMetaDataKeys();
 
             if (!isStarted) {
