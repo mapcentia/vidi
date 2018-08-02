@@ -308,8 +308,7 @@ module.exports = {
             };
 
             const initializeLayersFromURL = () => {
-                executeSequentially(layersToActivate).then(() => {
-                });
+                executeSequentially(layersToActivate).then(() => {});
             };
 
             if (layerTree.isReady()) {
