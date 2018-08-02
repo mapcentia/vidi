@@ -79,9 +79,6 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
-
-        console.log(`### switchLayer init`, name, enable);
-
         let result = new Promise((resolve, reject) => {
             let store = layerTree.getStores();
 
@@ -116,11 +113,11 @@ module.exports = module.exports = {
                     layerTree.setSelectorValue(name, 'tile');
 
                     layers.addLayer(name).then(() => {
-                        console.log(`### layer added ${name}`);
                         _self.checkLayerControl(name, doNotLegend);
 
                         tileLayer = cloud.get().getLayersByName(tileLayerId);
 
+                        let tileLayersCacheBuster = ``;
                         if (forceTileReload) {
                             tileLayersCacheBuster = Math.random();
                         }
@@ -129,29 +126,25 @@ module.exports = module.exports = {
                         tileLayer.redraw();
 
                         resolve();
-                    }).catch(() => {
-                        console.log(`### layer not added ${name}`);
-
-                        meta.init(name, true, true).then(() => {
+                    }).catch((err) => {
+                        meta.init(name, true, true).then(layerMeta => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
-
-                                
                                 // All layers are guaranteed to exist in meta
-                                /*
-                                console.log(`###`, layers.getLayers());
-                                layers.getLayers().split(',').map(layerToActivate => {
-                                    _self.checkLayerControl(layerToActivate, doNotLegend);
-                                });
-                                */
+                                let currentLayers = layers.getLayers();
+                                if (currentLayers && Array.isArray(currentLayers)) {
+                                    layers.getLayers().split(',').map(layerToActivate => {
+                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                    });
+                                }
 
-                                //_self.init(name, true).then(() => {
+                                _self.init(name, true).then(() => {
                                     resolve();
-                                //});
+                                });
                             });
                         }).catch(() => {
-                            console.log(`### Unable to meta.init for ${name}`);  
-                            console.error(`Could not add ${tileLayerId} layer`);
+                            console.error(`Could not add ${tileLayerId} tile layer`);
+                            resolve();
                         });
                     });
                 } else {
@@ -163,25 +156,28 @@ module.exports = module.exports = {
                         store[vectorLayerId].load();
 
                         backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-                        
+
                         _self.checkLayerControl(name, doNotLegend);
                         resolve();
                     } else {
-                        meta.init(tileLayerId, true, true).then(() => {
+                        meta.init(tileLayerId, true, true).then(layerMeta => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
-                                layers.getLayers().split(',').map(layerToActivate => {
-                                    _self.checkLayerControl(layerToActivate, doNotLegend);
-                                });
+                                let currentLayers = layers.getLayers();
+                                if (currentLayers && Array.isArray(currentLayers)) {
+                                    layers.getLayers().split(',').map(layerToActivate => {
+                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                    });
+                                }
 
                                 _self.init(name, true).then(() => {
                                     resolve();
                                 });
                             });
                         }).catch(() => {
-                            console.log(`### Unable to meta.init for ${name}`);  
-                            console.error(`Could not add ${tileLayerId} layer`);
+                            console.error(`Could not add ${tileLayerId} vector layer`);
+                            resolve();
                         });
                     }
                 }

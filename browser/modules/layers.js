@@ -182,9 +182,6 @@ module.exports = {
      */
     addLayer: function (l) {
         var me = this;
-
-        console.log(`### addlayer`, l);
-
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
@@ -232,7 +229,6 @@ module.exports = {
                 }
             });
 
-            console.log(`#### layerWasAdded`, layerWasAdded);
             if (layerWasAdded === false) {
                 console.info(`${l} was not added to the map`);
                 reject();

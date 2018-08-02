@@ -283,21 +283,32 @@ module.exports = {
                 }
             }
 
-            const createPromise = (x) => {
+            /**
+             * Creates promise
+             * 
+             * @param {String} data Input data for underlying function
+             * 
+             * @return {Function} 
+             */
+            const createPromise = (data) => {
                 return new Promise(resolve => {
-                    switchLayer.init(x, true, true).then(() => {
+                    switchLayer.init(data, true, true).then(() => {
                         resolve();
                     });
                 })
             };
 
+            /**
+             * Executes promises one after another
+             * 
+             * @param {Array} data Set of input values
+             */
             const executeSequentially = (data) => {
                 return createPromise(data.shift()).then(x => data.length == 0 ? x : executeSequentially(data));
             };
 
             const initializeLayersFromURL = () => {
                 executeSequentially(layersToActivate).then(() => {
-                    console.log(`### All layers from URL are enabled`);
                 });
             };
 
