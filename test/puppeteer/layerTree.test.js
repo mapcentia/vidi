@@ -6,17 +6,51 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Layer tree', () => {
-    it('should load layers from page URL', async () => {
+    it('should load layers from page URL from same schema', async () => {
         const page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
 
         await page.click(`#burger-btn`);
-        await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
 
-        expect(await page.evaluate(`$('[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
-        expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+    });
+
+    it('should load layers from page URL from different schemas', async () => {
+        const page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        await page.click(`#burger-btn`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').is(':checked')`)).to.be.false;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+
+        // Check if the panel for different schema was drawn as well
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
     });
 
     it('should load vector and tile layers', async () => {
@@ -96,7 +130,7 @@ describe('Layer tree', () => {
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
 
-        let e = await page.$('#layer-panel-VGVzdCBncm91cA');
+        let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw');
         let box = await e.boundingBox();
         let x = box.x + box.width / 2;
         let y = box.y + box.height / 2;
