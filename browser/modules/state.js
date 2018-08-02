@@ -272,21 +272,33 @@ module.exports = {
                             }
     
                             if (displayLayer) {
-                                layersToActivate.push([arr[i], true, false]);
+                                layersToActivate.push(arr[i]);
                             }
                         } else {
                             console.warn(`No meta layer was found for ${arr[i]}`);
                             // Add the requested in run-time
-                            layersToActivate.push([arr[i], true, false]);
+                            layersToActivate.push(arr[i]);
                         }
                     }
                 }
             }
 
+            const createPromise = (x) => {
+                return new Promise(resolve => {
+                    switchLayer.init(x, true, true).then(() => {
+                        resolve();
+                    });
+                })
+            };
+
+            const executeSequentially = (data) => {
+                return createPromise(data.shift()).then(x => data.length == 0 ? x : executeSequentially(data));
+            };
+
             const initializeLayersFromURL = () => {
-                layersToActivate.map(item => {
-                    switchLayer.init(item[0], item[1], true);
-                });    
+                executeSequentially(layersToActivate).then(() => {
+                    console.log(`### All layers from URL are enabled`);
+                });
             };
 
             if (layerTree.isReady()) {
