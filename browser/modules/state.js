@@ -272,21 +272,43 @@ module.exports = {
                             }
     
                             if (displayLayer) {
-                                layersToActivate.push([arr[i], true, false]);
+                                layersToActivate.push(arr[i]);
                             }
                         } else {
                             console.warn(`No meta layer was found for ${arr[i]}`);
                             // Add the requested in run-time
-                            layersToActivate.push([arr[i], true, false]);
+                            layersToActivate.push(arr[i]);
                         }
                     }
                 }
             }
 
+            /**
+             * Creates promise
+             * 
+             * @param {String} data Input data for underlying function
+             * 
+             * @return {Function} 
+             */
+            const createPromise = (data) => {
+                return new Promise(resolve => {
+                    switchLayer.init(data, true, true).then(() => {
+                        resolve();
+                    });
+                })
+            };
+
+            /**
+             * Executes promises one after another
+             * 
+             * @param {Array} data Set of input values
+             */
+            const executeSequentially = (data) => {
+                return createPromise(data.shift()).then(x => data.length == 0 ? x : executeSequentially(data));
+            };
+
             const initializeLayersFromURL = () => {
-                layersToActivate.map(item => {
-                    switchLayer.init(item[0], item[1], true);
-                });    
+                executeSequentially(layersToActivate).then(() => {});
             };
 
             if (layerTree.isReady()) {

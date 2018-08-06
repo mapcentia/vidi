@@ -49,13 +49,7 @@ var meta;
  */
 var backboneEvents;
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var layerTree;
-
-var tries = 0;
+let _self = false;
 
 /**
  *
@@ -70,7 +64,8 @@ module.exports = module.exports = {
         pushState = o.pushState;
         meta = o.meta;
         backboneEvents = o.backboneEvents;
-        layerTree = o.layerTree;
+
+        _self = this;
         return this;
     },
 
@@ -79,110 +74,166 @@ module.exports = module.exports = {
      * @param name {string}
      * @param enable {boolean}
      * @param doNotLegend {boolean}
-     * @param layerType {string}
+     * @param forceTileReload {boolean}
+     * 
+     * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
-        let store = layerTree.getStores();
-        var me = this, el = $('input[class="js-show-layer-control"][data-gc2-id="' + name.replace('v:', '') + '"]');
-        
-        if (!el || el.length !== 1) {
-            console.error(`Unable to find layer switch control for layer ${name}`);
-        }
+        let result = new Promise((resolve, reject) => {
+            let store = layerTree.getStores();
 
-        let layer = cloud.get().getLayersByName(name);
-        let layerType, tileLayerId, vectorLayerId;
-        if (name.startsWith('v:')) {
-            tileLayerId   = name.replace('v:', '');
-            vectorLayerId = name;
-            layerType     = 'vector';
-        } else {
-            tileLayerId   = name;
-            vectorLayerId = 'v:' + name;
-            layerType     = 'tile';
-        }
-
-        let tileLayer   = cloud.get().getLayersByName(tileLayerId);
-        let vectorLayer = cloud.get().getLayersByName(vectorLayerId);
-
-        if (tileLayer) cloud.get().map.removeLayer(tileLayer);
-        if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
-
-        if (store[vectorLayerId]) {
-            store[vectorLayerId].abort();
-            store[vectorLayerId].reset();
-        }
-
-        if (enable) {
-            // Only one layer at a time, so using the tile layer identifier
-            layers.incrementCountLoading(tileLayerId);
-
-            if (layerType === 'tile') {
-                layerTree.setSelectorValue(name, 'tile');
-
-                layers.addLayer(name).then(() => {
-                    el.prop('checked', true);
-                    me.update(doNotLegend, el);
-
-                    tries = 0;
-                    tileLayer = cloud.get().getLayersByName(tileLayerId);
-
-                    if (forceTileReload) {
-                        tileLayersCacheBuster = Math.random();
-                    }
-
-                    tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
-                    tileLayer.redraw();
-                }, () => {
-                    console.log("Layer " + name + " not in Meta");
-                    meta.init(name, true, true).then(() => {
-                        if (tries > 0) {
-                            console.error(`Could not add ${name} layer`);
-                            tries = 0;
-                            return;
-                        }
-
-                        layerTree.init();
-                        tries = 1;
-                        me.init(name, true); // recursive
-                    });
-                });
+            let layer = cloud.get().getLayersByName(name);
+            let layerType, tileLayerId, vectorLayerId;
+            if (name.startsWith('v:')) {
+                tileLayerId   = name.replace('v:', '');
+                vectorLayerId = name;
+                layerType     = 'vector';
             } else {
-                layerTree.setSelectorValue(name, 'vector');
+                tileLayerId   = name;
+                vectorLayerId = 'v:' + name;
+                layerType     = 'tile';
+            }
 
-                if (vectorLayerId in store) {
-                    cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
-                    let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                    cloud.get().map.addLayer(existingLayer);
-                    store[vectorLayerId].load();
-                } else {
-                    meta.init(tileLayerId, true, true).then(() => {
-                        if (tries > 0) {
-                            console.error(`Could not add ${tileLayerId} layer`);
-                            tries = 0;
-                            return;
+            let tileLayer   = cloud.get().getLayersByName(tileLayerId);
+            let vectorLayer = cloud.get().getLayersByName(vectorLayerId);
+
+            if (tileLayer) cloud.get().map.removeLayer(tileLayer);
+            if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
+
+            if (store[vectorLayerId]) {
+                store[vectorLayerId].abort();
+                store[vectorLayerId].reset();
+            }
+
+            if (enable) {
+                // Only one layer at a time, so using the tile layer identifier
+                layers.incrementCountLoading(tileLayerId);
+
+                if (layerType === 'tile') {
+                    layerTree.setSelectorValue(name, 'tile');
+
+                    layers.addLayer(name).then(() => {
+                        _self.checkLayerControl(name, doNotLegend);
+
+                        tileLayer = cloud.get().getLayersByName(tileLayerId);
+
+                        let tileLayersCacheBuster = ``;
+                        if (forceTileReload) {
+                            tileLayersCacheBuster = Math.random();
                         }
 
-                        layerTree.init();
-                        tries = 1;
-                        me.init(name, true); // recursive
+                        tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
+                        tileLayer.redraw();
+
+                        resolve();
+                    }).catch((err) => {
+                        meta.init(name, true, true).then(layerMeta => {
+                            // Trying to recreate the layer tree with updated meta and switch layer again
+                            layerTree.create().then(() => {
+                                // All layers are guaranteed to exist in meta
+                                let currentLayers = layers.getLayers();
+                                if (currentLayers && Array.isArray(currentLayers)) {
+                                    layers.getLayers().split(',').map(layerToActivate => {
+                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                    });
+                                }
+
+                                _self.init(name, true).then(() => {
+                                    resolve();
+                                });
+                            });
+                        }).catch(() => {
+                            console.error(`Could not add ${tileLayerId} tile layer`);
+                            resolve();
+                        });
                     });
+                } else {
+                    layerTree.setSelectorValue(name, 'vector');
+                    if (vectorLayerId in store) {
+                        cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
+                        let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                        cloud.get().map.addLayer(existingLayer);
+                        store[vectorLayerId].load();
+
+                        backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+
+                        _self.checkLayerControl(name, doNotLegend);
+                        resolve();
+                    } else {
+                        meta.init(tileLayerId, true, true).then(layerMeta => {
+                            // Trying to recreate the layer tree with updated meta and switch layer again
+                            layerTree.create().then(() => {
+                                // All layers are guaranteed to exist in meta
+                                let currentLayers = layers.getLayers();
+                                if (currentLayers && Array.isArray(currentLayers)) {
+                                    layers.getLayers().split(',').map(layerToActivate => {
+                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                    });
+                                }
+
+                                _self.init(name, true).then(() => {
+                                    resolve();
+                                });
+                            });
+                        }).catch(() => {
+                            console.error(`Could not add ${tileLayerId} vector layer`);
+                            resolve();
+                        });
+                    }
                 }
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                el.prop('checked', true);
-                me.update(doNotLegend, el);
+            } else {
+                _self.uncheckLayerControl(name, doNotLegend);
+                resolve();
             }
+        });
+
+        return result;
+    },
+
+    /**
+     * Toggles the layer control
+     */
+    _toggleLayerControl: (enable = false, layerName, doNotLegend) => {
+        const getLayerSwitchControl = () => {
+            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
+            if (!controlElement || controlElement.length !== 1) {
+                return false;
+            } else {
+                return controlElement;
+            }
+        };
+
+        let el = getLayerSwitchControl();
+        if (el === false) {
+            console.error(`Unable to find layer switch control for layer ${name}`);
         } else {
-            el.prop('checked', false);
-            me.update(doNotLegend, el);
+            el.prop('checked', enable);
+            _self.update(doNotLegend, el);
         }
+    },
+
+    /**
+     * Checks the layer control
+     * 
+     * @param {String} layerName Name of the layer
+     */
+    checkLayerControl: (layerName, doNotLegend) => {
+        _self._toggleLayerControl(true, layerName, doNotLegend);
+    },
+
+    /**
+     * Unchecks the layer control
+     * 
+     * @param {String} layerName Name of the layer
+     */
+    uncheckLayerControl: (layerName, doNotLegend) => {
+        _self._toggleLayerControl(false, layerName, doNotLegend);
     },
 
     /**
      * Updates the number of active layers indicator for the tab
      */
-    update: function (doNotLegend, el) {
+    update: (doNotLegend, el) => {
         var siblings = el.parents(".accordion-body").find("input"), c = 0;
 
         $.each(siblings, function (i, v) {

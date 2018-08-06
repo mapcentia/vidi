@@ -182,11 +182,11 @@ module.exports = {
      */
     addLayer: function (l) {
         var me = this;
-
-        let result = new Promise(function (resolve, reject) {
+        let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             let layerWasAdded = false;
+
             $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name,
                     singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
@@ -226,7 +226,6 @@ module.exports = {
                     console.info(`${l} was added to the map`);
                     layerWasAdded = true;
                     resolve();
-                    return false;
                 }
             });
 

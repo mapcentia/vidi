@@ -135,9 +135,13 @@ module.exports = {
                 url: '/api/meta/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",
                 success: function (response) {
-                    me.addMetaData(response);
-                    ready = true;
-                    resolve()
+                    if (response.data && response.data.length > 0) {
+                        me.addMetaData(response);
+                        ready = true;
+                        resolve(response);
+                    } else {
+                        reject();
+                    }
                 },
                 error: function (response) {
                     reject();

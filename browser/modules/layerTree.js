@@ -380,6 +380,8 @@ module.exports = {
     create: (forcedState = false) => {
         layerTreeWasBuilt = true;
 
+        console.log(`### creating the layer tree`);
+
         let result = new Promise((resolve, reject) => {
 
             layerTreeIsReady = false;
@@ -804,7 +806,6 @@ module.exports = {
                 state.listen(MODULE_NAME, `activeLayersChange`);
                 
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-
                 setTimeout(() => {
                     if (activeLayers) {
                         activeLayers.map(layerName => {
@@ -825,6 +826,7 @@ module.exports = {
 
                     layerTreeIsReady = true;
                     backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+
                     resolve();
                 }, 1000);
             });
