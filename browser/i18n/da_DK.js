@@ -169,5 +169,38 @@ module.exports = {
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
+
+        // OfflineMap
+        "OfflineMap block description": "# Here specific map areas can be stored to be used offline",
+        "OfflineMap instructions": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
+        "Extent": "# Extent",
+        "Stored map areas": "# Stored map areas",
+        "Store another": "# Store another",
+        "Please use the secured version of page (HTTPS enabled)": "# Please use the secured version of page (HTTPS enabled)",
+        "Show extent": "# Show extent",
+        "Hide extent": "# Hide extent",
+        "Delete map area?": "# Delete map area?",
+        "Refresh map area?": "# Refresh map area?",
+        "No map areas have been stored yet": "# No map areas have been stored yet",
+        "Saved tiles will be used in...": "# Saved tiles will be used in...",
+        "Processing tiles": "# Processing tiles",
+        "Please reload the page": "# Please reload the page",
+        "Checking the cache status": "# Checking the cache status",
+        "of": "af",
+        "Date": "Dato",
+        "Done": "Færdig",
+        "Delete": "Slet",
+        "Refresh": "Opdater",
+        "Actions": "Handlinger",
+        "Store": "Bewaren",
+        "Available space": "Ledig plads",
+        "Available space can not be detected": "# Available space can not be detected",
+        "Offline map": "Offline kort",
+        "Clear": "Klar",
+        "Zoom": "Zoom",
+        "Define": "Definere",
+        "Redefine": "Omdefinere",
+        "Show on map": "Vis på kort",
+        "Store map area": "# Store map area"
     }
 };
