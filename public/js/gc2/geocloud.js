@@ -55,6 +55,8 @@ geocloud = (function () {
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         HERENORMALDAYGREY = "hereNormalDayGrey",
+        GEODKBRIGHT = "geodkBright",
+        LUFTFOTOSERIER2017 = "luftfotoserier2017",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
@@ -1536,6 +1538,41 @@ geocloud = (function () {
             }());
 
         };
+
+        //ol2 and leaflet
+        this.addGeoDk = function (name, layer) {
+            var l,
+                url = "https://gc2.io/mapcache/baselayers/tms/";
+
+            switch (MAPLIB) {
+                case "ol2":
+                    l = new OpenLayers.Layer.TMS(name, url, {
+                        layername: layer,
+                        type: 'png',
+                        attribution: "&copy; Geodatastyrelsen",
+                        resolutions: resolutions,
+                        wrapDateLine: true
+                    });
+                    this.map.addLayer(l);
+                    l.setVisibility(false);
+                    break;
+                case "leaflet":
+                    l = new L.TileLayer(url + "1.0.0/" + layer + "/{z}/{x}/{y}.png", {
+                        tms: true,
+                        attribution: "",
+                        maxZoom: 21,
+                        maxNativeZoom: 19
+
+                    });
+                    lControl.addBaseLayer(l);
+                    console.log(l)
+                    break;
+            }
+            l.baseLayer = true;
+            l.id = name;
+            return (l);
+        };
+
         //ol2, ol3 and leaflet
         this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
             var me = this;
@@ -1674,6 +1711,12 @@ geocloud = (function () {
                     break;
                 case "hereNormalNightGrey":
                     o = this.addHere("hereNormalNightGrey");
+                    break;
+                case "geodkBright":
+                    o = this.addGeoDk("geodkBright", "geodk.bright");
+                    break;
+                case "luftfotoserier2017":
+                    o = this.addGeoDk("luftfotoserier2017", "luftfotoserier.geodanmark_2017_12_5cm");
                     break;
                 default : // Try to add as tile layer
                     o = this.addTileLayers($.extend({
@@ -2280,6 +2323,8 @@ geocloud = (function () {
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,
+        GEODKBRIGHT: GEODKBRIGHT,
+        LUFTFOTOSERIER2017: LUFTFOTOSERIER2017,
         setHost: setHost
     };
 }());
@@ -2379,3 +2424,4 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
+
