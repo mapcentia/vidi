@@ -61,11 +61,14 @@ const GlobalStyleDiv = styled.div`
 `;
 
 class App extends Component {
-  state = {
-    showBanner: false,
-    width: window.innerWidth,
-    height: window.innerHeight
-  };
+  constructor(props) {
+    super(props);
+    console.log(`### here`);
+    this.state = {
+        width: props.width,
+        height: props.height
+    };
+  }
 
   componentWillMount() {
     // if we pass an id as part of the url
@@ -77,12 +80,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    // delay 2s to show the banner
-    if (!window.localStorage.getItem('kgHideBanner')) {
-      window.setTimeout(this._showBanner, 3000);
-    }
     // load sample data
-    // this._loadSampleData();
+    //this._loadSampleData();
   }
 
   componentWillUnmount() {
@@ -90,23 +89,7 @@ class App extends Component {
   }
 
   _onResize = () => {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  };
-
-  _showBanner = () => {
-    this.setState({showBanner: true});
-  };
-
-  _hideBanner = () => {
-    this.setState({showBanner: false});
-  };
-
-  _disableBanner = () => {
-    this._hideBanner();
-    window.localStorage.setItem('kgHideBanner', 'true');
+    console.warn(`KeplerGL wrapper: resize case is not covered yet`);
   };
 
   _loadSampleData() {
@@ -169,24 +152,17 @@ class App extends Component {
   }
 
   render() {
-    const {showBanner, width, height} = this.state;
+    const {width, height} = this.state;
     return (
       <GlobalStyleDiv>
-        <Banner
-          show={this.state.showBanner}
-          height={bannerHeight}
-          onClose={this._hideBanner}
-        >
-          <Announcement onDisable={this._disableBanner}/>
-        </Banner>
         <div
           style={{
             transition: 'margin 1s, height 1s',
             position: 'absolute',
             width: '100%',
-            height: showBanner ? `calc(100% - ${bannerHeight}px)` : '100%',
-            minHeight: `calc(100% - ${bannerHeight}px)`,
-            marginTop: showBanner ? `${bannerHeight}px` : 0
+            height: '100%',
+            minHeight: `100%`,
+            marginTop: 0
           }}
         >
           <KeplerGl
@@ -197,7 +173,7 @@ class App extends Component {
              */
             getState={state => state.demo.keplerGl}
             width={width}
-            height={height - (showBanner ? bannerHeight : 0)}
+            height={height}
           />
 
         </div>

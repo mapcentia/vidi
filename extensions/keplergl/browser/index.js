@@ -13,12 +13,6 @@ import {render} from 'react-dom';
 import store from './src/store';
 import App from './src/app';
 
-const KeplerGLComponent = () => (
-    <Provider store={store}>
-      <App/>
-    </Provider>
-  );
-
 /**
  * Translations
  */
@@ -40,7 +34,8 @@ var utils;
  *
  * @type {string}
  */
-var exId = 'keplegl';
+var extensionId = 'keplergl-container';
+var modalContainerId = 'keplergl-modal-body';
 
 /**
  *
@@ -64,26 +59,17 @@ module.exports = {
      *
      */
     init: function () {
-        utils.createMainTab(exId, utils.__('KeplerGL', dict), utils.__("KeplerGL", dict), require('./../../../browser/modules/height')().max);
-
-
-        const Root = () => (
-            <Provider store={store}>
-              <App/>
-            </Provider>
-          );
-
+        utils.createMainTab(extensionId, utils.__('KeplerGL', dict), utils.__("KeplerGL", dict), require('./../../../browser/modules/height')().max);
 
         /**
          *
          */
-        class KeplerGLApp extends React.Component {
-
+        class KeplerGLComponent extends React.Component {
             constructor(props) {
                 super(props);
+                this.state = {};
 
-                this.state = {
-                };
+                this.openModal = this.openModal.bind(this);
             }
 
             /**
@@ -93,30 +79,59 @@ module.exports = {
                 this.setState({});
             }
 
+            openModal(e) {
+                setTimeout(() => {
+                    let width = $(`#keplergl-modal-body`).width();
+                    let height = $(`#keplergl-modal-body`).height();
+                    if (width > 0 && height > 0) {
+                        if (document.getElementById(modalContainerId)) {
+                            try {
+                                ReactDOM.render((<Provider store={store}>
+                                        <App width={width} height={height}/>
+                                    </Provider>),
+                                    document.getElementById(modalContainerId));
+                            } catch (e) {
+                                console.log(e);
+                            }
+                        } else {
+                            console.warn(`Unable to find the container for KeplerGL extension (element id: ${extensionId})`);
+                        }
+                    }
+                }, 1000);
+            }
+
             /**
              *
              * @returns {XML}
              */
             render() {
-                return (
-                    <div role="tabpanel">
-                        <KeplerGLComponent/>
+                return (<div role="tabpanel">
+                    <div>
                     </div>
-                );
+                    <div>
+                        <a className="btn btn-block" id="keplergl" href="#" data-toggle="modal" data-target="#keplergl-modal" onClick={this.openModal}>
+                            <i className="fa fa-columns" aria-hidden="true"></i> {utils.__(`Open KeplerGL in modal`, dict)}
+                        </a>
+                    </div>
+                </div>);
+
+                /*
+     
+                */
             }
         }
 
-        if (document.getElementById(exId)) {
+        if (document.getElementById(extensionId)) {
             try {
                 ReactDOM.render(
-                    <KeplerGLApp />,
-                    document.getElementById(exId)
+                    <KeplerGLComponent />,
+                    document.getElementById(extensionId)
                 );
             } catch (e) {
                 console.log(e);
             }
         } else {
-            console.warn(`Unable to find the container for offlineMap extension (element id: ${exId})`);
+            console.warn(`Unable to find the container for KeplerGL extension (element id: ${extensionId})`);
         }
     }
 

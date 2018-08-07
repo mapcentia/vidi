@@ -128,7 +128,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
                 }
             },
             publish_sw: {
@@ -139,7 +139,7 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
                 }
             },
             publish_sw_dev: {
@@ -150,7 +150,7 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
                 }
             },
             watch: {
