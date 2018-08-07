@@ -205,9 +205,6 @@ module.exports = {
     },
 
     toggleMeasurements: (activate = false) => {
-
-        console.log(`### activate`, activate);
-
         if (activate) {
             drawOn = true;
 
