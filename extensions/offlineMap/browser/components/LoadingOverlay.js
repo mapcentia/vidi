@@ -1,25 +1,6 @@
 var React = require('react');
 
 /**
- * Translations
- */
-const translations = require('./../translations');
-
-/**
- *
- * @param txt
- * @returns {*}
- * @private
- */
-var __ = function (txt) {
-    if (translations[txt][window._vidiLocale]) {
-        return translations[txt][window._vidiLocale];
-    } else {
-        return txt;
-    }
-};
-
-/**
  * MapAreaListItem component
  */
 

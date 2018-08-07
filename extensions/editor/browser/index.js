@@ -192,7 +192,7 @@ module.exports = {
                             let managePopup = L.popup({
                                 autoPan: false
                             }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
-                                <i class="fa fa-pencil" aria-hidden="true"></i>
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                             </button>
                             <button class="btn btn-primary btn-xs ge-delete">
                                 <i class="fa fa-trash" aria-hidden="true"></i>

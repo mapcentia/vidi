@@ -10,32 +10,6 @@ const MODULE_NAME = `measurements`;
 const drawTools = require(`./drawTools`);
 
 /**
- * Dictionary
- */
-const dict = {
-    "Expand measurements control": {
-        "da_DK": "# Expand measurements control",
-        "en_US": "# Expand measurements control"
-    },
-    "Collapse measurements control": {
-        "da_DK": "# Collapse measurements control",
-        "en_US": "# Collapse measurements control"
-    },
-    "Measure the distance": {
-        "da_DK": "# Measure the distance",
-        "en_US": "# Measure the distance"
-    },
-    "Measure the area": {
-        "da_DK": "# Measure the area",
-        "en_US": "# Measure the area"
-    },
-    "Delete all measurements": {
-        "da_DK": "# Delete all measurements",
-        "en_US": "# Delete all measurements"
-    },
-};
-
-/**
  * @type {*|exports|module.exports}
  */
 let cloud, state, serializeLayers, backboneEvents, utils;
@@ -46,7 +20,7 @@ let cloud, state, serializeLayers, backboneEvents, utils;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawControl, measurementControlButton;
+let drawControl, embedDrawControl, measurementControlButton;
 
 let editing = false;
 
@@ -88,7 +62,7 @@ module.exports = {
             let container = `#floating-container-secondary`;
 
             // Expand measurements control
-            $(container).append(`<a href="javascript:void(0)" title="${utils.__("Expand measurements control", dict)}" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
+            $(container).append(`<a href="javascript:void(0)" title="${__("Expand measurements control")}" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
                 <i class="fa fa-ruler" style="font-size: 20px;"></i>
             </a>`);
             $(`#measurements-module-btn`).click((event) => {
@@ -102,16 +76,16 @@ module.exports = {
 
             // Draw controls
             $(container).append(`
-            <a href="javascript:void(0)" title="${utils.__("Collapse measurements control", dict)}" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Collapse measurements control")}" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-ban" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${utils.__("Measure the distance", dict)}" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Measure the distance")}" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-project-diagram" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${utils.__("Measure the area", dict)}" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Measure the area")}" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-vector-square" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${utils.__("Delete all measurements", dict)}" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Delete all measurements")}" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-trash" style="font-size: 20px;"></i>
             </a>`);
 
@@ -125,7 +99,12 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polyline(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polyline(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
@@ -138,13 +117,22 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polygon(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polygon(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
             $(container).find(`#measurements-module-delete-btn`).click(() => {
                 if (drawnItems) {
                     drawnItems.clearLayers();
+                }
+
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
                 }
             });
 
@@ -156,6 +144,8 @@ module.exports = {
                 $(`#measurements-module-cancel-btn`).hide();
 
                 $(`#measurements-module-btn`).show();
+
+                _self.toggleMeasurements(false);
             });
         } else {
             let MeasurementControl = L.Control.extend({
@@ -300,6 +290,10 @@ module.exports = {
 
             backboneEvents.get().trigger("off:drawing");
             backboneEvents.get().trigger("on:infoClick");
+
+            if (embedDrawControl) {
+                embedDrawControl.disable();
+            }
 
             cloud.get().map.removeControl(drawControl);
             drawControl = false;

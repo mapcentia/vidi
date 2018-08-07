@@ -166,5 +166,59 @@ module.exports = {
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
+
+        // OfflineMap
+        "OfflineMap block description": "# Here specific map areas can be stored to be used offline",
+        "OfflineMap instructions": "# Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
+        "Extent": "# Extent",
+        "Stored map areas": "# Stored map areas",
+        "Store another": "# Store another",
+        "Please use the secured version of page (HTTPS enabled)": "# Please use the secured version of page (HTTPS enabled)",
+        "Show extent": "# Show extent",
+        "Hide extent": "# Hide extent",
+        "Delete map area?": "# Delete map area?",
+        "Refresh map area?": "# Refresh map area?",
+        "No map areas have been stored yet": "# No map areas have been stored yet",
+        "Saved tiles will be used in...": "# Saved tiles will be used in...",
+        "Processing tiles": "# Processing tiles",
+        "Please reload the page": "# Please reload the page",
+        "Checking the cache status": "# Checking the cache status",
+        "of": "of",
+        "Date": "Date",
+        "Done": "Done",
+        "Delete": "Delete",
+        "Refresh": "Refresh",
+        "Actions": "Actions",
+        "Store": "Store",
+        "Available space": "Available space",
+        "Available space can not be detected": "# Available space can not be detected",
+        "Offline map": "Offline map",
+        "Clear": "Clear",
+        "Zoom": "Zoom",
+        "Define": "Define",
+        "Redefine": "Redefine",
+        "Show on map": "Show on map",
+        "Store map area": "# Store map area",
+
+        //StateSnapshots
+        "State snapshots": "# State snapshots",
+        "Local snapshots": "# Local snapshots",
+        "User snapshots": "# User snapshots",
+        "No snapshots": "# No snapshots",
+        "Update state snapshot with current application state": "# Update state snapshot with current application state",
+        "Apply state snapshot": "# Apply state snapshot",
+        "Delete state snapshot": "# Delete state snapshot",
+        "Add local state snapshots to user's ones": "# Add local state snapshots to user's ones",
+        "Add local state snapshot to user's ones": "# Add local state snapshot to user's ones",
+        "copy link": "# copy link",
+        "New title": "# New title",
+        "StateSnapshots description": "# Save and share the current state of the application",
+
+        //Measurements
+        "Expand measurements control": "# Expand measurements control",
+        "Collapse measurements control": "# Collapse measurements control",
+        "Measure the distance": "# Measure the distance",
+        "Measure the area": "# Measure the area",
+        "Delete all measurements": "# Delete all measurements"
     }
 };

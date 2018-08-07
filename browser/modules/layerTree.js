@@ -379,11 +379,7 @@ module.exports = {
      */
     create: (forcedState = false) => {
         layerTreeWasBuilt = true;
-
-        console.log(`### creating the layer tree`);
-
         let result = new Promise((resolve, reject) => {
-
             layerTreeIsReady = false;
             if (forcedState) {
                 _self.getActiveLayers().map(item => {

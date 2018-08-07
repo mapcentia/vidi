@@ -226,8 +226,9 @@ module.exports = {
             $("#" + hashArr[0]).addClass("active");
             let layersToActivate = [];
 
+            let baseLayerId = false;
             if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                setBaseLayer.init(hashArr[0]);
+                baseLayerId = hashArr[0];
 
                 // Layers to activate
                 if (hashArr[4]) {
@@ -312,9 +313,13 @@ module.exports = {
             };
 
             if (layerTree.isReady()) {
+                setBaseLayer.init(baseLayerId);
                 initializeLayersFromURL();
             } else {
-                backboneEvents.get().once(`layerTree:ready`, initializeLayersFromURL);
+                backboneEvents.get().once(`layerTree:ready`, () => {
+                    setBaseLayer.init(baseLayerId);
+                    initializeLayersFromURL();
+                });
             }
 
             // When all layers are loaded, when load legend and when set "all_loaded" for print
