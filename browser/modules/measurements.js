@@ -46,7 +46,7 @@ let cloud, state, serializeLayers, backboneEvents, utils;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawControl, measurementControlButton;
+let drawControl, embedDrawControl, measurementControlButton;
 
 let editing = false;
 
@@ -125,7 +125,12 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polyline(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polyline(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
@@ -138,13 +143,22 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polygon(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polygon(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
             $(container).find(`#measurements-module-delete-btn`).click(() => {
                 if (drawnItems) {
                     drawnItems.clearLayers();
+                }
+
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
                 }
             });
 
@@ -156,6 +170,8 @@ module.exports = {
                 $(`#measurements-module-cancel-btn`).hide();
 
                 $(`#measurements-module-btn`).show();
+
+                _self.toggleMeasurements(false);
             });
         } else {
             let MeasurementControl = L.Control.extend({
@@ -300,6 +316,10 @@ module.exports = {
 
             backboneEvents.get().trigger("off:drawing");
             backboneEvents.get().trigger("on:infoClick");
+
+            if (embedDrawControl) {
+                embedDrawControl.disable();
+            }
 
             cloud.get().map.removeControl(drawControl);
             drawControl = false;
