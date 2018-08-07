@@ -158,7 +158,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify'],
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify'],
                     watch: true,
                     keepAlive: true
                 }
