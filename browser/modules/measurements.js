@@ -175,15 +175,17 @@ module.exports = {
             cloud.get().map.addControl(measurementControlButton);
         }
         cloud.get().map.addLayer(drawnItems);
-
     },
 
-    toggleMeasurements: (activate = false) => {
-        if (activate) {
-            drawOn = true;
+    off: () => {
+        _self.toggleMeasurements(false, false);
+    },
 
-            backboneEvents.get().trigger("on:drawing");
-            backboneEvents.get().trigger("off:infoClick");
+    toggleMeasurements: (activate = false, triggerEvents = true) => {
+        if (activate) {
+            if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
+
+            drawOn = true;
 
             L.drawLocal = require('./drawLocales/draw.js');            
 
@@ -286,16 +288,18 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
-            drawOn = false;
+            if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
 
-            backboneEvents.get().trigger("off:drawing");
-            backboneEvents.get().trigger("on:infoClick");
+            drawOn = false;
 
             if (embedDrawControl) {
                 embedDrawControl.disable();
             }
 
-            cloud.get().map.removeControl(drawControl);
+            if (drawControl) {
+                cloud.get().map.removeControl(drawControl);
+            }
+
             drawControl = false;
         }
     },

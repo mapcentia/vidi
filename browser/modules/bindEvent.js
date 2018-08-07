@@ -15,6 +15,12 @@ var draw;
  *
  * @type {*|exports|module.exports}
  */
+var measurements;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
 
 /**
@@ -117,6 +123,7 @@ var isStarted = false;
 module.exports = module.exports = {
     set: function (o) {
         draw = o.draw;
+        measurements = o.measurements;
         advancedInfo = o.advancedInfo;
         cloud = o.cloud;
         print = o.print;
@@ -224,22 +231,84 @@ module.exports = module.exports = {
         // Extensions must implement a listener for the reset:all event
         // and clean up
         // ============================================================
-        backboneEvents.get().on("reset:all", function () {
-            console.info("Resets all");
+        backboneEvents.get().on("reset:all", function (ignoreModules = []) {
+            console.info("Resets all", ignoreModules);
+
+            // Should be enabled by default
             backboneEvents.get().trigger("on:infoClick");
-            backboneEvents.get().trigger("off:advancedInfo");
-            backboneEvents.get().trigger("off:drawing");
-            backboneEvents.get().trigger("off:print");
+
+            // Should be disabled by default
+            if (ignoreModules.indexOf(`advancedInfo`) === -1) {
+                backboneEvents.get().trigger("off:advancedInfo");
+            }
+
+            if (ignoreModules.indexOf(`drawing`) === -1) {
+                backboneEvents.get().trigger("off:drawing");
+            }
+
+            if (ignoreModules.indexOf(`measurements`) === -1) {
+                backboneEvents.get().trigger("off:measurements");
+            }
+
+            if (ignoreModules.indexOf(`print`) === -1) {
+                backboneEvents.get().trigger("off:print");
+            }
         });
 
-        backboneEvents.get().on("off:advancedInfo on:drawing", function () {
+        backboneEvents.get().on("off:measurements", function () {
+            console.info("Stopping measurements");
+            measurements.off();
+        });
+
+        backboneEvents.get().on("off:drawing", function () {
+            console.info("Stopping drawing");
+            draw.off();
+        });
+
+        backboneEvents.get().on("off:advancedInfo", function () {
             console.info("Stopping advanced info");
             advancedInfo.off();
         });
 
-        backboneEvents.get().on("off:drawing on:advancedInfo", function () {
-            console.info("Stopping drawing");
-            draw.off();
+        /**
+         * Processing turn on/off events for drawing
+         */
+
+        // Drawing was turned on
+        backboneEvents.get().on("drawing:turnedOn", function () {
+            console.info(`Drawing was turned on`);
+            // Reset all modules except caller
+            backboneEvents.get().trigger(`reset:all`, [`drawing`]);
+            // Disable the infoClick
+            backboneEvents.get().trigger(`off:infoClick`);
+        });
+
+        // Drawing was turned off
+        backboneEvents.get().on("drawing:turnedOff", function () {
+            console.info(`Drawing was turned off`);
+            // Reset all modules except caller
+            backboneEvents.get().trigger(`reset:all`, [`drawing`]);
+        });
+
+
+        /**
+         * Processing turn on/off events for measurements
+         */
+
+        // Measurements were turned on
+        backboneEvents.get().on("measurements:turnedOn", function () {
+            console.info(`Measurements were turned on`);
+            // Reset all modules except caller
+            backboneEvents.get().trigger(`reset:all`, [`measurements`]);
+            // Disable the infoClick
+            backboneEvents.get().trigger(`off:infoClick`);
+        });
+
+        // Measurements were turned off
+        backboneEvents.get().on("measurements:turnedOff", function () {
+            console.info(`Measurements were turned off`);
+            // Reset all modules except caller
+            backboneEvents.get().trigger(`reset:all`, [`measurements`]);
         });
 
         // Info click
