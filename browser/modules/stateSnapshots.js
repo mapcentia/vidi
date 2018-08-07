@@ -54,7 +54,7 @@ const dict = {
         "da_DK": "# New title",
         "en_US": "# New title"
     },
-    "Description": {
+    "StateSnapshots description": {
         "da_DK": "# Save and share the current state of the application",
         "en_US": "# Save and share the current state of the application",
     }
@@ -117,7 +117,7 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        utils.createMainTab(exId, utils.__("State snapshots", dict), utils.__("Description", dict), require('./../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("State snapshots"), __("StateSnapshots description"), require('./../../browser/modules/height')().max);
 
         let buttonStyle = {
             padding: `4px`,
@@ -160,7 +160,7 @@ module.exports = {
                 }
 
                 return (<div className="input-group" style={{ width: '50%', display: 'inline-table', paddingLeft: '8px' }}>
-                    <input value={this.state.title} type="text" className="form-control" placeholder={utils.__("New title", dict)} onChange={this.onChange.bind(this)}/>
+                    <input value={this.state.title} type="text" className="form-control" placeholder={__("New title")} onChange={this.onChange.bind(this)}/>
                     <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                         <button
                             className="btn btn-xs btn-primary"
@@ -273,7 +273,7 @@ module.exports = {
              * @param {String} id Snapshot identifier
              */
             deleteSnapshot(id) {
-                if (confirm(`${utils.__(`Delete state snapshot`, dict)}?`)) {
+                if (confirm(`${__(`Delete state snapshot`)}?`)) {
                     let _self = this;
                     $.ajax({
                         url: `${API_URL}/${id}`,
@@ -334,7 +334,7 @@ module.exports = {
              */
             seizeSnapshot(item) {
                 let _self = this;
-                if (confirm(`${utils.__(`Add local state snapshot to user's ones`, dict)}?`)) {
+                if (confirm(`${__(`Add local state snapshot to user's ones`)}?`)) {
                     $.ajax({
                         url: `${API_URL}/${item.id}`,
                         method: 'PUT',
@@ -350,7 +350,7 @@ module.exports = {
              * Makes all state snapshots belong to user, not browser
              */
             seizeAllSnapshots() {
-                if (confirm(`${utils.__(`Add local state snapshots to user's ones`, dict)}?`)) {
+                if (confirm(`${__(`Add local state snapshots to user's ones`)}?`)) {
                     let _self = this;
                     let promises = [];
                     this.state.browserOwnerSnapshots.map(item => {
@@ -442,7 +442,7 @@ module.exports = {
                         type="button"
                         className="btn btn-xs btn-primary"
                         onClick={() => this.enableUpdateSnapshotForm(item.id)}
-                        title={utils.__(`Update state snapshot with current application state`, dict)}
+                        title={__(`Update state snapshot with current application state`)}
                         style={buttonStyle}>
                         <i className="material-icons">autorenew</i>
                     </button>);
@@ -465,7 +465,7 @@ module.exports = {
                                     className="btn btn-xs btn-primary"
                                     onClick={() => { this.applySnapshot(item); }}
                                     disabled={this.state.stateApplyingIsBlocked}
-                                    title={utils.__(`Apply state snapshot`, dict)}
+                                    title={__(`Apply state snapshot`)}
                                     style={buttonStyle}>
                                     <i className="material-icons">play_arrow</i>
                                 </button>
@@ -474,7 +474,7 @@ module.exports = {
                                     type="button"
                                     className="btn btn-xs btn-primary"
                                     onClick={() => this.deleteSnapshot(item.id)}
-                                    title={utils.__(`Delete state snapshot`, dict)}
+                                    title={__(`Delete state snapshot`)}
                                     style={buttonStyle}>
                                     <i className="material-icons">delete</i>
                                 </button>
@@ -482,7 +482,7 @@ module.exports = {
                             </div>
                             <div>
                                 <div className="input-group">
-                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{utils.__(`copy link`, dict)}</a>
+                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
                                     <input className="form-control" type="text" defaultValue={permaLink}/>
                                 </div>
                             </div>
@@ -491,7 +491,7 @@ module.exports = {
                 };
 
                 let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    {utils.__(`No snapshots`, dict)}
+                    {__(`No snapshots`)}
                 </div>);
 
                 let importAllIsDisabled = true;
@@ -505,7 +505,7 @@ module.exports = {
                 }
 
                 let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    {utils.__(`No snapshots`, dict)}
+                    {__(`No snapshots`)}
                 </div>);
                 if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
                     userOwnerSnapshots = [];
@@ -519,7 +519,7 @@ module.exports = {
                     userOwnerSnapshotsPanel = (<div className="js-user-owned">
                         <div>
                             <h4>
-                                {utils.__(`User snapshots`, dict)}
+                                {__(`User snapshots`)}
                                 <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
                             </h4>
                         </div>
@@ -547,7 +547,7 @@ module.exports = {
                         <div className="js-browser-owned">
                             <div>
                                 <h4>
-                                    {utils.__(`Local snapshots`, dict)} 
+                                    {__(`Local snapshots`)} 
                                     <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
                                     <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
                                         <i className="material-icons">person_add</i>

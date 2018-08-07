@@ -198,6 +198,27 @@ module.exports = {
         "Define": "Define",
         "Redefine": "Redefine",
         "Show on map": "Show on map",
-        "Store map area": "# Store map area"
+        "Store map area": "# Store map area",
+
+        //StateSnapshots
+        "State snapshots": "# State snapshots",
+        "Local snapshots": "# Local snapshots",
+        "User snapshots": "# User snapshots",
+        "No snapshots": "# No snapshots",
+        "Update state snapshot with current application state": "# Update state snapshot with current application state",
+        "Apply state snapshot": "# Apply state snapshot",
+        "Delete state snapshot": "# Delete state snapshot",
+        "Add local state snapshots to user's ones": "# Add local state snapshots to user's ones",
+        "Add local state snapshot to user's ones": "# Add local state snapshot to user's ones",
+        "copy link": "# copy link",
+        "New title": "# New title",
+        "StateSnapshots description": "# Save and share the current state of the application",
+
+        //Measurements
+        "Expand measurements control": "# Expand measurements control",
+        "Collapse measurements control": "# Collapse measurements control",
+        "Measure the distance": "# Measure the distance",
+        "Measure the area": "# Measure the area",
+        "Delete all measurements": "# Delete all measurements"
     }
 };
