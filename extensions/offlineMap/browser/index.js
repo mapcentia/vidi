@@ -31,11 +31,6 @@ const CachedAreasManager = require('./CachedAreasManager');
 const LoadingOverlay = require('./components/LoadingOverlay');
 
 /**
- * Translations
- */
-const dict = require('./translations');
-
-/**
  *
  * @type {*|exports|module.exports}
  */
@@ -129,7 +124,7 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        utils.createMainTab(exId, utils.__("Offline map", dict), utils.__("Block description", dict), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max);
 
         // Allowed zoom levels
         const minimalZoomLevel = 10;
@@ -302,7 +297,7 @@ module.exports = {
             onMapAreaRefresh(item) {
                 for (let key in this.state.existingCachedAreas) {
                     if (key === item.id) {
-                        if (confirm(utils.__("Refresh map area", dict) + "?")) {
+                        if (confirm(__("Refresh map area?"))) {
                             this.deleteMapArea(item).then(() => {
                                 this.checkAllURLsAreNotCached(item).then(result => {
                                     if (result === false) {
@@ -356,7 +351,7 @@ module.exports = {
             onMapAreaDelete(item) {
                 for (let key in this.state.existingCachedAreas) {
                     if (key === item.id) {
-                        if (confirm(utils.__("Delete map area", dict) + "?")) {
+                        if (confirm(__("Delete map area?"))) {
                             this.deleteMapArea(item).then(() => {
                                 cachedAreasManagerInstance.delete(item.id).then(() => {
                                     this.refreshStatus();
@@ -551,11 +546,11 @@ module.exports = {
             render() {
                 const showExtentButton = this.state.newAreaExtent ? (
                     <span>
-                        <button type="button" className="btn btn-primary" onClick={this.setExtent}>{utils.__("Redefine", dict)}</button>
-                        <button type="button" className="btn btn-primary" onClick={this.clearExtent}>{utils.__("Clear", dict)}</button>
+                        <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Redefine")}</button>
+                        <button type="button" className="btn btn-primary" onClick={this.clearExtent}>{__("Clear")}</button>
                     </span>
                 ) : (
-                    <button type="button" className="btn btn-primary" onClick={this.setExtent}>{utils.__("Define", dict)}</button>
+                    <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Define")}</button>
                 );
 
                 let zoomMinOptions = [];
@@ -573,7 +568,7 @@ module.exports = {
                 let loadingOverlay = false;
                 if (this.state.loading) {
                     loadingOverlay = (<LoadingOverlay tilesLoaded={this.state.tilesLoaded} tilesLeftToLoad={this.state.tilesLeftToLoad}>
-                        <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{utils.__("Store another", dict)}</button>
+                        <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{__("Store another")}</button>
                     </LoadingOverlay>);
                 }
 
@@ -596,13 +591,13 @@ module.exports = {
                             cursor: 'pointer',
                             textAlign: 'center'
                         }}>
-                            {utils.__("Please reload the page", dict)}
+                            {__("Please reload the page")}
                         </div>);
                     } else if (this.state.cacheIsAvailable === 0) {
                         cacheNotification = (<div className="alert alert-warning" role="alert" style={{
                             textAlign: 'center'
                         }}>
-                            {utils.__("Checking the cache status", dict)}
+                            {__("Checking the cache status")}
                         </div>);
                     }
 
@@ -617,7 +612,7 @@ module.exports = {
                                         data-parent="#layers"
                                         id="collapseOfflineMap1-trigger"
                                         href="#collapseOfflineMap1"
-                                        aria-expanded="true"><i className="material-icons">&#xE906;</i> {utils.__("Store map area", dict)}</a>
+                                        aria-expanded="true"><i className="material-icons">&#xE906;</i> {__("Store map area")}</a>
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap1" role="tabpanel">
@@ -627,15 +622,15 @@ module.exports = {
                                         <div className="row">
                                             <div className="col-lg-12">
                                                 <div>
-                                                    <h4>{utils.__("Extent", dict)} {required}</h4>
+                                                    <h4>{__("Extent")} {required}</h4>
                                                     {showExtentButton}
                                                 </div>
                                                 <div>
-                                                    <h4>{utils.__("Comment", dict)}</h4>
-                                                    <textarea className="form-control" id="offline-map-comment" onChange={this.setComment} placeholder={utils.__('Saved tiles will be used in...', dict)}></textarea>
+                                                    <h4>{__("Comment")}</h4>
+                                                    <textarea className="form-control" id="offline-map-comment" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
-                                                    <h4>{utils.__("Zoom", dict)} {required}</h4>
+                                                    <h4>{__("Zoom")} {required}</h4>
                                                     <div className="container-fluid">
                                                         <div className="row">
                                                             <div className="col-md-6">
@@ -649,7 +644,7 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <button type="button" className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')} onClick={this.onSave}>
-                                                        <i className="material-icons">&#xE906;</i> {utils.__("Store", dict)}
+                                                        <i className="material-icons">&#xE906;</i> {__("Store")}
                                                     </button>
                                                 </div>
                                             </div>
@@ -671,7 +666,7 @@ module.exports = {
                                         data-parent="#layers"
                                         id="collapseOfflineMap2-trigger"
                                         href="#collapseOfflineMap2"
-                                        aria-expanded="true"><i className="material-icons">&#xE896;</i> {utils.__("Stored map areas", dict)}</a>
+                                        aria-expanded="true"><i className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
@@ -692,16 +687,16 @@ module.exports = {
                         cursor: 'pointer',
                         textAlign: 'center'
                     }}>
-                        {utils.__("Please use the secured version of page (HTTPS enabled)", dict)}
+                        {__("Please use the secured version of page (HTTPS enabled)")}
                     </div>);
                 }
 
                 let availableSpaceNotification = (<div className="available-space-container">
-                    {utils.__("Available space", dict)}: {this.state.storageUsed}/{this.state.storageAvailable}
+                    {__("Available space")}: {this.state.storageUsed}/{this.state.storageAvailable}
                 </div>);
                 if (browser && browser.name === 'safari') {
                     availableSpaceNotification = (<div className="available-space-container">
-                        {utils.__("Available space can not be detected", dict)}
+                        {__("Available space can not be detected")}
                     </div>);
                 }
 
@@ -712,7 +707,7 @@ module.exports = {
                                 {/* Available storage notification */}
                                 {availableSpaceNotification}
 
-                                <p>{utils.__("Description", dict)}</p>
+                                <p>{__("OfflineMap instructions")}</p>
                             </div>
                         </div>
 

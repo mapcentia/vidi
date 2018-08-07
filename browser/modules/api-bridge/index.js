@@ -61,7 +61,7 @@ class APIBridge {
                                 if (error.responseJSON.message.message.ServiceException) {
                                     serverErrorMessage = error.responseJSON.message.message.ServiceException;
                                 } else if (error.responseJSON.message.code === 403) {
-                                    serverErrorMessage = __(`Not authorized to perform this action`);
+                                    serverErrorMessage = `Not authorized to perform this action`;
                                 } else if (typeof error.responseJSON.message.message === 'string') {
                                     serverErrorMessage = error.responseJSON.message.message;
                                 }
