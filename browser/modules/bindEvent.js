@@ -167,6 +167,14 @@ module.exports = module.exports = {
 
         });
 
+        // Linking the legend and layer tree
+        $(document).arrive('[data-gc2-id]', function () {
+            $(this).on("change", function (e) {
+              switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
+              e.stopPropagation();
+            });
+        });
+
         // Advanced info
         // =============
 
