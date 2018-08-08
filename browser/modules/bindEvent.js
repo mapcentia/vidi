@@ -170,8 +170,11 @@ module.exports = module.exports = {
         // Linking the legend and layer tree
         $(document).arrive('[data-gc2-id]', function () {
             $(this).on("change", function (e) {
-              switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
-              e.stopPropagation();
+                if (!$(this).data(`gc2-layer-type`)) {
+                    // legend control was changed, so the corresponding layerTree control has to be changed
+                    e.stopPropagation();
+                    $(`#layers`).find(`input[data-gc2-id="${$(this).data('gc2-id')}"]`).trigger('click');
+                }
             });
         });
 
@@ -311,20 +314,20 @@ module.exports = module.exports = {
         // =============
         backboneEvents.get().on("startLoading:layers", function (e) {
             console.log("Start loading: " + e);
-            doneB = doneL = false;
+            doneL = false;
             loadingL = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
             console.log("Start loading: " + e);
-            doneB = doneL = false;
+            doneB = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            console.log("Done loading: " + e);
+            console.log("Done loading: " + e, doneL, doneB, loadingL, loadingB);
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
@@ -342,7 +345,7 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading: " + e);
+            console.log("Done loading: " + e, doneL, doneB, loadingL, loadingB);
             doneB = true;
             loadingB = false;
             if ((doneL && doneB) || loadingL === false) {
