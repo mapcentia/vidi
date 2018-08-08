@@ -505,7 +505,7 @@ module.exports = {
                         e.getLatLng(),
                         {
                             icon: L.AwesomeMarkers.icon({
-                                    icon: 'arrows',
+                                    icon: 'arrows-alt',
                                     markerColor: 'blue',
                                     prefix: 'fa'
                                 }
@@ -523,7 +523,7 @@ module.exports = {
                             [v[1], v[0]],
                             {
                                 icon: L.AwesomeMarkers.icon({
-                                        icon: 'arrows',
+                                        icon: 'arrows-alt',
                                         markerColor: 'blue',
                                         prefix: 'fa'
                                     }
