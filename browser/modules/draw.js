@@ -88,7 +88,6 @@ module.exports = {
         // Bind events
         $("#draw-btn").on("click", () => {
             if ($("#draw-btn").is(':checked')) {
-                
                 me.control(true);
             } else {
                 me.control(false);
@@ -152,12 +151,6 @@ module.exports = {
     },
 
     off: () => {
-        // Clean up
-        try {
-            cloud.get().map.removeControl(drawControl);
-        } catch (e) {
-        }
-
         $("#draw-btn").prop("checked", false);
 
         // Unbind events
@@ -177,7 +170,12 @@ module.exports = {
             v();
         });
 
-        _self.control(false, false);
+        if (drawControl) {
+            cloud.get().map.removeControl(drawControl);
+        }
+
+        drawOn = false;
+        drawControl = false;
     },
 
     /**
@@ -239,7 +237,7 @@ module.exports = {
             });
 
             cloud.get().map.addControl(drawControl);
-            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-commenting-o" aria-hidden="true"></i>').css("background-image", "none");
+            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-comment" aria-hidden="true"></i>').css("background-image", "none");
 
             drawOn = true;
 
@@ -373,9 +371,7 @@ module.exports = {
             }, 2500);
         } else {
             if (triggerEvents) backboneEvents.get().trigger(`drawing:turnedOff`);
-
-            drawOn = false;
-            drawControl = false;
+            _self.off();
         }
     },
 
