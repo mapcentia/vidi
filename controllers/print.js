@@ -20,7 +20,7 @@ router.post('/api/print', function (req, response) {
 
     var wkhtmltopdf = require('wkhtmltopdf');
 
-    wkhtmltopdf.command = "/usr/local/bin/wkhtmltopdf";
+    wkhtmltopdf.command = "/root/wkhtmltox/bin/wkhtmltopdf";
     //wkhtmltopdf.command = "/home/mh/Downloads/wkhtmltox/bin/wkhtmltopdf";
 
     // TODO
@@ -30,8 +30,8 @@ router.post('/api/print', function (req, response) {
             return;
         }
         var url = '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !=="" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime+ '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
-        console.log("https://vidi.alexshumilov.ru" + url);
-        wkhtmltopdf("https://vidi.alexshumilov.ru" + url, {
+        console.log("http://127.0.0.1:3000" + url);
+        wkhtmltopdf("http://127.0.0.1:3000" + url, {
             pageSize: q.pageSize,
             orientation: (q.orientation === 'l') ? 'Landscape' : 'Portrait',
             B: 0,
