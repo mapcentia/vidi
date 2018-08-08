@@ -1576,7 +1576,7 @@ geocloud = (function () {
                             }
 
                             // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
-                            let existingLayer = [];
+                            var existingLayer = [];
                             for (var key in layers) {
                                 if (layers[key].layer.baseLayer === true) {
                                     if (existingLayer.indexOf(layers[key].name) === -1) {

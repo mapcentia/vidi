@@ -142,6 +142,8 @@ var _makeSearch = function () {
     }
 };
 
+let _self = false;
+
 /**
  *
  * @type {{set: module.exports.set, control: module.exports.control, init: module.exports.init, getSearchOn: module.exports.getSearchOn, getDrawLayer: module.exports.getDrawLayer, getBufferLayer: module.exports.getBufferLayer}}
@@ -156,6 +158,8 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
+
+        _self = this;
         return this;
     },
     /**
@@ -163,10 +167,7 @@ module.exports = {
      */
     control: function () {
         if ($("#advanced-info-btn").is(':checked')) {
-            backboneEvents.get().trigger("on:advancedInfo");
-
-            // Turn info click off
-            backboneEvents.get().trigger("off:infoClick");
+            backboneEvents.get().trigger("advancedInfo:turnedOn");
 
             $("#buffer").show();
 
@@ -250,10 +251,8 @@ module.exports = {
             }, 2500);
         } else {
             searchOn = false;
-            backboneEvents.get().trigger("off:advancedInfo");
-
-            // Turn info click on again
-            backboneEvents.get().trigger("on:infoClick");
+            _self.off();
+            backboneEvents.get().trigger("advancedInfo:turnedOff");
         }
     },
     /**

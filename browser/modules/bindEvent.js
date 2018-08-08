@@ -239,28 +239,19 @@ module.exports = module.exports = {
         // Extensions must implement a listener for the reset:all event
         // and clean up
         // ============================================================
-        backboneEvents.get().on("reset:all", function (ignoreModules = []) {
-            console.info("Resets all", ignoreModules);
+        backboneEvents.get().on("reset:all", function (ignoredModules = []) {
+            console.info("Resets all", ignoredModules);
 
             // Should be enabled by default
             backboneEvents.get().trigger("on:infoClick");
 
             // Should be disabled by default
-            if (ignoreModules.indexOf(`advancedInfo`) === -1) {
-                backboneEvents.get().trigger("off:advancedInfo");
-            }
-
-            if (ignoreModules.indexOf(`drawing`) === -1) {
-                backboneEvents.get().trigger("off:drawing");
-            }
-
-            if (ignoreModules.indexOf(`measurements`) === -1) {
-                backboneEvents.get().trigger("off:measurements");
-            }
-
-            if (ignoreModules.indexOf(`print`) === -1) {
-                backboneEvents.get().trigger("off:print");
-            }
+            let modulesToReset = [`advancedInfo`, `drawing`, `measurements`, `print`];
+            modulesToReset.map(moduleToReset => {
+                if (ignoredModules.indexOf(moduleToReset) === -1) {
+                    backboneEvents.get().trigger(`off:${moduleToReset}`);
+                }
+            });
         });
 
         backboneEvents.get().on("off:measurements", function () {
@@ -279,44 +270,24 @@ module.exports = module.exports = {
         });
 
         /**
-         * Processing turn on/off events for drawing
+         * Processing turn on/off events for modules
          */
-
-        // Drawing was turned on
-        backboneEvents.get().on("drawing:turnedOn", function () {
-            console.info(`Drawing was turned on`);
-            // Reset all modules except caller
-            backboneEvents.get().trigger(`reset:all`, [`drawing`]);
-            // Disable the infoClick
-            backboneEvents.get().trigger(`off:infoClick`);
-        });
-
-        // Drawing was turned off
-        backboneEvents.get().on("drawing:turnedOff", function () {
-            console.info(`Drawing was turned off`);
-            // Reset all modules except caller
-            backboneEvents.get().trigger(`reset:all`, [`drawing`]);
-        });
-
-
-        /**
-         * Processing turn on/off events for measurements
-         */
-
-        // Measurements were turned on
-        backboneEvents.get().on("measurements:turnedOn", function () {
-            console.info(`Measurements were turned on`);
-            // Reset all modules except caller
-            backboneEvents.get().trigger(`reset:all`, [`measurements`]);
-            // Disable the infoClick
-            backboneEvents.get().trigger(`off:infoClick`);
-        });
-
-        // Measurements were turned off
-        backboneEvents.get().on("measurements:turnedOff", function () {
-            console.info(`Measurements were turned off`);
-            // Reset all modules except caller
-            backboneEvents.get().trigger(`reset:all`, [`measurements`]);
+        let modulesToReactOnEachOtherChanges = [`measurements`, `drawing`, `advancedInfo`];
+        modulesToReactOnEachOtherChanges.map(module => {
+            backboneEvents.get().on(`${module}:turnedOn`, function () {
+                console.info(`${module} was turned on`);
+                // Reset all modules except caller
+                backboneEvents.get().trigger(`reset:all`, [module]);
+                // Disable the infoClick
+                backboneEvents.get().trigger(`off:infoClick`);
+            });
+    
+            // Drawing was turned off
+            backboneEvents.get().on(`${module}:turnedOff`, function () {
+                console.info(`${module} was turned off`);
+                // Reset all modules except caller
+                backboneEvents.get().trigger(`reset:all`, [module]);
+            });
         });
 
         // Info click
