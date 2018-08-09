@@ -6,17 +6,6 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("Application", () => {
-
-    it(`generate PDF`, async () => {
-        const page = await browser.newPage();
-        await page.goto(`https://vidi.alexshumilov.ru/app/aleksandrshumilov/public/?tmpl=print.tmpl&l=inline&h=none&px=1060&py=730&td=8th%20August%202018,%2014:48&d=8th%20August%202018&k=f943879f-f2be-4926-81ca-9b0fba161a05&t=&c=#osm/15/39.2765/-6.8216/v:public.test_line,public.test_poly,public.test`);
-        await helpers.sleep(5000);
-        await page.pdf({
-            path: './test.pdf',
-        });        
-    });
-
-
     it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
         const page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);

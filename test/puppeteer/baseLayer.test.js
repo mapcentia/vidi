@@ -72,8 +72,8 @@ describe('Base layers', () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-base-id="osm"]').find('input').trigger('click')`);
         await helpers.sleep(2000);
+        expect(osmWasRequested).to.be.true;
         expect(stamenTonerLiteWasRequested).to.be.true;
-        stamenTonerLiteWasRequested = false;
 
         await page.evaluate(`$('[data-gc2-side-by-side-base-id="stamenTonerLite"]').find('input').trigger('click')`);
         await helpers.sleep(1000);
