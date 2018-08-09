@@ -379,6 +379,14 @@ module.exports = {
      */
     create: (forcedState = false) => {
         layerTreeWasBuilt = true;
+
+        /*
+            Some layers are already shown, so they need to be checked in order
+            to stay in tune with the map. Those are different from the activeLayers,
+            which are defined externally via forcedState only.
+        */
+        let precheckedLayers = layers.getMapLayers();
+
         let result = new Promise((resolve, reject) => {
             layerTreeIsReady = false;
             if (forcedState) {
@@ -671,11 +679,24 @@ module.exports = {
                                     </button>`;
                                 }
 
+                                let checked = ``;
+                                // If activeLayers are set, then no need to sync with the map
+                                if (activeLayers.length === 0) {
+                                    if (precheckedLayers && precheckedLayers.length > 0) {
+                                        precheckedLayers.map(item => {
+                                            if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
+                                                checked = `checked="checked"`;
+                                            }
+                                        });
+                                    }
+                                }
+
                                 let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
                                     <div style="display: inline-block;">
                                         <div class="checkbox" style="width: 34px;">
                                             <label>
                                                 <input type="checkbox"
+                                                    ${checked}
                                                     class="js-show-layer-control"
                                                     id="${layer.f_table_name}"
                                                     data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
