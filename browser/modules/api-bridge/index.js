@@ -2,9 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = false;
-
-const DISPATCH_INTERVAL = 1000;
+const LOG = true;
 
 let singletoneInstance = false;
 

@@ -337,8 +337,8 @@ module.exports = {
                     }
                 });
 
-                switchLayer.init(layerName, false, true);
-                switchLayer.init(layerName, true, true);
+                switchLayer.init(layerName, false, true, true);
+                switchLayer.init(layerName, true, true, true);
             });
 
             accumulatedDiff = [];

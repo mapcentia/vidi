@@ -79,6 +79,10 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+
+        console.trace(`aaa`);
+        console.log(`###`, name, enable, doNotLegend, forceTileReload);
+
         let result = new Promise((resolve, reject) => {
             let store = layerTree.getStores();
 
