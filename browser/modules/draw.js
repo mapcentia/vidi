@@ -150,210 +150,228 @@ module.exports = {
         }());
     },
 
+    off: () => {
+        $("#draw-btn").prop("checked", false);
+
+        // Unbind events
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:drawstart');
+        cloud.get().map.off('draw:drawstop');
+        cloud.get().map.off('draw:editstart');
+        cloud.get().map.off('draw:editstop');
+        cloud.get().map.off('draw:deletestart');
+        cloud.get().map.off('draw:deletestop');
+        cloud.get().map.off('draw:deleted');
+        cloud.get().map.off('draw:created');
+        cloud.get().map.off('draw:edited');
+
+        // Call destruct functions
+        $.each(destructFunctions, function (i, v) {
+            v();
+        });
+
+        if (drawControl) {
+            cloud.get().map.removeControl(drawControl);
+        }
+
+        drawOn = false;
+        drawControl = false;
+    },
+
     /**
      * Adds drawings control to the map
      */
-    control: (enable = false) => {
+    control: (enable = false, triggerEvents = true) => {
         var me = _self;
 
-        if (enable) {
-            if (!drawControl) {
-                backboneEvents.get().trigger("on:drawing");
+        if (enable && !drawControl) {
+            if (triggerEvents) backboneEvents.get().trigger(`drawing:turnedOn`);
 
-                // Turn info click off
-                backboneEvents.get().trigger("off:infoClick");
+            L.drawLocal = require('./drawLocales/draw.js');
 
-                L.drawLocal = require('./drawLocales/draw.js');
-
-                drawControl = new L.Control.Draw({
-                    position: 'topright',
-                    draw: {
-                        polygon: {
-                            allowIntersection: true,
-                            shapeOptions: {
-                            },
-                            showArea: true
-                        },
-                        polyline: {
-                            metric: true,
-                            shapeOptions: {
-                            }
-                        },
-                        rectangle: {
-                            shapeOptions: {
-                            }
-                        },
-                        circle: {
-                            shapeOptions: {
-                            }
-                        },
-                        marker: true,
-                        circlemarker: true
-                    },
-
-                    edit: {
-                        featureGroup: drawnItems
-                    }
-
-                });
-
-                drawControl.setDrawingOptions({
+            drawControl = new L.Control.Draw({
+                position: 'topright',
+                draw: {
                     polygon: {
-                        icon: cloud.iconSmall
+                        allowIntersection: true,
+                        shapeOptions: {
+                        },
+                        showArea: true
                     },
                     polyline: {
-                        icon: cloud.iconSmall
+                        metric: true,
+                        shapeOptions: {
+                        }
                     },
                     rectangle: {
-                        icon: cloud.iconSmall
+                        shapeOptions: {
+                        }
                     },
                     circle: {
-                        icon: cloud.iconSmall
-                    }
-                });
-
-                cloud.get().map.addControl(drawControl);
-                $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-commenting-o" aria-hidden="true"></i>').css("background-image", "none");
-
-                drawOn = true;
-
-                // Unbind events
-                cloud.get().map.off('draw:created');
-                cloud.get().map.off('draw:drawstart');
-                cloud.get().map.off('draw:drawstop');
-                cloud.get().map.off('draw:editstart');
-                cloud.get().map.off('draw:editstop');
-                cloud.get().map.off('draw:deletestart');
-                cloud.get().map.off('draw:deletestop');
-                cloud.get().map.off('draw:deleted');
-                cloud.get().map.off('draw:created');
-                cloud.get().map.off('draw:edited');
-
-                // Bind events
-                cloud.get().map.on('draw:editstart', function (e) {
-                    editing = true;
-                });
-
-                cloud.get().map.on('draw:editstop', function (e) {
-                    editing = false;
-                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                });
-
-                cloud.get().map.on('draw:deletestart', function (e) {
-                    editing = true;
-                });
-
-                cloud.get().map.on('draw:deletestop', function (e) {
-                    editing = false;
-                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                });
-
-                cloud.get().map.on('draw:created', function (e) {
-
-                    var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
-
-                    if (type === 'marker') {
-                        drawLayer._vidi_marker = true;
-                    }
-
-                    if (type === 'circlemarker') {
-                        drawLayer._vidi_marker = true;
-
-                        var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
-                        if (text !== null) {
-                            drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
-                            drawLayer._vidi_marker_text = text;
-                        } else {
-                            drawLayer._vidi_marker_text = null;
+                        shapeOptions: {
                         }
+                    },
+                    marker: true,
+                    circlemarker: true
+                },
+
+                edit: {
+                    featureGroup: drawnItems
+                }
+
+            });
+
+            drawControl.setDrawingOptions({
+                polygon: {
+                    icon: cloud.iconSmall
+                },
+                polyline: {
+                    icon: cloud.iconSmall
+                },
+                rectangle: {
+                    icon: cloud.iconSmall
+                },
+                circle: {
+                    icon: cloud.iconSmall
+                }
+            });
+
+            cloud.get().map.addControl(drawControl);
+            $(".leaflet-draw-draw-circlemarker").append('<i class="fa fa-comment" aria-hidden="true"></i>').css("background-image", "none");
+
+            drawOn = true;
+
+            // Unbind events
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:drawstart');
+            cloud.get().map.off('draw:drawstop');
+            cloud.get().map.off('draw:editstart');
+            cloud.get().map.off('draw:editstop');
+            cloud.get().map.off('draw:deletestart');
+            cloud.get().map.off('draw:deletestop');
+            cloud.get().map.off('draw:deleted');
+            cloud.get().map.off('draw:created');
+            cloud.get().map.off('draw:edited');
+
+            // Bind events
+            cloud.get().map.on('draw:editstart', function (e) {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:editstop', function (e) {
+                editing = false;
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:deletestart', function (e) {
+                editing = true;
+            });
+
+            cloud.get().map.on('draw:deletestop', function (e) {
+                editing = false;
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+            });
+
+            cloud.get().map.on('draw:created', function (e) {
+
+                var type = e.layerType, area = null, distance = null, drawLayer = e.layer;
+
+                if (type === 'marker') {
+                    drawLayer._vidi_marker = true;
+                }
+
+                if (type === 'circlemarker') {
+                    drawLayer._vidi_marker = true;
+
+                    var text = prompt(__("Enter a text for the marker or cancel to add without text"), "");
+                    if (text !== null) {
+                        drawLayer.bindTooltip(text, {permanent: true}).on("click", () => {}).openTooltip();
+                        drawLayer._vidi_marker_text = text;
+                    } else {
+                        drawLayer._vidi_marker_text = null;
                     }
+                }
 
-                    drawnItems.addLayer(drawLayer);
-                    drawLayer.openTooltip();
+                drawnItems.addLayer(drawLayer);
+                drawLayer.openTooltip();
 
-                    me.setStyle(drawLayer, type);
+                me.setStyle(drawLayer, type);
 
-                    if (type !== 'circlemarker') {
-                        drawLayer.on('click', function (event) {
-                            me.bindPopup(event);
-                        });
-                    }
-
-                    if (type === "polygon" || type === "rectangle") {
-                        area = drawTools.getArea(drawLayer);
-                        //distance = getDistance(drawLayer);
-                    }
-                    if (type === 'polyline') {
-                        distance = drawTools.getDistance(drawLayer);
-
-                    }
-                    if (type === 'circle') {
-                        distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
-                    }
-
-                    drawLayer._vidi_type = "draw";
-
-                    drawLayer.feature = {
-                        properties: {
-                            type: type,
-                            area: area,
-                            distance: distance
-                        }
-                    };
-
-                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                    table.loadDataInTable();
-                });
-                cloud.get().map.on('draw:deleted', function (e) {
-                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                    table.loadDataInTable();
-                });
-                cloud.get().map.on('draw:edited', function (e) {
-
-                    $.each(e.layers._layers, function (i, v) {
-
-                        if (typeof v._mRadius !== "undefined") {
-                            v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
-                            v.updateMeasurements();
-
-                        }
-                        else if (typeof v._icon !== "undefined") {
-                        } else if (v.feature.properties.distance !== null) {
-                            v.feature.properties.distance = drawTools.getDistance(v);
-                            v.updateMeasurements();
-
-                        }
-                        else if (v.feature.properties.area !== null) {
-                            v.feature.properties.area = drawTools.getArea(v);
-                            v.updateMeasurements();
-
-                        }
+                if (type !== 'circlemarker') {
+                    drawLayer.on('click', function (event) {
+                        me.bindPopup(event);
                     });
+                }
 
-                    backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                    table.loadDataInTable();
+                if (type === "polygon" || type === "rectangle") {
+                    area = drawTools.getArea(drawLayer);
+                    //distance = getDistance(drawLayer);
+                }
+                if (type === 'polyline') {
+                    distance = drawTools.getDistance(drawLayer);
+
+                }
+                if (type === 'circle') {
+                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                }
+
+                drawLayer._vidi_type = "draw";
+
+                drawLayer.feature = {
+                    properties: {
+                        type: type,
+                        area: area,
+                        distance: distance
+                    }
+                };
+
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                table.loadDataInTable();
+            });
+            cloud.get().map.on('draw:deleted', function (e) {
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                table.loadDataInTable();
+            });
+            cloud.get().map.on('draw:edited', function (e) {
+
+                $.each(e.layers._layers, function (i, v) {
+
+                    if (typeof v._mRadius !== "undefined") {
+                        v.feature.properties.distance = L.GeometryUtil.readableDistance(v._mRadius, true);
+                        v.updateMeasurements();
+
+                    }
+                    else if (typeof v._icon !== "undefined") {
+                    } else if (v.feature.properties.distance !== null) {
+                        v.feature.properties.distance = drawTools.getDistance(v);
+                        v.updateMeasurements();
+
+                    }
+                    else if (v.feature.properties.area !== null) {
+                        v.feature.properties.area = drawTools.getArea(v);
+                        v.updateMeasurements();
+
+                    }
                 });
 
-                var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
-                po1.popover("show");
-                setTimeout(function () {
-                    po1.popover("hide");
-                }, 2500);
+                backboneEvents.get().trigger(`${MODULE_NAME}:update`);
+                table.loadDataInTable();
+            });
 
-                var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
-                po2.popover("show");
-                setTimeout(function () {
-                    po2.popover("hide");
-                }, 2500);
-            }
+            var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
+            po1.popover("show");
+            setTimeout(function () {
+                po1.popover("hide");
+            }, 2500);
+
+            var po2 = $('.leaflet-draw-section:eq(1)').popover({content: __("Use these tools for editing existing drawings."), placement: "left"});
+            po2.popover("show");
+            setTimeout(function () {
+                po2.popover("hide");
+            }, 2500);
         } else {
-            backboneEvents.get().trigger("off:drawing");
-
-            // Turn info click on again
-            backboneEvents.get().trigger("on:infoClick");
-
-            drawOn = false;
-            drawControl = false;
+            if (triggerEvents) backboneEvents.get().trigger(`drawing:turnedOff`);
+            _self.off();
         }
     },
 
@@ -592,32 +610,6 @@ module.exports = {
             l.setStyle({opacity: "0.0"});
             l.setStyle({fillOpacity: "0.0"});
         }
-    },
-
-    off: () => {
-        // Clean up
-        try {
-            cloud.get().map.removeControl(drawControl);
-        } catch (e) {
-        }
-
-        $("#draw-btn").prop("checked", false);
-        // Unbind events
-        cloud.get().map.off('draw:created');
-        cloud.get().map.off('draw:drawstart');
-        cloud.get().map.off('draw:drawstop');
-        cloud.get().map.off('draw:editstart');
-        cloud.get().map.off('draw:editstop');
-        cloud.get().map.off('draw:deletestart');
-        cloud.get().map.off('draw:deletestop');
-        cloud.get().map.off('draw:deleted');
-        cloud.get().map.off('draw:created');
-        cloud.get().map.off('draw:edited');
-
-        // Call destruct functions
-        $.each(destructFunctions, function (i, v) {
-            v();
-        });
     },
 
     /**

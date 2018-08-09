@@ -761,7 +761,6 @@ module.exports = {
 
                         $("#collapse" + base64GroupName).sortable({
                             axis: 'y',
-                            containment: 'parent',
                             stop: (event, ui) => {
                                 _self.calculateOrder();
                                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -785,7 +784,6 @@ module.exports = {
 
                 $(`#layers_list`).sortable({
                     axis: 'y',
-                    containment: 'parent',
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);

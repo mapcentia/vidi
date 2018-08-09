@@ -106,10 +106,10 @@ module.exports = module.exports = {
             }
 
             if (enable) {
-                // Only one layer at a time, so using the tile layer identifier
-                layers.incrementCountLoading(tileLayerId);
-
                 if (layerType === 'tile') {
+                    // Only one layer at a time, so using the tile layer identifier
+                    layers.incrementCountLoading(tileLayerId);
+
                     layerTree.setSelectorValue(name, 'tile');
 
                     layers.addLayer(name).then(() => {
@@ -148,6 +148,8 @@ module.exports = module.exports = {
                         });
                     });
                 } else {
+                    layers.incrementCountLoading(vectorLayerId);
+
                     layerTree.setSelectorValue(name, 'vector');
                     if (vectorLayerId in store) {
                         cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
