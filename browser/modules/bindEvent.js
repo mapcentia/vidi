@@ -144,7 +144,7 @@ module.exports = module.exports = {
     init: function (str) {
         apiBridgeInstance = APIBridgeSingletone();
 
-        var doneL, doneB, loadingL = false, loadingB = false;
+        var doneL = false, doneB = false, loadingL = 0, loadingB = 0;
 
         cloud.get().on("dragend", function () {
             pushState.init();
@@ -327,11 +327,12 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:layers", function (e) {
-            console.log("Done loading: " + e, doneL, doneB, loadingL, loadingB);
+            console.log("Done loading: " + e);
             if (layers.getCountLoading() === 0) {
                 layers.resetCount();
                 doneL = true;
                 loadingL = false;
+
                 if ((doneL && doneB) || loadingB === false) {
                     console.log("Setting timeout to " + window.vidiTimeout + "ms");
                     setTimeout(function () {
@@ -345,10 +346,11 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading: " + e, doneL, doneB, loadingL, loadingB);
+            console.log("Done loading: " + e);
             doneB = true;
             loadingB = false;
-            if ((doneL && doneB) || loadingL === false) {
+
+            if ((doneL && doneB) || loadingL === false || layers.getCountLoading() === 0) {
                 console.log("Setting timeout to " + window.vidiTimeout + "ms");
                 setTimeout(function () {
                     console.info("Layers all loaded B");
