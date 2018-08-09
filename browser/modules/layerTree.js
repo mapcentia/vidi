@@ -398,6 +398,9 @@ module.exports = {
 
             $("#layers").empty();
             _self.getLayersOrder().then(order => {
+
+                try {
+
                 let activeLayers = [];
                 if (forcedState) {
                     order = forcedState.order;
@@ -681,7 +684,7 @@ module.exports = {
 
                                 let checked = ``;
                                 // If activeLayers are set, then no need to sync with the map
-                                if (activeLayers.length === 0) {
+                                if (activeLayers && Array.isArray(activeLayers)) {
                                     if (precheckedLayers && precheckedLayers.length > 0) {
                                         precheckedLayers.map(item => {
                                             if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
@@ -844,6 +847,9 @@ module.exports = {
 
                     resolve();
                 }, 1000);
+
+            } catch(e) { console.log(e); };
+
             });
         });
 
