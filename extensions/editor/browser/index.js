@@ -155,19 +155,41 @@ module.exports = {
                             };
 
                             if (feature.meta.apiRecognitionStatus === 'pending') {
-                                content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Pending`)}
-                                    <span class="js-tooltip-content"></span>
-                                </div>`;
-
                                 tooltipSettings.className = `api-bridge-popup-warning`;
-                            } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+
                                 content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
                                     <span class="js-tooltip-content"></span>
                                 </div>`;
-
+                            } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
                                 tooltipSettings.className = `api-bridge-popup-error`;
+
+                                if (feature.meta.serverErrorType) {
+                                    if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
+                                        content = `<div class="js-feature-notification-tooltip">
+                                            <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                            <span class="js-tooltip-content"></span>
+                                        </div>`;
+        
+                                        tooltipSettings.className = `api-bridge-popup-error`;
+                                    } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
+                                        content = `<div class="js-feature-notification-tooltip">
+                                            <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
+                                            <span class="js-tooltip-content"></span>
+                                        </div>`;
+        
+                                       
+                                    } else {
+                                        throw new Error(`Invalid API error type value`);
+                                    }
+                                } else {
+                                    content = `<div class="js-feature-notification-tooltip">
+                                        <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                        <span class="js-tooltip-content"></span>
+                                    </div>`;
+    
+                                    tooltipSettings.className = `api-bridge-popup-error`;
+                                }
                             } else {
                                 throw new Error(`Invalid API recognition status value`);
                             }

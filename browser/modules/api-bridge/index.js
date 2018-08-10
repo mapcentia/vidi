@@ -2,7 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = true;
+const LOG = false;
 
 let singletoneInstance = false;
 
@@ -53,13 +53,14 @@ class APIBridge {
                     error: (error) => {
                         let itemWasReqectedByServer = false;
                         let serverErrorMessage = '';
+                        let serverErrorType = `REGULAR_ERROR`;
                         if (error.status === 500 && error.responseJSON) {
                             if (error.responseJSON.message && error.responseJSON.message.success === false) {
                                 itemWasReqectedByServer = true;
                                 if (error.responseJSON.message.message.ServiceException) {
                                     serverErrorMessage = error.responseJSON.message.message.ServiceException;
                                 } else if (error.responseJSON.message.code === 403) {
-                                    serverErrorMessage = `Not authorized to perform this action`;
+                                    serverErrorType = `AUTHORIZATION_ERROR`;
                                 } else if (typeof error.responseJSON.message.message === 'string') {
                                     serverErrorMessage = error.responseJSON.message.message;
                                 }
@@ -71,7 +72,8 @@ class APIBridge {
 
                             reject({
                                 rejectedByServer: true,
-                                serverErrorMessage
+                                serverErrorMessage,
+                                serverErrorType
                             });
                         } else {
                             if (LOG) console.warn('APIBridge: request failed');
@@ -287,6 +289,8 @@ class APIBridge {
                     if (LOG) console.log('APIBridge: skipped item was detected');
 
                     item.feature.features[0].meta.apiRecognitionStatus = 'rejected_by_server';
+                    if (item.serverErrorMessage) item.feature.features[0].meta.serverErrorMessage = item.serverErrorMessage;
+                    if (item.serverErrorType) item.feature.features[0].meta.serverErrorType = item.serverErrorType;
                 }
 
                 let feature = Object.assign({}, item.feature.features[0]);

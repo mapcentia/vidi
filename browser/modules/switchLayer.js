@@ -207,7 +207,7 @@ module.exports = module.exports = {
 
         let el = getLayerSwitchControl();
         if (el === false) {
-            console.error(`Unable to find layer switch control for layer ${name}`);
+            console.error(`Unable to find layer switch control for layer ${layerName}`);
         } else {
             el.prop('checked', enable);
             _self.update(doNotLegend, el);
@@ -249,7 +249,6 @@ module.exports = module.exports = {
         pushState.init();
 
         if (!doNotLegend) {
-            //console.trace(`aaa`);
             legend.init();
         }
     }
