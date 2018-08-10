@@ -189,7 +189,7 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
-        if (layerTreeWasBuilt === false) {
+        if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
         }
 
@@ -344,9 +344,9 @@ module.exports = {
                 switchLayer.init(layerName, false, true, true);
                 switchLayer.init(layerName, true, true, true);
             });
-
-            accumulatedDiff = [];
         }
+
+        accumulatedDiff = [];
     },
 
     /**
