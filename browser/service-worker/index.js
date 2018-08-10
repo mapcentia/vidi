@@ -1,7 +1,7 @@
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
-const LOG_FETCH_EVENTS = false;
+const LOG_FETCH_EVENTS = true;
 
 /**
  * Browser detection
@@ -104,7 +104,10 @@ let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
-    requested: 'bam.nr-data.net',
+    requested: 'bam.nr-data.net'
+}, {
+    regExp: true,
+    requested: 'gc2.io'   
 }];
 
 /**
@@ -252,16 +255,34 @@ self.addEventListener('activate', event => {
  * "message" event handler
  */
 self.addEventListener('message', (event) => {
-    if (event.data && event.data.force) {
+    if (`force` in event.data) {
+        if (event.data && event.data.force) {
 
-        if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');
+            if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');
 
-        forceIgnoredExtensionsCaching = true;
-    } else {
+            forceIgnoredExtensionsCaching = true;
+        } else {
 
-        if (LOG) console.log('Service worker: not forcing caching of files with ignored extensions');
+            if (LOG) console.log('Service worker: not forcing caching of files with ignored extensions');
 
-        forceIgnoredExtensionsCaching = false;
+            forceIgnoredExtensionsCaching = false;
+        }
+    } else if (`action` in event.data && `payload` in event.data) {
+        if  (event.data.action === `addUrlIgnoredForCaching`) {
+
+            if (LOG) console.log('Service worker: adding url that should not be cached', event.data);
+
+            if (event.data.payload && event.data.payload.length > 0) {
+                urlsIgnoredForCaching.push({
+                    regExp: true,
+                    requested: event.data.payload
+                });
+            } else {
+                throw new Error(`Invalid URL format`);
+            }
+        } else {
+            throw new Error(`Unrecognized action`);
+        }
     }
 });
 
@@ -329,7 +350,8 @@ self.addEventListener('fetch', (event) => {
     if (requestShouldBeBypassed) {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: bypassing the ${event.request.url} request`);
 
-        event.respondWith(fetch(event.request));
+        return false;
+        //return fetch(event.request);
     } else {
         event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
             let detectNoSlashPathRegExp = /\/app\/[\w]+\/[\w]+$/;

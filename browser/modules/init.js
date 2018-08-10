@@ -292,13 +292,33 @@ module.exports = {
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
-                console.log('Service worker registration succeeded:', registration);
+                console.log('Service worker registration succeeded');
             }).catch(error => {
                 console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });
         } else {
             console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
+
+        /**
+         * Talking to the service worker in test purposes
+         * 
+         * @todo Remove upon approbation
+         */
+        setTimeout(() => {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    action: `addUrlIgnoredForCaching`,
+                    payload: `jsonplaceholder.typicode`
+                });
+
+                setTimeout(() => {
+                    fetch('https://jsonplaceholder.typicode.com/todos/1').then(response => response.json()).then(json => console.log(json));
+                }, 3000);
+            } else {
+                throw new Error(`Unable to invoke the service worker controller`);
+            }
+        }, 3000);
 
         if (window.localforage) {
             localforage.getItem('appVersion').then(value => {

@@ -403,7 +403,6 @@ module.exports = module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on("refresh:meta", function (response) {
-
             meta.init()
 
                 .then(function () {

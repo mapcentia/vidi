@@ -160,7 +160,7 @@ module.exports = {
         "Error": "Error",
         "Cancel feature changes": "Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
-
+      
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
 
