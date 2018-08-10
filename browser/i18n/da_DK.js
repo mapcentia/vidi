@@ -160,6 +160,8 @@ module.exports = {
         "Tile": "Raster",
         "Vector": "Vektor",
         "Pending": "Afventer",
+        "Awaiting network": "Afventer netforbindelse",
+        "Awaiting login": "Afventer login",
         "Error": "Fejl",
         "Cancel feature changes": "Afvis ændringer",
         "This browser does not support Service Workers, some features may be unavailable": "Denne browser understøtter ikke Service Workers, nogle funktioner kan være utilgængelige.",
