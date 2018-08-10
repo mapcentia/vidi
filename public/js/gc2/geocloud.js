@@ -1177,7 +1177,7 @@ geocloud = (function () {
                             l.id = name;
                             break;
                         case "leaflet":
-                            l = new L.gridLayer.googleMutant(type);
+                            l = new L.gridLayer.googleMutant({type: type.toLowerCase()});
                             l.baseLayer = true;
                             lControl.addBaseLayer(l, prettyName);
                             l.id = name;
