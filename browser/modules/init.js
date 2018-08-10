@@ -300,6 +300,26 @@ module.exports = {
             console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
 
+        /**
+         * Talking to the service worker in test purposes
+         * 
+         * @todo Remove upon approbation
+         */
+        setTimeout(() => {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    action: `addUrlIgnoredForCaching`,
+                    payload: `jsonplaceholder.typicode`
+                });
+
+                setTimeout(() => {
+                    fetch('https://jsonplaceholder.typicode.com/todos/1').then(response => response.json()).then(json => console.log(json));
+                }, 3000);
+            } else {
+                throw new Error(`Unable to invoke the service worker controller`);
+            }
+        }, 3000);
+
         if (window.localforage) {
             localforage.getItem('appVersion').then(value => {
                 if (value === null) {
