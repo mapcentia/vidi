@@ -170,15 +170,12 @@ module.exports = {
                                             <i class="fa fa-exclamation"></i> ${__(`Error`)}
                                             <span class="js-tooltip-content"></span>
                                         </div>`;
-        
-                                        tooltipSettings.className = `api-bridge-popup-error`;
                                     } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
+                                        tooltipSettings.className = `api-bridge-popup-warning`;
                                         content = `<div class="js-feature-notification-tooltip">
                                             <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
                                             <span class="js-tooltip-content"></span>
                                         </div>`;
-        
-                                       
                                     } else {
                                         throw new Error(`Invalid API error type value`);
                                     }
@@ -187,8 +184,6 @@ module.exports = {
                                         <i class="fa fa-exclamation"></i> ${__(`Error`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
-    
-                                    tooltipSettings.className = `api-bridge-popup-error`;
                                 }
                             } else {
                                 throw new Error(`Invalid API recognition status value`);
