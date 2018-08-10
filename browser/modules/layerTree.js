@@ -399,6 +399,7 @@ module.exports = {
             $("#layers").empty();
             _self.getLayersOrder().then(order => {
 
+                // @todo Remove try/catch
                 try {
 
                 let activeLayers = [];
@@ -684,8 +685,8 @@ module.exports = {
 
                                 let checked = ``;
                                 // If activeLayers are set, then no need to sync with the map
-                                if (activeLayers && Array.isArray(activeLayers)) {
-                                    if (precheckedLayers && precheckedLayers.length > 0) {
+                                if (!forcedState) {
+                                    if (precheckedLayers && Array.isArray(precheckedLayers)) {
                                         precheckedLayers.map(item => {
                                             if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
                                                 checked = `checked="checked"`;
