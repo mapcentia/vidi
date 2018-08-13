@@ -79,6 +79,35 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+        let metaData = meta.getMetaDataLatestLoaded();
+        for (let j = 0; j < metaData.data.length; j++) {
+            if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === name.replace('v:', '')) {
+                let layer = metaData.data[j];
+
+                let isVectorLayer = true;
+                let isTileLayer = true;
+                if (layer && layer.meta) {
+                    let parsedMeta = JSON.parse(layer.meta);
+                    if (parsedMeta.vidi_layer_type) {
+                        if (parsedMeta.vidi_layer_type === 't') isVectorLayer = false;
+                        if (parsedMeta.vidi_layer_type === 'v') isTileLayer = false;
+                    }
+                }
+
+                if (isVectorLayer === false && name.startsWith('v:')) {
+                    name = name.replace(`v:`, ``);
+                    console.log(`No vector view for ${name}, requesting the tile one`);
+                }
+    
+                if (isTileLayer === false && !name.startsWith('v:')) {
+                    name = `v:` + name;
+                    console.log(`No tile view for ${name}, requesting the vector one`);
+                }
+
+                break;
+            }
+        }
+
         let result = new Promise((resolve, reject) => {
             let store = layerTree.getStores();
 
