@@ -167,14 +167,31 @@ module.exports = module.exports = {
 
         });
 
-        // Linking the legend and layer tree
-        $(document).arrive('[data-gc2-id]', function () {
+        /**
+         * Triggered when the layer control is changed in any module
+         */
+        $(document).arrive('[data-gc2-id]', function (e, data) {
             $(this).on("change", function (e) {
-                if (!$(this).data(`gc2-layer-type`)) {
-                    // legend control was changed, so the corresponding layerTree control has to be changed
-                    e.stopPropagation();
-                    $(`#layers`).find(`input[data-gc2-id="${$(this).data('gc2-id')}"]`).trigger('click');
+                let gc2Id = $(this).data('gc2-id');
+                let applicationWideControls = $(`*[data-gc2-id="${gc2Id.replace('v:', '')}"]`);
+                applicationWideControls.prop('checked', $(this).context.checked);
+
+                let prefix = '';
+                let doNotLegend = false;
+                if ($(this).data(`gc2-layer-type`)) {
+                    if ($(e.target).data('gc2-layer-type') === 'vector') {
+                        prefix = 'v:';
+                    }
+
+                    if (data) {
+                        doNotLegend = data.doNotLegend;
+                    }
                 }
+
+                switchLayer.init(prefix + gc2Id, $(e.target).prop(`checked`), doNotLegend);
+                e.stopPropagation();
+
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
             });
         });
 
@@ -380,7 +397,6 @@ module.exports = module.exports = {
                 $(this).button('loading');
                 $("#get-print-fieldset").prop("disabled", true);
             }
-
         });
 
         backboneEvents.get().on("off:print", function () {
