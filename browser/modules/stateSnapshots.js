@@ -427,7 +427,7 @@ module.exports = {
                     let importButton = false;
                     if (local && this.state.authenticated) {
                         importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)} style={buttonStyle}>
-                            <i className="material-icons">person_add</i>
+                            <i title={__(`Add local state snapshot to user's ones`)} className="material-icons">person_add</i>
                         </button>);
                     }
 
@@ -491,7 +491,7 @@ module.exports = {
                 };
 
                 let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    {__(`No snapshots`)}
+                    {__(`No local snapshots`)}
                 </div>);
 
                 let importAllIsDisabled = true;
@@ -505,7 +505,7 @@ module.exports = {
                 }
 
                 let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                    {__(`No snapshots`)}
+                    {__(`No user snapshots`)}
                 </div>);
                 if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
                     userOwnerSnapshots = [];
