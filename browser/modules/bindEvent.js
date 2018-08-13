@@ -172,10 +172,6 @@ module.exports = module.exports = {
          */
         $(document).arrive('[data-gc2-id]', function (e, data) {
             $(this).on("change", function (e) {
-                let gc2Id = $(this).data('gc2-id');
-                let applicationWideControls = $(`*[data-gc2-id="${gc2Id.replace('v:', '')}"]`);
-                applicationWideControls.prop('checked', $(this).context.checked);
-
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {

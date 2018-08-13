@@ -108,6 +108,10 @@ module.exports = module.exports = {
             }
         }
 
+        let gc2Id = name.replace('v:', '');
+        let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
+        applicationWideControls.prop('checked', enable);
+
         let result = new Promise((resolve, reject) => {
             let store = layerTree.getStores();
 
