@@ -19,7 +19,6 @@ puppeteer.launch({
 router.post('/api/print', function (req, response) {
     req.setTimeout(0); // no timeout
     var q = req.body;
-    console.log(q);
     var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -32,9 +31,9 @@ router.post('/api/print', function (req, response) {
             return;
         }
 
-        let host = `https://vidi.alexshumilov.ru`;
+        let host = q.applicationHost;
         var url = host + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !=="" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime+ '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
-        console.log(url);
+        console.log(`Printing ` + url);
 
         const page = await browser.newPage();
         page.on('console', msg => {
