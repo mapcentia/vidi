@@ -13,17 +13,13 @@ import {render} from 'react-dom';
 import store from './src/store';
 import App from './src/app';
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var cloud;
+const CompactLayerTree = require('./components/CompactLayerTree');
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var utils;
+var cloud, meta, backboneEvents, utils;
 
 /**
  *
@@ -46,6 +42,8 @@ module.exports = {
      */
     set: function (o) {
         cloud = o.cloud;
+        meta = o.meta;
+        backboneEvents = o.backboneEvents;
         utils = o.utils;
         return this;
     },
@@ -54,7 +52,7 @@ module.exports = {
      *
      */
     init: function () {
-        utils.createMainTab(extensionId, utils.__('KeplerGL', dict), utils.__("KeplerGL", dict), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(extensionId, 'KeplerGL', 'KeplerGL', require('./../../../browser/modules/height')().max);
 
         /**
          *
@@ -62,7 +60,9 @@ module.exports = {
         class KeplerGLComponent extends React.Component {
             constructor(props) {
                 super(props);
-                this.state = {};
+                this.state = {
+                    layers: false
+                };
 
                 this.openModal = this.openModal.bind(this);
             }
@@ -71,7 +71,12 @@ module.exports = {
              *
              */
             componentDidMount() {
-                this.setState({});
+                let _self = this;
+                backboneEvents.get().on(`ready:meta`, () => {
+                    _self.setState({
+                        layers: meta.getMetaData()
+                    });
+                });
             }
 
             openModal(e) {
@@ -102,17 +107,14 @@ module.exports = {
             render() {
                 return (<div role="tabpanel">
                     <div>
+                        <CompactLayerTree layers={this.state.layers}/>
                     </div>
                     <div>
                         <a className="btn btn-block" id="keplergl" href="#" data-toggle="modal" data-target="#keplergl-modal" onClick={this.openModal}>
-                            <i className="fa fa-columns" aria-hidden="true"></i> {utils.__(`Open KeplerGL in modal`, dict)}
+                            <i className="fa fa-columns" aria-hidden="true"></i> {__(`Open KeplerGL in modal`)}
                         </a>
                     </div>
                 </div>);
-
-                /*
-     
-                */
             }
         }
 
