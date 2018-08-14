@@ -31,11 +31,12 @@ router.post('/api/print', function (req, response) {
             return;
         }
 
-        let host = q.applicationHost;
+        let host = q.applicationHost.replace(`https://`, `http://`);
         var url = host + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !=="" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime+ '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log(`Printing ` + url);
 
         const page = await browser.newPage();
+        await page.emulateMedia('screen');
         page.on('console', msg => {
             if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                 console.log('App was loaded, generating PDF');
@@ -44,11 +45,12 @@ router.post('/api/print', function (req, response) {
                         path: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`,
                         landscape: (q.orientation === 'l'),
                         format: q.pageSize,
+                        printBackground: true
                     }).then(() => {
                         console.log('Done');
                         response.send({ success: true, key, url });
                     });
-                }, 1000);
+                }, 2000);
             }
         });
 
