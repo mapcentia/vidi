@@ -46,8 +46,6 @@
     "reactify": "^1.1.1"
   },
   "dependencies": {
-    "@material-ui/core": "^1.4.3",
-    "@material-ui/icons": "^2.0.1",
     "@turf/turf": "^5.1.6",
     "arrive": "^2.3.1",
     "async": "^2.6.0",
@@ -90,8 +88,8 @@
     "pg-escape": "^0.2.0",
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
-    "puppeteer": "^1.4.0",
-    "react": "^16.3.0",
+    "puppeteer": "^1.7.0",
+    "react": "^15.4.2",
     "react-addons": "^0.9.1-deprecated",
     "react-dom": "^16.3.3",
     "react-dropzone": "^4.2.11",
