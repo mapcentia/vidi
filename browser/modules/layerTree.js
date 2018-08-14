@@ -402,10 +402,6 @@ module.exports = {
 
             $("#layers").empty();
             _self.getLayersOrder().then(order => {
-
-                // @todo Remove try/catch
-                try {
-
                 let activeLayers = [];
                 if (forcedState) {
                     order = forcedState.order;
@@ -820,7 +816,7 @@ module.exports = {
                                     $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                 }
                             } else {
-                                $(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('change', [{doNotLegend: true}]);
+                                $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
                             }
                         });
 
@@ -832,9 +828,6 @@ module.exports = {
 
                     resolve();
                 }, 1000);
-
-            } catch(e) { console.log(e); };
-
             });
         });
 
@@ -883,6 +876,7 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        lastStatistics = false;
         if (newState === false) {
             newState = { order: false };
         } else if (newState.order && newState.order === 'false') {
