@@ -407,6 +407,7 @@ module.exports = {
         recEdit.editing.enable();
 
         data = {
+            applicationHost: window.location.origin,
             db: db,
             schema: schema,
             draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,

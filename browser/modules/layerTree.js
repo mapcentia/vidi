@@ -762,27 +762,7 @@ module.exports = {
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                                     backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                 });
-
-                                $(layerControlRecord).find('input[data-gc2-id]').first().on(`change`, (e, data) => {
-                                    if (data) {
-                                        if ($(e.target).prop(`checked`)) {
-                                            $(e.target).prop(`checked`, false);
-                                        } else {
-                                            $(e.target).prop(`checked`, true);
-                                        }
-                                    }
-
-                                    let prefix = '';
-                                    if ($(e.target).data('gc2-layer-type') === 'vector') {
-                                        prefix = 'v:';
-                                    }
-                
-                                    switchLayer.init(prefix + $(e.target).data('gc2-id'), $(e.target).prop(`checked`), (data ? data.doNotLegend : false));
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-
-                                    e.stopPropagation();
-                                });
-
+                                
                                 $("#collapse" + base64GroupName).append(layerControlRecord);
                                 l.push({});
                             }
