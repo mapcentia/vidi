@@ -539,7 +539,7 @@ module.exports = module.exports = {
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
             metaDataKeys = meta.getMetaDataKeys(),
-            visibleLayers = cloud.getVisibleLayers().split(";");
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
         }
