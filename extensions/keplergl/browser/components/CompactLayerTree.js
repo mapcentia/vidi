@@ -3,21 +3,29 @@ const React = require('react');
 /**
  * Compact layer tree component
  */
-
 class CompactLayerTree extends React.Component {
     constructor(props) {
         super(props);
     }
 
-    handleChange({target}){
+    getLayersCheckedForImport() {
+        let ids = [];
+        $(`[data-compact-layer-tree-gc2-id]:checked`).each((index, item) => {
+            ids.push($(item).data(`compact-layer-tree-gc2-id`));
+        });
 
-        console.log($(target).data(`compact-layer-tree-gc2-id`));
+        return ids;
+    }
 
+    handleChange({target}) {
         if (target.checked){
            target.removeAttribute('checked');
         } else {
            target.setAttribute('checked', true);
         }
+
+        console.log(this.getLayersCheckedForImport());
+
     }
 
     render() {
@@ -56,7 +64,7 @@ class CompactLayerTree extends React.Component {
                             <div style={{display: 'inline-block', float: 'right'}}>
                                 <div className="checkbox">
                                     <label>
-                                        <input type="checkbox" data-compact-layer-tree-gc2-id={tableId} onClick={this.handleChange} /> {__('View in KeplerGL')}
+                                        <input type="checkbox" data-compact-layer-tree-gc2-id={tableId} onClick={this.handleChange.bind(this)} /> {__('View in KeplerGL')}
                                     </label>
                                 </div>
                             </div>
