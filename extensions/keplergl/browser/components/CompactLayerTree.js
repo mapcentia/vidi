@@ -9,6 +9,17 @@ class CompactLayerTree extends React.Component {
         super(props);
     }
 
+    handleChange({target}){
+
+        console.log($(target).data(`compact-layer-tree-gc2-id`));
+
+        if (target.checked){
+           target.removeAttribute('checked');
+        } else {
+           target.setAttribute('checked', true);
+        }
+    }
+
     render() {
         let layersControl = (<p>{__(`No layers available`)}</p>);
 
@@ -24,7 +35,6 @@ class CompactLayerTree extends React.Component {
                 }
             }
 
-            let layerList = [];
             groups.map(groupName => {
                 let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
                 let groupLayers = [];
@@ -46,7 +56,7 @@ class CompactLayerTree extends React.Component {
                             <div style={{display: 'inline-block', float: 'right'}}>
                                 <div className="checkbox">
                                     <label>
-                                        <input type="checkbox"/> {__('View in KeplerGL')}
+                                        <input type="checkbox" data-compact-layer-tree-gc2-id={tableId} onClick={this.handleChange} /> {__('View in KeplerGL')}
                                     </label>
                                 </div>
                             </div>
