@@ -156,18 +156,73 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
-        "Force offline mode": "# Force offline mode",
-        "Tile": "# Tile",
-        "Vector": "# Vector",
-        "Pending": "# Pending",
-        "Error": "# Error",
-        "Cancel feature changes": "# Cancel feature changes",
-        "This browser does not support Service Workers, some features may be unavailable": "# This browser does not support Service Workers, some features may be unavailable",
-    
+        "Force offline mode": "Tving offline tilstand",
+        "Tile": "Raster",
+        "Vector": "Vektor",
+        "Pending": "Afventer",
+        "Error": "Fejl",
+        "Cancel feature changes": "Afvis ændringer",
+        "This browser does not support Service Workers, some features may be unavailable": "Denne browser understøtter ikke Service Workers, nogle funktioner kan være utilgængelige.",
+      
         // APIBridge
-        "Not authorized to perform this action": "# Not authorized to perform this action",
+        "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
         //Editor
-        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
+        "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
+
+        // OfflineMap
+        "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
+        "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
+        "Extent": "kortområde",
+        "Stored map areas": "Gemte kortområder",
+        "Store another": "Gem et andet område",
+        "Please use the secured version of page (HTTPS enabled)": "Please use the secured version of page (HTTPS enabled)",
+        "Show extent": "Vis kortområde",
+        "Hide extent": "Gem kortområde",
+        "Delete map area?": "Slet kortområde?",
+        "Refresh map area?": "Opdater kortområde?",
+        "No map areas have been stored yet": "Ingen kortområder er gemt endnu",
+        "Saved tiles will be used in...": "# Saved tiles will be used in...",
+        "Processing tiles": "Processerer kort-fliser ",
+        "Please reload the page": "Genindlæs venligst siden",
+        "Checking the cache status": "Tjekker cache status",
+        "of": "af",
+        "Date": "Dato",
+        "Done": "Færdig",
+        "Delete": "Slet",
+        "Refresh": "Opdater",
+        "Actions": "Handlinger",
+        "Store": "Gem",
+        "Available space": "Ledig plads",
+        "Available space can not be detected": "Ingen ledig plads",
+        "Offline map": "Offline kort",
+        "Clear": "Ryd",
+        "Zoom": "Zoom",
+        "Define": "Udvælg område",
+        "Redefine": "Udvælg område igen",
+        "Show on map": "Vis på kort",
+        "Store map area": "Gem kortområde",
+
+        //StateSnapshots
+        "State snapshots": "Tilstande",
+        "Local snapshots": "Lokal gemte tilstande",
+        "User snapshots": "Bruger gemte tilstande",
+        "No local snapshots": "Ingen lokale tilstande",
+        "No user snapshots": "Ingen bruger tilstande",
+        "Update state snapshot with current application state": "Opdater tilstand",
+        "Apply state snapshot": "Genskab tilstand",
+        "Delete state snapshot": "Slet tilstand",
+        "Add local state snapshots to user's ones": "Overfør lokale tilstande til bruger",
+        "Add local state snapshot to user's ones": "Overfør lokal tilstand til bruger",
+        "copy link": "Kopier link",
+        "New title": "Ny titel",
+        "StateSnapshots description": "Gem, genskab og del kortets tilstand. En tilstand indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist samt dine tegninger. Du kan dele en tilstand ved at dele den viste URL. Hvis du ikke er logget ind, vil tilstande blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre tilstande fra browser til login",
+
+        //Measurements
+        "Expand measurements control": "Aktiver måleværktøj",
+        "Collapse measurements control": "Deaktiver måleværktøj",
+        "Measure the distance": "Mål distance",
+        "Measure the area": "Mål areal",
+        "Delete all measurements": "Slet alle målinger"
     }
 };

@@ -776,7 +776,33 @@ geocloud = (function () {
             }
             throw new Error('Control doesn\'t have any active base layer!')
         }
-        //ol2, ol3 and leaflet
+
+        /**
+         * Returns both tile and vector visible layers 
+         */
+        this.getAllTypesOfVisibleLayers = function (getBaseLayers) {
+            getBaseLayers = (getBaseLayers === true) ? true : false;
+            var layerArr = [], i;
+            switch (MAPLIB) {
+                case "ol2":
+                    console.error(`Not implemented yet for OpenLayers 2`);
+                    break;
+                case "ol3":
+                    console.error(`Not implemented yet for OpenLayers 3`);
+                    break;
+                case "leaflet":
+                    var layers = this.map._layers;
+                    for (var key in layers) {
+                        if (layers.hasOwnProperty(key)) {
+                            if ((layers[key].baseLayer === getBaseLayers || layers[key].baseLayer === false || layers[key].baseLayer === null) && ('id' in layers[key])) {
+                                layerArr.push(layers[key].id.replace('v:', ''));
+                            }
+                        }
+                    }
+                    break;
+            }
+            return layerArr.join(";");
+        }
         this.getVisibleLayers = function (getBaseLayers) {
             getBaseLayers = (getBaseLayers === true) ? true : false;
             var layerArr = [], i;
@@ -1576,7 +1602,7 @@ geocloud = (function () {
                             }
 
                             // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
-                            let existingLayer = [];
+                            var existingLayer = [];
                             for (var key in layers) {
                                 if (layers[key].layer.baseLayer === true) {
                                     if (existingLayer.indexOf(layers[key].name) === -1) {

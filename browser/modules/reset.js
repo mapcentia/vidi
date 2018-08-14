@@ -30,7 +30,7 @@ module.exports = {
         var curUrl = window.location.href,
             newUrl = curUrl.split("#")[0];
 
-        if (window.confirm(__("Do you really want to reset the map?"))) {
+        if (window.confirm(__(`Do you really want to reset the map?`))) {
             state.resetState().then(() => {
                 location.href = newUrl;
             });

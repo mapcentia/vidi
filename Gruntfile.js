@@ -54,7 +54,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
                         'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
-                        'public/css/jasny-bootstrap.css',
+                        //'public/css/jasny-bootstrap.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -193,6 +193,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
                         'public/js/lib/jquery/jquery.js',
+                        'public/js/lib/jquery-ui/jquery-ui.min.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',

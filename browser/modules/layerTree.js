@@ -189,7 +189,7 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
-        if (layerTreeWasBuilt === false) {
+        if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
         }
 
@@ -276,14 +276,18 @@ module.exports = {
                             let copiedItemProperties = Object.assign({}, item.feature.features[0].properties);
                             delete copiedItemProperties.gid;
 
+                            let errorMessage = item.serverErrorMessage;
+                            if (item.serverErrorType && item.serverErrorType === `AUHTORIZATION_ERROR`) {
+                                errorMessage = `Not authorized to perform this action`;
+                            }
+
                             let errorRecord = $(`<div>
                                 <span class="label label-danger"><i style="color: black;" class="fa fa-exclamation"></i></span>
                                 <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
                                     <i style="color: black;" class="fa fa-map-marker"></i>
                                 </button>
-                                <span style="color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</span>
-                                <br/>
-                                <div style="overflow: scroll;font-size: 12px; color: darkgray;">${item.serverErrorMessage}</div>
+                                <div style="overflow-x: scroll; font-size: 12px; color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</div>
+                                <div style="overflow-x: scroll; font-size: 12px; color: darkgray;">${errorMessage}</div>
                             </div>`);
 
                             $(errorRecord).find('.js-center-map-on-item').click((event) => {
@@ -337,12 +341,12 @@ module.exports = {
                     }
                 });
 
-                switchLayer.init(layerName, false, true);
-                switchLayer.init(layerName, true, true);
+                switchLayer.init(layerName, false, true, true);
+                switchLayer.init(layerName, true, true, true);
             });
-
-            accumulatedDiff = [];
         }
+
+        accumulatedDiff = [];
     },
 
     /**
@@ -379,6 +383,14 @@ module.exports = {
      */
     create: (forcedState = false) => {
         layerTreeWasBuilt = true;
+
+        /*
+            Some layers are already shown, so they need to be checked in order
+            to stay in tune with the map. Those are different from the activeLayers,
+            which are defined externally via forcedState only.
+        */
+        let precheckedLayers = layers.getMapLayers();
+
         let result = new Promise((resolve, reject) => {
             layerTreeIsReady = false;
             if (forcedState) {
@@ -390,6 +402,10 @@ module.exports = {
 
             $("#layers").empty();
             _self.getLayersOrder().then(order => {
+
+                // @todo Remove try/catch
+                try {
+
                 let activeLayers = [];
                 if (forcedState) {
                     order = forcedState.order;
@@ -671,11 +687,24 @@ module.exports = {
                                     </button>`;
                                 }
 
+                                let checked = ``;
+                                // If activeLayers are set, then no need to sync with the map
+                                if (!forcedState) {
+                                    if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                                        precheckedLayers.map(item => {
+                                            if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
+                                                checked = `checked="checked"`;
+                                            }
+                                        });
+                                    }
+                                }
+
                                 let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
                                     <div style="display: inline-block;">
                                         <div class="checkbox" style="width: 34px;">
                                             <label>
                                                 <input type="checkbox"
+                                                    ${checked}
                                                     class="js-show-layer-control"
                                                     id="${layer.f_table_name}"
                                                     data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
@@ -733,27 +762,7 @@ module.exports = {
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                                     backboneEvents.get().trigger(`layerTree:activeLayersChange`);
                                 });
-
-                                $(layerControlRecord).find('input[data-gc2-id]').first().on(`change`, (e, data) => {
-                                    if (data) {
-                                        if ($(e.target).prop(`checked`)) {
-                                            $(e.target).prop(`checked`, false);
-                                        } else {
-                                            $(e.target).prop(`checked`, true);
-                                        }
-                                    }
-
-                                    let prefix = '';
-                                    if ($(e.target).data('gc2-layer-type') === 'vector') {
-                                        prefix = 'v:';
-                                    }
-                
-                                    switchLayer.init(prefix + $(e.target).data('gc2-id'), $(e.target).prop(`checked`), (data ? data.doNotLegend : false));
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-
-                                    e.stopPropagation();
-                                });
-
+                                
                                 $("#collapse" + base64GroupName).append(layerControlRecord);
                                 l.push({});
                             }
@@ -761,7 +770,6 @@ module.exports = {
 
                         $("#collapse" + base64GroupName).sortable({
                             axis: 'y',
-                            containment: 'parent',
                             stop: (event, ui) => {
                                 _self.calculateOrder();
                                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -785,7 +793,6 @@ module.exports = {
 
                 $(`#layers_list`).sortable({
                     axis: 'y',
-                    containment: 'parent',
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -825,6 +832,9 @@ module.exports = {
 
                     resolve();
                 }, 1000);
+
+            } catch(e) { console.log(e); };
+
             });
         });
 

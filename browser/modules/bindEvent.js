@@ -15,6 +15,12 @@ var draw;
  *
  * @type {*|exports|module.exports}
  */
+var measurements;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 var advancedInfo;
 
 /**
@@ -117,6 +123,7 @@ var isStarted = false;
 module.exports = module.exports = {
     set: function (o) {
         draw = o.draw;
+        measurements = o.measurements;
         advancedInfo = o.advancedInfo;
         cloud = o.cloud;
         print = o.print;
@@ -137,7 +144,7 @@ module.exports = module.exports = {
     init: function (str) {
         apiBridgeInstance = APIBridgeSingletone();
 
-        var doneL, doneB, loadingL = false, loadingB = false;
+        var doneL = false, doneB = false, loadingL = 0, loadingB = 0;
 
         cloud.get().on("dragend", function () {
             pushState.init();
@@ -158,6 +165,30 @@ module.exports = module.exports = {
             $(".fade-then-dragging").animate({opacity: "1"}, 200);
             $(".fade-then-dragging").css("pointer-events", "all");
 
+        });
+
+        /**
+         * Triggered when the layer control is changed in any module
+         */
+        $(document).arrive('[data-gc2-id]', function (e, data) {
+            $(this).on("change", function (e) {
+                let prefix = '';
+                let doNotLegend = false;
+                if ($(this).data(`gc2-layer-type`)) {
+                    if ($(e.target).data('gc2-layer-type') === 'vector') {
+                        prefix = 'v:';
+                    }
+
+                    if (data) {
+                        doNotLegend = data.doNotLegend;
+                    }
+                }
+
+                switchLayer.init(prefix + $(e.target).data(`gc2-id`), $(e.target).prop(`checked`), doNotLegend);
+                e.stopPropagation();
+
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
         });
 
         // Advanced info
@@ -224,22 +255,55 @@ module.exports = module.exports = {
         // Extensions must implement a listener for the reset:all event
         // and clean up
         // ============================================================
-        backboneEvents.get().on("reset:all", function () {
-            console.info("Resets all");
+        backboneEvents.get().on("reset:all", function (ignoredModules = []) {
+            console.info("Resets all", ignoredModules);
+
+            // Should be enabled by default
             backboneEvents.get().trigger("on:infoClick");
-            backboneEvents.get().trigger("off:advancedInfo");
-            backboneEvents.get().trigger("off:drawing");
-            backboneEvents.get().trigger("off:print");
+
+            // Should be disabled by default
+            let modulesToReset = [`advancedInfo`, `drawing`, `measurements`, `print`];
+            modulesToReset.map(moduleToReset => {
+                if (ignoredModules.indexOf(moduleToReset) === -1) {
+                    backboneEvents.get().trigger(`off:${moduleToReset}`);
+                }
+            });
         });
 
-        backboneEvents.get().on("off:advancedInfo on:drawing", function () {
+        backboneEvents.get().on("off:measurements", function () {
+            console.info("Stopping measurements");
+            measurements.off();
+        });
+
+        backboneEvents.get().on("off:drawing", function () {
+            console.info("Stopping drawing");
+            draw.off();
+        });
+
+        backboneEvents.get().on("off:advancedInfo", function () {
             console.info("Stopping advanced info");
             advancedInfo.off();
         });
 
-        backboneEvents.get().on("off:drawing on:advancedInfo", function () {
-            console.info("Stopping drawing");
-            draw.off();
+        /**
+         * Processing turn on/off events for modules
+         */
+        let modulesToReactOnEachOtherChanges = [`measurements`, `drawing`, `advancedInfo`];
+        modulesToReactOnEachOtherChanges.map(module => {
+            backboneEvents.get().on(`${module}:turnedOn`, function () {
+                console.info(`${module} was turned on`);
+                // Reset all modules except caller
+                backboneEvents.get().trigger(`reset:all`, [module]);
+                // Disable the infoClick
+                backboneEvents.get().trigger(`off:infoClick`);
+            });
+    
+            // Drawing was turned off
+            backboneEvents.get().on(`${module}:turnedOff`, function () {
+                console.info(`${module} was turned off`);
+                // Reset all modules except caller
+                backboneEvents.get().trigger(`reset:all`, [module]);
+            });
         });
 
         // Info click
@@ -263,14 +327,14 @@ module.exports = module.exports = {
         // =============
         backboneEvents.get().on("startLoading:layers", function (e) {
             console.log("Start loading: " + e);
-            doneB = doneL = false;
+            doneL = false;
             loadingL = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
             console.log("Start loading: " + e);
-            doneB = doneL = false;
+            doneB = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
         });
@@ -281,6 +345,7 @@ module.exports = module.exports = {
                 layers.resetCount();
                 doneL = true;
                 loadingL = false;
+
                 if ((doneL && doneB) || loadingB === false) {
                     console.log("Setting timeout to " + window.vidiTimeout + "ms");
                     setTimeout(function () {
@@ -297,7 +362,8 @@ module.exports = module.exports = {
             console.log("Done loading: " + e);
             doneB = true;
             loadingB = false;
-            if ((doneL && doneB) || loadingL === false) {
+
+            if ((doneL && doneB) || loadingL === false || layers.getCountLoading() === 0) {
                 console.log("Setting timeout to " + window.vidiTimeout + "ms");
                 setTimeout(function () {
                     console.info("Layers all loaded B");
@@ -327,7 +393,6 @@ module.exports = module.exports = {
                 $(this).button('loading');
                 $("#get-print-fieldset").prop("disabled", true);
             }
-
         });
 
         backboneEvents.get().on("off:print", function () {
@@ -350,7 +415,6 @@ module.exports = module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on("refresh:meta", function (response) {
-
             meta.init()
 
                 .then(function () {

@@ -79,6 +79,39 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+        let metaData = meta.getMetaDataLatestLoaded();
+        for (let j = 0; j < metaData.data.length; j++) {
+            if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === name.replace('v:', '')) {
+                let layer = metaData.data[j];
+
+                let isVectorLayer = true;
+                let isTileLayer = true;
+                if (layer && layer.meta) {
+                    let parsedMeta = JSON.parse(layer.meta);
+                    if (parsedMeta.vidi_layer_type) {
+                        if (parsedMeta.vidi_layer_type === 't') isVectorLayer = false;
+                        if (parsedMeta.vidi_layer_type === 'v') isTileLayer = false;
+                    }
+                }
+
+                if (isVectorLayer === false && name.startsWith('v:')) {
+                    name = name.replace(`v:`, ``);
+                    console.log(`No vector view for ${name}, requesting the tile one`);
+                }
+    
+                if (isTileLayer === false && !name.startsWith('v:')) {
+                    name = `v:` + name;
+                    console.log(`No tile view for ${name}, requesting the vector one`);
+                }
+
+                break;
+            }
+        }
+
+        let gc2Id = name.replace('v:', '');
+        let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
+        applicationWideControls.prop('checked', enable);
+
         let result = new Promise((resolve, reject) => {
             let store = layerTree.getStores();
 
@@ -106,10 +139,10 @@ module.exports = module.exports = {
             }
 
             if (enable) {
-                // Only one layer at a time, so using the tile layer identifier
-                layers.incrementCountLoading(tileLayerId);
-
                 if (layerType === 'tile') {
+                    // Only one layer at a time, so using the tile layer identifier
+                    layers.incrementCountLoading(tileLayerId);
+
                     layerTree.setSelectorValue(name, 'tile');
 
                     layers.addLayer(name).then(() => {
@@ -148,6 +181,8 @@ module.exports = module.exports = {
                         });
                     });
                 } else {
+                    layers.incrementCountLoading(vectorLayerId);
+
                     layerTree.setSelectorValue(name, 'vector');
                     if (vectorLayerId in store) {
                         cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
@@ -205,7 +240,7 @@ module.exports = module.exports = {
 
         let el = getLayerSwitchControl();
         if (el === false) {
-            console.error(`Unable to find layer switch control for layer ${name}`);
+            console.error(`Unable to find layer switch control for layer ${layerName}`);
         } else {
             el.prop('checked', enable);
             _self.update(doNotLegend, el);
@@ -247,7 +282,6 @@ module.exports = module.exports = {
         pushState.init();
 
         if (!doNotLegend) {
-            //console.trace(`aaa`);
             legend.init();
         }
     }

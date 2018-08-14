@@ -31,7 +31,7 @@ app.use(session({
     cookie: {secure: false}
 }));
 
-app.use('/app/:db/:schema', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
+app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
 if (config.staticRoutes) {
     for (var key in config.staticRoutes) {

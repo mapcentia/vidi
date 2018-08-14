@@ -226,60 +226,13 @@ module.exports = {
             $("#" + hashArr[0]).addClass("active");
             let layersToActivate = [];
 
+            let baseLayerId = false;
             if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                setBaseLayer.init(hashArr[0]);
+                baseLayerId = hashArr[0];
 
                 // Layers to activate
                 if (hashArr[4]) {
-                    arr = hashArr[4].split(",");
-
-                    // Removing duplicates as we do not trust user input
-                    arr = removeDuplicates(arr);
-
-                    let metaData = meta.getMetaDataLatestLoaded();
-                    for (i = 0; i < arr.length; i++) {
-                        let correspondingMetaLayer = false;
-                        for (let j = 0; j < metaData.data.length; j++) {
-                            if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === arr[i].replace('v:', '')) {
-                                correspondingMetaLayer = metaData.data[j];
-                                break;
-                            }
-                        }
-
-                        if (correspondingMetaLayer) {
-                            let displayLayer = true;
-
-                            let layer = correspondingMetaLayer;
-                            let isVectorLayer = true;
-                            let isTileLayer = true;
-    
-                            if (layer && layer.meta) {
-                                let parsedMeta = JSON.parse(layer.meta);
-                                if (parsedMeta.vidi_layer_type) {
-                                    if (parsedMeta.vidi_layer_type === 't') isVectorLayer = false;
-                                    if (parsedMeta.vidi_layer_type === 'v') isTileLayer = false;
-                                }
-                            }
-
-                            if (isVectorLayer === false && arr[i].startsWith('v:')) {
-                                displayLayer = false;
-                                console.warn(`The ${arr[i]} layer is requested, but there is only tile view available`);
-                            }
-    
-                            if (isTileLayer === false && !arr[i].startsWith('v:')) {
-                                displayLayer = false;
-                                console.warn(`The ${arr[i]} layer is requested, but there is only vector view available`);
-                            }
-    
-                            if (displayLayer) {
-                                layersToActivate.push(arr[i]);
-                            }
-                        } else {
-                            console.warn(`No meta layer was found for ${arr[i]}`);
-                            // Add the requested in run-time
-                            layersToActivate.push(arr[i]);
-                        }
-                    }
+                    layersToActivate = removeDuplicates(hashArr[4].split(","));
                 }
             }
 
@@ -312,9 +265,13 @@ module.exports = {
             };
 
             if (layerTree.isReady()) {
+                setBaseLayer.init(baseLayerId);
                 initializeLayersFromURL();
             } else {
-                backboneEvents.get().once(`layerTree:ready`, initializeLayersFromURL);
+                backboneEvents.get().once(`layerTree:ready`, () => {
+                    setBaseLayer.init(baseLayerId);
+                    initializeLayersFromURL();
+                });
             }
 
             // When all layers are loaded, when load legend and when set "all_loaded" for print

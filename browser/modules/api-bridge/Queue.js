@@ -452,6 +452,10 @@ class Queue {
                                     _self._queue[itemToProcessData.index].serverErrorMessage = error.serverErrorMessage;
                                 }
 
+                                if (error.serverErrorType) {
+                                    _self._queue[itemToProcessData.index].serverErrorType = error.serverErrorType;
+                                }
+
                                 _self._onUpdateListener(_self._generateCurrentStatistics(), true);
                                 _self._saveState();
 
