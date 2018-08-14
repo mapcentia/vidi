@@ -14,11 +14,6 @@ import store from './src/store';
 import App from './src/app';
 
 /**
- * Translations
- */
-const dict = require('./translations');
-
-/**
  *
  * @type {*|exports|module.exports}
  */
