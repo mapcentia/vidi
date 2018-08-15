@@ -419,11 +419,8 @@ module.exports = {
     /**
      * Builds actual layer tree.
      */
-    create: (forcedState = false, createdByEditor = false) => {
-        
+    create: (forcedState = false, createdByEditor = false) => {        
         editingIsEnabled = createdByEditor;
-
-        console.log(`### editingIsEnabled`, editingIsEnabled);
 
         layerTreeWasBuilt = true;
 
@@ -449,6 +446,34 @@ module.exports = {
                 if (forcedState) {
                     order = forcedState.order;
                     activeLayers = forcedState.activeLayers;
+
+
+
+                    let layersThatAreNotInMeta = [];
+                    let existingMeta = meta.getMetaData();
+                    if (`data` in existingMeta) {
+                        activeLayers.map(layerName => {
+                            let correspondingMeta = false;
+                            existingMeta.data.map(layer => {
+                                if (layer.f_table_schema + '.' + layer.f_table_name === layerName) {
+                                    correspondingMeta = layer;
+                                }
+                            });
+
+                            if (correspondingMeta === false) {
+                                layersThatAreNotInMeta.push(layerName);
+                            }
+                        });
+                    }
+
+                    if (layersThatAreNotInMeta.length > 0) {
+                        let layerFeatchPromises = [];
+                        layersThatAreNotInMeta.map(item => {
+                            layerFeatchPromises.push(switchLayer.init(item, true));
+                        });
+
+                        Promise.all(layerFeatchPromises).then(() => {});
+                    }
                 }
 
                 layerTreeOrder = order;
@@ -821,13 +846,7 @@ module.exports = {
                 
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                 setTimeout(() => {
-                    if (activeLayers) {
-
-                        let layersThatAreNotInMeta = [];
-                        let existingMeta = meta.getMetaData();
-
-                        console.log(`### got to enable `, activeLayers, existingMeta);
-  
+                    if (activeLayers) {   
                         activeLayers.map(layerName => {
                             if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
                                 $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
