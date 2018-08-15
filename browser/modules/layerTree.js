@@ -84,6 +84,8 @@ const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
 
 let layerTreeWasBuilt = false;
 
+let editingIsEnabled = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -102,7 +104,6 @@ module.exports = {
 
     init: function () {
         _self = this;
-
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
@@ -378,10 +379,52 @@ module.exports = {
         return layerTreeIsReady;
     },
 
+    _createToggleOfflineModeControl() {
+        let toggleOfllineOnlineMode = false;
+        if (`serviceWorker` in navigator) {
+            toggleOfllineOnlineMode = $(`<div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="togglebutton">
+                        <label>
+                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
+                            <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
+                            <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
+                            <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
+                        </label>
+                    </div>
+                </div>
+            </div>`);
+
+            if (apiBridgeInstance.offlineModeIsEnforced()) {
+                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+            }
+
+            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+                if ($(event.target).is(':checked')) {
+                    apiBridgeInstance.setOfflineMode(true);
+                } else {
+                    apiBridgeInstance.setOfflineMode(false);
+                }
+            });
+        } else {
+            toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
+                <button type="button" class="close" data-dismiss="alert">×</button>
+                ${__('This browser does not support Service Workers, some features may be unavailable')}
+            </div>`);
+        }
+
+        return toggleOfllineOnlineMode;
+    },
+
     /**
      * Builds actual layer tree.
      */
-    create: (forcedState = false) => {
+    create: (forcedState = false, createdByEditor = false) => {
+        
+        editingIsEnabled = createdByEditor;
+
+        console.log(`### editingIsEnabled`, editingIsEnabled);
+
         layerTreeWasBuilt = true;
 
         /*
@@ -412,40 +455,12 @@ module.exports = {
 
                 var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
 
-                let toggleOfllineOnlineMode = false;
-                if (`serviceWorker` in navigator) {
-                    toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-                        <div class="panel-body">
-                            <div class="togglebutton">
-                                <label>
-                                    <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                                    <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                                    <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                                    <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>`);
-
-                    if (apiBridgeInstance.offlineModeIsEnforced()) {
-                        $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
+                if (editingIsEnabled) {
+                    let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
+                    if (toggleOfllineOnlineMode) {
+                        $("#layers").append(toggleOfllineOnlineMode);
                     }
-
-                    $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
-                        if ($(event.target).is(':checked')) {
-                            apiBridgeInstance.setOfflineMode(true);
-                        } else {
-                            apiBridgeInstance.setOfflineMode(false);
-                        }
-                    });
-                } else {
-                    toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
-                        <button type="button" class="close" data-dismiss="alert">×</button>
-                        ${__('This browser does not support Service Workers, some features may be unavailable')}
-                    </div>`);
                 }
-
-                $("#layers").append(toggleOfllineOnlineMode);
 
                 groups = [];
 
@@ -676,7 +691,7 @@ module.exports = {
                                 }
 
                                 let addButton = ``;
-                                if (layerIsEditable) {
+                                if (editingIsEnabled && layerIsEditable) {
                                     addButton = `<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
                                         data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
                                         <i class="fa fa-plus"></i>
@@ -807,6 +822,12 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                 setTimeout(() => {
                     if (activeLayers) {
+
+                        let layersThatAreNotInMeta = [];
+                        let existingMeta = meta.getMetaData();
+
+                        console.log(`### got to enable `, activeLayers, existingMeta);
+  
                         activeLayers.map(layerName => {
                             if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
                                 $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
@@ -913,7 +934,6 @@ module.exports = {
         });
 
         activeLayerIds = activeLayerIds.filter((v, i, a) => { return a.indexOf(v) === i}); 
-
         return activeLayerIds;
     },
 
