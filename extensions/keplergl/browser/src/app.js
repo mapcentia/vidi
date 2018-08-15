@@ -33,17 +33,14 @@ const KeplerGl = require('kepler.gl/components').injectComponents([
 ]);
 
 const MAPBOX_TOKEN = `pk.eyJ1IjoiYWxla3NhbmRyc2h1bWlsb3YiLCJhIjoiY2praHZveHRjMHluMjNxczZ5aThyN2NnaSJ9.lvfZlFn0VMXItgZ4FFEEfg`;
+const uuidv4 = require('uuid/v4');
 
 // Sample data
 /* eslint-disable no-unused-vars */
-import sampleTripData from './data/sample-trip-data';
-import sampleGeojson from './data/sample-geojson.json';
 import sampleIconCsv, {config as savedMapConfig} from './data/sample-icon-csv';
 import {updateVisData, addDataToMap} from 'kepler.gl/actions';
 import Processors from 'kepler.gl/processors';
 /* eslint-enable no-unused-vars */
-
-const bannerHeight = 30;
 
 const GlobalStyleDiv = styled.div`
   font-family: ff-clan-web-pro, 'Helvetica Neue', Helvetica, sans-serif;
@@ -63,25 +60,26 @@ const GlobalStyleDiv = styled.div`
 class App extends Component {
   constructor(props) {
     super(props);
-    console.log(`### here`);
+
     this.state = {
         width: props.width,
-        height: props.height
+        height: props.height,
+        data: props.data
     };
   }
 
   componentWillMount() {
     // if we pass an id as part of the url
-    // we ry to fetch along map configurations
+    // we try to fetch along map configurations
     const {params: {id: sampleMapId} = {}} = this.props;
+
     this.props.dispatch(loadSampleConfigurations(sampleMapId));
     window.addEventListener('resize', this._onResize);
     this._onResize();
   }
 
   componentDidMount() {
-    // load sample data
-    //this._loadSampleData();
+    this._loadData();
   }
 
   componentWillUnmount() {
@@ -92,64 +90,62 @@ class App extends Component {
     console.warn(`KeplerGL wrapper: resize case is not covered yet`);
   };
 
-  _loadSampleData() {
-    this.props.dispatch(
-      updateVisData(
-        // datasets
-        {
-          info: {
-            label: 'Sample Taxi Trips in New York City',
-            id: 'test_trip_data'
-          },
-          data: sampleTripData
-        },
-        // option
-        {
-          centerMap: true,
-          readOnly: false
-        },
-        // config
-        {
-          filters: [
-            {
-              id: 'me',
-              dataId: 'test_trip_data',
-              name: 'tpep_pickup_datetime',
-              type: 'timeRange',
-              enlarged: true
+    _loadData() {
+        this.state.data.map(data => {
+            /*
+                Because of the https://github.com/uber/kepler.gl/issues/177 bug point layers
+                should be converted to CSV in order to be displayed as point layer (not polygons)
+            */
+
+            let processedData = false;
+            if (data.meta.type === `POINT`) {
+                let csvData = ``;
+
+                let columns = [];
+                data.layer.geoJSON.forGrid.map(item => {
+                    columns.push(item.header);
+                });
+
+                columns = columns.join(`,`);
+
+                let rowValuesAggregate = [];
+                data.layer.geoJSON.features.map(feature => {
+                    let rowValues = [];
+                    data.layer.geoJSON.forGrid.map(fieldName => {
+                        let value = feature.properties[fieldName.header];
+                        if (value === undefined || value === null) {
+                            rowValues.push(``);
+                        } else {
+                            value = `` + value;
+                            rowValues.push(value.replace(`,`, ``));
+                        }
+                    });
+
+                    rowValuesAggregate.push(rowValues.join(`,`));
+                });
+
+                rowValuesAggregate = rowValuesAggregate.join(`\n`);
+                csvData = columns + '\n' + rowValuesAggregate;
+
+                processedData = Processors.processCsvData(csvData);
+            } else {
+                processedData = Processors.processGeojson(data.layer.geoJSON);
             }
-          ]
-        }
-      )
-    );
 
-    // load icon data and config and process csv file
-    this.props.dispatch(
-      addDataToMap({
-        datasets: [
-          {
-            info: {
-              label: 'Icon Data',
-              id: 'test_icon_data'
-            },
-            data: Processors.processCsvData(sampleIconCsv)
-          }
-        ],
-        options: {
-          centerMap: false
-        },
-        config: savedMapConfig
-      })
-    );
-
-    // load geojson
-    this.props.dispatch(
-      updateVisData({
-        info: {label: 'SF Zip Geo'},
-        data: Processors.processGeojson(sampleGeojson)
-      })
-    );
-  }
+            this.props.dispatch(
+                updateVisData({
+                    info: {
+                        id: uuidv4(),
+                        label: data.layer.name.replace('.', ' ')
+                    },
+                    data: processedData
+                }, {
+                    centerMap: true,
+                    readOnly: false
+                })
+            );
+        });
+    }
 
   render() {
     const {width, height} = this.state;

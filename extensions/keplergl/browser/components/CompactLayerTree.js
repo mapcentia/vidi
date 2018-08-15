@@ -24,8 +24,7 @@ class CompactLayerTree extends React.Component {
            target.setAttribute('checked', true);
         }
 
-        console.log(this.getLayersCheckedForImport());
-
+        this.props.onSelectedLayersChange(this.getLayersCheckedForImport());
     }
 
     render() {
