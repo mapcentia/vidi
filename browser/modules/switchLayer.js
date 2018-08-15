@@ -79,7 +79,7 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
-        let metaData = meta.getMetaDataLatestLoaded();
+        let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {
             if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === name.replace('v:', '')) {
                 let layer = metaData.data[j];
