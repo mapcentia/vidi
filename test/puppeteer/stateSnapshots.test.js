@@ -218,7 +218,11 @@ describe("State snapshots", () => {
         expect(stateWasRequested).to.be.true;
     });
 
-    it("should restore multiple snapshots with initial and dynamic layers", async () => {
+    it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
+        expect(true).to.be.true;
+    });
+
+    it("should restore multiple snapshots with initial and dynamic layers in URL", async () => {
         const page = await browser.newPage();
         await page.goto(helpers.PAGE_URL + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -288,7 +292,7 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.false;       
-        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.true;
 
         // Applying second state snapshot
         await helpers.sleep(2000);
@@ -298,6 +302,8 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.false;
     });
+
+    
 });
