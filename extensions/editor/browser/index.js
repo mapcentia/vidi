@@ -243,7 +243,7 @@ module.exports = {
 
             if (layerTreeWasInitialized === false) {
                 layerTreeWasInitialized = true;
-                layerTree.create();
+                layerTree.create(false, true);
             }
         });
     },

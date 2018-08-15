@@ -222,6 +222,11 @@ module.exports = {
         "Collapse measurements control": "Deactivate measurements control",
         "Measure the distance": "Measure distance",
         "Measure the area": "Measure area",
-        "Delete all measurements": "Delete all measurements"
+        "Delete all measurements": "Delete all measurements",
+
+        //KeplerGL
+        "Open KeplerGL in modal": "# Open KeplerGL in modal",
+        "View in KeplerGL": "# View in KeplerGL",
+        "Visible": "# Visible",
     }
 };
