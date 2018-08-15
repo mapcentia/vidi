@@ -218,9 +218,9 @@ describe("State snapshots", () => {
         expect(stateWasRequested).to.be.true;
     });
 
-    it("should restore multiple snapshots", async () => {
+    it("should restore multiple snapshots with initial and dynamic layers", async () => {
         const page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
         await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
         await page.reload(helpers.PAGE_LOAD_TIMEOUT);
@@ -234,6 +234,7 @@ describe("State snapshots", () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('.accordion-toggle.collapsed').eq(2).trigger('click')`);
         await helpers.sleep(1000);
+
         await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test_line"]').trigger('click')`);
@@ -258,6 +259,8 @@ describe("State snapshots", () => {
         await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('input[data-gc2-id="test.polygon"]').trigger('click')`);
         await helpers.sleep(1000);
 
         // Clicking the Add state snapshot button
@@ -285,6 +288,7 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.false;       
+        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.false;
 
         // Applying second state snapshot
         await helpers.sleep(2000);
@@ -294,5 +298,6 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.true;
     });
 });
