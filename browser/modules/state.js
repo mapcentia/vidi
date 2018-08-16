@@ -273,7 +273,12 @@ module.exports = {
                     initializeLayersFromURL();
                 });
             }
+        };
 
+        /**
+         * Applies settings provided in the URL hash part
+         */
+        const initializeFromHashPart = () => {
             // When all layers are loaded, when load legend and when set "all_loaded" for print
             backboneEvents.get().once("allDoneLoading:layers", function (e) {
                 legend.init().then(function(){
@@ -281,12 +286,7 @@ module.exports = {
                     window.status = "all_loaded";
                 });
             });
-        };
 
-        /**
-         * Applies settings provided in the URL hash part
-         */
-        const initializeFromHashPart = () => {
             if (urlVars.k === undefined) {
                 if (hashArr[0]) {
                     setLayers();
