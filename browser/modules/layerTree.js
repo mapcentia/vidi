@@ -419,8 +419,10 @@ module.exports = {
     /**
      * Builds actual layer tree.
      */
-    create: (forcedState = false, createdByEditor = false) => {        
-        editingIsEnabled = createdByEditor;
+    create: (forcedState = false, createdByEditor = false) => {
+        if (editingIsEnabled === false && createdByEditor) {
+            editingIsEnabled = true;
+        }
 
         layerTreeWasBuilt = true;
 
@@ -446,8 +448,6 @@ module.exports = {
                 if (forcedState) {
                     order = forcedState.order;
                     activeLayers = forcedState.activeLayers;
-
-
 
                     let layersThatAreNotInMeta = [];
                     let existingMeta = meta.getMetaData();
@@ -475,6 +475,8 @@ module.exports = {
                         Promise.all(layerFeatchPromises).then(() => {});
                     }
                 }
+
+                try{
 
                 layerTreeOrder = order;
 
@@ -627,23 +629,25 @@ module.exports = {
                                 let layerIsEditable = false;
                                 if (layer && layer.meta) {
                                     let parsedMeta = JSON.parse(layer.meta);
-                                    if (parsedMeta && parsedMeta.vidi_layer_editable) {
-                                        layerIsEditable = true;
-                                    }
-
                                     if (parsedMeta) {
-                                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
-                                    }
+                                        if (parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
 
-                                    if (parsedMeta.vidi_layer_type && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                                        layerIsTheVectorOne = true;
-                                        singleTypeLayer = false;
+                                        if (`meta_desc` in parsedMeta) {
+                                            displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                                        }
 
-                                        if (parsedMeta.vidi_layer_type === 'v') {
-                                            defaultLayerType = 'vector';
-                                            selectorLabel = vectorLayerIcon;
-                                            singleTypeLayer = true;
-                                            layerIsTheTileOne = false;
+                                        if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                                            layerIsTheVectorOne = true;
+                                            singleTypeLayer = false;
+
+                                            if (parsedMeta.vidi_layer_type === 'v') {
+                                                defaultLayerType = 'vector';
+                                                selectorLabel = vectorLayerIcon;
+                                                singleTypeLayer = true;
+                                                layerIsTheTileOne = false;
+                                            }
                                         }
                                     }
                                 }
@@ -835,6 +839,8 @@ module.exports = {
                         layers.reorderLayers();
                     }
                 });
+
+            }catch(e){console.log(e);}
 
                 if (lastStatistics) {
                     _self.statisticsHandler(lastStatistics, false, true);

@@ -180,13 +180,13 @@ module.exports = {
             let database = splitLocation[2];
             let schema = splitLocation[3];
             if (!database || database.length === 0 || !schema || schema.length === 0) {
-                console.error(`Error detecting the current database and schema`);
+                console.warn(`Unable to detect current database and schema`);
             } else {
                 window.vidiConfig.appDatabase = database;
                 window.vidiConfig.appSchema = schema;
             }
         } else {
-            console.error(`Unable to detect the current database and schema`);
+            console.warn(`Unable to detect current database and schema`);
         }
 
         // Init the modules
@@ -211,6 +211,7 @@ module.exports = {
             backboneEvents.get().trigger("ready:meta");
             modules.state.init();
         }).then(() => {
+            modules.layerTree.create();
             modules.state.init();
         });
 
