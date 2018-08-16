@@ -420,10 +420,9 @@ module.exports = {
      * Builds actual layer tree.
      */
     create: (forcedState = false, createdByEditor = false) => {
-        
-        editingIsEnabled = createdByEditor;
-
-        console.log(`### editingIsEnabled`, editingIsEnabled);
+        if (editingIsEnabled === false && createdByEditor) {
+            editingIsEnabled = true;
+        }
 
         layerTreeWasBuilt = true;
 
@@ -449,7 +448,35 @@ module.exports = {
                 if (forcedState) {
                     order = forcedState.order;
                     activeLayers = forcedState.activeLayers;
+
+                    let layersThatAreNotInMeta = [];
+                    let existingMeta = meta.getMetaData();
+                    if (`data` in existingMeta) {
+                        activeLayers.map(layerName => {
+                            let correspondingMeta = false;
+                            existingMeta.data.map(layer => {
+                                if (layer.f_table_schema + '.' + layer.f_table_name === layerName) {
+                                    correspondingMeta = layer;
+                                }
+                            });
+
+                            if (correspondingMeta === false) {
+                                layersThatAreNotInMeta.push(layerName);
+                            }
+                        });
+                    }
+
+                    if (layersThatAreNotInMeta.length > 0) {
+                        let layerFeatchPromises = [];
+                        layersThatAreNotInMeta.map(item => {
+                            layerFeatchPromises.push(switchLayer.init(item, true));
+                        });
+
+                        Promise.all(layerFeatchPromises).then(() => {});
+                    }
                 }
+
+                try{
 
                 layerTreeOrder = order;
 
@@ -602,23 +629,25 @@ module.exports = {
                                 let layerIsEditable = false;
                                 if (layer && layer.meta) {
                                     let parsedMeta = JSON.parse(layer.meta);
-                                    if (parsedMeta && parsedMeta.vidi_layer_editable) {
-                                        layerIsEditable = true;
-                                    }
-
                                     if (parsedMeta) {
-                                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
-                                    }
+                                        if (parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
 
-                                    if (parsedMeta.vidi_layer_type && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                                        layerIsTheVectorOne = true;
-                                        singleTypeLayer = false;
+                                        if (`meta_desc` in parsedMeta) {
+                                            displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                                        }
 
-                                        if (parsedMeta.vidi_layer_type === 'v') {
-                                            defaultLayerType = 'vector';
-                                            selectorLabel = vectorLayerIcon;
-                                            singleTypeLayer = true;
-                                            layerIsTheTileOne = false;
+                                        if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                                            layerIsTheVectorOne = true;
+                                            singleTypeLayer = false;
+
+                                            if (parsedMeta.vidi_layer_type === 'v') {
+                                                defaultLayerType = 'vector';
+                                                selectorLabel = vectorLayerIcon;
+                                                singleTypeLayer = true;
+                                                layerIsTheTileOne = false;
+                                            }
                                         }
                                     }
                                 }
@@ -811,6 +840,8 @@ module.exports = {
                     }
                 });
 
+            }catch(e){console.log(e);}
+
                 if (lastStatistics) {
                     _self.statisticsHandler(lastStatistics, false, true);
                 }
@@ -821,13 +852,7 @@ module.exports = {
                 
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                 setTimeout(() => {
-                    if (activeLayers) {
-
-                        let layersThatAreNotInMeta = [];
-                        let existingMeta = meta.getMetaData();
-
-                        console.log(`### got to enable `, activeLayers, existingMeta);
-  
+                    if (activeLayers) {   
                         activeLayers.map(layerName => {
                             if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
                                 $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {

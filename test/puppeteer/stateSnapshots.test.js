@@ -219,7 +219,49 @@ describe("State snapshots", () => {
     });
 
     it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
-        expect(true).to.be.true;
+        const page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL + `test.polygon`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        // Accepting dialogs
+        page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Turn on two layers, including dynamic one
+        await page.click(`#burger-btn`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('.accordion-toggle.collapsed').eq(2).trigger('click')`);
+        await helpers.sleep(1000);
+
+        await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        // Open state snapshot manager
+        await page.click(`#state-snapshots-dialog-btn`);
+        await helpers.sleep(2000);
+
+        // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Reload page without dynamic layer turned on
+        const newPage = await browser.newPage();
+        await newPage.goto(helpers.PAGE_URL);
+        await newPage.emulate(helpers.EMULATED_SCREEN);
+        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+
+        // Open state snapshot manager
+        await newPage.click(`#state-snapshots-dialog-btn`);
+        await helpers.sleep(2000);
+
+        // Applying first state snapshot
+        await helpers.sleep(2000);
+        await newPage.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+
+        expect(newPage.url().indexOf(`test.polygon`) !== -1).to.be.true;
+        expect(newPage.url().indexOf(`public.test`) !== -1).to.be.true;
     });
 
     it("should restore multiple snapshots with initial and dynamic layers in URL", async () => {
