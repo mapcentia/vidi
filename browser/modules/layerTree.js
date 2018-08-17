@@ -5,6 +5,8 @@
 
 'use strict';
 
+const LOG = true;
+
 const MODULE_NAME = `layerTree`;
 
 var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
@@ -85,6 +87,10 @@ const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
 let layerTreeWasBuilt = false;
 
 let editingIsEnabled = false;
+
+let treeIsBeingBuilt = false;
+
+let treeBuildingRuns = [];
 
 /**
  *
@@ -190,6 +196,9 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
+
+        //console.log(`### statistics was updated`, statistics);
+
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
         }
@@ -417,465 +426,483 @@ module.exports = {
     },
 
     /**
-     * Builds actual layer tree.
+     * Creating request for building the tree.
+     * In order to avoid race condition as simultaneous calling of run() the pending create()
+     * requests are performed one by one.
      */
     create: (forcedState = false, createdByEditor = false) => {
         if (editingIsEnabled === false && createdByEditor) {
             editingIsEnabled = true;
         }
 
-        layerTreeWasBuilt = true;
+        let result = false;
+        if (treeIsBeingBuilt) {
+            result = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    _self.create(forcedState, createdByEditor).then(() => {
+                        resolve();
+                    })
+                }, 1000);
+            });
+        } else {
+            layerTreeWasBuilt = true;
+            treeIsBeingBuilt = true;
+            result = new Promise((resolve, reject) => {
+                if (LOG) console.log(`${MODULE_NAME}: started building the tree`);
 
-        /*
-            Some layers are already shown, so they need to be checked in order
-            to stay in tune with the map. Those are different from the activeLayers,
-            which are defined externally via forcedState only.
-        */
-        let precheckedLayers = layers.getMapLayers();
+                /*
+                    Some layers are already shown, so they need to be checked in order
+                    to stay in tune with the map. Those are different from the activeLayers,
+                    which are defined externally via forcedState only.
+                */
+                let precheckedLayers = layers.getMapLayers();
 
-        let result = new Promise((resolve, reject) => {
-            layerTreeIsReady = false;
-            if (forcedState) {
-                _self.getActiveLayers().map(item => {
-                    // Disabling active layers
-                    switchLayer.init(item, false, true, false);
-                });
-            }
-
-            $("#layers").empty();
-            _self.getLayersOrder().then(order => {
-                let activeLayers = [];
+                layerTreeIsReady = false;
                 if (forcedState) {
-                    order = forcedState.order;
-                    activeLayers = forcedState.activeLayers;
+                    _self.getActiveLayers().map(item => {
+                        // Disabling active layers
+                        switchLayer.init(item, false, true, false);
+                    });
+                }
 
-                    let layersThatAreNotInMeta = [];
-                    let existingMeta = meta.getMetaData();
-                    if (`data` in existingMeta) {
-                        activeLayers.map(layerName => {
-                            let correspondingMeta = false;
-                            existingMeta.data.map(layer => {
-                                if (layer.f_table_schema + '.' + layer.f_table_name === layerName) {
-                                    correspondingMeta = layer;
+                $("#layers").empty();
+                _self.getLayersOrder().then(order => {
+                    let activeLayers = [];
+                    if (forcedState) {
+                        order = forcedState.order;
+                        if (`activeLayers` in forcedState) {
+                            activeLayers = forcedState.activeLayers;
+                        }
+
+                        let layersThatAreNotInMeta = [];
+                        let existingMeta = meta.getMetaData();
+                        if (`data` in existingMeta) {
+                            activeLayers.map(layerName => {
+                                let correspondingMeta = false;
+                                existingMeta.data.map(layer => {
+                                    if (layer.f_table_schema + '.' + layer.f_table_name === layerName) {
+                                        correspondingMeta = layer;
+                                    }
+                                });
+
+                                if (correspondingMeta === false) {
+                                    layersThatAreNotInMeta.push(layerName);
+                                }
+                            });
+                        }
+
+                        if (layersThatAreNotInMeta.length > 0) {
+                            let layerFeatchPromises = [];
+                            layersThatAreNotInMeta.map(item => {
+                                layerFeatchPromises.push(switchLayer.init(item, true));
+                            });
+
+                            Promise.all(layerFeatchPromises).then(() => {
+                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                            });
+                        }
+                    }
+
+                    layerTreeOrder = order;
+
+                    var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
+
+                    if (editingIsEnabled) {
+                        let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
+                        if (toggleOfllineOnlineMode) {
+                            $("#layers").append(toggleOfllineOnlineMode);
+                        }
+                    }
+
+                    groups = [];
+
+                    // Getting set of all loaded vectors
+                    metaData = meta.getMetaData();
+                    for (i = 0; i < metaData.data.length; ++i) {
+                        groups[i] = metaData.data[i].layergroup;
+                    }
+
+                    let notSortedGroupsArray = array_unique(groups.reverse());
+                    let arr = [];
+                    metaData.data.reverse();
+
+                    if (order) {
+                        for (let key in order) {
+                            let item = order[key];
+                            let sortedElement = false;
+                            for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
+                                if (item.id === notSortedGroupsArray[i]) {
+                                    sortedElement = notSortedGroupsArray.splice(i, 1);
+                                    break;
+                                }
+                            }
+
+                            if (sortedElement) {
+                                arr.push(item.id);
+                            }
+                        }
+
+                        if (notSortedGroupsArray.length > 0) {
+                            for (let j = 0; j < notSortedGroupsArray.length; j++) {
+                                arr.push(notSortedGroupsArray[j]);
+                            }
+                        }
+                    } else {
+                        arr = notSortedGroupsArray;
+                    }
+
+                    $("#layers").append(`<div id="layers_list"></div>`);
+                    // Filling up groups and underlying layers (except ungrouped ones)
+                    for (i = 0; i < arr.length; ++i) {
+                        if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                            l = [];
+                            base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
+
+                            // Add group container
+                            // Only if container doesn't exist
+                            // ===============================
+                            if ($("#layer-panel-" + base64GroupName).length === 0) {
+                                $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
+                                    <div class="panel-heading" role="tab">
+                                        <h4 class="panel-title">
+                                            <div class="layer-count badge">
+                                                <span>0</span> / <span></span>
+                                            </div>
+                                            <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
+                                        </h4>
+                                    </div>
+                                    <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
+                                </div>`);
+
+                                // Append to inner group container
+                                // ===============================
+                                $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
+                            }
+
+                            // Get layers that belong to the current layer group
+                            let notSortedLayersForCurrentGroup = [];
+                            for (let u = 0; u < metaData.data.length; ++u) {
+                                if (metaData.data[u].layergroup == arr[i]) {
+                                    notSortedLayersForCurrentGroup.push(metaData.data[u]);
+                                }
+                            }
+
+                            // Sort layers if there is available order
+                            let layersForCurrentGroup = false;
+                            let sortedLayers = [];
+                            if (order) {
+                                let currentGroupLayersOrder = false;
+                                for (let key in order) {
+                                    if (order[key].id === arr[i] && 'layers' in order[key]) {
+                                        currentGroupLayersOrder = order[key].layers;
+                                    }
+                                }
+
+                                if (currentGroupLayersOrder) {
+                                    for (let key in currentGroupLayersOrder) {
+                                        let item = currentGroupLayersOrder[key];
+                                        let sortedElement = false;
+                                        for (let i = (notSortedLayersForCurrentGroup.length - 1); i >= 0; i--) {
+                                            let layerId = notSortedLayersForCurrentGroup[i].f_table_schema + '.' + notSortedLayersForCurrentGroup[i].f_table_name;
+                                            if (item.id === layerId) {
+                                                sortedElement = notSortedLayersForCurrentGroup.splice(i, 1);
+                                                break;
+                                            }
+                                        }
+
+                                        if (sortedElement) {
+                                            sortedLayers.push(sortedElement.pop());
+                                        }
+                                    }
+
+                                    if (notSortedLayersForCurrentGroup.length > 0) {
+                                        for (let j = 0; j < notSortedLayersForCurrentGroup.length; j++) {
+                                            sortedLayers.push(notSortedLayersForCurrentGroup[j]);
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (sortedLayers.length > 0) {
+                                layersForCurrentGroup = sortedLayers;
+                            } else {
+                                layersForCurrentGroup = notSortedLayersForCurrentGroup;
+                            }
+
+                            // Add layers
+                            // ==========
+                            for (var u = 0; u < layersForCurrentGroup.length; ++u) {
+                                let layer = layersForCurrentGroup[u];
+                                var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
+                                if (layer.baselayer) {
+                                    $("#base-layer-list").append(`<div class='list-group-item'>
+                                        <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
+                                            <label class='baselayer-label'>
+                                                <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
+                                            </label>
+                                        </div>
+                                    </div>`);
+                                } else {
+                                    let layerIsTheTileOne = true;
+                                    let layerIsTheVectorOne = false;
+                                                                
+                                    let singleTypeLayer = true;
+                                    let selectorLabel = tileLayerIcon;
+                                    let defaultLayerType = 'tile';
+
+                                    let layerIsEditable = false;
+                                    if (layer && layer.meta) {
+                                        let parsedMeta = JSON.parse(layer.meta);
+                                        if (parsedMeta && typeof parsedMeta === `object`) {
+                                            if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                                layerIsEditable = true;
+                                            }
+
+                                            if (`meta_desc` in parsedMeta) {
+                                                displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                                            }
+
+                                            if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                                                layerIsTheVectorOne = true;
+                                                singleTypeLayer = false;
+
+                                                if (parsedMeta.vidi_layer_type === 'v') {
+                                                    defaultLayerType = 'vector';
+                                                    selectorLabel = vectorLayerIcon;
+                                                    singleTypeLayer = true;
+                                                    layerIsTheTileOne = false;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+                                    let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+
+                                    if (layerIsTheVectorOne) {
+                                        store['v:' + layerKey] = new geocloud.sqlStore({
+                                            jsonp: false,
+                                            method: "POST",
+                                            host: "",
+                                            db: db,
+                                            uri: "/api/sql",
+                                            clickable: true,
+                                            id: 'v:' + layerKey,
+                                            name: 'v:' + layerKey,
+                                            lifetime: 0,
+                                            styleMap: styles['v:' + layerKey],
+                                            sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
+                                            onLoad: (l) => {
+                                                if (l === undefined) return;
+                                                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
+
+                                                layers.decrementCountLoading(l.id);
+                                                backboneEvents.get().trigger("doneLoading:layers", l.id);
+                                            },
+                                            transformResponse: (response, id) => {
+                                                return apiBridgeInstance.transformResponseHandler(response, id);
+                                            },
+                                            onEachFeature: onEachFeature['v:' + layerKey]
+                                        });
+                                    }
+
+                                    tooltip = layer.f_table_abstract || "";
+
+                                    let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+
+                                    let regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
+                                    let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
+                                    let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
+
+                                    let layerTypeSelector = false;
+                                    if (singleTypeLayer) {
+                                        if (layerIsTheTileOne) {
+                                            layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                                                ${tileLayerIcon}
+                                            </div>`;
+                                        } else if (layerIsTheVectorOne) {
+                                            layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                                                ${vectorLayerIcon}
+                                            </div>`;
+                                        }
+                                    } else {
+                                        layerTypeSelector = `<div class="dropdown">
+                                            <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
+                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                                                <span class="js-dropdown-label">${selectorLabel}</span>
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="js-layer-type-selector-tile" href="javascript:void(0)">${tileLayerIcon} ${__('Tile')}</a>
+                                                </li>
+                                                <li>
+                                                    <a class="js-layer-type-selector-vector" href="javascript:void(0)">${vectorLayerIcon} ${__('Vector')}</a>
+                                                </li>
+                                            </ul>
+                                        </div>`;
+                                    }
+
+                                    let addButton = ``;
+                                    if (editingIsEnabled && layerIsEditable) {
+                                        addButton = `<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
+                                            data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
+                                            <i class="fa fa-plus"></i>
+                                        </button>`;
+                                    }
+
+                                    let checked = ``;
+                                    // If activeLayers are set, then no need to sync with the map
+                                    if (!forcedState) {
+                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                                            precheckedLayers.map(item => {
+                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
+                                                    checked = `checked="checked"`;
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                    let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
+                                        <div style="display: inline-block;">
+                                            <div class="checkbox" style="width: 34px;">
+                                                <label>
+                                                    <input type="checkbox"
+                                                        ${checked}
+                                                        class="js-show-layer-control"
+                                                        id="${layer.f_table_name}"
+                                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
+                                                        data-gc2-layer-type="${defaultLayerType}">
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div style="display: inline-block;">${layerTypeSelector}</div>
+                                        <div style="display: inline-block;">
+                                            <span>${text}${lockedLayer}</span>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                                <i class="fa fa-plus"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                                <i class="fa fa-edit"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                                <i class="fa fa-plus"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                                <i class="fa fa-edit"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                                            </button>
+                                            <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
+                                                <i class="fa fa-undo"></i>
+                                            </button>
+                                        </div>
+                                        <div style="display: inline-block;">
+                                            ${addButton}
+                                            <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
+                                                style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
+                                        </div>
+                                        <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                                    </li>`);
+
+                                    $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
+                                        let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                        $(switcher).data('gc2-layer-type', 'tile');
+                                        $(switcher).prop('checked', true);
+                                        _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                                        $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                                    });
+
+                                    $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
+                                        let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                                        $(switcher).data('gc2-layer-type', 'vector');
+                                        $(switcher).prop('checked', true);
+                                        _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                                        $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                                    });
+                                    
+                                    $("#collapse" + base64GroupName).append(layerControlRecord);
+                                    l.push({});
+                                }
+                            }
+
+                            $("#collapse" + base64GroupName).sortable({
+                                axis: 'y',
+                                stop: (event, ui) => {
+                                    _self.calculateOrder();
+                                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                                    layers.reorderLayers();
+                                }
+                            });
+                            
+                            if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+                                count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
+                            } else {
+                                count = l.length;
+                            }
+
+                            $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+                            // Remove the group if empty
+                            if (l.length === 0) {
+                                $("#layer-panel-" + base64GroupName).remove();
+                            }
+                        }
+                    }
+
+                    $(`#layers_list`).sortable({
+                        axis: 'y',
+                        stop: (event, ui) => {
+                            _self.calculateOrder();
+                            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                            layers.reorderLayers();
+                        }
+                    });
+
+                    if (lastStatistics) {
+                        _self.statisticsHandler(lastStatistics, false, true);
+                    }
+
+                    layers.reorderLayers();
+                    state.listen(MODULE_NAME, `sorted`);
+                    state.listen(MODULE_NAME, `activeLayersChange`);
+                    
+                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                    setTimeout(() => {
+                        if (activeLayers) {   
+                            activeLayers.map(layerName => {
+                                if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                    if (layerName.indexOf(`v:`) === 0) {
+                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                    } else {
+                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                    }
+                                } else {
+                                    $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
                                 }
                             });
 
-                            if (correspondingMeta === false) {
-                                layersThatAreNotInMeta.push(layerName);
-                            }
-                        });
-                    }
-
-                    if (layersThatAreNotInMeta.length > 0) {
-                        let layerFeatchPromises = [];
-                        layersThatAreNotInMeta.map(item => {
-                            layerFeatchPromises.push(switchLayer.init(item, true));
-                        });
-
-                        Promise.all(layerFeatchPromises).then(() => {});
-                    }
-                }
-
-                try{
-
-                layerTreeOrder = order;
-
-                var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
-
-                if (editingIsEnabled) {
-                    let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
-                    if (toggleOfllineOnlineMode) {
-                        $("#layers").append(toggleOfllineOnlineMode);
-                    }
-                }
-
-                groups = [];
-
-                // Getting set of all loaded vectors
-                metaData = meta.getMetaData();
-                for (i = 0; i < metaData.data.length; ++i) {
-                    groups[i] = metaData.data[i].layergroup;
-                }
-
-                let notSortedGroupsArray = array_unique(groups.reverse());
-                let arr = [];
-                metaData.data.reverse();
-
-                if (order) {
-                    for (let key in order) {
-                        let item = order[key];
-                        let sortedElement = false;
-                        for (let i = (notSortedGroupsArray.length - 1); i >= 0; i--) {
-                            if (item.id === notSortedGroupsArray[i]) {
-                                sortedElement = notSortedGroupsArray.splice(i, 1);
-                                break;
-                            }
+                            legend.init();
                         }
 
-                        if (sortedElement) {
-                            arr.push(item.id);
-                        }
-                    }
+                        layerTreeIsReady = true;
+                        treeIsBeingBuilt = false;
+                        backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
 
-                    if (notSortedGroupsArray.length > 0) {
-                        for (let j = 0; j < notSortedGroupsArray.length; j++) {
-                            arr.push(notSortedGroupsArray[j]);
-                        }
-                    }
-                } else {
-                    arr = notSortedGroupsArray;
-                }
+                        if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                $("#layers").append(`<div id="layers_list"></div>`);
-
-                // Filling up groups and underlying layers (except ungrouped ones)
-                for (i = 0; i < arr.length; ++i) {
-                    if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                        l = [];
-                        base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
-
-                        // Add group container
-                        // Only if container doesn't exist
-                        // ===============================
-                        if ($("#layer-panel-" + base64GroupName).length === 0) {
-                            $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-                                <div class="panel-heading" role="tab">
-                                    <h4 class="panel-title">
-                                        <div class="layer-count badge">
-                                            <span>0</span> / <span></span>
-                                        </div>
-                                        <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
-                                    </h4>
-                                </div>
-                                <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
-                            </div>`);
-
-                            // Append to inner group container
-                            // ===============================
-                            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
-                        }
-
-                        // Get layers that belong to the current layer group
-                        let notSortedLayersForCurrentGroup = [];
-                        for (let u = 0; u < metaData.data.length; ++u) {
-                            if (metaData.data[u].layergroup == arr[i]) {
-                                notSortedLayersForCurrentGroup.push(metaData.data[u]);
-                            }
-                        }
-
-                        // Sort layers if there is available order
-                        let layersForCurrentGroup = false;
-                        let sortedLayers = [];
-                        if (order) {
-                            let currentGroupLayersOrder = false;
-                            for (let key in order) {
-                                if (order[key].id === arr[i] && 'layers' in order[key]) {
-                                    currentGroupLayersOrder = order[key].layers;
-                                }
-                            }
-
-                            if (currentGroupLayersOrder) {
-                                for (let key in currentGroupLayersOrder) {
-                                    let item = currentGroupLayersOrder[key];
-                                    let sortedElement = false;
-                                    for (let i = (notSortedLayersForCurrentGroup.length - 1); i >= 0; i--) {
-                                        let layerId = notSortedLayersForCurrentGroup[i].f_table_schema + '.' + notSortedLayersForCurrentGroup[i].f_table_name;
-                                        if (item.id === layerId) {
-                                            sortedElement = notSortedLayersForCurrentGroup.splice(i, 1);
-                                            break;
-                                        }
-                                    }
-
-                                    if (sortedElement) {
-                                        sortedLayers.push(sortedElement.pop());
-                                    }
-                                }
-
-                                if (notSortedLayersForCurrentGroup.length > 0) {
-                                    for (let j = 0; j < notSortedLayersForCurrentGroup.length; j++) {
-                                        sortedLayers.push(notSortedLayersForCurrentGroup[j]);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (sortedLayers.length > 0) {
-                            layersForCurrentGroup = sortedLayers;
-                        } else {
-                            layersForCurrentGroup = notSortedLayersForCurrentGroup;
-                        }
-
-                        // Add layers
-                        // ==========
-                        for (var u = 0; u < layersForCurrentGroup.length; ++u) {
-                            let layer = layersForCurrentGroup[u];
-                            var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
-                            if (layer.baselayer) {
-                                $("#base-layer-list").append(`<div class='list-group-item'>
-                                    <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
-                                        <label class='baselayer-label'>
-                                            <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
-                                        </label>
-                                    </div>
-                                </div>`);
-                            } else {
-                                let layerIsTheTileOne = true;
-                                let layerIsTheVectorOne = false;
-                                                            
-                                let singleTypeLayer = true;
-                                let selectorLabel = tileLayerIcon;
-                                let defaultLayerType = 'tile';
-
-                                let layerIsEditable = false;
-                                if (layer && layer.meta) {
-                                    let parsedMeta = JSON.parse(layer.meta);
-                                    if (parsedMeta) {
-                                        if (parsedMeta.vidi_layer_editable) {
-                                            layerIsEditable = true;
-                                        }
-
-                                        if (`meta_desc` in parsedMeta) {
-                                            displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
-                                        }
-
-                                        if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                                            layerIsTheVectorOne = true;
-                                            singleTypeLayer = false;
-
-                                            if (parsedMeta.vidi_layer_type === 'v') {
-                                                defaultLayerType = 'vector';
-                                                selectorLabel = vectorLayerIcon;
-                                                singleTypeLayer = true;
-                                                layerIsTheTileOne = false;
-                                            }
-                                        }
-                                    }
-                                }
-
-                                let layerKey = layer.f_table_schema + "." + layer.f_table_name;
-                                let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-                                if (layerIsTheVectorOne) {
-                                    store['v:' + layerKey] = new geocloud.sqlStore({
-                                        jsonp: false,
-                                        method: "POST",
-                                        host: "",
-                                        db: db,
-                                        uri: "/api/sql",
-                                        clickable: true,
-                                        id: 'v:' + layerKey,
-                                        name: 'v:' + layerKey,
-                                        lifetime: 0,
-                                        styleMap: styles['v:' + layerKey],
-                                        sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
-                                        onLoad: (l) => {
-                                            if (l === undefined) return;
-                                            $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
-                                            layers.decrementCountLoading(l.id);
-                                            backboneEvents.get().trigger("doneLoading:layers", l.id);
-                                        },
-                                        transformResponse: (response, id) => {
-                                            return apiBridgeInstance.transformResponseHandler(response, id);
-                                        },
-                                        onEachFeature: onEachFeature['v:' + layerKey]
-                                    });
-                                }
-
-                                tooltip = layer.f_table_abstract || "";
-
-                                let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-
-                                let regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
-                                let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
-                                let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
-
-                                let layerTypeSelector = false;
-                                if (singleTypeLayer) {
-                                    if (layerIsTheTileOne) {
-                                        layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                                            ${tileLayerIcon}
-                                        </div>`;
-                                    } else if (layerIsTheVectorOne) {
-                                        layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                                            ${vectorLayerIcon}
-                                        </div>`;
-                                    }
-                                } else {
-                                    layerTypeSelector = `<div class="dropdown">
-                                        <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
-                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                            <span class="js-dropdown-label">${selectorLabel}</span>
-                                            <span class="caret"></span>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <a class="js-layer-type-selector-tile" href="javascript:void(0)">${tileLayerIcon} ${__('Tile')}</a>
-                                            </li>
-                                            <li>
-                                                <a class="js-layer-type-selector-vector" href="javascript:void(0)">${vectorLayerIcon} ${__('Vector')}</a>
-                                            </li>
-                                        </ul>
-                                    </div>`;
-                                }
-
-                                let addButton = ``;
-                                if (editingIsEnabled && layerIsEditable) {
-                                    addButton = `<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
-                                        data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
-                                        <i class="fa fa-plus"></i>
-                                    </button>`;
-                                }
-
-                                let checked = ``;
-                                // If activeLayers are set, then no need to sync with the map
-                                if (!forcedState) {
-                                    if (precheckedLayers && Array.isArray(precheckedLayers)) {
-                                        precheckedLayers.map(item => {
-                                            if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
-                                                checked = `checked="checked"`;
-                                            }
-                                        });
-                                    }
-                                }
-
-                                let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
-                                    <div style="display: inline-block;">
-                                        <div class="checkbox" style="width: 34px;">
-                                            <label>
-                                                <input type="checkbox"
-                                                    ${checked}
-                                                    class="js-show-layer-control"
-                                                    id="${layer.f_table_name}"
-                                                    data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                                    data-gc2-layer-type="${defaultLayerType}">
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <div style="display: inline-block;">${layerTypeSelector}</div>
-                                    <div style="display: inline-block;">
-                                        <span>${text}${lockedLayer}</span>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
-                                            <i class="fa fa-plus"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
-                                            <i class="fa fa-edit"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
-                                            <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
-                                            <i class="fa fa-plus"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
-                                            <i class="fa fa-edit"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
-                                            <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                                        </button>
-                                        <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
-                                            <i class="fa fa-undo"></i>
-                                        </button>
-                                    </div>
-                                    <div style="display: inline-block;">
-                                        ${addButton}
-                                        <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
-                                            style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
-                                    </div>
-                                    <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-                                </li>`);
-
-                                $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
-                                    let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                    $(switcher).data('gc2-layer-type', 'tile');
-                                    $(switcher).prop('checked', true);
-                                    _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
-                                    $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                                });
-
-                                $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
-                                    let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                    $(switcher).data('gc2-layer-type', 'vector');
-                                    $(switcher).prop('checked', true);
-                                    _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
-                                    $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
-                                });
-                                
-                                $("#collapse" + base64GroupName).append(layerControlRecord);
-                                l.push({});
-                            }
-                        }
-
-                        $("#collapse" + base64GroupName).sortable({
-                            axis: 'y',
-                            stop: (event, ui) => {
-                                _self.calculateOrder();
-                                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                                layers.reorderLayers();
-                            }
-                        });
-                        
-                        if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                            count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
-                        } else {
-                            count = l.length;
-                        }
-
-                        $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
-                        // Remove the group if empty
-                        if (l.length === 0) {
-                            $("#layer-panel-" + base64GroupName).remove();
-                        }
-                    }
-                }
-
-                $(`#layers_list`).sortable({
-                    axis: 'y',
-                    stop: (event, ui) => {
-                        _self.calculateOrder();
-                        backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                        layers.reorderLayers();
-                    }
+                        resolve();
+                    }, 1000);
                 });
-
-            }catch(e){console.log(e);}
-
-                if (lastStatistics) {
-                    _self.statisticsHandler(lastStatistics, false, true);
-                }
-
-                layers.reorderLayers();
-                state.listen(MODULE_NAME, `sorted`);
-                state.listen(MODULE_NAME, `activeLayersChange`);
-                
-                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                setTimeout(() => {
-                    if (activeLayers) {   
-                        activeLayers.map(layerName => {
-                            if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                if (layerName.indexOf(`v:`) === 0) {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
-                                } else {
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
-                                }
-                            } else {
-                                $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
-                            }
-                        });
-
-                        legend.init();
-                    }
-
-                    layerTreeIsReady = true;
-                    backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
-
-                    resolve();
-                }, 1000);
             });
-        });
+        }
 
         return result;
     },

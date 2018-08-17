@@ -260,6 +260,8 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
         await newPage.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
 
+        await helpers.sleep(6000);
+
         expect(newPage.url().indexOf(`test.polygon`) !== -1).to.be.true;
         expect(newPage.url().indexOf(`public.test`) !== -1).to.be.true;
     });
