@@ -103,6 +103,7 @@ window.Vidi = function () {
         infoClick: require('./modules/infoClick'),
         bindEvent: require('./modules/bindEvent'),
         draw: require('./modules/draw'),
+        measurements: require('./modules/measurements'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
         sqlQuery: require('./modules/sqlQuery'),
@@ -134,6 +135,7 @@ window.Vidi = function () {
     modules.infoClick.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
+    modules.measurements.set(modules);
     modules.print.set(modules);
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);

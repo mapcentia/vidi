@@ -185,6 +185,7 @@ module.exports = {
         modules.infoClick.init();
         modules.advancedInfo.init();
         modules.draw.init();
+        modules.measurements.init();
         modules.print.init();
         modules.meta.init()
 

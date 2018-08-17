@@ -44,7 +44,10 @@ module.exports = {
         print = o.print;
         meta = o.meta;
         legend = o.legend;
-        editor = o.extensions.editor.index;
+        try {
+            editor = o.extensions.editor.index;
+        }catch(e) {}
+        
         return this;
     },
     init: function () {
@@ -126,7 +129,7 @@ module.exports = {
             }
 
             // If editor when deactivate
-            if ($(this).data('module') === "editor") {
+            if (editor && $(this).data('module') === "editor") {
                 editor.stopEdit();
             }
 
