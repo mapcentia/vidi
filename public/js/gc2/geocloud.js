@@ -1766,8 +1766,8 @@ geocloud = (function () {
                 names: [],
                 resolutions: this.map.resolutions,
                 type: "wms",
-                maxZoom: 27,
-                maxNativeZoom: 27,
+                maxZoom: 26,
+                maxNativeZoom: 26,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
