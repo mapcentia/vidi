@@ -90,7 +90,7 @@ let editingIsEnabled = false;
 
 let treeIsBeingBuilt = false;
 
-let treeBuildingRuns = [];
+let userPreferredForceOfflineMode = -1;
 
 /**
  *
@@ -196,13 +196,10 @@ module.exports = {
      * @param {*} forceLayerUpdate 
      */
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
-
-        //console.log(`### statistics was updated`, statistics);
-
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
-        }
-
+        }       
+        
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
 
@@ -238,20 +235,31 @@ module.exports = {
             if ($('.js-app-is-online-badge').length === 1) {
                 theStatisticsPanelWasDrawn = true;
             }
-            
-            if (statistics.online) {
-                $('.js-toggle-offline-mode').prop('disabled', false);
 
-                applicationIsOnline = 1;
+            if (statistics.online) {
+                /*
+                    User have not decided yet whenever he want to force or not the
+                    offline mode or user already selected not to force offline mode
+                */
+                if (userPreferredForceOfflineMode === false || userPreferredForceOfflineMode === -1) {
+                    apiBridgeInstance.setOfflineMode(false);
+                    $('.js-toggle-offline-mode').prop('checked', false);
+                } else {
+                    apiBridgeInstance.setOfflineMode(true);
+                    $('.js-toggle-offline-mode').prop('checked', true);
+                }
+
+                $('.js-toggle-offline-mode').prop('disabled', false);
+                applicationIsOnline = true;
                 $('.js-app-is-online-badge').removeClass('hidden');
             } else {
-                if (applicationIsOnline !== 0) {
-                    $('.js-toggle-offline-mode').trigger('click');
+                if (applicationIsOnline !== false) {
+                    apiBridgeInstance.setOfflineMode(true);
+                    $('.js-toggle-offline-mode').prop('checked', true);
                 }
 
                 $('.js-toggle-offline-mode').prop('disabled', true);
-
-                applicationIsOnline = 0;
+                applicationIsOnline = false;
                 $('.js-app-is-offline-badge').removeClass('hidden');
             }
 
@@ -408,12 +416,14 @@ module.exports = {
                 $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
             }
 
-            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change((event) => {
+            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change(event => {
                 if ($(event.target).is(':checked')) {
                     apiBridgeInstance.setOfflineMode(true);
                 } else {
                     apiBridgeInstance.setOfflineMode(false);
                 }
+
+                userPreferredForceOfflineMode = $(event.target).is(':checked');
             });
         } else {
             toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
@@ -431,6 +441,8 @@ module.exports = {
      * requests are performed one by one.
      */
     create: (forcedState = false, createdByEditor = false) => {
+        lastStatistics = false;
+
         if (editingIsEnabled === false && createdByEditor) {
             editingIsEnabled = true;
         }
