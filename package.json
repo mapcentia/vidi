@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should be able to reset the application\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should restore multiple snapshots with dynamic layers in state snapshot\""
   },
   "repository": {
     "type": "git",
