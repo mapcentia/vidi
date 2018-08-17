@@ -198,8 +198,8 @@ module.exports = {
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
-        }
-
+        }       
+        
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
 
@@ -441,6 +441,8 @@ module.exports = {
      * requests are performed one by one.
      */
     create: (forcedState = false, createdByEditor = false) => {
+        lastStatistics = false;
+
         if (editingIsEnabled === false && createdByEditor) {
             editingIsEnabled = true;
         }
