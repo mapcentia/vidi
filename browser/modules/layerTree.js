@@ -567,6 +567,7 @@ module.exports = {
                     // Filling up groups and underlying layers (except ungrouped ones)
                     for (i = 0; i < arr.length; ++i) {
                         if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                            let numberOfActiveLayers = 0;
                             l = [];
                             base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
@@ -664,6 +665,7 @@ module.exports = {
                                                 if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}` || item.id && item.id === `v:${layer.f_table_schema}.${layer.f_table_name}`) {
                                                     layerIsActive = true;
                                                     activeLayerName = item.id;
+                                                    numberOfActiveLayers++;
                                                 }
                                             });
                                         }
@@ -827,7 +829,7 @@ module.exports = {
                                             <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                                                 style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                         </div>
-                                        <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                                        <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                                     </li>`);
 
                                     $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
@@ -872,6 +874,10 @@ module.exports = {
                             // Remove the group if empty
                             if (l.length === 0) {
                                 $("#layer-panel-" + base64GroupName).remove();
+                            }
+
+                            if (numberOfActiveLayers > 0) {
+                                $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
                             }
                         }
                     }
