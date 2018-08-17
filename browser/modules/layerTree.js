@@ -198,7 +198,7 @@ module.exports = {
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
-        }       
+        }
         
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
@@ -567,6 +567,7 @@ module.exports = {
                     // Filling up groups and underlying layers (except ungrouped ones)
                     for (i = 0; i < arr.length; ++i) {
                         if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                            let numberOfActiveLayers = 0;
                             l = [];
                             base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
 
@@ -655,6 +656,21 @@ module.exports = {
                                         </div>
                                     </div>`);
                                 } else {
+                                    let layerIsActive = false;
+                                    let activeLayerName = false;
+                                    // If activeLayers are set, then no need to sync with the map
+                                    if (!forcedState) {
+                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                                            precheckedLayers.map(item => {
+                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}` || item.id && item.id === `v:${layer.f_table_schema}.${layer.f_table_name}`) {
+                                                    layerIsActive = true;
+                                                    activeLayerName = item.id;
+                                                    numberOfActiveLayers++;
+                                                }
+                                            });
+                                        }
+                                    }
+
                                     let layerIsTheTileOne = true;
                                     let layerIsTheVectorOne = false;
                                                                 
@@ -685,6 +701,13 @@ module.exports = {
                                                     layerIsTheTileOne = false;
                                                 }
                                             }
+                                        }
+                                    }
+
+                                    if (layerIsActive) {
+                                        if (activeLayerName.indexOf(`v:`) === 0) {
+                                            selectorLabel = vectorLayerIcon;
+                                            defaultLayerType = 'vector';
                                         }
                                     }
 
@@ -763,24 +786,12 @@ module.exports = {
                                         </button>`;
                                     }
 
-                                    let checked = ``;
-                                    // If activeLayers are set, then no need to sync with the map
-                                    if (!forcedState) {
-                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
-                                            precheckedLayers.map(item => {
-                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
-                                                    checked = `checked="checked"`;
-                                                }
-                                            });
-                                        }
-                                    }
-
                                     let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
                                         <div style="display: inline-block;">
                                             <div class="checkbox" style="width: 34px;">
                                                 <label>
                                                     <input type="checkbox"
-                                                        ${checked}
+                                                        ${(layerIsActive ? `checked="checked"` : ``)}
                                                         class="js-show-layer-control"
                                                         id="${layer.f_table_name}"
                                                         data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
@@ -818,7 +829,7 @@ module.exports = {
                                             <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                                                 style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                                         </div>
-                                        <div class="js-rejectedByServerItems" hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                                        <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                                     </li>`);
 
                                     $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
@@ -863,6 +874,10 @@ module.exports = {
                             // Remove the group if empty
                             if (l.length === 0) {
                                 $("#layer-panel-" + base64GroupName).remove();
+                            }
+
+                            if (numberOfActiveLayers > 0) {
+                                $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
                             }
                         }
                     }

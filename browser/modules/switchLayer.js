@@ -177,6 +177,7 @@ module.exports = module.exports = {
                             });
                         }).catch(() => {
                             console.error(`Could not add ${tileLayerId} tile layer`);
+                            layers.decrementCountLoading(tileLayerId);
                             resolve();
                         });
                     });
@@ -212,6 +213,7 @@ module.exports = module.exports = {
                             });
                         }).catch(() => {
                             console.error(`Could not add ${tileLayerId} vector layer`);
+                            layers.decrementCountLoading(vectorLayerId);
                             resolve();
                         });
                     }
