@@ -629,8 +629,9 @@ module.exports = {
                                 let layerIsEditable = false;
                                 if (layer && layer.meta) {
                                     let parsedMeta = JSON.parse(layer.meta);
-                                    if (parsedMeta) {
-                                        if (parsedMeta.vidi_layer_editable) {
+                                    console.log(`###`, layer.meta, parsedMeta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
                                             layerIsEditable = true;
                                         }
 
