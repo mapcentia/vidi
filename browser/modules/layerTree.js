@@ -295,8 +295,8 @@ module.exports = {
                             delete copiedItemProperties.gid;
 
                             let errorMessage = item.serverErrorMessage;
-                            if (item.serverErrorType && item.serverErrorType === `AUHTORIZATION_ERROR`) {
-                                errorMessage = `Not authorized to perform this action`;
+                            if (item.serverErrorType && item.serverErrorType === `AUTHORIZATION_ERROR`) {
+                                errorMessage = __(`Not authorized to perform this action`);
                             }
 
                             let errorRecord = $(`<div>
@@ -304,7 +304,6 @@ module.exports = {
                                 <button data-feature-geometry='${JSON.stringify(copiedItem.geometry)}' class="btn btn-secondary js-center-map-on-item" type="button" style="padding: 4px; margin-top: 0px; margin-bottom: 0px;">
                                     <i style="color: black;" class="fa fa-map-marker"></i>
                                 </button>
-                                <div style="overflow-x: scroll; font-size: 12px; color: gray; font-family: 'Courier New'">${JSON.stringify(copiedItemProperties)}</div>
                                 <div style="overflow-x: scroll; font-size: 12px; color: darkgray;">${errorMessage}</div>
                             </div>`);
 
