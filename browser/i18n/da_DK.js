@@ -153,6 +153,13 @@ module.exports = {
         "Languages": "Sprog",
 
         "Finish": "Afslut",
-        "Finish drawing": "Afslut tegning"
+        "Finish drawing": "Afslut tegning",
+
+        //Measurements
+        "Expand measurements control": "Aktiver måleværktøj",
+        "Collapse measurements control": "Deaktiver måleværktøj",
+        "Measure the distance": "Mål distance",
+        "Measure the area": "Mål areal",
+        "Delete all measurements": "Slet alle målinger"
     }
 };
