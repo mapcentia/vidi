@@ -198,7 +198,7 @@ module.exports = {
     statisticsHandler: (statistics, forceLayerUpdate = false, skipLastStatisticsCheck = false) => {
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
-        }       
+        }
         
         let currentStatisticsHash = btoa(JSON.stringify(statistics));
         let lastStatisticsHash = btoa(JSON.stringify(lastStatistics));
@@ -655,6 +655,20 @@ module.exports = {
                                         </div>
                                     </div>`);
                                 } else {
+                                    let layerIsActive = false;
+                                    let activeLayerName = false;
+                                    // If activeLayers are set, then no need to sync with the map
+                                    if (!forcedState) {
+                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                                            precheckedLayers.map(item => {
+                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}` || item.id && item.id === `v:${layer.f_table_schema}.${layer.f_table_name}`) {
+                                                    layerIsActive = true;
+                                                    activeLayerName = item.id;
+                                                }
+                                            });
+                                        }
+                                    }
+
                                     let layerIsTheTileOne = true;
                                     let layerIsTheVectorOne = false;
                                                                 
@@ -685,6 +699,13 @@ module.exports = {
                                                     layerIsTheTileOne = false;
                                                 }
                                             }
+                                        }
+                                    }
+
+                                    if (layerIsActive) {
+                                        if (activeLayerName.indexOf(`v:`) === 0) {
+                                            selectorLabel = vectorLayerIcon;
+                                            defaultLayerType = 'vector';
                                         }
                                     }
 
@@ -763,24 +784,12 @@ module.exports = {
                                         </button>`;
                                     }
 
-                                    let checked = ``;
-                                    // If activeLayers are set, then no need to sync with the map
-                                    if (!forcedState) {
-                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
-                                            precheckedLayers.map(item => {
-                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}`) {
-                                                    checked = `checked="checked"`;
-                                                }
-                                            });
-                                        }
-                                    }
-
                                     let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
                                         <div style="display: inline-block;">
                                             <div class="checkbox" style="width: 34px;">
                                                 <label>
                                                     <input type="checkbox"
-                                                        ${checked}
+                                                        ${(layerIsActive ? `checked="checked"` : ``)}
                                                         class="js-show-layer-control"
                                                         id="${layer.f_table_name}"
                                                         data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
