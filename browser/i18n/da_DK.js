@@ -169,6 +169,7 @@ module.exports = {
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
+        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
 
         // OfflineMap
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",

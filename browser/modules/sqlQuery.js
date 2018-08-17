@@ -277,7 +277,7 @@ module.exports = {
                             });
 
                             $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
                                     editor.delete(e, _key_, qstore);
                                 }
                             });
