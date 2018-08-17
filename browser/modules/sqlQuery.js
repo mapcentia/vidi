@@ -107,13 +107,31 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
+
+        /*
+                                    let layerIsEditable = false;
+                                    if (layer && layer.meta) {
+                                        let parsedMeta = JSON.parse(layer.meta);
+                                        if (parsedMeta && typeof parsedMeta === `object`) {
+                                            if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                                layerIsEditable = true;
+                                            }
+
+        */
+
         /**
          * A default template for GC2, with a loop
          * @type {string}
          */
         var defaultTemplate =
             `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil-alt" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
+                <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                    <button class="btn btn-primary btn-xs popup-edit-btn">
+                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-primary btn-xs popup-delete-btn">
+                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                    </div>
                   {{#_vidi_content.fields}}
                      {{#title}}<h4>{{title}}</h4>{{/title}}
                      {{#value}}

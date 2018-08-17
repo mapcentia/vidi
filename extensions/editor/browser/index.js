@@ -442,11 +442,16 @@ module.exports = {
             $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
-                    <Form schema={schema}
+                    <Form
+                        className="feature-attribute-editing-form"
+                        schema={schema}
                         uiSchema={uiSchema}
                         widgets={widgets}
-                        onSubmit={onSubmit}
-                    />
+                        onSubmit={onSubmit}>
+                        <div className="buttons">
+                            <button type="submit" className="btn btn-info">Submit</button>
+                        </div>
+                    </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
         };
@@ -654,14 +659,48 @@ module.exports = {
 
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
-                    <Form schema={schema}
+                    <Form
+                        className="feature-attribute-editing-form"
+                        schema={schema}
                         widgets={widgets}
                         uiSchema={uiSchema}
                         formData={e.feature.properties}
-                        onSubmit={onSubmit}
-                    />
+                        onSubmit={onSubmit}>
+                        <div className="buttons">
+                            <button type="submit" className="btn btn-info">Submit</button>
+                        </div>
+                    </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+            
+
+            /*
+           ReactDOM.render((
+            <div style={{"padding": "15px"}}>
+                <div style={{ "position": "relative" }}>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <h1>AAA</h1>
+                    <div className="buttons" style={{ "position": "absolute" }}>
+                        <button type="submit" className="btn btn-info">Submit</button>
+                    </div>
+                </div>
+            </div>
+        ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+        */
+
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
