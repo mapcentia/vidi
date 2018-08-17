@@ -447,7 +447,9 @@ module.exports = {
                 let activeLayers = [];
                 if (forcedState) {
                     order = forcedState.order;
-                    activeLayers = forcedState.activeLayers;
+                    if (`activeLayers` in forcedState) {
+                        activeLayers = forcedState.activeLayers;
+                    }
 
                     let layersThatAreNotInMeta = [];
                     let existingMeta = meta.getMetaData();
@@ -472,11 +474,11 @@ module.exports = {
                             layerFeatchPromises.push(switchLayer.init(item, true));
                         });
 
-                        Promise.all(layerFeatchPromises).then(() => {});
+                        Promise.all(layerFeatchPromises).then(() => {
+                            backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                        });
                     }
                 }
-
-                try{
 
                 layerTreeOrder = order;
 
@@ -527,7 +529,6 @@ module.exports = {
                 }
 
                 $("#layers").append(`<div id="layers_list"></div>`);
-
                 // Filling up groups and underlying layers (except ungrouped ones)
                 for (i = 0; i < arr.length; ++i) {
                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
@@ -629,7 +630,6 @@ module.exports = {
                                 let layerIsEditable = false;
                                 if (layer && layer.meta) {
                                     let parsedMeta = JSON.parse(layer.meta);
-                                    console.log(`###`, layer.meta, parsedMeta);
                                     if (parsedMeta && typeof parsedMeta === `object`) {
                                         if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
                                             layerIsEditable = true;
@@ -792,7 +792,7 @@ module.exports = {
                                     $(switcher).prop('checked', true);
                                     _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                                 });
 
                                 $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
@@ -801,7 +801,7 @@ module.exports = {
                                     $(switcher).prop('checked', true);
                                     _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                                     $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
-                                    backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+                                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                                 });
                                 
                                 $("#collapse" + base64GroupName).append(layerControlRecord);
@@ -841,8 +841,6 @@ module.exports = {
                     }
                 });
 
-            }catch(e){console.log(e);}
-
                 if (lastStatistics) {
                     _self.statisticsHandler(lastStatistics, false, true);
                 }
@@ -872,6 +870,7 @@ module.exports = {
 
                     layerTreeIsReady = true;
                     backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
 
                     resolve();
                 }, 1000);
