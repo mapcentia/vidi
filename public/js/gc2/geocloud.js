@@ -60,7 +60,7 @@ geocloud = (function () {
         resolutions = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
             4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
             76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
-            1.19432856696, 0.597164283478, 0.298582141739, 0.149291070869, 0.074645535],
+            1.19432856696, 0.597164283478, 0.298582141739, 0.149291070869, 0.074645535, 0.037322767, 0.018661384, 0.009330692],
         googleMapAdded = {}, yandexMapAdded = {};
     // Try to set host from script if not set already
     if (typeof window.geocloud_host === "undefined") {
@@ -789,6 +789,7 @@ geocloud = (function () {
                     break;
                 case "ol3":
                     console.error("Not implemented yet for OpenLayers 3");
+
                     break;
                 case "leaflet":
                     var layers = this.map._layers;
@@ -1206,7 +1207,7 @@ geocloud = (function () {
                             l.id = name;
                             break;
                         case "leaflet":
-                            l = new L.gridLayer.googleMutant(type);
+                            l = new L.gridLayer.googleMutant({type: type.toLowerCase()});
                             l.baseLayer = true;
                             lControl.addBaseLayer(l, prettyName);
                             l.id = name;
@@ -1766,8 +1767,8 @@ geocloud = (function () {
                 names: [],
                 resolutions: this.map.resolutions,
                 type: "wms",
-                maxZoom: 21,
-                maxNativeZoom: 21,
+                maxZoom: 26,
+                maxNativeZoom: 26,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
