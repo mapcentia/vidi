@@ -785,10 +785,11 @@ geocloud = (function () {
             var layerArr = [], i;
             switch (MAPLIB) {
                 case "ol2":
-                    //console.error(`Not implemented yet for OpenLayers 2`);
+                    console.error("Not implemented yet for OpenLayers 2");
                     break;
                 case "ol3":
-                    //console.error(`Not implemented yet for OpenLayers 3`);
+                    console.error("Not implemented yet for OpenLayers 3");
+
                     break;
                 case "leaflet":
                     var layers = this.map._layers;
