@@ -1025,6 +1025,7 @@ h4 small {
 }
 .feature-attribute-editing-form > .buttons {
   background-color: white;
-  bottom: 0px;
+  bottom: -20px;
   position: sticky !important;
+  position: -webkit-sticky !important;
 }

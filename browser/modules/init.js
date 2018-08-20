@@ -310,36 +310,39 @@ module.exports = {
                         throw new Error(`Unable to store current application version`);
                     });
                 } else {
-                    if (parseInt(window.vidiConfig.appVersion) !== parseInt(value)) {
-                        if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
-                            let unregisteringRequests = [];
+                    // If two versions are correctly detected
+                    if (isNaN(parseInt(window.vidiConfig.appVersion)) === false && isNaN(parseInt(value)) === false) {
+                        if (parseInt(window.vidiConfig.appVersion) > parseInt(value)) {
+                            if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
+                                let unregisteringRequests = [];
 
-                            // Unregister service worker
-                            navigator.serviceWorker.getRegistrations().then((registrations) => {
-                                for(let registration of registrations) {
-                                    console.log(`Versioning: unregistering service worker`, registration);
-                                    unregisteringRequests.push(registration.unregister());
-                                    registration.unregister();
-                                }
-                            });
-
-                            Promise.all(unregisteringRequests).then((values) => {
-                                // Clear caches
-                                caches.keys().then(function(names) {
-                                    for (let name of names) {
-                                        console.log(`Versioning: clearing cache`, name);
-                                        caches.delete(name);
+                                // Unregister service worker
+                                navigator.serviceWorker.getRegistrations().then((registrations) => {
+                                    for(let registration of registrations) {
+                                        console.log(`Versioning: unregistering service worker`, registration);
+                                        unregisteringRequests.push(registration.unregister());
+                                        registration.unregister();
                                     }
                                 });
 
-                                // Remove current app version
-                                localforage.removeItem('appVersion').then(() => {
-                                    location.reload();
+                                Promise.all(unregisteringRequests).then((values) => {
+                                    // Clear caches
+                                    caches.keys().then(function(names) {
+                                        for (let name of names) {
+                                            console.log(`Versioning: clearing cache`, name);
+                                            caches.delete(name);
+                                        }
+                                    });
+
+                                    // Remove current app version
+                                    localforage.removeItem('appVersion').then(() => {
+                                        location.reload();
+                                    });
                                 });
-                            });
+                            }
+                        } else {
+                            console.log('Versioning: new application version is not available');
                         }
-                    } else {
-                        console.log('Versioning: new application version is not available');
                     }
                 }
             });
