@@ -6,6 +6,8 @@ before_script:
   - cd extensions/keplergl/browser
   - npm install
   - cd ../../..
+  - ls config
+  - npm ls --depth=0
   - grunt production
 language: node_js
 node_js:
