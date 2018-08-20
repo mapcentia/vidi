@@ -344,7 +344,32 @@ module.exports = module.exports = {
      */
     applyState: (newState) => {
         if (newState === false) {
-            return _self.toggleSideBySideControl(false);
+            let availableBaseLayers = _self.getAvailableBaseLayers();
+            if (Array.isArray(availableBaseLayers) && availableBaseLayers.length > 0) {
+                let firstBaseLayerId = availableBaseLayers[0].id;
+                return setBaseLayer.init(firstBaseLayerId).then(() => {
+                    let minZoomLevel = false;
+                    let existingLayers = cloud.get().getBaseLayers();
+                    if (Array.isArray(existingLayers) && existingLayers.length === 1) {
+                        for (let key in existingLayers[0]) {
+                            let layer = existingLayers[0][key];
+                            if (`id` in layer && layer.id === firstBaseLayerId) {
+                                minZoomLevel = layer.options.minZoom;   
+                            }
+                        }
+                    }
+
+                    if (minZoomLevel === false) {
+                        console.error(`Unable to detect minimum zoom level`);
+                    } else {
+                        cloud.get().map.setZoom(minZoomLevel);
+                    }
+
+                    return _self.toggleSideBySideControl(false);
+                });
+            } else {
+                console.error(`Unable to select first available base layer`);
+            }
         } else {
             return _self.toggleSideBySideControl(newState.sideBySideMode);
         }
