@@ -2,6 +2,9 @@ before_script:
   - npm install -g grunt-cli
   - npm install
   - cp config/config.travis.js config/config.js
+  - cd extensions/keplergl/browser
+  - npm install
+  - cd ../../..
   - grunt production
 language: node_js
 node_js:
