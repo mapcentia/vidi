@@ -58,6 +58,8 @@ var BACKEND = require('../../config/config.js').backend;
 var extensions;
 
 
+let editingIsEnabled = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -90,9 +92,10 @@ module.exports = {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
-        try {
+        let editor = false;
+        if (`editor` in extensions) {
             editor = extensions.editor.index;
-        } catch (e) {
+            editingIsEnabled = true;
         }
 
         this.reset(qstore);
@@ -107,41 +110,28 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
-
-        /*
-                                    let layerIsEditable = false;
-                                    if (layer && layer.meta) {
-                                        let parsedMeta = JSON.parse(layer.meta);
-                                        if (parsedMeta && typeof parsedMeta === `object`) {
-                                            if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                                layerIsEditable = true;
-                                            }
-
-        */
-
         /**
          * A default template for GC2, with a loop
          * @type {string}
          */
-        var defaultTemplate =
-            `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                    <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                    </button>
-                    <button class="btn btn-primary btn-xs popup-delete-btn">
-                        <i class="fa fa-trash" aria-hidden="true"></i></button>
-                    </div>
-                  {{#_vidi_content.fields}}
-                     {{#title}}<h4>{{title}}</h4>{{/title}}
-                     {{#value}}
-                       <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                     {{/value}}
-                     {{^value}}
-                       <p class="empty">null</p>
-                     {{/value}}
-                  {{/_vidi_content.fields}}
-                </div>`;
+        var defaultTemplate = `<div class="cartodb-popup-content">
+        <div class="form-group gc2-edit-tools" style="visibility: hidden">
+            <button class="btn btn-primary btn-xs popup-edit-btn">
+                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+            </button>
+            <button class="btn btn-primary btn-xs popup-delete-btn">
+                <i class="fa fa-trash" aria-hidden="true"></i></button>
+            </div>
+            {{#_vidi_content.fields}}
+                {{#title}}<h4>{{title}}</h4>{{/title}}
+                {{#value}}
+                <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                {{/value}}
+                {{^value}}
+                <p class="empty">null</p>
+                {{/value}}
+            {{/_vidi_content.fields}}
+        </div>`;
 
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layer
@@ -266,12 +256,30 @@ module.exports = {
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            let layerIsEditable = false;
+                            if (metaDataKeys[value].meta) {
+                                let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                                if (parsedMeta && typeof parsedMeta === `object`) {
+                                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                        layerIsEditable = true;
+                                    }
+                                }
+                            }
+
+                            if (editingIsEnabled && layerIsEditable) {
+                                $(".popup-edit-btn").show();
+                                $(".popup-delete-btn").show();
+                            } else {
+                                $(".popup-edit-btn").hide();
+                                $(".popup-delete-btn").hide();
+                            }
+
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(e, _key_, qstore);
                             });
 
                             $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
                                     editor.delete(e, _key_, qstore);
                                 }
                             });

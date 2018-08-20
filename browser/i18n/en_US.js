@@ -168,6 +168,7 @@ module.exports = {
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
+        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
 
         // OfflineMap
         "OfflineMap block description": "Here specific map areas can be stored to be used offline",
