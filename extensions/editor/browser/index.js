@@ -673,6 +673,9 @@ module.exports = {
                         uiSchema={uiSchema}
                         formData={e.feature.properties}
                         onSubmit={onSubmit}>
+                        <div className="buttons">
+                            <button type="submit" className="btn btn-info">Submit</button>
+                        </div>
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
