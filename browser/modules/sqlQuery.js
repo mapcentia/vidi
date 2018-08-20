@@ -164,16 +164,18 @@ module.exports = {
             backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
-                var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
-                    4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
-                    76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
-                    1.19432856696, 0.597164283478, 0.298582141739, 0.149291, 0.074645535];
+                var res = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
+                    4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
+                    152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
+                    4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.298582141739,
+                    0.149291070869, 0.074645535435, 0.0373227677175, 0.018661384, 0.009330692, 0.004665346, 0.002332673, 0.001166337];
                 distance = 10 * res[cloud.get().getZoom()];
             }
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql, template;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql,
+                        template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -298,11 +300,11 @@ module.exports = {
                             event.stopPropagation();
                         });
 
-                        $("#_download_excel_" + storeId ).click(function() {
-                           download(sql,"excel");
+                        $("#_download_excel_" + storeId).click(function () {
+                            download(sql, "excel");
                         });
-                        $("#_download_geojson_" + storeId).click(function() {
-                           download(sql,"geojson");
+                        $("#_download_geojson_" + storeId).click(function () {
+                            download(sql, "geojson");
                         });
 
 
@@ -430,7 +432,7 @@ module.exports = {
         $("#info-pane").empty();
     },
 
-    setDownloadFunction: function(fn) {
+    setDownloadFunction: function (fn) {
         download = fn
     }
 };
@@ -458,8 +460,8 @@ var download = function (sql, format) {
     request.open('POST', '/api/sql/' + db, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
     request.responseType = 'blob';
-    request.onload = function() {
-        if(request.status === 200) {
+    request.onload = function () {
+        if (request.status === 200) {
             var filename, type;
             switch (format) {
                 case "excel":
@@ -471,7 +473,7 @@ var download = function (sql, format) {
                     type = 'application/json';
                     break;
             }
-            var blob = new Blob([request.response], { type: type });
+            var blob = new Blob([request.response], {type: type});
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = filename;
