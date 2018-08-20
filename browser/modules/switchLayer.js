@@ -155,8 +155,11 @@ module.exports = module.exports = {
                             tileLayersCacheBuster = Math.random();
                         }
 
-                        tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
-                        tileLayer.redraw();
+                        // TMS tile layer has the setUrl() method, the WMS one does not
+                        if (`setUrl` in tileLayer) {
+                            tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
+                            tileLayer.redraw();
+                        }
 
                         resolve();
                     }).catch((err) => {
