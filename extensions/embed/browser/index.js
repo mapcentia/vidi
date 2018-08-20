@@ -201,5 +201,7 @@ module.exports = {
 
             
         });
+        $("#locale-btn").append($(".leaflet-control-locate"));
+
     }
 };

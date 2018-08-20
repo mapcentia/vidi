@@ -440,6 +440,8 @@ module.exports = {
      * requests are performed one by one.
      */
     create: (forcedState = false, createdByEditor = false) => {
+        if (LOG) console.log(`${MODULE_NAME}: create`, forcedState, createdByEditor);
+
         lastStatistics = false;
 
         if (editingIsEnabled === false && createdByEditor) {
@@ -470,13 +472,17 @@ module.exports = {
 
                 layerTreeIsReady = false;
                 if (forcedState) {
+                    if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, _self.getActiveLayers());
+
                     _self.getActiveLayers().map(item => {
                         // Disabling active layers
                         switchLayer.init(item, false, true, false);
                     });
                 }
 
+                // Emptying the tree
                 $("#layers").empty();
+
                 _self.getLayersOrder().then(order => {
                     let activeLayers = [];
                     if (forcedState) {
@@ -491,16 +497,18 @@ module.exports = {
                             activeLayers.map(layerName => {
                                 let correspondingMeta = false;
                                 existingMeta.data.map(layer => {
-                                    if (layer.f_table_schema + '.' + layer.f_table_name === layerName) {
+                                    if (layer.f_table_schema + '.' + layer.f_table_name === layerName.replace(`v:`, ``)) {
                                         correspondingMeta = layer;
                                     }
                                 });
 
                                 if (correspondingMeta === false) {
-                                    layersThatAreNotInMeta.push(layerName);
+                                    layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
                                 }
                             });
                         }
+
+                        if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
                         if (layersThatAreNotInMeta.length > 0) {
                             let layerFeatchPromises = [];
@@ -900,6 +908,8 @@ module.exports = {
                     
                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                     setTimeout(() => {
+                        if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
+
                         if (activeLayers) {   
                             activeLayers.map(layerName => {
                                 if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
