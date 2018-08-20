@@ -144,7 +144,7 @@ module.exports = {
             {"offlineMap": ["index"]},
             {"session": ["index"]},
             {"editor": ["index"]},
-            {"keplergl": ["index"]},
+            //{"keplergl": ["index"]},
             //{"embed": ["index"]},
         ],
         "server": [
@@ -211,7 +211,7 @@ module.exports = {
         "coordinates",
         "session",
         "editor",
-        "keplergl",
+        //"keplergl",
         //"embed",
         "offlineMap"
     ],
