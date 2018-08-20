@@ -256,6 +256,7 @@ module.exports = {
      * @returns {{}}
      */
     createFormObj: function (fields, pkey, f_geometry_column, fieldConf) {
+        let required = [];
         let properties = {};
         let uiSchema = {};
 
@@ -268,9 +269,14 @@ module.exports = {
 
                 properties[key] = { title, type: `string` };
 
+                if (fields[key].is_nullable !== true) {
+                    required.push(key);
+                }
+
                 if (fields[key]) {
                     switch (fields[key].type) {
                         case `int`:
+                        case `integer`:
                             properties[key].type = `integer`;
                             break;
                         case `date`:
@@ -321,10 +327,11 @@ module.exports = {
         return {
             schema: {
                 type: "object",
+                required,
                 properties
             },
             uiSchema
-        }
+        };
     },
 
 
@@ -666,41 +673,9 @@ module.exports = {
                         uiSchema={uiSchema}
                         formData={e.feature.properties}
                         onSubmit={onSubmit}>
-                        <div className="buttons">
-                            <button type="submit" className="btn btn-info">Submit</button>
-                        </div>
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            
-
-            /*
-           ReactDOM.render((
-            <div style={{"padding": "15px"}}>
-                <div style={{ "position": "relative" }}>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <h1>AAA</h1>
-                    <div className="buttons" style={{ "position": "absolute" }}>
-                        <button type="submit" className="btn btn-info">Submit</button>
-                    </div>
-                </div>
-            </div>
-        ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-        */
-
     
             $("#editor-attr-dialog").animate({
                 bottom: "0"
