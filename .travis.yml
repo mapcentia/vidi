@@ -1,5 +1,8 @@
 before_script:
+  - npm install -g grunt-cli
   - npm install
+  - cp config/config.travis.js config/config.js
+  - grunt production
 language: node_js
 node_js:
   - "8"
