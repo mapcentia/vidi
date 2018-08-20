@@ -155,7 +155,8 @@ module.exports = module.exports = {
                             tileLayersCacheBuster = Math.random();
                         }
 
-                        // TMS tile layer has the setUrl() method, the WMS one does not
+                        // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
+                        // which does not have the setUrl() method
                         if (`setUrl` in tileLayer) {
                             tileLayer.setUrl(tileLayer._url + "?" + tileLayersCacheBuster);
                             tileLayer.redraw();
