@@ -28,7 +28,7 @@ body {
 }
 .leaflet-bar {
   border: none !important;
-  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12) !important;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
   border-radius: 4px !important;
 }
 #side-panel {
@@ -1028,4 +1028,5 @@ h4 small {
   bottom: -20px;
   position: sticky !important;
   position: -webkit-sticky !important;
+  z-index: 1000;
 }
