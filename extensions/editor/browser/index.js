@@ -537,6 +537,10 @@ module.exports = {
             me.stopEdit();
             infoClick.deactivate();
 
+            e.on(`editable:editing`, () => {
+                featureWasEdited = true;
+            });
+
             e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
             if (isVectorLayer) {
                 e.id = "v:" + e.id;
@@ -586,9 +590,6 @@ module.exports = {
 
                 default:
                     editor = e.enableEdit();
-                    e.on(`editable:editing`, () => {
-                        featureWasEdited = true;
-                    });
                     break;
             }
 
@@ -813,6 +814,7 @@ module.exports = {
         if (editedFeature) {
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point`) {
+                editedFeature.disableEdit();
                 if (featureWasEdited) {
                     switchLayer.init(editedFeature.id, false);
                     switchLayer.init(editedFeature.id, true);
