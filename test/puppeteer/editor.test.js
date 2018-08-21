@@ -60,6 +60,9 @@ describe('Editor', () => {
             await helpers.sleep(1000);
             await page.focus('#root_id');
             await page.keyboard.type('1000');
+            await page.focus('#root_stringfield');
+            await page.keyboard.type('222');
+
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
             await helpers.sleep(6000);
@@ -288,10 +291,11 @@ describe('Editor', () => {
         await helpers.sleep(1000);
 
         // Filling in attributes of the added feature
-        await page.evaluate(`$('#root_id').val('111')`);
-        await helpers.sleep(1000);
+        await page.focus('#root_id');
+        await page.keyboard.type('111');
+        await page.focus('#root_stringfield');
+        await page.keyboard.type('222');
         await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-
         await helpers.sleep(4000);
 
         // Created feature is not rejected by server yet, so checking the failed indicator
