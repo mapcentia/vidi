@@ -34,6 +34,8 @@ let editor;
 
 let editedFeature = false;
 
+let featureWasEdited = false;
+
 let nonCommitedEditedFeature = false;
 
 let switchLayer;
@@ -542,6 +544,7 @@ module.exports = {
 
             e.initialFeatureJSON = e.toGeoJSON();
 
+            featureWasEdited = false;
             // Hack to edit (Multi)Point layers
             // Create markers, which can be dragged
             switch (e.feature.geometry.type) {
@@ -583,6 +586,9 @@ module.exports = {
 
                 default:
                     editor = e.enableEdit();
+                    e.on(`editable:editing`, () => {
+                        featureWasEdited = true;
+                    });
                     break;
             }
 
@@ -805,8 +811,13 @@ module.exports = {
 
         // If feature was edited, then reload the layer
         if (editedFeature) {
-            switchLayer.init(editedFeature.id, false);
-            switchLayer.init(editedFeature.id, true);
+            // No need to reload layer if point feature was edited, as markers are destroyed anyway
+            if (editedFeature.feature.geometry.type !== `Point`) {
+                if (featureWasEdited) {
+                    switchLayer.init(editedFeature.id, false);
+                    switchLayer.init(editedFeature.id, true);
+                }
+            }
         }
 
         if (markers) {
@@ -816,7 +827,9 @@ module.exports = {
             });
         }
 
-        // Close the attribut dialog
+        featureWasEdited = false;
+
+        // Close the attribute dialog
         $("#" + EDITOR_CONTAINER_ID).animate({
             bottom: "-100%"
         }, 500, function () {
