@@ -127,6 +127,7 @@ const MarkupGenerator = {
             </ul>
         </div>`);
     }
+
 }
 
 module.exports = MarkupGenerator;
