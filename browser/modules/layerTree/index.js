@@ -37,7 +37,13 @@ var _self;
  *
  * @type {*|exports|module.exports}
  */
-var urlparser = require('./urlparser');
+var urlparser = require('./../urlparser');
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var makrupGenerator = require('./markupGenerator');
 
 /**
  * @type {string}
@@ -48,7 +54,7 @@ var db = urlparser.db;
  *
  * @type {*|exports|module.exports}
  */
-let APIBridgeSingletone = require('./api-bridge');
+let APIBridgeSingletone = require('./../api-bridge');
 
 /**
  *
@@ -396,20 +402,9 @@ module.exports = {
     },
 
     _createToggleOfflineModeControl() {
-        let toggleOfllineOnlineMode = false;
+        let toggleOfllineOnlineMode = $(makrupGenerator.getToggleOfflineModeSelectorDisabled());
         if (`serviceWorker` in navigator) {
-            toggleOfllineOnlineMode = $(`<div class="panel panel-default">
-                <div class="panel-body">
-                    <div class="togglebutton">
-                        <label>
-                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                            <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                            <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                            <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                        </label>
-                    </div>
-                </div>
-            </div>`);
+            toggleOfllineOnlineMode = $(makrupGenerator.getToggleOfflineModeSelectorEnabled());
 
             if (apiBridgeInstance.offlineModeIsEnforced()) {
                 $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
@@ -424,11 +419,6 @@ module.exports = {
 
                 userPreferredForceOfflineMode = $(event.target).is(':checked');
             });
-        } else {
-            toggleOfllineOnlineMode = $(`<div class="alert alert-dismissible alert-warning" role="alert">
-                <button type="button" class="close" data-dismiss="alert">×</button>
-                ${__('This browser does not support Service Workers, some features may be unavailable')}
-            </div>`);
         }
 
         return toggleOfllineOnlineMode;
@@ -528,7 +518,7 @@ module.exports = {
 
                     layerTreeOrder = order;
 
-                    var base64GroupName, groups, metaData, i, l, count, displayInfo, tooltip;
+                    var base64GroupName, groups, metaData, i, l, count, displayInfo;
 
                     if (editingIsEnabled) {
                         let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
@@ -565,17 +555,7 @@ module.exports = {
                             // Only if container doesn't exist
                             // ===============================
                             if ($("#layer-panel-" + base64GroupName).length === 0) {
-                                $("#layers_list").append(`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-                                    <div class="panel-heading" role="tab">
-                                        <h4 class="panel-title">
-                                            <div class="layer-count badge">
-                                                <span>0</span> / <span></span>
-                                            </div>
-                                            <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${arr[i]}</a>
-                                        </h4>
-                                    </div>
-                                    <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
-                                </div>`);
+                                $("#layers_list").append(makrupGenerator.getGroupPanel(base64GroupName, arr[i]));
 
                                 // Append to inner group container
                                 // ===============================
@@ -591,16 +571,6 @@ module.exports = {
                             }
 
                             let layersForCurrentGroup = _self.sortLayers(order, notSortedLayersForCurrentGroup, arr[i]);
-
-
-
-
-
-                            // @todo Here go subgroups
-                            console.log(`### layersForCurrentGroup`, layersForCurrentGroup);
-
-
-
 
                             // Add layers
                             // ==========
@@ -701,13 +671,7 @@ module.exports = {
                                         });
                                     }
 
-                                    tooltip = layer.f_table_abstract || "";
-
                                     let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-
-                                    let regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
-                                    let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
-                                    let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
 
                                     let layerTypeSelector = false;
                                     if (singleTypeLayer) {
@@ -721,76 +685,16 @@ module.exports = {
                                             </div>`;
                                         }
                                     } else {
-                                        layerTypeSelector = `<div class="dropdown">
-                                            <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                                                <span class="js-dropdown-label">${selectorLabel}</span>
-                                                <span class="caret"></span>
-                                            </button>
-                                            <ul class="dropdown-menu">
-                                                <li>
-                                                    <a class="js-layer-type-selector-tile" href="javascript:void(0)">${tileLayerIcon} ${__('Tile')}</a>
-                                                </li>
-                                                <li>
-                                                    <a class="js-layer-type-selector-vector" href="javascript:void(0)">${vectorLayerIcon} ${__('Vector')}</a>
-                                                </li>
-                                            </ul>
-                                        </div>`;
+                                        layerTypeSelector = makrupGenerator.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
                                     }
 
                                     let addButton = ``;
                                     if (editingIsEnabled && layerIsEditable) {
-                                        addButton = `<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
-                                            data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
-                                            <i class="fa fa-plus"></i>
-                                        </button>`;
+                                        addButton = makrupGenerator.getAddButton(layerKeyWithGeom);
                                     }
 
-                                    let layerControlRecord = $(`<li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px;">
-                                        <div style="display: inline-block;">
-                                            <div class="checkbox" style="width: 34px;">
-                                                <label>
-                                                    <input type="checkbox"
-                                                        ${(layerIsActive ? `checked="checked"` : ``)}
-                                                        class="js-show-layer-control"
-                                                        id="${layer.f_table_name}"
-                                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                                        data-gc2-layer-type="${defaultLayerType}">
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div style="display: inline-block;">${layerTypeSelector}</div>
-                                        <div style="display: inline-block;">
-                                            <span>${text}${lockedLayer}</span>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
-                                                <i class="fa fa-plus"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
-                                                <i class="fa fa-edit"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
-                                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
-                                                <i class="fa fa-plus"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
-                                                <i class="fa fa-edit"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
-                                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                                            </button>
-                                            <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
-                                                <i class="fa fa-undo"></i>
-                                            </button>
-                                        </div>
-                                        <div style="display: inline-block;">
-                                            ${addButton}
-                                            <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
-                                                style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
-                                        </div>
-                                        <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-                                    </li>`);
+                                    let layerControlRecord = $(makrupGenerator.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
+                                        layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
 
                                     $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                                         let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
@@ -809,7 +713,7 @@ module.exports = {
                                         $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                                         backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                                     });
-                                    
+
                                     $("#collapse" + base64GroupName).append(layerControlRecord);
                                     l.push({});
                                 }
