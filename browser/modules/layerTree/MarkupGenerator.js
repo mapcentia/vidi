@@ -8,15 +8,17 @@
 
 const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
 
-const MarkupGenerator = {
-    getAddButton: (layerKeyWithGeom) => {
+class MarkupGenerator {
+    constructor() {}
+
+    getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
             data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
             <i class="fa fa-plus"></i>
         </button>`);
-    },
+    }
 
-    getGroupPanel: (base64GroupName, name) => {
+    getGroupPanel(base64GroupName, name) {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
             <div class="panel-heading" role="tab">
                 <h4 class="panel-title">
@@ -28,9 +30,9 @@ const MarkupGenerator = {
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>
         </div>`);
-    },
+    }
 
-    getToggleOfflineModeSelectorEnabled: () => {
+    getToggleOfflineModeSelectorEnabled() {
         return (`<div class="panel panel-default">
             <div class="panel-body">
                 <div class="togglebutton">
@@ -43,16 +45,16 @@ const MarkupGenerator = {
                 </div>
             </div>
         </div>`);
-    },
+    }
 
-    getToggleOfflineModeSelectorDisabled: () => {
+    getToggleOfflineModeSelectorDisabled() {
         return (`<div class="alert alert-dismissible alert-warning" role="alert">
             <button type="button" class="close" data-dismiss="alert">×</button>
             ${__('This browser does not support Service Workers, some features may be unavailable')}
         </div>`);
-    },
+    }
 
-    getLayerControlRecord: (layerKeyWithGeom, layerKey, layerIsActive, layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) => {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -60,7 +62,7 @@ const MarkupGenerator = {
         return (`<li
             class="layer-item list-group-item"
             data-gc2-layer-key="${layerKeyWithGeom}"
-            style="min-height: 40px; margin-top: 10px; border: 1px solid red; background-color: white;">
+            style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
                     <div class="checkbox" style="width: 34px;">
@@ -74,7 +76,9 @@ const MarkupGenerator = {
                         </label>
                     </div>
                 </div>
+
                 <div style="display: inline-block;">${layerTypeSelector}</div>
+
                 <div style="display: inline-block;">
                     <span>${text}${lockedLayer}</span>
                     <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
@@ -99,18 +103,20 @@ const MarkupGenerator = {
                         <i class="fa fa-undo"></i>
                     </button>
                 </div>
+
                 <div style="display: inline-block;">
                     ${addButton}
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
+
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
             </div>
-            <div class="js-filters"></div>
+            <div class="js-layer-settings"></div>
         </li>`);
-    },
+    }
 
-    getLayerTypeSelector: (selectorLabel, tileLayerIcon, vectorLayerIcon) => {
+    getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {
         return (`<div class="dropdown">
             <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
@@ -127,7 +133,6 @@ const MarkupGenerator = {
             </ul>
         </div>`);
     }
-
 }
 
 module.exports = MarkupGenerator;
