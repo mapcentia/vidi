@@ -518,7 +518,7 @@ module.exports = {
 
                     layerTreeOrder = order;
 
-                    var base64GroupName, groups, metaData, i, l, count, displayInfo;
+                    var base64GroupName, groups, metaData, i, l, count;
 
                     if (editingIsEnabled) {
                         let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
@@ -575,148 +575,26 @@ module.exports = {
                             // Add layers
                             // ==========
                             for (var u = 0; u < layersForCurrentGroup.length; ++u) {
-                                let layer = layersForCurrentGroup[u];
-                                var text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
-                                if (layer.baselayer) {
-                                    $("#base-layer-list").append(`<div class='list-group-item'>
-                                        <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
-                                            <label class='baselayer-label'>
-                                                <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
-                                            </label>
-                                        </div>
-                                    </div>`);
-                                } else {
-                                    let layerIsActive = false;
-                                    let activeLayerName = false;
-                                    // If activeLayers are set, then no need to sync with the map
-                                    if (!forcedState) {
-                                        if (precheckedLayers && Array.isArray(precheckedLayers)) {
-                                            precheckedLayers.map(item => {
-                                                if (item.id && item.id === `${layer.f_table_schema}.${layer.f_table_name}` || item.id && item.id === `v:${layer.f_table_schema}.${layer.f_table_name}`) {
-                                                    layerIsActive = true;
-                                                    activeLayerName = item.id;
-                                                    numberOfActiveLayers++;
-                                                }
-                                            });
-                                        }
-                                    }
+                                let localLayer = layersForCurrentGroup[u];
 
-                                    let layerIsTheTileOne = true;
-                                    let layerIsTheVectorOne = false;
-                                                                
-                                    let singleTypeLayer = true;
-                                    let selectorLabel = tileLayerIcon;
-                                    let defaultLayerType = 'tile';
-
-                                    let layerIsEditable = false;
-                                    if (layer && layer.meta) {
-                                        let parsedMeta = JSON.parse(layer.meta);
-                                        if (parsedMeta && typeof parsedMeta === `object`) {
-                                            if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                                layerIsEditable = true;
+                                let layerIsActive = false;
+                                let activeLayerName = false;
+                                // If activeLayers are set, then no need to sync with the map
+                                if (!forcedState) {
+                                    if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                                        precheckedLayers.map(item => {
+                                            if (item.id && item.id === `${localLayer.f_table_schema}.${localLayer.f_table_name}`
+                                                || item.id && item.id === `v:${localLayer.f_table_schema}.${localLayer.f_table_name}`) {
+                                                layerIsActive = true;
+                                                activeLayerName = item.id;
+                                                numberOfActiveLayers++;
                                             }
-
-                                            if (`meta_desc` in parsedMeta) {
-                                                displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
-                                            }
-
-                                            if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                                                layerIsTheVectorOne = true;
-                                                singleTypeLayer = false;
-
-                                                if (parsedMeta.vidi_layer_type === 'v') {
-                                                    defaultLayerType = 'vector';
-                                                    selectorLabel = vectorLayerIcon;
-                                                    singleTypeLayer = true;
-                                                    layerIsTheTileOne = false;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    if (layerIsActive) {
-                                        if (activeLayerName.indexOf(`v:`) === 0) {
-                                            selectorLabel = vectorLayerIcon;
-                                            defaultLayerType = 'vector';
-                                        }
-                                    }
-
-                                    let layerKey = layer.f_table_schema + "." + layer.f_table_name;
-                                    let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-                                    if (layerIsTheVectorOne) {
-                                        store['v:' + layerKey] = new geocloud.sqlStore({
-                                            jsonp: false,
-                                            method: "POST",
-                                            host: "",
-                                            db: db,
-                                            uri: "/api/sql",
-                                            clickable: true,
-                                            id: 'v:' + layerKey,
-                                            name: 'v:' + layerKey,
-                                            lifetime: 0,
-                                            styleMap: styles['v:' + layerKey],
-                                            sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
-                                            onLoad: (l) => {
-                                                if (l === undefined) return;
-                                                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
-                                                layers.decrementCountLoading(l.id);
-                                                backboneEvents.get().trigger("doneLoading:layers", l.id);
-                                            },
-                                            transformResponse: (response, id) => {
-                                                return apiBridgeInstance.transformResponseHandler(response, id);
-                                            },
-                                            onEachFeature: onEachFeature['v:' + layerKey]
                                         });
                                     }
-
-                                    let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-
-                                    let layerTypeSelector = false;
-                                    if (singleTypeLayer) {
-                                        if (layerIsTheTileOne) {
-                                            layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                                                ${tileLayerIcon}
-                                            </div>`;
-                                        } else if (layerIsTheVectorOne) {
-                                            layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                                                ${vectorLayerIcon}
-                                            </div>`;
-                                        }
-                                    } else {
-                                        layerTypeSelector = makrupGenerator.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
-                                    }
-
-                                    let addButton = ``;
-                                    if (editingIsEnabled && layerIsEditable) {
-                                        addButton = makrupGenerator.getAddButton(layerKeyWithGeom);
-                                    }
-
-                                    let layerControlRecord = $(makrupGenerator.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                                        layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
-
-                                    $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
-                                        let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                        $(switcher).data('gc2-layer-type', 'tile');
-                                        $(switcher).prop('checked', true);
-                                        _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
-                                        $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
-                                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                                    });
-
-                                    $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
-                                        let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                                        $(switcher).data('gc2-layer-type', 'vector');
-                                        $(switcher).prop('checked', true);
-                                        _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
-                                        $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
-                                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                                    });
-
-                                    $("#collapse" + base64GroupName).append(layerControlRecord);
-                                    l.push({});
                                 }
+
+                                _self.generateLayerRecord(localLayer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
+                                l.push({});
                             }
 
                             $("#collapse" + base64GroupName).sortable({
@@ -805,6 +683,141 @@ module.exports = {
         }
 
         return result;
+    },
+
+    /**
+     * Generates separate layer control record
+     * 
+     * @returns {void}
+     */
+    generateLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName) => {
+        let displayInfo;
+        let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
+
+        if (layer.baselayer) {
+            $("#base-layer-list").append(`<div class='list-group-item'>
+                <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
+                    <label class='baselayer-label'>
+                        <input type='radio' name='baselayers'>${text}<span class='fa fa-check' aria-hidden='true'></span>
+                    </label>
+                </div>
+            </div>`);
+        } else {
+            let layerIsTheTileOne = true;
+            let layerIsTheVectorOne = false;
+                                        
+            let singleTypeLayer = true;
+            let selectorLabel = tileLayerIcon;
+            let defaultLayerType = 'tile';
+
+            let layerIsEditable = false;
+            if (layer && layer.meta) {
+                let parsedMeta = JSON.parse(layer.meta);
+                if (parsedMeta && typeof parsedMeta === `object`) {
+                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                        layerIsEditable = true;
+                    }
+
+                    if (`meta_desc` in parsedMeta) {
+                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                    }
+
+                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                        layerIsTheVectorOne = true;
+                        singleTypeLayer = false;
+
+                        if (parsedMeta.vidi_layer_type === 'v') {
+                            defaultLayerType = 'vector';
+                            selectorLabel = vectorLayerIcon;
+                            singleTypeLayer = true;
+                            layerIsTheTileOne = false;
+                        }
+                    }
+                }
+            }
+
+            if (layerIsActive) {
+                if (activeLayerName.indexOf(`v:`) === 0) {
+                    selectorLabel = vectorLayerIcon;
+                    defaultLayerType = 'vector';
+                }
+            }
+
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+
+            if (layerIsTheVectorOne) {
+                store['v:' + layerKey] = new geocloud.sqlStore({
+                    jsonp: false,
+                    method: "POST",
+                    host: "",
+                    db: db,
+                    uri: "/api/sql",
+                    clickable: true,
+                    id: 'v:' + layerKey,
+                    name: 'v:' + layerKey,
+                    lifetime: 0,
+                    styleMap: styles['v:' + layerKey],
+                    sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
+                    onLoad: (l) => {
+                        if (l === undefined) return;
+                        $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
+
+                        layers.decrementCountLoading(l.id);
+                        backboneEvents.get().trigger("doneLoading:layers", l.id);
+                    },
+                    transformResponse: (response, id) => {
+                        return apiBridgeInstance.transformResponseHandler(response, id);
+                    },
+                    onEachFeature: onEachFeature['v:' + layerKey]
+                });
+            }
+
+            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+
+            let layerTypeSelector = false;
+            if (singleTypeLayer) {
+                if (layerIsTheTileOne) {
+                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                        ${tileLayerIcon}
+                    </div>`;
+                } else if (layerIsTheVectorOne) {
+                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
+                        ${vectorLayerIcon}
+                    </div>`;
+                }
+            } else {
+                layerTypeSelector = makrupGenerator.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
+            }
+
+            let addButton = ``;
+            if (editingIsEnabled && layerIsEditable) {
+                addButton = makrupGenerator.getAddButton(layerKeyWithGeom);
+            }
+
+            let layerControlRecord = $(makrupGenerator.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+
+            $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
+                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                $(switcher).data('gc2-layer-type', 'tile');
+                $(switcher).prop('checked', true);
+                _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+            });
+
+            $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
+                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                $(switcher).data('gc2-layer-type', 'vector');
+                $(switcher).prop('checked', true);
+                _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+            });
+
+            $("#collapse" + base64GroupName).append(layerControlRecord);   
+        }
     },
 
 
