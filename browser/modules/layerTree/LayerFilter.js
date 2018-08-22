@@ -13,6 +13,12 @@ const SELECT_WIDTH = `50px`;
 
 const ALLOWED_TYPES_IN_FILTER = [`string`, `character varying`, `integer`];
 
+const DUMMY_RULE = {
+    fieldname: 'null',
+    expression: EXPRESSIONS[0],
+    value: ''
+};
+
 class LayerFilter extends React.Component {
     constructor(props) {
         super(props);
@@ -22,18 +28,14 @@ class LayerFilter extends React.Component {
         if (`match` in filters === false) filters[`match`] = MATCHES[0];
         if (`columns` in filters === false) filters[`columns`] = new Array();
         if (filters.columns.length === 0) {
-            filters.columns.push({
-                id: '',
-                expression: EXPRESSIONS[0],
-                value: ''
-            });
+            filters.columns.push(DUMMY_RULE);
         }
 
         // Validating the filters structure
         if (MATCHES.indexOf(filters.match) === -1) throw new Error(`Invalid match`);
         if (Array.isArray(filters.columns) === false) throw new Error(`Invalid columns`);
         filters.columns.map(column => {
-            if (`id` in column === false) throw new Error(`Column id does not exist`);
+            if (`fieldname` in column === false) throw new Error(`Column fieldname does not exist`);
             if (`expression` in column === false || EXPRESSIONS.indexOf(column.expression) === -1) throw new Error(`Invalid column expression`);
             if (`value` in column === false) throw new Error(`Column value does not exist`);
         });
@@ -41,20 +43,42 @@ class LayerFilter extends React.Component {
         this.state = {
             layer: props.layer,
             filters
-        }
+        };
     }
 
-    onRuleDelete(event) {
-        alert(`DEVELOPMENT: Delete rule`);
+    onRuleDelete(event, index) {
+        let filters = this.state.filters;
+        filters.columns.splice(index, 1);
+        this.setState({ filters });
     }
 
-    onRuleAdd(event) {
-        alert(`DEVELOPMENT: Add rule`);
+    onRuleAdd() {
+        let filters = this.state.filters;
+        filters.columns.push(DUMMY_RULE);
+        this.setState({ filters });
     }
 
     onRulesApply(event) {
         alert(`DEVELOPMENT: Apply rules`);
     }
+
+    changeFieldname(value, columnIndex) {
+        let filters = JSON.parse(JSON.stringify(this.state.filters));
+        filters.columns[columnIndex].fieldname = value;
+        this.setState({ filters });
+    }
+
+    changeExpression(value, columnIndex) {
+        let filters = JSON.parse(JSON.stringify(this.state.filters));
+        filters.columns[columnIndex].expression = value;
+        this.setState({ filters });
+    }
+
+    changeValue(value, columnIndex) {
+        let filters = JSON.parse(JSON.stringify(this.state.filters));
+        filters.columns[columnIndex].value = value;
+        this.setState({ filters });
+    }   
 
     render() {
         let allRulesAreValid = true;
@@ -68,51 +92,69 @@ class LayerFilter extends React.Component {
 
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
         let filterControls = [];
+
+        if (this.state.filters.columns.length === 0) {
+            allRulesAreValid = false;
+        }
+
         this.state.filters.columns.map((column, index) => {
+            // Constructing select for column fieldname
             let columnOptions = [];
-            let columnIndex = 0;
-
-            // @todo Null option
-
+            columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
+            let columnIndex = 1;
             for (let key in this.state.layer.fields) {
                 let field = this.state.layer.fields[key];
-                console.log(field.type);
                 if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-
-                    // @todo Selected option
-
                     columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{key}</option>);
                     columnIndex++;
                 }
             }
 
-            // @todo Null option
-
+            // Constructing select for expression
             let expressionOptions = [];
             EXPRESSIONS.map((expression, index) => {
-
-                // @todo Selected option
-
-                expressionOptions.push(<option key={`expression_` + layerKey + `_` + index} value={expression}>{expression}</option>);
+                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
             });
 
             let divStyle = { display: `inline-block`, paddingRight: `10px` };
 
+            let ruleValidityIndicator = (<span style={{ color: 'red' }}><i className="fa fa-ban"></i></span>);
+            if (column.fieldname && column.fieldname !== 'null' && column.expression && column.expression !== 'null' && column.value) {
+                ruleValidityIndicator = (<span style={{ color: 'green' }}><i className="fa fa-check-circle"></i></span>);
+            } else {
+                allRulesAreValid = false;
+            }
+
             filterControls.push(<div key={`column_` + index}>
                 <div style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this)}>
+                    <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
                         <i className="fa fa-minus"></i>
                     </button>
                 </div>
                 <div style={divStyle}>
-                    <select id={ `column_select_` + layerKey + `_` + index } className="form-control" style={{ width: `100px` }}>{columnOptions}</select>
+                    <select
+                        id={ `column_select_` + layerKey + `_` + index }
+                        className="form-control"
+                        onChange={(event) => { this.changeFieldname(event.target.value, index) }}
+                        value={column.fieldname}
+                        style={{ width: `100px` }}>{columnOptions}</select>
                 </div>
                 <div style={divStyle}>
-                    <select id={ `expression_select_` + layerKey + `_` + index } className="form-control" style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>
+                    <select
+                        id={ `expression_select_` + layerKey + `_` + index }
+                        className="form-control"
+                        onChange={(event) => { this.changeExpression(event.target.value, index) }}
+                        value={column.expression}
+                        style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>
                 </div>
-                <div id={ `expression_input_` + layerKey + `_` + index } style={divStyle}>
-                    <input className="form-control" type="text"/>
+                <div style={divStyle}>
+                    <input
+                        id={ `expression_input_` + layerKey + `_` + index }
+                        className="form-control"
+                        type="text"
+                        onChange={(event) => { this.changeValue(event.target.value, index) }} value={column.value}/>
                 </div>
+                <div style={divStyle}>{ruleValidityIndicator}</div>
             </div>);
         });
 

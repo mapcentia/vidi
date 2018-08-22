@@ -109,6 +109,10 @@ class MarkupGenerator {
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
+                
+                <div style="display: inline-block;">
+                    <a href="javascript:void(0);" class="js-toggle-filters">Filters</a>
+                </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
             </div>

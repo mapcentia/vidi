@@ -618,6 +618,11 @@ module.exports = {
             let componentContainerId = `layer-settings-filters-${layerKey}`;
             $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
             ReactDOM.render(<LayerFilter layer={layer} filters={{}}/>, document.getElementById(componentContainerId));
+            $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+
+            $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
+            });
         }
     },
 
