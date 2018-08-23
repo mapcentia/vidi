@@ -111,7 +111,7 @@ class MarkupGenerator {
                 </div>
                 
                 <div style="display: inline-block;">
-                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)}</a>
+                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>

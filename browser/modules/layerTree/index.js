@@ -9,6 +9,8 @@ const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
+const SQL_QUERY_LIMIT = 500;
+
 var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
 
 var automaticStartup = true;
@@ -40,6 +42,7 @@ var React = require('react');
 var ReactDOM = require('react-dom');
 
 import LayerFilter from './LayerFilter';
+import { relative } from 'path';
 
 
 /**
@@ -112,6 +115,8 @@ let editingIsEnabled = false;
 let treeIsBeingBuilt = false;
 
 let userPreferredForceOfflineMode = -1;
+
+let vectorFilters = {};
 
 /**
  *
@@ -480,6 +485,44 @@ module.exports = {
         return result;
     },
 
+
+    /**
+     * Creates SQL store for vector layers
+     * 
+     * @param {Object} layer Layer description
+     * @param {String} sql   Custom SQL
+     * 
+     * @return {void}
+     */
+    createStore: (layer, sql = false) => {
+        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+
+        store['v:' + layerKey] = new geocloud.sqlStore({
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: db,
+            uri: "/api/sql",
+            clickable: true,
+            id: 'v:' + layerKey,
+            name: 'v:' + layerKey,
+            lifetime: 0,
+            styleMap: styles['v:' + layerKey],
+            sql: (sql ? sql : "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT " + SQL_QUERY_LIMIT),
+            onLoad: (l) => {
+                if (l === undefined) return;
+                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+            },
+            transformResponse: (response, id) => {
+                return apiBridgeInstance.transformResponseHandler(response, id);
+            },
+            onEachFeature: onEachFeature['v:' + layerKey]
+        });
+    },
+
     /**
      * Generates separate layer control record
      * 
@@ -542,30 +585,7 @@ module.exports = {
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
             if (layerIsTheVectorOne) {
-                store['v:' + layerKey] = new geocloud.sqlStore({
-                    jsonp: false,
-                    method: "POST",
-                    host: "",
-                    db: db,
-                    uri: "/api/sql",
-                    clickable: true,
-                    id: 'v:' + layerKey,
-                    name: 'v:' + layerKey,
-                    lifetime: 0,
-                    styleMap: styles['v:' + layerKey],
-                    sql: "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT 500",
-                    onLoad: (l) => {
-                        if (l === undefined) return;
-                        $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
-                        layers.decrementCountLoading(l.id);
-                        backboneEvents.get().trigger("doneLoading:layers", l.id);
-                    },
-                    transformResponse: (response, id) => {
-                        return apiBridgeInstance.transformResponseHandler(response, id);
-                    },
-                    onEachFeature: onEachFeature['v:' + layerKey]
-                });
+                _self.createStore(layer);
             }
 
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
@@ -622,10 +642,72 @@ module.exports = {
 
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
+                const onApplyFiltersHandler = ({ layerKey, filters}) => {
+
+                    let existingMeta = meta.getMetaData();
+                    let correspondingLayer = false;
+                    existingMeta.data.map(layer => {
+                        if (layer.f_table_schema + `.` + layer.f_table_name === layerKey) {
+                            correspondingLayer = layer;
+                            return false;
+                        }
+                    });
+
+                    if (correspondingLayer) {
+                        let fields = correspondingLayer.fields;
+                        let conditions = [];
+                        filters.columns.map((column, index) => {
+                            if (column.fieldname && column.value) {
+                                for (let key in fields) {
+                                    if (key === column.fieldname) {
+                                        switch (fields[key].type) {
+                                            case `string`:
+                                            case `character varying`:
+                                                conditions.push(` ${column.fieldname} ${column.expression} '${column.value}' `);
+                                                break;
+                                            case `integer`:
+                                                conditions.push(` ${column.fieldname} ${column.expression} ${column.value} `);
+                                                break;
+                                            default:
+                                                console.error(`Unable to process filter with type '${fields[key].type}'`);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+    
+                        $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
+
+                        let whereClause = false;
+                        if (conditions.length > 0) {
+                            if (filters.match === `any`) {
+                                whereClause = conditions.join(` OR `);
+                            } else if (filters.match === `all`) {
+                                whereClause = conditions.join(` AND `);
+                            } else {
+                                throw new Error(`Invalid match type value`);
+                            }
+
+                            if (`v:${layerKey}` in store) {
+                                _self.createStore(correspondingLayer, `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`);
+                                _self.reloadLayer(`v:` + layerKey);
+                            } else {
+                                throw new Error(`Unable to find store for layer ${layerKey}`);
+                            }
+                        } else {
+                            _self.createStore(correspondingLayer);
+                            _self.reloadLayer(`v:` + layerKey);
+                        }
+                    } else {
+                        throw new Error(`Unable to find meta for table ${layerKey}`);
+                    }
+
+                };
+
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
         
-                ReactDOM.render(<LayerFilter layer={layer} filters={{}}/>, document.getElementById(componentContainerId));
+                ReactDOM.render(<LayerFilter layer={layer} filters={{}} onApply={onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
     
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
