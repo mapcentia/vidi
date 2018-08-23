@@ -64,7 +64,7 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
 
-        expect(page.url()).to.equal(helpers.PAGE_URL.replace('8082', '8081'));
+        expect(page.url()).to.equal(`https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#stamenTonerLite/0/39.2963/-6.8335/`);
     });
 
     it("should ignore invalid layer in URL", async () => {

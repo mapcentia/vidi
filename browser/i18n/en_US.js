@@ -162,6 +162,14 @@ module.exports = {
         "Error": "Error",
         "Cancel feature changes": "Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
+        "Match": "# Match",
+        "of the following": "# of the following",
+        "any": "# any",
+        "all": "# all",
+        "Select": "# Select",
+        "Filters": "# Filters",
+        "Disable": "# Disable",
+        "Add condition": "# Add condition",
       
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
