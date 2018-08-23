@@ -34,6 +34,8 @@ let editor;
 
 let editedFeature = false;
 
+let featureWasEdited = false;
+
 let nonCommitedEditedFeature = false;
 
 let switchLayer;
@@ -45,6 +47,7 @@ const ImageUploadWidget = require('./ImageUploadWidget');
 const widgets = { 'imageupload': ImageUploadWidget };
 
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
+const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
 /**
  *
@@ -116,11 +119,26 @@ module.exports = {
         });
 
         // Listen to close of attr box
-        $(".close-hide").on("click", function (e) {
-            // If editor when deactivate
-            if ($(this).data('module') === "editor") {
-                me.stopEdit(editedFeature);
-            }
+        $(".editor-attr-dialog__close-hide").on("click", function (e) {
+            me.stopEdit(editedFeature);
+        });
+
+        $(".editor-attr-dialog__expand-less").on("click", function () {
+            $("#" + EDITOR_CONTAINER_ID).animate({
+                bottom: (($("#" + EDITOR_CONTAINER_ID).height()*-1)+30) + "px"
+            }, 500, function () {
+                $(".editor-attr-dialog__expand-less").hide();
+                $(".editor-attr-dialog__expand-more").show();
+            });
+        });
+
+        $(".editor-attr-dialog__expand-more").on("click", function () {
+            $("#" + EDITOR_CONTAINER_ID).animate({
+                bottom: "0"
+            }, 500, function () {
+                $(".editor-attr-dialog__expand-less").show();
+                $(".editor-attr-dialog__expand-more").hide();
+            });
         });
 
         // Listen to arrival of edit-tools
@@ -370,11 +388,11 @@ module.exports = {
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
-            $("#editor-attr-dialog").animate({
+            $("#" + EDITOR_CONTAINER_ID).animate({
                 bottom: "0"
             }, 500, function () {
-                $("#editor-attr-dialog" + " .expand-less").show();
-                $("#editor-attr-dialog" + " .expand-more").hide();
+                $(".editor-attr-dialog__expand-less").show();
+                $(".editor-attr-dialog__expand-more").hide();
             });
 
             // Start editor with the right type
@@ -519,6 +537,10 @@ module.exports = {
             me.stopEdit();
             infoClick.deactivate();
 
+            e.on(`editable:editing`, () => {
+                featureWasEdited = true;
+            });
+
             e.id = metaDataKeys[schemaQualifiedName].f_table_schema + "." + metaDataKeys[schemaQualifiedName].f_table_name;
             if (isVectorLayer) {
                 e.id = "v:" + e.id;
@@ -526,6 +548,7 @@ module.exports = {
 
             e.initialFeatureJSON = e.toGeoJSON();
 
+            featureWasEdited = false;
             // Hack to edit (Multi)Point layers
             // Create markers, which can be dragged
             switch (e.feature.geometry.type) {
@@ -680,11 +703,11 @@ module.exports = {
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
     
-            $("#editor-attr-dialog").animate({
+            $("#" + EDITOR_CONTAINER_ID).animate({
                 bottom: "0"
             }, 500, () => {
-                $("#editor-attr-dialog" + " .expand-less").show();
-                $("#editor-attr-dialog" + " .expand-more").hide();
+                $(".editor-attr-dialog__expand-less").show();
+                $(".editor-attr-dialog__expand-more").hide();
             });
         };
 
@@ -789,8 +812,14 @@ module.exports = {
 
         // If feature was edited, then reload the layer
         if (editedFeature) {
-            switchLayer.init(editedFeature.id, false);
-            switchLayer.init(editedFeature.id, true);
+            // No need to reload layer if point feature was edited, as markers are destroyed anyway
+            if (editedFeature.feature.geometry.type !== `Point`) {
+                editedFeature.disableEdit();
+                if (featureWasEdited) {
+                    switchLayer.init(editedFeature.id, false);
+                    switchLayer.init(editedFeature.id, true);
+                }
+            }
         }
 
         if (markers) {
@@ -800,12 +829,14 @@ module.exports = {
             });
         }
 
-        // Close the attribut dialog
-        $("#editor-attr-dialog").animate({
+        featureWasEdited = false;
+
+        // Close the attribute dialog
+        $("#" + EDITOR_CONTAINER_ID).animate({
             bottom: "-100%"
         }, 500, function () {
-            $("#editor-attr-dialog .expand-less").show();
-            $("#editor-attr-dialog .expand-more").hide();
+            $(".editor-attr-dialog__expand-less").show();
+            $(".editor-attr-dialog__expand-more").hide();
         });
     },
 

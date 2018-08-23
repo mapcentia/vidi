@@ -9,57 +9,6 @@
 
 const md5 = require(`md5`);
 
-const dict = {
-    "State snapshots": {
-        "da_DK": "# State snapshots",
-        "en_US": "# State snapshots"
-    },
-    "Local snapshots": {
-        "da_DK": "# Local snapshots",
-        "en_US": "# Local snapshots"
-    },
-    "User snapshots": {
-        "da_DK": "# User snapshots",
-        "en_US": "# User snapshots"
-    },
-    "No snapshots": {
-        "da_DK": "# No snapshots",
-        "en_US": "# No snapshots"
-    },
-    "Update state snapshot with current application state": {
-        "da_DK": "# Update state snapshot with current application state",
-        "en_US": "# Update state snapshot with current application state"
-    },
-    "Apply state snapshot": {
-        "da_DK": "# Apply state snapshot",
-        "en_US": "# Apply state snapshot"
-    },
-    "Delete state snapshot": {
-        "da_DK": "# Delete state snapshot",
-        "en_US": "# Delete state snapshot"
-    },
-    "Add local state snapshots to user's ones": {
-        "da_DK": "# Add local state snapshots to user's ones",
-        "en_US": "# Add local state snapshots to user's ones"
-    },
-    "Add local state snapshot to user's ones": {
-        "da_DK": "# Add local state snapshot to user's ones",
-        "en_US": "# Add local state snapshot to user's ones"
-    },
-    "copy link": {
-        "da_DK": "# copy link",
-        "en_US": "# copy link"
-    },
-    "New title": {
-        "da_DK": "# New title",
-        "en_US": "# New title"
-    },
-    "StateSnapshots description": {
-        "da_DK": "# Save and share the current state of the application",
-        "en_US": "# Save and share the current state of the application",
-    }
-};
-
 const API_URL = `/api/state-snapshots`;
 
 /**
