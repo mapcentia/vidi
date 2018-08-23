@@ -6,4 +6,7 @@ Puppeteer:
 - docking panels for all templates
 - reset function should also reset base layer and zoom to max extent
 - single tile layers
-- restoring vector and tile layers from state snapshot - the filter setting, filter panel availability, interactions
+- toggle vector and tile layer with using control, filters have to appear and dissappeat correctly
+- creating three filters has to modify the server respons (test adding condition, deleting contdition, changing condition, leaving condition incomplete)
+- test Disable button
+- store filters for different ids of vector layer, test the restoration of the state snapshot and all the idicators and server response
