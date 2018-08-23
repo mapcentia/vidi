@@ -140,12 +140,12 @@ class LayerFilter extends React.Component {
             }
 
             filterControls.push(<div key={`column_` + index}>
-                <div style={divStyle}>
+                <div className="form-group" style={divStyle}>
                     <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
                         <i className="fa fa-minus"></i>
                     </button>
                 </div>
-                <div style={divStyle}>
+                <div className="form-group" style={divStyle}>
                     <select
                         id={ `column_select_` + layerKey + `_` + index }
                         className="form-control"
@@ -153,7 +153,7 @@ class LayerFilter extends React.Component {
                         value={column.fieldname}
                         style={{ width: `100px` }}>{columnOptions}</select>
                 </div>
-                <div style={divStyle}>
+                <div className="form-group" style={divStyle}>
                     <select
                         id={ `expression_select_` + layerKey + `_` + index }
                         className="form-control"
@@ -161,7 +161,7 @@ class LayerFilter extends React.Component {
                         value={column.expression}
                         style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>
                 </div>
-                <div style={divStyle}>
+                <div className="form-group" style={divStyle}>
                     <input
                         id={ `expression_input_` + layerKey + `_` + index }
                         className="form-control"
@@ -173,7 +173,7 @@ class LayerFilter extends React.Component {
         });
 
         return (<div>
-            <div>
+            <div className="form-group">
                 <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
             </div>
             <div>{filterControls}</div>
