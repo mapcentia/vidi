@@ -177,7 +177,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             if (err) {
                                 console.log(err);
                             } else {
-                                console.log("Repport saved");
+                                console.log("Report saved");
                             }
                         });
                         return;
