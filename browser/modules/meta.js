@@ -61,6 +61,8 @@ var host;
  */
 var backboneEvents;
 
+let _self = false;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -80,6 +82,8 @@ module.exports = {
      */
     set: function (o) {
         backboneEvents = o.backboneEvents;
+
+        _self = this;
         return this;
     },
 
@@ -164,6 +168,33 @@ module.exports = {
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
         backboneEvents.get().trigger("ready:meta");
+    },
+
+    /**
+     * Returns meta object for the specified layer idenfitier
+     * 
+     * @param {String} layerKey Layer identifier
+     * 
+     * @throws {Exception} If layer with provided key does not exist
+     */
+    getMetaByKey: (layerKey, throwException = true) => {
+        let existingMeta = _self.getMetaData();
+
+        let correspondingLayer = false;
+        existingMeta.data.map(layer => {
+            if (layer.f_table_schema + `.` + layer.f_table_name === layerKey) {
+                correspondingLayer = layer;
+                return false;
+            }
+        });
+
+        if (correspondingLayer) {
+            return correspondingLayer;
+        } else if (throwException) {
+            throw new Error(`Unable to find meta with identifier ${layerKey}`);
+        } else {
+            return false;
+        }
     },
 
     /**
