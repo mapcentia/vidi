@@ -1,13 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { validateFilters, MATCHES, EXPRESSIONS } from './filterUtils';
 
 /**
  * Layer filter component
  */
 
-const MATCHES = [`any`, `all`];
-
-const EXPRESSIONS = [`=`, `<>`, `<`, `>`, `<=`, `>=`, `like`];
 
 const SELECT_WIDTH = `50px`;
 
@@ -32,14 +30,8 @@ class LayerFilter extends React.Component {
         }
 
         // Validating the filters structure
-        if (MATCHES.indexOf(filters.match) === -1) throw new Error(`Invalid match`);
-        if (Array.isArray(filters.columns) === false) throw new Error(`Invalid columns`);
-        filters.columns.map(column => {
-            if (`fieldname` in column === false) throw new Error(`Column fieldname does not exist`);
-            if (`expression` in column === false || EXPRESSIONS.indexOf(column.expression) === -1) throw new Error(`Invalid column expression`);
-            if (`value` in column === false) throw new Error(`Column value does not exist`);
-        });
-     
+        validateFilters(filters);
+
         this.state = {
             layer: props.layer,
             filters
@@ -193,7 +185,7 @@ class LayerFilter extends React.Component {
                     <i className="fa fa-check"></i> {__(`Apply`)}
                 </button>
                 <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                    <i className="fa fa-eraser"></i> {__(`Clear`)}
+                    <i className="fa fa-eraser"></i> {__(`Disable`)}
                 </button>
             </div>
         </div>);

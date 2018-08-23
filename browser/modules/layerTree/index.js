@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = false;
+const LOG = true;
 
 const MODULE_NAME = `layerTree`;
 
@@ -43,7 +43,7 @@ var ReactDOM = require('react-dom');
 
 import LayerFilter from './LayerFilter';
 import { relative } from 'path';
-
+import { validateFilters } from './filterUtils';
 
 /**
  *
@@ -263,9 +263,7 @@ module.exports = {
                 layerTreeIsReady = false;
                 if (forcedState) {
                     if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, _self.getActiveLayers());
-
                     _self.getActiveLayers().map(item => {
-                        // Disabling active layers
                         switchLayer.init(item, false, true, false);
                     });
                 }
@@ -289,13 +287,7 @@ module.exports = {
                         let existingMeta = meta.getMetaData();
                         if (`data` in existingMeta) {
                             activeLayers.map(layerName => {
-                                let correspondingMeta = false;
-                                existingMeta.data.map(layer => {
-                                    if (layer.f_table_schema + '.' + layer.f_table_name === layerName.replace(`v:`, ``)) {
-                                        correspondingMeta = layer;
-                                    }
-                                });
-
+                                let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
                                 if (correspondingMeta === false) {
                                     layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
                                 }
@@ -440,6 +432,7 @@ module.exports = {
                     layers.reorderLayers();
                     state.listen(MODULE_NAME, `sorted`);
                     state.listen(MODULE_NAME, `activeLayersChange`);
+                    state.listen(MODULE_NAME, `filtersChange`);
                     
                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                     setTimeout(() => {
@@ -490,12 +483,30 @@ module.exports = {
      * Creates SQL store for vector layers
      * 
      * @param {Object} layer Layer description
-     * @param {String} sql   Custom SQL
      * 
      * @return {void}
      */
-    createStore: (layer, sql = false) => {
+    createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+
+        let whereClause = false;
+        if (layerKey in vectorFilters) {
+            let conditions = _self.getFilterConditions(layerKey);
+            if (conditions.length > 0) {
+                if (vectorFilters[layerKey].match === `any`) {
+                    whereClause = conditions.join(` OR `);
+                } else if (vectorFilters[layerKey].match === `all`) {
+                    whereClause = conditions.join(` AND `);
+                } else {
+                    throw new Error(`Invalid match type value`);
+                }
+            }
+
+            $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
+        }
+
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
+        if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
         store['v:' + layerKey] = new geocloud.sqlStore({
             jsonp: false,
@@ -508,7 +519,7 @@ module.exports = {
             name: 'v:' + layerKey,
             lifetime: 0,
             styleMap: styles['v:' + layerKey],
-            sql: (sql ? sql : "SELECT * FROM " + layer.f_table_schema + "." + layer.f_table_name + " LIMIT " + SQL_QUERY_LIMIT),
+            sql: sql,
             onLoad: (l) => {
                 if (l === undefined) return;
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
@@ -521,6 +532,40 @@ module.exports = {
             },
             onEachFeature: onEachFeature['v:' + layerKey]
         });
+    },
+
+    /**
+     * Extracts valid conditions for specified layer
+     * 
+     * @param {String} layerKey Vector layer identifier
+     */
+    getFilterConditions(layerKey) {
+        let layer = meta.getMetaByKey(layerKey);
+
+        let conditions = [];
+        if (layerKey in vectorFilters) {
+            vectorFilters[layerKey].columns.map((column, index) => {
+                if (column.fieldname && column.value) {
+                    for (let key in layer.fields) {
+                        if (key === column.fieldname) {
+                            switch (layer.fields[key].type) {
+                                case `string`:
+                                case `character varying`:
+                                    conditions.push(` ${column.fieldname} ${column.expression} '${column.value}' `);
+                                    break;
+                                case `integer`:
+                                    conditions.push(` ${column.fieldname} ${column.expression} ${column.value} `);
+                                    break;
+                                default:
+                                    console.error(`Unable to process filter with type '${layer.fields[key].type}'`);
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        return conditions;
     },
 
     /**
@@ -642,72 +687,17 @@ module.exports = {
 
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
-                const onApplyFiltersHandler = ({ layerKey, filters}) => {
-
-                    let existingMeta = meta.getMetaData();
-                    let correspondingLayer = false;
-                    existingMeta.data.map(layer => {
-                        if (layer.f_table_schema + `.` + layer.f_table_name === layerKey) {
-                            correspondingLayer = layer;
-                            return false;
-                        }
-                    });
-
-                    if (correspondingLayer) {
-                        let fields = correspondingLayer.fields;
-                        let conditions = [];
-                        filters.columns.map((column, index) => {
-                            if (column.fieldname && column.value) {
-                                for (let key in fields) {
-                                    if (key === column.fieldname) {
-                                        switch (fields[key].type) {
-                                            case `string`:
-                                            case `character varying`:
-                                                conditions.push(` ${column.fieldname} ${column.expression} '${column.value}' `);
-                                                break;
-                                            case `integer`:
-                                                conditions.push(` ${column.fieldname} ${column.expression} ${column.value} `);
-                                                break;
-                                            default:
-                                                console.error(`Unable to process filter with type '${fields[key].type}'`);
-                                        }
-                                    }
-                                }
-                            }
-                        });
-    
-                        $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
-
-                        let whereClause = false;
-                        if (conditions.length > 0) {
-                            if (filters.match === `any`) {
-                                whereClause = conditions.join(` OR `);
-                            } else if (filters.match === `all`) {
-                                whereClause = conditions.join(` AND `);
-                            } else {
-                                throw new Error(`Invalid match type value`);
-                            }
-
-                            if (`v:${layerKey}` in store) {
-                                _self.createStore(correspondingLayer, `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`);
-                                _self.reloadLayer(`v:` + layerKey);
-                            } else {
-                                throw new Error(`Unable to find store for layer ${layerKey}`);
-                            }
-                        } else {
-                            _self.createStore(correspondingLayer);
-                            _self.reloadLayer(`v:` + layerKey);
-                        }
-                    } else {
-                        throw new Error(`Unable to find meta for table ${layerKey}`);
-                    }
-
-                };
-
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
         
-                ReactDOM.render(<LayerFilter layer={layer} filters={{}} onApply={onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
+                let conditions = _self.getFilterConditions(layerKey);
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
+                let filters = {};
+                if (layerKey in vectorFilters) {
+                    filters = vectorFilters[layerKey];
+                }
+
+                ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
     
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
@@ -724,6 +714,18 @@ module.exports = {
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
             }
         }
+    },
+
+    onApplyFiltersHandler: ({ layerKey, filters}) => {
+        validateFilters(filters);
+
+        let correspondingLayer = meta.getMetaByKey(layerKey);
+
+        vectorFilters[layerKey] = filters;
+        backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
+
+        _self.createStore(correspondingLayer);
+        _self.reloadLayer(`v:` + layerKey);
     },
 
     calculateOrder: () => {
@@ -758,6 +760,7 @@ module.exports = {
         let activeLayers = _self.getActiveLayers();
         let state = {
             order: layerTreeOrder,
+            vectorFilters,
             activeLayers
         };
 
@@ -768,6 +771,17 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+        // Setting vector filters
+        if (`vectorFilters` in newState) {
+            for (let key in newState.vectorFilters) {
+                validateFilters(newState.vectorFilters[key]);
+            }
+
+            vectorFilters = newState.vectorFilters;
+        } else {
+            vectorFilters = {};
+        }
+
         queueStatistsics.setLastStatistics(false);
         if (newState === false) {
             newState = { order: false };
