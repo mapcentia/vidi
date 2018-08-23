@@ -772,7 +772,7 @@ module.exports = {
      */
     applyState: (newState) => {
         // Setting vector filters
-        if (`vectorFilters` in newState) {
+        if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {
                 validateFilters(newState.vectorFilters[key]);
             }
