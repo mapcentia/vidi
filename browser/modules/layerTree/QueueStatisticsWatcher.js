@@ -193,15 +193,17 @@ class QueueStatisticsWatcher {
 
         if (forceLayerUpdate) {
             accumulatedDiff.map(item => {
-                let layerName = item;
-                layerTree.getActiveLayers().map(activeLayerName => {
-                    if (activeLayerName === ('v:' + layerName) || ('v:' + activeLayerName) === layerName) {
-                        layerName = activeLayerName;
-                    }
-                });
+                if (layerTree) {
+                    let layerName = item;
+                    layerTree.getActiveLayers().map(activeLayerName => {
+                        if (activeLayerName === ('v:' + layerName) || ('v:' + activeLayerName) === layerName) {
+                            layerName = activeLayerName;
+                        }
+                    });
 
-                switchLayer.init(layerName, false, true, true);
-                switchLayer.init(layerName, true, true, true);
+                    switchLayer.init(layerName, false, true, true);
+                    switchLayer.init(layerName, true, true, true);
+                }
             });
         }
 
