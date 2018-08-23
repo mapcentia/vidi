@@ -54,7 +54,7 @@ class MarkupGenerator {
         </div>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -72,7 +72,7 @@ class MarkupGenerator {
                                 class="js-show-layer-control"
                                 id="${layer.f_table_name}"
                                 data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                data-gc2-layer-type="${defaultLayerType}">
+                                data-gc2-layer-type="${layerType}">
                         </label>
                     </div>
                 </div>
@@ -111,7 +111,7 @@ class MarkupGenerator {
                 </div>
                 
                 <div style="display: inline-block;">
-                    <a href="javascript:void(0);" class="js-toggle-filters">Filters</a>
+                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)}</a>
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>

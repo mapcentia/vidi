@@ -170,6 +170,7 @@ module.exports = {
         "any": "# any",
         "all": "# all",
         "Select": "# Select",
+        "Filters": "# Filters",
         "Add condition": "# Add condition",
       
         // APIBridge

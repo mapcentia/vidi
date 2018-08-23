@@ -70,8 +70,6 @@ let layerSortingInstance = new LayerSorting();
 let queueStatistsics = false;
 let QueueStatisticsWatcher = require('./QueueStatisticsWatcher');
 
-
-
 /**
  * @type {string}
  */
@@ -133,7 +131,7 @@ module.exports = {
 
     init: function () {
         _self = this;
-        queueStatistsics = new QueueStatisticsWatcher({ switchLayer });
+        queueStatistsics = new QueueStatisticsWatcher({ switchLayer, layerTree: _self });
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
@@ -599,6 +597,10 @@ module.exports = {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                 $(switcher).data('gc2-layer-type', 'tile');
                 $(switcher).prop('checked', true);
+
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
@@ -608,6 +610,9 @@ module.exports = {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                 $(switcher).data('gc2-layer-type', 'vector');
                 $(switcher).prop('checked', true);
+
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
@@ -615,14 +620,27 @@ module.exports = {
 
             $("#collapse" + base64GroupName).append(layerControlRecord);
 
-            let componentContainerId = `layer-settings-filters-${layerKey}`;
-            $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-            ReactDOM.render(<LayerFilter layer={layer} filters={{}}/>, document.getElementById(componentContainerId));
-            $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+            // Filtering is available only for vector layers
+            if (layerIsTheVectorOne) {
+                let componentContainerId = `layer-settings-filters-${layerKey}`;
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+        
+                ReactDOM.render(<LayerFilter layer={layer} filters={{}}/>, document.getElementById(componentContainerId));
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+    
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
+                });
 
-            $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
-            });
+                // If vector layer is active, show the filtering option
+                if (defaultLayerType === `vector`) {
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+                } else {
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                }
+            } else {
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
+            }
         }
     },
 
