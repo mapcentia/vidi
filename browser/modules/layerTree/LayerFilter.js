@@ -58,8 +58,27 @@ class LayerFilter extends React.Component {
         this.setState({ filters });
     }
 
-    onRulesApply(event) {
-        alert(`DEVELOPMENT: Apply rules`);
+    onRulesApply() {
+        this.props.onApply({
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            filters: JSON.parse(JSON.stringify(this.state.filters))
+        });
+    }
+
+    onRulesClear() {
+        this.props.onApply({
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            filters: {
+                match: `any`,
+                columns: []
+            }
+        });
+    }
+
+    changeMatchType(value) {
+        let filters = JSON.parse(JSON.stringify(this.state.filters));
+        filters.match = value;
+        this.setState({ filters });
     }
 
     changeFieldname(value, columnIndex) {
@@ -85,10 +104,13 @@ class LayerFilter extends React.Component {
 
         let matchSelectorOptions = [];
         MATCHES.map((match, index) => { matchSelectorOptions.push(<option key={`match_` + index} value={match}>{__(match)}</option>); });
-        let matchSelector = (<select className="form-control" style={{
-            display: `inline`,
-            width: SELECT_WIDTH
-        }}>{matchSelectorOptions}</select>);
+        let matchSelector = (<select
+            onChange={(event) => { this.changeMatchType(event.target.value) }}
+            value={this.state.filters.match}
+            className="form-control" style={{
+                display: `inline`,
+                width: SELECT_WIDTH
+            }}>{matchSelectorOptions}</select>);
 
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
         let filterControls = [];
@@ -170,6 +192,9 @@ class LayerFilter extends React.Component {
                 <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid} onClick={this.onRulesApply.bind(this)}>
                     <i className="fa fa-check"></i> {__(`Apply`)}
                 </button>
+                <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
+                    <i className="fa fa-eraser"></i> {__(`Clear`)}
+                </button>
             </div>
         </div>);
     }
@@ -178,6 +203,7 @@ class LayerFilter extends React.Component {
 LayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
     filters: PropTypes.object.isRequired,
+    onApply: PropTypes.func.isRequired,
 };
 
 export default LayerFilter;
