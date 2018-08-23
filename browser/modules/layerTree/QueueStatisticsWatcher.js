@@ -17,9 +17,12 @@ let lastStatistics = false;
 
 let switchLayer = false;
 
+let layerTree = false;
+
 class QueueStatisticsWatcher {
     constructor(o) {
         switchLayer = o.switchLayer;
+        layerTree = o.layerTree;
     }
 
     setLastStatistics(newLastStatistics) {
@@ -191,7 +194,7 @@ class QueueStatisticsWatcher {
         if (forceLayerUpdate) {
             accumulatedDiff.map(item => {
                 let layerName = item;
-                _self.getActiveLayers().map(activeLayerName => {
+                layerTree.getActiveLayers().map(activeLayerName => {
                     if (activeLayerName === ('v:' + layerName) || ('v:' + activeLayerName) === layerName) {
                         layerName = activeLayerName;
                     }
