@@ -4,7 +4,9 @@
 
 const MATCHES = [`any`, `all`];
 
-const EXPRESSIONS = [`=`, `<>`, `<`, `>`, `<=`, `>=`, `like`];
+const EXPRESSIONS_FOR_STRINGS = [`=`, `<>`, `like`];
+const EXPRESSIONS_FOR_NUMBERS = [`=`, `<>`, `<`, `>`, `<=`, `>=`];
+const EXPRESSIONS = [].concat(EXPRESSIONS_FOR_NUMBERS).concat(EXPRESSIONS_FOR_STRINGS).filter((v, i, a) => a.indexOf(v) === i);
 
 /**
  * Checks validity of the filters object
@@ -30,4 +32,4 @@ const validateFilters = (filters) => {
     }
 };
 
-export { validateFilters, MATCHES, EXPRESSIONS };
+export { validateFilters, MATCHES, EXPRESSIONS_FOR_STRINGS, EXPRESSIONS_FOR_NUMBERS, EXPRESSIONS };

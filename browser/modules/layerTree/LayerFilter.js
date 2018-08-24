@@ -1,6 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { validateFilters, MATCHES, EXPRESSIONS } from './filterUtils';
+import {
+    validateFilters,
+    MATCHES,
+    EXPRESSIONS_FOR_STRINGS,
+    EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS
+} from './filterUtils';
 
 /**
  * Layer filter component
@@ -9,7 +15,9 @@ import { validateFilters, MATCHES, EXPRESSIONS } from './filterUtils';
 
 const SELECT_WIDTH = `50px`;
 
-const ALLOWED_TYPES_IN_FILTER = [`string`, `character varying`, `integer`];
+const STRING_TYPES = [`string`, `character varying`];
+const NUMBER_TYPES = [`integer`, `double precision`];
+const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const DUMMY_RULE = {
     fieldname: 'null',
@@ -75,6 +83,28 @@ class LayerFilter extends React.Component {
 
     changeFieldname(value, columnIndex) {
         let filters = JSON.parse(JSON.stringify(this.state.filters));
+
+        // Check if current expression is valid against new fieldname type
+        for (let key in this.state.layer.fields) {
+            if (key === value) {
+                let type = this.state.layer.fields[key].type;
+
+                if (this.isValid(filters.columns[columnIndex].value, type) === false) {
+                    filters.columns[columnIndex].value = ``;
+                }
+
+                if (STRING_TYPES.indexOf(type) !== -1) {
+                    if (EXPRESSIONS_FOR_STRINGS.indexOf(filters.columns[columnIndex].expression) === -1) {
+                        filters.columns[columnIndex].expression = EXPRESSIONS_FOR_STRINGS[0];
+                    }
+                } else if (NUMBER_TYPES.indexOf(type) !== -1) {
+                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(filters.columns[columnIndex].expression) === -1) {
+                        filters.columns[columnIndex].expression = EXPRESSIONS_FOR_NUMBERS[0];
+                    }
+                }
+            }
+        }
+
         filters.columns[columnIndex].fieldname = value;
         this.setState({ filters });
     }
@@ -89,7 +119,24 @@ class LayerFilter extends React.Component {
         let filters = JSON.parse(JSON.stringify(this.state.filters));
         filters.columns[columnIndex].value = value;
         this.setState({ filters });
-    }   
+    }
+
+    isValid(value, type) {
+        let valueIsValid = false;
+        if (NUMBER_TYPES.indexOf(type) === -1) {
+            valueIsValid = true;
+        } else {
+            let intReg = /^\d+$/;
+            let floatReg = /^[+-]?\d+(\.\d+)?$/;
+            if (type === `integer` && value.match(intReg)) {
+                valueIsValid = true;
+            } else if (type === `double precision` && value.match(floatReg)) {
+                valueIsValid = true;
+            }
+        }
+
+        return valueIsValid;
+    }
 
     render() {
         let allRulesAreValid = true;
@@ -112,6 +159,13 @@ class LayerFilter extends React.Component {
         }
 
         this.state.filters.columns.map((column, index) => {
+            let type = false;
+            for (let key in this.state.layer.fields) {
+                if (key === column.fieldname) {
+                    type = this.state.layer.fields[key].type;
+                }
+            }
+
             // Constructing select for column fieldname
             let columnOptions = [];
             columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
@@ -126,17 +180,45 @@ class LayerFilter extends React.Component {
 
             // Constructing select for expression
             let expressionOptions = [];
-            EXPRESSIONS.map((expression, index) => {
-                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
-            });
+            if (column.fieldname === DUMMY_RULE.fieldname) {
+                EXPRESSIONS.map((expression, index) => {
+                    expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                });
+            } else {
+                for (let key in this.state.layer.fields) {
+                    if (key === column.fieldname) {
+                        if (STRING_TYPES.indexOf(this.state.layer.fields[key].type) !== -1) {
+                            EXPRESSIONS_FOR_STRINGS.map((expression, index) => {
+                                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                            });
+                        } else if (NUMBER_TYPES.indexOf(this.state.layer.fields[key].type) !== -1) {
+                            EXPRESSIONS_FOR_NUMBERS.map((expression, index) => {
+                                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                            });
+                        }
+                    }
+                }
+            }
 
             let divStyle = { display: `inline-block`, paddingRight: `10px` };
 
-            let ruleValidityIndicator = (<span style={{ color: 'red' }}><i className="fa fa-ban"></i></span>);
+            let valueIsValid = false;
             if (column.fieldname && column.fieldname !== 'null' && column.expression && column.expression !== 'null' && column.value) {
-                ruleValidityIndicator = (<span style={{ color: 'green' }}><i className="fa fa-check-circle"></i></span>);
-            } else {
+                valueIsValid = this.isValid(column.value, type);
+            }
+
+            let ruleValidityIndicator = (<span style={{ color: 'green' }}><i className="fa fa-check-circle"></i></span>);
+            if (!valueIsValid) {
+                ruleValidityIndicator = (<span style={{ color: 'red' }}><i className="fa fa-ban"></i></span>);
                 allRulesAreValid = false;
+            }
+
+            let placeholder = `abc`;
+            let inputType = `text`;
+
+            if (NUMBER_TYPES.indexOf(type) !== -1) {
+                placeholder = `123`;
+                inputType = `number`;
             }
 
             filterControls.push(<div key={`column_` + index}>
@@ -165,7 +247,8 @@ class LayerFilter extends React.Component {
                     <input
                         id={ `expression_input_` + layerKey + `_` + index }
                         className="form-control"
-                        type="text"
+                        type={inputType}
+                        placeholder={placeholder}
                         onChange={(event) => { this.changeValue(event.target.value, index) }} value={column.value}/>
                 </div>
                 <div style={divStyle}>{ruleValidityIndicator}</div>
