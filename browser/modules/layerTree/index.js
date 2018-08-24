@@ -11,7 +11,11 @@ const MODULE_NAME = `layerTree`;
 
 const SQL_QUERY_LIMIT = 500;
 
-var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
+const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
+
+const TABLE_VIEW_CONTAINER_ID = 'vector-layer-table-view-dialog';
+
+var meta, layers, switchLayer, cloud, legend, state, backboneEvents;
 
 var automaticStartup = true;
 
@@ -142,6 +146,33 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").on("click", function () {
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: (($("#" + TABLE_VIEW_CONTAINER_ID).height()*-1)+30) + "px"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").hide();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").show();
+            });
+        });
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").on("click", function () {
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: "0"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
+            });
+        });
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".close-hide").on("click", function () {
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: "-100%"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
+            });
+        });
     },
 
     statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
@@ -665,6 +696,8 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
+
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
 
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
@@ -678,6 +711,7 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
@@ -705,14 +739,73 @@ module.exports = {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
                 });
 
+
+
+
+                // Table view
+
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+                    var defaultTemplate = `<div class="cartodb-popup-content">
+                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                        <button class="btn btn-primary btn-xs popup-edit-btn">
+                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-primary btn-xs popup-delete-btn">
+                            <i class="fa fa-trash" aria-hidden="true"></i></button>
+                        </div>
+                        {{#_vidi_content.fields}}
+                            {{#title}}<h4>{{title}}</h4>{{/title}}
+                            {{#value}}
+                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                            {{/value}}
+                            {{^value}}
+                            <p class="empty">null</p>
+                            {{/value}}
+                        {{/_vidi_content.fields}}
+                    </div>`;
+
+                    let metaDataKeys = meta.getMetaDataKeys();
+                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+    
+                    console.log(`### cloud get`, layers.getMapLayers());
+
+                    let content = [];
+                    var _table = gc2table.init({
+                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
+                        geocloud2: cloud.get(),
+                        store: store[`v:` + layerKey],
+                        cm: content,
+                        autoUpdate: false,
+                        autoPan: false,
+                        openPopUp: true,
+                        setViewOnSelect: true,
+                        responsive: false,
+                        callCustomOnload: false,
+                        height: 400,
+                        locale: window._vidiLocale.replace("_", "-"),
+                        template: template,
+                        usingCartodb: false
+                    });
+
+                    $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                        bottom: "0"
+                    }, 500, function () {
+                        $(".expand-less").show();
+                        $(".expand-more").hide();
+                    });
+                });
+
                 // If vector layer is active, show the filtering option
                 if (defaultLayerType === `vector`) {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
                 } else {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
                 }
             } else {
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).remove();
             }
         }
     },
