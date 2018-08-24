@@ -9,7 +9,7 @@ const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
-const SQL_QUERY_LIMIT = 500;
+const SQL_QUERY_LIMIT = 1000;
 
 var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
 
