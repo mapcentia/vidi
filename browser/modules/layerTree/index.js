@@ -508,8 +508,6 @@ module.exports = {
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
-        console.log(`### sql`, sql);
-
         store['v:' + layerKey] = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
@@ -553,11 +551,11 @@ module.exports = {
                             switch (layer.fields[key].type) {
                                 case `string`:
                                 case `character varying`:
-                                    conditions.push(` ${column.fieldname} ${column.expression} '${column.value}' `);
+                                    conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                     break;
                                 case `integer`:
                                 case `double precision`:
-                                    conditions.push(` ${column.fieldname} ${column.expression} ${column.value} `);
+                                    conditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
                                     break;
                                 default:
                                     console.error(`Unable to process filter with type '${layer.fields[key].type}'`);
