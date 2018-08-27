@@ -15,7 +15,7 @@ const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
 const TABLE_VIEW_CONTAINER_ID = 'vector-layer-table-view-dialog';
 
-var meta, layers, switchLayer, cloud, legend, state, backboneEvents;
+var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var automaticStartup = true;
 
@@ -133,6 +133,7 @@ module.exports = {
         layers = o.layers;
         legend = o.legend;
         state = o.state;
+        sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
@@ -518,6 +519,9 @@ module.exports = {
      * @return {void}
      */
     createStore: (layer) => {
+
+        console.log(`### createStore`, layer);
+
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
         let whereClause = false;
@@ -557,6 +561,10 @@ module.exports = {
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
+
+                console.log(`### l.geoJSON`, this, l.geoJSON);
+
+                store['v:' + layerKey].geoJSON = JSON.parse(JSON.stringify(l.geoJSON));
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
@@ -768,15 +776,21 @@ module.exports = {
 
                     let metaDataKeys = meta.getMetaDataKeys();
                     let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
-    
-                    console.log(`### cloud get`, layers.getMapLayers());
 
-                    let content = [];
-                    var _table = gc2table.init({
+                    let layerObj = store[`v:` + layerKey];
+                    if (`geoJSON` in layerObj === false || !layerObj.geoJSON) {
+                        throw new Error(`Unable to find the geoJSON in store`);
+                    }
+
+                    let cm = sqlQuery.prepareDataForTableView(`v:` + layerKey, layerObj);
+
+                    console.log(`### cm`, cm);
+
+                    let localTable = gc2table.init({
                         el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
                         geocloud2: cloud.get(),
                         store: store[`v:` + layerKey],
-                        cm: content,
+                        cm: cm,
                         autoUpdate: false,
                         autoPan: false,
                         openPopUp: true,
@@ -788,6 +802,8 @@ module.exports = {
                         template: template,
                         usingCartodb: false
                     });
+
+                    localTable.loadDataInTable();
 
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                         bottom: "0"
