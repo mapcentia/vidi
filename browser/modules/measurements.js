@@ -30,6 +30,8 @@ let _self = false;
 
 let embedModeIsEnabled = false;
 
+let legacyCompatibilityMode = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -41,13 +43,17 @@ module.exports = {
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
+
+        if (`listenTo` in o.state === false) {
+            legacyCompatibilityMode = true;
+        }
+
         _self = this;
         return this;
     },
 
     init: () => {
-        // Legacy state module check
-        if (`listenTo` in state) {
+        if (legacyCompatibilityMode === false) {
             state.listenTo(MODULE_NAME, _self);
             state.listen(MODULE_NAME, `update`);
         }
