@@ -37,6 +37,10 @@ var styles = [];
 
 var store = [];
 
+var tables = {};
+
+var activeOpenedTable = false;
+
 var _self;
 
 /**
@@ -167,6 +171,12 @@ module.exports = {
         });
 
         $(`#` + TABLE_VIEW_CONTAINER_ID).find(".close-hide").on("click", function () {
+            if (activeOpenedTable) {
+                tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
+            }
+
+            activeOpenedTable = false;
+
             $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                 bottom: "-100%"
             }, 500, function () {
@@ -555,51 +565,55 @@ module.exports = {
             onLoad: (l) => {
                 if (l === undefined) return;
 
-                if (`geoJSON` in l === false || !l.geoJSON) {
-                    throw new Error(`No geoJSON in layer`);
-                } else {
-                    let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
-                    $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div><table id="${tableId}"></table></div>`);
+                /*
+                let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
+                if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
+                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
+                    <table id="${tableId}"></table>
+                </div>`);
 
-                    var defaultTemplate = `<div class="cartodb-popup-content">
-                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                        {{#_vidi_content.fields}}
-                            {{#title}}<h4>{{title}}</h4>{{/title}}
-                            {{#value}}
-                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                            {{/value}}
-                            {{^value}}
-                            <p class="empty">null</p>
-                            {{/value}}
-                        {{/_vidi_content.fields}}
-                    </div>`;
+                var defaultTemplate = `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                    {{#_vidi_content.fields}}
+                        {{#title}}<h4>{{title}}</h4>{{/title}}
+                        {{#value}}
+                        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                        {{/value}}
+                        {{^value}}
+                        <p class="empty">null</p>
+                        {{/value}}
+                    {{/_vidi_content.fields}}
+                </div>`;
 
-                    let metaDataKeys = meta.getMetaDataKeys();
-                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                        && metaDataKeys[layerKey].infowindow.template !== "")
-                        ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+                let metaDataKeys = meta.getMetaDataKeys();
+                let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                    && metaDataKeys[layerKey].infowindow.template !== "")
+                    ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
 
-                    let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
-                    let localTable = gc2table.init({
-                        el: `#` + tableId,
-                        geocloud2: cloud.get(),
-                        store: store[`v:` + layerKey],
-                        cm: tableHeaders,
-                        autoUpdate: false,
-                        autoPan: false,
-                        openPopUp: true,
-                        setViewOnSelect: true,
-                        responsive: false,
-                        callCustomOnload: false,
-                        height: 400,
-                        locale: window._vidiLocale.replace("_", "-"),
-                        template: template,
-                        usingCartodb: false
-                    });
+                let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                let localTable = gc2table.init({
+                    el: `#` + tableId,
+                    geocloud2: cloud.get(),
+                    store: store[`v:` + layerKey],
+                    cm: tableHeaders,
+                    autoUpdate: false,
+                    autoPan: false,
+                    openPopUp: true,
+                    setViewOnSelect: true,
+                    responsive: false,
+                    callCustomOnload: false,
+                    height: 400,
+                    locale: window._vidiLocale.replace("_", "-"),
+                    template: template,
+                    usingCartodb: false
+                });
 
-                    //cloud.get().addGeoJsonStore(store['v:' + layerKey]);
-                    //localTable.loadDataInTable();                   
-                }
+                setTimeout(() => {
+                    localTable.loadDataInTable();
+                }, 100);
+
+                tables[`v:` + layerKey] = localTable;
+                */
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
@@ -790,14 +804,25 @@ module.exports = {
                 }
 
                 // Table view
-                //$(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+                    if (activeOpenedTable) {
+                        tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
+                    }
+
+                    activeOpenedTable = `v:` + layerKey;
+
+                    $(`.js-table-view-container`).hide();
+                    let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
+                    if($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+                    $(`#${tableId}_container`).show();
+
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                         bottom: "0"
                     }, 500, function () {
                         $(".expand-less").show();
                         $(".expand-more").hide();
                     });
-                //});
+                });
 
                 // If vector layer is active, show the filtering option
                 if (defaultLayerType === `vector`) {

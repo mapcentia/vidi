@@ -380,9 +380,6 @@ module.exports = {
      * @param {Array}  features Layer features
      */
     prepareDataForTableView: (layerKey, features) => {
-
-//console.log(`### prepareDataForTableView`, layerKey, JSON.parse(JSON.stringify(features)));
-
         let first = true;
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
@@ -391,14 +388,9 @@ module.exports = {
             && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
             ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
 
-//console.log(`### fieldConf`, JSON.parse(JSON.stringify(fieldConf)));
-
         let cm = [];
         let out = [];
         $.each(features, function (i, feature) {
-            
-//console.log(`### feature`, feature);
-
             var fi = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
@@ -410,30 +402,36 @@ module.exports = {
                 });
             } else {
                 $.each(sortObject(fieldConf), function (name, property) {
-                    if (property.value.querable) {
-                        fi.push({
-                            title: property.value.alias || property.key,
-                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
-                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
-                                    feature.properties[property.key]
-                        });
+                    /*
+                     * Used to be only for property.value.querable = true
+                     * if (property.value.querable) {
+                     *    ...
+                     * }
+                     */
 
-                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                        if (feature.properties[property.key] !== undefined) {
-                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                        }
-                    } else {
-                        fi.push({
-                            title: property.value.alias || property.key,
-                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
-                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
-                                    feature.properties[property.key]
-                        });
+                    let value = feature.properties[property.key];
+                    if (property.value.link) {
+                        value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                    } else if (property.value.image) {
+                        if (!feature.properties[property.key]) {
+                            value = `<i class="fa fa-ban"></i>`;
+                        } else {
+                            let subValue = feature.properties[property.key];
+                            if (property.value.type === `bytea`) {
+                                subValue = atob(feature.properties[property.key]);
+                            }
 
-                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                        if (feature.properties[property.key] !== undefined) {
-                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                            value = `<a target='_blank' href='${subValue}'>
+                                <img style='width:178px' src='${subValue}'/>
+                            </a>`;
                         }
+                    }
+
+                    fi.push({ title: property.value.alias || property.key, value });
+
+                    fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                    if (feature.properties[property.key] !== undefined) {
+                        out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                     }
                 });
 
@@ -444,9 +442,6 @@ module.exports = {
 
             feature.properties._vidi_content = {};
             feature.properties._vidi_content.fields = fi; // Used in a "loop" template
-
-//console.log(`### out`, out);
-
             if (first) {
                 $.each(out, function (name, property) {
                     cm.push({
@@ -461,8 +456,6 @@ module.exports = {
 
             out = [];
         });
-
-        console.log(`### cm`, cm);
 
         return cm;
     },
