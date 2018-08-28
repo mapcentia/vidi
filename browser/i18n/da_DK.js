@@ -156,6 +156,7 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         //Measurements
+        "Measure distance": "# Measure distance",
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",

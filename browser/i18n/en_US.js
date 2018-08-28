@@ -150,6 +150,14 @@ module.exports = {
         "Languages": "Languages",
 
         "Finish": "Finish",
-        "Finish drawing": "Finish drawing"
+        "Finish drawing": "Finish drawing",
+
+        //Measurements
+        "Measure distance": "Measure distance",
+        "Expand measurements control": "Expand measurements control",
+        "Collapse measurements control": "Collapse measurements control",
+        "Measure the distance": "Measure the distance",
+        "Measure the area": "Measure the area",
+        "Delete all measurements": "Delete all measurements"
     }
 };

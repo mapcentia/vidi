@@ -164,7 +164,7 @@ module.exports = {
                 onAdd: function (map) {
                     let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
                     container.style.backgroundColor = 'white';
-                    container.title = `Measure distance`;
+                    container.title = __(`Measure distance`);
 
                     container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
                         <span class="fa fa-ruler"></span>
