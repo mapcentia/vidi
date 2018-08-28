@@ -10,32 +10,6 @@ const MODULE_NAME = `measurements`;
 const drawTools = require(`./drawTools`);
 
 /**
- * Dictionary
- */
-const dict = {
-    "Expand measurements control": {
-        "da_DK": "Expand measurements control",
-        "en_US": "# Expand measurements control"
-    },
-    "Collapse measurements control": {
-        "da_DK": "# Collapse measurements control",
-        "en_US": "# Collapse measurements control"
-    },
-    "Measure the distance": {
-        "da_DK": "# Measure the distance",
-        "en_US": "# Measure the distance"
-    },
-    "Measure the area": {
-        "da_DK": "# Measure the area",
-        "en_US": "# Measure the area"
-    },
-    "Delete all measurements": {
-        "da_DK": "# Delete all measurements",
-        "en_US": "# Delete all measurements"
-    },
-};
-
-/**
  * @type {*|exports|module.exports}
  */
 let cloud, state, serializeLayers, backboneEvents, utils;
@@ -46,7 +20,7 @@ let cloud, state, serializeLayers, backboneEvents, utils;
  */
 let drawnItems = new L.FeatureGroup();
 
-let drawControl, measurementControlButton;
+let drawControl, embedDrawControl, measurementControlButton;
 
 let editing = false;
 
@@ -55,8 +29,6 @@ let drawOn = false;
 let _self = false;
 
 let embedModeIsEnabled = false;
-
-let legacyCompatibilityMode = false;
 
 /**
  *
@@ -69,17 +41,13 @@ module.exports = {
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
-
-        if (`listenTo` in o.state === false) {
-            legacyCompatibilityMode = true;
-        }
-
         _self = this;
         return this;
     },
 
     init: () => {
-        if (legacyCompatibilityMode === false) {
+        // Legacy state module check
+        if (`listenTo` in state) {
             state.listenTo(MODULE_NAME, _self);
             state.listen(MODULE_NAME, `update`);
         }
@@ -97,7 +65,7 @@ module.exports = {
             let container = `#floating-container-secondary`;
 
             // Expand measurements control
-            $(container).append(`<a href="javascript:void(0)" title="${__("Expand measurements control", dict)}" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
+            $(container).append(`<a href="javascript:void(0)" title="${__("Expand measurements control")}" id="measurements-module-btn" class="${buttonClass}" style="${buttonStyle}">
                 <i class="fa fa-ruler" style="font-size: 20px;"></i>
             </a>`);
             $(`#measurements-module-btn`).click((event) => {
@@ -111,16 +79,16 @@ module.exports = {
 
             // Draw controls
             $(container).append(`
-            <a href="javascript:void(0)" title="${__("Collapse measurements control", dict)}" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Collapse measurements control")}" id="measurements-module-cancel-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-ban" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${__("Measure the distance", dict)}" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Measure the distance")}" id="measurements-module-draw-line-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-project-diagram" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${__("Measure the area", dict)}" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Measure the area")}" id="measurements-module-draw-polygon-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-vector-square" style="font-size: 20px;"></i>
             </a>
-            <a href="javascript:void(0)" title="${__("Delete all measurements", dict)}" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
+            <a href="javascript:void(0)" title="${__("Delete all measurements")}" id="measurements-module-delete-btn" class="${buttonClass}" style="${buttonStyleHidden}">
                 <i class="fa fa-trash" style="font-size: 20px;"></i>
             </a>`);
 
@@ -134,7 +102,12 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polyline(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polyline(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
@@ -147,13 +120,22 @@ module.exports = {
                     }
                 });
 
-                let control = new L.Draw.Polygon(cloud.get().map).enable();
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
+                }
+
+                embedDrawControl = new L.Draw.Polygon(cloud.get().map);
+                embedDrawControl.enable();
             });
 
             // Area measurement
             $(container).find(`#measurements-module-delete-btn`).click(() => {
                 if (drawnItems) {
                     drawnItems.clearLayers();
+                }
+
+                if (embedDrawControl) {
+                    embedDrawControl.disable();
                 }
             });
 
@@ -165,6 +147,8 @@ module.exports = {
                 $(`#measurements-module-cancel-btn`).hide();
 
                 $(`#measurements-module-btn`).show();
+
+                _self.toggleMeasurements(false);
             });
         } else {
             let MeasurementControl = L.Control.extend({
@@ -174,8 +158,6 @@ module.exports = {
                 onAdd: function (map) {
                     let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
                     container.style.backgroundColor = 'white';
-                    container.style.width = `30px`;
-                    container.style.height = `30px`;
                     container.title = `Measure distance`;
 
                     container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
@@ -193,16 +175,20 @@ module.exports = {
             measurementControlButton = new MeasurementControl();
             cloud.get().map.addControl(measurementControlButton);
         }
-
         cloud.get().map.addLayer(drawnItems);
     },
 
-    toggleMeasurements: (activate = false) => {
-        if (activate) {
-            drawOn = true;
+    off: () => {
+        _self.toggleMeasurements(false, false);
+    },
 
-            backboneEvents.get().trigger("on:drawing");
-            backboneEvents.get().trigger("off:infoClick");
+    toggleMeasurements: (activate = false, triggerEvents = true) => {
+        if (activate) {
+            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
+
+            if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
+
+            drawOn = true;
 
             L.drawLocal = require('./drawLocales/draw.js');            
 
@@ -305,12 +291,20 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
+            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ruler"></span>');
+
+            if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
+
             drawOn = false;
 
-            backboneEvents.get().trigger("off:drawing");
-            backboneEvents.get().trigger("on:infoClick");
+            if (embedDrawControl) {
+                embedDrawControl.disable();
+            }
 
-            cloud.get().map.removeControl(drawControl);
+            if (drawControl) {
+                cloud.get().map.removeControl(drawControl);
+            }
+
             drawControl = false;
         }
     },
@@ -403,3 +397,4 @@ module.exports = {
         });
     },
 };
+
