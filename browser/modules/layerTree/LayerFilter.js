@@ -7,6 +7,7 @@ import {
     EXPRESSIONS_FOR_NUMBERS,
     EXPRESSIONS
 } from './filterUtils';
+import { StringControl, NumberControl, BooleanControl, DateControl } from './controls';
 
 /**
  * Layer filter component
@@ -17,7 +18,9 @@ const SELECT_WIDTH = `50px`;
 
 const STRING_TYPES = [`string`, `character varying`];
 const NUMBER_TYPES = [`integer`, `double precision`];
-const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).filter((v, i, a) => a.indexOf(v) === i);
+const DATE_TYPES = [`date`];
+const BOOLEAN_TYPES = [`boolean`];
+const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const DUMMY_RULE = {
     fieldname: 'null',
@@ -116,6 +119,9 @@ class LayerFilter extends React.Component {
     }
 
     changeValue(value, columnIndex) {
+
+        console.log(`### changeValue`, value, columnIndex);
+
         let filters = JSON.parse(JSON.stringify(this.state.filters));
         filters.columns[columnIndex].value = value;
         this.setState({ filters });
@@ -213,12 +219,28 @@ class LayerFilter extends React.Component {
                 allRulesAreValid = false;
             }
 
-            let placeholder = `abc`;
-            let inputType = `text`;
+            /**
+             * Different control for different types
+             */
+            let control = false;
+            if (column.fieldname === DUMMY_RULE.fieldname) {
+                control = (<p className="text-secondary">{__(`Select field`)}</p>);
+            } else {
+                let id = (`expression_input_` + layerKey + `_` + index);
+                const changeHandler = (value) => { this.changeValue(value, index) };
 
-            if (NUMBER_TYPES.indexOf(type) !== -1) {
-                placeholder = `123`;
-                inputType = `number`;
+                // Selecting control for specific type
+                if (STRING_TYPES.indexOf(type) !== -1) {
+                    control = (<StringControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (NUMBER_TYPES.indexOf(type) !== -1) {
+                    control = (<NumberControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (DATE_TYPES.indexOf(type) !== -1) {
+                    control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
+                    control = (<BooleanControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else {
+                    throw new Error(`Unrecognized type`);
+                }
             }
 
             filterControls.push(<div key={`column_` + index}>
@@ -243,14 +265,7 @@ class LayerFilter extends React.Component {
                         value={column.expression}
                         style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>
                 </div>
-                <div className="form-group" style={divStyle}>
-                    <input
-                        id={ `expression_input_` + layerKey + `_` + index }
-                        className="form-control"
-                        type={inputType}
-                        placeholder={placeholder}
-                        onChange={(event) => { this.changeValue(event.target.value, index) }} value={column.value}/>
-                </div>
+                <div className="form-group" style={divStyle}>{control}</div>
                 <div style={divStyle}>{ruleValidityIndicator}</div>
             </div>);
         });

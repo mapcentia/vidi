@@ -173,6 +173,7 @@ module.exports = {
         "Filters": "# Filters",
         "Disable": "# Disable",
         "Table view": "# Table view",
+        "Select field": "# Select field",
         "Add condition": "# Add condition",
       
         // APIBridge

@@ -170,7 +170,9 @@ module.exports = {
         "Filters": "# Filters",
         "Disable": "# Disable",
         "Table view": "# Table view",
+        "Select field": "# Select field",
         "Add condition": "# Add condition",
+
       
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",

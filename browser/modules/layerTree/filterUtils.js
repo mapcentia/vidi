@@ -4,6 +4,14 @@
 
 const MATCHES = [`any`, `all`];
 
+
+const ALLOWED_EXPRESSIONS_MAP = {
+
+
+
+};
+
+
 const EXPRESSIONS_FOR_STRINGS = [`=`, `<>`, `like`];
 const EXPRESSIONS_FOR_NUMBERS = [`=`, `<>`, `<`, `>`, `<=`, `>=`];
 const EXPRESSIONS = [].concat(EXPRESSIONS_FOR_NUMBERS).concat(EXPRESSIONS_FOR_STRINGS).filter((v, i, a) => a.indexOf(v) === i);
