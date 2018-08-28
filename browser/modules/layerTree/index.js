@@ -558,6 +558,9 @@ module.exports = {
                 if (`geoJSON` in l === false || !l.geoJSON) {
                     throw new Error(`No geoJSON in layer`);
                 } else {
+                    let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
+                    $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div><table id="${tableId}"></table></div>`);
+
                     var defaultTemplate = `<div class="cartodb-popup-content">
                     <div class="form-group gc2-edit-tools" style="visibility: hidden">
                         {{#_vidi_content.fields}}
@@ -576,12 +579,12 @@ module.exports = {
                         && metaDataKeys[layerKey].infowindow.template !== "")
                         ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
 
-                    let cm = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                    let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
                     let localTable = gc2table.init({
-                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
+                        el: `#` + tableId,
                         geocloud2: cloud.get(),
                         store: store[`v:` + layerKey],
-                        cm: cm,
+                        cm: tableHeaders,
                         autoUpdate: false,
                         autoPan: false,
                         openPopUp: true,
@@ -594,8 +597,8 @@ module.exports = {
                         usingCartodb: false
                     });
 
-                    cloud.get().addGeoJsonStore(store['v:' + layerKey]);
-                    localTable.loadDataInTable();                   
+                    //cloud.get().addGeoJsonStore(store['v:' + layerKey]);
+                    //localTable.loadDataInTable();                   
                 }
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
@@ -787,14 +790,14 @@ module.exports = {
                 }
 
                 // Table view
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+                //$(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                         bottom: "0"
                     }, 500, function () {
                         $(".expand-less").show();
                         $(".expand-more").hide();
                     });
-                });
+                //});
 
                 // If vector layer is active, show the filtering option
                 if (defaultLayerType === `vector`) {
