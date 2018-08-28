@@ -519,9 +519,6 @@ module.exports = {
      * @return {void}
      */
     createStore: (layer) => {
-
-        console.log(`### createStore`, layer);
-
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
         let whereClause = false;
@@ -557,14 +554,54 @@ module.exports = {
             sql: sql,
             onLoad: (l) => {
                 if (l === undefined) return;
+
+                if (`geoJSON` in l === false || !l.geoJSON) {
+                    throw new Error(`No geoJSON in layer`);
+                } else {
+                    var defaultTemplate = `<div class="cartodb-popup-content">
+                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                        {{#_vidi_content.fields}}
+                            {{#title}}<h4>{{title}}</h4>{{/title}}
+                            {{#value}}
+                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                            {{/value}}
+                            {{^value}}
+                            <p class="empty">null</p>
+                            {{/value}}
+                        {{/_vidi_content.fields}}
+                    </div>`;
+
+                    let metaDataKeys = meta.getMetaDataKeys();
+                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                        && metaDataKeys[layerKey].infowindow.template !== "")
+                        ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+
+                    let cm = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                    let localTable = gc2table.init({
+                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
+                        geocloud2: cloud.get(),
+                        store: store[`v:` + layerKey],
+                        cm: cm,
+                        autoUpdate: false,
+                        autoPan: false,
+                        openPopUp: true,
+                        setViewOnSelect: true,
+                        responsive: false,
+                        callCustomOnload: false,
+                        height: 400,
+                        locale: window._vidiLocale.replace("_", "-"),
+                        template: template,
+                        usingCartodb: false
+                    });
+
+                    cloud.get().addGeoJsonStore(store['v:' + layerKey]);
+                    localTable.loadDataInTable();                   
+                }
+
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
-
-                console.log(`### l.geoJSON`, this, l.geoJSON);
-
-                store['v:' + layerKey].geoJSON = JSON.parse(JSON.stringify(l.geoJSON));
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
@@ -749,62 +786,8 @@ module.exports = {
                     });
                 }
 
-
-
-
                 // Table view
-
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
-                    var defaultTemplate = `<div class="cartodb-popup-content">
-                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                        <button class="btn btn-primary btn-xs popup-edit-btn">
-                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-primary btn-xs popup-delete-btn">
-                            <i class="fa fa-trash" aria-hidden="true"></i></button>
-                        </div>
-                        {{#_vidi_content.fields}}
-                            {{#title}}<h4>{{title}}</h4>{{/title}}
-                            {{#value}}
-                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                            {{/value}}
-                            {{^value}}
-                            <p class="empty">null</p>
-                            {{/value}}
-                        {{/_vidi_content.fields}}
-                    </div>`;
-
-                    let metaDataKeys = meta.getMetaDataKeys();
-                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
-
-                    let layerObj = store[`v:` + layerKey];
-                    if (`geoJSON` in layerObj === false || !layerObj.geoJSON) {
-                        throw new Error(`Unable to find the geoJSON in store`);
-                    }
-
-                    let cm = sqlQuery.prepareDataForTableView(`v:` + layerKey, layerObj);
-
-                    console.log(`### cm`, cm);
-
-                    let localTable = gc2table.init({
-                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
-                        geocloud2: cloud.get(),
-                        store: store[`v:` + layerKey],
-                        cm: cm,
-                        autoUpdate: false,
-                        autoPan: false,
-                        openPopUp: true,
-                        setViewOnSelect: true,
-                        responsive: false,
-                        callCustomOnload: false,
-                        height: 400,
-                        locale: window._vidiLocale.replace("_", "-"),
-                        template: template,
-                        usingCartodb: false
-                    });
-
-                    localTable.loadDataInTable();
-
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                         bottom: "0"
                     }, 500, function () {
