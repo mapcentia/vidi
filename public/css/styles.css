@@ -1030,3 +1030,13 @@ h4 small {
   position: -webkit-sticky !important;
   z-index: 1000;
 }
+.date-picker-popover {
+  background-color: white;
+}
+.date-picker-popover.tooltip-inner {
+  color: black !important;
+}
+.date-picker-popover.popover {
+  width: 235px;
+  color: black !important;
+}
