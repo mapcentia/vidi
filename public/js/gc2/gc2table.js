@@ -178,6 +178,7 @@ var gc2table = (function () {
 
                 object.on("selected" + "_" + uid, function (id) {
                     clearSelection();
+                    if (id === undefined) return;
 
                     var row = $('*[data-uniqueid="' + id + '"]');
                     row.addClass("selected");
