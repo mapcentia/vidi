@@ -156,15 +156,29 @@ var gc2table = (function () {
             if (scriptsLoaded) {
                 var originalLayers, filters, filterControls;
                 _.extend(object, Backbone.Events);
-                object.on("selected" + "_" + uid, function (id) {
 
+                /**
+                 * Clearing existing feature selection
+                 */
+                var clearSelection = function() {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
                         try {
+                            v.closePopup();
                             store.layer.resetStyle(v);
                         } catch (e) {
+                            console.log(e);
                         }
                     });
+                };
+
+                object.on("clearSelection_" + uid, function () {
+                    clearSelection();
+                });
+
+                object.on("selected" + "_" + uid, function (id) {
+                    clearSelection();
+
                     var row = $('*[data-uniqueid="' + id + '"]');
                     row.addClass("selected");
                     if (setSelectedStyle) {
