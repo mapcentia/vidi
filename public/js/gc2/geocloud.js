@@ -275,6 +275,7 @@ geocloud = (function () {
                                     break;
                             }
                         } else {
+                            console.log(`### nullifying geoJSON`);
                             me.geoJSON = null;
                         }
                     }

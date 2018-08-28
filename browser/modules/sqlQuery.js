@@ -57,6 +57,7 @@ var BACKEND = require('../../config/config.js').backend;
 
 var extensions;
 
+let _self = false;
 
 let editingIsEnabled = false;
 
@@ -77,6 +78,8 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
         extensions = o.extensions;
+
+        _self = this;
         return this;
     },
 
@@ -157,7 +160,6 @@ module.exports = {
             var versioning = metaDataKeys[value].versioning;
             var cartoSql = metaDataKeys[value].sql;
             var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
-            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
 
             _layers.incrementCountLoading(key);
@@ -174,7 +176,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql,
+                    var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql,
                         template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
@@ -190,54 +192,9 @@ module.exports = {
                         $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body">' +
                             '<div>' + __("Download result as: ") + '<a id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)">GeoJson</a> <a id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)">Excel</a></div>' +
                             '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div></div></div>');
-                        $.each(layerObj.geoJSON.features, function (i, feature) {
-                            var fi = [];
-                            if (fieldConf === null) {
-                                $.each(feature.properties, function (name, property) {
-                                    fi.push({
-                                        title: name,
-                                        value: feature.properties[name]
-                                    });
-                                    out.push([name, 0, name, false]);
-                                });
-                            }
-                            else {
-                                $.each(sortObject(fieldConf), function (name, property) {
-                                    if (property.value.querable) {
-                                        fi.push({
-                                            title: property.value.alias || property.key,
-                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
-                                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
-                                                    feature.properties[property.key]
-                                        });
 
-                                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                                        if (feature.properties[property.key] !== undefined) {
-                                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                                        }
-                                    }
-                                });
-                                out.sort(function (a, b) {
-                                    return a[1] - b[1];
-                                });
-                            }
-
-                            feature.properties._vidi_content = {};
-                            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
-
-                            if (first) {
-                                $.each(out, function (name, property) {
-                                    cm.push({
-                                        header: property[2],
-                                        dataIndex: property[0],
-                                        sortable: true,
-                                        link: property[3]
-                                    })
-                                });
-                                first = false;
-                            }
-                            $('#tab_' + storeId).tab('show');
-                        });
+                        cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
+                        $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
                             geocloud2: cloud.get(),
@@ -414,6 +371,100 @@ module.exports = {
             qstore[index].load();
 
         });
+    },
+
+    /**
+     * Prepares stored data for being displayed in table
+     * 
+     * @param {String} layerKey Layer key
+     * @param {Array}  features Layer features
+     */
+    prepareDataForTableView: (layerKey, features) => {
+
+//console.log(`### prepareDataForTableView`, layerKey, JSON.parse(JSON.stringify(features)));
+
+        let first = true;
+        let fieldLabel = false;
+        let metaDataKeys = meta.getMetaDataKeys();
+
+        let fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
+            && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
+            ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+
+//console.log(`### fieldConf`, JSON.parse(JSON.stringify(fieldConf)));
+
+        let cm = [];
+        let out = [];
+        $.each(features, function (i, feature) {
+            
+//console.log(`### feature`, feature);
+
+            var fi = [];
+            if (fieldConf === null) {
+                $.each(feature.properties, function (name, property) {
+                    fi.push({
+                        title: name,
+                        value: feature.properties[name]
+                    });
+                    out.push([name, 0, name, false]);
+                });
+            } else {
+                $.each(sortObject(fieldConf), function (name, property) {
+                    if (property.value.querable) {
+                        fi.push({
+                            title: property.value.alias || property.key,
+                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
+                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
+                                    feature.properties[property.key]
+                        });
+
+                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                        if (feature.properties[property.key] !== undefined) {
+                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                        }
+                    } else {
+                        fi.push({
+                            title: property.value.alias || property.key,
+                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
+                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
+                                    feature.properties[property.key]
+                        });
+
+                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                        if (feature.properties[property.key] !== undefined) {
+                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                        }
+                    }
+                });
+
+                out.sort(function (a, b) {
+                    return a[1] - b[1];
+                });
+            }
+
+            feature.properties._vidi_content = {};
+            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
+
+//console.log(`### out`, out);
+
+            if (first) {
+                $.each(out, function (name, property) {
+                    cm.push({
+                        header: property[2],
+                        dataIndex: property[0],
+                        sortable: true,
+                        link: property[3]
+                    })
+                });
+                first = false;
+            }
+
+            out = [];
+        });
+
+        console.log(`### cm`, cm);
+
+        return cm;
     },
 
     /**

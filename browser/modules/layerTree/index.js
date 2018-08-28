@@ -15,7 +15,7 @@ const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
 const TABLE_VIEW_CONTAINER_ID = 'vector-layer-table-view-dialog';
 
-var meta, layers, switchLayer, cloud, legend, state, backboneEvents;
+var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var automaticStartup = true;
 
@@ -133,6 +133,7 @@ module.exports = {
         layers = o.layers;
         legend = o.legend;
         state = o.state;
+        sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
@@ -553,6 +554,50 @@ module.exports = {
             sql: sql,
             onLoad: (l) => {
                 if (l === undefined) return;
+
+                if (`geoJSON` in l === false || !l.geoJSON) {
+                    throw new Error(`No geoJSON in layer`);
+                } else {
+                    var defaultTemplate = `<div class="cartodb-popup-content">
+                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                        {{#_vidi_content.fields}}
+                            {{#title}}<h4>{{title}}</h4>{{/title}}
+                            {{#value}}
+                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                            {{/value}}
+                            {{^value}}
+                            <p class="empty">null</p>
+                            {{/value}}
+                        {{/_vidi_content.fields}}
+                    </div>`;
+
+                    let metaDataKeys = meta.getMetaDataKeys();
+                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                        && metaDataKeys[layerKey].infowindow.template !== "")
+                        ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+
+                    let cm = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                    let localTable = gc2table.init({
+                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
+                        geocloud2: cloud.get(),
+                        store: store[`v:` + layerKey],
+                        cm: cm,
+                        autoUpdate: false,
+                        autoPan: false,
+                        openPopUp: true,
+                        setViewOnSelect: true,
+                        responsive: false,
+                        callCustomOnload: false,
+                        height: 400,
+                        locale: window._vidiLocale.replace("_", "-"),
+                        template: template,
+                        usingCartodb: false
+                    });
+
+                    cloud.get().addGeoJsonStore(store['v:' + layerKey]);
+                    localTable.loadDataInTable();                   
+                }
+
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
                 layers.decrementCountLoading(l.id);
@@ -741,54 +786,8 @@ module.exports = {
                     });
                 }
 
-
-
-
                 // Table view
-
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
-                    var defaultTemplate = `<div class="cartodb-popup-content">
-                    <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                        <button class="btn btn-primary btn-xs popup-edit-btn">
-                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-primary btn-xs popup-delete-btn">
-                            <i class="fa fa-trash" aria-hidden="true"></i></button>
-                        </div>
-                        {{#_vidi_content.fields}}
-                            {{#title}}<h4>{{title}}</h4>{{/title}}
-                            {{#value}}
-                            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                            {{/value}}
-                            {{^value}}
-                            <p class="empty">null</p>
-                            {{/value}}
-                        {{/_vidi_content.fields}}
-                    </div>`;
-
-                    let metaDataKeys = meta.getMetaDataKeys();
-                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
-    
-                    console.log(`### cloud get`, layers.getMapLayers());
-
-                    let content = [];
-                    var _table = gc2table.init({
-                        el: `#` + TABLE_VIEW_FORM_CONTAINER_ID,
-                        geocloud2: cloud.get(),
-                        store: store[`v:` + layerKey],
-                        cm: content,
-                        autoUpdate: false,
-                        autoPan: false,
-                        openPopUp: true,
-                        setViewOnSelect: true,
-                        responsive: false,
-                        callCustomOnload: false,
-                        height: 400,
-                        locale: window._vidiLocale.replace("_", "-"),
-                        template: template,
-                        usingCartodb: false
-                    });
-
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
                         bottom: "0"
                     }, 500, function () {
