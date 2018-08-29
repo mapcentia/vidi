@@ -245,7 +245,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
+                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
