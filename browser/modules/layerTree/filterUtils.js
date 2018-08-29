@@ -4,14 +4,6 @@
 
 const MATCHES = [`any`, `all`];
 
-
-const ALLOWED_EXPRESSIONS_MAP = {
-
-
-
-};
-
-
 const EXPRESSIONS_FOR_STRINGS = [`=`, `<>`, `like`];
 const EXPRESSIONS_FOR_NUMBERS = [`=`, `<>`, `<`, `>`, `<=`, `>=`];
 const EXPRESSIONS_FOR_DATES = [`=`, `<>`, `<`, `>`, `<=`, `>=`];

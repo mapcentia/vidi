@@ -11,11 +11,24 @@ class DateControl extends React.Component {
     }
 
     render() {
+        /*
+        // Using the third-party date picker
         return (<div style={{ display: 'inline-table', maxWidth: '140px' }}>
             <DatePicker
                 id={this.props.id}
                 value={this.props.value}
                 onChange={(value) => { this.props.onChange(value) }}/>
+        </div>);
+        */
+
+        return (<div style={{ display: 'inline-table', maxWidth: '140px' }}>
+            <input
+                id={this.props.id}
+                className="form-control"
+                type="datetime-local"
+                placeholder=""
+                value={this.props.value}
+                onChange={(event) => { this.props.onChange(event.target.value) }}/>
         </div>);
     }
 }
