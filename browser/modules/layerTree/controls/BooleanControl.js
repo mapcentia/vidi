@@ -10,13 +10,21 @@ class BooleanControl extends React.Component {
     }
 
     render() {
-        return (<input
-            id={this.props.id}
-            className="form-control"
-            type="number"
-            placeholder="123"
-            value={this.props.value}
-            onChange={(event) => { this.props.onChange(event.target.value) }}/>);
+        console.log(`### value`, this.props.value);
+        return (<div>
+            <div style={{ display: 'inline-block' }}>
+                <input type="radio" id={this.props.id} name={this.props.id} value="null" checked={this.props.value === `null` || this.props.value === ``}
+                    onChange={(event) => { this.props.onChange('null') }}/>{__(`Null`)}
+            </div>
+            <div style={{ display: 'inline-block', paddingLeft: '20px' }}>
+                <input type="radio" id={this.props.id} name={this.props.id} value="true" checked={this.props.value === `true`}
+                    onChange={(event) => { this.props.onChange('true') }}/>{__(`Yes`)}
+            </div>
+            <div style={{ display: 'inline-block', paddingLeft: '20px' }}>
+                <input type="radio" id={this.props.id} name={this.props.id} value="false" checked={this.props.value === `false`}
+                    onChange={(event) => { this.props.onChange('false') }}/>{__(`No`)}
+            </div>
+        </div>);
     }
 }
 

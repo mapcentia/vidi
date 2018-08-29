@@ -174,6 +174,9 @@ module.exports = {
         "Disable": "# Disable",
         "Table view": "# Table view",
         "Select field": "# Select field",
+        "Null": "Nul",
+        "Yes": "Ja",
+        "No": "Nej",
         "Add condition": "# Add condition",
       
         // APIBridge

@@ -5,6 +5,8 @@ import {
     MATCHES,
     EXPRESSIONS_FOR_STRINGS,
     EXPRESSIONS_FOR_NUMBERS,
+    EXPRESSIONS_FOR_DATES,
+    EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
 import { StringControl, NumberControl, BooleanControl, DateControl } from './controls';
@@ -23,9 +25,9 @@ const BOOLEAN_TYPES = [`boolean`];
 const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const DUMMY_RULE = {
-    fieldname: 'null',
-    expression: EXPRESSIONS[0],
-    value: ''
+    fieldname: `null`,
+    expression: `null`,
+    value: ``
 };
 
 class LayerFilter extends React.Component {
@@ -84,6 +86,19 @@ class LayerFilter extends React.Component {
         this.setState({ filters });
     }
 
+    getExpressionSetForType(type) {
+        let expressionSet = EXPRESSIONS_FOR_STRINGS;                
+        if (NUMBER_TYPES.indexOf(type) !== -1) {
+            expressionSet = EXPRESSIONS_FOR_NUMBERS;
+        } else if (DATE_TYPES.indexOf(type) !== -1) {
+            expressionSet = EXPRESSIONS_FOR_DATES;
+        } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
+            expressionSet = EXPRESSIONS_FOR_BOOLEANS;
+        }
+
+        return expressionSet;
+    }
+
     changeFieldname(value, columnIndex) {
         let filters = JSON.parse(JSON.stringify(this.state.filters));
 
@@ -96,14 +111,9 @@ class LayerFilter extends React.Component {
                     filters.columns[columnIndex].value = ``;
                 }
 
-                if (STRING_TYPES.indexOf(type) !== -1) {
-                    if (EXPRESSIONS_FOR_STRINGS.indexOf(filters.columns[columnIndex].expression) === -1) {
-                        filters.columns[columnIndex].expression = EXPRESSIONS_FOR_STRINGS[0];
-                    }
-                } else if (NUMBER_TYPES.indexOf(type) !== -1) {
-                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(filters.columns[columnIndex].expression) === -1) {
-                        filters.columns[columnIndex].expression = EXPRESSIONS_FOR_NUMBERS[0];
-                    }
+                let expressionSet = this.getExpressionSetForType(type);
+                if (expressionSet.indexOf(filters.columns[columnIndex].expression) === -1) {
+                    filters.columns[columnIndex].expression = expressionSet[0];
                 }
             }
         }
@@ -144,6 +154,68 @@ class LayerFilter extends React.Component {
         return valueIsValid;
     }
 
+    /**
+     * Constructing select control for column fieldname
+     * 
+     * @param {*} column 
+     * @param {*} index 
+     * @param {*} layerKey 
+     */
+    renderFieldControl(column, index, layerKey) {
+        let columnOptions = [];
+        columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
+        let columnIndex = 1;
+        for (let key in this.state.layer.fields) {
+            let field = this.state.layer.fields[key];
+            if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
+                columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{key}</option>);
+                columnIndex++;
+            }
+        }
+
+        let fieldControl = (<select
+            id={ `column_select_` + layerKey + `_` + index }
+            className="form-control"
+            onChange={(event) => { this.changeFieldname(event.target.value, index) }}
+            value={column.fieldname}
+            style={{ width: `100px` }}>{columnOptions}</select>);
+
+        return fieldControl;
+    }
+
+    /**
+     * Constructing select control for expression
+     * 
+     * @param {*} column 
+     * @param {*} index 
+     * @param {*} layerKey 
+     */
+    renderExpressionControl(column, index, layerKey) {
+        let expressionControl = false;
+        if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
+            expressionControl = (<p className="text-secondary">{__(`Select field`)}</p>);
+        } else {
+            let expressionOptions = [];
+            for (let key in this.state.layer.fields) {
+                if (key === column.fieldname) {
+                    let expressionSet = this.getExpressionSetForType(this.state.layer.fields[key].type);
+                    expressionSet.map((expression, index) => {
+                        expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                    });
+                }
+            }
+            
+            expressionControl = (<select
+                id={ `expression_select_` + layerKey + `_` + index }
+                className="form-control"
+                onChange={(event) => { this.changeExpression(event.target.value, index) }}
+                value={column.expression}
+                style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>);
+        }
+
+        return expressionControl;
+    }
+
     render() {
         let allRulesAreValid = true;
 
@@ -172,41 +244,8 @@ class LayerFilter extends React.Component {
                 }
             }
 
-            // Constructing select for column fieldname
-            let columnOptions = [];
-            columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
-            let columnIndex = 1;
-            for (let key in this.state.layer.fields) {
-                let field = this.state.layer.fields[key];
-                if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-                    columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{key}</option>);
-                    columnIndex++;
-                }
-            }
-
-            // Constructing select for expression
-            let expressionOptions = [];
-            if (column.fieldname === DUMMY_RULE.fieldname) {
-                EXPRESSIONS.map((expression, index) => {
-                    expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
-                });
-            } else {
-                for (let key in this.state.layer.fields) {
-                    if (key === column.fieldname) {
-                        if (STRING_TYPES.indexOf(this.state.layer.fields[key].type) !== -1) {
-                            EXPRESSIONS_FOR_STRINGS.map((expression, index) => {
-                                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
-                            });
-                        } else if (NUMBER_TYPES.indexOf(this.state.layer.fields[key].type) !== -1) {
-                            EXPRESSIONS_FOR_NUMBERS.map((expression, index) => {
-                                expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
-                            });
-                        }
-                    }
-                }
-            }
-
-            let divStyle = { display: `inline-block`, paddingRight: `10px` };
+            let fieldControl = this.renderFieldControl(column, index, layerKey);
+            let expressionControl = this.renderExpressionControl(column, index, layerKey);
 
             let valueIsValid = false;
             if (column.fieldname && column.fieldname !== 'null' && column.expression && column.expression !== 'null' && column.value) {
@@ -224,12 +263,10 @@ class LayerFilter extends React.Component {
              */
             let control = false;
             if (column.fieldname === DUMMY_RULE.fieldname) {
-                control = (<p className="text-secondary">{__(`Select field`)}</p>);
+                //control = (<p className="text-secondary">{__(`Select field`)}</p>);
             } else {
                 let id = (`expression_input_` + layerKey + `_` + index);
                 const changeHandler = (value) => { this.changeValue(value, index) };
-
-                // Selecting control for specific type
                 if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (<StringControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
@@ -243,28 +280,15 @@ class LayerFilter extends React.Component {
                 }
             }
 
+            let divStyle = { display: `inline-block`, paddingRight: `10px` };
             filterControls.push(<div key={`column_` + index}>
                 <div className="form-group" style={divStyle}>
                     <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
                         <i className="fa fa-minus"></i>
                     </button>
                 </div>
-                <div className="form-group" style={divStyle}>
-                    <select
-                        id={ `column_select_` + layerKey + `_` + index }
-                        className="form-control"
-                        onChange={(event) => { this.changeFieldname(event.target.value, index) }}
-                        value={column.fieldname}
-                        style={{ width: `100px` }}>{columnOptions}</select>
-                </div>
-                <div className="form-group" style={divStyle}>
-                    <select
-                        id={ `expression_select_` + layerKey + `_` + index }
-                        className="form-control"
-                        onChange={(event) => { this.changeExpression(event.target.value, index) }}
-                        value={column.expression}
-                        style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>
-                </div>
+                <div className="form-group" style={divStyle}>{fieldControl}</div>
+                <div className="form-group" style={divStyle}>{expressionControl}</div>
                 <div className="form-group" style={divStyle}>{control}</div>
                 <div style={divStyle}>{ruleValidityIndicator}</div>
             </div>);
