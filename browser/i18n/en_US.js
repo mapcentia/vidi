@@ -171,6 +171,9 @@ module.exports = {
         "Disable": "# Disable",
         "Table view": "# Table view",
         "Select field": "# Select field",
+        "Null": "Null",
+        "Yes": "Yes",
+        "No": "No",
         "Add condition": "# Add condition",
 
       
