@@ -14,8 +14,6 @@ import { StringControl, NumberControl, BooleanControl, DateControl } from './con
 /**
  * Layer filter component
  */
-
-
 const SELECT_WIDTH = `50px`;
 
 const STRING_TYPES = [`string`, `character varying`];
@@ -106,11 +104,6 @@ class LayerFilter extends React.Component {
         for (let key in this.state.layer.fields) {
             if (key === value) {
                 let type = this.state.layer.fields[key].type;
-
-                if (this.isValid(filters.columns[columnIndex].value, type) === false) {
-                    filters.columns[columnIndex].value = ``;
-                }
-
                 let expressionSet = this.getExpressionSetForType(type);
                 if (expressionSet.indexOf(filters.columns[columnIndex].expression) === -1) {
                     filters.columns[columnIndex].expression = expressionSet[0];
@@ -118,6 +111,7 @@ class LayerFilter extends React.Component {
             }
         }
 
+        filters.columns[columnIndex].value = DUMMY_RULE.value;
         filters.columns[columnIndex].fieldname = value;
         this.setState({ filters });
     }

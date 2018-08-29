@@ -51,7 +51,7 @@ var ReactDOM = require('react-dom');
 
 import LayerFilter from './LayerFilter';
 import { relative } from 'path';
-import { validateFilters } from './filterUtils';
+import { validateFilters, EXPRESSIONS_FOR_STRINGS, EXPRESSIONS_FOR_NUMBERS, EXPRESSIONS_FOR_DATES, EXPRESSIONS_FOR_BOOLEANS } from './filterUtils';
 
 /**
  *
@@ -550,6 +550,10 @@ module.exports = {
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
+        console.log(`### sql`, sql);
+        console.log(`### sql encoded`, btoa(sql));
+        console.log(`### sql decoded`, atob(btoa(sql)));
+
         store['v:' + layerKey] = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
@@ -642,12 +646,38 @@ module.exports = {
                     for (let key in layer.fields) {
                         if (key === column.fieldname) {
                             switch (layer.fields[key].type) {
+                                case `boolean`:
+                                    if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    let value = `NULL`;
+                                    if (column.value === `true`) value = `TRUE`;
+                                    if (column.value === `false`) value = `FALSE`;
+
+                                    conditions.push(`${column.fieldname} ${column.expression} ${value}`);
+                                    break;
+                                case `date`:
+                                    if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    break;
                                 case `string`:
                                 case `character varying`:
+                                    if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
                                     conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                     break;
                                 case `integer`:
                                 case `double precision`:
+                                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
                                     conditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
                                     break;
                                 default:
