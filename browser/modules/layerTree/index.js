@@ -550,10 +550,6 @@ module.exports = {
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
-        console.log(`### sql`, sql);
-        console.log(`### sql encoded`, btoa(sql));
-        console.log(`### sql decoded`, atob(btoa(sql)));
-
         store['v:' + layerKey] = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
@@ -670,7 +666,12 @@ module.exports = {
                                         throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
                                     }
 
-                                    conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    if (column.expression === 'like') {
+                                        conditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                    } else {
+                                        conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    }
+                                    
                                     break;
                                 case `integer`:
                                 case `double precision`:
