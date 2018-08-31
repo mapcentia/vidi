@@ -123,9 +123,6 @@ class LayerFilter extends React.Component {
     }
 
     changeValue(value, columnIndex) {
-
-        console.log(`### changeValue`, value, columnIndex);
-
         let filters = JSON.parse(JSON.stringify(this.state.filters));
         filters.columns[columnIndex].value = value;
         this.setState({ filters });
@@ -212,10 +209,12 @@ class LayerFilter extends React.Component {
 
     render() {
         let allRulesAreValid = true;
+        let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
 
         let matchSelectorOptions = [];
         MATCHES.map((match, index) => { matchSelectorOptions.push(<option key={`match_` + index} value={match}>{__(match)}</option>); });
         let matchSelector = (<select
+            id={ `match_select_` + layerKey }
             onChange={(event) => { this.changeMatchType(event.target.value) }}
             value={this.state.filters.match}
             className="form-control" style={{
@@ -223,7 +222,6 @@ class LayerFilter extends React.Component {
                 width: SELECT_WIDTH
             }}>{matchSelectorOptions}</select>);
 
-        let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
         let filterControls = [];
 
         if (this.state.filters.columns.length === 0) {
