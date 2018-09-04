@@ -633,7 +633,8 @@ body {
 .layer-count {
   float: right;
 }
-.leaflet-bar {
+.leaflet-bar,
+.leaflet-toolbar-0 {
   border: none !important;
 }
 .leaflet-bar button,
