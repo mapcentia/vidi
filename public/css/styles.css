@@ -633,6 +633,9 @@ body {
 .layer-count {
   float: right;
 }
+.leaflet-bar {
+  border: none !important;
+}
 .leaflet-bar button,
 .leaflet-bar button:hover {
   background-color: #fff;
