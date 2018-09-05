@@ -10,3 +10,4 @@ Puppeteer:
 - creating three filters has to modify the server respons (test adding condition, deleting contdition, changing condition, leaving condition incomplete)
 - test Disable button
 - store filters for different ids of vector layer, test the restoration of the state snapshot and all the idicators and server response
+- validate input in filters
