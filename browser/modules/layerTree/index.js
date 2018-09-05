@@ -11,7 +11,11 @@ const MODULE_NAME = `layerTree`;
 
 const SQL_QUERY_LIMIT = 1000;
 
-var meta, layers, switchLayer, cloud, layers, legend, state, backboneEvents;
+const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
+
+const TABLE_VIEW_CONTAINER_ID = 'vector-layer-table-view-dialog';
+
+var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var automaticStartup = true;
 
@@ -31,9 +35,28 @@ var cm = [];
 
 var styles = [];
 
-var store = [];
+var stores = [];
+
+var tableViewStores = {};
+
+var tables = {};
+
+var activeOpenedTable = false;
 
 var _self;
+
+var defaultTemplate = `<div class="cartodb-popup-content">
+<div class="form-group gc2-edit-tools" style="visibility: hidden">
+    {{#_vidi_content.fields}}
+        {{#title}}<h4>{{title}}</h4>{{/title}}
+        {{#value}}
+        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+        {{/value}}
+        {{^value}}
+        <p class="empty">null</p>
+        {{/value}}
+    {{/_vidi_content.fields}}
+</div>`;
 
 /**
  * Layer filters
@@ -43,7 +66,7 @@ var ReactDOM = require('react-dom');
 
 import LayerFilter from './LayerFilter';
 import { relative } from 'path';
-import { validateFilters } from './filterUtils';
+import { validateFilters, EXPRESSIONS_FOR_STRINGS, EXPRESSIONS_FOR_NUMBERS, EXPRESSIONS_FOR_DATES, EXPRESSIONS_FOR_BOOLEANS } from './filterUtils';
 
 /**
  *
@@ -129,6 +152,7 @@ module.exports = {
         layers = o.layers;
         legend = o.legend;
         state = o.state;
+        sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         return this;
@@ -142,6 +166,41 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").on("click", function () {
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: (($("#" + TABLE_VIEW_CONTAINER_ID).height()*-1)+30) + "px"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").hide();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").show();
+            });
+        });
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").on("click", function () {
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: "0"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
+            });
+        });
+
+        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".close-hide").on("click", function () {
+            $.each(tableViewStores, function (index, store) {
+                if (store) {
+                    store.abort();
+                    store.reset();
+                    cloud.get().removeGeoJsonStore(store);
+                }
+            });
+
+            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                bottom: "-100%"
+            }, 500, function () {
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
+                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
+            });
+        });
     },
 
     statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
@@ -508,7 +567,7 @@ module.exports = {
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
-        store['v:' + layerKey] = new geocloud.sqlStore({
+        stores['v:' + layerKey] = new geocloud.sqlStore({
             jsonp: false,
             method: "POST",
             host: "",
@@ -522,6 +581,7 @@ module.exports = {
             sql: sql,
             onLoad: (l) => {
                 if (l === undefined) return;
+
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
                 layers.decrementCountLoading(l.id);
@@ -549,12 +609,44 @@ module.exports = {
                     for (let key in layer.fields) {
                         if (key === column.fieldname) {
                             switch (layer.fields[key].type) {
+                                case `boolean`:
+                                    if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    let value = `NULL`;
+                                    if (column.value === `true`) value = `TRUE`;
+                                    if (column.value === `false`) value = `FALSE`;
+
+                                    conditions.push(`${column.fieldname} ${column.expression} ${value}`);
+                                    break;
+                                case `date`:
+                                    if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    break;
                                 case `string`:
                                 case `character varying`:
-                                    conditions.push(` ${column.fieldname} ${column.expression} '${column.value}' `);
+                                    if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    if (column.expression === 'like') {
+                                        conditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                    } else {
+                                        conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    }
+                                    
                                     break;
                                 case `integer`:
-                                    conditions.push(` ${column.fieldname} ${column.expression} ${column.value} `);
+                                case `double precision`:
+                                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
+                                    }
+
+                                    conditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
                                     break;
                                 default:
                                     console.error(`Unable to process filter with type '${layer.fields[key].type}'`);
@@ -664,6 +756,8 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
+
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
 
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
@@ -677,6 +771,7 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
@@ -697,21 +792,175 @@ module.exports = {
                     filters = vectorFilters[layerKey];
                 }
 
-                ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+                if (document.getElementById(componentContainerId)) {                   
+                    ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+        
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
+                        $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
+                    });
+                }
+
+                // Table view
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+
+                    let index = layerKey;
+                    let metaDataKeys = meta.getMetaDataKeys();
+                    if (!metaDataKeys[layerKey]) {
+                        throw new Error(`metaDataKeys[${layerKey}] is undefined`);
+                    }
+        
+                    var isEmpty = true;
+                    var srid = metaDataKeys[layerKey].srid;
+                    var key = "_vidi_sql_" + index;
+                    var _key_ = metaDataKeys[layerKey]._key_;
+                    var geoType = metaDataKeys[layerKey].type;
+                    var layerTitel = (metaDataKeys[layerKey].f_table_title !== null && metaDataKeys[layerKey].f_table_title !== "") ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+                    var not_querable = metaDataKeys[layerKey].not_querable;
+                    var versioning = metaDataKeys[layerKey].versioning;
+                    var cartoSql = metaDataKeys[layerKey].sql;
+                    var fields = typeof metaDataKeys[layerKey].fields !== "undefined" ? metaDataKeys[layerKey].fields : null;
+                    
+                    layers.incrementCountLoading(key);
+                    backboneEvents.get().trigger("startLoading:layers", key);
+
+                    let onLoad = function () {
+                        $('.js-table-view-container').remove();
+
+                        var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql, template;
     
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
+                        layers.decrementCountLoading("_vidi_sql_" + storeId);
+                        backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
+    
+                        isEmpty = layerObj.isEmpty();
+    
+                        template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+    
+                        if (!isEmpty && !not_querable) {
+                            let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
+                            if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
+                            $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
+                                <table id="${tableId}"></table>
+                            </div>`);
+
+                            let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, layerObj.geoJSON.features);
+                            let _table = gc2table.init({
+                                el: `#` + tableId,
+                                geocloud2: cloud.get(),
+                                store: layerObj,
+                                cm: tableHeaders,
+                                autoUpdate: false,
+                                autoPan: false,
+                                openPopUp: true,
+                                setViewOnSelect: true,
+                                responsive: false,
+                                callCustomOnload: false,
+                                height: 400,
+                                locale: window._vidiLocale.replace("_", "-"),
+                                template: defaultTemplate,
+                                usingCartodb: false
+                            });
+
+                            tables[`v:` + layerKey] = _table;
+
+                            // Here inside onLoad we call loadDataInTable(), so the table is populated
+                            _table.loadDataInTable();
+    
+                            // If only one feature is selected, when activate it.
+                            if (Object.keys(layerObj.layer._layers).length === 1) {
+                                _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                            }
+    
+                            // Add fancy material raised style to buttons
+                            $(".bootstrap-table .btn-default").addClass("btn-raised");
+                            // Stop the click on detail icon from bubbling up the DOM tree
+                            $(".detail-icon").click(function (event) {
+                                event.stopPropagation();
+                            });
+                        } else {
+                            layerObj.reset();
+                        }
+
+                        $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                            bottom: "0"
+                        }, 500, function () {
+                            $(".expand-less").show();
+                            $(".expand-more").hide();
+                        });
+                    };
+
+                    tableViewStores[index] = new geocloud.sqlStore({
+                        jsonp: false,
+                        method: "POST",
+                        host: "",
+                        db: db,
+                        uri: "/api/sql",
+                        clickable: true,
+                        id: index,
+                        styleMap: {
+                            weight: 5,
+                            color: '#660000',
+                            dashArray: '',
+                            fillOpacity: 0.2
+                        },
+        
+                        // Set _vidi_type on all vector layers,
+                        // so they can be recreated as query layers
+                        // after serialization
+                        // ========================================
+                        onEachFeature: function (f, l) {
+                            if (typeof l._layers !== "undefined") {
+                                $.each(l._layers, function (i, v) {
+                                    v._vidi_type = "query_result";
+                                })
+                            } else {
+                                l._vidi_type = "query_result";
+                            }
+                        }
+                    });
+    
+                    cloud.get().addGeoJsonStore(tableViewStores[index]);
+    
+                    tableViewStores[index].onLoad = onLoad;
+                    tableViewStores[index].sql = stores[`v:` + layerKey].sql;
+                    tableViewStores[index].load();
+        
+
+
+
+
+
+
+
+                    /*
+                    if (activeOpenedTable) {
+                        tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
+                    }
+
+                    activeOpenedTable = `v:` + layerKey;
+
+                    $(`.js-table-view-container`).hide();
+                    let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
+                    if($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+                    $(`#${tableId}_container`).show();
+                    */
+
+
+
+
                 });
 
                 // If vector layer is active, show the filtering option
                 if (defaultLayerType === `vector`) {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
                 } else {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
+                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
                 }
             } else {
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).remove();
             }
         }
     },
@@ -855,10 +1104,10 @@ module.exports = {
     },
     
     getStores: function () {
-        return store;
+        return stores;
     },
 
     load: function (id) {
-        store[id].load();
+        stores[id].load();
     }
 };

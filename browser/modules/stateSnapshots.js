@@ -11,6 +11,8 @@ const md5 = require(`md5`);
 
 const API_URL = `/api/state-snapshots`;
 
+import TitleFieldComponent from './shared/TitleFieldComponent';
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -72,58 +74,6 @@ module.exports = {
             padding: `4px`,
             margin: `0px`
         };
-
-        /**
-         * Title field for state snapshot
-         */
-        class StateSnapshotTitleField extends React.Component {
-            constructor(props) {
-                super(props);
-                if (props.type !== `userOwned` && props.type !== `browserOwned`) {
-                    throw new Error(`Invalid type options`);
-                }
-                
-                this.state = {
-                    title: (props.value ? props.value : ``)
-                }
-            }
-
-            onChange(event) {
-                this.setState({ title: event.target.value });
-            }
-
-            onSave(event) {
-                this.props.onAdd(this.state.title);
-                this.setState({ title: '' });
-            }
-
-            render() {
-                let cancelControl = false;
-                if (this.props.onCancel) {
-                    cancelControl = (<button
-                        className="btn btn-xs btn-primary"
-                        onClick={this.props.onCancel}
-                        style={buttonStyle}>
-                        <i className="material-icons">cancel</i>
-                    </button>);
-                }
-
-                return (<div className="input-group" style={{ width: '50%', display: 'inline-table', paddingLeft: '8px' }}>
-                    <input value={this.state.title} type="text" className="form-control" placeholder={__("New title")} onChange={this.onChange.bind(this)}/>
-                    <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
-                        <button
-                            className="btn btn-xs btn-primary"
-                            onClick={this.onSave.bind(this)}
-                            disabled={!this.state.title}
-                            style={buttonStyle}>
-                            <i className="material-icons">save</i>
-                        </button>
-                        {cancelControl}
-                    </span>
-                </div>);
-            }
-        }
-
 
         /**
          *
@@ -397,7 +347,7 @@ module.exports = {
                     </button>);
                     if (this.state.updatedItemId === item.id) {
                         let type = (local ? 'browserOwned' : 'userOwned')
-                        updateSnapshotControl = (<StateSnapshotTitleField
+                        updateSnapshotControl = (<TitleFieldComponent
                             value={item.title}
                             onAdd={(newTitle) => { this.updateSnapshot(item, newTitle) }}
                             onCancel={() => { this.setState({ updatedItemId: false }) }}
@@ -469,7 +419,7 @@ module.exports = {
                         <div>
                             <h4>
                                 {__(`User snapshots`)}
-                                <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
+                                <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
                             </h4>
                         </div>
                         <div>
@@ -497,7 +447,7 @@ module.exports = {
                             <div>
                                 <h4>
                                     {__(`Local snapshots`)} 
-                                    <StateSnapshotTitleField onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
+                                    <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
                                     <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
                                         <i className="material-icons">person_add</i>
                                     </button>

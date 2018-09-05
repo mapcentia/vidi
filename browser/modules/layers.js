@@ -89,7 +89,7 @@ module.exports = {
     /**
      * Fetches Leaflet layers from map
      */
-    getMapLayers: (includeHidden = false) => {
+    getMapLayers: (includeHidden = false, searchedLayerKey = false) => {
         var mapLayers = [];
         var layers = cloud.get().map._layers;
 
@@ -97,7 +97,13 @@ module.exports = {
             if (layers[key].baseLayer !== true) {
                 if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
                     if (typeof layers[key]._tiles === "object" || layers[key].id && layers[key].id.startsWith('v:')) {
-                        mapLayers.push(layers[key]);
+                        if (searchedLayerKey) {
+                            if (searchedLayerKey === layers[key].id) {
+                                mapLayers.push(layers[key]);
+                            }
+                        } else {
+                            mapLayers.push(layers[key]);
+                        }
                     }
                 }
             }

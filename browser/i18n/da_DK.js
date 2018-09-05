@@ -172,6 +172,11 @@ module.exports = {
         "Select": "# Select",
         "Filters": "# Filters",
         "Disable": "# Disable",
+        "Table view": "# Table view",
+        "Select field": "# Select field",
+        "Null": "Nul",
+        "Yes": "Ja",
+        "No": "Nej",
         "Add condition": "# Add condition",
       
         // APIBridge
@@ -240,5 +245,14 @@ module.exports = {
         "Open KeplerGL in modal": "# Open KeplerGL in modal",
         "View in KeplerGL": "# View in KeplerGL",
         "Visible": "# Visible",
+
+        //Boreholes
+        "Plots": "# Plots",
+        "Available plots": "# Available plots",
+        "At least one y axis has to be provided": "# At least one y axis has to be provided",
+        "Data series": "# Data series",
+        "Borehole": "# Borehole",
+        "No plots were created yet": "# No plots were created yet",
+        "Please select the measurement": "# Please select the measurement",
     }
 };
