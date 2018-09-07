@@ -79,6 +79,9 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+
+        console.log(`### switchLayer`, name, enable);
+
         let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {
             if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === name.replace('v:', '')) {
@@ -164,6 +167,9 @@ module.exports = module.exports = {
 
                         resolve();
                     }).catch((err) => {
+                        
+                        console.log(`### switchLayer ${name} is not in meta, fetching`);
+
                         meta.init(name, true, true).then(layerMeta => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
@@ -189,6 +195,9 @@ module.exports = module.exports = {
                     layers.incrementCountLoading(vectorLayerId);
 
                     layerTree.setSelectorValue(name, 'vector');
+
+                    console.log(`### store keys`, Object.keys(store));
+
                     if (vectorLayerId in store) {
                         cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
                         let existingLayer = cloud.get().getLayersByName(vectorLayerId);
@@ -200,8 +209,14 @@ module.exports = module.exports = {
                         _self.checkLayerControl(name, doNotLegend);
                         resolve();
                     } else {
+
+                        console.log(`### switchLayer ${name} is not in meta, fetching`);
+
                         meta.init(tileLayerId, true, true).then(layerMeta => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
+
+                            console.log(`### switchLayer calling create()`);
+
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
                                 let currentLayers = layers.getLayers();
@@ -238,7 +253,10 @@ module.exports = module.exports = {
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
             if (!controlElement || controlElement.length !== 1) {
-                console.error(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
+                if (enable) {
+                    console.error(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
+                }
+
                 return false;
             } else {
                 return controlElement;
