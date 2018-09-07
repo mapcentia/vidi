@@ -144,22 +144,20 @@ describe('Editor', () => {
 
             let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
             if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
+                await page.evaluate(`$('#layers .toggle').trigger('click');`);
                 await helpers.sleep(1000);
             }
 
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
-            await page.click(`#map`);
 
-            await helpers.sleep(1000);
             // Filling in attributes of the added feature
             await page.focus('#root_id');
             await page.keyboard.type('111');
             await page.focus('#root_stringfield');
             await page.keyboard.type('222');
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(4000);
+            await helpers.sleep(6000);
 
             // Checking if the queue indicator shows that element was added to the queue
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.true;
