@@ -162,11 +162,26 @@ module.exports = {
      */
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
-        metaData.data = metaData.data.concat(data.data);
+
+        data.data.map(layerMeta => {
+            let layerAlreadyExists = false;
+            metaData.data.map(existingMetaLayer => {
+                if ((existingMetaLayer.f_table_schema + existingMetaLayer.f_table_name) === (layerMeta.f_table_schema + layerMeta.f_table_name)) {
+                    layerAlreadyExists = true;
+                    return false;
+                }
+            });
+
+            if (layerAlreadyExists === false) {
+                metaData.data.push(layerMeta);
+            }
+        });
+
         for (var i = 0; i < data.data.length; i++) {
             metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
+
         backboneEvents.get().trigger("ready:meta");
     },
 
