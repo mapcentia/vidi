@@ -64,6 +64,10 @@ let isInit = false;
 
 let layerTreeWasInitialized = false;
 
+let watsoncIsEnabled = false;
+
+let extensions = false;
+
 let _self = false;
 
 /**
@@ -87,6 +91,7 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        extensions = o.extensions;
         _self = this;
         try {
             vectorLayers = o.extensions.vectorLayers.index;
@@ -98,6 +103,11 @@ module.exports = {
      *
      */
     init: function () {
+        if (`watsonc` in extensions) {
+            console.log(`Editor extension is disabled due to the enabled watsonc`);
+            return;
+        }
+
         let me = this, metaDataKeys, metaData, styleFn;
         apiBridgeInstance = APIBridgeSingletone();
 

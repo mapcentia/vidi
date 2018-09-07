@@ -429,9 +429,6 @@ module.exports = module.exports = {
                     })
 
                 .then(function () {
-
-                    console.log(`### layerTree.create() after meta init`);
-
                     layerTree.create();
                     state.init();
                 });

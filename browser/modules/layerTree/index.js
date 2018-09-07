@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -300,11 +300,9 @@ module.exports = {
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
-                console.log(`### ignoring create request`);
                 resolve();
                 /*
                 setTimeout(() => {
-                    console.log(`### launching pseudo delayed create()`);
                     _self.create(forcedState, createdByEditor).then(() => {
                         resolve();
                     })
@@ -420,21 +418,13 @@ module.exports = {
 
                             // Get layers that belong to the current layer group
                             let notSortedLayersForCurrentGroup = [];
-                            
-                            //console.log(`### metadata`, JSON.parse(JSON.stringify(metaData.data)));
-
                             for (let u = 0; u < metaData.data.length; ++u) {
                                 if (metaData.data[u].layergroup == arr[i]) {
-
-                                    //console.log(`### adding layer to group`, i, u, metaData.data[u])
-
                                     notSortedLayersForCurrentGroup.push(metaData.data[u]);
                                 }
                             }
 
                             let layersForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersForCurrentGroup, arr[i]);
-
-                            //console.log(`### layerTree layer to draw`, metaData.data);
 
                             // Add layers
                             // ==========
@@ -559,9 +549,6 @@ module.exports = {
      * @return {void}
      */
     createStore: (layer) => {
-
-        //console.log(`### layerTree create store`, layer);
-
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
         let whereClause = false;
