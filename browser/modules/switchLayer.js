@@ -238,6 +238,7 @@ module.exports = module.exports = {
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
             if (!controlElement || controlElement.length !== 1) {
+                console.error(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
                 return false;
             } else {
                 return controlElement;
@@ -245,9 +246,7 @@ module.exports = module.exports = {
         };
 
         let el = getLayerSwitchControl();
-        if (el === false) {
-            console.error(`Unable to find layer switch control for layer ${layerName}`);
-        } else {
+        if (el) {
             el.prop('checked', enable);
             _self.update(doNotLegend, el);
         }

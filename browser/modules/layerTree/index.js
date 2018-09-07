@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = false;
+const LOG = true;
 
 const MODULE_NAME = `layerTree`;
 
@@ -289,7 +289,7 @@ module.exports = {
      * requests are performed one by one.
      */
     create: (forcedState = false, createdByEditor = false) => {
-        if (LOG) console.log(`${MODULE_NAME}: create`, forcedState, createdByEditor);
+        if (LOG) console.log(`${MODULE_NAME}: create`, treeIsBeingBuilt, forcedState, createdByEditor);
 
         queueStatistsics.setLastStatistics(false);
 
@@ -301,6 +301,7 @@ module.exports = {
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
                 setTimeout(() => {
+                    console.log(`### launching pseudo delayed create()`);
                     _self.create(forcedState, createdByEditor).then(() => {
                         resolve();
                     })
