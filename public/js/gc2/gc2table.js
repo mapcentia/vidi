@@ -303,7 +303,7 @@ var gc2table = (function () {
                     $.each(store.layer._layers, function (i, v) {
                         v.off('click', click);
                         // Hack for removing irrelevant popups
-                        v._events.click.map((item, index) => {
+                        v._events.click.map(function (item, index) {
                             if ('name' in item.fn && item.fn.name === '_openPopup') {
                                 v._events.click.splice(index, 1);
                             }
