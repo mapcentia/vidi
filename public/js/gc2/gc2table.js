@@ -281,8 +281,6 @@ var gc2table = (function () {
                             var layer = m.map._layers[id];
                             onMouseOver(id, layer);
                         });
-
-
                     }, 100);
                 };
                 $(el).bootstrapTable({
@@ -306,7 +304,7 @@ var gc2table = (function () {
                         v.off('click', click);
                         // Hack for removing irrelevant popups
                         v._events.click.map((item, index) => {
-                            if (`name` in item.fn && item.fn.name === `_openPopup`) {
+                            if ('name' in item.fn && item.fn.name === '_openPopup') {
                                 v._events.click.splice(index, 1);
                             }
                         });
