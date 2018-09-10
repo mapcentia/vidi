@@ -5,6 +5,8 @@
 
 'use strict';
 
+import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './layerTree/LayerSorting';
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -169,13 +171,27 @@ module.exports = {
         let layers = _self.getMapLayers();
         if (order) {
             order.map((orderItem, groupIndex) => {
-                orderItem.layers.map((item, index) => {
-                    layers.map(layer => {
-                        if (layer.id && (layer.id === item.id)) {
-                            let zIndex = ((orderItem.layers.length - index) + ((order.length - groupIndex) + 1) * 10000);
-                            layer.setZIndex(zIndex);
-                        }
-                    });
+
+                orderItem.children.map((item, index) => {
+                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                        layers.map(layer => {
+                            if (layer.id && (layer.id.replace(`v:`, ``) === item.id.replace(`v:`, ``))) {
+                                let zIndex = ((orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                layer.setZIndex(zIndex);
+                            }
+                        });
+                    } else if (item.type === GROUP_CHILD_TYPE_GROUP) {
+                        item.children.map((childItem, childIndex) => {
+                            layers.map(layer => {
+                                if (layer.id && (layer.id.replace(`v:`, ``) === childItem.id.replace(`v:`, ``))) {
+                                    let zIndex = ((item.children.length - childIndex) + (orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                    layer.setZIndex(zIndex);
+                                }
+                            });
+                        });
+                    } else {
+                        throw new Error(`Invalid order object type`);   
+                    }
                 });
             });
         }
