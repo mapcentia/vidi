@@ -54,6 +54,16 @@ class MarkupGenerator {
         </div>`);
     }
 
+    getSubgroupControlRecord(base64SubgroupName, name) {
+        return (`<li
+        class="layer-item list-group-item"
+        data-gc2-subgroup-id="${name}"
+        style="min-height: 40px; margin-top: 10px; background-color: white;">
+            <div class="js-subgroup-id" style="padding-left: 14px;"></div>
+            <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
+        </li>`);
+    }
+
     getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
