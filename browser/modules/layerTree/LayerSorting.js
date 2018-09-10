@@ -4,8 +4,8 @@
  * @todo Rewrite layerTree using React or Angular
  */
 
-const GROUP_CHILD_TYPE_LAYER = 1;
-const GROUP_CHILD_TYPE_GROUP = 2;
+const GROUP_CHILD_TYPE_LAYER = `layer`;
+const GROUP_CHILD_TYPE_GROUP = `group`;
 
 class LayerSorting {
     constructor() {}
@@ -48,11 +48,6 @@ class LayerSorting {
      * @returns {Array}
      */
     sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName) {
-
-
-        
-
-
         if (order === false) {
             return notSortedLayersAndSubgroupsForCurrentGroup;
         } else if (this.validateOrderObject(order) === false) {
