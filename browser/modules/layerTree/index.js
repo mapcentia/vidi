@@ -665,8 +665,8 @@ module.exports = {
                         parsedMeta = JSON.parse(layer.meta);
                     } catch (e) {}
     
-                    if (parsedMeta && `vidi_sub_ group` in parsedMeta) {
-                        layer.subGroup = parsedMeta[`vidi_sub_ group`];
+                    if (parsedMeta && `vidi_sub_group` in parsedMeta) {
+                        layer.subGroup = parsedMeta[`vidi_sub_group`];
                     } else {
                         layer.subGroup = false;
                     }
@@ -781,7 +781,7 @@ module.exports = {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
         $("#collapse" + base64GroupName).append(markup);
-        $("#collapse" + base64GroupName).find(`.js-subgroup-id`).append(`<p>${subgroup.id}</p>`);
+        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<p>${subgroup.id}</p>`);
         
         subgroup.children.map(child => {
             // For now expecting nothing but regular layers
@@ -790,7 +790,7 @@ module.exports = {
                 activeLayers++;
             }
     
-            _self.createLayerRecord(child, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, base64SubgroupName);
+            _self.createLayerRecord(child, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
             addedLayers++;           
         });
 
@@ -811,7 +811,7 @@ module.exports = {
      * 
      * @returns {void}
      */
-    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, base64SubgroupName = false) => {
+    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
         let displayInfo;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -925,7 +925,7 @@ module.exports = {
             });
 
             if (base64SubgroupName) {
-                $("#" + base64SubgroupName).append(layerControlRecord);
+                $(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
             } else {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
