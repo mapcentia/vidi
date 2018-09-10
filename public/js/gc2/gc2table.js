@@ -327,7 +327,7 @@ var gc2table = (function () {
                     loadDataInTable();
                 };
 
-                loadDataInTable = function (doNotCallCustomOnload = false) {
+                loadDataInTable = function (doNotCallCustomOnload) {
                     data = [];
                     $.each(store.layer._layers, function (i, v) {
                         v.feature.properties._id = i;
