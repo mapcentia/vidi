@@ -86,7 +86,7 @@ let markupGeneratorInstance = new MarkupGenerator();
  * @type {*|exports|module.exports}
  */
 
-let LayerSorting = require('./LayerSorting');
+import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting } from './LayerSorting';
 let layerSortingInstance = new LayerSorting();
 
 /**
@@ -327,43 +327,49 @@ module.exports = {
 
                     try {
 
+                    if (order && layerSortingInstance.validateOrderObject(order) === false) {
+                        console.error(`Invalid order object`, order);
+                        order = false;
+                    }
 
                     let activeLayers = [];
                     if (forcedState) {
-                        order = forcedState.order;
-                        if (`activeLayers` in forcedState) {
-                            activeLayers = forcedState.activeLayers;
-                        }
+                        if (layerSortingInstance.validateOrderObject(forcedState.order)) {
+                            order = forcedState.order;
+                            if (`activeLayers` in forcedState) {
+                                activeLayers = forcedState.activeLayers;
+                            }
 
-                        let layersThatAreNotInMeta = [];
-                        let existingMeta = meta.getMetaData();
-                        if (`data` in existingMeta) {
-                            activeLayers.map(layerName => {
-                                let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
-                                if (correspondingMeta === false) {
-                                    layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
-                                }
-                            });
-                        }
+                            let layersThatAreNotInMeta = [];
+                            let existingMeta = meta.getMetaData();
+                            if (`data` in existingMeta) {
+                                activeLayers.map(layerName => {
+                                    let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
+                                    if (correspondingMeta === false) {
+                                        layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
+                                    }
+                                });
+                            }
 
-                        if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
+                            if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
-                        if (layersThatAreNotInMeta.length > 0) {
-                            let layerFeatchPromises = [];
-                            layersThatAreNotInMeta.map(item => {
-                                layerFeatchPromises.push(switchLayer.init(item, true));
-                            });
+                            if (layersThatAreNotInMeta.length > 0) {
+                                let layerFeatchPromises = [];
+                                layersThatAreNotInMeta.map(item => {
+                                    layerFeatchPromises.push(switchLayer.init(item, true));
+                                });
 
-                            Promise.all(layerFeatchPromises).then(() => {
-                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                            });
+                                Promise.all(layerFeatchPromises).then(() => {
+                                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                                });
+                            }
+                        } else {
+                            console.error(forcedState.order);
+                            throw new Error(`The provided order object in forced layerTree state is invalid`);
                         }
                     }
 
                     layerTreeOrder = order;
-
-                    var base64GroupName, groups, metaData, i, l, count;
-
                     if (editingIsEnabled) {
                         let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
                         if (toggleOfllineOnlineMode) {
@@ -371,11 +377,11 @@ module.exports = {
                         }
                     }
 
-                    groups = [];
+                    let groups = [];
 
                     // Getting set of all loaded vectors
-                    metaData = meta.getMetaData();
-                    for (i = 0; i < metaData.data.length; ++i) {
+                    let metaData = meta.getMetaData();
+                    for (let i = 0; i < metaData.data.length; ++i) {
                         groups[i] = metaData.data[i].layergroup;
                     }
 
@@ -389,82 +395,9 @@ module.exports = {
 
                     $("#layers").append(`<div id="layers_list"></div>`);
                     // Filling up groups and underlying layers (except ungrouped ones)
-                    for (i = 0; i < arr.length; ++i) {
+                    for (let i = 0; i < arr.length; ++i) {
                         if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                            let numberOfActiveLayers = 0;
-                            l = [];
-                            base64GroupName = Base64.encode(arr[i]).replace(/=/g, "");
-
-                            // Add group container
-                            // Only if container doesn't exist
-                            // ===============================
-                            if ($("#layer-panel-" + base64GroupName).length === 0) {
-                                $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, arr[i]));
-
-                                // Append to inner group container
-                                // ===============================
-                                $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
-                            }
-
-                            // Get layers that belong to the current layer group
-                            let notSortedLayersForCurrentGroup = [];
-                            for (let u = 0; u < metaData.data.length; ++u) {
-                                if (metaData.data[u].layergroup == arr[i]) {
-                                    notSortedLayersForCurrentGroup.push(metaData.data[u]);
-                                }
-                            }
-
-                            let layersForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersForCurrentGroup, arr[i]);
-
-                            // Add layers
-                            // ==========
-                            for (var u = 0; u < layersForCurrentGroup.length; ++u) {
-                                let localLayer = layersForCurrentGroup[u];
-
-                                let layerIsActive = false;
-                                let activeLayerName = false;
-                                // If activeLayers are set, then no need to sync with the map
-                                if (!forcedState) {
-                                    if (precheckedLayers && Array.isArray(precheckedLayers)) {
-                                        precheckedLayers.map(item => {
-                                            if (item.id && item.id === `${localLayer.f_table_schema}.${localLayer.f_table_name}`
-                                                || item.id && item.id === `v:${localLayer.f_table_schema}.${localLayer.f_table_name}`) {
-                                                layerIsActive = true;
-                                                activeLayerName = item.id;
-                                                numberOfActiveLayers++;
-                                            }
-                                        });
-                                    }
-                                }
-
-                                _self.createLayerRecord(localLayer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
-                                l.push({});
-                            }
-
-                            $("#collapse" + base64GroupName).sortable({
-                                axis: 'y',
-                                stop: (event, ui) => {
-                                    _self.calculateOrder();
-                                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                                    layers.reorderLayers();
-                                }
-                            });
-                            
-                            if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                                count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + l.length;
-                            } else {
-                                count = l.length;
-                            }
-
-                            $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
-                            // Remove the group if empty
-                            if (l.length === 0) {
-                                $("#layer-panel-" + base64GroupName).remove();
-                            }
-
-                            if (numberOfActiveLayers > 0) {
-                                $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
-                            }
+                            _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
                         }
                     }
 
@@ -517,11 +450,9 @@ module.exports = {
                         resolve();
                     }, 1000);
 
-
                 }catch(e) {
                     console.log(e);
                 }
-
 
                 });
             });
@@ -702,11 +633,185 @@ module.exports = {
     },
 
     /**
-     * Generates separate layer control record
+     * Generates single layer group control
      * 
      * @returns {void}
      */
-    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName) => {
+    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
+        let metaData = meta.getMetaData();
+        let numberOfActiveLayers = 0;        
+        let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
+
+        // Add group container
+        // Only if container doesn't exist
+        // ===============================
+        if ($("#layer-panel-" + base64GroupName).length === 0) {
+            $("#layers_list").append(markupGeneratorInstance.getGroupPanel(base64GroupName, groupName));
+
+            // Append to inner group container
+            // ===============================
+            $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
+        }
+
+        // Get layers and subgroups that belong to the current layer group
+        let notSortedLayersAndSubgroupsForCurrentGroup = [];
+        for (let u = 0; u < metaData.data.length; ++u) {
+            if (metaData.data[u].layergroup == groupName) {
+                let layer = metaData.data[u];
+
+                if (layer.meta) {
+                    let parsedMeta = false;
+                    try {
+                        parsedMeta = JSON.parse(layer.meta);
+                    } catch (e) {}
+    
+                    if (parsedMeta && `vidi_sub_ group` in parsedMeta) {
+                        layer.subGroup = parsedMeta[`vidi_sub_ group`];
+                    } else {
+                        layer.subGroup = false;
+                    }
+                }
+
+                if (layer.subGroup) {
+                    let subGroupIndex = false;
+                    notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
+                        if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
+                            subGroupIndex = index;
+                            return false;
+                        }
+                    });
+
+                    // Group does not exist
+                    if (subGroupIndex === false) {
+                        notSortedLayersAndSubgroupsForCurrentGroup.push({
+                            id: layer.subGroup,
+                            type: GROUP_CHILD_TYPE_GROUP,
+                            children: [layer]
+                        });
+                    } else {
+                        notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push(layer);
+                    }
+                } else {
+                    notSortedLayersAndSubgroupsForCurrentGroup.push({
+                        type: GROUP_CHILD_TYPE_LAYER,
+                        layer
+                    });
+                }
+            }
+        }
+
+        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
+
+        // Add layers and subgroups
+        let numberOfAddedLayers = 0;
+        for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
+            let localItem = layersAndSubgroupsForCurrentGroup[u];
+            if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
+                let { layerIsActive, activeLayerName } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem);
+                if (layerIsActive) {
+                    numberOfActiveLayers++;
+                }
+
+                _self.createLayerRecord(localItem.layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
+                numberOfAddedLayers++;
+            } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
+                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
+                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+            } else {
+                throw new Error(`Invalid sorting element type`);
+            }
+        }
+
+        $("#collapse" + base64GroupName).sortable({
+            axis: 'y',
+            stop: (event, ui) => {
+                _self.calculateOrder();
+                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                layers.reorderLayers();
+            }
+        });
+        
+        let count = 0;
+        if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+            count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
+        } else {
+            count = numberOfAddedLayers;
+        }
+
+        $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+        // Remove the group if empty
+        if (numberOfAddedLayers === 0) {
+            $("#layer-panel-" + base64GroupName).remove();
+        }
+
+        if (numberOfActiveLayers > 0) {
+            $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
+        }
+    },
+
+    checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
+        let layerIsActive = false;
+        let activeLayerName = false;
+        
+        // If activeLayers are set, then no need to sync with the map
+        if (!forcedState) {
+            if (precheckedLayers && Array.isArray(precheckedLayers)) {
+                precheckedLayers.map(item => {
+                    if (item.id && item.id === `${localItem.f_table_schema}.${localItem.f_table_name}`
+                        || item.id && item.id === `v:${localItem.f_table_schema}.${localItem.f_table_name}`) {
+                        layerIsActive = true;
+                        activeLayerName = item.id;
+                    }
+                });
+            }
+        }
+
+        return { layerIsActive, activeLayerName }
+    },
+
+    /**
+     * Generates single subgroup control
+     * 
+     * @returns {Object}
+     */
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
+        let addedLayers = 0, activeLayers = 0;
+
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
+        let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
+        $("#collapse" + base64GroupName).append(markup);
+        $("#collapse" + base64GroupName).find(`.js-subgroup-id`).append(`<p>${subgroup.id}</p>`);
+        
+        subgroup.children.map(child => {
+            // For now expecting nothing but regular layers
+            let { layerIsActive, activeLayerName } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child);
+            if (layerIsActive) {
+                activeLayers++;
+            }
+    
+            _self.createLayerRecord(child, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, base64SubgroupName);
+            addedLayers++;           
+        });
+
+        $(`#` + base64SubgroupName).sortable({
+            axis: 'y',
+            stop: (event, ui) => {
+                _self.calculateOrder();
+                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                layers.reorderLayers();
+            }
+        });
+
+        return { addedLayers, activeLayers };
+    },
+
+    /**
+     * Generates single layer control
+     * 
+     * @returns {void}
+     */
+    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, base64SubgroupName = false) => {
         let displayInfo;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -819,7 +924,11 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
             });
 
-            $("#collapse" + base64GroupName).append(layerControlRecord);
+            if (base64SubgroupName) {
+                $("#" + base64SubgroupName).append(layerControlRecord);
+            } else {
+                $("#collapse" + base64GroupName).append(layerControlRecord);
+            }
 
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
@@ -893,25 +1002,56 @@ module.exports = {
         _self.reloadLayer(`v:` + layerKey);
     },
 
+    /**
+     * Calculates layer order using the current markup
+     * 
+     * @returns {void}
+     */
     calculateOrder: () => {
         layerTreeOrder = [];
 
         $(`[id^="layer-panel-"]`).each((index, element) => {
             let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
-            let layers = [];
-            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+            let children = [];
+
+            const processLayerRecord = (layerElement) => {
                 let layerKey = $(layerElement).data(`gc2-layer-key`);
                 let splitLayerKey = layerKey.split('.');
                 if (splitLayerKey.length !== 3) {
                     throw new Error(`Invalid layer key (${layerKey})`);
                 }
 
-                layers.push({ id: `${splitLayerKey[0]}.${splitLayerKey[1]}` });
+                return {
+                    id: `${splitLayerKey[0]}.${splitLayerKey[1]}`,
+                    type: GROUP_CHILD_TYPE_LAYER
+                };
+            };
+
+            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+                if ($(layerElement).data(`gc2-layer-key`)) {
+                    // Processing layer record
+                    children.push(processLayerRecord(layerElement));
+                } else if ($(layerElement).data(`gc2-subgroup-id`)) {
+                    // Processing subgroup record
+                    let subgroupDescription = {
+                        id: $(layerElement).data(`gc2-subgroup-id`),
+                        type: GROUP_CHILD_TYPE_GROUP,
+                        children: []
+                    };
+
+                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
+                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
+                    });
+
+                    children.push(subgroupDescription);
+                } else {
+                    throw new Error(`Unable to detect the group child element`);
+                }
             });
 
             let readableId = atob(id);
             if (readableId) {
-                layerTreeOrder.push({ id: readableId, layers });
+                layerTreeOrder.push({ id: readableId, children });
             } else {
                 throw new Error(`Unable to decode the layer group identifier (${id})`);
             }
