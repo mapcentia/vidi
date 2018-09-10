@@ -113,7 +113,7 @@ module.exports = module.exports = {
         applicationWideControls.prop('checked', enable);
 
         let result = new Promise((resolve, reject) => {
-            let store = layerTree.getStores();
+            let vectorDataStores = layerTree.getStores();
 
             let layer = cloud.get().getLayersByName(name);
             let layerType, tileLayerId, vectorLayerId;
@@ -133,9 +133,9 @@ module.exports = module.exports = {
             if (tileLayer) cloud.get().map.removeLayer(tileLayer);
             if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
 
-            if (store[vectorLayerId]) {
-                store[vectorLayerId].abort();
-                store[vectorLayerId].reset();
+            if (vectorDataStores[vectorLayerId]) {
+                vectorDataStores[vectorLayerId].abort();
+                vectorDataStores[vectorLayerId].reset();
             }
 
             if (enable) {
@@ -189,11 +189,11 @@ module.exports = module.exports = {
                     layers.incrementCountLoading(vectorLayerId);
 
                     layerTree.setSelectorValue(name, 'vector');
-                    if (vectorLayerId in store) {
-                        cloud.get().layerControl.addOverlay(store[vectorLayerId].layer, vectorLayerId);
+                    if (vectorLayerId in vectorDataStores) {
+                        cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
                         let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                         cloud.get().map.addLayer(existingLayer);
-                        store[vectorLayerId].load();
+                        vectorDataStores[vectorLayerId].load();
 
                         backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
 
@@ -238,6 +238,10 @@ module.exports = module.exports = {
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
             if (!controlElement || controlElement.length !== 1) {
+                if (enable) {
+                    console.error(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
+                }
+
                 return false;
             } else {
                 return controlElement;
@@ -245,10 +249,16 @@ module.exports = module.exports = {
         };
 
         let el = getLayerSwitchControl();
-        if (el === false) {
-            console.error(`Unable to find layer switch control for layer ${layerName}`);
-        } else {
+        if (el) {
             el.prop('checked', enable);
+            if (enable && layerName.indexOf(`v:`) === 0) {
+                $(el).closest(`.layer-item`).find(`.js-toggle-filters`).show();
+                $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).show();
+            } else {
+                $(el).closest(`.layer-item`).find(`.js-toggle-filters`).hide();
+                $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).hide();
+            }
+         
             _self.update(doNotLegend, el);
         }
     },

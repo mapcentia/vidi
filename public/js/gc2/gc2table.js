@@ -107,6 +107,7 @@ var gc2table = (function () {
                 ns: "",
                 template: null,
                 usingCarto: false,
+                assignFeatureEventListenersOnDataLoad: true,
                 onSelect: function () {
                 },
                 onMouseOver: function () {
@@ -134,6 +135,7 @@ var gc2table = (function () {
             autoUpdate = defaults.autoUpdate,
             height = defaults.height,
             tableBodyHeight = defaults.tableBodyHeight,
+            assignFeatureEventListenersOnDataLoad = defaults.assignFeatureEventListenersOnDataLoad,
             styleSelected = defaults.styleSelected,
             el = defaults.el, click, loadDataInTable, moveEndOff, moveEndOn,
             setSelectedStyle = defaults.setSelectedStyle,
@@ -149,6 +151,8 @@ var gc2table = (function () {
             ns = defaults.ns,
             template = defaults.template,
             usingCartodb = defaults.usingCartodb;
+
+        var customOnLoad = false, destroy, assignEventListeners;
 
         $(el).parent("div").addClass("gc2map");
 
@@ -185,6 +189,7 @@ var gc2table = (function () {
                     if (setSelectedStyle) {
                         m.map._layers[id].setStyle(styleSelected);
                     }
+
                     if (openPopUp) {
                         var str = "<table>", renderedText;
                         $.each(cm, function (i, v) {
@@ -202,15 +207,15 @@ var gc2table = (function () {
                         }
 
                         m.map._layers[id].bindPopup(renderedText || str, {
-                            className: "custom-popup",
+                            className: "custom-popup gc2table-custom-popup",
                             autoPan: autoPan,
                             closeButton: true
                         }).openPopup();
 
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
                     }
-
                 });
+
                 click = function (e) {
                     var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
                     try {
@@ -220,6 +225,8 @@ var gc2table = (function () {
                     } catch (e) {}
                     object.trigger("selected" + "_" + uid, e.target._leaflet_id);
                 };
+                click.byGC2Table = true;
+
                 $(el).append("<thead><tr></tr></thead>");
                 $.each(cm, function (i, v) {
                     $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
@@ -274,8 +281,6 @@ var gc2table = (function () {
                             var layer = m.map._layers[id];
                             onMouseOver(id, layer);
                         });
-
-
                     }, 100);
                 };
                 $(el).bootstrapTable({
@@ -288,11 +293,40 @@ var gc2table = (function () {
                     onColumnSearch: filterMap
                 });
 
+                /**
+                 * Destroys events and popups for vector layer features, as
+                 * well as restoring the regular store onLoad() method.
+                 * 
+                 * @returns {void}
+                 */
+                destroy = function () {
+                    $.each(store.layer._layers, function (i, v) {
+                        v.off('click', click);
+                        // Hack for removing irrelevant popups
+                        v._events.click.map(function (item, index) {
+                            if ('name' in item.fn && item.fn.name === '_openPopup') {
+                                v._events.click.splice(index, 1);
+                            }
+                        });
+                    });
+
+                    if (customOnLoad) {
+                        store.onLoad = customOnLoad;
+                    }
+                };
+
+                assignEventListeners = function () {
+                    $.each(store.layer._layers, function (i, v) {
+                        v.on('click', click);
+                    });
+                };
+
                 // Define a callback for when the SQL returns
-                var customOnLoad = store.onLoad;
+                customOnLoad = store.onLoad;
                 store.onLoad = function () {
                     loadDataInTable();
                 };
+
                 loadDataInTable = function (doNotCallCustomOnload) {
                     data = [];
                     $.each(store.layer._layers, function (i, v) {
@@ -306,10 +340,10 @@ var gc2table = (function () {
                             });
                         });
                         data.push(v.feature.properties);
-                        v.on({
-                            click: click
-                        });
 
+                        if (assignFeatureEventListenersOnDataLoad) {
+                            assignEventListeners();
+                        }
                     });
 
                     originalLayers = jQuery.extend(true, {}, store.layer._layers);
@@ -325,7 +359,6 @@ var gc2table = (function () {
                     $(".fixed-table-body").css("overflow", "auto");
                     $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
                     $(".fixed-table-body").css("height", tableBodyHeight + "px");
-
                 };
 
                 var moveEndEvent = function () {
@@ -381,6 +414,8 @@ var gc2table = (function () {
         }());
         return {
             loadDataInTable: loadDataInTable,
+            destroy: destroy,
+            assignEventListeners: assignEventListeners,
             object: object,
             uid: uid,
             store: store,

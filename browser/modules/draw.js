@@ -429,106 +429,108 @@ module.exports = {
         let l = _self.getLayer();
         let t = _self.getTable();
 
-        $.each(v[0].geojson.features, function (n, m) {
-            // If polyline or polygon
-            // ======================
-            if (m.type === "Feature" && GeoJsonAdded === false) {
-                var json = L.geoJson(m, {
-                    style: function (f) {
-                        return f.style;
+        if (parr.length === 1) {
+            $.each(v[0].geojson.features, function (n, m) {
+                // If polyline or polygon
+                // ======================
+                if (m.type === "Feature" && GeoJsonAdded === false) {
+                    var json = L.geoJson(m, {
+                        style: function (f) {
+                            return f.style;
+                        }
+                    });
+
+                    var g = json._layers[Object.keys(json._layers)[0]];
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle
+                // =========
+                if (m.type === "Circle") {
+                    g = L.circle(m._latlng, m._mRadius, m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If rectangle
+                // ============
+                if (m.type === "Rectangle") {
+                    g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                    g.feature = m.feature;
+
+                    // Adding vidi-specific properties
+                    g._vidi_type = m._vidi_type;
+
+                    l.addLayer(g);
+                }
+
+                // If circle marker
+                // ================
+                if (m.type === "CircleMarker") {
+                    g = L.circleMarker(m._latlng, m.options);
+                    g.feature = m.feature;
+
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
                     }
-                });
 
-                var g = json._layers[Object.keys(json._layers)[0]];
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = m._vidi_marker_text;
 
-                // Adding vidi-specific properties
-                g._vidi_type = m._vidi_type;
-
-                l.addLayer(g);
-            }
-
-            // If circle
-            // =========
-            if (m.type === "Circle") {
-                g = L.circle(m._latlng, m._mRadius, m.style);
-                g.feature = m.feature;
-
-                // Adding vidi-specific properties
-                g._vidi_type = m._vidi_type;
-
-                l.addLayer(g);
-            }
-
-            // If rectangle
-            // ============
-            if (m.type === "Rectangle") {
-                g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
-                g.feature = m.feature;
-
-                // Adding vidi-specific properties
-                g._vidi_type = m._vidi_type;
-
-                l.addLayer(g);
-            }
-
-            // If circle marker
-            // ================
-            if (m.type === "CircleMarker") {
-                g = L.circleMarker(m._latlng, m.options);
-                g.feature = m.feature;
-
-                // Add label
-                if (m._vidi_marker_text) {
-                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", () => {}).openTooltip();
+                    l.addLayer(g);
                 }
 
-                // Adding vidi-specific properties
-                g._vidi_marker = true;
-                g._vidi_type = m._vidi_type;
-                g._vidi_marker_text = m._vidi_marker_text;
+                // If marker
+                // =========
+                if (m.type === "Marker") {
+                    g = L.marker(m._latlng, m.style);
+                    g.feature = m.feature;
 
-                l.addLayer(g);
-            }
+                    // Add label
+                    if (m._vidi_marker_text) {
+                        g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
+                        }).openTooltip();
+                    }
 
-            // If marker
-            // =========
-            if (m.type === "Marker") {
-                g = L.marker(m._latlng, m.style);
-                g.feature = m.feature;
+                    // Adding vidi-specific properties
+                    g._vidi_marker = true;
+                    g._vidi_type = m._vidi_type;
+                    g._vidi_marker_text = null;
 
-                // Add label
-                if (m._vidi_marker_text) {
-                    g.bindTooltip(m._vidi_marker_text, {permanent: true}).on("click", function () {
-                    }).openTooltip();
+                    l.addLayer(g);
+
+                } else {
+
+                    // Add measure
+                    if (m._vidi_measurementLayer) {
+                        g.showMeasurements(m._vidi_measurementOptions);
+                    }
+
+                    // Add extremities
+                    if (m._vidi_extremities) {
+                        g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
+                    }
+
+                    // Bind popup
+                    g.on('click', function (event) {
+
+                        _self.bindPopup(event);
+
+                    });
                 }
-
-                // Adding vidi-specific properties
-                g._vidi_marker = true;
-                g._vidi_type = m._vidi_type;
-                g._vidi_marker_text = null;
-
-                l.addLayer(g);
-
-            } else {
-
-                // Add measure
-                if (m._vidi_measurementLayer) {
-                    g.showMeasurements(m._vidi_measurementOptions);
-                }
-
-                // Add extremities
-                if (m._vidi_extremities) {
-                    g.showExtremities(m._vidi_extremities.pattern, m._vidi_extremities.size, m._vidi_extremities.where);
-                }
-
-                // Bind popup
-                g.on('click', function (event) {
-
-                    _self.bindPopup(event);
-
-                });
-            }
-        });
+            });
+        }
 
         t.loadDataInTable();
 

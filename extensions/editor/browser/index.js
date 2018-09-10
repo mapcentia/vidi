@@ -64,6 +64,8 @@ let isInit = false;
 
 let layerTreeWasInitialized = false;
 
+let watsoncIsEnabled = false;
+
 let _self = false;
 
 /**
@@ -98,6 +100,11 @@ module.exports = {
      *
      */
     init: function () {
+        if (`watsonc` in window.vidiConfig.enabledExtensions) {
+            console.log(`Editor extension is disabled due to the enabled watsonc`);
+            return;
+        }
+
         let me = this, metaDataKeys, metaData, styleFn;
         apiBridgeInstance = APIBridgeSingletone();
 
