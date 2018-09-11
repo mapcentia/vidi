@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -1105,9 +1105,6 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-
-        console.log(`###`, JSON.stringify(newState));
-
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {
