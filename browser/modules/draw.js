@@ -380,8 +380,20 @@ module.exports = {
      */
     removeFeatures: () => {
         let l = _self.getLayer();
+        console.log(`### removeFeatures l`, l);
         l.getLayers().map(layer => {
             l.removeLayer(layer);
+        });
+    },
+
+    /**
+     * Resets state to default value
+     */
+    resetState: () => {
+        return new Promise((resolve, reject) => {
+            _self.control(false);
+            _self.removeFeatures();
+            resolve();
         });
     },
 

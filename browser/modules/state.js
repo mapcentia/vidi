@@ -600,12 +600,22 @@ module.exports = {
         let result = new Promise((resolve, reject) => {
             const applyStateToModules = () => {
                 let promises = [];
+                let modulesWithAppliedState = [];
                 if ('modules' in state) {
                     for (let name in state.modules) {
                         if (name in listened) {
                             promises.push(listened[name].applyState(state.modules[name]));
+                            modulesWithAppliedState.push(name);
                         } else {
                             console.warn(`Module or extension ${name} is not registered in state module, so its state is not applied`);
+                        }
+                    }
+                }
+
+                for (let key in listened) {
+                    if (modulesWithAppliedState.indexOf(key) === -1) {
+                        if (`resetState` in listened[key]) {
+                            promises.push(listened[key].resetState());
                         }
                     }
                 }
