@@ -172,7 +172,6 @@ module.exports = {
                 let drawControlFull = new L.Control.Draw({ draw: { polyline: false } });
 
                 this.refreshStatus();
-
                 this.setState({
                     drawRectangleControl: new L.Draw.Rectangle(mapObj, drawControlFull.options.rectangle),
                     newAreaZoomMin: mapObj.getZoom(),
@@ -181,7 +180,7 @@ module.exports = {
                     zoomMax: this.getMapMaxZoom()
                 });
 
-                setTimeout(() => {
+                const checkServiceWorkerRegistration = () => {
                     if (navigator.serviceWorker.controller) {
                         this.setState({
                             cacheIsAvailable: 1
@@ -190,8 +189,12 @@ module.exports = {
                         this.setState({
                             cacheIsAvailable: -1
                         });
-                    }
-                }, 1000);
+
+                        setTimeout(checkServiceWorkerRegistration, 2000);
+                    }     
+                };
+
+                setTimeout(checkServiceWorkerRegistration, 1000);
 
                 mapObj.on('zoomend', (e) => {
                     if (mapObj.getZoom() <= this.state.newAreaZoomMax) {
@@ -452,7 +455,7 @@ module.exports = {
                     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
                 };
 
-                if (browser && browser.name !== 'safari') {
+                if (browser && browser.name.toLowerCase() !== 'safari' && browser.name.toLowerCase() !== 'ios') {
                     navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
                         this.setState({
                             storageUsed: bytesToSize(usedBytes),
