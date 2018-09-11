@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = false;
+const LOG = true;
 
 const MODULE_NAME = `layerTree`;
 
@@ -297,12 +297,16 @@ module.exports = {
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
+                console.warn(`Ignoring the layerTree.create() request`);
                 resolve();
             });
         } else {
             layerTreeWasBuilt = true;
             treeIsBeingBuilt = true;
             result = new Promise((resolve, reject) => {
+
+                try {
+
                 if (LOG) console.log(`${MODULE_NAME}: started building the tree`);
 
                 /*
@@ -333,39 +337,39 @@ module.exports = {
                     }
 
                     let activeLayers = [];
-                    if (forcedState && forcedState.order) {
-                        if (layerSortingInstance.validateOrderObject(forcedState.order)) {
-                            order = forcedState.order;
-                            if (`activeLayers` in forcedState) {
-                                activeLayers = forcedState.activeLayers;
-                            }
-
-                            let layersThatAreNotInMeta = [];
-                            let existingMeta = meta.getMetaData();
-                            if (`data` in existingMeta) {
-                                activeLayers.map(layerName => {
-                                    let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
-                                    if (correspondingMeta === false) {
-                                        layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
-                                    }
-                                });
-                            }
-
-                            if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
-
-                            if (layersThatAreNotInMeta.length > 0) {
-                                let layerFeatchPromises = [];
-                                layersThatAreNotInMeta.map(item => {
-                                    layerFeatchPromises.push(switchLayer.init(item, true));
-                                });
-
-                                Promise.all(layerFeatchPromises).then(() => {
-                                    backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                                });
-                            }
-                        } else {
+                    if (forcedState) {
+                        if (forcedState.order && layerSortingInstance.validateOrderObject(forcedState.order) === false) {
                             console.error(forcedState.order);
                             throw new Error(`The provided order object in forced layerTree state is invalid`);
+                        }
+
+                        order = forcedState.order;
+                        if (`activeLayers` in forcedState) {
+                            activeLayers = forcedState.activeLayers;
+                        }
+
+                        let layersThatAreNotInMeta = [];
+                        let existingMeta = meta.getMetaData();
+                        if (`data` in existingMeta) {
+                            activeLayers.map(layerName => {
+                                let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
+                                if (correspondingMeta === false) {
+                                    layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
+                                }
+                            });
+                        }
+
+                        if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
+
+                        if (layersThatAreNotInMeta.length > 0) {
+                            let layerFeatchPromises = [];
+                            layersThatAreNotInMeta.map(item => {
+                                layerFeatchPromises.push(switchLayer.init(item, true));
+                            });
+
+                            Promise.all(layerFeatchPromises).then(() => {
+                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                            });
                         }
                     }
 
@@ -455,7 +459,14 @@ module.exports = {
                 }
 
                 });
+
+            }catch(e) {
+                console.log(e);
+            }
+
+
             });
+
         }
 
         return result;
@@ -1094,6 +1105,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+        console.log(`###`, JSON.stringify(newState));
+
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {
