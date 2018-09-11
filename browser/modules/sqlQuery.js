@@ -161,6 +161,9 @@ module.exports = {
             var cartoSql = metaDataKeys[value].sql;
             var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
             var onLoad;
+            let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
+                && metaDataKeys[value].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
