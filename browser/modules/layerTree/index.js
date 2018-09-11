@@ -781,7 +781,25 @@ module.exports = {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
         $("#collapse" + base64GroupName).append(markup);
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<p>${subgroup.id}</p>`);
+        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
+            <p>
+                <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
+                    <i class="fa fa-arrow-up"></i>
+                </button>
+                ${subgroup.id}
+            </p>
+        </div>`);
+
+        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`);
+            if (subgroupRootElement.find(`.js-subgroup-children`).is(`:visible`)) {
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).hide();
+            } else {
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).show();
+            }
+        });
         
         subgroup.children.map(child => {
             // For now expecting nothing but regular layers
