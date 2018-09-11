@@ -26,6 +26,7 @@ module.exports = {
     },
     init: function () {
         if (document.getElementById('custom-search')) {
+            /*
             var autocomplete = new google.maps.places.Autocomplete(document.getElementById('custom-search')), myLayer;
             google.maps.event.addListener(autocomplete, 'place_changed', function () {
                 var place = autocomplete.getPlace(),
@@ -49,6 +50,7 @@ module.exports = {
                 myLayer.clearLayers();
                 $("#custom-search").val("");
             });
+            */
         } else {
             console.warn(`Unable to find the custom search field`);
         }
