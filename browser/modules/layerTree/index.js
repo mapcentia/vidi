@@ -333,7 +333,7 @@ module.exports = {
                     }
 
                     let activeLayers = [];
-                    if (forcedState) {
+                    if (forcedState && forcedState.order) {
                         if (layerSortingInstance.validateOrderObject(forcedState.order)) {
                             order = forcedState.order;
                             if (`activeLayers` in forcedState) {
