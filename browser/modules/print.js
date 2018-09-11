@@ -192,7 +192,7 @@ module.exports = {
      *
      */
     print: (endEventName = "end:print", customData) => {
-        state.bookmarkState().then(response => {
+        state.bookmarkState(customData).then(response => {
             backboneEvents.get().trigger(endEventName, response);
             callBack(response.responseJSON);
         }).catch(response => {

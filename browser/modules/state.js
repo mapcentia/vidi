@@ -642,9 +642,9 @@ module.exports = {
      * 
      * @returns {Promise}
      */
-    bookmarkState: (data) => {
+    bookmarkState: (customData) => {
         // Getting the print data
-        let printData = print.getPrintData();
+        let printData = print.getPrintData(customData);
 
         // Getting modules and extensions state
         let modulesData = {};
