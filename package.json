@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should be able to print page as PDF\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should create permalink that will make possible to share state snapshot\""
   },
   "repository": {
     "type": "git",
