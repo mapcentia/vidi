@@ -6,7 +6,9 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = false;
+const LOG = true;
+
+const MODULE_NAME = `state`;
 
 /**
  * @type {*|exports|module.exports}
@@ -617,6 +619,9 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state) => {
+
+        if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
+
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {
             const applyStateToModules = () => {

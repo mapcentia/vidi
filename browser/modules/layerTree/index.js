@@ -299,6 +299,7 @@ module.exports = {
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
+                console.trace(`async`);
                 console.error(`Asynchronous layerTree.create() attempt`);
                 reject();
             });
