@@ -203,92 +203,97 @@ module.exports = {
             modules[name].init();
         });
 
+        /**
+         * Fetch meta > initialize settings > create layer tree >
+         * initialize state > load layers > initialize extensions > finish
+         */
         modules.meta.init().then(() => {
             return modules.setting.init();
         }, (error) => {
             console.log(error); // Stacktrace
             alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
-            modules.state.init();
         }).then(() => {
-            modules.layerTree.create();
-            modules.state.init();
-        });
+            return modules.layerTree.create();
+        }).finally(() => {
+            console.log(`### state.init()`);
+            modules.state.init().then(() => {
+                // Require search module
+                // =====================
 
-        // Require search module
-        // =====================
+                // Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ() {
+                    require('./search/*.js', {glob: true});
+                }
 
-        // Hack to compile Glob files. Don´t call this function!
-        function ಠ_ಠ() {
-            require('./search/*.js', {glob: true});
-        }
+                if (typeof vidiConfig.searchModules !== "undefined") {
+                    $.each(vidiConfig.searchModules, function (i, v) {
+                        modules.search[v] = require('./search/' + v + '.js');
+                        modules.search[v].set(modules);
+                    });
+                    modules.search[window.vidiConfig.enabledSearch].init();
+                }
 
-        if (typeof vidiConfig.searchModules !== "undefined") {
-            $.each(vidiConfig.searchModules, function (i, v) {
-                modules.search[v] = require('./search/' + v + '.js');
-                modules.search[v].set(modules);
-            });
-            modules.search[window.vidiConfig.enabledSearch].init();
-        }
+                // Require extensions modules
+                // ==========================
 
-        // Require extensions modules
-        // ==========================
+                //Hack to compile Glob files. Don´t call this function!
+                function ಠ_ಠ() {
+                    require('./../../extensions/*/browser/*.js', {glob: true});
+                    require('./../../extensions/*/browser/*/*.js', {glob: true});
+                }
 
-        //Hack to compile Glob files. Don´t call this function!
-        function ಠ_ಠ() {
-            require('./../../extensions/*/browser/*.js', {glob: true});
-            require('./../../extensions/*/browser/*/*.js', {glob: true});
-        }
+                if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
+                    $.each(vidiConfig.extensions.browser, function (i, v) {
+                        modules.extensions[Object.keys(v)[0]] = {};
+                        $.each(v[Object.keys(v)[0]], function (n, m) {
+                            modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
+                            modules.extensions[Object.keys(v)[0]][m].set(modules);
+                        })
+                    });
 
-        if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
-            $.each(vidiConfig.extensions.browser, function (i, v) {
-                modules.extensions[Object.keys(v)[0]] = {};
-                $.each(v[Object.keys(v)[0]], function (n, m) {
-                    modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
-                    modules.extensions[Object.keys(v)[0]][m].set(modules);
-                })
-            });
+                    if (typeof window.vidiConfig.enabledExtensions === "object") {
+                        $.each(vidiConfig.extensions.browser, function (i, v) {
+                            $.each(v[Object.keys(v)[0]], function (n, m) {
+                                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                    modules.extensions[Object.keys(v)[0]][m].init();
+                                }
+                            })
+                        });
+                    }
+                }
 
-            if (typeof window.vidiConfig.enabledExtensions === "object") {
-                $.each(vidiConfig.extensions.browser, function (i, v) {
-                    $.each(v[Object.keys(v)[0]], function (n, m) {
-                        if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                            modules.extensions[Object.keys(v)[0]][m].init();
-                        }
-                    })
+                // Init some GUI stuff after modules are loaded
+                // ============================================
+                $("[data-toggle=tooltip]").tooltip();
+
+                try {
+                    $.material.init();
+                    touchScroll(".tab-pane");
+                    touchScroll("#info-modal-body-wrapper");
+                    $("#loadscreentext").html(__("Loading data"));
+                    if (window.vidiConfig.activateMainTab) {
+                        setTimeout(function () {
+                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                        }, 200);
+                    }
+                    $(window).resize(_.debounce(function () {
+                        $("#myNavmenu").offcanvas('hide');
+                        setTimeout(function () {
+                            modules.cloud.get().map.invalidateSize();
+                        }, 100);
+                    }, 0));
+                } catch (e) {
+                    console.info("Could not init Bootstrap Material Design");
+                }
+
+                // Calling optional postInit method
+                defaultModules.map(name => {
+                    if (`postInit` in modules[name]) {
+                        modules[name].postInit();
+                    }
                 });
-            }
-        }
-
-        // Init some GUI stuff after modules are loaded
-        // ============================================
-        $("[data-toggle=tooltip]").tooltip();
-
-        try {
-            $.material.init();
-            touchScroll(".tab-pane");
-            touchScroll("#info-modal-body-wrapper");
-            $("#loadscreentext").html(__("Loading data"));
-            if (window.vidiConfig.activateMainTab) {
-                setTimeout(function () {
-                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                }, 200);
-            }
-            $(window).resize(_.debounce(function () {
-                $("#myNavmenu").offcanvas('hide');
-                setTimeout(function () {
-                    modules.cloud.get().map.invalidateSize();
-                }, 100);
-            }, 0));
-        } catch (e) {
-            console.info("Could not init Bootstrap Material Design");
-        }
-
-        // Calling optional postInit method
-        defaultModules.map(name => {
-            if (`postInit` in modules[name]) {
-                modules[name].postInit();
-            }
+            });
         });
 
         if ('serviceWorker' in navigator) {

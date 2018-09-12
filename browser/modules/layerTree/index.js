@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = false;
+const LOG = true;
 
 const MODULE_NAME = `layerTree`;
 
@@ -297,8 +297,8 @@ module.exports = {
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
-                console.warn(`Ignoring the layerTree.create() request`);
-                resolve();
+                throw new Error(`Asynchronous layerTree.create() attempt`);
+                reject();
             });
         } else {
             layerTreeWasBuilt = true;
@@ -315,6 +315,8 @@ module.exports = {
                     which are defined externally via forcedState only.
                 */
                 let precheckedLayers = layers.getMapLayers();
+
+                if (LOG) console.log(`${MODULE_NAME}: precheckedLayers`, precheckedLayers);
 
                 layerTreeIsReady = false;
                 if (forcedState) {
@@ -372,6 +374,8 @@ module.exports = {
                             });
                         }
                     }
+
+                    if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
 
                     layerTreeOrder = order;
                     if (editingIsEnabled) {
@@ -572,7 +576,9 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-                onEachFeature['v:' + layerKey](feature, layer);
+                if (('v:' + layerKey) in onEachFeature) {
+                    onEachFeature['v:' + layerKey](feature, layer);
+                }
             }
         });
     },
@@ -713,12 +719,14 @@ module.exports = {
 
         let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
 
+console.log(`### layersAndSubgroupsForCurrentGroup`, layersAndSubgroupsForCurrentGroup);
+
         // Add layers and subgroups
         let numberOfAddedLayers = 0;
         for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
             let localItem = layersAndSubgroupsForCurrentGroup[u];
             if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                let { layerIsActive, activeLayerName } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem);
+                let { layerIsActive, activeLayerName } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
                 if (layerIsActive) {
                     numberOfActiveLayers++;
                 }
@@ -762,6 +770,10 @@ module.exports = {
     },
 
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
+        if (!localItem) {
+            throw new Error(`Layer meta object is empty`);
+        }
+
         let layerIsActive = false;
         let activeLayerName = false;
         
@@ -777,6 +789,8 @@ module.exports = {
                 });
             }
         }
+
+        console.log(`### check if layer is active`, `${localItem.f_table_schema}.${localItem.f_table_name}`, layerIsActive);
 
         return { layerIsActive, activeLayerName }
     },

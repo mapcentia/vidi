@@ -79,6 +79,9 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
+
+        console.log(`### switchLayer`, name, enable);
+
         let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {
             if (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name === name.replace('v:', '')) {
@@ -165,7 +168,9 @@ module.exports = module.exports = {
                         resolve();
                     }).catch((err) => {
                         meta.init(name, true, true).then(layerMeta => {
-                            // Trying to recreate the layer tree with updated meta and switch layer again
+                            console.log(`### layerTree.create() from switchLayer`);
+
+                            // Trying to recreate the layer tree with updated meta and switch layer again                           
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
                                 let currentLayers = layers.getLayers();
@@ -201,6 +206,8 @@ module.exports = module.exports = {
                         resolve();
                     } else {
                         meta.init(tileLayerId, true, true).then(layerMeta => {
+                            console.log(`### layerTree.create() from switchLayer`);
+
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
