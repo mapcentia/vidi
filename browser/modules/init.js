@@ -142,7 +142,7 @@ module.exports = {
             console.info("Using pre-processed template: " + tmpl);
             me.startApp();
         } else {
-            $.get(window.vidiConfig.configUrl + "/" + tmpl, function (template) {
+            $.get("/api/template/" + urlparser.db + "/" + tmpl, function (template) {
                 var rendered = Mustache.render(template, gc2i18n.dict);
                 $("#main-container").html(rendered);
                 console.info("Loaded external template: " + tmpl);
