@@ -6,7 +6,9 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = false;
+const LOG = true;
+
+const MODULE_NAME = `state`;
 
 /**
  * @type {*|exports|module.exports}
@@ -192,334 +194,355 @@ module.exports = {
      */
     init: function () {
         _self = this;
+        return new Promise((initResolve, initReject) => {
 
-        if ('localforage' in window === false) {
-            throw new Error('localforage is not defined');
-        }
+            try {
 
-        var arr, i, maxBounds = setting.getMaxBounds();
-
-        if (maxBounds) {
-            cloud.get().setMaxBounds(maxBounds);
-        }
-
-        // Reset hash. Needed if state is invoked after start up
-        hash = decodeURIComponent(window.location.hash);
-        hashArr = hash.replace("#", "").split("/");
-
-        const removeDuplicates = (inputArray) => {
-            var temp = {};
-            for (var i = 0; i < inputArray.length; i++) {
-                temp[inputArray[i]] = true;
+            if ('localforage' in window === false) {
+                throw new Error('localforage is not defined');
             }
 
-            var result = [];
-            for (var key in temp) {
-                result.push(key);
+            var arr, i, maxBounds = setting.getMaxBounds();
+
+            if (maxBounds) {
+                cloud.get().setMaxBounds(maxBounds);
             }
 
-            return result;
-        };
+            // Reset hash. Needed if state is invoked after start up
+            hash = decodeURIComponent(window.location.hash);
+            hashArr = hash.replace("#", "").split("/");
 
-        const setLayers = () => {
-            $(".base-map-button").removeClass("active");
-            $("#" + hashArr[0]).addClass("active");
-            let layersToActivate = [];
-
-            let baseLayerId = false;
-            if (hashArr[1] && hashArr[2] && hashArr[3]) {
-                baseLayerId = hashArr[0];
-
-                // Layers to activate
-                if (hashArr[4]) {
-                    layersToActivate = removeDuplicates(hashArr[4].split(","));
+            const removeDuplicates = (inputArray) => {
+                var temp = {};
+                for (var i = 0; i < inputArray.length; i++) {
+                    temp[inputArray[i]] = true;
                 }
-            }
 
-            /**
-             * Creates promise
-             * 
-             * @param {String} data Input data for underlying function
-             * 
-             * @return {Function} 
-             */
-            const createPromise = (data) => {
-                return new Promise(resolve => {
-                    switchLayer.init(data, true, true).then(() => {
-                        resolve();
-                    });
-                })
+                var result = [];
+                for (var key in temp) {
+                    result.push(key);
+                }
+
+                return result;
             };
 
-            /**
-             * Executes promises one after another
-             * 
-             * @param {Array} data Set of input values
-             */
-            const executeSequentially = (data) => {
-                return createPromise(data.shift()).then(x => data.length == 0 ? x : executeSequentially(data));
-            };
+            const setLayers = () => {
+                $(".base-map-button").removeClass("active");
+                $("#" + hashArr[0]).addClass("active");
+                let layersToActivate = [];
 
-            const initializeLayersFromURL = () => {
-                executeSequentially(layersToActivate).then(() => {});
-            };
+                let baseLayerId = false;
+                if (hashArr[1] && hashArr[2] && hashArr[3]) {
+                    baseLayerId = hashArr[0];
 
-            if (layerTree.isReady()) {
-                setBaseLayer.init(baseLayerId);
-                initializeLayersFromURL();
-            } else {
-                backboneEvents.get().once(`layerTree:ready`, () => {
+                    // Layers to activate
+                    if (hashArr[4]) {
+                        layersToActivate = removeDuplicates(hashArr[4].split(","));
+                    }
+                }
+
+                /**
+                 * Creates promise
+                 * 
+                 * @param {String} data Input data for underlying function
+                 * 
+                 * @return {Function} 
+                 */
+                const createPromise = (data) => {
+                    return new Promise(resolve => {
+                        switchLayer.init(data, true, true).then(() => {
+                            resolve();
+                        });
+                    })
+                };
+
+                /**
+                 * Executes promises one after another
+                 * 
+                 * @param {Array} data Set of input values
+                 */
+                const executeSequentially = (data) => {
+                    return createPromise(data.pop()).then(x => data.length == 0 ? x : executeSequentially(data));
+                };
+
+                const initializeLayersFromURL = () => {
+                    if (layersToActivate.length === 0) {
+                        initResolve();
+                    } else {
+                        executeSequentially(layersToActivate).then(() => {
+                            initResolve();
+                        });
+                    }
+                };
+
+                if (layerTree.isReady()) {
                     setBaseLayer.init(baseLayerId);
                     initializeLayersFromURL();
-                });
-            }
-        };
-
-        /**
-         * Applies settings provided in the URL hash part
-         */
-        const initializeFromHashPart = () => {
-            // When all layers are loaded, when load legend and when set "all_loaded" for print
-            backboneEvents.get().once("allDoneLoading:layers", function (e) {
-                legend.init().then(function(){
-                    console.log("Vidi is now loaded");// Vidi is now fully loaded
-                    window.status = "all_loaded";
-                });
-            });
-
-            if (urlVars.k === undefined) {
-                if (hashArr[0]) {
-                    setLayers();
                 } else {
-                    // Set base layer to the first added one
-                    setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
-                    var extent = setting.getExtent();
-                    if (extent !== null) {
-                        cloud.get().zoomToExtent(extent);
+                    backboneEvents.get().once(`layerTree:ready`, () => {
+                        setBaseLayer.init(baseLayerId);
+                        initializeLayersFromURL();
+                    });
+                }
+            };
+
+            /**
+             * Applies settings provided in the URL hash part
+             */
+            const initializeFromHashPart = () => {
+                // When all layers are loaded, when load legend and when set "all_loaded" for print
+                backboneEvents.get().once("allDoneLoading:layers", function (e) {
+                    legend.init().then(function(){
+                        console.log("Vidi is now loaded");// Vidi is now fully loaded
+                        window.status = "all_loaded";
+                    });
+                });
+
+                if (urlVars.k === undefined) {
+                    if (hashArr[0]) {
+                        setLayers();
                     } else {
-                        cloud.get().zoomToExtent();
+                        // Set base layer to the first added one
+                        setBaseLayer.init(baseLayer.getAvailableBaseLayers()[0].id);
+                        var extent = setting.getExtent();
+                        if (extent !== null) {
+                            cloud.get().zoomToExtent(extent);
+                        } else {
+                            cloud.get().zoomToExtent();
+                        }
+
+                        initResolve();
                     }
-                }
-            } else {
-                var parr, v, l, t, GeoJsonAdded = false;
-                parr = urlVars.k.split("#");
-                if (parr.length > 1) {
-                    parr.pop();
-                }
-
-                $.ajax({
-                    dataType: "json",
-                    method: "get",
-                    url: '/api/postdata/',
-                    data: {
-                        k: parr.join()
-                    },
-                    scriptCharset: "utf-8",
-                    success: function (response) {
-                        if (response.data.bounds !== null) {
-                            var bounds = response.data.bounds;
-                            cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
-                        }
-
-                        if (response.data.customData !== null) {
-                            backboneEvents.get().trigger("on:customData", response.data.customData);
-                        }
-
-                        // Recreate print
-                        // ==============
-                        if (response.data.print !== null) {
-                            GeoJsonAdded = false;
-                            parr = response.data.print;
-                            v = parr;
-                            $.each(v[0].geojson.features, function (n, m) {
-                                if (m.type === "Rectangle") {
-                                    var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
-                                        fillOpacity: 0,
-                                        opacity: 1,
-                                        color: 'red',
-                                        weight: 1
-                                    });
-                                    g.feature = m.feature;
-                                    cloud.get().map.addLayer(g);
-                                    setTimeout(function () {
-                                        var bounds = g.getBounds(),
-                                            sw = bounds.getSouthWest(),
-                                            ne = bounds.getNorthEast(),
-                                            halfLat = (sw.lat + ne.lat) / 2,
-                                            midLeft = L.latLng(halfLat, sw.lng),
-                                            midRight = L.latLng(halfLat, ne.lng),
-                                            scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
-
-                                        $("#container1").css("transform", "scale(" + scaleFactor + ")");
-                                        $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
-                                        $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
-                                        $("#scale").html("1 : " + response.data.scale);
-                                        $("#title").html(decodeURIComponent(urlVars.t));
-                                        parr = urlVars.c.split("#");
-                                        if (parr.length > 1) {
-                                            parr.pop();
-                                        }
-                                        $("#comment").html(decodeURIComponent(parr.join()));
-
-                                        if (hashArr[0]) {
-                                            setLayers()
-                                        }
-                                        cloud.get().map.removeLayer(g);
-                                    }, 0)
-                                }
-                            });
-                        }
-
-                        // Recreate Drawings
-                        // =================
-
-                        if (response.data.draw !== null) {
-                            draw.recreateDrawnings(response.data.draw);
-                        }
-
-                        // Recreate query draw
-                        // ===================
-
-                        if (response.data.queryDraw !== null) {
-                            GeoJsonAdded = false;
-                            parr = response.data.queryDraw;
-                            v = parr;
-                            l = advancedInfo.getDrawLayer();
-                            $.each(v[0].geojson.features, function (n, m) {
-                                if (m.type === "Feature" && GeoJsonAdded === false) {
-                                    var g = L.geoJson(v[0].geojson, {
-                                        style: function (f) {
-                                            return f.style;
-                                        }
-                                    });
-                                    $.each(g._layers, function (i, v) {
-                                        l.addLayer(v);
-                                    });
-                                    GeoJsonAdded = true;
-                                }
-                                if (m.type === "Circle") {
-                                    g = L.circle(m._latlng, m._mRadius, m.style);
-                                    g.feature = m.feature;
-                                    l.addLayer(g);
-                                }
-                                if (m.type === "Rectangle") {
-                                    g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
-                                    g.feature = m.feature;
-                                    l.addLayer(g);
-                                }
-                                if (m.type === "Marker") {
-                                    g = L.marker(m._latlng, m.style);
-                                    g.feature = m.feature;
-                                    l.addLayer(g);
-                                }
-                            });
-                        }
-
-                        // Recreate query buffer
-                        // =====================
-
-                        if (response.data.queryBuffer !== null) {
-                            GeoJsonAdded = false;
-                            parr = response.data.queryBuffer;
-                            v = parr;
-                            l = advancedInfo.getDrawLayer();
-                            $.each(v[0].geojson.features, function (n, m) {
-                                if (m.type === "Feature" && GeoJsonAdded === false) {
-                                    var g = L.geoJson(v[0].geojson, {
-                                        style: function (f) {
-                                            return f.style;
-                                        }
-                                    });
-                                    $.each(g._layers, function (i, v) {
-                                        l.addLayer(v);
-                                    });
-                                    GeoJsonAdded = true;
-                                }
-                            });
-                        }
-
-
-                        // Recreate result
-                        // ===============
-
-                        if (response.data.queryResult !== null) {
-                            GeoJsonAdded = false;
-                            parr = response.data.queryResult;
-                            v = parr;
-                            $.each(v[0].geojson.features, function (n, m) {
-                                if (m.type === "Feature" && GeoJsonAdded === false) {
-                                    var g = L.geoJson(v[0].geojson, {
-                                        style: function (f) {
-                                            return f.style;
-                                        }
-                                    });
-                                    $.each(g._layers, function (i, v) {
-                                        cloud.get().map.addLayer(v);
-                                    });
-                                    GeoJsonAdded = true;
-                                }
-                                if (m.type === "Circle") {
-                                    g = L.circleMarker(m._latlng, m.style);
-                                    g.setRadius(m._radius);
-                                    g.feature = m.feature;
-                                    cloud.get().map.addLayer(g);
-                                }
-                            });
-                        }
-
-                        // Recreate added layers
-                        // from layerSearch
-                        // =====================
-
-                        var currentLayers = meta.getMetaData();
-                        var flag;
-                        var addedLayers = [];
-
-                        // Get array with the added layers
-                        $.each(response.data.metaData.data, function (i, v) {
-                            flag = false;
-                            $.each(currentLayers.data, function (u, m) {
-                                if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
-                                    flag = true; // Flag layers from loaded schemata
-                                }
-                            });
-                            if (!flag) {
-                                addedLayers.push(v);
-                            }
-                        });
-
-                        // If any added layers, then add them
-                        if (addedLayers.length > 0) {
-                            meta.addMetaData({data: addedLayers});
-                            layerTree.init();
-                            if (arr) {
-                                for (i = 0; i < arr.length; i++) {
-                                    switchLayer.init(arr[i], true, true);
-                                }
-                            }
-                        }
-
-                    }
-                });
-            }
-        };
-
-        if (urlVars.state) {
-            stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
-                if (state) {
-                    this.applyState(state.snapshot);
                 } else {
-                    initializeFromHashPart();
-                }
-            }).catch(error => {
-                console.warn(`Unable to find valid state snapshot with id ${urlVars.state}`);
-                initializeFromHashPart();
-            });            
-        } else {
-            initializeFromHashPart();
-        }
+                    var parr, v, l, t, GeoJsonAdded = false;
+                    parr = urlVars.k.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
 
-        backboneEvents.get().trigger("end:state");
+                    $.ajax({
+                        dataType: "json",
+                        method: "get",
+                        url: '/api/postdata/',
+                        data: {
+                            k: parr.join()
+                        },
+                        scriptCharset: "utf-8",
+                        success: function (response) {
+                            if (response.data.bounds !== null) {
+                                var bounds = response.data.bounds;
+                                cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
+                            }
+
+                            if (response.data.customData !== null) {
+                                backboneEvents.get().trigger("on:customData", response.data.customData);
+                            }
+
+                            // Recreate print
+                            // ==============
+                            if (response.data.print !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.print;
+                                v = parr;
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Rectangle") {
+                                        var g = L.rectangle([m._latlngs[0], m._latlngs[2]], {
+                                            fillOpacity: 0,
+                                            opacity: 1,
+                                            color: 'red',
+                                            weight: 1
+                                        });
+                                        g.feature = m.feature;
+                                        cloud.get().map.addLayer(g);
+                                        setTimeout(function () {
+                                            var bounds = g.getBounds(),
+                                                sw = bounds.getSouthWest(),
+                                                ne = bounds.getNorthEast(),
+                                                halfLat = (sw.lat + ne.lat) / 2,
+                                                midLeft = L.latLng(halfLat, sw.lng),
+                                                midRight = L.latLng(halfLat, ne.lng),
+                                                scaleFactor = ($("#pane1").width() / (cloud.get().map.project(midRight).x - cloud.get().map.project(midLeft).x));
+
+                                            $("#container1").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform", "scale(" + scaleFactor + ")");
+                                            $(".leaflet-control-scale-line").prependTo("#scalebar").css("transform-origin", "left bottom 0px");
+                                            $("#scale").html("1 : " + response.data.scale);
+                                            $("#title").html(decodeURIComponent(urlVars.t));
+                                            parr = urlVars.c.split("#");
+                                            if (parr.length > 1) {
+                                                parr.pop();
+                                            }
+                                            $("#comment").html(decodeURIComponent(parr.join()));
+
+                                            if (hashArr[0]) {
+                                                setLayers()
+                                            }
+                                            cloud.get().map.removeLayer(g);
+                                        }, 0)
+                                    }
+                                });
+                            }
+
+                            // Recreate Drawings
+                            // =================
+
+                            if (response.data.draw !== null) {
+                                draw.recreateDrawnings(response.data.draw);
+                            }
+
+                            // Recreate query draw
+                            // ===================
+
+                            if (response.data.queryDraw !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryDraw;
+                                v = parr;
+                                l = advancedInfo.getDrawLayer();
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            l.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                    if (m.type === "Circle") {
+                                        g = L.circle(m._latlng, m._mRadius, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Rectangle") {
+                                        g = L.rectangle([m._latlngs[0], m._latlngs[2]], m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                    if (m.type === "Marker") {
+                                        g = L.marker(m._latlng, m.style);
+                                        g.feature = m.feature;
+                                        l.addLayer(g);
+                                    }
+                                });
+                            }
+
+                            // Recreate query buffer
+                            // =====================
+
+                            if (response.data.queryBuffer !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryBuffer;
+                                v = parr;
+                                l = advancedInfo.getDrawLayer();
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            l.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                });
+                            }
+
+
+                            // Recreate result
+                            // ===============
+
+                            if (response.data.queryResult !== null) {
+                                GeoJsonAdded = false;
+                                parr = response.data.queryResult;
+                                v = parr;
+                                $.each(v[0].geojson.features, function (n, m) {
+                                    if (m.type === "Feature" && GeoJsonAdded === false) {
+                                        var g = L.geoJson(v[0].geojson, {
+                                            style: function (f) {
+                                                return f.style;
+                                            }
+                                        });
+                                        $.each(g._layers, function (i, v) {
+                                            cloud.get().map.addLayer(v);
+                                        });
+                                        GeoJsonAdded = true;
+                                    }
+                                    if (m.type === "Circle") {
+                                        g = L.circleMarker(m._latlng, m.style);
+                                        g.setRadius(m._radius);
+                                        g.feature = m.feature;
+                                        cloud.get().map.addLayer(g);
+                                    }
+                                });
+                            }
+
+                            // Recreate added layers
+                            // from layerSearch
+                            // =====================
+
+                            var currentLayers = meta.getMetaData();
+                            var flag;
+                            var addedLayers = [];
+
+                            // Get array with the added layers
+                            $.each(response.data.metaData.data, function (i, v) {
+                                flag = false;
+                                $.each(currentLayers.data, function (u, m) {
+                                    if (m.f_table_name === v.f_table_name && m.f_table_schema === v.f_table_schema) {
+                                        flag = true; // Flag layers from loaded schemata
+                                    }
+                                });
+                                if (!flag) {
+                                    addedLayers.push(v);
+                                }
+                            });
+
+                            // If any added layers, then add them
+                            if (addedLayers.length > 0) {
+
+                                // @todo Review
+                                console.error(`Consider reviewing`);
+
+                                meta.addMetaData({data: addedLayers});
+                                layerTree.init();
+                                if (arr) {
+                                    for (i = 0; i < arr.length; i++) {
+                                        switchLayer.init(arr[i], true, true);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+
+            if (urlVars.state) {
+                stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
+                    if (state) {
+                        this.applyState(state.snapshot);
+                    } else {
+                        initializeFromHashPart();
+                    }
+                }).catch(error => {
+                    console.warn(`Unable to find valid state snapshot with id ${urlVars.state}`);
+                    initializeFromHashPart();
+                });            
+            } else {
+                initializeFromHashPart();
+            }
+
+            backboneEvents.get().trigger("end:state");
+
+            } catch(e) {
+                console.error(e);
+                initReject();
+            }
+
+        });
     },
 
     listenTo: (moduleName, module) => {
@@ -596,6 +619,9 @@ module.exports = {
      * @returns {Promise}
      */
     applyState: (state) => {
+
+        if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
+
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {
             const applyStateToModules = () => {
