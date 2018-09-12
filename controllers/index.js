@@ -12,5 +12,6 @@ router.use(require('./print'));
 router.use(require('./locale'));
 router.use(require('./config'));
 router.use(require('./feature'));
+router.use(require('./template'));
 
 module.exports = router;
