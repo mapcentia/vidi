@@ -193,6 +193,9 @@ module.exports = {
     init: function () {
         _self = this;
         return new Promise((initResolve, initReject) => {
+
+            try {
+
             if ('localforage' in window === false) {
                 throw new Error('localforage is not defined');
             }
@@ -261,9 +264,13 @@ module.exports = {
                 };
 
                 const initializeLayersFromURL = () => {
-                    executeSequentially(layersToActivate).then(() => {
+                    if (layersToActivate.length === 0) {
                         initResolve();
-                    });
+                    } else {
+                        executeSequentially(layersToActivate).then(() => {
+                            initResolve();
+                        });
+                    }
                 };
 
                 if (layerTree.isReady()) {
@@ -527,6 +534,12 @@ module.exports = {
             }
 
             backboneEvents.get().trigger("end:state");
+
+            } catch(e) {
+                console.error(e);
+                initReject();
+            }
+
         });
     },
 

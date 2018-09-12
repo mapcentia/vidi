@@ -195,11 +195,9 @@ module.exports = {
         modules.cloud.init();
         modules.state.setExtent();
 
-        let defaultModules = [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`];
-
         // Calling mandatory init method
-        defaultModules.map(name => {
+        [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`].map(name => {
             modules[name].init();
         });
 
@@ -218,6 +216,10 @@ module.exports = {
         }).finally(() => {
             console.log(`### state.init()`);
             modules.state.init().then(() => {
+
+                console.log(`### state.init().then()`);
+
+
                 // Require search module
                 // =====================
 
@@ -286,13 +288,6 @@ module.exports = {
                 } catch (e) {
                     console.info("Could not init Bootstrap Material Design");
                 }
-
-                // Calling optional postInit method
-                defaultModules.map(name => {
-                    if (`postInit` in modules[name]) {
-                        modules[name].postInit();
-                    }
-                });
             });
         });
 

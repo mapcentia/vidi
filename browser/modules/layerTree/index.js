@@ -208,11 +208,13 @@ module.exports = {
         }
     },
 
+    /*
     postInit: () => {
         if (layerTreeWasBuilt === false && automaticStartup) {
             _self.create();
         }
     },
+    */
 
     setSelectorValue: (name, type) => {
         let el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
@@ -297,7 +299,7 @@ module.exports = {
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
-                throw new Error(`Asynchronous layerTree.create() attempt`);
+                console.error(`Asynchronous layerTree.create() attempt`);
                 reject();
             });
         } else {
@@ -719,8 +721,6 @@ module.exports = {
 
         let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
 
-console.log(`### layersAndSubgroupsForCurrentGroup`, layersAndSubgroupsForCurrentGroup);
-
         // Add layers and subgroups
         let numberOfAddedLayers = 0;
         for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
@@ -789,8 +789,6 @@ console.log(`### layersAndSubgroupsForCurrentGroup`, layersAndSubgroupsForCurren
                 });
             }
         }
-
-        console.log(`### check if layer is active`, `${localItem.f_table_schema}.${localItem.f_table_name}`, layerIsActive);
 
         return { layerIsActive, activeLayerName }
     },

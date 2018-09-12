@@ -79,7 +79,9 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceTileReload) {
-
+        if (!name) {
+            throw new Error(`Layer name is undefined`);
+        }
         console.log(`### switchLayer`, name, enable);
 
         let metaData = meta.getMetaData();
