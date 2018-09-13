@@ -109,6 +109,10 @@ module.exports = {
         }
 
         return new Promise(function (resolve, reject) {
+
+            try {
+
+            
             var schemata;
 
             if (!doNotLoadExisting) {
@@ -152,6 +156,11 @@ module.exports = {
                     alert(JSON.parse(response.responseText).message);
                 }
             });
+
+            } catch(e) {
+                console.error(e);
+            }
+
         })
     },
 
