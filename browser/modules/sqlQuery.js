@@ -548,5 +548,3 @@ var download = function (sql, format) {
     var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
     request.send(uri);
 };
-
-
