@@ -82,7 +82,6 @@ module.exports = module.exports = {
         if (!name) {
             throw new Error(`Layer name is undefined`);
         }
-        console.log(`### switchLayer`, name, enable);
 
         let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {
@@ -170,8 +169,6 @@ module.exports = module.exports = {
                         resolve();
                     }).catch((err) => {
                         meta.init(name, true, true).then(layerMeta => {
-                            console.log(`### layerTree.create() from switchLayer`);
-
                             // Trying to recreate the layer tree with updated meta and switch layer again                           
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
@@ -208,8 +205,6 @@ module.exports = module.exports = {
                         resolve();
                     } else {
                         meta.init(tileLayerId, true, true).then(layerMeta => {
-                            console.log(`### layerTree.create() from switchLayer`);
-
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
@@ -248,7 +243,7 @@ module.exports = module.exports = {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
             if (!controlElement || controlElement.length !== 1) {
                 if (enable) {
-                    console.error(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
+                    console.warn(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
                 }
 
                 return false;
@@ -267,7 +262,7 @@ module.exports = module.exports = {
                 $(el).closest(`.layer-item`).find(`.js-toggle-filters`).hide();
                 $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).hide();
             }
-         
+
             _self.update(doNotLegend, el);
         }
     },

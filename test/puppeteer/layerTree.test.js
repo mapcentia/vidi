@@ -7,9 +7,9 @@ const helpers = require("./../helpers");
 
 describe('Layer tree', () => {
     it('should load layers from page URL from same schema', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
         await helpers.sleep(1000);
@@ -22,12 +22,14 @@ describe('Layer tree', () => {
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').length`)).to.equal(1);
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+
+        await page.close();
     });
 
     it('should load layers from page URL from different schemas', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
         await helpers.sleep(1000);
@@ -51,12 +53,14 @@ describe('Layer tree', () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
+
+        await page.close();
     });
 
     it('should load vector and tile layers', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
         await page._client.send('Network.enable');
@@ -78,12 +82,14 @@ describe('Layer tree', () => {
         });
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-tile').trigger('click')`);
         expect(tilesWereRequested).to.be.true;
+
+        await page.close();
     });
 
     it('should load vector layers', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
         await page._client.send('Network.enable');
@@ -97,12 +103,14 @@ describe('Layer tree', () => {
 
         await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-show-layer-control').trigger('click')`);
         expect(apiWasRequested).to.be.true;
+
+        await page.close();
     });
 
     it('should load tile layers', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
         await page._client.send('Network.enable');
@@ -116,14 +124,15 @@ describe('Layer tree', () => {
 
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
         expect(tilesWereRequested).to.be.true;
+
+        await page.close();
     });
 
     it('should keep layer and layer group order', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-
+        page = await helpers.waitForPageToLoad(page);
         await page.click(`#burger-btn`);
         await helpers.sleep(1000);
 
@@ -148,5 +157,7 @@ describe('Layer tree', () => {
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Public group`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+
+        await page.close();
     });
 });
