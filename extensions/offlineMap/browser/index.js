@@ -205,6 +205,10 @@ module.exports = {
                 });
             }
 
+            componentWillUnmount() {
+                alert(`www`);
+            }
+
             /**
              * Generates all URL for fetching the underlying tile set for specified boundary
              * 
@@ -480,16 +484,6 @@ module.exports = {
                 return maximumZoomLevel;
             }
 
-            /**
-             *
-             */
-            componentWillUnmount() {
-                // @todo
-                // Move the tile management logic into the separate class
-                // Clear drawn extent
-                // Stop listening to draw:created
-            }
-
             setComment(e) {
                 this.setState({ newAreaComment: e.target.value });
             }
@@ -507,8 +501,11 @@ module.exports = {
              */
             setExtent(e) {
                 this.state.drawRectangleControl.enable();
+                $(`#offline-map-dialog`).find(`.expand-less`).trigger(`click`);
+                
                 mapObj.on('draw:created', (e) => {
-                    console.log('draw:created');
+                    $(`#offline-map-dialog`).find(`.expand-more`).trigger(`click`);
+                    
                     if (this.state.drawnExtentLayer) {
                         mapObj.removeLayer(this.state.drawnExtentLayer);
                     }

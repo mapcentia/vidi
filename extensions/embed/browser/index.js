@@ -121,8 +121,7 @@ module.exports = {
         });
 
         // Bottom dialog
-        $(".close-hide").on("click", function (e) {
-
+        $(".close-hide").on("click touchstart", function (e) {
             var id = ($(this)).parent().parent().attr('id');
 
             // If print when deactivate
@@ -139,7 +138,7 @@ module.exports = {
             });
         });
 
-        $(".expand-less").on("click", function () {
+        $(".expand-less").on("click touchstart", function () {
 
             var id = ($(this)).parent().parent().attr('id');
 
@@ -151,7 +150,7 @@ module.exports = {
             });
         });
 
-        $(".expand-more").on("click", function () {
+        $(".expand-more").on("click touchstart", function () {
 
             var id = ($(this)).parent().parent().attr('id');
 
