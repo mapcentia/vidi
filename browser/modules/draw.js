@@ -380,7 +380,6 @@ module.exports = {
      */
     removeFeatures: () => {
         let l = _self.getLayer();
-        console.log(`### removeFeatures l`, l);
         l.getLayers().map(layer => {
             l.removeLayer(layer);
         });

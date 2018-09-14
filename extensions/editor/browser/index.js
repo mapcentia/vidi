@@ -60,10 +60,6 @@ let urlparser = require('./../../../browser/modules/urlparser');
  */
 let db = urlparser.db;
 
-let isInit = false;
-
-let layerTreeWasInitialized = false;
-
 let watsoncIsEnabled = false;
 
 let _self = false;
@@ -89,6 +85,7 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+
         _self = this;
         try {
             vectorLayers = o.extensions.vectorLayers.index;
@@ -105,11 +102,7 @@ module.exports = {
             return;
         }
 
-        let me = this, metaDataKeys, metaData, styleFn;
         apiBridgeInstance = APIBridgeSingletone();
-
-        isInit = true;
-        layerTree.setAutomatic(false);
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
@@ -120,14 +113,14 @@ module.exports = {
                 }
 
                 var t = ($(this).data('gc2-key'));
-                me.add(t, null, true, isVectorLayer);
+                _self.add(t, null, true, isVectorLayer);
                 e.stopPropagation();
             });
         });
 
         // Listen to close of attr box
         $(".editor-attr-dialog__close-hide").on("click", function (e) {
-            me.stopEdit(editedFeature);
+            _self.stopEdit(editedFeature);
         });
 
         $(".editor-attr-dialog__expand-less").on("click", function () {
@@ -154,122 +147,124 @@ module.exports = {
         });
 
         backboneEvents.get().on("ready:meta", function () {
-            metaDataKeys = meta.getMetaDataKeys();
-            metaData = meta.getMetaData();
-            metaData.data.map(v => {
-                let layerName = v.f_table_schema + "." + v.f_table_name;
+            _self.setHandlersForVectorLayers();
+        });
 
-                let layerMeta = false;
-                if (v.meta) {
-                    try {
-                        layerMeta = JSON.parse(v.meta);
-                    } catch (e) {
-                        console.warn(`Unable to parse meta for ${layerName}`);
-                    }
+        /*
+            By this time the meta is already loaded and the layerTree is already built,
+            so handlers need to be set up manually.
+        */
+        _self.setHandlersForVectorLayers();
+    },
+
+    setHandlersForVectorLayers: () => {
+        let metaDataKeys = meta.getMetaDataKeys();
+        let metaData = meta.getMetaData();
+        metaData.data.map(v => {
+            let layerName = v.f_table_schema + "." + v.f_table_name;
+
+            let layerMeta = false;
+            if (v.meta) {
+                try {
+                    layerMeta = JSON.parse(v.meta);
+                } catch (e) {
+                    console.warn(`Unable to parse meta for ${layerName}`);
                 }
+            }
 
-                if (layerMeta && layerMeta.vidi_layer_editable) {
-                    // Set popup with Edit and Delete buttons
-                    layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
-                        if (feature.meta) {
-                            let content = false;
-                            let tooltipSettings = {
-                                autoClose: false,
-                                minWidth: 25,
-                                permanent: true
-                            };
+            if (layerMeta && layerMeta.vidi_layer_editable) {
+                // Set popup with Edit and Delete buttons
+                layerTree.setOnEachFeature("v:" + layerName, (feature, layer) => {
+                    if (feature.meta) {
+                        let content = false;
+                        let tooltipSettings = {
+                            autoClose: false,
+                            minWidth: 25,
+                            permanent: true
+                        };
 
-                            if (feature.meta.apiRecognitionStatus === 'pending') {
-                                tooltipSettings.className = `api-bridge-popup-warning`;
+                        if (feature.meta.apiRecognitionStatus === 'pending') {
+                            tooltipSettings.className = `api-bridge-popup-warning`;
 
-                                content = `<div class="js-feature-notification-tooltip">
-                                    <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
-                                    <span class="js-tooltip-content"></span>
-                                </div>`;
-                            } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
-                                tooltipSettings.className = `api-bridge-popup-error`;
+                            content = `<div class="js-feature-notification-tooltip">
+                                <i class="fa fa-exclamation"></i> ${__(`Awaiting network`)}
+                                <span class="js-tooltip-content"></span>
+                            </div>`;
+                        } else if (feature.meta.apiRecognitionStatus === 'rejected_by_server') {
+                            tooltipSettings.className = `api-bridge-popup-error`;
 
-                                if (feature.meta.serverErrorType) {
-                                    if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
-                                        content = `<div class="js-feature-notification-tooltip">
-                                            <i class="fa fa-exclamation"></i> ${__(`Error`)}
-                                            <span class="js-tooltip-content"></span>
-                                        </div>`;
-                                    } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
-                                        tooltipSettings.className = `api-bridge-popup-warning`;
-                                        content = `<div class="js-feature-notification-tooltip">
-                                            <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
-                                            <span class="js-tooltip-content"></span>
-                                        </div>`;
-                                    } else {
-                                        throw new Error(`Invalid API error type value`);
-                                    }
-                                } else {
+                            if (feature.meta.serverErrorType) {
+                                if (feature.meta.serverErrorType === `REGULAR_ERROR`) {
                                     content = `<div class="js-feature-notification-tooltip">
                                         <i class="fa fa-exclamation"></i> ${__(`Error`)}
                                         <span class="js-tooltip-content"></span>
                                     </div>`;
+                                } else if (feature.meta.serverErrorType === `AUTHORIZATION_ERROR`) {
+                                    tooltipSettings.className = `api-bridge-popup-warning`;
+                                    content = `<div class="js-feature-notification-tooltip">
+                                        <i class="fa fa-exclamation"></i> ${__(`Awaiting login`)}
+                                        <span class="js-tooltip-content"></span>
+                                    </div>`;
+                                } else {
+                                    throw new Error(`Invalid API error type value`);
                                 }
                             } else {
-                                throw new Error(`Invalid API recognition status value`);
+                                content = `<div class="js-feature-notification-tooltip">
+                                    <i class="fa fa-exclamation"></i> ${__(`Error`)}
+                                    <span class="js-tooltip-content"></span>
+                                </div>`;
                             }
-
-                            layer.on("add", function (e) {
-                                let latLng = false;
-                                if (feature.geometry && feature.geometry.type === 'Point') {
-                                    latLng = layer.getLatLng();
-                                } else {
-                                    let bounds = layer.getBounds();
-                                    latLng = bounds.getCenter()
-                                }
-
-                                let tooltip = L.tooltip(tooltipSettings).setContent(content);
-                                layer.bindTooltip(tooltip);
-                            });
+                        } else {
+                            throw new Error(`Invalid API recognition status value`);
                         }
 
-                        layer.on("click", function (e) {
-                            e.originalEvent.clickedOnFeature = true;
+                        layer.on("add", function (e) {
+                            let latLng = false;
+                            if (feature.geometry && feature.geometry.type === 'Point') {
+                                latLng = layer.getLatLng();
+                            } else {
+                                let bounds = layer.getBounds();
+                                latLng = bounds.getCenter()
+                            }
 
-                            let managePopup = L.popup({
-                                autoPan: false
-                            }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
-                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                            </button>
-                            <button class="btn btn-primary btn-xs ge-delete">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>`).openOn(cloud.get().map);
+                            let tooltip = L.tooltip(tooltipSettings).setContent(content);
+                            layer.bindTooltip(tooltip);
+                        });
+                    }
 
-                            $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                me.edit(layer, layerName + ".the_geom", null, true);
-                            });
+                    layer.on("click", function (e) {
+                        e.originalEvent.clickedOnFeature = true;
 
-                            $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                    me.delete(layer, layerName + ".the_geom", null, true);
-                                }
-                            });
+                        let managePopup = L.popup({
+                            autoPan: false
+                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                        </button>
+                        <button class="btn btn-primary btn-xs ge-delete">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>`).openOn(cloud.get().map);
+
+                        $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                            _self.edit(layer, layerName + ".the_geom", null, true);
+                        });
+
+                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                            if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                _self.delete(layer, layerName + ".the_geom", null, true);
+                            }
                         });
                     });
-                }
-
-                if (layerMeta && layerMeta.vectorstyle !== "undefined") {
-                    try {
-                        styleFn = eval("(" + layerMeta.vectorstyle + ")");
-                    } catch (e) {
-                        styleFn = () => {};
-                    }
-                }
-
-                layerTree.setStyle(layerName, styleFn);
-            });
-
-            backboneEvents.get().on("ready:layerTree", () => {});
-
-            if (layerTreeWasInitialized === false) {
-                layerTreeWasInitialized = true;
-                layerTree.create(false, true);
+                });
             }
+
+            let styleFn = () => {};
+            if (layerMeta && layerMeta.vectorstyle !== "undefined") {
+                try {
+                    styleFn = eval("(" + layerMeta.vectorstyle + ")");
+                } catch (e) {}
+            }
+
+            layerTree.setStyle(layerName, styleFn);
         });
     },
 

@@ -17,8 +17,6 @@ const TABLE_VIEW_CONTAINER_ID = 'vector-layer-table-view-dialog';
 
 var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
-var automaticStartup = true;
-
 var layerTreeOrder = false;
 
 var onEachFeature = [];
@@ -208,14 +206,6 @@ module.exports = {
         }
     },
 
-    /*
-    postInit: () => {
-        if (layerTreeWasBuilt === false && automaticStartup) {
-            _self.create();
-        }
-    },
-    */
-
     setSelectorValue: (name, type) => {
         let el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
         if (type === 'tile') {
@@ -342,6 +332,7 @@ module.exports = {
                     }
 
                     let activeLayers = [];
+                    let layersThatAreNotInMeta = [];
                     if (forcedState) {
                         if (forcedState.order && layerSortingInstance.validateOrderObject(forcedState.order) === false) {
                             console.error(forcedState.order);
@@ -353,7 +344,6 @@ module.exports = {
                             activeLayers = forcedState.activeLayers;
                         }
 
-                        let layersThatAreNotInMeta = [];
                         let existingMeta = meta.getMetaData();
                         if (`data` in existingMeta) {
                             activeLayers.map(layerName => {
@@ -365,101 +355,110 @@ module.exports = {
                         }
 
                         if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
-
-                        if (layersThatAreNotInMeta.length > 0) {
-                            let layerFeatchPromises = [];
-                            layersThatAreNotInMeta.map(item => {
-                                layerFeatchPromises.push(switchLayer.init(item, true));
-                            });
-
-                            Promise.all(layerFeatchPromises).then(() => {
-                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                            });
-                        }
                     }
 
                     if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
-
-                    layerTreeOrder = order;
-                    if (editingIsEnabled) {
-                        let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
-                        if (toggleOfllineOnlineMode) {
-                            $("#layers").append(toggleOfllineOnlineMode);
+                    const proceedWithBuilding = () => {
+                        layerTreeOrder = order;
+                        if (editingIsEnabled) {
+                            let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
+                            if (toggleOfllineOnlineMode) {
+                                $("#layers").append(toggleOfllineOnlineMode);
+                            }
                         }
-                    }
 
-                    let groups = [];
+                        let groups = [];
 
-                    // Getting set of all loaded vectors
-                    let metaData = meta.getMetaData();
-                    for (let i = 0; i < metaData.data.length; ++i) {
-                        groups[i] = metaData.data[i].layergroup;
-                    }
-
-                    let notSortedGroupsArray = array_unique(groups.reverse());
-                    metaData.data.reverse();
-
-                    let arr = notSortedGroupsArray;
-                    if (order) {
-                        arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
-                    }
-
-                    $("#layers").append(`<div id="layers_list"></div>`);
-                    // Filling up groups and underlying layers (except ungrouped ones)
-                    for (let i = 0; i < arr.length; ++i) {
-                        if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                            _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                        // Getting set of all loaded vectors
+                        let metaData = meta.getMetaData();
+                        for (let i = 0; i < metaData.data.length; ++i) {
+                            groups[i] = metaData.data[i].layergroup;
                         }
-                    }
 
-                    $(`#layers_list`).sortable({
-                        axis: 'y',
-                        stop: (event, ui) => {
-                            _self.calculateOrder();
-                            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                            layers.reorderLayers();
+                        let notSortedGroupsArray = array_unique(groups.reverse());
+                        metaData.data.reverse();
+
+                        let arr = notSortedGroupsArray;
+                        if (order) {
+                            arr = layerSortingInstance.sortGroups(order, notSortedGroupsArray);
                         }
-                    });
 
-                    if (queueStatistsics.getLastStatistics()) {
-                        _self.statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
-                    }
+                        $("#layers").append(`<div id="layers_list"></div>`);
+                        // Filling up groups and underlying layers (except ungrouped ones)
+                        for (let i = 0; i < arr.length; ++i) {
+                            if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
+                                _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                            }
+                        }
 
-                    layers.reorderLayers();
-                    state.listen(MODULE_NAME, `sorted`);
-                    state.listen(MODULE_NAME, `activeLayersChange`);
-                    state.listen(MODULE_NAME, `filtersChange`);
-                    
-                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                    setTimeout(() => {
-                        if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
+                        $(`#layers_list`).sortable({
+                            axis: 'y',
+                            stop: (event, ui) => {
+                                _self.calculateOrder();
+                                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                                layers.reorderLayers();
+                            }
+                        });
 
-                        if (activeLayers) {   
-                            activeLayers.map(layerName => {
-                                if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                    if (layerName.indexOf(`v:`) === 0) {
-                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                        if (queueStatistsics.getLastStatistics()) {
+                            _self.statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
+                        }
+
+                        layers.reorderLayers();
+                        state.listen(MODULE_NAME, `sorted`);
+                        state.listen(MODULE_NAME, `activeLayersChange`);
+                        state.listen(MODULE_NAME, `filtersChange`);
+                        
+                        backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                        setTimeout(() => {
+                            if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
+
+                            if (activeLayers) {   
+                                activeLayers.map(layerName => {
+                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                        if (layerName.indexOf(`v:`) === 0) {
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                        } else {
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                        }
                                     } else {
-                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                        $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
                                     }
-                                } else {
-                                    $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
-                                }
-                            });
+                                });
 
-                            legend.init();
-                        }
+                                legend.init();
+                            }
 
-                        layerTreeIsReady = true;
-                        treeIsBeingBuilt = false;
-                        backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
-                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                            layerTreeIsReady = true;
+                            treeIsBeingBuilt = false;
+                            backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+                            backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
 
-                        if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
+                            if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                        resolve();
-                    }, 1000);
+                            resolve();
+                        }, 1000);
+                    }
+
+
+
+
+
+                    console.log(`### enabling layers that are not in meta`, layersThatAreNotInMeta);
+
+                    if (layersThatAreNotInMeta.length > 0) {
+                        let fetchMetaRequests = [];
+                        layersThatAreNotInMeta.map(item => {
+                            fetchMetaRequests.push(meta.init(item ,true, true))
+                        });
+
+                        Promise.all(fetchMetaRequests).then(() => {
+                            proceedWithBuilding();
+                        });
+                    } else {
+                        proceedWithBuilding();
+                    }
 
                 }catch(e) {
                     console.log(e);
@@ -479,6 +478,14 @@ module.exports = {
         return result;
     },
 
+    /**
+     * Returns the current building state of the tree
+     * 
+     * @returns {Boolean}
+     */
+    isBeingBuilt: () => {
+        return treeIsBeingBuilt;
+    },
 
     /**
      * Creates SQL store for vector layers
@@ -489,6 +496,8 @@ module.exports = {
      */
     createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+
+        console.log(`### createStore`, layerKey);
 
         let whereClause = false;
         if (layerKey in vectorFilters) {
@@ -1195,10 +1204,6 @@ module.exports = {
 
     setPointToLayer: function (layer, fn) {
         pointToLayer[layer] = fn;
-    },
-
-    setAutomatic: (value) => {
-        automaticStartup = value;
     },
     
     getStores: function () {

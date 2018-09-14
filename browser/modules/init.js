@@ -173,7 +173,6 @@ module.exports = {
 
         $("body").append('<div id="tail" style="position: fixed; float: left; display: none"></div>');
 
-
         // Detect the database and schema
         let splitLocation = window.location.pathname.split(`/`);
         if (splitLocation.length === 4 || splitLocation.length === 5) {
@@ -214,12 +213,7 @@ module.exports = {
         }).then(() => {
             return modules.layerTree.create();
         }).finally(() => {
-            console.log(`### state.init()`);
             modules.state.init().then(() => {
-
-                console.log(`### state.init().then()`);
-
-
                 // Require search module
                 // =====================
 

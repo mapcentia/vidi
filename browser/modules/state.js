@@ -6,7 +6,7 @@
 'use strict';
 
 const STATE_STORE_NAME = `vidi-state-store`;
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `state`;
 
