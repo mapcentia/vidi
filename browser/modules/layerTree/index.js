@@ -441,12 +441,6 @@ module.exports = {
                         }, 1000);
                     }
 
-
-
-
-
-                    console.log(`### enabling layers that are not in meta`, layersThatAreNotInMeta);
-
                     if (layersThatAreNotInMeta.length > 0) {
                         let fetchMetaRequests = [];
                         layersThatAreNotInMeta.map(item => {
@@ -496,9 +490,6 @@ module.exports = {
      */
     createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
-        console.log(`### createStore`, layerKey);
-
         let whereClause = false;
         if (layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
