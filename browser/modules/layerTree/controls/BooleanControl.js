@@ -10,7 +10,6 @@ class BooleanControl extends React.Component {
     }
 
     render() {
-        console.log(`### value`, this.props.value);
         return (<div>
             <div style={{ display: 'inline-block' }}>
                 <input type="radio" id={this.props.id} name={this.props.id} value="null" checked={this.props.value === `null` || this.props.value === ``}

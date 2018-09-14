@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"Layer tree\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should keep layer and layer group order\""
   },
   "repository": {
     "type": "git",
@@ -94,14 +94,14 @@
     "plotly.js": "^1.40.1",
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
+    "prop-types": "^15.6.2",
     "puppeteer": "^1.7.0",
-    "react": "^15.4.2",
+    "react": "^16.5.1",
     "react-addons": "^0.9.1-deprecated",
-    "react-bootstrap": "^0.32.3",
-    "react-bootstrap-date-picker": "^5.1.0",
-    "react-dom": "^15.4.2",
-    "react-dropzone": "^4.2.11",
-    "react-jsonschema-form": "^1.0.0",
+    "react-bootstrap": "^0.32.4",
+    "react-dom": "^16.5.1",
+    "react-dropzone": "^5.1.0",
+    "react-jsonschema-form": "^1.0.4",
     "react-plotly.js": "^2.2.0",
     "reproject": "^1.1.1",
     "request": "^2.81.0",
