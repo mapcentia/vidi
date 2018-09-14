@@ -48,6 +48,7 @@ router.post('/api/print', function (req, response) {
                         printBackground: true
                     }).then(() => {
                         console.log('Done');
+                        page.close();
                         response.send({ success: true, key, url });
                     });
                 }, 2000);
