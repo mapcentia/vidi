@@ -5,7 +5,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -692,9 +692,11 @@ module.exports = {
                     let parsedMeta = false;
                     try {
                         parsedMeta = JSON.parse(layer.meta);
-                    } catch (e) {}
-    
-                    if (parsedMeta && `vidi_sub_group` in parsedMeta) {
+                    } catch (e) {
+                        console.log(e);
+                    }
+
+                    if (parsedMeta && typeof parsedMeta === 'object' && `vidi_sub_group` in parsedMeta) {
                         layer.subGroup = parsedMeta[`vidi_sub_group`];
                     } else {
                         layer.subGroup = false;
