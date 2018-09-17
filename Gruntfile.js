@@ -7,6 +7,14 @@ module.exports = function (grunt) {
                 NODE_ENV: 'production'
             }
         },
+        version: {
+            options: {
+                prefix: '"version":"'
+            },
+            defaults: {
+                src: ['public/version.json']
+            }
+        },
         less: {
             publish: {
                 options: {
@@ -299,8 +307,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-watchify');
+    grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('default', ['version', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
+    grunt.registerTask('production', ['version', 'env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
