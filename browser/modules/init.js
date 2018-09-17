@@ -214,6 +214,9 @@ module.exports = {
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
+
+                try {
+
                 // Require search module
                 // =====================
 
@@ -263,24 +266,25 @@ module.exports = {
                 // ============================================
                 $("[data-toggle=tooltip]").tooltip();
 
-                try {
-                    $.material.init();
-                    touchScroll(".tab-pane");
-                    touchScroll("#info-modal-body-wrapper");
-                    $("#loadscreentext").html(__("Loading data"));
-                    if (window.vidiConfig.activateMainTab) {
-                        setTimeout(function () {
-                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                        }, 200);
-                    }
-                    $(window).resize(_.debounce(function () {
-                        $("#myNavmenu").offcanvas('hide');
-                        setTimeout(function () {
-                            modules.cloud.get().map.invalidateSize();
-                        }, 100);
-                    }, 0));
+                $.material.init();
+                touchScroll(".tab-pane");
+                touchScroll("#info-modal-body-wrapper");
+                $("#loadscreentext").html(__("Loading data"));
+                if (window.vidiConfig.activateMainTab) {
+                    setTimeout(function () {
+                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                    }, 200);
+                }
+
+                $(window).resize(_.debounce(function () {
+                    $("#myNavmenu").offcanvas('hide');
+                    setTimeout(function () {
+                        modules.cloud.get().map.invalidateSize();
+                    }, 100);
+                }, 0));
+
                 } catch (e) {
-                    console.info("Could not init Bootstrap Material Design");
+                    console.error("Could not perform application initialization", error);
                 }
             });
         });

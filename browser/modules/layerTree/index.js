@@ -153,6 +153,11 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+
+        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
+            editingIsEnabled = true;
+        }
+
         return this;
     },
 
@@ -277,14 +282,10 @@ module.exports = {
      * In order to avoid race condition as simultaneous calling of run() the pending create()
      * requests are performed one by one.
      */
-    create: (forcedState = false, createdByEditor = false) => {
-        if (LOG) console.log(`${MODULE_NAME}: create`, treeIsBeingBuilt, forcedState, createdByEditor);
+    create: (forcedState = false) => {
+        if (LOG) console.log(`${MODULE_NAME}: create`, treeIsBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
-
-        if (editingIsEnabled === false && createdByEditor) {
-            editingIsEnabled = true;
-        }
 
         let result = false;
         if (treeIsBeingBuilt) {
