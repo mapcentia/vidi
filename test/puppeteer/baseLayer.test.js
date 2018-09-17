@@ -86,7 +86,7 @@ describe('Base layers', () => {
 
         // Reloading page
         await page.reload();
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
     });
