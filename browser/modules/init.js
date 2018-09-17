@@ -64,7 +64,7 @@ module.exports = {
                 } else {
                     me.render();
                 }
-            }).done(function () {
+            }).always(function () {
                 $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
                     window.vidiConfig.appVersion = data.version;
                 }).fail(function () {
