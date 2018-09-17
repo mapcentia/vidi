@@ -293,6 +293,26 @@ module.exports = function (grunt) {
             }
         }
     });
+
+    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function() {
+        var crypto = require('crypto');
+        var md5 = crypto.createHash('md5');
+
+        var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
+        var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
+        if (jsSource.length !== 1 || cssSource.length !== 1) {
+            throw new Error(`Unable to find all.min.*.js[css] sources`);
+        }
+
+        var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+        md5.update(buffer);
+        var md5Hash = md5.digest('hex');
+        var versionJSON = grunt.file.readJSON('public/version.json');
+        versionJSON.extensionsBuild = md5Hash;
+        grunt.file.write('public/version.json', JSON.stringify(versionJSON));
+        grunt.log.write('Extensions build version was written ' + md5Hash).verbose.write('...').ok();
+    });
+
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
@@ -310,6 +330,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['version', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['version', 'env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('production', ['version', 'env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
