@@ -820,10 +820,10 @@ module.exports = {
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
             let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`);
             if (subgroupRootElement.find(`.js-subgroup-children`).is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).show();
             }
         });
