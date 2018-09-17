@@ -7,12 +7,13 @@ const helpers = require("./../helpers");
 
 describe("Application", () => {
     it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload();
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
+        await page.click(`#burger-btn`);
+        await helpers.sleep(3000);
+        await page.screenshot({ path: './test.png' });
         expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
 
@@ -27,9 +28,9 @@ describe("Application", () => {
     });
 
     it("should be able to reset the application", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting the dialog
         page.on('dialog', (dialog) => {
@@ -68,9 +69,9 @@ describe("Application", () => {
     });
 
     it("should ignore invalid layer in URL", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}test.polygon,public.test_poly_invalid_layer,v:public.test_line`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting the dialog
         page.on('dialog', (dialog) => {
@@ -89,9 +90,9 @@ describe("Application", () => {
     });
 
     it("should update coordinates upon map changes", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
         await helpers.sleep(1000);

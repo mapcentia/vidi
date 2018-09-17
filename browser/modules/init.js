@@ -12,6 +12,7 @@ var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
 
+const semver = require('semver');
 require("bootstrap");
 
 module.exports = {
@@ -34,9 +35,7 @@ module.exports = {
         var me = this, configFile, stop = false;
 
         var loadConfig = function () {
-            $.getJSON( "/api/config/" + urlparser.db + "/" + configFile, function (data) {
-                window.vidiConfig.appVersion = data.appVersion ? data.appVersion : window.vidiConfig.appVersion;
-                console.info("Started with config: " + configFile);
+            $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -65,9 +64,14 @@ module.exports = {
                 } else {
                     me.render();
                 }
-
             }).done(function () {
-                me.render();
+                $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
+                    window.vidiConfig.appVersion = data.version;
+                }).fail(function () {
+                    console.error(`Unable to detect the current application version`);
+                }).done(function () {
+                    me.render();
+                });
             });
         };
 
@@ -214,6 +218,9 @@ module.exports = {
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
+
+                try {
+
                 // Require search module
                 // =====================
 
@@ -263,24 +270,25 @@ module.exports = {
                 // ============================================
                 $("[data-toggle=tooltip]").tooltip();
 
-                try {
-                    $.material.init();
-                    touchScroll(".tab-pane");
-                    touchScroll("#info-modal-body-wrapper");
-                    $("#loadscreentext").html(__("Loading data"));
-                    if (window.vidiConfig.activateMainTab) {
-                        setTimeout(function () {
-                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                        }, 200);
-                    }
-                    $(window).resize(_.debounce(function () {
-                        $("#myNavmenu").offcanvas('hide');
-                        setTimeout(function () {
-                            modules.cloud.get().map.invalidateSize();
-                        }, 100);
-                    }, 0));
+                $.material.init();
+                touchScroll(".tab-pane");
+                touchScroll("#info-modal-body-wrapper");
+                $("#loadscreentext").html(__("Loading data"));
+                if (window.vidiConfig.activateMainTab) {
+                    setTimeout(function () {
+                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                    }, 200);
+                }
+
+                $(window).resize(_.debounce(function () {
+                    $("#myNavmenu").offcanvas('hide');
+                    setTimeout(function () {
+                        modules.cloud.get().map.invalidateSize();
+                    }, 100);
+                }, 0));
+
                 } catch (e) {
-                    console.info("Could not init Bootstrap Material Design");
+                    console.error("Could not perform application initialization", error);
                 }
             });
         });
@@ -297,6 +305,9 @@ module.exports = {
 
         if (window.localforage) {
             localforage.getItem('appVersion').then(value => {
+
+                
+
                 if (value === null) {
                     localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
                         console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion})`);
@@ -304,9 +315,12 @@ module.exports = {
                         throw new Error(`Unable to store current application version`);
                     });
                 } else {
+
+                    console.log(`### value`, window.vidiConfig.appVersion, semver.valid(window.vidiConfig.appVersion), semver.valid(value));
+
                     // If two versions are correctly detected
-                    if (isNaN(parseInt(window.vidiConfig.appVersion)) === false && isNaN(parseInt(value)) === false) {
-                        if (parseInt(window.vidiConfig.appVersion) > parseInt(value)) {
+                    if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(value) !== null) {
+                        if (semver.gt(window.vidiConfig.appVersion, value)) {
                             if (confirm(`Update application to the newest version (current: ${value}, latest: ${window.vidiConfig.appVersion})?`)) {
                                 let unregisteringRequests = [];
 
@@ -337,6 +351,11 @@ module.exports = {
                         } else {
                             console.log('Versioning: new application version is not available');
                         }
+                    } else if (semver.valid(value) === null) {
+                        console.warn(`Seems like current application version is invalid, resetting it`);
+                        localforage.setItem('appVersion', '1.0.0').then(() => {}).catch(error => {
+                            throw new Error(`Unable to store current application version`);
+                        });
                     }
                 }
             });

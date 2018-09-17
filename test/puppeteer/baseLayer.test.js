@@ -7,7 +7,7 @@ const helpers = require("./../helpers");
 
 describe('Base layers', () => {
     it('should allow switching base layers', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
 
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
@@ -26,9 +26,9 @@ describe('Base layers', () => {
             interceptedRequest.continue();
         });
 
-        await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#osm/8/9.7971/55.7688/`);
+        await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#stamenTonerLite/8/9.7971/55.7688/`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#base-layers-btn`);
         await helpers.sleep(1000);
@@ -37,18 +37,21 @@ describe('Base layers', () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-base-id="geodk.bright"]').find('input').trigger('click')`);
         await helpers.sleep(2000);
+        await page.evaluate(`$('[data-gc2-base-id="osm"]').find('input').trigger('click')`);
+        await helpers.sleep(2000);
 
         expect(osmWasRequested && stamenTonerLiteWasRequested && geodkBrightWasRequested).to.be.true;
     });
 
     it('should be able to show base layers side-by-side and restore the side-by-side mode after page reload', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
 
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
 
         await page.setRequestInterception(true);
         page.on('request', interceptedRequest => {
+            console.log(interceptedRequest.url());
             if (interceptedRequest.url().indexOf(`tile.openstreetmap.org`) !== -1) {
                 osmWasRequested = true;
             } else if (interceptedRequest.url().indexOf(`fastly.net/toner-lite`) !== -1) {
@@ -60,7 +63,7 @@ describe('Base layers', () => {
 
         await page.goto(`${helpers.PAGE_URL}`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#base-layers-btn`);
         await helpers.sleep(1000);
@@ -83,7 +86,7 @@ describe('Base layers', () => {
 
         // Reloading page
         await page.reload();
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
     });
