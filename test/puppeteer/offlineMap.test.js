@@ -12,10 +12,10 @@ describe("OfflineMap", () => {
             || message.indexOf('c.tile.openstreetmap') !== -1);
         }
 
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         const logAllCachedTiles = `caches.open('vidi-static-cache').then(cache => {
             cache.keys().then(keys => {
@@ -125,10 +125,10 @@ describe("OfflineMap", () => {
         expect(numberOfCachedTiles > 0).to.be.true;
 
         // Checking if map is truly stored across all tabs
-        const newPage = await browser.newPage();
+        let newPage = await browser.newPage();
         await newPage.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
         await newPage.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        newPage = await helpers.waitForPageToLoad(newPage);
 
         // Check if previously saved map is restored
         await newPage.click(`#offline-map-btn`);
