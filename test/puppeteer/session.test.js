@@ -7,10 +7,10 @@ const helpers = require("./../helpers");
 
 describe('Session', () => {
     it('should login with correct credentials', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('.gc2-session-unlock').trigger('click')`);
 
@@ -32,10 +32,10 @@ describe('Session', () => {
     });
 
     it('should not login with invalid credentials', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('.gc2-session-unlock').trigger('click')`);
 
