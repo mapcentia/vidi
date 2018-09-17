@@ -1,11 +1,11 @@
 {
   "name": "vidi",
-  "version": "1.0.0",
+  "version": "1.1.2",
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 50000 --recursive test/unit && nyc mocha -t 50000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 50000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 50000 --recursive test/puppeteer --grep \"should constantly check for connection status and keep Force offline mode selector updated\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 50000 --recursive test/puppeteer --grep \"should be able to show base layers side-by-side and restore\""
   },
   "repository": {
     "type": "git",
@@ -37,6 +37,7 @@
     "grunt-git": "^1.0.0",
     "grunt-processhtml": "^0.4.1",
     "grunt-templates-hogan": "^0.3.0",
+    "grunt-version": "^1.2.1",
     "grunt-watchify": "^0.1.0",
     "install": "^0.12.1",
     "karma": "^2.0.2",
@@ -106,6 +107,7 @@
     "reproject": "^1.1.1",
     "request": "^2.81.0",
     "require-globify": "^1.4.0",
+    "semver": "^5.5.1",
     "serialijse": "0.0.17",
     "showdown": "^1.5.1",
     "snackbarjs": "^1.1.0",
