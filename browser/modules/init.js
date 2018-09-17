@@ -315,9 +315,6 @@ module.exports = {
                         throw new Error(`Unable to store current application version`);
                     });
                 } else {
-
-                    console.log(`### value`, window.vidiConfig.appVersion, semver.valid(window.vidiConfig.appVersion), semver.valid(value));
-
                     // If two versions are correctly detected
                     if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(value) !== null) {
                         if (semver.gt(window.vidiConfig.appVersion, value)) {

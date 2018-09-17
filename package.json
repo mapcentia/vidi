@@ -4,8 +4,8 @@
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {
-    "test": "nyc mocha -t 50000 --recursive test/unit && nyc mocha -t 50000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 50000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 50000 --recursive test/puppeteer --grep \"should be able to show base layers side-by-side and restore the\""
+    "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"should make the map area available off\""
   },
   "repository": {
     "type": "git",
