@@ -312,7 +312,9 @@ module.exports = {
                 localforage.getItem('appExtensionsBuild').then(extensionsBuildValue => {
                     if (versionValue === null) {
                         localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
-                            console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion})`);
+                            localforage.setItem('appExtensionsBuild', window.vidiConfig.appExtensionsBuild).then(() => {
+                                console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion}, ${window.vidiConfig.appExtensionsBuild})`);
+                            });
                         }).catch(error => {
                             throw new Error(`Unable to store current application version`);
                         });
