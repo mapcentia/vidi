@@ -171,7 +171,6 @@ module.exports = {
         let layers = _self.getMapLayers();
         if (order) {
             order.map((orderItem, groupIndex) => {
-
                 orderItem.children.map((item, index) => {
                     if (item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {

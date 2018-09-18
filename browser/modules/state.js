@@ -501,6 +501,12 @@ module.exports = {
                                 }
                             });
 
+                            if (`state` in response.data && response.data.state) {
+                                if (`modules` in response.data.state && `layerTree` in response.data.state.modules && `order` in response.data.state.modules.layerTree) {
+                                    layerTree.applyState(response.data.state.modules.layerTree);
+                                }
+                            }
+
                             // If any added layers, then add them
                             if (addedLayers.length > 0) {
 
@@ -669,23 +675,26 @@ module.exports = {
      * @returns {Promise}
      */
     bookmarkState: (data) => {
-        // Getting the print data
-        let printData = print.getPrintData();
-
-        // Getting modules and extensions state
-        let modulesData = {};
-
-        let overallData = Object.assign({}, printData, modulesData);
         let result = new Promise((resolve, reject) => {
-            $.ajax({
-                dataType: `json`,
-                method: `POST`,
-                url: `/api/print/`,
-                contentType: `application/json`,
-                data: JSON.stringify(overallData),
-                scriptCharset: `utf-8`,
-                success: resolve,
-                error: reject
+            // Getting the print data
+            print.getPrintData().then(printData => {
+                // Getting modules and extensions state
+                let modulesData = {};
+
+                let overallData = Object.assign({}, printData, modulesData);
+
+                $.ajax({
+                    dataType: `json`,
+                    method: `POST`,
+                    url: `/api/print/`,
+                    contentType: `application/json`,
+                    data: JSON.stringify(overallData),
+                    scriptCharset: `utf-8`,
+                    success: resolve,
+                    error: reject
+                });
+            }).catch(error => {
+                console.error(error);
             });
         });
 

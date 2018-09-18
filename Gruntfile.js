@@ -329,7 +329,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['version', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['version', 'env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'appendBuildHashToVersion']);
+    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
