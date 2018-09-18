@@ -105,10 +105,10 @@ module.exports = {
         apiBridgeInstance = APIBridgeSingletone();
 
         // Listen to arrival of add-feature buttons
-        $(document).arrive('.gc2-add-feature', function () {
-            console.log(`### arrived`);
+        $(document).arrive('.gc2-add-feature', {
+            existing: true
+        }, function () {
             $(this).on("click", function (e) {
-                console.log(`### clicked`);
                 let isVectorLayer = false;
                 if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
                     isVectorLayer = true;
