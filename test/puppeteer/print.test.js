@@ -7,9 +7,9 @@ const helpers = require("./../helpers");
 
 describe("Print", () => {
     it("should be able to print page as PDF", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}public.test_poly,v:public.test_line`);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('#search-border').trigger('click')`);
         await helpers.sleep(1000);
@@ -22,6 +22,9 @@ describe("Print", () => {
 
         let disabled = await page.evaluate(`$('#get-print-fieldset').attr('disabled')`);
         let PDFLink = await page.evaluate(`$('#open-pdf').attr('href')`);
+
+        await page.screenshot({ path: './test.png' });
+
         expect(disabled === undefined || disabled === `undefined`).to.be.true;
         expect(PDFLink.indexOf(`.pdf`) !== -1).to.be.true;
     });
