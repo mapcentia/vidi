@@ -106,7 +106,9 @@ module.exports = {
 
         // Listen to arrival of add-feature buttons
         $(document).arrive('.gc2-add-feature', function () {
+            console.log(`### arrived`);
             $(this).on("click", function (e) {
+                console.log(`### clicked`);
                 let isVectorLayer = false;
                 if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
                     isVectorLayer = true;
@@ -466,7 +468,8 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
+            //$(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
+            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form
@@ -674,7 +677,7 @@ module.exports = {
 
             cloud.get().map.closePopup();
 
-            $(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
+            ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
 
             for (let key in schema.properties) {
                 if (key in e.feature.properties && e.feature.properties[key]) {
