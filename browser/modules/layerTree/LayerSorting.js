@@ -66,17 +66,18 @@ class LayerSorting {
         if (order && groupOrder) {
             for (let key in groupOrder) {
                 let groupOrderItem = groupOrder[key];
-                if (groupOrderItem.type === GROUP_CHILD_TYPE_LAYER) {
+                if (groupOrderItem.type === GROUP_CHILD_TYPE_LAYER || groupOrderItem.type === GROUP_CHILD_TYPE_GROUP) {
                     for (let i = (notSortedLayersAndSubgroupsForCurrentGroup.length - 1); i >= 0; i--) {
-                        let layerId = notSortedLayersAndSubgroupsForCurrentGroup[i].layer.f_table_schema + '.' + notSortedLayersAndSubgroupsForCurrentGroup[i].layer.f_table_name;
-                        if (groupOrderItem.id === layerId) {
-                            sortedLayersAndSubgroups.push(notSortedLayersAndSubgroupsForCurrentGroup.splice(i, 1).pop());
-                            break;
+                        let groupChildId = false;
+                        if (notSortedLayersAndSubgroupsForCurrentGroup[i].type === GROUP_CHILD_TYPE_LAYER) {
+                            groupChildId = notSortedLayersAndSubgroupsForCurrentGroup[i].layer.f_table_schema + '.' + notSortedLayersAndSubgroupsForCurrentGroup[i].layer.f_table_name;
+                        } else if (notSortedLayersAndSubgroupsForCurrentGroup[i].type === GROUP_CHILD_TYPE_GROUP) {
+                            groupChildId = notSortedLayersAndSubgroupsForCurrentGroup[i].id;
+                        } else {
+                            throw new Error(`Undetectable not sorted group child type`);
                         }
-                    }
-                } else if (groupOrderItem.type === GROUP_CHILD_TYPE_GROUP) {
-                    for (let i = (notSortedLayersAndSubgroupsForCurrentGroup.length - 1); i >= 0; i--) {
-                        if (groupOrderItem.id === notSortedLayersAndSubgroupsForCurrentGroup[i].id) {
+
+                        if (groupOrderItem.id === groupChildId) {
                             sortedLayersAndSubgroups.push(notSortedLayersAndSubgroupsForCurrentGroup.splice(i, 1).pop());
                             break;
                         }
