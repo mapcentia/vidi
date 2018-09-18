@@ -1194,8 +1194,14 @@ module.exports = {
         cm[layer] = c;
     },
 
-    setStyle: function (layer, s) {
-        styles[layer] = s;
+    setStyle: function (layerName, style) {
+        let foundLayers = layers.getMapLayers(false, layerName);
+        if (foundLayers.length === 1) {
+            let layer = foundLayers[0];
+            layer.options.style = style;
+        }
+
+        styles[layerName] = style;
     },
 
     setPointToLayer: function (layer, fn) {
