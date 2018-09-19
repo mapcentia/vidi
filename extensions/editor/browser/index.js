@@ -11,6 +11,8 @@
  */
 let APIBridgeSingletone = require('../../../browser/modules/api-bridge');
 
+let PANEL_DOCKING_PARAMETER = 1024;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -60,7 +62,7 @@ let urlparser = require('./../../../browser/modules/urlparser');
  */
 let db = urlparser.db;
 
-let watsoncIsEnabled = false;
+let embedIsEnabled = false;
 
 let _self = false;
 
@@ -85,6 +87,9 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
+            embedIsEnabled = true;
+        }
 
         _self = this;
         try {
@@ -392,12 +397,14 @@ module.exports = {
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
+            /*
             $("#" + EDITOR_CONTAINER_ID).animate({
                 bottom: "0"
             }, 500, function () {
                 $(".editor-attr-dialog__expand-less").show();
                 $(".editor-attr-dialog__expand-more").hide();
             });
+            */
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
@@ -468,7 +475,6 @@ module.exports = {
             };
 
             // Slide panel with attributes in and render form component
-            //$(`#${EDITOR_FORM_CONTAINER_ID}`).empty();
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
@@ -484,6 +490,8 @@ module.exports = {
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
+
+            _self.openAttributesDialog();
         };
 
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -678,7 +686,6 @@ module.exports = {
             cloud.get().map.closePopup();
 
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-
             for (let key in schema.properties) {
                 if (key in e.feature.properties && e.feature.properties[key]) {
                     if (schema.properties[key].type === `string` && schema.properties[key].format === `date-time`) {
@@ -708,12 +715,7 @@ module.exports = {
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
     
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, () => {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
+            _self.openAttributesDialog();
         };
 
         let confirmMessage = __(`Application is offline, tiles will not be updated. Proceed?`);
@@ -736,6 +738,30 @@ module.exports = {
         }
     },
 
+    /**
+     * Opens attribute dialog depending on page width and height
+     * 
+     * @returns {void}
+     */
+    openAttributesDialog: () => {
+        if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
+            $("#" + EDITOR_CONTAINER_ID).animate({
+                bottom: (($("#" + EDITOR_CONTAINER_ID).height()*-1)+30) + "px"
+            }, 500, () => {
+                $(".editor-attr-dialog__expand-less").hide();
+                $(".editor-attr-dialog__expand-more").show();
+            });
+
+            $('#layer-slide').find('.close').trigger('click');
+        } else {
+            $("#" + EDITOR_CONTAINER_ID).animate({
+                bottom: "0"
+            }, 500, () => {
+                $(".editor-attr-dialog__expand-less").show();
+                $(".editor-attr-dialog__expand-more").hide();
+            });
+        }
+    },
 
     /**
      * Delete feature from layer
