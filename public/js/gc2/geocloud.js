@@ -124,7 +124,8 @@ geocloud = (function () {
         error: function () {
         },
         key: null,
-        base64: true
+        base64: true,
+        custom_data: null
     };
     // Base class for stores
     storeClass = function () {
@@ -221,6 +222,7 @@ geocloud = (function () {
         this.method = this.defaults.method;
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
+        this.custom_data = this.defaults.custom_data;
         this.load = function (doNotShowAlertOnError) {
 
             try {
@@ -245,7 +247,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
+                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key + '&custom_data=' + this.custom_data,
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -1999,7 +2001,20 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     mapBounds = this.map.getBounds().toBBoxString().split(",");
-                    bounds = {left: mapBounds[0], right: mapBounds[2], top: mapBounds[3], bottom: mapBounds[1]};
+
+                    var lower = transformPoint(mapBounds[0], mapBounds[1], "EPSG:4326", "EPSG:900913")
+                    var upper = transformPoint(mapBounds[2], mapBounds[3], "EPSG:4326", "EPSG:900913")
+
+                    bounds = {
+                        left: mapBounds[0],
+                        right: mapBounds[2],
+                        top: mapBounds[3],
+                        bottom: mapBounds[1],
+                        leftProj: lower.x,
+                        bottomProj: lower.y,
+                        rightProj: upper.x,
+                        topProj: upper.y
+                    };
                     break;
             }
             return (bounds);
@@ -2154,7 +2169,9 @@ geocloud = (function () {
                     var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:900913");
                     return {
                         x: p.x,
-                        y: p.y
+                        y: p.y,
+                        lat: point.lat,
+                        lng: point.lng
                     };
                     break;
             }

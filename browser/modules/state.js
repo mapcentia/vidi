@@ -674,7 +674,15 @@ module.exports = {
      * 
      * @returns {Promise}
      */
-    bookmarkState: (data) => {
+
+    bookmarkState: (customData) => {
+        // Getting the print data
+        let printData = print.getPrintData(customData);
+
+        // Getting modules and extensions state
+        let modulesData = {};
+
+        let overallData = Object.assign({}, printData, modulesData);
         let result = new Promise((resolve, reject) => {
             // Getting the print data
             print.getPrintData().then(printData => {

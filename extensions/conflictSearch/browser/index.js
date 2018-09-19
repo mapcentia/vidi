@@ -587,7 +587,6 @@ module.exports = module.exports = {
 
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
-
             var projWktWithBuffer;
             if (buffer === 0) {
                 projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
@@ -630,7 +629,7 @@ module.exports = module.exports = {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
                     success: function (response) {
                         var hitsCount = 0, noHitsCount = 0, errorCount = 0;
