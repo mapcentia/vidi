@@ -7,10 +7,10 @@ const helpers = require(`./../helpers`);
 
 describe('Measurements', () => {
     it('should allow measuring distance and area in default template', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         expect(await page.evaluate(`$('.leaflet-draw-draw-polyline').is(':visible')`)).to.be.false;
         expect(await page.evaluate(`$('.leaflet-draw-draw-polygon').is(':visible')`)).to.be.false;
@@ -23,11 +23,11 @@ describe('Measurements', () => {
     });
 
     it('should allow measuring distance and area in embed template', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-
+        page = await helpers.waitForPageToLoad(page);
+        
         expect(await page.evaluate(`$('#measurements-module-btn').is(':visible')`)).to.be.true;
         expect(await page.evaluate(`$('#measurements-module-cancel-btn').is(':visible')`)).to.be.false;
         expect(await page.evaluate(`$('#measurements-module-draw-line-btn').is(':visible')`)).to.be.false;

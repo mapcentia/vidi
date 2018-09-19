@@ -7,10 +7,10 @@ const helpers = require("./../helpers");
 
 describe('Draw', () => {
     it('should allow drawing features and restoring them switching base layers', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         page.on('dialog', async dialog => {
             await dialog.accept('Test');
@@ -59,7 +59,7 @@ describe('Draw', () => {
         await helpers.sleep(2000);
 
         await page.reload();
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
         await helpers.sleep(1000);

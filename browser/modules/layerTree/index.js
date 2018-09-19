@@ -811,7 +811,7 @@ module.exports = {
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
             <p>
                 <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
-                    <i class="fa fa-arrow-up"></i>
+                    <i class="fa fa-arrow-down"></i>
                 </button>
                 ${subgroup.id}
             </p>
@@ -820,13 +820,15 @@ module.exports = {
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
             let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`);
             if (subgroupRootElement.find(`.js-subgroup-children`).is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).show();
             }
         });
+
+        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
         
         subgroup.children.map(child => {
             // For now expecting nothing but regular layers
@@ -1192,8 +1194,14 @@ module.exports = {
         cm[layer] = c;
     },
 
-    setStyle: function (layer, s) {
-        styles[layer] = s;
+    setStyle: function (layerName, style) {
+        let foundLayers = layers.getMapLayers(false, layerName);
+        if (foundLayers.length === 1) {
+            let layer = foundLayers[0];
+            layer.options.style = style;
+        }
+
+        styles[layerName] = style;
     },
 
     setPointToLayer: function (layer, fn) {
