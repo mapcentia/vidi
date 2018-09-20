@@ -84,14 +84,14 @@ module.exports = {
     },
 
     /**
-     *
-     * @param qstore {array}
-     * @param wkt {string}
-     * @param proj {string}
-     * @param callBack {string}
-     * @param num {int}
+     * @param qstore
+     * @param wkt
+     * @param proj
+     * @param callBack
+     * @param num
+     * @param point
      */
-    init: function (qstore, wkt, proj, callBack, num) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint) {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -161,6 +161,9 @@ module.exports = {
             var cartoSql = metaDataKeys[value].sql;
             var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
             var onLoad;
+            let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
+                && metaDataKeys[value].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
@@ -347,10 +350,23 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
-            if (geoType === "RASTER") {
+            if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
                 sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
+
+                qstore[index].custom_data = [
+                    value,
+                    cloud.get().map.getSize().x,
+                    cloud.get().map.getSize().y,
+                    cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
+                    cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
+                    cloud.get().getExtent().left,
+                    cloud.get().getExtent().bottom,
+                    cloud.get().getExtent().right,
+                    cloud.get().getExtent().top
+                ];
+
             } else {
                 if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
@@ -363,6 +379,7 @@ module.exports = {
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
+                    qstore[index].custom_data = "";
                 }
             }
             sql = sql + " LIMIT " + (num || 500);
@@ -375,7 +392,7 @@ module.exports = {
 
     /**
      * Prepares stored data for being displayed in table
-     * 
+     *
      * @param {String} layerKey Layer key
      * @param {Array}  features Layer features
      */
@@ -427,7 +444,7 @@ module.exports = {
                         }
                     }
 
-                    fi.push({ title: property.value.alias || property.key, value });
+                    fi.push({title: property.value.alias || property.key, value});
 
                     fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                     if (feature.properties[property.key] !== undefined) {
@@ -531,5 +548,3 @@ var download = function (sql, format) {
     var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
     request.send(uri);
 };
-
-
