@@ -53,7 +53,7 @@ module.exports = {
                 console.log("Could not load: " + configFile);
 
                 if (stop) {
-                    me.render();
+                    me.getVersion();
                     return;
                 }
 
@@ -62,18 +62,8 @@ module.exports = {
                     stop = true;
                     loadConfig();
                 }
-            }).always(function () {
-                $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
-                    window.vidiConfig.appVersion = data.version;
-                    window.vidiConfig.appExtensionsBuild = '0';
-                    if (`extensionsBuild` in data) {
-                        window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
-                    }
-                }).fail(function () {
-                    console.error(`Unable to detect the current application version`);
-                }).always(function () {
-                    me.render();
-                });
+            }).done(function () {
+                me.getVersion();
             });
         };
 
@@ -88,10 +78,25 @@ module.exports = {
         if (configFile) {
             loadConfig();
         } else {
-            me.render();
+            me.getVersion();
         }
-
     },
+
+    getVersion: function () {
+        var me = this;
+        $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
+            window.vidiConfig.appVersion = data.version;
+            window.vidiConfig.appExtensionsBuild = '0';
+            if (`extensionsBuild` in data) {
+                window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
+            }
+        }).fail(function () {
+            console.error(`Unable to detect the current application version`);
+        }).always(function () {
+            me.render();
+        });
+    },
+
 
     /**
      *
