@@ -1,4 +1,4 @@
- /**
+/**
  * @fileoverview Description of file, its uses and information
  * about its dependencies.
  */
@@ -29,7 +29,7 @@ module.exports = {
             clicktimer = undefined;
         });
         cloud.get().on("click", function (e) {
-           if (active === false || e.originalEvent.clickedOnFeature) {
+            if (active === false || e.originalEvent.clickedOnFeature) {
                 return;
             }
 
@@ -41,7 +41,7 @@ module.exports = {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
-                    sqlQuery.init(qstore, wkt, "3857");
+                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng]);
                 }, 250);
             }
         });
@@ -49,7 +49,7 @@ module.exports = {
     /**
      *
      */
-    reset: function(){
+    reset: function () {
         sqlQuery.reset(qstore);
     },
 
@@ -57,7 +57,7 @@ module.exports = {
      *
      * @param a {boolean}
      */
-    active: function(a){
+    active: function (a) {
         if (!a) {
             this.reset();
         }

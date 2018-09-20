@@ -12,6 +12,7 @@ router.all('/api/sql/:db', function (req, response) {
         client_encoding = req.body.client_encoding || req.query.client_encoding,
         base64 = req.body.base64 || req.query.base64,
         format = req.body.format || req.query.format,
+        custom_data = req.body.custom_data || req.query.custom_data,
         store = req.body.store || req.query.store,
         userName,
         fileName,
@@ -23,7 +24,7 @@ router.all('/api/sql/:db', function (req, response) {
             return v.toString(16);
         });
 
-    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey,
+    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + custom_data,
         options;
 
     // Check if user is a sub user
@@ -39,7 +40,7 @@ router.all('/api/sql/:db', function (req, response) {
 
     options = {
         method: 'POST',
-        uri: config.host + "/api/v1/sql/" + userName,
+        uri: config.host + "/api/v2/sqlwrapper/" + userName,
         form: postData
     };
 

@@ -108,6 +108,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'gc2.io/api'
+}, {
+    regExp: true,
+    requested: '/version.json'
 }];
 
 /**
