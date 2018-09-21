@@ -154,14 +154,15 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
 
-        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            editingIsEnabled = true;
-        }
-
         return this;
     },
 
     init: function () {
+
+        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
+            editingIsEnabled = true;
+        }
+
         _self = this;
         queueStatistsics = new QueueStatisticsWatcher({ switchLayer, layerTree: _self });
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
