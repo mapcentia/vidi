@@ -292,7 +292,7 @@ module.exports = {
                 }, 0));
 
                 } catch (e) {
-                    console.error("Could not perform application initialization", error);
+                    console.error("Could not perform application initialization", e.message);
                 }
             });
         });
