@@ -177,9 +177,11 @@ module.exports = {
         "Add condition": "Add condition",
         "Apply": "Apply",
 
-      
+        // Base layers
+        "Side-by-side mode": "Side-by-side mode",
+
         // APIBridge
-        "Not authorized to perform this action": "# Not authorized to perform this action",
+        "Not authorized to perform this action": "Not authorized to perform this action",
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",

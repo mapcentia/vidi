@@ -5,13 +5,6 @@
 
 'use strict';
 
-const dict = {
-    "Side-by-side mode": {
-        "da_DK": "# Side-by-side mode",
-        "en_US": "# Side-by-side mode"
-    }
-};
-
 const MODULE_NAME = `baseLayer`;
 
 /**
@@ -86,7 +79,7 @@ module.exports = module.exports = {
             <div class="panel-body">
                 <div class="togglebutton">
                     <label>
-                        <input class="js-toggle-side-by-side-mode" type="checkbox"> ${utils.__(`Side-by-side mode`, dict)}
+                        <input class="js-toggle-side-by-side-mode" type="checkbox"> ${__(`Side-by-side mode`)}
                     </label>
                 </div>
             </div>

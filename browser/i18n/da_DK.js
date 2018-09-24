@@ -180,6 +180,8 @@ module.exports = {
         "Add condition": "Tilføj betingelsebetingelse",
         "Apply": "Anvend",
 
+        // Base layers
+        "Side-by-side mode": "Side-by-side tilstand",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
