@@ -269,14 +269,14 @@ module.exports = {
                                 let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
                                 if (enabledExtensionIndex > -1) {
                                     modules.extensions[Object.keys(v)[0]][m].init();
-                                    enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
+                                    //enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
                                 }
                             })
                         });
 
-                        if (enabledExtensionsCopy.length > 0) {
-                            console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
-                        }
+                        // if (enabledExtensionsCopy.length > 0) {
+                        //     console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                        // }
                     }
                 }
 
