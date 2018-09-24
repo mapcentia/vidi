@@ -7,12 +7,9 @@ const helpers = require("./../helpers");
 
 describe("State snapshots", () => {
     it("should react to authorization status change", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
-        await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
@@ -37,12 +34,10 @@ describe("State snapshots", () => {
     });
 
     it("should capture current state and save it as browser-owned", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -64,7 +59,7 @@ describe("State snapshots", () => {
 
         // Snapshot is displayed after the browser reload
         await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
@@ -77,12 +72,10 @@ describe("State snapshots", () => {
     });
 
     it("should capture current state and save it as user-owned", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -118,12 +111,10 @@ describe("State snapshots", () => {
     });
 
     it("should make browser-owned state snapshots user-owned ones and delete them", async () => {
-        const page = await browser.newPage();   
+        let page = await browser.newPage();   
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -175,12 +166,10 @@ describe("State snapshots", () => {
     });
 
     it("should create permalink that will make possible to share state snapshot", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -198,7 +187,7 @@ describe("State snapshots", () => {
 
         let linkURL = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
 
-        const statePage = await browser.newPage();
+        let statePage = await browser.newPage();
         await statePage.setRequestInterception(true);
         let stateWasRequested = false;
         statePage.on('request', interceptedRequest => {
@@ -213,16 +202,16 @@ describe("State snapshots", () => {
 
         await statePage.goto(linkURL);
         await statePage.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        statePage = await helpers.waitForPageToLoad(statePage);
 
         expect(stateWasRequested).to.be.true;
     });
 
     it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -247,10 +236,10 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
 
         // Reload page without dynamic layer turned on
-        const newPage = await browser.newPage();
+        let newPage = await browser.newPage();
         await newPage.goto(helpers.PAGE_URL);
         await newPage.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        newPage = await helpers.waitForPageToLoad(newPage);
 
         // Open state snapshot manager
         await newPage.click(`#state-snapshots-dialog-btn`);
@@ -267,12 +256,10 @@ describe("State snapshots", () => {
     });
 
     it("should restore multiple snapshots with initial and dynamic layers in URL", async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
@@ -348,6 +335,4 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.false;
     });
-
-    
 });
