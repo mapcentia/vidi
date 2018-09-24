@@ -162,19 +162,20 @@ module.exports = {
         "Error": "Error",
         "Cancel feature changes": "Cancel feature changes",
         "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
-        "Match": "# Match",
-        "of the following": "# of the following",
-        "any": "# any",
-        "all": "# all",
-        "Select": "# Select",
-        "Filters": "# Filters",
-        "Disable": "# Disable",
-        "Table view": "# Table view",
-        "Select field": "# Select field",
+        "Match": "Match",
+        "of the following": "of the following",
+        "any": "any",
+        "all": "all",
+        "Select": "Select",
+        "Filters": "Filters",
+        "Disable": "Disable",
+        "Table view": "Table view",
+        "Select field": "Select field",
         "Null": "Null",
         "Yes": "Yes",
         "No": "No",
-        "Add condition": "# Add condition",
+        "Add condition": "Add condition",
+        "Apply": "Apply",
 
       
         // APIBridge
@@ -240,9 +241,10 @@ module.exports = {
         "Delete all measurements": "Delete all measurements",
 
         //KeplerGL
-        "Open KeplerGL in modal": "# Open KeplerGL in modal",
-        "View in KeplerGL": "# View in KeplerGL",
-        "Visible": "# Visible",
+        "Open KeplerGL in modal": "Open KeplerGL in modal",
+        "View in KeplerGL": "View in KeplerGL",
+        "Visible": "Visible",
+        "No layers available": "No layers available",
 
         //Boreholes
         "Plots": "# Plots",
