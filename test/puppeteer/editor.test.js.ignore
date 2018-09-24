@@ -8,12 +8,10 @@ const helpers = require("./../helpers");
 describe('Editor', () => {
     describe('(if user is authorized)', () => {
         it('should add, update and delete features', async () => {
-            const page = await browser.newPage();
+            let page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-            await page.reload();
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            page = await helpers.waitForPageToLoad(page);
 
             // Accepting the dialog
             page.on('dialog', (dialog) => {
@@ -126,12 +124,10 @@ describe('Editor', () => {
 
     describe('(if user is not authorized)', () => {
         it('should put add feature request to the queue', async () => {
-            const page = await browser.newPage();
+            let page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-            await page.reload();
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            page = await helpers.waitForPageToLoad(page);
 
             // Accepting the dialog
             page.on('dialog', (dialog) => {
@@ -164,12 +160,10 @@ describe('Editor', () => {
         });
 
         it('should put update feature request to the queue', async () => {
-	        const page = await browser.newPage();
+	        let page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-            await page.reload();
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            page = await helpers.waitForPageToLoad(page);
 
             // Accepting the dialog
             page.on('dialog', (dialog) => {
@@ -216,12 +210,10 @@ describe('Editor', () => {
         });
 
         it('should put delete feature request to the queue', async () => {
-	        const page = await browser.newPage();
+	        let page = await browser.newPage();
             await page.goto(`${helpers.PAGE_URL}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-            await page.reload();
-            await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+            page = await helpers.waitForPageToLoad(page);
 
             // Accepting the dialog
             page.on("dialog", (dialog) => {
@@ -264,10 +256,10 @@ describe('Editor', () => {
     });
 
     it('should react to Force offline mode setting', async () => {
-        const page = await browser.newPage();
+        let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
 
         // Accepting the dialog
         page.on('dialog', (dialog) => {
