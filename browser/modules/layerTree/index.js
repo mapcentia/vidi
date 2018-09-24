@@ -153,12 +153,10 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
-
         return this;
     },
 
     init: function () {
-
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
             editingIsEnabled = true;
         }

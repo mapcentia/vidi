@@ -23,7 +23,7 @@ module.exports = {
     waitForPageToLoad: async (page) => {
         let loadedPage = new Promise((resolve, reject) => {
             page.on('console', async (msg) => {
-                //console.log(msg.text());
+                console.log(msg.text());
                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                     await sleepFunction(1000);
                     resolve(page);

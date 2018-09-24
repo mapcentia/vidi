@@ -208,6 +208,14 @@ module.exports = {
                 cloud.get().setMaxBounds(maxBounds);
             }
 
+            // When all layers are loaded, when load legend and when set "all_loaded" for print
+            backboneEvents.get().once("allDoneLoading:layers", function (e) {
+                legend.init().then(function(){
+                    console.log("Vidi is now loaded");// Vidi is now fully loaded
+                    window.status = "all_loaded";
+                });
+            });
+
             // Reset hash. Needed if state is invoked after start up
             hash = decodeURIComponent(window.location.hash);
             hashArr = hash.replace("#", "").split("/");
@@ -290,14 +298,6 @@ module.exports = {
              * Applies settings provided in the URL hash part
              */
             const initializeFromHashPart = () => {
-                // When all layers are loaded, when load legend and when set "all_loaded" for print
-                backboneEvents.get().once("allDoneLoading:layers", function (e) {
-                    legend.init().then(function(){
-                        console.log("Vidi is now loaded");// Vidi is now fully loaded
-                        window.status = "all_loaded";
-                    });
-                });
-
                 if (urlVars.k === undefined) {
                     if (hashArr[0]) {
                         setLayers();
