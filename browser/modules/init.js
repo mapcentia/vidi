@@ -263,13 +263,20 @@ module.exports = {
                     });
 
                     if (typeof window.vidiConfig.enabledExtensions === "object") {
+                        let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
                         $.each(vidiConfig.extensions.browser, function (i, v) {
                             $.each(v[Object.keys(v)[0]], function (n, m) {
-                                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
+                                if (enabledExtensionIndex > -1) {
                                     modules.extensions[Object.keys(v)[0]][m].init();
+                                    enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
                                 }
                             })
                         });
+
+                        if (enabledExtensionsCopy.length > 0) {
+                            console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                        }
                     }
                 }
 
