@@ -53,7 +53,7 @@ module.exports = {
                 console.log("Could not load: " + configFile);
 
                 if (stop) {
-                    me.render();
+                    me.getVersion();
                     return;
                 }
 
@@ -61,21 +61,9 @@ module.exports = {
                     configFile = window.vidiConfig.defaultConfig;
                     stop = true;
                     loadConfig();
-                } else {
-                    me.render();
                 }
-            }).always(function () {
-                $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
-                    window.vidiConfig.appVersion = data.version;
-                    window.vidiConfig.appExtensionsBuild = '0';
-                    if (`extensionsBuild` in data) {
-                        window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
-                    }
-                }).fail(function () {
-                    console.error(`Unable to detect the current application version`);
-                }).done(function () {
-                    me.render();
-                });
+            }).done(function () {
+                me.getVersion();
             });
         };
 
@@ -90,10 +78,25 @@ module.exports = {
         if (configFile) {
             loadConfig();
         } else {
-            me.render();
+            me.getVersion();
         }
-
     },
+
+    getVersion: function () {
+        var me = this;
+        $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
+            window.vidiConfig.appVersion = data.version;
+            window.vidiConfig.appExtensionsBuild = '0';
+            if (`extensionsBuild` in data) {
+                window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
+            }
+        }).fail(function () {
+            console.error(`Unable to detect the current application version`);
+        }).always(function () {
+            me.render();
+        });
+    },
+
 
     /**
      *
@@ -360,7 +363,7 @@ module.exports = {
                             } else {
                                 console.log('Versioning: new application version is not available');
                             }
-                        } else if (semver.valid(value) === null) {
+                        } else if (typeof value === "undefined" || semver.valid(value) === null) {
                             console.warn(`Seems like current application version is invalid, resetting it`);
                             localforage.setItem('appVersion', '1.0.0').then(() => {}).catch(error => {
                                 localforage.setItem('appExtensionsBuild', '0').then(() => {}).catch(error => {

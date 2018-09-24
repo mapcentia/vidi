@@ -66,6 +66,8 @@ let embedIsEnabled = false;
 
 let _self = false;
 
+let vectorLayers;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -87,9 +89,6 @@ module.exports = {
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
-        if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
-            embedIsEnabled = true;
-        }
 
         _self = this;
         try {
@@ -105,6 +104,10 @@ module.exports = {
         if (`watsonc` in window.vidiConfig.enabledExtensions) {
             console.log(`Editor extension is disabled due to the enabled watsonc`);
             return;
+        }
+
+        if (vidiConfig.enabledExtensions.indexOf(`embed`) !== -1) {
+            embedIsEnabled = true;
         }
 
         apiBridgeInstance = APIBridgeSingletone();
@@ -844,7 +847,7 @@ module.exports = {
         // If feature was edited, then reload the layer
         if (editedFeature) {
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
-            if (editedFeature.feature.geometry.type !== `Point`) {
+            if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();
                 if (featureWasEdited) {
                     switchLayer.init(editedFeature.id, false);
