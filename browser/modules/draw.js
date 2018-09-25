@@ -312,7 +312,8 @@ module.exports = {
 
                 }
                 if (type === 'circle') {
-                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                    distance = L.GeometryUtil.readableDistance(drawLayer.getRadius(), true);
+                    area = drawTools.getAreaOfCircle(drawLayer);
                 }
 
                 drawLayer._vidi_type = "draw";
