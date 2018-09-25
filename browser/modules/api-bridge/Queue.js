@@ -3,7 +3,7 @@
 const QUEUE_PROCESSING_INTERVAL = 5000;
 const QUEUE_STORE_NAME = 'vidi-feature-management-queue';
 
-const LOG = false;
+const LOG = true;
 
 // Types of queue items
 const ADD_REQUEST = 0;
