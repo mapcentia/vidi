@@ -80,7 +80,7 @@ var _getDistance = function (e) {
  * @private
  */
 var _getArea = function (e) {
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
+    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()[0]), true);
 };
 
 /**
