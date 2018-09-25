@@ -62,7 +62,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
                         'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
-                        //'public/css/jasny-bootstrap.css',
                         //custom
                         'public/css/styles.min.css'
                     ]
@@ -228,7 +227,6 @@ module.exports = function (grunt) {
 
                         'public/js/leaflet-easybutton/easy-button.js',
                         'public/js/proj4js-combined.js',
-                        'public/js/jasny-bootstrap.js',
                         'public/js/bundle.js',
                         'public/js/vidi.js',
                         'public/js/gc2/geocloud.js',

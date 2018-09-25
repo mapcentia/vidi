@@ -59,7 +59,7 @@ module.exports = {
         cloud.map.addControl(zoomControl);
 
         var scaleControl = L.control.scale({
-            position: "bottomleft",
+            position: "bottomright",
             imperial: false
         });
         cloud.map.addControl(scaleControl);

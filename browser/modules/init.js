@@ -296,12 +296,11 @@ module.exports = {
                         }, 200);
                     }
 
-                    $(window).resize(_.debounce(function () {
-                        $("#myNavmenu").offcanvas('hide');
+                    $(window).resize(function () {
                         setTimeout(function () {
                             modules.cloud.get().map.invalidateSize();
                         }, 100);
-                    }, 0));
+                    });
 
                 } catch (e) {
                     console.error("Could not perform application initialization", e.message);

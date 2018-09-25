@@ -1043,3 +1043,11 @@ h4 small {
 .watsonc-custom-popup {
   width: 240px;
 }
+#map,
+#pane,
+#search-ribbon {
+  -webkit-transition: all 500ms ease-out 0.5s;
+  -moz-transition: all 500ms ease-out 0.5s;
+  -o-transition: all 500ms ease-out 0.5s;
+  transition: all 500ms ease-out 0.5s;
+}
