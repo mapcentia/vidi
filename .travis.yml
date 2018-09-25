@@ -9,7 +9,7 @@ before_script:
   - cd public/js/lib/bootstrap-material-design
   - npm install
   - cd ../../../..
-#  - grunt production
+  - grunt production
 language: node_js
 node_js:
   - "8"
