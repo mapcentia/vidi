@@ -49,11 +49,17 @@ class CompactLayerTree extends React.Component {
                 layersMeta.map((layerMeta, index) => {
                     if (layerMeta.layergroup === groupName) {
                         let tableId = (layerMeta.f_table_schema + '.' + layerMeta.f_table_name);
+
+                        let checked = false;
+                        if (this.props.layerTree.getActiveLayers().indexOf(`v:` + tableId) > -1) {
+                            checked = true;
+                        }
+
                         groupLayers.push(<li key={base64GroupName + index} className="layer-item list-group-item" style={{minHeight: '40px', marginTop: '10px'}}>
                             <div style={{display: 'inline-block'}}>
                                 <div className="checkbox">
                                     <label>
-                                        <input type="checkbox" data-gc2-id={tableId}/>
+                                        <input type="checkbox" defaultChecked={checked} data-gc2-layer-type="vector" data-gc2-id={tableId}/>
                                     </label>
                                 </div>
                             </div>
