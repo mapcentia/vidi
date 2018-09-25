@@ -2,7 +2,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = false;
+const LOG = true;
 
 let singletoneInstance = false;
 
