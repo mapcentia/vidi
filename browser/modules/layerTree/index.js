@@ -949,6 +949,7 @@ module.exports = {
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).hide();
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
 
@@ -964,6 +965,7 @@ module.exports = {
 
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).show();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
@@ -1022,6 +1024,9 @@ module.exports = {
                 });
 
                 // If vector layer is active, show the filtering option
+
+                // @todo How to handle the "js-toggle-layer-offline-mode-container"?
+
                 if (layerIsActive && defaultLayerType === `vector`) {
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
                     $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
@@ -1032,6 +1037,7 @@ module.exports = {
             } else {
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
                 $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).remove();
+                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).remove();
             }
         }
     },

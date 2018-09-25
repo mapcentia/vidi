@@ -119,10 +119,18 @@ class MarkupGenerator {
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
-                
+
                 <div style="display: inline-block;">
                     <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
+                </div>
+
+                <div class="js-toggle-layer-offline-mode-container" style="display: node;">
+                    <div class="togglebutton">
+                        <label>
+                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode for layer')}
+                        </label>
+                    </div>
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>

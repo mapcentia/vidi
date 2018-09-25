@@ -185,12 +185,19 @@ describe('Editor', () => {
             await page.evaluate(`$('#layer-slide .close').trigger('click')`);
             await helpers.sleep(1000);
 
+            await page.screenshot({ path: './test1.png' });
+
             // Selecting first already existing point on map and trying to edit it
             const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
+
+console.log(`### markerPosition`, markerPosition);
+
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
             await mouse.click(markerPosition.left + 10 - 24, markerPosition.top + 10 - 48);
+
+            await page.screenshot({ path: './test2.png' });
 
             // Editing attributes of the selected feature
             await helpers.sleep(2000);
@@ -199,11 +206,17 @@ describe('Editor', () => {
 	        await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
             await helpers.sleep(500);
 
+            await page.screenshot({ path: './test3.png' });
+
             // Checking if the queue indicator shows that element was added to the queue
             await page.click(`#burger-btn`);
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
 
+            await page.screenshot({ path: './test4.png' });
+
             await helpers.sleep(4000);
+
+            await page.screenshot({ path: './test5.png' });
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
 
