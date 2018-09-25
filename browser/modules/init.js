@@ -11,6 +11,8 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
+let jquery = require('jquery');
+require('snackbarjs');
 
 const semver = require('semver');
 require("bootstrap");
@@ -333,8 +335,13 @@ module.exports = {
                         if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
                             if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
                                 (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
+                                jquery.snackbar({
+                                    id: "snackbar-conflict",
+                                    content: `Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`,
+                                    htmlAllowed: true,
+                                    timeout: 2500
+                                });
                                 setTimeout(function () {
-                                    console.info(`Updated application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`);
                                     let unregisteringRequests = [];
                                     // Unregister service worker
                                     navigator.serviceWorker.getRegistrations().then((registrations) => {
@@ -358,7 +365,7 @@ module.exports = {
                                             location.reload();
                                         });
                                     });
-                                }, 2000);
+                                }, 3000);
                             } else {
                                 console.info('Versioning: new application version is not available');
                             }
