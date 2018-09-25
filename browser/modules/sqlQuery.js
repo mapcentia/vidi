@@ -419,39 +419,30 @@ module.exports = {
                 });
             } else {
                 $.each(sortObject(fieldConf), function (name, property) {
-                    /*
-                     * Used to be only for property.value.querable = true
-                     * if (property.value.querable) {
-                     *    ...
-                     * }
-                     */
-
-                    let value = feature.properties[property.key];
-                    if (property.value.link) {
-                        value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
-                    } else if (property.value.image) {
-                        if (!feature.properties[property.key]) {
-                            value = `<i class="fa fa-ban"></i>`;
-                        } else {
-                            let subValue = feature.properties[property.key];
-                            if (property.value.type === `bytea`) {
-                                subValue = atob(feature.properties[property.key]);
-                            }
-
-                            value = `<a target='_blank' href='${subValue}'>
+                     if (property.value.querable) {
+                         let value = feature.properties[property.key];
+                         if (property.value.link) {
+                             value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                         } else if (property.value.image) {
+                             if (!feature.properties[property.key]) {
+                                 value = `<i class="fa fa-ban"></i>`;
+                             } else {
+                                 let subValue = feature.properties[property.key];
+                                 if (property.value.type === `bytea`) {
+                                     subValue = atob(feature.properties[property.key]);
+                                 }
+                                 value = `<a target='_blank' href='${subValue}'>
                                 <img style='width:178px' src='${subValue}'/>
                             </a>`;
-                        }
-                    }
-
-                    fi.push({title: property.value.alias || property.key, value});
-
-                    fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                    if (feature.properties[property.key] !== undefined) {
-                        out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                    }
+                             }
+                         }
+                         fi.push({title: property.value.alias || property.key, value});
+                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                         if (feature.properties[property.key] !== undefined) {
+                             out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                         }
+                     }
                 });
-
                 out.sort(function (a, b) {
                     return a[1] - b[1];
                 });
