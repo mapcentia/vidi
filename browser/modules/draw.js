@@ -580,7 +580,7 @@ module.exports = {
      * @param type
      */
     setStyle: function (l, type) {
-        if ($("#draw-measure").is(":checked") && type !== 'marker') {
+        if ($("#draw-measure").is(":checked") && type !== 'marker' && type !== 'circlemarker') {
             l.hideMeasurements();
             l.showMeasurements({
                 showTotal: $("#draw-line-total-dist").is(":checked")

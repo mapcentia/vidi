@@ -9,7 +9,17 @@
  * @private
  */
 const getDistance = e => {
-    return L.GeometryUtil.readableDistance(e.getRadius(), true);
+    var tempLatLng = null;
+    var totalDistance = 0.00000;
+    $.each(e._latlngs, function (i, latlng) {
+        if (tempLatLng == null) {
+            tempLatLng = latlng;
+            return;
+        }
+        totalDistance += tempLatLng.distanceTo(latlng);
+        tempLatLng = latlng;
+    });
+    return L.GeometryUtil.readableDistance(totalDistance, true);
 };
 
 /**
@@ -22,12 +32,6 @@ const getArea = e => {
     return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()[0]), true);
 };
 
-/**
- * Get readable area of layer
- * @param e
- * @returns {string}
- * @private
- */
 const getAreaOfCircle = e => {
     return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
 };
