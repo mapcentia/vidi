@@ -10,7 +10,7 @@ const MODULE_NAME = `baseLayer`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, utils, layers, setBaseLayer, urlparser, backboneEvents, state;
+var cloud, utils, layers, setBaseLayer, urlparser, backboneEvents, state, setting;
 
 /**
  * List with base layers added to the map. Can be got through API.
@@ -46,6 +46,7 @@ module.exports = module.exports = {
         state = o.state;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
+        setting = o.setting;
 
         _self = this;
         return this;
@@ -341,23 +342,12 @@ module.exports = module.exports = {
             if (Array.isArray(availableBaseLayers) && availableBaseLayers.length > 0) {
                 let firstBaseLayerId = availableBaseLayers[0].id;
                 return setBaseLayer.init(firstBaseLayerId).then(() => {
-                    let minZoomLevel = false;
-                    let existingLayers = cloud.get().getBaseLayers();
-                    if (Array.isArray(existingLayers) && existingLayers.length === 1) {
-                        for (let key in existingLayers[0]) {
-                            let layer = existingLayers[0][key];
-                            if (`id` in layer && layer.id === firstBaseLayerId) {
-                                minZoomLevel = layer.options.minZoom;   
-                            }
-                        }
-                    }
-
-                    if (minZoomLevel === false) {
-                        console.error(`Unable to detect minimum zoom level`);
+                    let extent = setting.getExtent();
+                    if (extent !== null) {
+                        cloud.get().zoomToExtent(extent);
                     } else {
-                        cloud.get().map.setZoom(minZoomLevel);
+                        cloud.get().zoomToExtent();
                     }
-
                     return _self.toggleSideBySideControl(false);
                 });
             } else {
