@@ -48,6 +48,7 @@ const ImageUploadWidget = require('./ImageUploadWidget');
 
 const widgets = { 'imageupload': ImageUploadWidget };
 
+const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
@@ -241,30 +242,7 @@ module.exports = {
                             layer.bindTooltip(tooltip);
                         });
                     }
-
-                    layer.on("click", function (e) {
-                        e.originalEvent.clickedOnFeature = true;
-
-                        let managePopup = L.popup({
-                            autoPan: false
-                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
-                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-primary btn-xs ge-delete">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                        </button>`).openOn(cloud.get().map);
-
-                        $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                            _self.edit(layer, layerName + ".the_geom", null, true);
-                        });
-
-                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                            if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                _self.delete(layer, layerName + ".the_geom", null, true);
-                            }
-                        });
-                    });
-                });
+                }, MODULE_NAME);
             }
 
             let styleFn = () => {};

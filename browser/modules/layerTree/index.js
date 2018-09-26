@@ -139,6 +139,10 @@ let userPreferredForceOfflineMode = -1;
 
 let vectorFilters = {};
 
+let extensions = false;
+
+let editor = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -153,12 +157,16 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        extensions = o.extensions;
         return this;
     },
 
     init: function () {
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            editingIsEnabled = true;
+            if (`editor` in extensions) {
+                editor = extensions.editor.index;
+                editingIsEnabled = true;
+            }
         }
 
         _self = this;
@@ -580,7 +588,145 @@ module.exports = {
             },
             onEachFeature: (feature, layer) => {
                 if (('v:' + layerKey) in onEachFeature) {
-                    onEachFeature['v:' + layerKey](feature, layer);
+                    if (onEachFeature['v:' + layerKey].caller === `editor`) {
+                        layer.on("click", function (e) {
+                            let value = layerKey;
+                            let metaDataKeys = meta.getMetaDataKeys();
+                            if (!metaDataKeys[value]) {
+                                throw new Error(`metaDataKeys[${value}] is undefined`);
+                            }
+
+                            var isEmpty = true;
+                            var srid = metaDataKeys[value].srid;
+                            var geoType = metaDataKeys[value].type;
+                            var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
+                            var versioning = metaDataKeys[value].versioning;
+                            var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
+
+                            /**
+                             * A default template for GC2, with a loop
+                             * @type {string}
+                             */
+                            var defaultTemplate = `<div class="cartodb-popup-content">
+                                <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                                    <button class="btn btn-primary btn-xs popup-edit-btn">
+                                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                                    </button>
+                                    <button class="btn btn-primary btn-xs popup-delete-btn">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                                {{#_vidi_content.fields}}
+                                    {{#title}}<h4>{{title}}</h4>{{/title}}
+                                    {{#value}}
+                                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                                    {{/value}}
+                                    {{^value}}
+                                    <p class="empty">null</p>
+                                    {{/value}}
+                                {{/_vidi_content.fields}}
+                            </div>`;
+
+                            var _table = gc2table.init({
+                                geocloud2: cloud.get(),
+                                store: stores[`v:` + layerKey],
+                                autoUpdate: false,
+                                autoPan: false,
+                                openPopUp: true,
+                                setViewOnSelect: true,
+                                responsive: false,
+                                callCustomOnload: false,
+                                height: 400,
+                                locale: window._vidiLocale.replace("_", "-"),
+                                template: defaultTemplate,
+                            });
+
+                            /*
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                                let layerIsEditable = false;
+                                if (metaDataKeys[value].meta) {
+                                    let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
+                                    }
+                                }
+
+                                if (editingIsEnabled && layerIsEditable) {
+                                    $(".popup-edit-btn").show();
+                                    $(".popup-delete-btn").show();
+                                } else {
+                                    $(".popup-edit-btn").hide();
+                                    $(".popup-delete-btn").hide();
+                                }
+
+                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                    editor.edit(e, _key_, qstore);
+                                });
+
+                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                    if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                                        editor.delete(e, _key_, qstore);
+                                    }
+                                });
+                            });
+
+                            // Here inside onLoad we call loadDataInTable(), so the table is populated
+                            _table.loadDataInTable();
+
+                            // If only one feature is selected, when activate it.
+                            if (Object.keys(layerObj.layer._layers).length === 1) {
+                                _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
+                            }
+                            hit = true;
+                            // Add fancy material raised style to buttons
+                            $(".bootstrap-table .btn-default").addClass("btn-raised");
+                            // Stop the click on detail icon from bubbling up the DOM tree
+                            $(".detail-icon").click(function (event) {
+                                event.stopPropagation();
+                            });
+                            */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            /*
+                            e.originalEvent.clickedOnFeature = true;
+    
+                            let managePopup = L.popup({
+                                autoPan: false
+                            }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                            <button class="btn btn-primary btn-xs ge-delete">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>`).openOn(cloud.get().map);
+    
+                            $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                                editor.edit(layer, layerKey + ".the_geom", null, true);
+                            });
+    
+                            $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                                if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                    editor.delete(layer, layerKey + ".the_geom", null, true);
+                                }
+                            });
+                            */
+                        });
+                    }
+
+                    onEachFeature['v:' + layerKey].fn(feature, layer);
                 }
             }
         });
@@ -1179,8 +1325,16 @@ module.exports = {
         return activeLayerIds;
     },
 
-    setOnEachFeature: function (layer, fn) {
-        onEachFeature[layer] = fn;
+    /**
+     * Sets the onEachFeature handler
+     * 
+     * @param {String}   layer  Layer name
+     * @param {Function} fn     Handler
+     * @param {String}   caller Name of the calling module
+     */
+    setOnEachFeature: function (layer, fn, caller) {
+        if (!caller) throw new Error(`caller is not defined in setOnEachFeature`);
+        onEachFeature[layer] = { caller, fn };
     },
 
     setOnLoad: function (layer, fn) {
