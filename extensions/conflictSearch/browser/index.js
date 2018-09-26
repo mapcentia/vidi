@@ -796,7 +796,7 @@ var dom = '<div role="tabpanel">' +
     '<li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>' +
     '</ul>' +
     '<div class="tab-content">' +
-    '<div role="tabpanel" class="tab-pane active" id="hits-content">' +
+    '<div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">' +
     '<div id="hits">' +
     '<table class="table table-hover">' +
     '<thead>' +
@@ -810,10 +810,10 @@ var dom = '<div role="tabpanel">' +
     '</table>' +
     '</div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="hits-data-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">' +
     '<div id="hits-data"></div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="nohits-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">' +
     '<div id="nohits">' +
     '<table class="table table-hover">' +
     '<thead>' +
@@ -827,7 +827,7 @@ var dom = '<div role="tabpanel">' +
     '</table>' +
     '</div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="error-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">' +
     '<div id="error">' +
     '<table class="table table-hover">' +
     '<thead>' +
