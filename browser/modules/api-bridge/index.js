@@ -24,7 +24,7 @@ class APIBridge {
         this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
                 if (LOG) {
-                    console.log('APIBridge: in queue processor, ', queueItem);
+                    console.log('APIBridge: in queue processor', queueItem);
                     console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforced());
                 }
 
@@ -36,7 +36,7 @@ class APIBridge {
                     scriptCharset: "utf-8",
                     success: (response) => {
 
-                        if (LOG) console.log('APIBridge: request succeeded', response);
+                        if (LOG) console.log('APIBridge: request succeeded', JSON.stringify(response));
 
                         if (queueItem.type === Queue.ADD_REQUEST) {
                             let newFeatureId = false;
@@ -105,7 +105,7 @@ class APIBridge {
                     case Queue.UPDATE_REQUEST:
                         if (queueItem.feature.features[0].properties.gid < 0) {
                             
-                            if (LOG) console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (update), skipping');
+                            console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (update), skipping');
                             
                             resolve();
                         } else {
@@ -217,7 +217,7 @@ class APIBridge {
      * the API response is cached through the service worker. 
      */
     transformResponseHandler(response, tableId) {
-        if (LOG) console.log('APIBridge: running transformResponse handler');
+        if (LOG) console.log('APIBridge: running transformResponse handler', JSON.stringify(response.features));
 
         if (this._queue.length > 0) {
 

@@ -37,8 +37,6 @@ describe('Editor', () => {
             while (await page.evaluate(`$('.ge-delete').is(':visible')`)) {
                 await page.evaluate(`$('.ge-delete').trigger('click')`);
                 await helpers.sleep(6000);
-                console.log('Feature was deleted');
-
                 await page.click(`#map`);
                 await helpers.sleep(1000);
             }
@@ -57,24 +55,27 @@ describe('Editor', () => {
             await page.click(`#map`);
             await helpers.sleep(1000);
             await page.focus('#root_id');
-            await page.keyboard.type('1000');
+            await page.keyboard.type('2000');
             await page.focus('#root_stringfield');
-            await page.keyboard.type('222');
-
+            await page.keyboard.type('333');
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(6000);
+            await helpers.sleep(4000);
 
             // Ensure that the feature was added
             await page.click(`#map`);
             await helpers.sleep(1000);
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
-            
+            await helpers.sleep(4000);
+
             // Updating feature
+            await helpers.sleep(4000);
+            await page.click(`#map`);
+            await helpers.sleep(1000);
             await page.evaluate(`$('.ge-start-edit').trigger('click')`);
             await helpers.sleep(2000);
             await page.focus('#root_id');
-            await page.keyboard.type('2000');
+            await page.keyboard.type('1000');
             await helpers.sleep(1000);
 
             await page.setRequestInterception(true);
@@ -86,6 +87,8 @@ describe('Editor', () => {
     
                 interceptedRequest.continue();
             });
+
+            await helpers.sleep(1000);
 
             expect(await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').length`)).to.equal(1);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
@@ -184,6 +187,7 @@ describe('Editor', () => {
 
             // Selecting first already existing point on map and trying to edit it
             const markerPosition = await page.evaluate(`$('.leaflet-interactive').first().position()`);
+
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
@@ -199,7 +203,6 @@ describe('Editor', () => {
             // Checking if the queue indicator shows that element was added to the queue
             await page.click(`#burger-btn`);
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-
             await helpers.sleep(4000);
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;

@@ -19,7 +19,7 @@ const CompactLayerTree = require('./components/CompactLayerTree');
  *
  * @type {*|exports|module.exports}
  */
-var cloud, meta, backboneEvents, utils;
+var cloud, meta, backboneEvents, utils, layerTree;
 
 /**
  *
@@ -56,6 +56,7 @@ module.exports = {
         meta = o.meta;
         backboneEvents = o.backboneEvents;
         utils = o.utils;
+        layerTree = o.layerTree;
         return this;
     },
 
@@ -89,6 +90,10 @@ module.exports = {
                         layers: meta.getMetaData()
                     });
                 });
+
+                _self.setState({
+                    layers: meta.getMetaData()
+                });
             }
 
             /**
@@ -102,9 +107,6 @@ module.exports = {
 
             openModal(e) {
                 $(`#keplergl-modal-body`).empty();
-
-                console.log(this.state.layers);
-
                 let localDataStores = [];
                 let fetchPromises = [];
                 this.state.selectedLayers.map(layerKey => {
@@ -183,7 +185,7 @@ module.exports = {
             render() {
                 return (<div role="tabpanel">
                     <div>
-                        <CompactLayerTree layers={this.state.layers} onSelectedLayersChange={this.onSelectedLayersChange.bind(this)}/>
+                        <CompactLayerTree layerTree={layerTree} layers={this.state.layers} onSelectedLayersChange={this.onSelectedLayersChange.bind(this)}/>
                     </div>
                     <div>
                         <a className="btn btn-block" id="keplergl" href="#" data-toggle="modal" data-target="#keplergl-modal" onClick={this.openModal}>
