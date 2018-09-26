@@ -1046,8 +1046,8 @@ h4 small {
 #map,
 #pane,
 #search-ribbon {
-  -webkit-transition: all 500ms ease-out 0.5s;
-  -moz-transition: all 500ms ease-out 0.5s;
-  -o-transition: all 500ms ease-out 0.5s;
-  transition: all 500ms ease-out 0.5s;
+  -webkit-transition: all 500ms ease-out;
+  -moz-transition: all 500ms ease-out;
+  -o-transition: all 500ms ease-out;
+  transition: all 500ms ease-out;
 }
