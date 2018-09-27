@@ -103,11 +103,11 @@ var gc2table = (function () {
                 autoPan: false,
                 locale: 'en-US',
                 callCustomOnload: true,
-                popupHtml: null,
                 ns: "",
                 template: null,
                 usingCarto: false,
                 pkey: "gid",
+                checkBox: false,
                 assignFeatureEventListenersOnDataLoad: true,
                 onSelect: function () {
                 },
@@ -148,10 +148,10 @@ var gc2table = (function () {
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
             locale = defaults.locale,
-            popupHtml = defaults.popupHtml,
             ns = defaults.ns,
             template = defaults.template,
             pkey = defaults.pkey,
+            checkBox = defaults.checkBox,
             usingCartodb = defaults.usingCartodb;
 
         var customOnLoad = false, destroy, assignEventListeners;
@@ -239,7 +239,9 @@ var gc2table = (function () {
 
                 $(el).append("<thead><tr></tr></thead>");
 
-                $(el + ' thead tr').append("<th data-field='" + pkey +"' data-checkbox='true'</th>");
+                if (checkBox) {
+                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'</th>");
+                }
 
                 $.each(cm, function (i, v) {
                     $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
@@ -278,7 +280,7 @@ var gc2table = (function () {
 
                         $(el + ' > tbody > tr').on("click", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1) {
+                            if (uncheckedIds.indexOf(id) === -1 || checkBox === false) {
                                 object.trigger("selected" + "_" + uid, id);
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
@@ -293,7 +295,7 @@ var gc2table = (function () {
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
                             var id = $(this).data('uniqueid');
                             var layer = m.map._layers[id];
-                            if (uncheckedIds.indexOf(id) === -1) {
+                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
                                 store.layer._layers[id].setStyle({
                                     fillColor: "#660000",
                                     fillOpacity: "0.6"
@@ -304,7 +306,7 @@ var gc2table = (function () {
 
                         $(el + ' > tbody > tr').on("mouseout", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1) {
+                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
                                 store.layer.resetStyle(store.layer._layers[id])
                             }
                         });
