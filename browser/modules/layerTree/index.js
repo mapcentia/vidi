@@ -44,16 +44,17 @@ var activeOpenedTable = false;
 var _self;
 
 var defaultTemplate = `<div class="cartodb-popup-content">
-<div class="form-group gc2-edit-tools" style="visibility: hidden">
-    {{#_vidi_content.fields}}
-        {{#title}}<h4>{{title}}</h4>{{/title}}
-        {{#value}}
-        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-        {{/value}}
-        {{^value}}
-        <p class="empty">null</p>
-        {{/value}}
-    {{/_vidi_content.fields}}
+    <div class="form-group gc2-edit-tools">
+        {{#_vidi_content.fields}}
+            {{#title}}<h4>{{title}}</h4>{{/title}}
+            {{#value}}
+            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+            {{/value}}
+            {{^value}}
+            <p class="empty">null</p>
+            {{/value}}
+        {{/_vidi_content.fields}}
+    </div>
 </div>`;
 
 /**
@@ -163,10 +164,7 @@ module.exports = {
 
     init: function () {
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            if (`editor` in extensions) {
-                editor = extensions.editor.index;
-                editingIsEnabled = true;
-            }
+            editingIsEnabled = true;
         }
 
         _self = this;
@@ -537,18 +535,6 @@ module.exports = {
                 $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
                     <table id="${tableId}"></table>
                 </div>`);
-                var defaultTemplate = `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                    {{#_vidi_content.fields}}
-                        {{#title}}<h4>{{title}}</h4>{{/title}}
-                        {{#value}}
-                        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                        {{/value}}
-                        {{^value}}
-                        <p class="empty">null</p>
-                        {{/value}}
-                    {{/_vidi_content.fields}}
-                </div>`;
 
                 let metaDataKeys = meta.getMetaDataKeys();
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
@@ -587,53 +573,50 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
+
                 if (('v:' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].fn ||
+                        `caller` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
                     if (onEachFeature['v:' + layerKey].caller === `editor`) {
+                        /*
+                            If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                        */
+                        if (`editor` in extensions) {
+                            editor = extensions.editor.index;   
+                        }
+
                         layer.on("click", function (e) {
-
-                            console.log(`### click`, feature, layer);
-
-                            let value = layerKey;
+                            let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
-                            if (!metaDataKeys[value]) {
-                                throw new Error(`metaDataKeys[${value}] is undefined`);
+                            if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
+                                try {
+                                    let parsedMeta = JSON.parse(metaDataKeys[layerKey].meta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
+                                    }
+                                } catch(e) {
+                                    console.warn(`Unable to parse meta for ${layerKey}`);
+                                }
+                            } else {
+                                throw new Error(`metaDataKeys[${layerKey}] is undefined`);
                             }
 
-                            /**
-                             * A default template for GC2, with a loop
-                             * @type {string}
-                             */
-                            var defaultTemplate = `<div class="cartodb-popup-content">
-                                {{#_vidi_content.fields}}
-                                    {{#title}}<h4>{{title}}</h4>{{/title}}
-                                    {{#value}}
-                                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                                    {{/value}}
-                                    {{^value}}
-                                    <p class="empty">null</p>
-                                    {{/value}}
-                                {{/_vidi_content.fields}}
-                            </div>`;
+                            let editingButtonsMarkup = ``;
+                            if (editingIsEnabled && layerIsEditable) {
+                                editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
+                            }
 
-                            e.originalEvent.clickedOnFeature = true;
+                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup);
     
-                            let renderedText = Mustache.render(defaultTemplate, feature.properties);
-                            let managePopup = L.popup({
-                                autoPan: false,
-                                className: `js-vector-layer-popup`
-                            }).setLatLng(e.latlng).setContent(`<div>
-                                <div>${renderedText}</div>
-                                <div>
-                                    <button class="btn btn-primary btn-xs ge-start-edit">
-                                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                                    </button>
-                                    <button class="btn btn-primary btn-xs ge-delete">
-                                        <i class="fa fa-trash" aria-hidden="true"></i>
-                                    </button>
-                                </div>
-                            </div>`).openOn(cloud.get().map);
-    
-                            if (editingIsEnabled) {
+                            if (editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
                                     editor.edit(layer, layerKey + ".the_geom", null, true);
                                 });
@@ -651,9 +634,26 @@ module.exports = {
                     }
 
                     onEachFeature['v:' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
                 }
             }
         });
+    },
+
+    displayAttributesPopup(feature, layer, event, additionalControls = ``) {
+        event.originalEvent.clickedOnFeature = true;
+        let renderedText = Mustache.render(defaultTemplate, feature.properties);
+        let managePopup = L.popup({
+            autoPan: false,
+            className: `js-vector-layer-popup`
+        }).setLatLng(event.latlng).setContent(`<div>
+            <div>${renderedText}</div>
+            ${additionalControls}
+        </div>`).openOn(cloud.get().map);
     },
 
     /**

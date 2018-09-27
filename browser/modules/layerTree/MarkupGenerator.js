@@ -139,6 +139,21 @@ class MarkupGenerator {
         </li>`);
     }
 
+    getEditingButtons() {
+        return `<div class="btn-group btn-group-justified">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-xs ge-start-edit">
+                    <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-xs ge-delete">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>`;
+    }
+
     getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {
         return (`<div class="dropdown">
             <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
