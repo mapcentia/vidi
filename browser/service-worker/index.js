@@ -113,6 +113,12 @@ let urlsIgnoredForCaching = [{
     requested: '/version.json'
 }];
 
+
+/**
+ * Keeping mapping of request hashed parameters to theirs initial form
+ */
+let requestParameters = [];
+
 /**
  * Cleaning up and substituting with local URLs provided address
  * 
@@ -178,11 +184,25 @@ const normalizeTheURLForFetch = (event) => {
             } else {
                 clonedRequest.formData().then((formdata) => {
                     let payload = '';
+                    let mappedObject = {};
                     for (var p of formdata) {
+                        let splitParameter = p.toString().split(',');
+                        if (splitParameter.length === 2) {
+                            mappedObject[splitParameter[0]] = splitParameter[1];
+                        }
+
                         payload += p.toString();
                     }
-    
+
                     cleanedRequestURL += '/' + btoa(payload);
+
+                    // @todo Remove try/catch
+                    // @todo Implement for iOS
+                    try {
+                        requestParameters[cleanedRequestURL] = mappedObject;
+                    } catch(e) {
+                        console.error(e);
+                    }
     
                     resolve(cleanedRequestURL);
                 });
@@ -316,12 +336,23 @@ self.addEventListener('fetch', (event) => {
                     return fetch(event.request).then(apiResponse => {
                         if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
 
+                        
+                    
+                        if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                            if (cleanedRequestURL in requestParameters && `q` in requestParameters[cleanedRequestURL]) {
+                                // Detect what layer/table it is
+                                let decodedQuery = decodeURI(atob(requestParameters[cleanedRequestURL].q));
+                                let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                                if (matches.length === 1) {
+                                    let tableName = matches[0].trim();
+                                    console.log(`### we've got request and response for ${tableName}`);
+                                }
+                            }
+                        }
+
+
+
                         // Caching the API request in case if app will go offline aftewards
-                        
-                        
-                        console.log(`### apiResponse`, apiResponse);
-
-
                         return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
                             resolve(apiResponse);
                         }).catch(() => {
