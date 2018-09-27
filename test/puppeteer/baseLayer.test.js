@@ -51,7 +51,6 @@ describe('Base layers', () => {
 
         await page.setRequestInterception(true);
         page.on('request', interceptedRequest => {
-            console.log(interceptedRequest.url());
             if (interceptedRequest.url().indexOf(`tile.openstreetmap.org`) !== -1) {
                 osmWasRequested = true;
             } else if (interceptedRequest.url().indexOf(`fastly.net/toner-lite`) !== -1) {
