@@ -573,7 +573,6 @@ module.exports = {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-
                 if (('v:' + layerKey) in onEachFeature) {
                     /*
                         Checking for correct onEachFeature structure
