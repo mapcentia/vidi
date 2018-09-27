@@ -125,6 +125,14 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
                 </div>
 
+                <div class="js-toggle-layer-offline-mode-container" style="display: none;">	
+                    <div class="togglebutton">	
+                        <label>	
+                            <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode for layer')}	
+                        </label>	
+                    </div>	
+                </div>
+
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
             </div>
             <div class="js-layer-settings"></div>
