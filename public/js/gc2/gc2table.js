@@ -107,6 +107,7 @@ var gc2table = (function () {
                 ns: "",
                 template: null,
                 usingCarto: false,
+                pkey: "gid",
                 assignFeatureEventListenersOnDataLoad: true,
                 onSelect: function () {
                 },
@@ -116,7 +117,7 @@ var gc2table = (function () {
                     weight: 5,
                     color: '#666',
                     dashArray: '',
-                    fillOpacity: 0.7
+                    fillOpacity: 0.2
                 }
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -150,6 +151,7 @@ var gc2table = (function () {
             popupHtml = defaults.popupHtml,
             ns = defaults.ns,
             template = defaults.template,
+            pkey = defaults.pkey,
             usingCartodb = defaults.usingCartodb;
 
         var customOnLoad = false, destroy, assignEventListeners;
@@ -164,7 +166,7 @@ var gc2table = (function () {
                 /**
                  * Clearing existing feature selection
                  */
-                var clearSelection = function() {
+                var clearSelection = function () {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
 
@@ -237,7 +239,7 @@ var gc2table = (function () {
 
                 $(el).append("<thead><tr></tr></thead>");
 
-                $(el + ' thead tr').append("<th data-field='gid' data-checkbox='true'</th>");
+                $(el + ' thead tr').append("<th data-field='" + pkey +"' data-checkbox='true'</th>");
 
                 $.each(cm, function (i, v) {
                     $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
@@ -293,7 +295,8 @@ var gc2table = (function () {
                             var layer = m.map._layers[id];
                             if (uncheckedIds.indexOf(id) === -1) {
                                 store.layer._layers[id].setStyle({
-                                    fillColor: "#00ff00"
+                                    fillColor: "#660000",
+                                    fillOpacity: "0.6"
                                 });
                                 onMouseOver(id, layer);
                             }
@@ -319,24 +322,24 @@ var gc2table = (function () {
 
                 $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
 
-                   if (m.gid === false) {
-                       uncheckedIds.push(parseInt(m._id));
-                       store.layer._layers[m._id].setStyle({
-                           fillOpacity: 0.0,
-                           opacity: 0.2
-                       });
-                       store.layer._layers[m._id].closePopup()
+                    if (m[pkey] === false) {
+                        uncheckedIds.push(parseInt(m._id));
+                        store.layer._layers[m._id].setStyle({
+                            fillOpacity: 0.0,
+                            opacity: 0.2
+                        });
+                        store.layer._layers[m._id].closePopup()
 
-                   } else {
-                       uncheckedIds = uncheckedIds.filter(item => item !== parseInt(m._id));
-                       store.layer.resetStyle(store.layer._layers[m._id])
-                   }
+                    } else {
+                        uncheckedIds = uncheckedIds.filter(item => item !== parseInt(m._id));
+                        store.layer.resetStyle(store.layer._layers[m._id])
+                    }
                 });
 
                 /**
                  * Destroys events and popups for vector layer features, as
                  * well as restoring the regular store onLoad() method.
-                 * 
+                 *
                  * @returns {void}
                  */
                 destroy = function () {

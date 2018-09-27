@@ -117,24 +117,31 @@ module.exports = {
          * A default template for GC2, with a loop
          * @type {string}
          */
-        var defaultTemplate = `<div class="cartodb-popup-content">
-        <div class="form-group gc2-edit-tools" style="visibility: hidden">
-            <button class="btn btn-primary btn-xs popup-edit-btn">
-                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-            </button>
-            <button class="btn btn-primary btn-xs popup-delete-btn">
-                <i class="fa fa-trash" aria-hidden="true"></i></button>
-            </div>
-            {{#_vidi_content.fields}}
-                {{#title}}<h4>{{title}}</h4>{{/title}}
-                {{#value}}
-                <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                {{/value}}
-                {{^value}}
-                <p class="empty">null</p>
-                {{/value}}
-            {{/_vidi_content.fields}}
-        </div>`;
+        var defaultTemplate =
+            `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                    <button class="btn btn-primary btn-xs popup-edit-btn">
+                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-primary btn-xs popup-delete-btn">
+                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                </div>
+                {{#_vidi_content.fields}}
+                    {{#title}}<h4>{{title}}</h4>{{/title}}
+                    {{#value}}
+                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                    {{/value}}
+                    {{^value}}
+                    <p class="empty">null</p>
+                    {{/value}}
+                {{/_vidi_content.fields}}
+            </div>`;
+
+        var defaultTemplateRaster =
+            `<div class="cartodb-popup-content">
+                <h4>Class</h4>
+                <p>{{{ class }}}</p>
+             </div>`;
 
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layer
@@ -154,11 +161,11 @@ module.exports = {
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;
             var _key_ = metaDataKeys[value]._key_;
+            var pkey = metaDataKeys[value].pkey;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
-            var cartoSql = metaDataKeys[value].sql;
             var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
             var onLoad;
             let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
@@ -187,7 +194,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : defaultTemplate;
+                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster :defaultTemplate;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -216,7 +223,8 @@ module.exports = {
                             height: 400,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
-                            usingCartodb: BACKEND === "cartodb"
+                            pkey: pkey,
+                            usingCartodb: false
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
@@ -319,12 +327,9 @@ module.exports = {
                     }
 
                     l.on("click", function (e) {
-
-
                         setTimeout(function () {
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(l, _key_, qstore);
-
                             });
 
                             $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
@@ -350,12 +355,11 @@ module.exports = {
                     }
                 });
                 fieldStr = fieldNames.join(",");
-                console.log(fieldStr)
             } else {
                 fieldStr = "*";
             }
             if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
-                sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+                sql = "SELECT rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
 
@@ -373,13 +377,13 @@ module.exports = {
 
             } else {
                 if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
                     sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
@@ -404,10 +408,22 @@ module.exports = {
         let first = true;
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
+        let fieldConf;
 
-        let fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
-            && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
-            ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+        // Hardcoded field config for raster layers
+        if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
+            fieldConf = {class: {
+                "alias": "Class",
+                "column": "class",
+                "id": "class",
+                "querable": true
+                }
+            };
+        } else {
+            fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
+                && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+        }
 
         let cm = [];
         let out = [];
@@ -423,29 +439,29 @@ module.exports = {
                 });
             } else {
                 $.each(sortObject(fieldConf), function (name, property) {
-                     if (property.value.querable) {
-                         let value = feature.properties[property.key];
-                         if (property.value.link) {
-                             value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
-                         } else if (property.value.image) {
-                             if (!feature.properties[property.key]) {
-                                 value = `<i class="fa fa-ban"></i>`;
-                             } else {
-                                 let subValue = feature.properties[property.key];
-                                 if (property.value.type === `bytea`) {
-                                     subValue = atob(feature.properties[property.key]);
-                                 }
-                                 value = `<a target='_blank' href='${subValue}'>
+                    if (property.value.querable) {
+                        let value = feature.properties[property.key];
+                        if (property.value.link) {
+                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                        } else if (property.value.image) {
+                            if (!feature.properties[property.key]) {
+                                value = `<i class="fa fa-ban"></i>`;
+                            } else {
+                                let subValue = feature.properties[property.key];
+                                if (property.value.type === `bytea`) {
+                                    subValue = atob(feature.properties[property.key]);
+                                }
+                                value = `<a target='_blank' href='${subValue}'>
                                 <img style='width:178px' src='${subValue}'/>
                             </a>`;
-                             }
-                         }
-                         fi.push({title: property.value.alias || property.key, value});
-                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                         if (feature.properties[property.key] !== undefined) {
-                             out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                         }
-                     }
+                            }
+                        }
+                        fi.push({title: property.value.alias || property.key, value});
+                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                        if (feature.properties[property.key] !== undefined) {
+                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                        }
+                    }
                 });
                 out.sort(function (a, b) {
                     return a[1] - b[1];
