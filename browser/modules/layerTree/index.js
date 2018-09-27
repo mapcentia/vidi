@@ -1011,16 +1011,18 @@ module.exports = {
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
                 layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
 
+            
+
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                 $(switcher).data('gc2-layer-type', 'tile');
                 $(switcher).prop('checked', true);
 
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).hide();
-
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+                $(layerContainer).find(`.js-toggle-filters`).hide();
+                $(layerContainer).find(`.js-toggle-table-view`).hide();
+                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
+                $(layerContainer).find('.js-layer-settings').hide(0);
 
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
@@ -1032,9 +1034,10 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', 'vector');
                 $(switcher).prop('checked', true);
 
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).show();
+                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+                $(layerContainer).find(`.js-toggle-filters`).show();
+                $(layerContainer).find(`.js-toggle-table-view`).show();
+                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
@@ -1047,13 +1050,15 @@ module.exports = {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
 
+            let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                $(layerContainer).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
         
                 let conditions = _self.getFilterConditions(layerKey);
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
+                $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
                 let filters = {};
                 if (layerKey in vectorFilters) {
                     filters = vectorFilters[layerKey];
@@ -1061,15 +1066,25 @@ module.exports = {
 
                 if (document.getElementById(componentContainerId)) {                   
                     ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').hide(0);
+                    $(layerContainer).find('.js-layer-settings').hide(0);
         
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).click(() => {
-                        $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find('.js-layer-settings').toggle();
+                    $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                        $(layerContainer).find('.js-layer-settings').toggle();
+                    });
+
+                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).click(() => {
+                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).prop('disabled', true);
+                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).prop('disabled', false);
+                    });
+
+                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).click(() => {
+                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).prop('disabled', false);
+                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).prop('disabled', true);
                     });
                 }
 
                 // Table view
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).click(() => {
+                $(layerContainer).find(`.js-toggle-table-view`).click(() => {
                     if (activeOpenedTable) {
                         tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
                         tables[activeOpenedTable].destroy();
@@ -1097,16 +1112,16 @@ module.exports = {
                 // @todo How to handle the "js-toggle-layer-offline-mode-container"?
 
                 if (layerIsActive && defaultLayerType === `vector`) {
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).show();
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).show();
+                    $(layerContainer).find(`.js-toggle-filters`).show();
+                    $(layerContainer).find(`.js-toggle-table-view`).show();
                 } else {
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).hide();
-                    $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).hide();
+                    $(layerContainer).find(`.js-toggle-filters`).hide();
+                    $(layerContainer).find(`.js-toggle-table-view`).hide();
                 }
             } else {
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-filters`).remove();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-table-view`).remove();
-                $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).find(`.js-toggle-layer-offline-mode-container`).remove();
+                $(layerContainer).find(`.js-toggle-filters`).remove();
+                $(layerContainer).find(`.js-toggle-table-view`).remove();
+                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).remove();
             }
         }
     },

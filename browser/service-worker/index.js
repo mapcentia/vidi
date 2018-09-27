@@ -315,10 +315,16 @@ self.addEventListener('fetch', (event) => {
                 return caches.open(CACHE_NAME).then((cache) => {
                     return fetch(event.request).then(apiResponse => {
                         if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+
                         // Caching the API request in case if app will go offline aftewards
+                        
+                        
+                        console.log(`### apiResponse`, apiResponse);
+
+
                         return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
                             resolve(apiResponse);
-                        }).catch(error => {
+                        }).catch(() => {
                             throw new Error('Unable to put the response in cache');
                             reject();
                         });
@@ -326,7 +332,7 @@ self.addEventListener('fetch', (event) => {
                         if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
                         resolve(cachedResponse);
                     });
-                }).catch(error => {
+                }).catch(() => {
                     throw new Error('Unable to open cache');
                     reject();
                 });
