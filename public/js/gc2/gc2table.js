@@ -158,7 +158,7 @@ var gc2table = (function () {
 
         (function poll() {
             if (scriptsLoaded) {
-                var originalLayers, filters, filterControls;
+                var originalLayers, filters, filterControls, uncheckedIds = [];
                 _.extend(object, Backbone.Events);
 
                 /**
@@ -167,11 +167,16 @@ var gc2table = (function () {
                 var clearSelection = function() {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
-                        try {
-                            v.closePopup();
-                            store.layer.resetStyle(v);
-                        } catch (e) {
-                            console.log(e);
+
+                        if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
+
+
+                            try {
+                                v.closePopup();
+                                store.layer.resetStyle(v);
+                            } catch (e) {
+                                console.log(e);
+                            }
                         }
                     });
                 };
@@ -217,17 +222,23 @@ var gc2table = (function () {
                 });
 
                 click = function (e) {
-                    var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
-                    try {
-                        $(ns + " .fixed-table-body").animate({
-                            scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
-                        }, 300);
-                    } catch (e) {}
-                    object.trigger("selected" + "_" + uid, e.target._leaflet_id);
+                    if (uncheckedIds.indexOf(e.target._leaflet_id) === -1) {
+                        var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
+                        try {
+                            $(ns + " .fixed-table-body").animate({
+                                scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
+                            }, 300);
+                        } catch (e) {
+                        }
+                        object.trigger("selected" + "_" + uid, e.target._leaflet_id);
+                    }
                 };
                 click.byGC2Table = true;
 
                 $(el).append("<thead><tr></tr></thead>");
+
+                $(el + ' thead tr').append("<th data-field='gid' data-checkbox='true'</th>");
+
                 $.each(cm, function (i, v) {
                     $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
                 });
@@ -265,21 +276,34 @@ var gc2table = (function () {
 
                         $(el + ' > tbody > tr').on("click", function (e) {
                             var id = $(this).data('uniqueid');
-                            object.trigger("selected" + "_" + uid, id);
-                            var layer = m.map._layers[id];
-                            setTimeout(function () {
-                                if (setViewOnSelect) {
-                                    m.map.fitBounds(layer.getBounds());
-                                }
-                            }, 100);
-                            onSelect(id, layer);
+                            if (uncheckedIds.indexOf(id) === -1) {
+                                object.trigger("selected" + "_" + uid, id);
+                                var layer = m.map._layers[id];
+                                setTimeout(function () {
+                                    if (setViewOnSelect) {
+                                        m.map.fitBounds(layer.getBounds());
+                                    }
+                                }, 100);
+                                onSelect(id, layer);
+                            }
                         });
 
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
                             var id = $(this).data('uniqueid');
-                            object.trigger("selected" + "_" + uid, id);
                             var layer = m.map._layers[id];
-                            onMouseOver(id, layer);
+                            if (uncheckedIds.indexOf(id) === -1) {
+                                store.layer._layers[id].setStyle({
+                                    fillColor: "#00ff00"
+                                });
+                                onMouseOver(id, layer);
+                            }
+                        });
+
+                        $(el + ' > tbody > tr').on("mouseout", function (e) {
+                            var id = $(this).data('uniqueid');
+                            if (uncheckedIds.indexOf(id) === -1) {
+                                store.layer.resetStyle(store.layer._layers[id])
+                            }
                         });
                     }, 100);
                 };
@@ -291,6 +315,22 @@ var gc2table = (function () {
                     onSort: bindEvent,
                     onColumnSwitch: bindEvent,
                     onColumnSearch: filterMap
+                });
+
+                $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+
+                   if (m.gid === false) {
+                       uncheckedIds.push(parseInt(m._id));
+                       store.layer._layers[m._id].setStyle({
+                           fillOpacity: 0.0,
+                           opacity: 0.2
+                       });
+                       store.layer._layers[m._id].closePopup()
+
+                   } else {
+                       uncheckedIds = uncheckedIds.filter(item => item !== parseInt(m._id))
+                       store.layer.resetStyle(store.layer._layers[m._id])
+                   }
                 });
 
                 /**
@@ -336,7 +376,6 @@ var gc2table = (function () {
                                 if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
                                     v.feature.properties[n] = "<a target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
                                 }
-
                             });
                         });
                         data.push(v.feature.properties);

@@ -194,6 +194,10 @@ module.exports = {
                         $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
                         $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body">' +
                             '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
+                            // '<div id="toolbar">\n' +
+                            // '            <button id="button" class="btn btn-sm btn-raised">checkAll</button>\n' +
+                            // '            <button id="button2" class="btn btn-sm btn-raised">uncheckAll</button>\n' +
+                            // '        </div>' +
                             '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div></div></div>');
 
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
