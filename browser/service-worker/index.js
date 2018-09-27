@@ -111,6 +111,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/version.json'
+}, {
+    regExp: true,
+    requested: 'geocloud.envirogissolutions.co.za/api'
 }];
 
 /**
