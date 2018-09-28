@@ -125,13 +125,10 @@ let urlsToCache = [
     '/js/proj4js-combined.js',
     '/js/gc2/gc2table.js',
     '/js/gc2/geocloud.js',
-    '/js/jasny-bootstrap.js',
     '/js/point-clusterer.js',
     '/js/bundle.js',
     '/css/styles.css',
-    '/css/jasny-bootstrap.min.css',
     '/css/styles.css',
-    '/css/jasny-bootstrap.css',
     '/css/font-awesome.v520.regular.css',
     '/css/font-awesome.v520.css',
 ];

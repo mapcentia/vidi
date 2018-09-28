@@ -29,7 +29,11 @@ const getDistance = e => {
  * @private
  */
 const getArea = e => {
-    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()), true);
+    return L.GeometryUtil.readableArea(L.GeometryUtil.geodesicArea(e.getLatLngs()[0]), true);
 };
 
-module.exports = { getDistance, getArea };
+const getAreaOfCircle = e => {
+    return L.GeometryUtil.readableArea(Math.pow(e.getRadius(), 2) * Math.PI, true);
+};
+
+module.exports = { getDistance, getArea, getAreaOfCircle };

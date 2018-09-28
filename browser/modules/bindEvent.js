@@ -209,7 +209,7 @@ module.exports = module.exports = {
             if (!$(this).data("extraClickHandlerIsEnabled")) {
                 $("#info-modal").animate({
                     right: "-" + $("#myNavmenu").width() + "px"
-                }, 200, ()=>{
+                }, 200, () => {
                     $("#info-modal.slide-right").hide();
                 });
             }
@@ -226,18 +226,10 @@ module.exports = module.exports = {
                 isStarted = true;
                 setTimeout(
                     function () {
-                        // HACK! Important to actual open the menu and when close it again
-                        // This will set the width of the pane the right way
-                        $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                        if ($(document).width() < 767) {
-                            setTimeout(
-                                function () {
-                                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                                    $("#myNavmenu").offcanvas('hide'); // Hide it also, in case of the toogle button is hidden
-                                }, 200
-                            );
+                        if ($(document).width() > 1024) {
+                            $("#search-border").trigger("click");
                         }
-                    }, 200
+                    }, 2000
                 );
 
                 setTimeout(
@@ -297,7 +289,7 @@ module.exports = module.exports = {
                 // Disable the infoClick
                 backboneEvents.get().trigger(`off:infoClick`);
             });
-    
+
             // Drawing was turned off
             backboneEvents.get().on(`${module}:turnedOff`, function () {
                 console.info(`${module} was turned off`);
@@ -405,7 +397,7 @@ module.exports = module.exports = {
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         backboneEvents.get().on("refresh:auth", function (response) {
@@ -487,34 +479,19 @@ module.exports = module.exports = {
             });
 
 
-            //************************//
+            // Set up the open/close functions for side panel
             var searchPanelOpen
             var searchShow = function () {
-                $("#search-ribbon").animate({
-                    right: '0'
-                }, 500, function () {
-                    $("#pane").animate({
-                        right: '550px'
-                    }, 500);
-
-                    $('#map').animate({ "width": "-=275px" }, 500);
-                });
-
+                $("#search-ribbon").css("right", "0");
+                $("#pane").css("right", "550px");
+                $('#map').css("width", "calc(100% - 275px)");
                 searchPanelOpen = true;
-            };
+            }
 
             var searchHide = function () {
-                $("#pane").animate({
-                    right: '40px'
-                }, 500);
-                $("#map").animate({
-                    width: '100%'
-                }, 500, function () {
-                    $("#search-ribbon").animate({
-                        right: '-510px'
-                    }, 500);
-                });
-
+                $("#pane").css("right", "40px");
+                $('#map').css("width", "100%");
+                $("#search-ribbon").css("right", "-510px");
                 searchPanelOpen = false
             };
             $('#search-border').click(function () {

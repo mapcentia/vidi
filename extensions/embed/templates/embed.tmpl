@@ -318,7 +318,7 @@
     }
 
     .fixed-table-container {
-        height: calc(100vh - 100px) !important;
+        height: 100% !important;
     }
 
     .list-group .list-group-item {
@@ -434,6 +434,11 @@
         }
     }
 
+    .dialog-bottom-wide {
+        min-width: 568px;
+        max-width: 768px;
+    }
+
     @media (max-width: 767px) {
         .dialog-bottom {
             min-width: 100%;
@@ -454,6 +459,11 @@
 
         .nav .checkbox {
             display: none;
+        }
+
+        .dialog-bottom-wide {
+            min-width: 288px;
+            max-width: 568px;
         }
 
     }
@@ -524,6 +534,11 @@
     .refresh-vector-layer {
         display: none !important;
     }
+
+    .tab-content > .tab-pane {
+        height: auto !important;
+    }
+
 </style>
 <!-- map -->
 <div id="pane">
@@ -545,6 +560,9 @@
             <a href="#base-layers-dialog" id="base-layers-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>
+            <a href="#info-dialog" id="info-dialog-btn" data-module="info"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">info</i></a>
             <a href="#print-dialog" id="print-dialog-btn" data-module="print"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">print</i></a>
@@ -554,9 +572,6 @@
             <a href="#state-snapshots-dialog" id="state-snapshots-dialog-btn" data-module="state-snapshots"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">camera</i></a>
-            <!--<a href="#info-dialog" id="info-dialog-btn" data-module="info"
-               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
-                    class="material-icons">print</i></a>-->
         </div>
 
     </div>
@@ -746,6 +761,27 @@
                         </div>
                     </fieldset>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="info-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
+        <div class="modal-header">
+            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
+                    class="material-icons">close</i>
+            </button>
+            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+            </button>
+            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+            </button>
+            <h3 class="modal-title">Info</h3>
+        </div>
+        <div class="modal-body">
+            <div id="info-box">
+                <div id="modal-info-body">
+                    <ul class="nav nav-tabs" id="info-tab"></ul>
+                    <div class="tab-content" id="info-pane"></div>
+                </div>
             </div>
         </div>
     </div>
