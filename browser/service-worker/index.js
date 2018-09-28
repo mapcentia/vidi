@@ -333,7 +333,7 @@ self.addEventListener('message', (event) => {
                                 cachedVectorLayers[key].offlineMode = false;
                             }
 
-                            console.log(`### ${localLayerKey} has now offlineMode set to ${cachedVectorLayers[key].offlineMode}`, JSON.parse(JSON.stringify(cachedVectorLayers)));
+                            console.log(`### ${localLayerKey} has now offlineMode set to ${cachedVectorLayers[key].offlineMode}`);
 
                             event.ports[0].postMessage(true);
                         }
@@ -376,7 +376,7 @@ self.addEventListener('fetch', (event) => {
 
                     // @todo Remove debug code
                     if (cleanedRequestURL.indexOf('/api/sql') > -1) {
-                        console.log(`###`, cleanedRequestURL, JSON.parse(JSON.stringify(cachedVectorLayers)), cleanedRequestURL in cachedVectorLayers);
+                        console.log(`###`, cleanedRequestURL);
                     }
 
                     if (cachedResponse && cleanedRequestURL in cachedVectorLayers &&
