@@ -175,8 +175,11 @@ module.exports = {
         "Yes": "Yes",
         "No": "No",
         "Add condition": "# Add condition",
+        "Refresh cache for layer": "# Refresh cache for layer",
+        "Fetch layer data from server": "# Fetch layer data from server",
+        "Fetch layer data from cache": "# Fetch layer data from cache",
+        "Refresh existing cache for layer": "# Refresh existing cache for layer",
 
-      
         // APIBridge
         "Not authorized to perform this action": "# Not authorized to perform this action",
 

@@ -126,14 +126,14 @@ class MarkupGenerator {
                 </div>
 
                 <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">	
-                    <div class="btn-group" role="group" aria-label="...">
-                        <button type="button" class="btn btn-success btn-xs js-set-online">
+                    <div class="btn-group" role="group">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}">
                             <i class="fa fa-signal"></i>
                         </button>
-                        <button type="button" class="btn btn-danger btn-xs js-set-offline">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}">
                             <i class="fa fa-times"></i>
                         </button>
-                        <button type="button" class="btn btn-secondary btn-xs js-refresh">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}">
                             <i class="fa fa-refresh"></i>
                         </button>
                     </div>

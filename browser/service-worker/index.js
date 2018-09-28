@@ -9,6 +9,8 @@ const LOG_FETCH_EVENTS = false;
 const { detect } = require('detect-browser');
 const browser = detect();
 
+const localforage = require('localforage');
+
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
  * 1. API calls are always performed, the cached response is retured only if the app is offline or 
@@ -117,7 +119,7 @@ let urlsIgnoredForCaching = [{
 /**
  * Keeping mapping of request hashed parameters to theirs initial form
  */
-let requestParameters = [];
+let cachedVectorLayers = {};
 
 /**
  * Cleaning up and substituting with local URLs provided address
@@ -196,14 +198,11 @@ const normalizeTheURLForFetch = (event) => {
 
                     cleanedRequestURL += '/' + btoa(payload);
 
-                    // @todo Remove try/catch
                     // @todo Implement for iOS
-                    try {
-                        requestParameters[cleanedRequestURL] = mappedObject;
-                    } catch(e) {
-                        console.error(e);
+                    if (cleanedRequestURL in cachedVectorLayers === false) {
+                        cachedVectorLayers[cleanedRequestURL] = mappedObject;
                     }
-    
+
                     resolve(cleanedRequestURL);
                 });
             }
@@ -290,8 +289,8 @@ self.addEventListener('message', (event) => {
 
             forceIgnoredExtensionsCaching = false;
         }
-    } else if (`action` in event.data && `payload` in event.data) {
-        if  (event.data.action === `addUrlIgnoredForCaching`) {
+    } else if (`action` in event.data) {
+        if (event.data.action === `addUrlIgnoredForCaching` && `payload` in event.data) {
 
             if (LOG) console.log('Service worker: adding url that should not be cached', event.data);
 
@@ -302,6 +301,46 @@ self.addEventListener('message', (event) => {
                 });
             } else {
                 throw new Error(`Invalid URL format`);
+            }
+        } else if (event.data.action === `getListOfCachedRequests`) {
+            /**
+             * { action: "getListOfCachedRequests" }
+             * 
+             * 
+             * @returns {Array} of cached layer names
+            */
+
+            let layers = [];
+            for (let key in cachedVectorLayers) {
+                if (`meta` in cachedVectorLayers[key] && cachedVectorLayers[key].meta && `offlineMode` in cachedVectorLayers[key]) {
+                    layers.push({
+                        layerKey: (cachedVectorLayers[key].meta.f_table_schema + `.` + cachedVectorLayers[key].meta.f_table_name),
+                        offlineMode: cachedVectorLayers[key].offlineMode
+                    });
+                }
+            }
+
+            event.ports[0].postMessage(layers);
+        } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
+            if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
+                for (let key in cachedVectorLayers) {
+                    if (`meta` in cachedVectorLayers[key] && cachedVectorLayers[key].meta) {
+                        let localLayerKey = (cachedVectorLayers[key].meta.f_table_schema + `.` + cachedVectorLayers[key].meta.f_table_name);
+                        if (localLayerKey === event.data.payload.layerKey) {
+                            if (event.data.action === `enableOfflineModeForLayer`) {
+                                cachedVectorLayers[key].offlineMode = true;
+                            } else if (event.data.action === `disableOfflineModeForLayer`) {
+                                cachedVectorLayers[key].offlineMode = false;
+                            }
+
+                            console.log(`### ${localLayerKey} has now offlineMode set to ${cachedVectorLayers[key].offlineMode}`, JSON.parse(JSON.stringify(cachedVectorLayers)));
+
+                            event.ports[0].postMessage(true);
+                        }
+                    }
+                }
+            } else {
+                throw new Error(`Invalid payload for ${event.data.action} action`);
             }
         } else {
             throw new Error(`Unrecognized action`);
@@ -333,36 +372,64 @@ self.addEventListener('fetch', (event) => {
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
-                    return fetch(event.request).then(apiResponse => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+                    // If the vector layer is set to be offline, then return the cached response
 
-                        
-                    
+                    // @todo Remove debug code
+                    if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                        console.log(`###`, cleanedRequestURL, JSON.parse(JSON.stringify(cachedVectorLayers)), cleanedRequestURL in cachedVectorLayers);
+                    }
+
+                    if (cachedResponse && cleanedRequestURL in cachedVectorLayers &&
+                        `offlineMode` in cachedVectorLayers[cleanedRequestURL] && cachedVectorLayers[cleanedRequestURL].offlineMode) {
+
+                        // @todo Remove debug code
                         if (cleanedRequestURL.indexOf('/api/sql') > -1) {
-                            if (cleanedRequestURL in requestParameters && `q` in requestParameters[cleanedRequestURL]) {
-                                // Detect what layer/table it is
-                                let decodedQuery = decodeURI(atob(requestParameters[cleanedRequestURL].q));
-                                let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
-                                if (matches.length === 1) {
-                                    let tableName = matches[0].trim();
-                                    console.log(`### we've got request and response for ${tableName}`);
-                                }
-                            }
+                            console.log(`### Response will be taken from cache`);
                         }
 
-
-
-                        // Caching the API request in case if app will go offline aftewards
-                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                            resolve(apiResponse);
-                        }).catch(() => {
-                            throw new Error('Unable to put the response in cache');
-                            reject();
-                        });
-                    }).catch(error => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
                         resolve(cachedResponse);
-                    });
+                    } else {
+
+                        // @todo Remove debug code
+                        if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                            console.log(`### Response will be taken from server`);
+                        }
+
+                        return fetch(event.request).then(apiResponse => {
+                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+                            
+                            if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                                if (cleanedRequestURL in cachedVectorLayers && `q` in cachedVectorLayers[cleanedRequestURL]) {
+                                    // Detect what layer/table it is
+                                    let decodedQuery = decodeURI(atob(cachedVectorLayers[cleanedRequestURL].q));
+                                    let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                                    if (matches.length === 1) {
+                                        let tableName = matches[0].trim().split(`.`);
+
+                                        if (`offlineMode` in cachedVectorLayers[cleanedRequestURL] === false) {
+                                            cachedVectorLayers[cleanedRequestURL].offlineMode = false;
+                                        }
+
+                                        cachedVectorLayers[cleanedRequestURL].meta = {
+                                            "f_table_schema": tableName[0],
+                                            "f_table_name": tableName[1]
+                                        };                                   
+                                    }
+                                }
+                            }
+
+                            // Caching the API request in case if app will go offline aftewards
+                            return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                                resolve(apiResponse);
+                            }).catch(() => {
+                                throw new Error('Unable to put the response in cache');
+                                reject();
+                            });
+                        }).catch(error => {
+                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
+                            resolve(cachedResponse);
+                        });
+                    }
                 }).catch(() => {
                     throw new Error('Unable to open cache');
                     reject();

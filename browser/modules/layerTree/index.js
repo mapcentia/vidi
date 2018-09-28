@@ -145,6 +145,26 @@ let extensions = false;
 let editor = false;
 
 /**
+ * Communicating with the service workied via MessageChannel interface
+ * 
+ * @returns {Promise}
+ */
+const queryServiceWorker = (data) => {
+    return new Promise((resolve, reject) => {
+        var messageChannel = new MessageChannel();
+        messageChannel.port1.onmessage = (event) => {
+            if(event.data.error){
+                reject(event.data.error);
+            }else{
+                resolve(event.data);
+            }
+        };
+
+        navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
+    });
+}
+
+/**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
@@ -212,6 +232,7 @@ module.exports = {
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
         } else {
+            _self._setupToggleOfflineModeControlsForLayers();
             queueStatistsics.processStatisticsUpdate(statistics, forceLayerUpdate, skipLastStatisticsCheck, userPreferredForceOfflineMode, apiBridgeInstance);
         }
     },
@@ -259,7 +280,7 @@ module.exports = {
         return layerTreeIsReady;
     },
 
-    _createToggleOfflineModeControl() {
+    _setupToggleOfflineModeControl() {
         let toggleOfllineOnlineMode = $(markupGeneratorInstance.getToggleOfflineModeSelectorDisabled());
         if (`serviceWorker` in navigator) {
             toggleOfllineOnlineMode = $(markupGeneratorInstance.getToggleOfflineModeSelectorEnabled());
@@ -280,6 +301,49 @@ module.exports = {
         }
 
         return toggleOfllineOnlineMode;
+    },
+
+    _setOfflineModeLayerControl(layerRecord, offlineMode = false) {
+        if (offlineMode) {
+            $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
+            $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
+            $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
+
+            $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
+            $(layerRecord).find(`.js-set-offline`).css(`background-color`, `#009688`);
+            $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
+        } else {
+            $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
+            $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
+            $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
+
+            $(layerRecord).find(`.js-set-online`).css(`background-color`, `#009688`);
+            $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
+            $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
+        }
+    },
+
+    _setupToggleOfflineModeControlsForLayers() {
+        // Check if service worker is registered
+        $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
+        if (`serviceWorker` in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                if (registrations.length === 1 && registrations[0].active !== null) {
+                    queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                        if (Array.isArray(response) && response.length > 0) {
+                            response.map(item => {
+                                let layerRecord = $(`[data-gc2-layer-key="${item.layerKey}.the_geom"]`);
+                                if ($(layerRecord).length === 1) {
+                                    _self._setOfflineModeLayerControl(layerRecord, item.offlineMode);
+                                } else {
+                                    console.error(`Unable the find layer container for ${item}`);
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        }
     },
 
     /**
@@ -367,7 +431,7 @@ module.exports = {
                     const proceedWithBuilding = () => {
                         layerTreeOrder = order;
                         if (editingIsEnabled) {
-                            let toggleOfllineOnlineMode = _self._createToggleOfflineModeControl();
+                            let toggleOfllineOnlineMode = _self._setupToggleOfflineModeControl();
                             if (toggleOfllineOnlineMode) {
                                 $("#layers").append(toggleOfllineOnlineMode);
                             }
@@ -1009,9 +1073,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
-
-            
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));          
 
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
@@ -1022,6 +1084,7 @@ module.exports = {
                 $(layerContainer).find(`.js-toggle-filters`).hide();
                 $(layerContainer).find(`.js-toggle-table-view`).hide();
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
+
                 $(layerContainer).find('.js-layer-settings').hide(0);
 
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
@@ -1050,6 +1113,8 @@ module.exports = {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
 
+            _self._setupToggleOfflineModeControlsForLayers();
+
             let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
 
             // Filtering is available only for vector layers
@@ -1072,14 +1137,47 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings').toggle();
                     });
 
-                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).click(() => {
-                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).prop('disabled', true);
-                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).prop('disabled', false);
+                    $(layerContainer).find(`.js-set-online`).click(() => {
+                        _self._setOfflineModeLayerControl(layerContainer, false);
+                        queryServiceWorker({
+                            action: `disableOfflineModeForLayer`,
+                            payload: {
+                                layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
+                            }
+                        }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
                     });
 
-                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).click(() => {
-                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-online`).prop('disabled', false);
-                        $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).find(`.js-set-offline`).prop('disabled', true);
+                    $(layerContainer).find(`.js-set-offline`).click(() => {
+                        _self._setOfflineModeLayerControl(layerContainer, true);
+                        queryServiceWorker({
+                            action: `enableOfflineModeForLayer`,
+                            payload: {
+                                layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
+                            }
+                        }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
+                    });
+
+                    $(layerContainer).find(`.js-refresh`).click(() => {
+                        let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
+                        if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
+                            console.log(`### 1`);
+                            queryServiceWorker({
+                                action: `disableOfflineModeForLayer`,
+                                payload: { layerKey }
+                            }).then(() => {
+                                console.log(`### 2`);
+                                _self.reloadLayer(`v:` + layerKey).then(() => {
+                                    console.log(`### 3`);
+                                    queryServiceWorker({
+                                        action: `enableOfflineModeForLayer`,
+                                        payload: { layerKey }
+                                    }).then(() => {
+                                        console.log(`### 4`);
+                                        _self._setupToggleOfflineModeControlsForLayers()
+                                    });
+                                });
+                            });
+                        }
                     });
                 }
 
@@ -1109,14 +1207,14 @@ module.exports = {
 
                 // If vector layer is active, show the filtering option
 
-                // @todo How to handle the "js-toggle-layer-offline-mode-container"?
-
                 if (layerIsActive && defaultLayerType === `vector`) {
                     $(layerContainer).find(`.js-toggle-filters`).show();
                     $(layerContainer).find(`.js-toggle-table-view`).show();
+                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
                 } else {
                     $(layerContainer).find(`.js-toggle-filters`).hide();
                     $(layerContainer).find(`.js-toggle-table-view`).hide();
+                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
                 }
             } else {
                 $(layerContainer).find(`.js-toggle-filters`).remove();
@@ -1239,8 +1337,13 @@ module.exports = {
      * @param {String} layerId Layer identifier
      */
     reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false) => {
-        switchLayer.init(layerId, false, doNotLegend, forceTileRedraw);
-        switchLayer.init(layerId, true, doNotLegend, forceTileRedraw);
+        return new Promise((resolve, reject) => {
+            switchLayer.init(layerId, false, doNotLegend, forceTileRedraw).then(() => {
+                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw).then(() => {
+                    resolve();
+                });
+            });
+        });
     },
 
     /**
