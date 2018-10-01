@@ -26,7 +26,7 @@ module.exports = {
             info +
             '</div>' +
             '<div id="' + id + '"></div>' +
-            '</div>').appendTo("#side-panel .main-content");
+            '</div>').appendTo(".tab-content.main-content");
     },
 
     createNavItem: function (id, dropdown) {

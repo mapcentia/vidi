@@ -205,15 +205,6 @@ module.exports = module.exports = {
             reset.init();
         });
 
-        $("#info-modal button").on("click", function () {
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
-                $("#info-modal").animate({
-                    right: "-" + $("#myNavmenu").width() + "px"
-                }, 200, () => {
-                    $("#info-modal.slide-right").hide();
-                });
-            }
-        });
 
         $("#searchclear").on("click", function () {
             backboneEvents.get().trigger("clear:search");
@@ -427,7 +418,6 @@ module.exports = module.exports = {
 
         });
 
-
         // HACK. Arrive.js seems to mess up Wkhtmltopdf,
         // so we don't bind events on print HTML page.
         // =============================================
@@ -463,8 +453,8 @@ module.exports = module.exports = {
 
                     html = html ? Mustache.render(html, metaDataKeys[t]) : "";
 
-                    $("#info-modal.slide-right").show();
-                    $("#info-modal.slide-right").animate({right: "0"}, 200);
+                    //$("#info-modal.slide-right").show();
+                    $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(title || name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
                     legend.init([t], "#info-modal-legend");
@@ -472,33 +462,84 @@ module.exports = module.exports = {
                 });
             });
 
+
             $(document).arrive('[data-scale-ul]', function () {
                 $(this).on("click", function (e) {
                     $("#select-scale").val($(this).data('scale-ul')).trigger("change");
                 });
             });
 
-
             // Set up the open/close functions for side panel
             var searchPanelOpen
+
+            $("#search-ribbon").css("width", "600px").css("right", "-560px");
+            $("#module-container").css("width", "500px");
+            $("#info-modal").css("width", "500px");
+
+            $("#main-tabs a").on("click", function (e) {
+                $("#module-container.slide-right").css("right", "0");
+                searchShowFull();
+            });
+
+            $(document).arrive("#main-tabs a", function () {
+                $(this).on("click", function (e) {
+                    $("#module-container.slide-right").css("right", "0");
+                    searchShowFull();
+                });
+            });
+
+
+            $("#info-modal .modal-header button").on("click", function () {
+                if (!$(this).data("extraClickHandlerIsEnabled")) {
+                    infoModalHide();
+                }
+            });
+
+
+            $("#module-container .modal-header button").on("click", function () {
+                searchShow();
+                if (!$(this).data("extraClickHandlerIsEnabled")) {
+                    moduleContainerHide();
+                }
+            });
+
+            var infoModalHide = function () {
+                $("#info-modal").css("right", "-500px");
+            }
+
+            var moduleContainerHide = function () {
+                $("#module-container.slide-right").css("right", "-500px");
+            }
+
             var searchShow = function () {
-                $("#search-ribbon").css("right", "0");
-                $("#pane").css("right", "550px");
-                $('#map').css("width", "calc(100% - 275px)");
+                $("#search-ribbon").css("right", "-300px");
+                $("#pane").css("right", "300px");
+                $('#map').css("width", "calc(100% - 150px)");
                 searchPanelOpen = true;
             }
+
+            var searchShowFull = function () {
+                $("#search-ribbon").css("right", "0");
+                $("#pane").css("right", "600px");
+                $('#map').css("width", "calc(100% - 300px)");
+                searchPanelOpen = true;
+            }
+
 
             var searchHide = function () {
                 $("#pane").css("right", "40px");
                 $('#map').css("width", "100%");
-                $("#search-ribbon").css("right", "-510px");
+                $("#search-ribbon").css("right", "-560px");
                 searchPanelOpen = false
             };
+
             $('#search-border').click(function () {
                 if (searchPanelOpen) {
                     searchHide();
+                    infoModalHide();
+                    moduleContainerHide();
                 } else {
-                    searchShow()
+                    searchShow();
                 }
             });
         }
