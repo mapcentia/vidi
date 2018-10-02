@@ -1089,3 +1089,6 @@ h4 small {
   height: 48px;
   line-height: 19px;
 }
+.togglebutton {
+  margin-bottom: 6px;
+}
