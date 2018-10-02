@@ -120,67 +120,6 @@ module.exports = {
             }, 500)
         });
 
-        // Bottom dialog
-        $(".close-hide").on("click touchstart", function (e) {
-            var id = ($(this)).parent().parent().attr('id');
-
-            // If print when deactivate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", false);
-                print.activate();
-            }
-
-            $("#" + id).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            });
-        });
-
-        $(".expand-less").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: (($("#" + id).height()*-1)+30) + "px"
-            }, 500, function () {
-                $("#" + id + " .expand-less").hide();
-                $("#" + id + " .expand-more").show();
-            });
-        });
-
-        $(".expand-more").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $("#" + id + " .expand-less").show();
-                $("#" + id + " .expand-more").hide();
-            });
-        });
-
-        $(".map-tool-btn").on("click", function (e) {
-
-            e.preventDefault();
-
-            var id = ($(this)).attr('href');
-
-            // If print when activate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", true);
-                print.activate();
-            }
-
-            $(id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            })
-        });
 
         $("#zoom-in-btn").on("click", function () {
             map.zoomIn();

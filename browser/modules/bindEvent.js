@@ -542,6 +542,82 @@ module.exports = module.exports = {
                     searchShow();
                 }
             });
+
+            // Bottom dialog
+            $(".close-hide").on("click touchstart", function (e) {
+                var id = ($(this)).parent().parent().attr('id');
+
+                // If print when deactivate
+                if ($(this).data('module') === "print") {
+                    $("#print-btn").prop("checked", false);
+                    print.activate();
+                }
+
+                // If legend when deactivate
+                if ($(this).data('module') === "legend") {
+                    $("#legend-content").append($("#legend"));
+                    $("#btn-show-legend-in-map").prop("disabled", false);
+                }
+
+                $("#" + id).animate({
+                    bottom: "-100%"
+                }, 500, function () {
+                    $(id + " .expand-less").show();
+                    $(id + " .expand-more").hide();
+                });
+            });
+
+            $(".expand-less").on("click touchstart", function () {
+
+                var id = ($(this)).parent().parent().attr('id');
+
+                $("#" + id).animate({
+                    bottom: (($("#" + id).height() * -1) + 30) + "px"
+                }, 500, function () {
+                    $("#" + id + " .expand-less").hide();
+                    $("#" + id + " .expand-more").show();
+                });
+            });
+
+            $(".expand-more").on("click touchstart", function () {
+
+                var id = ($(this)).parent().parent().attr('id');
+
+                $("#" + id).animate({
+                    bottom: "0"
+                }, 500, function () {
+                    $("#" + id + " .expand-less").show();
+                    $("#" + id + " .expand-more").hide();
+                });
+            });
+
+            $(".map-tool-btn").on("click", function (e) {
+
+                e.preventDefault();
+
+                var id = ($(this)).attr('href');
+
+                // If print when activate
+                if ($(this).data('module') === "print") {
+                    $("#print-btn").prop("checked", true);
+                    print.activate();
+                }
+
+
+                // If legend when deactivate
+                if ($(this).data('module') === "legend") {
+                    $("#legend-dialog .modal-body").append($("#legend"));
+                    $("#btn-show-legend-in-map").prop("disabled", true);
+                }
+
+                $(id).animate({
+                    bottom: "0"
+                }, 500, function () {
+                    $(id + " .expand-less").show();
+                    $(id + " .expand-more").hide();
+                })
+            });
         }
     }
 };
+

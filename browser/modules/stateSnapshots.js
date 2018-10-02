@@ -28,7 +28,7 @@ const cookie = require('js-cookie');
 
 let _self = false;
 
-const exId = `state-snapshots-dialog-content`;
+const exId = `state-snapshots`;
 
 /**
  *
@@ -67,8 +67,6 @@ module.exports = {
          *
          */
         var ReactDOM = require('react-dom');
-
-        utils.createMainTab(exId, __("State snapshots"), __("StateSnapshots description"), require('./../../browser/modules/height')().max);
 
         let buttonStyle = {
             padding: `4px`,
