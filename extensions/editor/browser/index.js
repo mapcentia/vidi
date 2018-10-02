@@ -48,6 +48,7 @@ const ImageUploadWidget = require('./ImageUploadWidget');
 
 const widgets = { 'imageupload': ImageUploadWidget };
 
+const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
@@ -241,30 +242,7 @@ module.exports = {
                             layer.bindTooltip(tooltip);
                         });
                     }
-
-                    layer.on("click", function (e) {
-                        e.originalEvent.clickedOnFeature = true;
-
-                        let managePopup = L.popup({
-                            autoPan: false
-                        }).setLatLng(e.latlng).setContent(`<button class="btn btn-primary btn-xs ge-start-edit">
-                            <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                        </button>
-                        <button class="btn btn-primary btn-xs ge-delete">
-                            <i class="fa fa-trash" aria-hidden="true"></i>
-                        </button>`).openOn(cloud.get().map);
-
-                        $(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                            _self.edit(layer, layerName + ".the_geom", null, true);
-                        });
-
-                        $(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                            if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                _self.delete(layer, layerName + ".the_geom", null, true);
-                            }
-                        });
-                    });
-                });
+                }, MODULE_NAME);
             }
 
             let styleFn = () => {};
@@ -609,14 +587,15 @@ module.exports = {
                     break;
             }
 
-            // Delete som system attributes
-            delete e.feature.properties._vidi_content;
-            delete e.feature.properties._id;
+            // Delete some system attributes
+            let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
+            delete eventFeatureCopy.properties._vidi_content;
+            delete eventFeatureCopy.properties._id;
 
             // Set NULL values to undefined, because NULL is a type
-            Object.keys(e.feature.properties).map(function (key) {
-                if (e.feature.properties[key] === null) {
-                    e.feature.properties[key] = undefined;
+            Object.keys(eventFeatureCopy.properties).map(function (key) {
+                if (eventFeatureCopy.properties[key] === null) {
+                    eventFeatureCopy.properties[key] = undefined;
                 }
             });
 
@@ -626,10 +605,12 @@ module.exports = {
              */
             const onSubmit = (formData) => {
                 let GeoJSON = e.toGeoJSON(), featureCollection;
+                delete GeoJSON.properties._vidi_content;
+                delete GeoJSON.properties._id;
 
                 // HACK to handle (Multi)Point layers
                 // Update the GeoJSON from markers
-                switch (e.feature.geometry.type) {
+                switch (eventFeatureCopy.geometry.type) {
                     case "Point":
                         GeoJSON.geometry.coordinates = [markers[0].getLatLng().lng, markers[0].getLatLng().lat];
                         break;
@@ -646,7 +627,7 @@ module.exports = {
                 }
 
                 // Set GeoJSON properties from form values
-                Object.keys(e.feature.properties).map(function (key) {
+                Object.keys(eventFeatureCopy.properties).map(function (key) {
                     GeoJSON.properties[key] = formData.formData[key];
                     // Set undefined values back to NULL
                     if (GeoJSON.properties[key] === undefined) {
@@ -690,14 +671,14 @@ module.exports = {
 
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
             for (let key in schema.properties) {
-                if (key in e.feature.properties && e.feature.properties[key]) {
+                if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
                     if (schema.properties[key].type === `string` && schema.properties[key].format === `date-time`) {
-                        if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(e.feature.properties[key])) {
-                            let dateObject = new Date(e.feature.properties[key]);
-                            e.feature.properties[key] = dateObject.toISOString();
+                        if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(eventFeatureCopy.properties[key])) {
+                            let dateObject = new Date(eventFeatureCopy.properties[key]);
+                            eventFeatureCopy.properties[key] = dateObject.toISOString();
                         }
                     } else if (schema.properties[key].type === `string`) {
-                        e.feature.properties[key] = `` + e.feature.properties[key];
+                        eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
                     }
                 }
             }
@@ -709,7 +690,7 @@ module.exports = {
                         schema={schema}
                         widgets={widgets}
                         uiSchema={uiSchema}
-                        formData={e.feature.properties}
+                        formData={eventFeatureCopy.properties}
                         onSubmit={onSubmit}>
                         <div className="buttons">
                             <button type="submit" className="btn btn-info">Submit</button>

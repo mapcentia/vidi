@@ -192,15 +192,17 @@ module.exports = {
      *
      */
     print: (endEventName = "end:print", customData) => {
-        state.bookmarkState(customData).then(response => {
-            backboneEvents.get().trigger(endEventName, response);
-            callBack(response.responseJSON);
-        }).catch(response => {
-            backboneEvents.get().trigger(endEventName, response);
-            callBack(response.responseJSON);
+        return new Promise((resolve, reject) => {
+            state.bookmarkState(customData).then(response => {
+                backboneEvents.get().trigger(endEventName, response);
+                callBack(response.responseJSON);
+                resolve();
+            }).catch(response => {
+                backboneEvents.get().trigger(endEventName, response);
+                callBack(response.responseJSON);
+                reject();
+            });
         });
-
-        return true;
     },
 
     /**
@@ -328,7 +330,7 @@ module.exports = {
      * @returns {Object}
      */
     getPrintData: (customData) => {
-        return new Promise((resolve, reject) => {
+        let result = new Promise((resolve, reject) => {
             var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null, uriObj = new uriJs(window.location.href);
 
             if (isNaN(scale) || scale < 200) {
@@ -447,6 +449,8 @@ module.exports = {
                 resolve(data);
             });
         });
+
+        return result;
     },
 
     cleanUp: function (hard) {

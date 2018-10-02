@@ -33,18 +33,14 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="panel panel-default">
-            <div class="panel-body">
-                <div class="togglebutton">
+        return (`<div class="togglebutton">
                     <label>
                         <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
                         <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
                         <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
                         <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
                     </label>
-                </div>
-            </div>
-        </div>`);
+                 </div>`);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -129,6 +125,21 @@ class MarkupGenerator {
             </div>
             <div class="js-layer-settings"></div>
         </li>`);
+    }
+
+    getEditingButtons() {
+        return `<div class="btn-group btn-group-justified">
+            <div class="btn-group">
+                <button class="btn btn-primary btn-xs ge-start-edit">
+                    <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                </button>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary btn-xs ge-delete">
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>`;
     }
 
     getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {

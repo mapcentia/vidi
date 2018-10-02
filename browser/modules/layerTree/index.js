@@ -44,16 +44,17 @@ var activeOpenedTable = false;
 var _self;
 
 var defaultTemplate = `<div class="cartodb-popup-content">
-<div class="form-group gc2-edit-tools" style="visibility: hidden">
-    {{#_vidi_content.fields}}
-        {{#title}}<h4>{{title}}</h4>{{/title}}
-        {{#value}}
-        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-        {{/value}}
-        {{^value}}
-        <p class="empty">null</p>
-        {{/value}}
-    {{/_vidi_content.fields}}
+    <div class="form-group gc2-edit-tools">
+        {{#_vidi_content.fields}}
+            {{#title}}<h4>{{title}}</h4>{{/title}}
+            {{#value}}
+            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+            {{/value}}
+            {{^value}}
+            <p class="empty">null</p>
+            {{/value}}
+        {{/_vidi_content.fields}}
+    </div>
 </div>`;
 
 /**
@@ -139,6 +140,10 @@ let userPreferredForceOfflineMode = -1;
 
 let vectorFilters = {};
 
+let extensions = false;
+
+let editor = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -153,6 +158,7 @@ module.exports = {
         sqlQuery = o.sqlQuery;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
+        extensions = o.extensions;
         return this;
     },
 
@@ -529,18 +535,6 @@ module.exports = {
                 $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
                     <table id="${tableId}"></table>
                 </div>`);
-                var defaultTemplate = `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                    {{#_vidi_content.fields}}
-                        {{#title}}<h4>{{title}}</h4>{{/title}}
-                        {{#value}}
-                        <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                        {{/value}}
-                        {{^value}}
-                        <p class="empty">null</p>
-                        {{/value}}
-                    {{/_vidi_content.fields}}
-                </div>`;
 
                 let metaDataKeys = meta.getMetaDataKeys();
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
@@ -580,10 +574,85 @@ module.exports = {
             },
             onEachFeature: (feature, layer) => {
                 if (('v:' + layerKey) in onEachFeature) {
-                    onEachFeature['v:' + layerKey](feature, layer);
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].fn ||
+                        `caller` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
+                    if (onEachFeature['v:' + layerKey].caller === `editor`) {
+                        /*
+                            If the handler was set by the editor extension, then display the attributes popup and editing buttons
+                        */
+                        if (`editor` in extensions) {
+                            editor = extensions.editor.index;   
+                        }
+
+                        layer.on("click", function (e) {
+                            let layerIsEditable = false;
+                            let metaDataKeys = meta.getMetaDataKeys();
+                            if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
+                                try {
+                                    let parsedMeta = JSON.parse(metaDataKeys[layerKey].meta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
+                                    }
+                                } catch(e) {
+                                    console.warn(`Unable to parse meta for ${layerKey}`);
+                                }
+                            } else {
+                                throw new Error(`metaDataKeys[${layerKey}] is undefined`);
+                            }
+
+                            let editingButtonsMarkup = ``;
+                            if (editingIsEnabled && layerIsEditable) {
+                                editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
+                            }
+
+                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup);
+    
+                            if (editingIsEnabled && layerIsEditable) {
+                                $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                                    editor.edit(layer, layerKey + ".the_geom", null, true);
+                                });
+        
+                                $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                                    if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                        editor.delete(layer, layerKey + ".the_geom", null, true);
+                                    }
+                                });
+                            } else {
+                                $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
+                                $(`.js-vector-layer-popup`).find(".ge-delete").hide();
+                            }
+                        });
+                    }
+
+                    onEachFeature['v:' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
                 }
             }
         });
+    },
+
+    displayAttributesPopup(feature, layer, event, additionalControls = ``) {
+        event.originalEvent.clickedOnFeature = true;
+        let renderedText = Mustache.render(defaultTemplate, feature.properties);
+        let managePopup = L.popup({
+            autoPan: false,
+            className: `js-vector-layer-popup`
+        }).setLatLng(event.latlng).setContent(`<div>
+            <div>${renderedText}</div>
+            ${additionalControls}
+        </div>`).openOn(cloud.get().map);
     },
 
     /**
@@ -1179,8 +1248,16 @@ module.exports = {
         return activeLayerIds;
     },
 
-    setOnEachFeature: function (layer, fn) {
-        onEachFeature[layer] = fn;
+    /**
+     * Sets the onEachFeature handler
+     * 
+     * @param {String}   layer  Layer name
+     * @param {Function} fn     Handler
+     * @param {String}   caller Name of the calling module
+     */
+    setOnEachFeature: function (layer, fn, caller) {
+        if (!caller) throw new Error(`caller is not defined in setOnEachFeature`);
+        onEachFeature[layer] = { caller, fn };
     },
 
     setOnLoad: function (layer, fn) {
