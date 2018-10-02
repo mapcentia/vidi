@@ -76,15 +76,12 @@ module.exports = module.exports = {
         cloud.get().digitalGlobeKey = window.digitalGlobeKey;
 
         // Creating side-by-side mode toggle
-        $("#base-layer-list").append(`<div class="panel panel-default">
-            <div class="panel-body">
+        $("#base-layer-list").append(`
                 <div class="togglebutton">
                     <label>
                         <input class="js-toggle-side-by-side-mode" type="checkbox"> ${__(`Side-by-side mode`)}
                     </label>
-                </div>
-            </div>
-        </div>`);
+                </div>`);
 
         $(`.js-toggle-side-by-side-mode`).off();
         $(`.js-toggle-side-by-side-mode`).change((event) => {
