@@ -9,7 +9,7 @@ const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
-const SQL_QUERY_LIMIT = 5000;
+const SQL_QUERY_LIMIT = 500;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
@@ -377,12 +377,14 @@ module.exports = {
 
                         // Getting set of all loaded vectors
                         let metaData = meta.getMetaData();
+                        metaData.data.reverse();
+
                         for (let i = 0; i < metaData.data.length; ++i) {
                             groups[i] = metaData.data[i].layergroup;
                         }
 
-                        let notSortedGroupsArray = array_unique(groups.reverse());
-                        metaData.data.reverse();
+                        let notSortedGroupsArray = array_unique(groups);
+
 
                         let arr = notSortedGroupsArray;
                         if (order) {
@@ -445,7 +447,7 @@ module.exports = {
 
                             resolve();
                         }, 1000);
-                    }
+                    };
 
                     if (layersThatAreNotInMeta.length > 0) {
                         let fetchMetaRequests = [];
@@ -639,7 +641,8 @@ module.exports = {
                         _self.displayAttributesPopup(feature, layer, e);
                     });
                 }
-            }
+            },
+            pointToLayer: pointToLayer['v:' + layerKey]
         });
     },
 
@@ -791,7 +794,15 @@ module.exports = {
             }
         }
 
-        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
+        // Reverse subgroups
+        notSortedLayersAndSubgroupsForCurrentGroup.map((item) => {
+            if (item.type === "group") {
+                item.children.reverse();
+            }
+        });
+
+        // Reverse groups
+        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
 
         // Add layers and subgroups
         let numberOfAddedLayers = 0;
