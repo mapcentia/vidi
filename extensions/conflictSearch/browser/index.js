@@ -758,7 +758,7 @@ var dom = '<div role="tabpanel">' +
     '<div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">' +
     '<input id="' + id + '" class="' + id + ' typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
     '</div>' +
-    '<div id="conflict-main-tabs-container" class="panel panel-default" style="display: none"><div class="panel-body">' +
+    '<div id="conflict-main-tabs-container" style="display: none">' +
     '<ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">' +
     '<li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>' +
     '<li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>' +
@@ -855,7 +855,6 @@ var dom = '<div role="tabpanel">' +
     '</div>' +
     '<div role="tabpanel" class="tab-pane" id="conflict-log-content">' +
     '<textarea style="width: 100%" rows="8" id="conflict-console"></textarea>' +
-    '</div>' +
     '</div>' +
     '</div>' +
     '</div>' +
