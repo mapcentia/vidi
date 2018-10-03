@@ -1040,6 +1040,9 @@ h4 small {
   padding-left: 40px;
   height: 100%;
 }
+#search-content {
+  height: calc(100vh - 78px);
+}
 .feature-attribute-editing-form {
   position: relative;
 }
@@ -1091,4 +1094,8 @@ h4 small {
 }
 .togglebutton {
   margin-bottom: 6px;
+}
+.help-btn {
+  position: fixed;
+  top: 14px;
 }
