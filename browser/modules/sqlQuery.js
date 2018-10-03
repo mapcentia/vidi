@@ -200,6 +200,7 @@ module.exports = {
                         $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
+                            ns: "#_" + storeId,
                             geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
