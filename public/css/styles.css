@@ -701,6 +701,9 @@ body {
 #main-tabs {
   overflow: hidden !important;
 }
+#side-panel hr {
+  margin-left: -20px;
+}
 #side-panel ul {
   overflow: hidden !important;
   list-style-type: none;

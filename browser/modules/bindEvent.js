@@ -471,9 +471,11 @@ module.exports = module.exports = {
             // Set up the open/close functions for side panel
             var searchPanelOpen
 
-            $("#search-ribbon").css("width", "600px").css("right", "-560px");
-            $("#module-container").css("width", "500px");
-            $("#info-modal").css("width", "500px");
+            var width = 550;
+
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width -40) + "px");
+            $("#module-container").css("width", (width - 100) + "px");
+            $("#info-modal").css("width", (width - 100) + "px");
 
             $("#main-tabs a").on("click", function (e) {
                 $("#module-container.slide-right").css("right", "0");
@@ -503,15 +505,15 @@ module.exports = module.exports = {
             });
 
             var infoModalHide = function () {
-                $("#info-modal").css("right", "-500px");
+                $("#info-modal").css("right", "-" + (width - 100) + "px");
             }
 
             var moduleContainerHide = function () {
-                $("#module-container.slide-right").css("right", "-500px");
+                $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
             }
 
             var searchShow = function () {
-                $("#search-ribbon").css("right", "-300px");
+                $("#search-ribbon").css("right", "-" + (width - 300) + "px");
                 $("#pane").css("right", "260px");
                 $('#map').css("width", "calc(100% - 150px)");
                 searchPanelOpen = true;
@@ -519,16 +521,17 @@ module.exports = module.exports = {
 
             var searchShowFull = function () {
                 $("#search-ribbon").css("right", "0");
-                $("#pane").css("right", "560px");
-                $('#map').css("width", "calc(100% - 300px)");
+                $("#pane").css("right", (width -40) + "px");
+                $('#map').css("width", "calc(100% - " + (width/2) + "px");
                 searchPanelOpen = true;
             }
+
 
 
             var searchHide = function () {
                 $("#pane").css("right", "0");
                 $('#map').css("width", "100%");
-                $("#search-ribbon").css("right", "-560px");
+                $("#search-ribbon").css("right", "-" + (width -40) + "px");
                 searchPanelOpen = false
             };
 
