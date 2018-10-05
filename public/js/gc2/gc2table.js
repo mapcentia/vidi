@@ -333,7 +333,9 @@ var gc2table = (function () {
                         store.layer._layers[m._id].closePopup()
 
                     } else {
-                        uncheckedIds = uncheckedIds.filter(item => item !== parseInt(m._id));
+                        uncheckedIds = uncheckedIds.filter(function (item) {
+                            return item !== parseInt(m._id);
+                        });
                         store.layer.resetStyle(store.layer._layers[m._id])
                     }
                 });
