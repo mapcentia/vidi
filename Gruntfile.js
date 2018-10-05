@@ -167,7 +167,10 @@ module.exports = function (grunt) {
                 options: {
                     transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify'],
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+                    browserifyOptions: {
+                        debug: true
+                    }
                 }
             }
         },

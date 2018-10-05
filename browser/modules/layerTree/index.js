@@ -498,6 +498,13 @@ module.exports = {
      */
     createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+
+        // TODO createStore should not be called twice.
+        // Second time it will reset the store, if the layer has been switch on by URL
+        if (stores.hasOwnProperty('v:' + layerKey)){
+            return
+        }
+
         let whereClause = false;
         if (layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
@@ -570,6 +577,7 @@ module.exports = {
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
+                onLoad['v:' + layerKey](l);
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);

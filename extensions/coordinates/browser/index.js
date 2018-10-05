@@ -129,7 +129,7 @@ module.exports = {
             }
         };
 
-        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max, "my_location");
 
 
         // Create React component

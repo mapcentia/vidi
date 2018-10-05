@@ -444,16 +444,15 @@ module.exports = module.exports = {
 
                     for (var key in  metaDataKeys[t]) {
                         if (metaDataKeys[t].hasOwnProperty(key)) {
-                            console.log(key + " -> " + metaDataKeys[t][key]);
                             if (key === "lastmodified") {
-                                metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+                                //metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
                             }
                         }
                     }
 
                     html = html ? Mustache.render(html, metaDataKeys[t]) : "";
 
-                    //$("#info-modal.slide-right").show();
+                    $("#info-modal.slide-right").show();
                     $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(title || name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
@@ -513,21 +512,21 @@ module.exports = module.exports = {
 
             var searchShow = function () {
                 $("#search-ribbon").css("right", "-300px");
-                $("#pane").css("right", "300px");
+                $("#pane").css("right", "260px");
                 $('#map').css("width", "calc(100% - 150px)");
                 searchPanelOpen = true;
             }
 
             var searchShowFull = function () {
                 $("#search-ribbon").css("right", "0");
-                $("#pane").css("right", "600px");
+                $("#pane").css("right", "560px");
                 $('#map').css("width", "calc(100% - 300px)");
                 searchPanelOpen = true;
             }
 
 
             var searchHide = function () {
-                $("#pane").css("right", "40px");
+                $("#pane").css("right", "0");
                 $('#map').css("width", "100%");
                 $("#search-ribbon").css("right", "-560px");
                 searchPanelOpen = false

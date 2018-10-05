@@ -124,7 +124,7 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max, "get_app");
 
         // Allowed zoom levels
         const minimalZoomLevel = 10;

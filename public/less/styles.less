@@ -42,6 +42,9 @@ body {
   width: 100%;
   right: 0;
   border: 0;
+  overflow: scroll;
+  height: calc(~'100vh - 30px');
+  background-color: white;
 }
 
 #legend {
@@ -212,6 +215,7 @@ input[type="checkbox"] {
 .navbar {
   border-radius: 0;
   min-height: 0;
+  margin-bottom: 0;
 }
 
 .legend-text {
@@ -228,6 +232,10 @@ input[type="checkbox"] {
   vertical-align: top !important;
   font-weight: 300;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+
+.leaflet-top {
+  top: 50px;
 }
 
 /*
@@ -691,6 +699,7 @@ body {
   width: 100%;
   height: 100%;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
+  position: fixed;
 }
 
 .navmenu-brand {
@@ -704,7 +713,7 @@ body {
 }
 
 #info-modal, #info-modal-top {
-  position: absolute;
+  position: fixed;
   top: 0;
   z-index: 3000;
   height: 100%;
@@ -715,7 +724,7 @@ body {
 }
 
 #module-container {
-  position: absolute;
+  position: fixed;
   top: 0;
   z-index: 2000;
   height: 100%;
@@ -728,6 +737,7 @@ body {
 
 .slide-right {
   right: -100%;
+  position: fixed;
 }
 
 .slide-left {
@@ -828,7 +838,7 @@ body {
 #side-panel ul  {
   overflow: hidden !important;
   list-style-type: none;
-  padding: 0px 19px
+  padding: 0px 19px;
 }
 
 #side-panel ul li {
@@ -1211,7 +1221,7 @@ h4 small {
 }
 
 #pane {
-  right: 40px;
+  right: 0;
 }
 
 #search-border {
@@ -1225,17 +1235,17 @@ h4 small {
   min-width: 100px;
   top: 0;
   position: absolute;
-  height: 100%;
+  height: 48px;
   background-color: white;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 
 #search-ribbon > div > i {
-  top: 20px;
-  font-size: 1.5em;
+  top: 15px;
+  font-size: 1.4em;
   line-height: 1em;
   color: #1f4164;
-  padding: 0 .4em 0 .4em;
+  padding-left:11px;
   position: absolute;
   cursor: pointer;
 }
@@ -1314,4 +1324,10 @@ h4 small {
 .help-btn {
   position: fixed;
   top: 14px;
+  color: rgba(0,0,0, 0.26);
+  cursor: help;
+}
+
+.brand-icon {
+  margin-right: 20px;
 }
