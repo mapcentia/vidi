@@ -452,7 +452,7 @@ module.exports = module.exports = {
 
                     html = html ? Mustache.render(html, metaDataKeys[t]) : "";
 
-                    $("#info-modal.slide-right").show();
+                    //$("#info-modal.slide-right").show();
                     $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(title || name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');

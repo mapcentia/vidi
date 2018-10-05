@@ -16,7 +16,7 @@ module.exports = {
     },
     init: function () {
     },
-    createMainTab: function (id, name, info, height ,icon) {
+    createMainTab: function (id, name, info, height, icon) {
         let el = `#${id}-content`;
         icon = icon || "help";
         $(`<li role="presentation"><a href="#${id}-content" aria-controls role="tab" data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}"
@@ -29,6 +29,7 @@ module.exports = {
         });
         $(`<div></div>`).appendTo(el);
         $(`<div id="${id}"></div>`).appendTo(el);
+
     },
 
     createNavItem: function (id, dropdown) {
