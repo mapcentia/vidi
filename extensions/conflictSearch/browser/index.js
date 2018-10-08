@@ -306,7 +306,7 @@ module.exports = module.exports = {
         cloud.map.addLayer(dataItems);
 
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check");
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle");
         $("#conflict").append(dom);
 
         // DOM created
