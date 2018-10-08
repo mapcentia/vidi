@@ -157,14 +157,15 @@ geocloud = (function () {
                         style: this.defaults.styleMap
                     });
                     this.layer.id = this.defaults.name;
-                    break
+                    break;
 
                 case 'leaflet':
                     this.layer = L.geoJson(null, {
                         style: this.defaults.styleMap,
                         pointToLayer: this.defaults.pointToLayer,
                         onEachFeature: this.defaults.onEachFeature,
-                        interactive: this.defaults.clickable
+                        interactive: this.defaults.clickable,
+                        bubblingMouseEvents: false
                     });
                     this.layer.id = this.defaults.name;
                     break;
