@@ -932,7 +932,7 @@ h4 small {
   vertical-align: top;
 }
 .fixed-table-body {
-  height: auto;
+  height: 100%;
 }
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
