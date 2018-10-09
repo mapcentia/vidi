@@ -583,7 +583,9 @@ module.exports = {
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
-                onLoad['v:' + layerKey](l);
+                if (typeof onLoad['v:' + layerKey] === "function") {
+                    onLoad['v:' + layerKey](l);
+                }
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
