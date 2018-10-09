@@ -3,6 +3,18 @@
 
 *.iml
 
+# Mock snapshot database, should be removed when state snapshot management is moved to GC2
+temporary-state-storage.json
+
+# Code coverage files
+.nyc_output
+coverage
+coverageQueue
+
+## Build files
+public/js/build
+public/css/build
+
 ## Directory-based project format:
 .idea/
 # if you remove the above rule, at least ignore the following:
@@ -84,6 +96,7 @@ config/_variables.less
 
 /public/css/build/all.min.css
 /public/js/bundle.js
+/public/service-worker.bundle.js
 /public/js/build/all.min.js
 /config/_styles.less
 /config/configServer.js

@@ -5,6 +5,8 @@
 
 'use strict';
 
+import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './layerTree/LayerSorting';
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -30,12 +32,6 @@ var ready = false;
 
 /**
  *
- * @type {boolean}
- */
-var cartoDbLayersready = false;
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -53,11 +49,13 @@ var backboneEvents;
 
 var host = require("./connection").getHost();
 
-var switchLayer;
+var layerTree;
 
 var array = [];
 
 var uri = null
+
+let _self = false;
 
 /**
  *
@@ -70,10 +68,12 @@ module.exports = {
      * @returns {exports}
      */
     set: function (o) {
+        _self = this;
+
         cloud = o.cloud;
         meta = o.meta;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
-        switchLayer = o.switchLayer;
         return this;
     },
 
@@ -81,37 +81,48 @@ module.exports = {
      *
      */
     init: function () {
-
-
+        
     },
 
     ready: function () {
-        // If CartoDB, we wait for cartodb.createLayer to finish
-        if (BACKEND === "cartodb") {
-            return (ready && cartoDbLayersready);
-        }
-        // GC2 layers are direct tile request
-        else {
-            return ready;
-        }
+        return ready;
     },
 
-    getLayers: function (separator, includeHidden) {
-        var layerArr = [];
+    /**
+     * Fetches Leaflet layers from map
+     */
+    getMapLayers: (includeHidden = false, searchedLayerKey = false) => {
+        var mapLayers = [];
         var layers = cloud.get().map._layers;
+
         for (var key in layers) {
-            if (layers.hasOwnProperty(key)) {
-                if (layers[key].baseLayer !== true && (typeof layers[key]._tiles === "object" || typeof layers[key].wmsParams === "object")) {
-                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                        layerArr.push(layers[key].id);
+            if (layers[key].baseLayer !== true) {
+                if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
+                    if (typeof layers[key]._tiles === "object" || layers[key].id && layers[key].id.startsWith('v:')) {
+                        if (searchedLayerKey) {
+                            if (searchedLayerKey === layers[key].id) {
+                                mapLayers.push(layers[key]);
+                            }
+                        } else {
+                            mapLayers.push(layers[key]);
+                        }
                     }
                 }
             }
         }
+
+        return mapLayers;
+    },
+
+    getLayers: function (separator, includeHidden) {
+        var layerArr = [];
+        _self.getMapLayers(includeHidden).map(item => {
+            layerArr.push(item.id);
+        });
+
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
-        }
-        else {
+        } else {
             return false;
         }
     },
@@ -126,10 +137,10 @@ module.exports = {
             }
         }
     },
-    resetCount: function (i) {
-        ready = cartoDbLayersready = false;
-    },
 
+    resetCount: function () {
+        ready = false;
+    },
 
     incrementCountLoading: function (i) {
         if (array.indexOf(i) === -1) {
@@ -155,6 +166,36 @@ module.exports = {
       uri = str;
     },
 
+    reorderLayers: () => {
+        let order = layerTree.getLatestLayersOrder();
+        let layers = _self.getMapLayers();
+        if (order) {
+            order.map((orderItem, groupIndex) => {
+                orderItem.children.map((item, index) => {
+                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                        layers.map(layer => {
+                            if (layer.id && (layer.id.replace(`v:`, ``) === item.id.replace(`v:`, ``))) {
+                                let zIndex = ((orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                layer.setZIndex(zIndex);
+                            }
+                        });
+                    } else if (item.type === GROUP_CHILD_TYPE_GROUP) {
+                        item.children.map((childItem, childIndex) => {
+                            layers.map(layer => {
+                                if (layer.id && (layer.id.replace(`v:`, ``) === childItem.id.replace(`v:`, ``))) {
+                                    let zIndex = ((item.children.length - childIndex) + (orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                    layer.setZIndex(zIndex);
+                                }
+                            });
+                        });
+                    } else {
+                        throw new Error(`Invalid order object type`);   
+                    }
+                });
+            });
+        }
+    },
+
     /**
      *
      * @param l
@@ -162,13 +203,12 @@ module.exports = {
      */
     addLayer: function (l) {
         var me = this;
-
-        return new Promise(function (resolve, reject) {
-
+        let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
-            $.each(metaData.data, function (i, v) {
+            let layerWasAdded = false;
 
+            $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name,
                     singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
@@ -181,7 +221,8 @@ module.exports = {
                         isBaseLayer: isBaseLayer,
                         tileCached: !singleTiled,
                         singleTile: singleTiled,
-                        visibility: false,
+                        // @todo Was somehow set to false
+                        //visibility: false,
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: v.f_table_name,
@@ -201,13 +242,20 @@ module.exports = {
                     });
 
                     layers[[layer]][0].setZIndex(v.sort_id + 10000);
+                    me.reorderLayers();
 
+                    console.info(`${l} was added to the map`);
+                    layerWasAdded = true;
                     resolve();
-
                 }
             });
-            reject();
-            console.info(l + " added to the map.");
-        })
+
+            if (layerWasAdded === false) {
+                console.info(`${l} was not added to the map`);
+                reject();
+            }
+        });
+
+        return result;
     }
 };

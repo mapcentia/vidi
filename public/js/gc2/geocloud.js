@@ -59,10 +59,11 @@ geocloud = (function () {
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
-        resolutions = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
-            4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
-            76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
-            1.19432856696, 0.597164283478, 0.298582141739, 0.149291070869, 0.074645535],
+        resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
+            4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
+            152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
+            4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.298582141739,
+            0.149291070869, 0.074645535435, 0.0373227677175, 0.018661384, 0.009330692, 0.004665346, 0.002332673, 0.001166337],
         googleMapAdded = {}, yandexMapAdded = {};
     // Try to set host from script if not set already
     if (typeof window.geocloud_host === "undefined") {
@@ -106,9 +107,11 @@ geocloud = (function () {
             return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function () {
-        },
+        onEachFeature: function (feature, layer) {},
         onLoad: function () {
+        },
+        transformResponse: function (response) {
+            return response;
         },
         loading: function () {
         },
@@ -123,7 +126,8 @@ geocloud = (function () {
         error: function () {
         },
         key: null,
-        base64: true
+        base64: true,
+        custom_data: null
     };
     // Base class for stores
     storeClass = function () {
@@ -155,14 +159,15 @@ geocloud = (function () {
                         style: this.defaults.styleMap
                     });
                     this.layer.id = this.defaults.name;
-                    break
+                    break;
 
                 case 'leaflet':
                     this.layer = L.geoJson(null, {
                         style: this.defaults.styleMap,
                         pointToLayer: this.defaults.pointToLayer,
                         onEachFeature: this.defaults.onEachFeature,
-                        interactive: this.defaults.clickable
+                        interactive: this.defaults.clickable,
+                        bubblingMouseEvents: false
                     });
                     this.layer.id = this.defaults.name;
                     break;
@@ -212,6 +217,7 @@ geocloud = (function () {
         this.db = this.defaults.db;
         this.host = this.defaults.host.replace("cdn.", "");
         this.onLoad = this.defaults.onLoad;
+        this.transformResponse = this.defaults.transformResponse;
         this.loading = this.defaults.loading;
         this.dataType = this.defaults.dataType;
         this.async = this.defaults.async;
@@ -219,6 +225,7 @@ geocloud = (function () {
         this.method = this.defaults.method;
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
+        this.custom_data = this.defaults.custom_data;
         this.load = function (doNotShowAlertOnError) {
 
             try {
@@ -243,7 +250,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key,
+                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key + '&custom_data=' + this.custom_data,
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -253,6 +260,8 @@ geocloud = (function () {
                     }
                     if (response.success === true) {
                         if (response.features !== null) {
+                            response = me.transformResponse(response, me.id);
+
                             me.geoJSON = response;
                             switch (MAPLIB) {
                                 case "ol2":
@@ -773,7 +782,34 @@ geocloud = (function () {
             }
             throw new Error('Control doesn\'t have any active base layer!')
         }
-        //ol2, ol3 and leaflet
+
+        /**
+         * Returns both tile and vector visible layers 
+         */
+        this.getAllTypesOfVisibleLayers = function (getBaseLayers) {
+            getBaseLayers = (getBaseLayers === true) ? true : false;
+            var layerArr = [], i;
+            switch (MAPLIB) {
+                case "ol2":
+                    console.error("Not implemented yet for OpenLayers 2");
+                    break;
+                case "ol3":
+                    console.error("Not implemented yet for OpenLayers 3");
+
+                    break;
+                case "leaflet":
+                    var layers = this.map._layers;
+                    for (var key in layers) {
+                        if (layers.hasOwnProperty(key)) {
+                            if ((layers[key].baseLayer === getBaseLayers || layers[key].baseLayer === false || layers[key].baseLayer === null) && ('id' in layers[key])) {
+                                layerArr.push(layers[key].id.replace('v:', ''));
+                            }
+                        }
+                    }
+                    break;
+            }
+            return layerArr.join(";");
+        }
         this.getVisibleLayers = function (getBaseLayers) {
             getBaseLayers = (getBaseLayers === true) ? true : false;
             var layerArr = [], i;
@@ -1597,35 +1633,62 @@ geocloud = (function () {
                             break;
                         case "leaflet":
                             layers = lControl._layers;
+
+                            // Remove every base layer from the map and layer control
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true && me.map.hasLayer(layers[key].layer)) {
                                         me.map.removeLayer(layers[key].layer);
                                     }
-                                    if (layers[key].layer.baseLayer === true && layers[key].layer.id === baseLayerName) {
-                                        // Move all others than Google maps back
-                                        if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
-                                            layers[key].layer.setZIndex(1);
-                                        }
-                                        if (!loadEvent) {
-                                            loadEvent = function () {
+                                }
+                            }
+
+                            // Removing duplicated layers from the layer control, so no extra events of deleted layers will be called
+                            var existingLayer = [];
+                            for (var key in layers) {
+                                if (layers[key].layer.baseLayer === true) {
+                                    if (existingLayer.indexOf(layers[key].name) === -1) {
+                                        existingLayer.push(layers[key].name);
+                                    } else {
+                                        lControl.removeLayer(layers[key].layer);
+                                    }                                   
+                                }
+                            }
+
+                            // Adding specified layer to map
+                            for (var key in layers) {
+                                if (layers.hasOwnProperty(key)) {
+                                    if (layers[key].layer.baseLayer === true) {
+                                        if (layers[key].layer.id === baseLayerName) {
+                                            // Move all others than Google maps back
+                                            if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
+                                                layers[key].layer.setZIndex(1);
                                             }
-                                        }
-                                        if (!loadingEvent) {
-                                            loadingEvent = function () {
+
+                                            if (!loadEvent) {
+                                                loadEvent = function () {
+                                                }
                                             }
+
+                                            if (!loadingEvent) {
+                                                loadingEvent = function () {
+                                                }
+                                            }
+
+                                            layers[key].layer.off("load");
+                                            layers[key].layer.on("load", loadEvent);
+
+                                            layers[key].layer.off("loading");
+                                            layers[key].layer.on("loading", loadingEvent);
+
+                                            me.map.addLayer(layers[key].layer);
                                         }
-
-                                        layers[key].layer.off("load", loadEvent);
-                                        layers[key].layer.on("load", loadEvent);
-
-                                        layers[key].layer.off("loading", loadingEvent);
-                                        layers[key].layer.on("loading", loadingEvent);
-
-                                        me.map.addLayer(layers[key].layer, false);
                                     }
                                 }
                             }
+
+                            //
+
                             break;
                     }
                 } else {
@@ -1751,8 +1814,8 @@ geocloud = (function () {
                 names: [],
                 resolutions: this.map.resolutions,
                 type: "wms",
-                maxZoom: 21,
-                maxNativeZoom: 21,
+                maxZoom: 26,
+                maxNativeZoom: 26,
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
@@ -1982,7 +2045,20 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     mapBounds = this.map.getBounds().toBBoxString().split(",");
-                    bounds = {left: mapBounds[0], right: mapBounds[2], top: mapBounds[3], bottom: mapBounds[1]};
+
+                    var lower = transformPoint(mapBounds[0], mapBounds[1], "EPSG:4326", "EPSG:900913")
+                    var upper = transformPoint(mapBounds[2], mapBounds[3], "EPSG:4326", "EPSG:900913")
+
+                    bounds = {
+                        left: mapBounds[0],
+                        right: mapBounds[2],
+                        top: mapBounds[3],
+                        bottom: mapBounds[1],
+                        leftProj: lower.x,
+                        bottomProj: lower.y,
+                        rightProj: upper.x,
+                        topProj: upper.y
+                    };
                     break;
             }
             return (bounds);
@@ -2137,7 +2213,9 @@ geocloud = (function () {
                     var p = transformPoint(point.lng, point.lat, "EPSG:4326", "EPSG:900913");
                     return {
                         x: p.x,
-                        y: p.y
+                        y: p.y,
+                        lat: point.lat,
+                        lng: point.lng
                     };
                     break;
             }

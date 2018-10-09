@@ -12,6 +12,8 @@ const SRS ="EPSG:3857";
  */
 var cloud;
 
+let _self = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, serialize: module.exports.serialize}}
@@ -19,19 +21,82 @@ var cloud;
 module.exports = module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        _self = this;
         return this;
     },
     init: function (str) {
 
     },
-    serialize: function (filters) {
+    
+    /**
+     * Shortcut for serializing drawn items
+     * 
+     * @return {Array<Object>}
+     */
+    serializeMeasurementItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": true,
+            "print": true,
+            "measurement": false,
+            "draw": true
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+
+    /**
+     * Shortcut for serializing drawn items
+     * 
+     * @return {Array<Object>}
+     */
+    serializeDrawnItems: (strictMode = false) => {
+        let layerDraw = [];
+
+        let e = _self.serialize({
+            "printHelper": true,
+            "query_draw": true,
+            "query_buffer": true,
+            "query_result": true,
+            "print": true,
+            "measurement": true,
+            "draw": false
+        }, strictMode);
+
+        $.each(e, (i, v) => {
+            if (v.type === "Vector") {
+                layerDraw.push({geojson: v.geoJson})
+            }
+        });
+
+        return layerDraw;
+    },
+
+    serialize: function (filters, strictMode = false) {
         var e = _encodeLayers(cloud.get().map);
+
         $.each(e, function (i, v) {
             if (typeof v.geoJson !== "undefined") {
                 // Loop backwards
                 for (var key = v.geoJson.features.length - 1; key > -1; key--) {
-                    if (filters[v.geoJson.features[key]._vidi_type]) {
-                        v.geoJson.features.splice(key, 1);
+                    if (strictMode) {
+                        if (filters[v.geoJson.features[key]._vidi_type] || !v.geoJson.features[key]._vidi_type) {
+                            v.geoJson.features.splice(key, 1);
+                        }
+                    } else {
+                        if (filters[v.geoJson.features[key]._vidi_type]) {
+                            v.geoJson.features.splice(key, 1);
+                        }
                     }
                 }
             }
@@ -68,8 +133,8 @@ var _encodeLayers = function (map) {
             vectors.push(layer);
         }
     }
+
     if (vectors.length) {
-        //console.log(vectors);
         enc.push(_encoders.layers.vector.call(this, vectors));
     }
     return enc;
@@ -263,14 +328,17 @@ var _encoders = {
                     featureGeoJson = {_latlngs: feature._latlngs};
                     featureGeoJson.type = "Rectangle";
                     featureGeoJson.feature = feature.feature;
+                } else if (`feature` in feature && `properties` in feature.feature && feature.feature.properties.type === "circlemarker") {
+                    featureGeoJson = {_latlng: feature._latlng};
+                    featureGeoJson.type = "CircleMarker";
+                    featureGeoJson.feature = feature.feature;
+                    featureGeoJson.options = feature.options;
+                    featureGeoJson._tooltipHandlersAdded = feature._tooltipHandlersAdded;
+                    featureGeoJson._vidi_marker = feature._vidi_marker;
+                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else if (feature instanceof L.Marker) {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "Marker";
-                    featureGeoJson.feature = feature.feature;
-                    featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
-                }else if (feature.feature.properties.type === "circlemarker") {
-                    featureGeoJson = {_latlng: feature._latlng};
-                    featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
                     featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
                 } else {
@@ -289,6 +357,7 @@ var _encoders = {
                 if (opacity === null) {
                     opacity = feature.options.opacity || 1.0;
                 }
+
                 encFeatures.push(featureGeoJson);
             }
 

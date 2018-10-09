@@ -59,7 +59,7 @@ module.exports = {
         cloud.map.addControl(zoomControl);
 
         var scaleControl = L.control.scale({
-            position: "bottomleft",
+            position: "bottomright",
             imperial: false
         });
         cloud.map.addControl(scaleControl);
@@ -113,6 +113,32 @@ module.exports = {
         if (window._vidiLocale === "en_US") {
             localization = "en";
         }
+
+        /*
+        var measureControl = new L.Control.Measure({
+            position: 'topright',
+            primaryLengthUnit: 'kilometers',
+            secondaryLengthUnit: 'meters',
+            primaryAreaUnit: 'hectares',
+            secondaryAreaUnit: 'sqmeters',
+            localization: localization,
+            units: {
+                meters: {
+                    factor: 1,
+                    display: 'meters',
+                    decimals: 1
+                },
+                sqmeters: {
+                    factor: 1,
+                    display: 'sqmeters',
+                    decimals: 1
+                }
+            }
+
+
+        });
+        measureControl.addTo(map);
+        */
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {

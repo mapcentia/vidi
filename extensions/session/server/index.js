@@ -91,7 +91,6 @@ router.get('/api/session/status', function (req, response) {
             userName: req.session.gc2UserName
         }
     });
-
 });
 
 module.exports = router;

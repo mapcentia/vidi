@@ -3,13 +3,13 @@
 <head>
     <title>MapCentia Vidi</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" value="notranslate">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <!-- Material Design fonts -->
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:200,300,400,500,700">
-    <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="/fonts/fonts.css">
+    <link rel="stylesheet" href="/icons/material-icons.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.solid.css"/>
@@ -33,10 +33,8 @@
     <link rel="stylesheet" href="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-select/bootstrap-select.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-table/bootstrap-table.css"/>
-    <link rel="stylesheet"
-          href="/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css">
+    <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css">
-    <link rel="stylesheet" href="/css/jasny-bootstrap.min.css">
     <!-- custom -->
     <link rel="stylesheet" href="/css/styles.min.css">
     <!-- /build -->
@@ -64,7 +62,6 @@
     </div>
 </div>
 <div id="main-container"></div>
-</body>
 <script src="/js/lib/hogan.js/hogan-3.0.2.js"></script>
 <script src="/js/templates.js"></script>
 <script>
@@ -104,13 +101,18 @@
 <script src="/js/lib/leaflet-plugins/Yandex.js"></script>
 <script src="/js/lib/leaflet-plugins/Bing.js"></script>
 <script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
+<script src="/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js"></script>
 <script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
 <script src="/js/lib/q-cluster/src/utils.js"></script>
 <script src="/js/lib/q-cluster/src/clustering.js"></script>
 <script src="/js/point-clusterer.js"></script>
+<script src="/js/lib/localforage/localforage.js"></script>
 <script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
 <!-- Core -->
 <script src="/js/lib/jquery/jquery.js"></script>
+<script src="/js/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/js/lib/jquery.canvasResize.js/jquery.canvasResize.js"></script>
+<script src="/js/lib/jquery.canvasResize.js/jquery.exif.js"></script>
 <script src="/js/lib/jrespond/jRespond.js"></script>
 <script src="/js/lib/mustache.js/mustache.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
@@ -134,7 +136,6 @@
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- Custom -->
-<script src="/js/jasny-bootstrap.js"></script>
 <script src="/js/gc2/geocloud.js"></script>
 <script src="/js/gc2/gc2table.js"></script>
 <script src="/js/vidi.js"></script>
@@ -142,4 +143,5 @@
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
+</body>
 </html>

@@ -11,7 +11,10 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
+let jquery = require('jquery');
+require('snackbarjs');
 
+const semver = require('semver');
 require("bootstrap");
 
 module.exports = {
@@ -34,8 +37,7 @@ module.exports = {
         var me = this, configFile, stop = false;
 
         var loadConfig = function () {
-            $.getJSON( "/api/config/" + urlparser.db + "/" + configFile, function (data) {
-                console.info("Started with config: " + configFile);
+            $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
@@ -53,7 +55,7 @@ module.exports = {
                 console.log("Could not load: " + configFile);
 
                 if (stop) {
-                    me.render();
+                    me.getVersion();
                     return;
                 }
 
@@ -61,12 +63,9 @@ module.exports = {
                     configFile = window.vidiConfig.defaultConfig;
                     stop = true;
                     loadConfig();
-                } else {
-                    me.render();
                 }
-
             }).done(function () {
-                me.render();
+                me.getVersion();
             });
         };
 
@@ -81,10 +80,25 @@ module.exports = {
         if (configFile) {
             loadConfig();
         } else {
-            me.render();
+            me.getVersion();
         }
-
     },
+
+    getVersion: function () {
+        var me = this;
+        $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
+            window.vidiConfig.appVersion = data.version;
+            window.vidiConfig.appExtensionsBuild = '0';
+            if (`extensionsBuild` in data) {
+                window.vidiConfig.appExtensionsBuild = data.extensionsBuild;
+            }
+        }).fail(function () {
+            console.error(`Unable to detect the current application version`);
+        }).always(function () {
+            me.render();
+        });
+    },
+
 
     /**
      *
@@ -172,105 +186,205 @@ module.exports = {
 
         $("body").append('<div id="tail" style="position: fixed; float: left; display: none"></div>');
 
+        // Detect the database and schema
+        let splitLocation = window.location.pathname.split(`/`);
+        if (splitLocation.length === 4 || splitLocation.length === 5) {
+            let database = splitLocation[2];
+            let schema = splitLocation[3];
+            if (!database || database.length === 0 || !schema || schema.length === 0) {
+                console.warn(`Unable to detect current database and schema`);
+            } else {
+                window.vidiConfig.appDatabase = database;
+                window.vidiConfig.appSchema = schema;
+            }
+        } else {
+            console.warn(`Unable to detect current database and schema`);
+        }
 
         // Init the modules
         // ================
 
         modules.cloud.init();
         modules.state.setExtent();
-        modules.backboneEvents.init();
-        modules.socketId.init();
-        modules.bindEvent.init();
-        modules.baseLayer.init();
-        modules.infoClick.init();
-        modules.advancedInfo.init();
-        modules.draw.init();
-        modules.measurements.init();
-        modules.print.init();
-        modules.meta.init()
 
-            .then(function () {
-                    return modules.setting.init();
-                },
+        // Calling mandatory init method
+        [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
+            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`].map(name => {
+            modules[name].init();
+        });
 
-                function (error) {
-                    console.log(error); // Stacktrace
-                    alert("Vidi is loaded without schema. Can't set extent or add layers");
-                    backboneEvents.get().trigger("ready:meta");
-                    modules.state.init();
-                })
+        /**
+         * Fetch meta > initialize settings > create layer tree >
+         * initialize state > load layers > initialize extensions > finish
+         */
+        modules.meta.init().then(() => {
+            return modules.setting.init();
+        }, (error) => {
+            console.log(error); // Stacktrace
+            alert("Vidi is loaded without schema. Can't set extent or add layers");
+            backboneEvents.get().trigger("ready:meta");
+        }).then(() => {
+            return modules.layerTree.create();
+        }).finally(() => {
+            modules.state.init().then(() => {
 
-            .then(function () {
-                modules.layerTree.init();
-                modules.state.init();
-            });
+                //try {
 
-        // Require search module
-        // =====================
+                    // Require search module
+                    // =====================
 
-        // Hack to compile Glob files. Don´t call this function!
-        function ಠ_ಠ() {
-            require('./search/*.js', {glob: true});
-        }
+                    // Hack to compile Glob files. Don´t call this function!
+                    function ಠ_ಠ() {
+                        require('./search/*.js', {glob: true});
+                    }
 
-        if (typeof vidiConfig.searchModules !== "undefined") {
-            $.each(vidiConfig.searchModules, function (i, v) {
-                modules.search[v] = require('./search/' + v + '.js');
-                modules.search[v].set(modules);
-            });
-            modules.search[window.vidiConfig.enabledSearch].init();
-        }
+                    if (typeof vidiConfig.searchModules !== "undefined") {
+                        $.each(vidiConfig.searchModules, function (i, v) {
+                            modules.search[v] = require('./search/' + v + '.js');
+                            modules.search[v].set(modules);
+                        });
+                        modules.search[window.vidiConfig.enabledSearch].init();
+                    }
 
-        // Require extensions modules
-        // ==========================
+                    // Require extensions modules
+                    // ==========================
 
-        //Hack to compile Glob files. Don´t call this function!
-        function ಠ_ಠ() {
-           require('./../../extensions/*/browser/*.js', {glob: true});
-           require('./../../extensions/*/browser/*/*.js', {glob: true});
-        }
+                    //Hack to compile Glob files. Don´t call this function!
+                    function ಠ_ಠ() {
+                        require('./../../extensions/*/browser/*.js', {glob: true});
+                        require('./../../extensions/*/browser/*/*.js', {glob: true});
+                    }
 
-        if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
-            $.each(vidiConfig.extensions.browser, function (i, v) {
-                modules.extensions[Object.keys(v)[0]] = {};
-                $.each(v[Object.keys(v)[0]], function (n, m) {
-                    modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
-                    modules.extensions[Object.keys(v)[0]][m].set(modules);
-                })
-            });
+                    if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
+                        $.each(vidiConfig.extensions.browser, function (i, v) {
+                            modules.extensions[Object.keys(v)[0]] = {};
+                            $.each(v[Object.keys(v)[0]], function (n, m) {
+                                modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
+                                modules.extensions[Object.keys(v)[0]][m].set(modules);
+                            })
+                        });
 
-            if (typeof window.vidiConfig.enabledExtensions === "object") {
-                $.each(vidiConfig.extensions.browser, function (i, v) {
-                    $.each(v[Object.keys(v)[0]], function (n, m) {
-                        if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                            modules.extensions[Object.keys(v)[0]][m].init();
+                        if (typeof window.vidiConfig.enabledExtensions === "object") {
+                            let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
+                            $.each(vidiConfig.extensions.browser, function (i, v) {
+                                $.each(v[Object.keys(v)[0]], function (n, m) {
+                                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                        modules.extensions[Object.keys(v)[0]][m].init();
+                                        let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
+                                        if (enabledExtensionIndex > -1) {
+                                            enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
+                                        }
+                                    }
+                                })
+                            });
+
+                            if (enabledExtensionsCopy.length > 0) {
+                                console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                            }
                         }
-                    })
-                });
-            }
+                    }
+
+                    // Init some GUI stuff after modules are loaded
+                    // ============================================
+                    $("[data-toggle=tooltip]").tooltip();
+
+                    $.material.init();
+                    touchScroll(".tab-pane");
+                    touchScroll("#info-modal-body-wrapper");
+                    $("#loadscreentext").html(__("Loading data"));
+                    if (window.vidiConfig.activateMainTab) {
+                        setTimeout(function () {
+                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                        }, 200);
+                    }
+
+                    $(window).resize(function () {
+                        setTimeout(function () {
+                            modules.cloud.get().map.invalidateSize();
+                        }, 100);
+                    });
+
+                // } catch (e) {
+                //     console.error("Could not perform application initialization", e.message);
+                // }
+            });
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
+                console.log('Service worker registration succeeded');
+            }).catch(error => {
+                console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
+            });
+        } else {
+            console.warn(`Service workers are not supported in this browser, some features may be unavailable`);
         }
 
-        // Init some GUI stuff after modules are loaded
-        // ============================================
-        try {
-            $("[data-toggle=tooltip]").tooltip();
-            $.material.init();
-            touchScroll(".tab-pane");
-            touchScroll("#info-modal-body-wrapper");
-            $("#loadscreentext").html(__("Loading data"));
-            if (window.vidiConfig.activateMainTab) {
-                setTimeout(function () {
-                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                }, 200);
-            }
-            $(window).resize(_.debounce(function () {
-                $("#myNavmenu").offcanvas('hide');
-                setTimeout(function () {
-                    modules.cloud.get().map.invalidateSize();
-                }, 100);
-            }, 0));
-        } catch (e) {
-            console.info("Could not init Bootstrap Material Design");
+        if (window.localforage) {
+            localforage.getItem('appVersion').then(versionValue => {
+                localforage.getItem('appExtensionsBuild').then(extensionsBuildValue => {
+                    if (versionValue === null) {
+                        localforage.setItem('appVersion', window.vidiConfig.appVersion).then(() => {
+                            localforage.setItem('appExtensionsBuild', window.vidiConfig.appExtensionsBuild).then(() => {
+                                console.log(`Versioning: setting new application version (${window.vidiConfig.appVersion}, ${window.vidiConfig.appExtensionsBuild})`);
+                            });
+                        }).catch(error => {
+                            throw new Error(`Unable to store current application version`);
+                        });
+                    } else {
+                        // If two versions are correctly detected
+                        if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
+                            if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
+                                (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
+                                jquery.snackbar({
+                                    id: "snackbar-conflict",
+                                    content: `Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`,
+                                    htmlAllowed: true,
+                                    timeout: 2500
+                                });
+                                setTimeout(function () {
+                                    let unregisteringRequests = [];
+                                    // Unregister service worker
+                                    navigator.serviceWorker.getRegistrations().then((registrations) => {
+                                        for (let registration of registrations) {
+                                            console.log(`Versioning: unregistering service worker`, registration);
+                                            unregisteringRequests.push(registration.unregister());
+                                            registration.unregister();
+                                        }
+                                    });
+                                    Promise.all(unregisteringRequests).then((values) => {
+                                        // Clear caches
+                                        caches.keys().then(function (names) {
+                                            for (let name of names) {
+                                                console.log(`Versioning: clearing cache`, name);
+                                                caches.delete(name);
+                                            }
+                                        });
+
+                                        // Remove current app version
+                                        localforage.removeItem('appVersion').then(() => {
+                                            location.reload();
+                                        });
+                                    });
+                                }, 3000);
+                            } else {
+                                console.info('Versioning: new application version is not available');
+                            }
+                        } else if (typeof value === "undefined" || semver.valid(value) === null) {
+                            console.warn(`Seems like current application version is invalid, resetting it`);
+                            localforage.setItem('appVersion', '1.0.0').then(() => {
+                            }).catch(error => {
+                                localforage.setItem('appExtensionsBuild', '0').then(() => {
+                                }).catch(error => {
+                                    throw new Error(`Unable to store current application version`);
+                                });
+                            });
+                        }
+                    }
+                });
+            });
+        } else {
+            throw new Error(`localforage is not available`);
         }
     }
 };

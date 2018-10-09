@@ -28,8 +28,9 @@ var backboneEvents;
 var legend;
 var moment = require('moment');
 var meta;
+var state;
 var uriJs = require('urijs');
-var callBack= function () {};
+var callBack= () => {};
 
 /**
  * @private
@@ -62,6 +63,7 @@ module.exports = {
         serializeLayers = o.serializeLayers;
         anchor = o.anchor;
         meta = o.meta;
+        state = o.state;
         backboneEvents = o.backboneEvents;
         return this;
     },
@@ -189,161 +191,18 @@ module.exports = {
     /**
      *
      */
-    print: function (endEventName, customData) {
-        var layerDraw = [], layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, data, parr, configFile = null, uriObj = new uriJs(window.location.href);
-
-        if (isNaN(scale) || scale < 200) {
-            alert(__("Not a valid scale. Must be over 200."));
-            return false;
-        }
-
-        backboneEvents.get().trigger("start:print");
-
-        try {
-            recEdit.editing.disable();
-        } catch (e) {
-        }
-
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": true,
-            "query_buffer": true,
-            "query_result": true,
-            "print": true,
-            "draw": false // Get draw
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerDraw.push({geojson: v.geoJson})
-            }
-        });
-
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": false, // Get query draw
-            "query_buffer": true,
-            "query_result": true,
-            "draw": true,
-            "print": true
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerQueryDraw.push({geojson: v.geoJson})
-            }
-        });
-
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": true,
-            "query_buffer": false, // Get query buffer draw
-            "query_result": true,
-            "draw": true,
-            "print": true
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerQueryBuffer.push({geojson: v.geoJson})
-            }
-        });
-
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": true,
-            "query_buffer": true,
-            "query_result": false, // Get result
-            "draw": true,
-            "print": true
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerQueryResult.push({geojson: v.geoJson})
-            }
-        });
-
-        e = serializeLayers.serialize({
-            "printHelper": true,
-            "query_draw": true,
-            "query_buffer": true,
-            "query_result": true,
-            "draw": true,
-            "print": false // Get print
-        });
-
-        $.each(e, function (i, v) {
-            if (v.type === "Vector") {
-                layerPrint.push({geojson: v.geoJson})
-            }
-        });
-
-        recEdit.editing.enable();
-
-        data = {
-            db: db,
-            schema: schema,
-            draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
-            queryDraw: (typeof  layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
-            queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
-            queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
-            print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-            anchor: anchor.getAnchor(),
-            bounds: recScale.getBounds(),
-            scale: scale,
-            tmpl: tmpl,
-            pageSize: pageSize,
-            orientation: orientation,
-            title: encodeURIComponent($("#print-title").val()),
-            comment: encodeURIComponent($("#print-comment").val()),
-            legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
-            header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
-            dateTime: moment().format('Do MMMM YYYY, H:mm'),
-            date: moment().format('Do MMMM YYYY'),
-            customData: customData || null,
-            metaData: meta.getMetaData(),
-            px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
-            py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
-            queryString: uriObj.search()
-        };
-
-        if (urlVars.config) {
-            parr = urlVars.config.split("#");
-            if (parr.length > 1) {
-                parr.pop();
-            }
-            data.config = parr.join();
-        }
-
-
-        $.ajax({
-            dataType: "json",
-            method: "post",
-            url: '/api/print/',
-            contentType: "application/json",
-            data: JSON.stringify(data),
-            scriptCharset: "utf-8",
-            success: function (response) {
-                if (!endEventName) {
-                    backboneEvents.get().trigger("end:print", response);
-                } else {
-                    backboneEvents.get().trigger(endEventName, response);
-                }
-            },
-            error: function (response) {
-                if (!endEventName) {
-                    backboneEvents.get().trigger("end:print", response);
-                } else {
-                    backboneEvents.get().trigger(endEventName, response);
-                }
-            },
-            complete: function (response) {
+    print: (endEventName = "end:print", customData) => {
+        return new Promise((resolve, reject) => {
+            state.bookmarkState(customData).then(response => {
+                backboneEvents.get().trigger(endEventName, response);
                 callBack(response.responseJSON);
-            }
+                resolve();
+            }).catch(response => {
+                backboneEvents.get().trigger(endEventName, response);
+                callBack(response.responseJSON);
+                reject();
+            });
         });
-
-        return true;
     },
 
     /**
@@ -460,6 +319,140 @@ module.exports = {
             _cleanUp();
         }
     },
+
+    /**
+     * Gathers current application state
+     * 
+     * @todo
+     * Most of the gathered properties should be fetched using the getState() of corresponding modules and
+     * merged together as a global application state representation.
+     * 
+     * @returns {Object}
+     */
+    getPrintData: (customData) => {
+        let result = new Promise((resolve, reject) => {
+            var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null, uriObj = new uriJs(window.location.href);
+
+            if (isNaN(scale) || scale < 200) {
+                alert(__("Not a valid scale. Must be over 200."));
+                return false;
+            }
+
+            backboneEvents.get().trigger("start:print");
+
+            try {
+                recEdit.editing.disable();
+            } catch (e) {
+            }
+
+            let layerDraw = serializeLayers.serializeDrawnItems();
+
+            e = serializeLayers.serialize({
+                "printHelper": true,
+                "query_draw": false, // Get query draw
+                "query_buffer": true,
+                "query_result": true,
+                "draw": true,
+                "print": true
+            });
+
+            $.each(e, function (i, v) {
+                if (v.type === "Vector") {
+                    layerQueryDraw.push({geojson: v.geoJson})
+                }
+            });
+
+            e = serializeLayers.serialize({
+                "printHelper": true,
+                "query_draw": true,
+                "query_buffer": false, // Get query buffer draw
+                "query_result": true,
+                "draw": true,
+                "print": true
+            });
+
+            $.each(e, function (i, v) {
+                if (v.type === "Vector") {
+                    layerQueryBuffer.push({geojson: v.geoJson})
+                }
+            });
+
+            e = serializeLayers.serialize({
+                "printHelper": true,
+                "query_draw": true,
+                "query_buffer": true,
+                "query_result": false, // Get result
+                "draw": true,
+                "print": true
+            });
+
+            $.each(e, function (i, v) {
+                if (v.type === "Vector") {
+                    layerQueryResult.push({geojson: v.geoJson})
+                }
+            });
+
+            e = serializeLayers.serialize({
+                "printHelper": true,
+                "query_draw": true,
+                "query_buffer": true,
+                "query_result": true,
+                "draw": true,
+                "print": false // Get print
+            });
+
+            $.each(e, function (i, v) {
+                if (v.type === "Vector") {
+                    layerPrint.push({geojson: v.geoJson})
+                }
+            });
+
+            recEdit.editing.enable();
+            state.getState().then(applicationState => {
+                let data = {
+                    applicationHost: window.location.origin,
+                    db: db,
+                    schema: schema,
+                    draw: (typeof  layerDraw[0] !== "undefined" && layerDraw[0].geojson.features.length > 0) ? layerDraw : null,
+                    queryDraw: (typeof  layerQueryDraw[0] !== "undefined" && layerQueryDraw[0].geojson.features.length > 0) ? layerQueryDraw : null,
+                    queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
+                    queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
+                    print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
+                    anchor: anchor.getAnchor(),
+                    bounds: recScale.getBounds(),
+                    scale: scale,
+                    tmpl: tmpl,
+                    pageSize: pageSize,
+                    orientation: orientation,
+                    title: encodeURIComponent($("#print-title").val()),
+                    comment: encodeURIComponent($("#print-comment").val()),
+                    legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
+                    header: encodeURIComponent($("#print-title").val()) || encodeURIComponent($("#print-comment").val()) ? "inline" : "none",
+                    dateTime: moment().format('Do MMMM YYYY, H:mm'),
+                    date: moment().format('Do MMMM YYYY'),
+                    customData: customData || null,
+                    metaData: meta.getMetaData(),
+                    px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
+                    py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
+                    queryString: uriObj.search(),
+                    state: applicationState
+                };
+
+                if (urlVars.config) {
+                    parr = urlVars.config.split("#");
+                    if (parr.length > 1) {
+                        parr.pop();
+                    }
+                    data.config = parr.join();
+                }
+
+                resolve(data);
+            });
+        });
+
+        return result;
+    },
+
     cleanUp: function (hard) {
         _cleanUp(hard);
     }

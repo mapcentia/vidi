@@ -150,6 +150,111 @@ module.exports = {
         "Languages": "Languages",
 
         "Finish": "Finish",
-        "Finish drawing": "Finish drawing"
+        "Finish drawing": "Finish drawing",
+
+        // LayerTree
+        "Force offline mode": "Force offline mode",
+        "Tile": "Raster",
+        "Vector": "Vector",
+        "Pending": "Pending",
+        "Awaiting network": "Awaiting network",
+        "Awaiting login": "Awaiting login",
+        "Error": "Error",
+        "Cancel feature changes": "Cancel feature changes",
+        "This browser does not support Service Workers, some features may be unavailable": "This browser does not support Service Workers, some features may be unavailable",
+        "Match": "Match",
+        "of the following": "of the following",
+        "any": "any",
+        "all": "all",
+        "Select": "Select",
+        "Filters": "Filters",
+        "Disable": "Disable",
+        "Table view": "Table view",
+        "Select field": "Select field",
+        "Null": "Null",
+        "Yes": "Yes",
+        "No": "No",
+        "Add condition": "Add condition",
+        "Apply": "Apply",
+
+        // Base layers
+        "Side-by-side mode": "Side-by-side mode",
+
+        // APIBridge
+        "Not authorized to perform this action": "Not authorized to perform this action",
+
+        //Editor
+        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
+        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+
+        // OfflineMap
+        "OfflineMap block description": "Here specific map areas can be stored to be used offline",
+        "OfflineMap instructions": "Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
+        "Extent": "Extent",
+        "Stored map areas": "Stored map areas",
+        "Store another": "Store another",
+        "Please use the secured version of page (HTTPS enabled)": "Please use the secured version of page (HTTPS enabled)",
+        "Show extent": "Show extent",
+        "Hide extent": "Hide extent",
+        "Delete map area?": "Delete map area?",
+        "Refresh map area?": "Refresh map area?",
+        "No map areas have been stored yet": "No map areas have been stored yet",
+        "Saved tiles will be used in...": "Saved tiles will be used in...",
+        "Processing tiles": "Processing tiles",
+        "Please reload the page": "Please reload the page",
+        "Checking the cache status": "Checking the cache status",
+        "of": "of",
+        "Date": "Date",
+        "Done": "Done",
+        "Delete": "Delete",
+        "Refresh": "Refresh",
+        "Actions": "Actions",
+        "Store": "Store",
+        "Available space": "Available space",
+        "Available space can not be detected": "Available space can not be detected",
+        "Offline map": "Offline map",
+        "Clear": "Clear",
+        "Zoom": "Zoom",
+        "Define": "Define",
+        "Redefine": "Redefine",
+        "Show on map": "Show on map",
+        "Store map area": "# Store map area",
+
+        //StateSnapshots
+        "State snapshots": "State snapshots",
+        "Local snapshots": "Local snapshots",
+        "User snapshots": "User snapshots",
+        "No local snapshots": "No local snapshots",
+        "No user snapshots": "No user snapshots",
+        "Update snapshot with current application state": "Update snapshot",
+        "Apply state snapshot": "Apply snapshot",
+        "Delete state snapshot": "Delete snapshot",
+        "Add local state snapshots to user's ones": "Add local snapshots to user's ones",
+        "Add local state snapshot to user's ones": "Add local snapshot to user's ones",
+        "copy link": "Copy link",
+        "New title": "New title",
+        "StateSnapshots description": "Save and share the current state of the application",
+
+        //Measurements
+        "Expand measurements control": "Activate measurements control",
+        "Collapse measurements control": "Deactivate measurements control",
+        "Measure the distance": "Measure distance",
+        "Measure the area": "Measure area",
+        "Delete all measurements": "Delete all measurements",
+
+        //KeplerGL
+        "Open KeplerGL in modal": "Open KeplerGL in modal",
+        "View in KeplerGL": "View in KeplerGL",
+        "Visible": "Visible",
+        "No layers available": "No layers available",
+
+        //Boreholes
+        "Plots": "# Plots",
+        "Available plots": "# Available plots",
+        "At least one y axis has to be provided": "# At least one y axis has to be provided",
+        "Data series": "# Data series",
+        "Borehole": "# Borehole",
+        "No plots were created yet": "# No plots were created yet",
+        "Please select the measurement": "# Please select the measurement",
     }
 };

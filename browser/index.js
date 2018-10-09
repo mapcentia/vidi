@@ -99,11 +99,13 @@ window.Vidi = function () {
         baseLayer: require('./modules/baseLayer'),
         legend: require('./modules/legend'),
         state: require('./modules/state'),
+        stateSnapshots: require('./modules/stateSnapshots'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
         bindEvent: require('./modules/bindEvent'),
         draw: require('./modules/draw'),
         measurements: require('./modules/measurements'),
+        tilecache: require('./modules/tileCache'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
         sqlQuery: require('./modules/sqlQuery'),
@@ -131,11 +133,13 @@ window.Vidi = function () {
     modules.baseLayer.set(modules);
     modules.legend.set(modules);
     modules.state.set(modules);
+    modules.stateSnapshots.set(modules);
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
     modules.measurements.set(modules);
+    modules.tilecache.set(modules);
     modules.print.set(modules);
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);

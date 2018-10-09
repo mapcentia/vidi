@@ -8,6 +8,8 @@
 /**
  *
  */
+var measurements;
+
 var backboneEvents;
 
 var oplevsyddjurs;
@@ -21,8 +23,6 @@ var print;
 var meta;
 
 var legend;
-
-var editor;
 
 var metaDataKeys;
 
@@ -38,16 +38,13 @@ var converter = new showdown.Converter();
  */
 module.exports = {
     set: function (o) {
+        measurements = o.measurements;
         backboneEvents = o.backboneEvents;
         cloud = o.cloud;
         setting = o.setting;
         print = o.print;
         meta = o.meta;
         legend = o.legend;
-        try {
-            editor = o.extensions.editor.index;
-        }catch(e) {}
-        
         return this;
     },
     init: function () {
@@ -89,7 +86,7 @@ module.exports = {
                 }
 
                 html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-
+                $("#info-modal-top.slide-left").show();
                 $("#info-modal-top.slide-left").animate({left: "0"}, 200);
                 $("#info-modal-top .modal-title").html(title || name);
                 $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
@@ -105,86 +102,17 @@ module.exports = {
         });
 
         $("#burger-btn").on("click", function () {
-            $("#info-modal.slide-left").animate({
+            $("#layer-slide.slide-left").animate({
                 left: "0"
             }, 500)
         });
 
 
-        $("#info-modal.slide-left .close").on("click", function () {
-            $("#info-modal.slide-left").animate({
+        $("#layer-slide.slide-left .close").on("click", function () {
+            $("#layer-slide.slide-left").animate({
                 left: "-100%"
             }, 500)
         });
-
-        // Bottom dialog
-        $(".close-hide").on("click", function (e) {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            // If print when deactivate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", false);
-                print.activate();
-            }
-
-            // If editor when deactivate
-            if (editor && $(this).data('module') === "editor") {
-                editor.stopEdit();
-            }
-
-            $("#" + id).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            });
-        });
-
-        $(".expand-less").on("click", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: (($("#" + id).height()*-1)+30) + "px"
-            }, 500, function () {
-                $("#" + id + " .expand-less").hide();
-                $("#" + id + " .expand-more").show();
-            });
-        });
-
-        $(".expand-more").on("click", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $("#" + id + " .expand-less").show();
-                $("#" + id + " .expand-more").hide();
-            });
-        });
-
-        $(".map-tool-btn").on("click", function (e) {
-
-            e.preventDefault();
-
-            var id = ($(this)).attr('href');
-
-            // If print when activate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", true);
-                print.activate();
-            }
-
-            $(id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            })
-        });
-
 
         $("#info-modal-top.slide-left .close").on("click", function () {
             $("#info-modal-top.slide-left").animate({
@@ -192,9 +120,6 @@ module.exports = {
             }, 500)
         });
 
-        $("#todo-btn").on("click", function () {
-            $("#todo-list-modal").modal({});
-        });
 
         $("#zoom-in-btn").on("click", function () {
             map.zoomIn();
@@ -208,7 +133,13 @@ module.exports = {
             cloud.get().zoomToExtent(setting.getExtent());
         });
 
+        $("#measurements-module-btn").on("click", function () {
+            measurements.toggleMeasurements(true);
 
+
+            
+        });
+        $("#locale-btn").append($(".leaflet-control-locate"));
 
     }
 };

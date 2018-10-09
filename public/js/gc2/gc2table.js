@@ -103,10 +103,12 @@ var gc2table = (function () {
                 autoPan: false,
                 locale: 'en-US',
                 callCustomOnload: true,
-                popupHtml: null,
                 ns: "",
                 template: null,
                 usingCarto: false,
+                pkey: "gid",
+                checkBox: false,
+                assignFeatureEventListenersOnDataLoad: true,
                 onSelect: function () {
                 },
                 onMouseOver: function () {
@@ -115,7 +117,7 @@ var gc2table = (function () {
                     weight: 5,
                     color: '#666',
                     dashArray: '',
-                    fillOpacity: 0.7
+                    fillOpacity: 0.2
                 }
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -134,6 +136,7 @@ var gc2table = (function () {
             autoUpdate = defaults.autoUpdate,
             height = defaults.height,
             tableBodyHeight = defaults.tableBodyHeight,
+            assignFeatureEventListenersOnDataLoad = defaults.assignFeatureEventListenersOnDataLoad,
             styleSelected = defaults.styleSelected,
             el = defaults.el, click, loadDataInTable, moveEndOff, moveEndOn,
             setSelectedStyle = defaults.setSelectedStyle,
@@ -145,31 +148,55 @@ var gc2table = (function () {
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
             locale = defaults.locale,
-            popupHtml = defaults.popupHtml,
             ns = defaults.ns,
             template = defaults.template,
+            pkey = defaults.pkey,
+            checkBox = defaults.checkBox,
             usingCartodb = defaults.usingCartodb;
+
+        var customOnLoad = false, destroy, assignEventListeners;
 
         $(el).parent("div").addClass("gc2map");
 
         (function poll() {
             if (scriptsLoaded) {
-                var originalLayers, filters, filterControls;
+                var originalLayers, filters, filterControls, uncheckedIds = [];
                 _.extend(object, Backbone.Events);
-                object.on("selected" + "_" + uid, function (id) {
 
+                /**
+                 * Clearing existing feature selection
+                 */
+                var clearSelection = function () {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
-                        try {
-                            store.layer.resetStyle(v);
-                        } catch (e) {
+
+                        if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
+
+
+                            try {
+                                v.closePopup();
+                                store.layer.resetStyle(v);
+                            } catch (e) {
+                                console.log(e);
+                            }
                         }
                     });
+                };
+
+                object.on("clearSelection_" + uid, function () {
+                    clearSelection();
+                });
+
+                object.on("selected" + "_" + uid, function (id) {
+                    clearSelection();
+                    if (id === undefined) return;
+
                     var row = $('*[data-uniqueid="' + id + '"]');
                     row.addClass("selected");
                     if (setSelectedStyle) {
                         m.map._layers[id].setStyle(styleSelected);
                     }
+
                     if (openPopUp) {
                         var str = "<table>", renderedText;
                         $.each(cm, function (i, v) {
@@ -187,25 +214,35 @@ var gc2table = (function () {
                         }
 
                         m.map._layers[id].bindPopup(renderedText || str, {
-                            className: "custom-popup",
+                            className: "custom-popup gc2table-custom-popup",
                             autoPan: autoPan,
                             closeButton: true
                         }).openPopup();
 
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
                     }
-
                 });
+
                 click = function (e) {
-                    var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
-                    try {
-                        $(ns + " .fixed-table-body").animate({
-                            scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
-                        }, 300);
-                    } catch (e) {}
-                    object.trigger("selected" + "_" + uid, e.target._leaflet_id);
+                    if (uncheckedIds.indexOf(e.target._leaflet_id) === -1) {
+                        var row = $('*[data-uniqueid="' + e.target._leaflet_id + '"]');
+                        try {
+                            $(ns + " .fixed-table-body").animate({
+                                scrollTop: $(ns + " .fixed-table-body").scrollTop() + (row.offset().top - $(ns + " .fixed-table-body").offset().top)
+                            }, 300);
+                        } catch (e) {
+                        }
+                        object.trigger("selected" + "_" + uid, e.target._leaflet_id);
+                    }
                 };
+                click.byGC2Table = true;
+
                 $(el).append("<thead><tr></tr></thead>");
+
+                if (checkBox) {
+                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'</th>");
+                }
+
                 $.each(cm, function (i, v) {
                     $(el + ' thead tr').append("<th data-filter-control=" + (v.filterControl || "false") + " data-field='" + v.dataIndex + "' data-sortable='" + (v.sortable || "false") + "' data-editable='false' data-formatter='" + (v.formatter || "") + "'>" + v.header + "</th>");
                 });
@@ -243,24 +280,36 @@ var gc2table = (function () {
 
                         $(el + ' > tbody > tr').on("click", function (e) {
                             var id = $(this).data('uniqueid');
-                            object.trigger("selected" + "_" + uid, id);
-                            var layer = m.map._layers[id];
-                            setTimeout(function () {
-                                if (setViewOnSelect) {
-                                    m.map.fitBounds(layer.getBounds());
-                                }
-                            }, 100);
-                            onSelect(id, layer);
+                            if (uncheckedIds.indexOf(id) === -1 || checkBox === false) {
+                                object.trigger("selected" + "_" + uid, id);
+                                var layer = m.map._layers[id];
+                                setTimeout(function () {
+                                    if (setViewOnSelect) {
+                                        m.map.fitBounds(layer.getBounds());
+                                    }
+                                }, 100);
+                                onSelect(id, layer);
+                            }
                         });
 
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
                             var id = $(this).data('uniqueid');
-                            object.trigger("selected" + "_" + uid, id);
                             var layer = m.map._layers[id];
-                            onMouseOver(id, layer);
+                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
+                                store.layer._layers[id].setStyle({
+                                    fillColor: "#660000",
+                                    fillOpacity: "0.6"
+                                });
+                                onMouseOver(id, layer);
+                            }
                         });
 
-
+                        $(el + ' > tbody > tr').on("mouseout", function (e) {
+                            var id = $(this).data('uniqueid');
+                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
+                                store.layer.resetStyle(store.layer._layers[id])
+                            }
+                        });
                     }, 100);
                 };
                 $(el).bootstrapTable({
@@ -273,11 +322,58 @@ var gc2table = (function () {
                     onColumnSearch: filterMap
                 });
 
+                $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+
+                    if (m[pkey] === false) {
+                        uncheckedIds.push(parseInt(m._id));
+                        store.layer._layers[m._id].setStyle({
+                            fillOpacity: 0.0,
+                            opacity: 0.2
+                        });
+                        store.layer._layers[m._id].closePopup()
+
+                    } else {
+                        uncheckedIds = uncheckedIds.filter(function (item) {
+                            return item !== parseInt(m._id);
+                        });
+                        store.layer.resetStyle(store.layer._layers[m._id])
+                    }
+                });
+
+                /**
+                 * Destroys events and popups for vector layer features, as
+                 * well as restoring the regular store onLoad() method.
+                 *
+                 * @returns {void}
+                 */
+                destroy = function () {
+                    $.each(store.layer._layers, function (i, v) {
+                        v.off('click', click);
+                        // Hack for removing irrelevant popups
+                        v._events.click.map(function (item, index) {
+                            if ('name' in item.fn && item.fn.name === '_openPopup') {
+                                v._events.click.splice(index, 1);
+                            }
+                        });
+                    });
+
+                    if (customOnLoad) {
+                        store.onLoad = customOnLoad;
+                    }
+                };
+
+                assignEventListeners = function () {
+                    $.each(store.layer._layers, function (i, v) {
+                        v.on('click', click);
+                    });
+                };
+
                 // Define a callback for when the SQL returns
-                var customOnLoad = store.onLoad;
+                customOnLoad = store.onLoad;
                 store.onLoad = function () {
                     loadDataInTable();
                 };
+
                 loadDataInTable = function (doNotCallCustomOnload) {
                     data = [];
                     $.each(store.layer._layers, function (i, v) {
@@ -287,14 +383,13 @@ var gc2table = (function () {
                                 if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
                                     v.feature.properties[n] = "<a target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
                                 }
-
                             });
                         });
                         data.push(v.feature.properties);
-                        v.on({
-                            click: click
-                        });
 
+                        if (assignFeatureEventListenersOnDataLoad) {
+                            assignEventListeners();
+                        }
                     });
 
                     originalLayers = jQuery.extend(true, {}, store.layer._layers);
@@ -310,7 +405,6 @@ var gc2table = (function () {
                     $(".fixed-table-body").css("overflow", "auto");
                     $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
                     $(".fixed-table-body").css("height", tableBodyHeight + "px");
-
                 };
 
                 var moveEndEvent = function () {
@@ -366,6 +460,8 @@ var gc2table = (function () {
         }());
         return {
             loadDataInTable: loadDataInTable,
+            destroy: destroy,
+            assignEventListeners: assignEventListeners,
             object: object,
             uid: uid,
             store: store,

@@ -61,6 +61,8 @@ var host;
  */
 var backboneEvents;
 
+let _self = false;
+
 try {
     host = require('../../config/config.js').gc2.host;
 } catch (e) {
@@ -80,6 +82,8 @@ module.exports = {
      */
     set: function (o) {
         backboneEvents = o.backboneEvents;
+
+        _self = this;
         return this;
     },
 
@@ -89,14 +93,26 @@ module.exports = {
      * @param doNotLoadExisting
      * @returns {Promise<any>}
      */
-    init: function (str, doNotLoadExisting) {
+    init: function (str, doNotLoadExisting, doNotReset) {
         var me = this,
             schemataStr = urlparser.schema;
 
         // Reset
         ready = false;
 
+        /*
+            Reset, otherwise it gets duplicated via addMetaData() - adding same meta
+            to the array which already contains this meta
+        */
+        if (!doNotReset) {
+            window.metaData = {data: []};
+        }
+
         return new Promise(function (resolve, reject) {
+
+            try {
+
+            
             var schemata;
 
             if (!doNotLoadExisting) {
@@ -127,15 +143,24 @@ module.exports = {
                 url: '/api/meta/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",
                 success: function (response) {
-                    me.addMetaData(response);
-                    ready = true;
-                    resolve()
+                    if (response.data && response.data.length > 0) {
+                        me.addMetaData(response);
+                        ready = true;
+                        resolve(response);
+                    } else {
+                        reject();
+                    }
                 },
                 error: function (response) {
                     reject();
                     alert(JSON.parse(response.responseText).message);
                 }
             });
+
+            } catch(e) {
+                console.error(e);
+            }
+
         })
     },
 
@@ -146,12 +171,54 @@ module.exports = {
      */
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
-        metaData.data = metaData.data.concat(data.data);
+
+        data.data.map(layerMeta => {
+            let layerAlreadyExists = false;
+            metaData.data.map(existingMetaLayer => {
+                if ((existingMetaLayer.f_table_schema + existingMetaLayer.f_table_name) === (layerMeta.f_table_schema + layerMeta.f_table_name)) {
+                    layerAlreadyExists = true;
+                    return false;
+                }
+            });
+
+            if (layerAlreadyExists === false) {
+                metaData.data.push(layerMeta);
+            }
+        });
+
         for (var i = 0; i < data.data.length; i++) {
             metaDataKeys[data.data[i].f_table_schema + "." + data.data[i].f_table_name] = data.data[i];
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
+
         backboneEvents.get().trigger("ready:meta");
+    },
+
+    /**
+     * Returns meta object for the specified layer idenfitier
+     * 
+     * @param {String} layerKey Layer identifier
+     * 
+     * @throws {Exception} If layer with provided key does not exist
+     */
+    getMetaByKey: (layerKey, throwException = true) => {
+        let existingMeta = _self.getMetaData();
+
+        let correspondingLayer = false;
+        existingMeta.data.map(layer => {
+            if (layer.f_table_schema + `.` + layer.f_table_name === layerKey) {
+                correspondingLayer = layer;
+                return false;
+            }
+        });
+
+        if (correspondingLayer) {
+            return correspondingLayer;
+        } else if (throwException) {
+            throw new Error(`Unable to find meta with identifier ${layerKey}`);
+        } else {
+            return false;
+        }
     },
 
     /**

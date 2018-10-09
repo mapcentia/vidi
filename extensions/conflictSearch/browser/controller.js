@@ -87,8 +87,9 @@ module.exports = {
             $("#conflict-get-print-fieldset").prop("disabled", true);
             $(this).button('loading');
             print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
-            print.print(endPrintEventName, conflictSearch.getResult());
-            print.cleanUp(true);
+            print.print(endPrintEventName, conflictSearch.getResult()).then(() => {
+                print.cleanUp(true);
+            });
         });
 
         // Click event for conflict search on/off toggle button

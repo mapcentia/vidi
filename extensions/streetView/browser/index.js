@@ -250,53 +250,48 @@ module.exports = {
                 return (
 
                     <div role="tabpanel">
-                        <div className="panel panel-default">
-                            <div className="panel-body">
-                                <div className="form-group">
-                                    <div className="togglebutton">
-                                        <label><input id="streetview-btn" type="checkbox"
-                                                      checked={ this.state.active }
-                                                      onChange={this.onActive}/>{__("Activate")}
-                                        </label>
-
-                                    </div>
-                                    <h3>{__("Choose service")}</h3>
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-google" name="streetview-service"
-                                                   value="google" checked={this.state.selectedOption === 'google'}
-                                                   onChange={this.onChange}/>
-                                            Google Street View
-                                        </label>
-                                    </div>
-
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-mapillary"
-                                                   name="streetview-service" value="mapillary"
-                                                   checked={this.state.selectedOption === 'mapillary'}
-                                                   onChange={this.onChange}/>
-                                            Mapillary
-                                        </label>
-                                    </div>
-
-                                </div>
+                        <div className="form-group">
+                            <div className="togglebutton">
+                                <label><input id="streetview-btn" type="checkbox"
+                                              checked={this.state.active}
+                                              onChange={this.onActive}/>{__("Activate")}
+                                </label>
 
                             </div>
+                            <h3>{__("Choose service")}</h3>
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-google" name="streetview-service"
+                                           value="google" checked={this.state.selectedOption === 'google'}
+                                           onChange={this.onChange}/>
+                                    Google Street View
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-mapillary"
+                                           name="streetview-service" value="mapillary"
+                                           checked={this.state.selectedOption === 'mapillary'}
+                                           onChange={this.onChange}/>
+                                    Mapillary
+                                </label>
+                            </div>
+
                         </div>
                     </div>
                 );
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera");
 
         // Append to DOM
         //==============
         try {
 
             ReactDOM.render(
-                <Streetview />,
+                <Streetview/>,
                 document.getElementById(exId)
             );
         } catch (e) {
@@ -309,10 +304,9 @@ module.exports = {
         utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
     },
 
-    setCallBack: function(fn) {
+    setCallBack: function (fn) {
         this.callBack = fn;
     }
-
 
 
 };

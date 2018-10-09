@@ -7,6 +7,14 @@ module.exports = function (grunt) {
                 NODE_ENV: 'production'
             }
         },
+        version: {
+            options: {
+                prefix: '"version":"'
+            },
+            defaults: {
+                src: ['public/version.json']
+            }
+        },
         less: {
             publish: {
                 options: {
@@ -54,8 +62,7 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-table/bootstrap-table.css',
                         'public/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css',
                         'public/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css',
-                        'public/css/jasny-bootstrap.css',
-                        //custon
+                        //custom
                         'public/css/styles.min.css'
                     ]
                 }
@@ -125,10 +132,32 @@ module.exports = function (grunt) {
         browserify: {
             publish: {
                 files: {
-                    'public/js/bundle.js': ['browser/index.js']
+                    'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                }
+            },
+            publish_sw: {
+                files: {
+                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+                },
+                options: {
+                    alias: {
+                        'urls-to-cache': './browser/service-worker/cache.production.js'
+                    },
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                }
+            },
+            publish_sw_dev: {
+                files: {
+                    'public/service-worker.bundle.js': ['browser/service-worker/index.js']
+                },
+                options: {
+                    alias: {
+                        'urls-to-cache': './browser/service-worker/cache.development.js'
+                    },
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
                 }
             },
             watch: {
@@ -136,9 +165,12 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react']]}], 'require-globify'],
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify'],
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+                    browserifyOptions: {
+                        debug: true
+                    }
                 }
             }
         },
@@ -164,6 +196,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-plugins/Yandex.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
+                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
                         'public/js/lib/q-cluster/src/utils.js',
                         'public/js/lib/q-cluster/src/clustering.js',
@@ -171,6 +204,9 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
 
                         'public/js/lib/jquery/jquery.js',
+                        'public/js/lib/jquery-ui/jquery-ui.min.js',
+                        'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
+                        'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
@@ -178,6 +214,7 @@ module.exports = function (grunt) {
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
+                        'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap-table/bootstrap-table.js',
@@ -191,8 +228,8 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-select/bootstrap-select.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
+                        'public/js/leaflet-easybutton/easy-button.js',
                         'public/js/proj4js-combined.js',
-                        'public/js/jasny-bootstrap.js',
                         'public/js/bundle.js',
                         'public/js/vidi.js',
                         'public/js/gc2/geocloud.js',
@@ -257,12 +294,32 @@ module.exports = function (grunt) {
             }
         }
     });
+
+    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function() {
+        var crypto = require('crypto');
+        var md5 = crypto.createHash('md5');
+
+        var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
+        var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
+        if (jsSource.length !== 1 || cssSource.length !== 1) {
+            throw new Error(`Unable to find all.min.*.js[css] sources`);
+        }
+
+        var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+        md5.update(buffer);
+        var md5Hash = md5.digest('hex');
+        var versionJSON = grunt.file.readJSON('public/version.json');
+        versionJSON.extensionsBuild = md5Hash;
+        grunt.file.write('public/version.json', JSON.stringify(versionJSON));
+        grunt.log.write('Extensions build version was written ' + md5Hash).verbose.write('...').ok();
+    });
+
     grunt.loadNpmTasks('grunt-templates-hogan');
     grunt.loadNpmTasks('grunt-browserify');
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');
@@ -270,12 +327,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-handlebars');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-bower-task');
+    grunt.loadNpmTasks('grunt-watchify');
+    grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['browserify:publish', 'extension-css', 'hogan']);
-    grunt.registerTask('production', ['env', 'gitreset', 'browserify:publish', 'extension-css', 'hogan', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust']);
+    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
+    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
-
-
-
-

@@ -37,6 +37,7 @@ module.exports = module.exports = {
             } else {
                 layers = visibleLayers;
             }
+
             var param = 'l=' + layers + '&db=' + db;
             $.ajax({
                 url: '/api/legend/' + db + '?' + param,

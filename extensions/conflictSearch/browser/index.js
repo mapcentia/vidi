@@ -306,7 +306,7 @@ module.exports = module.exports = {
         cloud.map.addLayer(dataItems);
 
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max);
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle");
         $("#conflict").append(dom);
 
         // DOM created
@@ -539,7 +539,7 @@ module.exports = module.exports = {
             hitsData = $("#hits-data"),
             row, fileId, searchFinish, geomStr,
             metaDataKeys = meta.getMetaDataKeys(),
-            visibleLayers = cloud.getVisibleLayers().split(";");
+            visibleLayers = cloud.getAllTypesOfVisibleLayers().split(";");
         if (text) {
             currentFromText = text;
         }
@@ -587,7 +587,6 @@ module.exports = module.exports = {
 
             var buffer4326 = reproject.reproject(writer.write(geom.geometry.buffer(buffer)), "proj", "unproj", crss);
 
-
             var projWktWithBuffer;
             if (buffer === 0) {
                 projWktWithBuffer = Terraformer.convert(writer.write(geom.geometry));
@@ -630,7 +629,7 @@ module.exports = module.exports = {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(primitive.geometry),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
                     success: function (response) {
                         var hitsCount = 0, noHitsCount = 0, errorCount = 0;
@@ -743,7 +742,7 @@ module.exports = module.exports = {
     }
 };
 
-var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="panel-body">' +
+var dom = '<div role="tabpanel">' +
     '<div class="togglebutton">' +
     '<label>' +
     '<input id="conflict-btn" type="checkbox">Aktiver konfliktsøgning' +
@@ -756,12 +755,10 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<div id="conflict-buffer-slider" class="slider shor"></div>' +
     '</div>' +
     '</div>' +
-    '</div>' +
-    '</div>' +
     '<div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">' +
     '<input id="' + id + '" class="' + id + ' typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
     '</div>' +
-    '<div id="conflict-main-tabs-container" class="panel panel-default" style="display: none"><div class="panel-body">' +
+    '<div id="conflict-main-tabs-container" style="display: none">' +
     '<ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">' +
     '<li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>' +
     '<li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>' +
@@ -799,7 +796,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>' +
     '</ul>' +
     '<div class="tab-content">' +
-    '<div role="tabpanel" class="tab-pane active" id="hits-content">' +
+    '<div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">' +
     '<div id="hits">' +
     '<table class="table table-hover">' +
     '<thead>' +
@@ -813,10 +810,10 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</table>' +
     '</div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="hits-data-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">' +
     '<div id="hits-data"></div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="nohits-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">' +
     '<div id="nohits">' +
     '<table class="table table-hover">' +
     '<thead>' +
@@ -830,7 +827,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</table>' +
     '</div>' +
     '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="error-content">' +
+    '<div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">' +
     '<div id="error">' +
     '<table class="table table-hover">' +
     '<thead>' +
@@ -858,7 +855,6 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '</div>' +
     '<div role="tabpanel" class="tab-pane" id="conflict-log-content">' +
     '<textarea style="width: 100%" rows="8" id="conflict-console"></textarea>' +
-    '</div>' +
     '</div>' +
     '</div>' +
     '</div>' +

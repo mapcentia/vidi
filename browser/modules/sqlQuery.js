@@ -57,6 +57,9 @@ var BACKEND = require('../../config/config.js').backend;
 
 var extensions;
 
+let _self = false;
+
+let editingIsEnabled = false;
 
 /**
  *
@@ -75,24 +78,27 @@ module.exports = {
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
         extensions = o.extensions;
+
+        _self = this;
         return this;
     },
 
     /**
-     *
-     * @param qstore {array}
-     * @param wkt {string}
-     * @param proj {string}
-     * @param callBack {string}
-     * @param num {int}
+     * @param qstore
+     * @param wkt
+     * @param proj
+     * @param callBack
+     * @param num
+     * @param point
      */
-    init: function (qstore, wkt, proj, callBack, num) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint) {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
-        try {
+        let editor = false;
+        if (`editor` in extensions) {
             editor = extensions.editor.index;
-        } catch (e) {
+            editingIsEnabled = true;
         }
 
         this.reset(qstore);
@@ -113,114 +119,95 @@ module.exports = {
          */
         var defaultTemplate =
             `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden"><button class="btn btn-primary btn-xs popup-edit-btn"><i class="fa fa-pencil-alt" aria-hidden="true"></i></button><button class="btn btn-primary btn-xs popup-delete-btn"><i class="fa fa-trash" aria-hidden="true"></i></button></div>
-                  {{#_vidi_content.fields}}
-                     {{#title}}<h4>{{title}}</h4>{{/title}}
-                     {{#value}}
-                       <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                     {{/value}}
-                     {{^value}}
-                       <p class="empty">null</p>
-                     {{/value}}
-                  {{/_vidi_content.fields}}
-                </div>`;
+                <div class="form-group gc2-edit-tools" style="visibility: hidden">
+                    <button class="btn btn-primary btn-xs popup-edit-btn">
+                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                    </button>
+                    <button class="btn btn-primary btn-xs popup-delete-btn">
+                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                </div>
+                {{#_vidi_content.fields}}
+                    {{#title}}<h4>{{title}}</h4>{{/title}}
+                    {{#value}}
+                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                    {{/value}}
+                    {{^value}}
+                    <p class="empty">null</p>
+                    {{/value}}
+                {{/_vidi_content.fields}}
+            </div>`;
+
+        var defaultTemplateRaster =
+            `<div class="cartodb-popup-content">
+                <h4>Class</h4>
+                <p>{{{ class }}}</p>
+             </div>`;
 
         $.each(layers, function (index, value) {
+            // No need to search in the already displayed vector layer
+            if (value.indexOf('v:') === 0) {
+                return true;
+            }
+
             if (layers[0] === "") {
                 return false;
+            }
+
+            if (!metaDataKeys[value]) {
+                throw new Error(`metaDataKeys[${value}] is undefined`);
             }
 
             var isEmpty = true;
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;
             var _key_ = metaDataKeys[value]._key_;
+            var pkey = metaDataKeys[value].pkey;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
             var not_querable = metaDataKeys[value].not_querable;
             var versioning = metaDataKeys[value].versioning;
-            var cartoSql = metaDataKeys[value].sql;
             var fields = typeof metaDataKeys[value].fields !== "undefined" ? metaDataKeys[value].fields : null;
-            var fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined" && metaDataKeys[value].fieldconf !== "") ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             var onLoad;
+            let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
+                && metaDataKeys[value].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
 
             if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON") {
-                var res = [156543.033928, 78271.516964, 39135.758482, 19567.879241, 9783.9396205,
-                    4891.96981025, 2445.98490513, 1222.99245256, 611.496226281, 305.748113141, 152.87405657,
-                    76.4370282852, 38.2185141426, 19.1092570713, 9.55462853565, 4.77731426782, 2.38865713391,
-                    1.19432856696, 0.597164283478, 0.298582141739, 0.149291, 0.074645535];
+                var res = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
+                    4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
+                    152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
+                    4.777314267823516, 2.388657133911758, 1.194328566955879, 0.5971642834779395, 0.298582141739,
+                    0.149291070869, 0.074645535435, 0.0373227677175, 0.018661384, 0.009330692, 0.004665346, 0.002332673, 0.001166337];
                 distance = 10 * res[cloud.get().getZoom()];
             }
+
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql, template;
+                    var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql,
+                        template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
 
-
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : defaultTemplate;
+                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster :defaultTemplate;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '"><div class="panel panel-default"><div class="panel-body">' +
+                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
                             '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
-                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div></div></div>');
-                        $.each(layerObj.geoJSON.features, function (i, feature) {
-                            var fi = [];
-                            if (fieldConf === null) {
-                                $.each(feature.properties, function (name, property) {
-                                    fi.push({
-                                        title: name,
-                                        value: feature.properties[name]
-                                    });
-                                    out.push([name, 0, name, false]);
-                                });
-                            }
-                            else {
-                                $.each(sortObject(fieldConf), function (name, property) {
-                                    if (property.value.querable) {
-                                        fi.push({
-                                            title: property.value.alias || property.key,
-                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
-                                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
-                                                    feature.properties[property.key]
-                                        });
+                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
 
-                                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
-                                        if (feature.properties[property.key] !== undefined) {
-                                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
-                                        }
-                                    }
-                                });
-                                out.sort(function (a, b) {
-                                    return a[1] - b[1];
-                                });
-                            }
-
-                            feature.properties._vidi_content = {};
-                            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
-
-                            if (first) {
-                                $.each(out, function (name, property) {
-                                    cm.push({
-                                        header: property[2],
-                                        dataIndex: property[0],
-                                        sortable: true,
-                                        link: property[3]
-                                    })
-                                });
-                                first = false;
-                            }
-                            $('#tab_' + storeId).tab('show');
-                        });
+                        cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
+                        $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
                             el: "#_" + storeId + " table",
+                            ns: "#_" + storeId,
                             geocloud2: cloud.get(),
                             store: layerObj,
                             cm: cm,
@@ -230,19 +217,39 @@ module.exports = {
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
+                            checkBox: false,
                             height: 400,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
-                            usingCartodb: BACKEND === "cartodb"
+                            pkey: pkey,
+                            usingCartodb: false
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            let layerIsEditable = false;
+                            if (metaDataKeys[value].meta) {
+                                let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                                if (parsedMeta && typeof parsedMeta === `object`) {
+                                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                        layerIsEditable = true;
+                                    }
+                                }
+                            }
+
+                            if (editingIsEnabled && layerIsEditable) {
+                                $(".popup-edit-btn").show();
+                                $(".popup-delete-btn").show();
+                            } else {
+                                $(".popup-edit-btn").hide();
+                                $(".popup-delete-btn").hide();
+                            }
+
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(e, _key_, qstore);
                             });
 
                             $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm("Er du sikker? Dine ændringer vil ikke blive gemt!")) {
+                                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
                                     editor.delete(e, _key_, qstore);
                                 }
                             });
@@ -263,11 +270,11 @@ module.exports = {
                             event.stopPropagation();
                         });
 
-                        $("#_download_excel_" + storeId ).click(function() {
-                           download(sql,"excel");
+                        $("#_download_excel_" + storeId).click(function () {
+                            download(sql, "excel");
                         });
-                        $("#_download_geojson_" + storeId).click(function() {
-                           download(sql,"geojson");
+                        $("#_download_geojson_" + storeId).click(function () {
+                            download(sql, "geojson");
                         });
 
 
@@ -318,12 +325,9 @@ module.exports = {
                     }
 
                     l.on("click", function (e) {
-
-
                         setTimeout(function () {
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(l, _key_, qstore);
-
                             });
 
                             $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
@@ -349,26 +353,39 @@ module.exports = {
                     }
                 });
                 fieldStr = fieldNames.join(",");
-                console.log(fieldStr)
             } else {
                 fieldStr = "*";
             }
-            if (geoType === "RASTER") {
-                sql = "SELECT foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+            if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
+                sql = "SELECT rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
+
+                qstore[index].custom_data = [
+                    value,
+                    cloud.get().map.getSize().x,
+                    cloud.get().map.getSize().y,
+                    cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
+                    cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
+                    cloud.get().getExtent().left,
+                    cloud.get().getExtent().bottom,
+                    cloud.get().getExtent().right,
+                    cloud.get().getExtent().top
+                ];
+
             } else {
                 if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
                     sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT " + (BACKEND === "cartodb" ? "*" : fieldStr) + " FROM " + (BACKEND === "cartodb" ? "(" + cartoSql + ") as foo" : value) + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                     if (versioning) {
                         sql = sql + " AND gc2_version_end_date IS NULL ";
                     }
+                    qstore[index].custom_data = "";
                 }
             }
             sql = sql + " LIMIT " + (num || 500);
@@ -380,20 +397,112 @@ module.exports = {
     },
 
     /**
+     * Prepares stored data for being displayed in table
+     *
+     * @param {String} layerKey Layer key
+     * @param {Array}  features Layer features
+     */
+    prepareDataForTableView: (layerKey, features) => {
+        let first = true;
+        let fieldLabel = false;
+        let metaDataKeys = meta.getMetaDataKeys();
+        let fieldConf;
+
+        // Hardcoded field config for raster layers
+        if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
+            fieldConf = {class: {
+                "alias": "Class",
+                "column": "class",
+                "id": "class",
+                "querable": true
+                }
+            };
+        } else {
+            fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
+                && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+        }
+
+        let cm = [];
+        let out = [];
+        $.each(features, function (i, feature) {
+            var fi = [];
+            if (fieldConf === null) {
+                $.each(feature.properties, function (name, property) {
+                    fi.push({
+                        title: name,
+                        value: feature.properties[name]
+                    });
+                    out.push([name, 0, name, false]);
+                });
+            } else {
+                $.each(sortObject(fieldConf), function (name, property) {
+                    if (property.value.querable) {
+                        let value = feature.properties[property.key];
+                        if (property.value.link) {
+                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                        } else if (property.value.image) {
+                            if (!feature.properties[property.key]) {
+                                value = `<i class="fa fa-ban"></i>`;
+                            } else {
+                                let subValue = feature.properties[property.key];
+                                if (property.value.type === `bytea`) {
+                                    subValue = atob(feature.properties[property.key]);
+                                }
+                                value = `<a target='_blank' href='${subValue}'>
+                                <img style='width:178px' src='${subValue}'/>
+                            </a>`;
+                            }
+                        }
+                        fi.push({title: property.value.alias || property.key, value});
+                        fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
+                        if (feature.properties[property.key] !== undefined) {
+                            out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
+                        }
+                    }
+                });
+                out.sort(function (a, b) {
+                    return a[1] - b[1];
+                });
+            }
+
+            feature.properties._vidi_content = {};
+            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
+            if (first) {
+                $.each(out, function (name, property) {
+                    cm.push({
+                        header: property[2],
+                        dataIndex: property[0],
+                        sortable: true,
+                        link: property[3]
+                    })
+                });
+                first = false;
+            }
+
+            out = [];
+        });
+
+        return cm;
+    },
+
+    /**
      * Resets all stores in qstore
      * @param qstore {array}
      */
     reset: function (qstore) {
         $.each(qstore, function (index, store) {
-            store.abort();
-            store.reset();
-            cloud.get().removeGeoJsonStore(store);
+            if (store) {
+                store.abort();
+                store.reset();
+                cloud.get().removeGeoJsonStore(store);
+            }
         });
         $("#info-tab").empty();
         $("#info-pane").empty();
     },
 
-    setDownloadFunction: function(fn) {
+    setDownloadFunction: function (fn) {
         download = fn
     }
 };
@@ -421,8 +530,8 @@ var download = function (sql, format) {
     request.open('POST', '/api/sql/' + db, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
     request.responseType = 'blob';
-    request.onload = function() {
-        if(request.status === 200) {
+    request.onload = function () {
+        if (request.status === 200) {
             var filename, type;
             switch (format) {
                 case "excel":
@@ -434,7 +543,7 @@ var download = function (sql, format) {
                     type = 'application/json';
                     break;
             }
-            var blob = new Blob([request.response], { type: type });
+            var blob = new Blob([request.response], {type: type});
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = filename;
@@ -448,5 +557,3 @@ var download = function (sql, format) {
     var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
     request.send(uri);
 };
-
-
