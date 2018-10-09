@@ -1,8 +1,3 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
- */
-
 'use strict';
 
 import React from 'react';
