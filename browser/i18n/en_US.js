@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 module.exports = {
     dict: {
         /* Start of viewer and widget */
@@ -233,7 +239,7 @@ module.exports = {
         "Add local state snapshot to user's ones": "Add local snapshot to user's ones",
         "copy link": "Copy link",
         "New title": "New title",
-        "StateSnapshots description": "Save and share the current state of the application",
+        "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",
