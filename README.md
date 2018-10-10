@@ -1,5 +1,5 @@
 # vidi
-Vidi (View) is a new map viewer for GC2 and CartoDB.
+Vidi (View) is a new map viewer for GC2.
 
 [Install instructions](https://github.com/mapcentia/vidi/wiki/Install-Vidi)
 
