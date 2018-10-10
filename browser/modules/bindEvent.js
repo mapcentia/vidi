@@ -472,7 +472,7 @@ module.exports = module.exports = {
             // Set up the open/close functions for side panel
             var searchPanelOpen
 
-            var width = 550;
+            var width = 650;
 
             $("#search-ribbon").css("width", width + "px").css("right", "-" + (width -40) + "px");
             $("#module-container").css("width", (width - 100) + "px");
@@ -526,8 +526,6 @@ module.exports = module.exports = {
                 $('#map').css("width", "calc(100% - " + (width/2) + "px");
                 searchPanelOpen = true;
             }
-
-
 
             var searchHide = function () {
                 $("#pane").css("right", "0");
