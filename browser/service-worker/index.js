@@ -120,6 +120,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'geocloud.envirogissolutions.co.za/api'
+}, {
+    regExp: true,
+    requested: 'geofyn.mapcentia.com/api'
 }];
 
 /**
