@@ -97,8 +97,8 @@ module.exports = {
         var dict = {
 
             "Info": {
-                "da_DK": "Start Google Street View eller Mapillary op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
-                "en_US": "Start Google Street View or Mapillary from where you click on the map. The service starts in a new browser window."
+                "da_DK": "Start Google Street View, Mapillary eller Skråfoto op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
+                "en_US": "Start Google Street View, Mapillary or Oblique Photo from where you click on the map. The service starts in a new browser window."
             },
 
             "Street View": {
@@ -234,6 +234,10 @@ module.exports = {
                                 case "mapillary":
                                     url = "https://www.mapillary.com/app/?lat=" + p.y + "&lng=" + p.x + "&z=17";
                                     break;
+
+                                case "skraafoto":
+                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                                    break;
                             }
 
                             parentThis.callBack(url);
@@ -274,6 +278,16 @@ module.exports = {
                                     <input type="radio" id="streetview-service-mapillary"
                                            name="streetview-service" value="mapillary"
                                            checked={this.state.selectedOption === 'mapillary'}
+                                           onChange={this.onChange}/>
+                                    Mapillary
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-skraafoto"
+                                           name="streetview-service" value="skraafoto"
+                                           checked={this.state.selectedOption === 'skraafoto'}
                                            onChange={this.onChange}/>
                                     Mapillary
                                 </label>
