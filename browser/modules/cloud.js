@@ -80,7 +80,7 @@ module.exports = {
             locateOptions: {
                 enableHighAccuracy: true,
                 timeout: 0,
-                maximumAge: Infinity
+                maximumAge: 9999999
             }
         }).addTo(map);
 
