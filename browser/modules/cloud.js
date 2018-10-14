@@ -78,7 +78,9 @@ module.exports = {
             keepCurrentZoomLevel: true,
             drawCircle: false,
             locateOptions: {
-                enableHighAccuracy: true
+                enableHighAccuracy: true,
+                timeout: 0,
+                maximumAge: Infinity
             }
         }).addTo(map);
 
