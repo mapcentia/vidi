@@ -76,7 +76,10 @@ module.exports = {
             icon: "fa fa-location-arrow",
             iconLoading: "fa fa-circle-o-notch fa-spin",
             keepCurrentZoomLevel: true,
-            drawCircle: false
+            drawCircle: false,
+            locateOptions: {
+                enableHighAccuracy: true
+            }
         }).addTo(map);
 
         /**
