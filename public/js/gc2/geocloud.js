@@ -584,6 +584,8 @@ geocloud = (function () {
                 };
 
                 if (defaults.singleTile) {
+	            // Insert in tile pane, so non-tiled and tiled layers can be sorted
+		    options.pane = "tilePane";
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
