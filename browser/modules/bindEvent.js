@@ -419,6 +419,8 @@ module.exports = module.exports = {
 
         });
 
+        $.material.init();
+
         // HACK. Arrive.js seems to mess up Wkhtmltopdf,
         // so we don't bind events on print HTML page.
         // =============================================

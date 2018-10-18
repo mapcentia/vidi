@@ -289,7 +289,6 @@ module.exports = {
                     // ============================================
                     $("[data-toggle=tooltip]").tooltip();
 
-                    $.material.init();
                     touchScroll(".tab-pane");
                     touchScroll("#info-modal-body-wrapper");
                     $("#loadscreentext").html(__("Loading data"));
