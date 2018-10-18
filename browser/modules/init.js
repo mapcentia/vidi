@@ -285,19 +285,6 @@ module.exports = {
                         }
                     }
 
-                    // Init some GUI stuff after modules are loaded
-                    // ============================================
-                    $("[data-toggle=tooltip]").tooltip();
-
-                    touchScroll(".tab-pane");
-                    touchScroll("#info-modal-body-wrapper");
-                    $("#loadscreentext").html(__("Loading data"));
-                    if (window.vidiConfig.activateMainTab) {
-                        setTimeout(function () {
-                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                        }, 200);
-                    }
-
                     $(window).resize(function () {
                         setTimeout(function () {
                             modules.cloud.get().map.invalidateSize();

@@ -419,7 +419,20 @@ module.exports = module.exports = {
 
         });
 
+	    // Init some GUI stuff after modules are loaded
+	    // ============================================
+	    $("[data-toggle=tooltip]").tooltip();
         $.material.init();
+
+	    touchScroll(".tab-pane");
+	    touchScroll("#info-modal-body-wrapper");
+	    $("#loadscreentext").html(__("Loading data"));
+	    if (window.vidiConfig.activateMainTab) {
+		setTimeout(function () {
+		    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+		}, 200);
+	    }
+
 
         // HACK. Arrive.js seems to mess up Wkhtmltopdf,
         // so we don't bind events on print HTML page.
