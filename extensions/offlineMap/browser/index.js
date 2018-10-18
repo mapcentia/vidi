@@ -207,7 +207,7 @@ module.exports = {
             }
 
             componentWillUnmount() {
-                alert(`www`);
+                //alert(`www`);
             }
 
             /**
