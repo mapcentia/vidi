@@ -533,7 +533,7 @@ module.exports = module.exports = {
     makeSearch: function (text, callBack) {
 
         var primitive, coord,
-            layer, buffer = parseFloat($("#conflict-buffer-value").val()),
+            layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
             noHitsTable = $("#nohits-content tbody"),
             errorTable = $("#error-content tbody"),
@@ -630,7 +630,7 @@ module.exports = module.exports = {
                 xhr = $.ajax({
                     method: "POST",
                     url: "/api/extension/conflictSearch",
-                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + buffer + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
+                    data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
                     success: function (response) {
                         var hitsCount = 0, noHitsCount = 0, errorCount = 0;

@@ -245,6 +245,7 @@ module.exports = {
         "Expand measurements control": "Activate measurements control",
         "Collapse measurements control": "Deactivate measurements control",
         "Measure the distance": "Measure distance",
+        "Measure distance": "Measure distance",
         "Measure the area": "Measure area",
         "Delete all measurements": "Delete all measurements",
 

@@ -229,7 +229,7 @@ module.exports = {
         }).finally(() => {
             modules.state.init().then(() => {
 
-                //try {
+                try {
 
                     // Require search module
                     // =====================
@@ -305,9 +305,9 @@ module.exports = {
                         }, 100);
                     });
 
-                // } catch (e) {
-                //     console.error("Could not perform application initialization", e.message);
-                // }
+                } catch (e) {
+                     console.error("Could not perform application initialization", e.message);
+                }
             });
         });
 

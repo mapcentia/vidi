@@ -71,7 +71,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
                 geomField = metaDataFinal.data[count].f_geometry_column;
 
-                if (buffer > 0) {
+                if (buffer > 10000000) {
                     sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
                 } else {
                     sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";

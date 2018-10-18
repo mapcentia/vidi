@@ -158,7 +158,7 @@ module.exports = {
                     container.style.backgroundColor = 'white';
                     container.style.width = `30px`;
                     container.style.height = `30px`;
-                    container.title = `Measure distance`;
+                    container.title = __(`Measure distance`);
 
                     container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
                         <span class="fa fa-ruler"></span>
