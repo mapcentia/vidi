@@ -139,9 +139,7 @@
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
                                 <div id="place-search">
-                                    <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Search places}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                     <div></div>
                                     <div class="places">
                                         <div class="btn-group">
@@ -153,9 +151,7 @@
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="info-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Info text}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
                                     <label>
@@ -179,31 +175,23 @@
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Help text overlays}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                 <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="layers" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Help text baselayers}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="base-layer-list"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="legend-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Help text legend}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">Show legend in map</a>
                                 <div id="legend" class="legend"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="draw-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Help text draw}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
                                     <label>
@@ -408,16 +396,12 @@
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{StateSnapshots description}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="state-snapshots" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="print-content">
-                                <div class="help-btn" onclick='javascript:$(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                                    <button type="button" class="close" data-dismiss="alert">×</button>{{Help text print}}
-                                    </div>`)'><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
 
                                 <div class="togglebutton">
