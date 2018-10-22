@@ -265,5 +265,6 @@ module.exports = {
         "Please select the measurement": "# Please select the measurement",
 
         "Show legend on top the map": "Show legend on top the map"
+
     }
 };

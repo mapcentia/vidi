@@ -245,6 +245,7 @@ module.exports = {
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
 
         //Measurements
+        "Measure distance": "# Measure distance",
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",

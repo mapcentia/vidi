@@ -185,9 +185,7 @@ module.exports = {
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
             $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
-
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
-
             drawOn = true;
 
             L.drawLocal = require('./drawLocales/draw.js');            
