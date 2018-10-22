@@ -248,7 +248,7 @@ module.exports = {
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
-        "Measure distance": "Mål distance",
+        "Measure distance": "Mål objekter",
         "Measure the area": "Mål areal",
         "Delete all measurements": "Slet alle målinger",
 
