@@ -266,5 +266,7 @@ module.exports = {
         "Borehole": "# Borehole",
         "No plots were created yet": "# No plots were created yet",
         "Please select the measurement": "# Please select the measurement",
+
+        "Show legend on top the map": "Vis signaturen ovenpå kortet"
     }
 };
