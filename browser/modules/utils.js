@@ -34,7 +34,7 @@ module.exports = {
     },
 
     createNavItem: function (id, dropdown) {
-      $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
+        $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
     },
 
     injectCSS: function (css) {

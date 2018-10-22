@@ -270,11 +270,11 @@ module.exports = {
                             $.each(vidiConfig.extensions.browser, function (i, v) {
                                 $.each(v[Object.keys(v)[0]], function (n, m) {
                                     if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-					try {
-                                        	modules.extensions[Object.keys(v)[0]][m].init();
-					} catch(e) {
-						console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
-					}
+                                        try {
+                                            modules.extensions[Object.keys(v)[0]][m].init();
+                                        } catch (e) {
+                                            console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                        }
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
                                         if (enabledExtensionIndex > -1) {
                                             enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
@@ -282,7 +282,6 @@ module.exports = {
                                     }
                                 })
                             });
-
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
                             }
@@ -296,7 +295,7 @@ module.exports = {
                     });
 
                 } catch (e) {
-                     console.error("Could not perform application initialization", e.message);
+                    console.error("Could not perform application initialization", e.message);
                 }
             });
         });
