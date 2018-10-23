@@ -1043,3 +1043,26 @@ h4 small {
 .watsonc-custom-popup {
   width: 240px;
 }
+#map,
+#pane,
+#search-ribbon {
+  -webkit-transition: all 500ms ease-out;
+  -moz-transition: all 500ms ease-out;
+  -o-transition: all 500ms ease-out;
+  transition: all 500ms ease-out;
+}
+#layer-slide-body-wrapper > div {
+  height: calc(100vh - 48px);
+}
+#conflict-result-content {
+  height: 100% !important;
+}
+.conflict-result-content {
+  height: 100% !important;
+}
+#info-pane > .tab-pane {
+  height: 100%;
+}
+.togglebutton {
+  margin-bottom: 6px;
+}
