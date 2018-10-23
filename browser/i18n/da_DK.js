@@ -165,24 +165,28 @@ module.exports = {
         "Error": "Fejl",
         "Cancel feature changes": "Afvis ændringer",
         "This browser does not support Service Workers, some features may be unavailable": "Denne browser understøtter ikke Service Workers, nogle funktioner kan være utilgængelige.",
-        "Match": "# Match",
-        "of the following": "# of the following",
-        "any": "# any",
-        "all": "# all",
-        "Select": "# Select",
-        "Filters": "# Filters",
-        "Disable": "# Disable",
-        "Table view": "# Table view",
-        "Select field": "# Select field",
-        "Null": "Nul",
+        "Match": "Match",
+        "of the following": "af følgende",
+        "any": "enhver",
+        "all": "alle",
+        "Select": "Vælg",
+        "Filters": "Filtre",
+        "Disable": "Deaktiver",
+        "Table view": "Tabel view",
+        "Select field": "Vælg felt",
+        "Null": "Null",
         "Yes": "Ja",
         "No": "Nej",
-        "Add condition": "# Add condition",
+        "Add condition": "Tilføj betingelsebetingelse",
         "Refresh cache for layer": "# Refresh cache for layer",
         "Fetch layer data from server": "# Fetch layer data from server",
         "Fetch layer data from cache": "# Fetch layer data from cache",
-        "Refresh existing cache for layer": "# Refresh existing cache for layer",
-      
+        "Refresh existing cache for layer": "# Refresh existing cache for layer",        
+        "Apply": "Anvend",
+
+        // Base layers
+        "Side-by-side mode": "Side-by-side tilstand",
+
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
@@ -246,9 +250,10 @@ module.exports = {
         "Delete all measurements": "Slet alle målinger",
 
         //KeplerGL
-        "Open KeplerGL in modal": "# Open KeplerGL in modal",
-        "View in KeplerGL": "# View in KeplerGL",
-        "Visible": "# Visible",
+        "Open KeplerGL in modal": "Start KeplerGL",
+        "View in KeplerGL": "Se i KeplerGL",
+        "Visible": "Synlige",
+        "No layers available": "Ingen synlige lag",
 
         //Boreholes
         "Plots": "# Plots",

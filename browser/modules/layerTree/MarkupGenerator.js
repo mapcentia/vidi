@@ -33,18 +33,14 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="panel panel-default">
-            <div class="panel-body">
-                <div class="togglebutton">
+        return (`<div class="togglebutton">
                     <label>
                         <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
                         <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
                         <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
                         <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
                     </label>
-                </div>
-            </div>
-        </div>`);
+                 </div>`);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -119,7 +115,7 @@ class MarkupGenerator {
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
-
+                
                 <div style="display: inline-block;">
                     <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>

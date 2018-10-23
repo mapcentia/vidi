@@ -1,6 +1,6 @@
 {
   "name": "vidi",
-  "version": "1.3.3",
+  "version": "1.5.0",
   "description": "Vidi (View) is a new map viewer for GC2 and CartoDB",
   "main": "index.js",
   "scripts": {

@@ -11,6 +11,8 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
+let jquery = require('jquery');
+require('snackbarjs');
 
 const semver = require('semver');
 require("bootstrap");
@@ -228,80 +230,79 @@ module.exports = {
 
                 try {
 
-                // Require search module
-                // =====================
+                    // Require search module
+                    // =====================
 
-                // Hack to compile Glob files. Don´t call this function!
-                function ಠ_ಠ() {
-                    require('./search/*.js', {glob: true});
-                }
+                    // Hack to compile Glob files. Don´t call this function!
+                    function ಠ_ಠ() {
+                        require('./search/*.js', {glob: true});
+                    }
 
-                if (typeof vidiConfig.searchModules !== "undefined") {
-                    $.each(vidiConfig.searchModules, function (i, v) {
-                        modules.search[v] = require('./search/' + v + '.js');
-                        modules.search[v].set(modules);
-                    });
-                    modules.search[window.vidiConfig.enabledSearch].init();
-                }
+                    if (typeof vidiConfig.searchModules !== "undefined") {
+                        $.each(vidiConfig.searchModules, function (i, v) {
+                            modules.search[v] = require('./search/' + v + '.js');
+                            modules.search[v].set(modules);
+                        });
+                        modules.search[window.vidiConfig.enabledSearch].init();
+                    }
 
-                // Require extensions modules
-                // ==========================
+                    // Require extensions modules
+                    // ==========================
 
-                //Hack to compile Glob files. Don´t call this function!
-                function ಠ_ಠ() {
-                    require('./../../extensions/*/browser/*.js', {glob: true});
-                    require('./../../extensions/*/browser/*/*.js', {glob: true});
-                }
+                    //Hack to compile Glob files. Don´t call this function!
+                    function ಠ_ಠ() {
+                        require('./../../extensions/*/browser/*.js', {glob: true});
+                        require('./../../extensions/*/browser/*/*.js', {glob: true});
+                    }
 
-                if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
-                    $.each(vidiConfig.extensions.browser, function (i, v) {
-                        modules.extensions[Object.keys(v)[0]] = {};
-                        $.each(v[Object.keys(v)[0]], function (n, m) {
-                            modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
-                            modules.extensions[Object.keys(v)[0]][m].set(modules);
-                        })
-                    });
-
-                    if (typeof window.vidiConfig.enabledExtensions === "object") {
-                        let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
+                    if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
                         $.each(vidiConfig.extensions.browser, function (i, v) {
+                            modules.extensions[Object.keys(v)[0]] = {};
                             $.each(v[Object.keys(v)[0]], function (n, m) {
-                                if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                                    modules.extensions[Object.keys(v)[0]][m].init();
-                                    let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
-                                    if (enabledExtensionIndex > -1) {
-                                        enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
-                                    }
-                                }
+                                modules.extensions[Object.keys(v)[0]][m] = require('./../../extensions/' + Object.keys(v)[0] + '/browser/' + m + ".js");
+                                modules.extensions[Object.keys(v)[0]][m].set(modules);
                             })
                         });
 
-                        if (enabledExtensionsCopy.length > 0) {
-                            console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                        if (typeof window.vidiConfig.enabledExtensions === "object") {
+                            let enabledExtensionsCopy = JSON.parse(JSON.stringify(window.vidiConfig.enabledExtensions));
+                            $.each(vidiConfig.extensions.browser, function (i, v) {
+                                $.each(v[Object.keys(v)[0]], function (n, m) {
+                                    if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
+                                        modules.extensions[Object.keys(v)[0]][m].init();
+                                        let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
+                                        if (enabledExtensionIndex > -1) {
+                                            enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
+                                        }
+                                    }
+                                })
+                            });
+
+                            if (enabledExtensionsCopy.length > 0) {
+                                console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                            }
                         }
                     }
-                }
 
-                // Init some GUI stuff after modules are loaded
-                // ============================================
-                $("[data-toggle=tooltip]").tooltip();
+                    // Init some GUI stuff after modules are loaded
+                    // ============================================
+                    $("[data-toggle=tooltip]").tooltip();
 
-                $.material.init();
-                touchScroll(".tab-pane");
-                touchScroll("#info-modal-body-wrapper");
-                $("#loadscreentext").html(__("Loading data"));
-                if (window.vidiConfig.activateMainTab) {
-                    setTimeout(function () {
-                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                    }, 200);
-                }
+                    $.material.init();
+                    touchScroll(".tab-pane");
+                    touchScroll("#info-modal-body-wrapper");
+                    $("#loadscreentext").html(__("Loading data"));
+                    if (window.vidiConfig.activateMainTab) {
+                        setTimeout(function () {
+                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                        }, 200);
+                    }
 
-                $(window).resize(_.debounce(function () {
-                    $("#myNavmenu").offcanvas('hide');
-                    setTimeout(function () {
-                        modules.cloud.get().map.invalidateSize();
-                    }, 100);
-                }, 0));
+                    $(window).resize(function () {
+                        setTimeout(function () {
+                            modules.cloud.get().map.invalidateSize();
+                        }, 100);
+                    });
 
                 } catch (e) {
                     console.error("Could not perform application initialization", e.message);
@@ -335,21 +336,25 @@ module.exports = {
                         if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
                             if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
                                 (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
-                                if (confirm(`Update application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`)) {
+                                jquery.snackbar({
+                                    id: "snackbar-conflict",
+                                    content: `Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`,
+                                    htmlAllowed: true,
+                                    timeout: 2500
+                                });
+                                setTimeout(function () {
                                     let unregisteringRequests = [];
-
                                     // Unregister service worker
                                     navigator.serviceWorker.getRegistrations().then((registrations) => {
-                                        for(let registration of registrations) {
+                                        for (let registration of registrations) {
                                             console.log(`Versioning: unregistering service worker`, registration);
                                             unregisteringRequests.push(registration.unregister());
                                             registration.unregister();
                                         }
                                     });
-
                                     Promise.all(unregisteringRequests).then((values) => {
                                         // Clear caches
-                                        caches.keys().then(function(names) {
+                                        caches.keys().then(function (names) {
                                             for (let name of names) {
                                                 console.log(`Versioning: clearing cache`, name);
                                                 caches.delete(name);
@@ -361,14 +366,16 @@ module.exports = {
                                             location.reload();
                                         });
                                     });
-                                }
+                                }, 3000);
                             } else {
-                                console.log('Versioning: new application version is not available');
+                                console.info('Versioning: new application version is not available');
                             }
                         } else if (typeof value === "undefined" || semver.valid(value) === null) {
                             console.warn(`Seems like current application version is invalid, resetting it`);
-                            localforage.setItem('appVersion', '1.0.0').then(() => {}).catch(error => {
-                                localforage.setItem('appExtensionsBuild', '0').then(() => {}).catch(error => {
+                            localforage.setItem('appVersion', '1.0.0').then(() => {
+                            }).catch(error => {
+                                localforage.setItem('appExtensionsBuild', '0').then(() => {
+                                }).catch(error => {
                                     throw new Error(`Unable to store current application version`);
                                 });
                             });

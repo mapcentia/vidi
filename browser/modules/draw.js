@@ -312,7 +312,8 @@ module.exports = {
 
                 }
                 if (type === 'circle') {
-                    distance = L.GeometryUtil.readableDistance(drawLayer._mRadius, true);
+                    distance = L.GeometryUtil.readableDistance(drawLayer.getRadius(), true);
+                    area = drawTools.getAreaOfCircle(drawLayer);
                 }
 
                 drawLayer._vidi_type = "draw";
@@ -579,7 +580,7 @@ module.exports = {
      * @param type
      */
     setStyle: function (l, type) {
-        if ($("#draw-measure").is(":checked") && type !== 'marker') {
+        if ($("#draw-measure").is(":checked") && type !== 'marker' && type !== 'circlemarker') {
             l.hideMeasurements();
             l.showMeasurements({
                 showTotal: $("#draw-line-total-dist").is(":checked")
