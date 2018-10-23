@@ -211,7 +211,7 @@ module.exports = module.exports = {
             backboneEvents.get().trigger("clear:search");
         });
 
-        backboneEvents.get().on("ready:meta", function () {
+        backboneEvents.get().on("allDoneLoading:layers", function () {
             metaDataKeys = meta.getMetaDataKeys();
 
             if (!isStarted) {
@@ -221,7 +221,7 @@ module.exports = module.exports = {
                         if ($(document).width() > 1024) {
                             $("#search-border").trigger("click");
                         }
-                    }, 2000
+                    }, 200
                 );
 
                 setTimeout(
