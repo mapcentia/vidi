@@ -54,16 +54,16 @@ module.exports = {
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
-
-                if (stop) {
-                    me.getVersion();
-                    return;
-                }
-
-                if (window.vidiConfig.defaultConfig) {
+                if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
                     configFile = window.vidiConfig.defaultConfig;
-                    stop = true;
-                    loadConfig();
+                    if (!stop) {
+                        stop = true;
+                        loadConfig();
+                    } else {
+                        me.getVersion();
+                    }
+                } else {
+                    me.getVersion();
                 }
             }).done(function () {
                 me.getVersion();
