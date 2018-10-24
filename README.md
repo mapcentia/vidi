@@ -34,7 +34,7 @@ The Vidi project aims to make it easy for organizations to use open source softw
 ## How to try Vidi
 Head over to gc2.mapcentia.com, create a PostGIS database and start uploading data. Then start Vidi from the dashboard.
 
-Or just try it [here](Head over to gc2.mapcentia.com, create a PostGIS database and start uploading data.)
+Or just try it [here](https://dev.geofyn.dk/app/geofyn/?config=kitchensink.json)
 
 ## How to install Vidi
 
