@@ -198,6 +198,9 @@ class APIBridge {
      * @param {Function} listener Listening function
      */
     setOfflineMode(mode) {
+
+        console.error(`setOfflineMode() use should be deprecated, offline mode is now set per-layer`);
+
         this._forcedOffline = mode;
     }
 
@@ -207,6 +210,9 @@ class APIBridge {
      * @return {Boolean}
      */
     offlineModeIsEnforced() {
+
+        console.error(`offlineModeIsEnforced() use should be deprecated, offline mode is now set per-layer`);
+
         return this._forcedOffline;
     }
 

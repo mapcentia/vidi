@@ -33,14 +33,21 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="togglebutton">
-                    <label>
-                        <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                        <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                        <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                        <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                    </label>
-                 </div>`);
+        return (`<div class="panel panel-default">
+            <div class="panel-body">
+                ${__('Network status')}
+                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;">
+                    <i class="fa fa-ellipsis-h"></i> ${__('Pending')}
+                </span>
+                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;">
+                    <i class="fa fa-signal"></i> Online
+                </span>
+                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
+                    <i class="fa fa-times"></i> Offline
+                </span>
+                ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-onine">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
+            </div>
+        </div>`);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -115,13 +122,8 @@ class MarkupGenerator {
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
-                
-                <div style="display: inline-block;">
-                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
-                    <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
-                </div>
 
-                <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">	
+                <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
                     <div class="btn-group" role="group">
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}">
                             <i class="fa fa-signal"></i>
@@ -133,6 +135,11 @@ class MarkupGenerator {
                             <i class="fa fa-refresh"></i>
                         </button>
                     </div>
+                </div>
+
+                <div style="display: inline-block;">
+                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
+                    <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>

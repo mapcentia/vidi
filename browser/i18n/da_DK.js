@@ -156,6 +156,8 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Network status": "# Network status",
+        "Set all layers to be": "# Set all layers to be",
         "Force offline mode": "Tving offline tilstand",
         "Tile": "Raster",
         "Vector": "Vektor",

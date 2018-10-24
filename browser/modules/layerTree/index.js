@@ -281,23 +281,13 @@ module.exports = {
     },
 
     _setupToggleOfflineModeControl() {
+        /*
+            @todo Implement callbacks for clicking the "Set all layers to be ..."
+        */
+
         let toggleOfllineOnlineMode = $(markupGeneratorInstance.getToggleOfflineModeSelectorDisabled());
         if (`serviceWorker` in navigator) {
             toggleOfllineOnlineMode = $(markupGeneratorInstance.getToggleOfflineModeSelectorEnabled());
-
-            if (apiBridgeInstance.offlineModeIsEnforced()) {
-                $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').prop('checked', true);
-            }
-
-            $(toggleOfllineOnlineMode).find('.js-toggle-offline-mode').change(event => {
-                if ($(event.target).is(':checked')) {
-                    apiBridgeInstance.setOfflineMode(true);
-                } else {
-                    apiBridgeInstance.setOfflineMode(false);
-                }
-
-                userPreferredForceOfflineMode = $(event.target).is(':checked');
-            });
         }
 
         return toggleOfllineOnlineMode;
@@ -330,9 +320,38 @@ module.exports = {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 if (registrations.length === 1 && registrations[0].active !== null) {
                     queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                        try {
+                        let existingMeta = meta.getMetaData();
+                        existingMeta.data.map(layer => {
+                            let layerIsVector = false;
+                            if (layer && layer.meta) {
+                                let parsedMeta = JSON.parse(layer.meta);
+                                if (parsedMeta && typeof parsedMeta === `object`) {           
+                                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+                                        let layerKey = (layer.f_table_schema + '.' + layer.f_table_name);
+                                        let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+                                        if ($(layerRecord).length === 1) {
+                                            _self._setOfflineModeLayerControl(layerRecord, false);
+                                        } else {
+                                            console.error(`Unable the find layer container for ${layerKey}`);
+                                        }
+
+                                        /*
+                                            @todo If this is the vt/tv layer then check what type is currently enabled
+                                        */
+                                    }
+                                }
+                            }
+                        });
+                    }catch(e){console.log(e);}
+
+                        console.log(`### a`);
                         if (Array.isArray(response) && response.length > 0) {
                             response.map(item => {
                                 let layerRecord = $(`[data-gc2-layer-key="${item.layerKey}.the_geom"]`);
+
+                                console.log(`### b`);
+
                                 if ($(layerRecord).length === 1) {
                                     _self._setOfflineModeLayerControl(layerRecord, item.offlineMode);
                                 } else {
@@ -1214,12 +1233,12 @@ module.exports = {
                 } else {
                     $(layerContainer).find(`.js-toggle-filters`).hide();
                     $(layerContainer).find(`.js-toggle-table-view`).hide();
-                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
+                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
                 }
             } else {
                 $(layerContainer).find(`.js-toggle-filters`).remove();
                 $(layerContainer).find(`.js-toggle-table-view`).remove();
-                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).remove();
+                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
             }
         }
     },

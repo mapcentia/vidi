@@ -262,7 +262,7 @@ module.exports = module.exports = {
             } else {
                 $(el).closest(`.layer-item`).find(`.js-toggle-filters`).hide();
                 $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).hide();
-                $(el).closest(`.layer-item`).find(`.js-toggle-layer-offline-mode-container`).hide();
+                $(el).closest(`.layer-item`).find(`.js-toggle-layer-offline-mode-container`).show();
             }
 
             _self.update(doNotLegend, el);
