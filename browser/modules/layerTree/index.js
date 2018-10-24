@@ -77,6 +77,13 @@ let urlparser = require('./../urlparser');
  *
  * @type {*|exports|module.exports}
  */
+import OfflineModeControlsManager from './OfflineModeControlsManager';
+let offlineModeControlsManager = false;
+
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
 let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
@@ -179,6 +186,9 @@ module.exports = {
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         extensions = o.extensions;
+
+        offlineModeControlsManager = new OfflineModeControlsManager(meta);
+
         return this;
     },
 
@@ -188,7 +198,7 @@ module.exports = {
         }
 
         _self = this;
-        queueStatistsics = new QueueStatisticsWatcher({ switchLayer, layerTree: _self });
+        queueStatistsics = new QueueStatisticsWatcher({ switchLayer, offlineModeControlsManager, layerTree: _self });
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
@@ -293,26 +303,6 @@ module.exports = {
         return toggleOfllineOnlineMode;
     },
 
-    _setOfflineModeLayerControl(layerRecord, offlineMode = false) {
-        if (offlineMode) {
-            $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
-            $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
-            $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
-
-            $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
-            $(layerRecord).find(`.js-set-offline`).css(`background-color`, `#009688`);
-            $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
-        } else {
-            $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
-            $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
-            $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
-
-            $(layerRecord).find(`.js-set-online`).css(`background-color`, `#009688`);
-            $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
-            $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
-        }
-    },
-
     _setupToggleOfflineModeControlsForLayers() {
         // Check if service worker is registered
         $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
@@ -320,43 +310,9 @@ module.exports = {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 if (registrations.length === 1 && registrations[0].active !== null) {
                     queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-                        try {
-                        let existingMeta = meta.getMetaData();
-                        existingMeta.data.map(layer => {
-                            let layerIsVector = false;
-                            if (layer && layer.meta) {
-                                let parsedMeta = JSON.parse(layer.meta);
-                                if (parsedMeta && typeof parsedMeta === `object`) {           
-                                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                                        let layerKey = (layer.f_table_schema + '.' + layer.f_table_name);
-                                        let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
-                                        if ($(layerRecord).length === 1) {
-                                            _self._setOfflineModeLayerControl(layerRecord, false);
-                                        } else {
-                                            console.error(`Unable the find layer container for ${layerKey}`);
-                                        }
-
-                                        /*
-                                            @todo If this is the vt/tv layer then check what type is currently enabled
-                                        */
-                                    }
-                                }
-                            }
-                        });
-                    }catch(e){console.log(e);}
-
-                        console.log(`### a`);
-                        if (Array.isArray(response) && response.length > 0) {
-                            response.map(item => {
-                                let layerRecord = $(`[data-gc2-layer-key="${item.layerKey}.the_geom"]`);
-
-                                console.log(`### b`);
-
-                                if ($(layerRecord).length === 1) {
-                                    _self._setOfflineModeLayerControl(layerRecord, item.offlineMode);
-                                } else {
-                                    console.error(`Unable the find layer container for ${item}`);
-                                }
+                        if (Array.isArray(response)) {
+                            offlineModeControlsManager.setCachedLayers(response).then(() => {
+                                offlineModeControlsManager.updateControls();
                             });
                         }
                     });
@@ -1157,7 +1113,7 @@ module.exports = {
                     });
 
                     $(layerContainer).find(`.js-set-online`).click(() => {
-                        _self._setOfflineModeLayerControl(layerContainer, false);
+                        offlineModeControlsManager.setControlState(layerKey, false);
                         queryServiceWorker({
                             action: `disableOfflineModeForLayer`,
                             payload: {
@@ -1167,7 +1123,7 @@ module.exports = {
                     });
 
                     $(layerContainer).find(`.js-set-offline`).click(() => {
-                        _self._setOfflineModeLayerControl(layerContainer, true);
+                        offlineModeControlsManager.setControlState(layerKey, true);
                         queryServiceWorker({
                             action: `enableOfflineModeForLayer`,
                             payload: {

@@ -15,14 +15,13 @@ let accumulatedDiff = [];
 
 let lastStatistics = false;
 
-let switchLayer = false;
-
-let layerTree = false;
+let switchLayer = false, layerTree = false, offlineModeControlsManager = false;
 
 class QueueStatisticsWatcher {
     constructor(o) {
         switchLayer = o.switchLayer;
         layerTree = o.layerTree;
+        offlineModeControlsManager = o.offlineModeControlsManager;
     }
 
     setLastStatistics(newLastStatistics) {
@@ -78,11 +77,22 @@ class QueueStatisticsWatcher {
                 theStatisticsPanelWasDrawn = true;
             }
 
+            offlineModeControlsManager.setAllControlsState(statistics.online);
+
             if (statistics.online) {
-                /*
-                    User have not decided yet whenever he want to force or not the
-                    offline mode or user already selected not to force offline mode
-                */
+                $('.js-app-is-online-badge').removeClass('hidden');
+                $('.js-app-is-pending-badge').remove();
+            } else {
+                $('.js-app-is-offline-badge').removeClass('hidden');
+                $('.js-app-is-pending-badge').remove();
+            }
+
+
+            /*
+            if (statistics.online) {
+                // User have not decided yet whenever he want to force or not the
+                // offline mode or user already selected not to force offline mode
+
                 if (userPreferredForceOfflineMode === false || userPreferredForceOfflineMode === -1) {
                     apiBridgeInstance.setOfflineMode(false);
                     $('.js-toggle-offline-mode').prop('checked', false);
@@ -108,6 +118,7 @@ class QueueStatisticsWatcher {
             if (applicationIsOnline !== -1) {
                 $('.js-app-is-pending-badge').remove();
             }
+            */
 
             for (let key in statistics) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
