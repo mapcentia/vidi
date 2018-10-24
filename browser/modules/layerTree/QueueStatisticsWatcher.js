@@ -77,7 +77,9 @@ class QueueStatisticsWatcher {
                 theStatisticsPanelWasDrawn = true;
             }
 
-            offlineModeControlsManager.setAllControlsState(statistics.online);
+            offlineModeControlsManager.setAllControlsState(statistics.online).then(() => {
+                offlineModeControlsManager.updateControls();
+            });
 
             if (statistics.online) {
                 $('.js-app-is-online-badge').removeClass('hidden');

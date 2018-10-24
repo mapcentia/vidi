@@ -23,8 +23,11 @@ class OfflineModeControlsManager {
 
     cachedLayers = [];
 
-    // Keeping the offline mode control state
+    // Keeping the offline mode control state for layes (user-defined)
     offlineModeValues = {};
+
+    // Global application offline mode
+    _globalApplicationOfflineMode = false;
 
     constructor(metaObject) {
         meta = metaObject;
@@ -36,7 +39,6 @@ class OfflineModeControlsManager {
             resolve();
         });
     }
-
 
     /*
         If application went offline, then put all layer offline mode selectors into the offline mode state and block them
@@ -51,13 +53,32 @@ class OfflineModeControlsManager {
      * 
      * @returns {Promise}
      */
-    setAllControlsState(offlineMode) {
+    setAllControlsState(applicationIsOnline) {
         return new Promise((resolve, reject) => {
+            this._globalApplicationOfflineMode = !applicationIsOnline;
+            resolve();            
+        });
+    }
 
-            console.log(`### setting all controls state ${offlineMode}`);
+    _getAvailableVectorLayersKeys() {
+        return new Promise((resolve, reject) => {
+            let layerKeys = [];
+            let existingMeta = meta.getMetaData();
+            existingMeta.data.map(layer => {
+                if (layer && layer.meta) {
+                    let parsedMeta = JSON.parse(layer.meta);
+                    if (parsedMeta && typeof parsedMeta === `object`) {           
+                        if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
 
-            resolve();
+                            // @todo If this is the vt/tv layer then check what type is currently enabled
 
+                            layerKeys.push(layer.f_table_schema + '.' + layer.f_table_name);
+                        }
+                    }
+                }
+            });
+
+            resolve(layerKeys);
         });
     }
 
@@ -69,65 +90,72 @@ class OfflineModeControlsManager {
         console.log(`### updateControls`);
 
         return new Promise((resolve, reject) => {
-            try{
-            let existingMeta = meta.getMetaData();
-            existingMeta.data.map(layer => {
-                if (layer && layer.meta) {
-                    let parsedMeta = JSON.parse(layer.meta);
-                    if (parsedMeta && typeof parsedMeta === `object`) {           
-                        if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
+            this._getAvailableVectorLayersKeys().then(layerKeys => {
+                layerKeys.map(layerKey => {
+                    let isAlreadyCached = false;
+                    this.cachedLayers.map(cachedLayer => {
+                        if (cachedLayer.layerKey === layerKey) {
+                            isAlreadyCached = true;
+                            return false;
+                        }
+                    });
 
-                            // @todo If this is the vt/tv layer then check what type is currently enabled
+                    let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+                    if ($(layerRecord).length === 1) {
+                        let offlineMode = false;
+                        if (layerKey in this.offlineModeValues) {
+                            offlineMode = this.offlineModeValues[layerKey];
+                        }
 
-                            let layerKey = (layer.f_table_schema + '.' + layer.f_table_name);
-                            let isAlreadyCached = false;
-                            this.cachedLayers.map(cachedLayer => {
-                                if (cachedLayer.layerKey === layerKey) {
-                                    isAlreadyCached = true;
-                                    return false;
-                                }
-                            });
-
-                            let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
-                            if ($(layerRecord).length === 1) {                           
-                                let offlineMode = false;
-                                if (layerKey in this.offlineModeValues) {
-                                    offlineMode = this.offlineModeValues[layerKey];
-                                }
-
-                                if (isAlreadyCached) {
-                                    if (offlineMode) {
-                                        $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
-                                        $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
-                                        $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
-                
-                                        $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
-                                        $(layerRecord).find(`.js-set-offline`).css(`background-color`, `#009688`);
-                                        $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
-                                    } else {
-                                        $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
-                                        $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
-                                        $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
-                            
-                                        $(layerRecord).find(`.js-set-online`).css(`background-color`, `#009688`);
-                                        $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
-                                        $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
-                                    }
+                        if (this._globalApplicationOfflineMode) {
+                            this.setRecordDisabled(layerRecord);   
+                        } else {
+                            if (isAlreadyCached) {
+                                if (offlineMode) {
+                                    this.setRecordOffline(layerRecord);
                                 } else {
-                                    console.log(`### doing nothing for ${layerKey}, as it is not cached`)    
+                                    this.setRecordOnline(layerRecord);
                                 }
-
-                                resolve();
-                            } else {
-                                console.error(`Unable the find layer container for ${layerKey}`);
-                                reject();
                             }
                         }
+                    } else {
+                        console.error(`Unable the find layer container for ${layerKey}`);
+                        reject();
                     }
-                }
+                });
+
+                resolve();
             });
-        }catch(e){console.log(e);}
         });
+    }
+
+    setRecordOnline(layerRecord) {
+        $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
+        $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
+        $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
+
+        $(layerRecord).find(`.js-set-online`).css(`background-color`, `#009688`);
+        $(layerRecord).find(`.js-set-online`).css(`color`, `white`);
+        $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
+    }
+
+    setRecordOffline(layerRecord) {
+        $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
+        $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
+        $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
+
+        $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
+        $(layerRecord).find(`.js-set-offline`).css(`background-color`, `#009688`);
+        $(layerRecord).find(`.js-set-offline`).css(`color`, `white`);
+    }
+
+    setRecordDisabled(layerRecord) {
+        $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
+        $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
+        $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
+
+        $(layerRecord).find(`.js-set-online`).attr(`style`, ``);
+        $(layerRecord).find(`.js-set-offline`).attr(`style`, ``);
     }
 
     /**
