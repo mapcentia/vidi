@@ -29,6 +29,8 @@ class OfflineModeControlsManager {
     // Global application offline mode
     _globalApplicationOfflineMode = false;
 
+    _apiBridgeInstance = false;
+
     constructor(metaObject) {
         meta = metaObject;
     }
@@ -53,7 +55,8 @@ class OfflineModeControlsManager {
      * 
      * @returns {Promise}
      */
-    setAllControlsState(applicationIsOnline) {
+    setAllControlsState(applicationIsOnline, apiBridgeInstance) {
+        this._apiBridgeInstance = apiBridgeInstance;
         return new Promise((resolve, reject) => {
             this._globalApplicationOfflineMode = !applicationIsOnline;
             resolve();            
@@ -86,9 +89,6 @@ class OfflineModeControlsManager {
      * Updates state of offline mode controls according to current application state
      */
     updateControls() {
-
-        console.log(`### updateControls`);
-
         return new Promise((resolve, reject) => {
             this._getAvailableVectorLayersKeys().then(layerKeys => {
                 layerKeys.map(layerKey => {
@@ -108,12 +108,23 @@ class OfflineModeControlsManager {
                         }
 
                         if (this._globalApplicationOfflineMode) {
-                            this.setRecordDisabled(layerRecord);   
+                            $('.js-app-is-online-badge').addClass('hidden');
+                            $('.js-app-is-offline-badge').removeClass('hidden');
+                            $('.js-app-is-pending-badge').remove();
+
+                            this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
+                            this.setRecordDisabled(layerRecord);
                         } else {
+                            $('.js-app-is-online-badge').removeClass('hidden');
+                            $('.js-app-is-offline-badge').addClass('hidden');
+                            $('.js-app-is-pending-badge').remove();
+
                             if (isAlreadyCached) {
                                 if (offlineMode) {
+                                    this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
                                     this.setRecordOffline(layerRecord);
                                 } else {
+                                    this._apiBridgeInstance.setOfflineModeForLayer(layerKey, false);
                                     this.setRecordOnline(layerRecord);
                                 }
                             }

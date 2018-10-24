@@ -77,18 +77,9 @@ class QueueStatisticsWatcher {
                 theStatisticsPanelWasDrawn = true;
             }
 
-            offlineModeControlsManager.setAllControlsState(statistics.online).then(() => {
+            offlineModeControlsManager.setAllControlsState(statistics.online, apiBridgeInstance).then(() => {
                 offlineModeControlsManager.updateControls();
             });
-
-            if (statistics.online) {
-                $('.js-app-is-online-badge').removeClass('hidden');
-                $('.js-app-is-pending-badge').remove();
-            } else {
-                $('.js-app-is-offline-badge').removeClass('hidden');
-                $('.js-app-is-pending-badge').remove();
-            }
-
 
             /*
             if (statistics.online) {
@@ -102,23 +93,11 @@ class QueueStatisticsWatcher {
                     apiBridgeInstance.setOfflineMode(true);
                     $('.js-toggle-offline-mode').prop('checked', true);
                 }
-
-                $('.js-toggle-offline-mode').prop('disabled', false);
-                applicationIsOnline = true;
-                $('.js-app-is-online-badge').removeClass('hidden');
             } else {
                 if (applicationIsOnline !== false) {
                     apiBridgeInstance.setOfflineMode(true);
                     $('.js-toggle-offline-mode').prop('checked', true);
                 }
-
-                $('.js-toggle-offline-mode').prop('disabled', true);
-                applicationIsOnline = false;
-                $('.js-app-is-offline-badge').removeClass('hidden');
-            }
-
-            if (applicationIsOnline !== -1) {
-                $('.js-app-is-pending-badge').remove();
             }
             */
 
