@@ -304,7 +304,6 @@ module.exports = {
     },
 
     _setupToggleOfflineModeControlsForLayers() {
-        // Check if service worker is registered
         $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
         if (`serviceWorker` in navigator) {
             navigator.serviceWorker.getRegistrations().then(registrations => {
@@ -1058,7 +1057,8 @@ module.exports = {
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
                 $(layerContainer).find(`.js-toggle-filters`).hide();
                 $(layerContainer).find(`.js-toggle-table-view`).hide();
-                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).hide();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).show();
 
                 $(layerContainer).find('.js-layer-settings').hide(0);
 
@@ -1075,7 +1075,8 @@ module.exports = {
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
                 $(layerContainer).find(`.js-toggle-filters`).show();
                 $(layerContainer).find(`.js-toggle-table-view`).show();
-                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).show();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).hide();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
@@ -1091,6 +1092,57 @@ module.exports = {
             _self._setupToggleOfflineModeControlsForLayers();
 
             let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+
+            $(layerContainer).find(`.js-set-online`).click(() => {
+                offlineModeControlsManager.setControlState(layerKey, false);
+                if (offlineModeControlsManager.isVectorLayer(layerKey)) {
+                    queryServiceWorker({
+                        action: `disableOfflineModeForLayer`,
+                        payload: {
+                            layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
+                        }
+                    }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
+                } else {
+                    offlineModeControlsManager.updateControls();
+                }
+            });
+
+            $(layerContainer).find(`.js-set-offline`).click(() => {
+                offlineModeControlsManager.setControlState(layerKey, true);
+                if (offlineModeControlsManager.isVectorLayer(layerKey)) {
+                    queryServiceWorker({
+                        action: `enableOfflineModeForLayer`,
+                        payload: {
+                            layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
+                        }
+                    }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
+                } else {
+                    offlineModeControlsManager.updateControls();
+                }
+            });
+
+            $(layerContainer).find(`.js-refresh`).click(() => {
+                let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
+                if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
+                    console.log(`### 1`);
+                    queryServiceWorker({
+                        action: `disableOfflineModeForLayer`,
+                        payload: { layerKey }
+                    }).then(() => {
+                        console.log(`### 2`);
+                        _self.reloadLayer(`v:` + layerKey).then(() => {
+                            console.log(`### 3`);
+                            queryServiceWorker({
+                                action: `enableOfflineModeForLayer`,
+                                payload: { layerKey }
+                            }).then(() => {
+                                console.log(`### 4`);
+                                _self._setupToggleOfflineModeControlsForLayers()
+                            });
+                        });
+                    });
+                }
+            });
 
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
@@ -1110,49 +1162,6 @@ module.exports = {
         
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
                         $(layerContainer).find('.js-layer-settings').toggle();
-                    });
-
-                    $(layerContainer).find(`.js-set-online`).click(() => {
-                        offlineModeControlsManager.setControlState(layerKey, false);
-                        queryServiceWorker({
-                            action: `disableOfflineModeForLayer`,
-                            payload: {
-                                layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
-                            }
-                        }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
-                    });
-
-                    $(layerContainer).find(`.js-set-offline`).click(() => {
-                        offlineModeControlsManager.setControlState(layerKey, true);
-                        queryServiceWorker({
-                            action: `enableOfflineModeForLayer`,
-                            payload: {
-                                layerKey: $(layerContainer).find(`.js-set-offline`).data(`layer-key`)
-                            }
-                        }).then(() => { _self._setupToggleOfflineModeControlsForLayers() });
-                    });
-
-                    $(layerContainer).find(`.js-refresh`).click(() => {
-                        let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
-                        if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
-                            console.log(`### 1`);
-                            queryServiceWorker({
-                                action: `disableOfflineModeForLayer`,
-                                payload: { layerKey }
-                            }).then(() => {
-                                console.log(`### 2`);
-                                _self.reloadLayer(`v:` + layerKey).then(() => {
-                                    console.log(`### 3`);
-                                    queryServiceWorker({
-                                        action: `enableOfflineModeForLayer`,
-                                        payload: { layerKey }
-                                    }).then(() => {
-                                        console.log(`### 4`);
-                                        _self._setupToggleOfflineModeControlsForLayers()
-                                    });
-                                });
-                            });
-                        }
                     });
                 }
 
@@ -1180,21 +1189,22 @@ module.exports = {
                     });
                 });
 
-                // If vector layer is active, show the filtering option
-
                 if (layerIsActive && defaultLayerType === `vector`) {
                     $(layerContainer).find(`.js-toggle-filters`).show();
                     $(layerContainer).find(`.js-toggle-table-view`).show();
-                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
+                    //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).show();
+                    //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).hide();
                 } else {
                     $(layerContainer).find(`.js-toggle-filters`).hide();
                     $(layerContainer).find(`.js-toggle-table-view`).hide();
-                    $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).show();
+                    //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).hide();
+                    //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).show();
                 }
             } else {
                 $(layerContainer).find(`.js-toggle-filters`).remove();
                 $(layerContainer).find(`.js-toggle-table-view`).remove();
-                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).hide();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).hide();
+                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).show();
             }
         }
     },
