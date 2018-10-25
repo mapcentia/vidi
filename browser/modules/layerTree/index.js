@@ -1057,14 +1057,12 @@ module.exports = {
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
                 $(layerContainer).find(`.js-toggle-filters`).hide();
                 $(layerContainer).find(`.js-toggle-table-view`).hide();
-                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).hide();
-                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).show();
-
                 $(layerContainer).find('.js-layer-settings').hide(0);
 
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                offlineModeControlsManager.updateControls();
             });
 
             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
@@ -1075,12 +1073,11 @@ module.exports = {
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
                 $(layerContainer).find(`.js-toggle-filters`).show();
                 $(layerContainer).find(`.js-toggle-table-view`).show();
-                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-vector`).show();
-                //$(layerContainer).find(`.js-toggle-layer-offline-mode-container-tile`).hide();
 
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                offlineModeControlsManager.updateControls();
             });
 
             if (base64SubgroupName) {
@@ -1093,7 +1090,9 @@ module.exports = {
 
             let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
 
-            $(layerContainer).find(`.js-set-online`).click(() => {
+            $(layerContainer).find(`.js-set-online`).click(e => {
+                e.preventDefault();
+
                 offlineModeControlsManager.setControlState(layerKey, false);
                 if (offlineModeControlsManager.isVectorLayer(layerKey)) {
                     queryServiceWorker({
@@ -1107,7 +1106,9 @@ module.exports = {
                 }
             });
 
-            $(layerContainer).find(`.js-set-offline`).click(() => {
+            $(layerContainer).find(`.js-set-offline`).click(e => {
+                e.preventDefault();
+
                 offlineModeControlsManager.setControlState(layerKey, true);
                 if (offlineModeControlsManager.isVectorLayer(layerKey)) {
                     queryServiceWorker({
@@ -1121,7 +1122,9 @@ module.exports = {
                 }
             });
 
-            $(layerContainer).find(`.js-refresh`).click(() => {
+            $(layerContainer).find(`.js-refresh`).click(e => {
+                e.preventDefault();
+
                 let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
                 if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
                     console.log(`### 1`);
