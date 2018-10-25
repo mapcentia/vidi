@@ -17,6 +17,11 @@ Every layer can have following states:
 
 let meta = false;
 
+/*
+    @todo Process case when applied state wants vector layer to be offline, but it is not cached by the moment, so it should be either loaded
+    or the state expectation should be ignored.
+*/
+
 class OfflineModeControlsManager {
 
     cachedLayers = [];
@@ -31,6 +36,14 @@ class OfflineModeControlsManager {
 
     constructor(metaObject) {
         meta = metaObject;
+    }
+
+    applyOfflineModeSettings(settings) {
+        console.log(`### got to apply ${settings}`);
+    }
+
+    getOfflineModeSettings() {
+        return this.offlineModeValues;
     }
 
     setCachedLayers(cachedLayers) {
@@ -48,6 +61,9 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     setAllControlsState(applicationIsOnline, apiBridgeInstance) {
+
+        console.log(`### setAllControlsState`);
+
         this._apiBridgeInstance = apiBridgeInstance;
         return new Promise((resolve, reject) => {
             if (applicationIsOnline) {
@@ -78,6 +94,16 @@ class OfflineModeControlsManager {
         });
     }
 
+    /**
+     * Checks if the specified layer is vector, accounting the chosen layer type
+     * in case of both tile and vector availability for layer.
+     * 
+     * @param {String} layerKey Layer key
+     * 
+     * @returns {Boolean}
+     * 
+     * @throws {Error}
+     */
     isVectorLayer(layerKey) {
         let isVectorLayer = -1;
 
@@ -118,6 +144,8 @@ class OfflineModeControlsManager {
 
     /**
      * Updates state of offline mode controls according to current application state
+     * 
+     * @returns {Promise}
      */
     updateControls() {
 
@@ -126,9 +154,10 @@ class OfflineModeControlsManager {
         return new Promise((resolve, reject) => {
             this._getAvailableLayersKeys().then(layerKeys => {
 
-
+                /*
+                    @todo Remove the try/catch
+                */
                 try{
-
 
                 layerKeys.map(layerKey => {
                     let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
@@ -183,14 +212,20 @@ class OfflineModeControlsManager {
 
                 resolve();
 
-
-            }catch(e){console.log(e)};
-
+                }catch(e){console.log(e)};
 
             });
         });
     }
 
+    /**
+     * Modifies the control according to the online state 
+     * 
+     * @param {HTMLElement} layerRecord   Layer record HTML element
+     * @param {Boolean}     isVectorLayer Specifies if the layer is the vector one
+     * 
+     * @returns {void}
+     */
     setRecordOnline(layerRecord, isVectorLayer = true) {
         $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
@@ -207,6 +242,14 @@ class OfflineModeControlsManager {
         }
     }
 
+    /**
+     * Modifies the control according to the offline state 
+     * 
+     * @param {HTMLElement} layerRecord   Layer record HTML element
+     * @param {Boolean}     isVectorLayer Specifies if the layer is the vector one
+     * 
+     * @returns {void}
+     */
     setRecordOffline(layerRecord, isVectorLayer = true) {
         $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
@@ -223,6 +266,14 @@ class OfflineModeControlsManager {
         }
     }
 
+    /**
+     * Modifies the control according to the disabled state 
+     * 
+     * @param {HTMLElement} layerRecord   Layer record HTML element
+     * @param {Boolean}     isVectorLayer Specifies if the layer is the vector one
+     * 
+     * @returns {void}
+     */
     setRecordDisabled(layerRecord, isVectorLayer = true) {
         $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
