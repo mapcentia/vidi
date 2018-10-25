@@ -877,6 +877,21 @@ module.exports = {
         if (numberOfActiveLayers > 0) {
             $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
         }
+
+        const setAllControlsProcessors = (type) => {
+            $(`.js-set-all-layer-to-be-${type}`).off();
+            $(`.js-set-all-layer-to-be-${type}`).click(e => {
+                e.preventDefault();
+                $(`button[class*="js-set-${type}"]`).each((index, element) => {
+                    if ($(element).prop(`disabled`) !== true) {
+                        $(element).trigger(`click`);
+                    }
+                });
+            });
+        };
+
+        setAllControlsProcessors(`online`);
+        setAllControlsProcessors(`offline`);
     },
 
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
@@ -1089,7 +1104,6 @@ module.exports = {
             _self._setupToggleOfflineModeControlsForLayers();
 
             let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-
             $(layerContainer).find(`.js-set-online`).click(e => {
                 e.preventDefault();
 

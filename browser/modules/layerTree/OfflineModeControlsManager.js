@@ -50,6 +50,12 @@ class OfflineModeControlsManager {
     setAllControlsState(applicationIsOnline, apiBridgeInstance) {
         this._apiBridgeInstance = apiBridgeInstance;
         return new Promise((resolve, reject) => {
+            if (applicationIsOnline) {
+                $(`.js-set-all-layer-offline-mode-container`).show();
+            } else {
+                $(`.js-set-all-layer-offline-mode-container`).hide();
+            }
+
             this._globalApplicationOfflineMode = !applicationIsOnline;
             resolve();            
         });

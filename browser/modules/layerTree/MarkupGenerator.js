@@ -45,7 +45,9 @@ class MarkupGenerator {
                 <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
                     <i class="fa fa-times"></i> Offline
                 </span>
-                ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-onine">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
+                <span class="js-set-all-layer-offline-mode-container">
+                    ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
+                </span>
             </div>
         </div>`);
     }
