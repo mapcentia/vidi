@@ -155,7 +155,8 @@ module.exports = {
             }
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql, template;
+                    var layerObj = this, out = [], fieldLabel, cm = [], first = true, storeId = this.id, sql = this.sql,
+                        template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -185,11 +186,16 @@ module.exports = {
                             else {
                                 $.each(sortObject(fieldConf), function (name, property) {
                                     if (property.value.querable) {
+                                        var js;
+                                        if (typeof property.value.linkprefix === "string" && property.value.linkprefix.split(":")[0] === "javascript") {
+                                            js = property.value.linkprefix.replace("javascript:", "");
+                                        }
                                         fi.push({
                                             title: property.value.alias || property.key,
-                                            value: property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
-                                                property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
-                                                    feature.properties[property.key]
+                                            value: js ? "<a target='_blank' rel='noopener' href='javascript:var url=`" + feature.properties[property.key] + "`;" + js + "'>Link</a>" :
+                                                property.value.link ? "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>" :
+                                                    property.value.image ? "<a target='_blank' href='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'><img style='width:178px' src='" + (property.value.type === "bytea" ? atob(feature.properties[property.key]) : feature.properties[property.key]) + "'/></a>" :
+                                                        feature.properties[property.key]
                                         });
 
                                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
@@ -263,11 +269,11 @@ module.exports = {
                             event.stopPropagation();
                         });
 
-                        $("#_download_excel_" + storeId ).click(function() {
-                           download(sql,"excel");
+                        $("#_download_excel_" + storeId).click(function () {
+                            download(sql, "excel");
                         });
-                        $("#_download_geojson_" + storeId).click(function() {
-                           download(sql,"geojson");
+                        $("#_download_geojson_" + storeId).click(function () {
+                            download(sql, "geojson");
                         });
 
 
@@ -393,7 +399,7 @@ module.exports = {
         $("#info-pane").empty();
     },
 
-    setDownloadFunction: function(fn) {
+    setDownloadFunction: function (fn) {
         download = fn
     }
 };
@@ -421,8 +427,8 @@ var download = function (sql, format) {
     request.open('POST', '/api/sql/' + db, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
     request.responseType = 'blob';
-    request.onload = function() {
-        if(request.status === 200) {
+    request.onload = function () {
+        if (request.status === 200) {
             var filename, type;
             switch (format) {
                 case "excel":
@@ -434,7 +440,7 @@ var download = function (sql, format) {
                     type = 'application/json';
                     break;
             }
-            var blob = new Blob([request.response], { type: type });
+            var blob = new Blob([request.response], {type: type});
             var link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = filename;
