@@ -6,6 +6,58 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Layer tree', () => {
+
+    /*
+    it("should react when application goes online or offline", async () => {
+        // @todo Not supported by Puppeteer right now https://github.com/GoogleChrome/puppeteer/issues/2469
+    });
+
+    it("should keep offline mode settings for layers after page reload", async () => {
+
+        // @todo Unstable test
+        return;
+
+        let page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
+        page = await helpers.waitForPageToLoad(page);
+
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(2000);
+
+        expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
+        expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;
+        await helpers.sleep(1000);
+
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').trigger('click')`);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Reload page
+        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
+        page = await helpers.waitForPageToLoad(page);
+        
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(2000);
+
+        expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
+        expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+    });
+    */
+
     it('should load layers from page URL from same schema', async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
