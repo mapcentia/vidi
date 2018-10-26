@@ -312,9 +312,6 @@ module.exports = {
             navigator.serviceWorker.getRegistrations().then(registrations => {
                 if (registrations.length === 1 && registrations[0].active !== null) {
                     queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-
-                        console.log(`### response 2`, response);
-
                         if (Array.isArray(response)) {
                             offlineModeControlsManager.setCachedLayers(response).then(() => {
                                 offlineModeControlsManager.updateControls();
@@ -404,10 +401,22 @@ module.exports = {
                             });
                         }
 
+                        if (`layersOfflineMode` in forcedState) {
+                            offlineModeSettings = forcedState.layersOfflineMode;
+                            for (let key in offlineModeSettings) {
+                                if (offlineModeSettings[key] === `true`) {
+                                    offlineModeSettings[key] = true;
+                                } else {
+                                    offlineModeSettings[key] = false;
+                                }
+                            }
+                        }
+
                         if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
                     }
 
                     if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
+                    
                     const proceedWithBuilding = () => {
                         layerTreeOrder = order;
                         if (editingIsEnabled) {
@@ -505,24 +514,16 @@ module.exports = {
                              */
                             const applyOfflineModeSettings = (settings) => {
                                 return new Promise((resolve, reject) => {
-
-
                                     queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
                                         try{
                                         if (Array.isArray(response)) {
-                                            
-                                            console.log(`### offlineModeSettings`, offlineModeSettings);
-
                                             for (let key in offlineModeSettings) {
                                                 if (key.indexOf(`v:`) === 0) {
                                                     // Before enabling offline mode for vector layer, the service worker has to be 
                                                     // requested if it has previously cached response for this layer                                                    
                                                     response.map(cachedRequest => {
                                                         if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
-
-                                                            console.log(`### response 1`, response);
-
-                                                            if (cachedRequest.offlineMode) {
+                                                            if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
                                                                 offlineModeControlsManager.setControlState(key, true);
                                                             }
                                                         }
@@ -1368,6 +1369,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+        console.log(`### newState`, newState);
+
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {
