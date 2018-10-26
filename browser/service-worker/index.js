@@ -9,6 +9,8 @@ const LOG_FETCH_EVENTS = false;
 const { detect } = require('detect-browser');
 const browser = detect();
 
+const localforage = require('localforage');
+
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
  * 1. API calls are always performed, the cached response is retured only if the app is offline or 
@@ -113,6 +115,68 @@ let urlsIgnoredForCaching = [{
     requested: '/version.json'
 }];
 
+
+/**
+ * Keeping mapping of request hashed parameters to theirs initial form
+ */
+const CACHED_VECTORS_KEY = `VIDI_CACHED_VECTORS_KEY`;
+let cachedVectorLayersKeeper = {
+    set: (key, value) => {
+
+        //console.log(`### CACHED_VECTORS_KEY set`, key, value);
+
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+                storedValue[key] = value;
+                localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
+
+                    //console.log(`### CACHED_VECTORS_KEY storedValue +`);
+
+                    resolve();
+                }).catch(error => {
+                    console.error(`Unable to store value`)
+                });
+            });
+        });
+    },
+    get: (key) => {
+
+        //console.log(`### CACHED_VECTORS_KEY get`, key);
+
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+                if (key in storedValue) {
+
+                    //console.log(`### CACHED_VECTORS_KEY storedValue`, storedValue[key]);
+
+                    resolve(storedValue[key]);
+                } else {
+
+                    //console.log(`### CACHED_VECTORS_KEY storedValue`, false);
+
+                    resolve(false);
+                }
+            });
+        });
+    },
+    getAllRecords: () => {
+
+        //console.log(`### CACHED_VECTORS_KEY getAllRecords`);
+
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+
+                //console.log(`### CACHED_VECTORS_KEY storedValue`, storedValue);
+
+                resolve(storedValue);
+            });
+        });
+    }
+};
+
 /**
  * Cleaning up and substituting with local URLs provided address
  * 
@@ -178,13 +242,26 @@ const normalizeTheURLForFetch = (event) => {
             } else {
                 clonedRequest.formData().then((formdata) => {
                     let payload = '';
+                    let mappedObject = {};
                     for (var p of formdata) {
+                        let splitParameter = p.toString().split(',');
+                        if (splitParameter.length === 2) {
+                            mappedObject[splitParameter[0]] = splitParameter[1];
+                        }
+
                         payload += p.toString();
                     }
-    
+
                     cleanedRequestURL += '/' + btoa(payload);
-    
-                    resolve(cleanedRequestURL);
+
+                    // @todo Implement for iOS
+                    cachedVectorLayersKeeper.get(cleanedRequestURL).then(hasRequest => {
+                        if (hasRequest === false) {
+                            cachedVectorLayersKeeper.set(cleanedRequestURL, mappedObject);
+                        }
+
+                        resolve(cleanedRequestURL);
+                    });
                 });
             }
         } else {
@@ -270,8 +347,8 @@ self.addEventListener('message', (event) => {
 
             forceIgnoredExtensionsCaching = false;
         }
-    } else if (`action` in event.data && `payload` in event.data) {
-        if  (event.data.action === `addUrlIgnoredForCaching`) {
+    } else if (`action` in event.data) {
+        if (event.data.action === `addUrlIgnoredForCaching` && `payload` in event.data) {
 
             if (LOG) console.log('Service worker: adding url that should not be cached', event.data);
 
@@ -282,6 +359,51 @@ self.addEventListener('message', (event) => {
                 });
             } else {
                 throw new Error(`Invalid URL format`);
+            }
+        } else if (event.data.action === `getListOfCachedRequests`) {
+            /**
+             * { action: "getListOfCachedRequests" }
+             * 
+             * 
+             * @returns {Array} of cached layer names
+            */
+
+            let layers = [];
+
+            cachedVectorLayersKeeper.getAllRecords().then(records => {
+                for (let key in records) {
+                    if (`meta` in records[key] && records[key].meta && `offlineMode` in records[key]) {
+                        layers.push({
+                            layerKey: (records[key].meta.f_table_schema + `.` + records[key].meta.f_table_name),
+                            offlineMode: records[key].offlineMode
+                        });
+                    }
+                }
+
+                event.ports[0].postMessage(layers);
+            });
+        } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
+            if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
+                cachedVectorLayersKeeper.getAllRecords().then(records => {
+                    for (let key in records) {
+                        if (`meta` in records[key] && records[key].meta) {
+                            let localLayerKey = (records[key].meta.f_table_schema + `.` + records[key].meta.f_table_name);
+                            if (localLayerKey === event.data.payload.layerKey) {
+                                if (event.data.action === `enableOfflineModeForLayer`) {
+                                    records[key].offlineMode = true;
+                                } else if (event.data.action === `disableOfflineModeForLayer`) {
+                                    records[key].offlineMode = false;
+                                }
+
+                                cachedVectorLayersKeeper.set(key, records[key]).then(() => {
+                                    event.ports[0].postMessage(true);
+                                });
+                            }
+                        }
+                    }
+                });
+            } else {
+                throw new Error(`Invalid payload for ${event.data.action} action`);
             }
         } else {
             throw new Error(`Unrecognized action`);
@@ -313,20 +435,50 @@ self.addEventListener('fetch', (event) => {
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
-                    return fetch(event.request).then(apiResponse => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
-                        // Caching the API request in case if app will go offline aftewards
-                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                            resolve(apiResponse);
-                        }).catch(error => {
-                            throw new Error('Unable to put the response in cache');
-                            reject();
-                        });
-                    }).catch(error => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
-                        resolve(cachedResponse);
+                    return cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
+                        // If the vector layer is set to be offline, then return the cached response
+                        if (cachedResponse && record && `offlineMode` in record && record.offlineMode) {
+                            resolve(cachedResponse);
+                        } else {
+                            return fetch(event.request).then(apiResponse => {
+                                if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+
+                                if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                                    if (record && `q` in record) {
+                                        // Detect what layer/table it is
+                                        let decodedQuery = decodeURI(atob(record.q));
+                                        let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                                        if (matches.length === 1) {
+                                            let tableName = matches[0].trim().split(`.`);
+
+                                            if (`offlineMode` in record === false) {
+                                                record.offlineMode = false;
+                                            }
+
+                                            record.meta = {
+                                                "f_table_schema": tableName[0],
+                                                "f_table_name": tableName[1]
+                                            };
+
+                                            cachedVectorLayersKeeper.set(cleanedRequestURL, record);
+                                        }
+                                    }
+                                }
+
+                                // Caching the API request in case if app will go offline aftewards
+                                return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                                    resolve(apiResponse);
+                                }).catch(() => {
+                                    throw new Error('Unable to put the response in cache');
+                                    reject();
+                                });
+                            }).catch(error => {
+                                if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
+                                resolve(cachedResponse);
+                            });
+                        }
                     });
-                }).catch(error => {
+                }).catch(() => {
                     throw new Error('Unable to open cache');
                     reject();
                 });

@@ -33,14 +33,23 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="togglebutton">
-                    <label>
-                        <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                        <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                        <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                        <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                    </label>
-                 </div>`);
+        return (`<div class="panel panel-default">
+            <div class="panel-body">
+                ${__('Network status')}
+                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;">
+                    <i class="fa fa-ellipsis-h"></i> ${__('Pending')}
+                </span>
+                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;">
+                    <i class="fa fa-signal"></i> Online
+                </span>
+                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
+                    <i class="fa fa-times"></i> Offline
+                </span>
+                <span class="js-set-all-layer-offline-mode-container">
+                    ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
+                </span>
+            </div>
+        </div>`);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -115,7 +124,21 @@ class MarkupGenerator {
                     <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
                         style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
                 </div>
-                
+
+                <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
+                    <div class="btn-group" role="group">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}">
+                            <i class="fa fa-signal"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}">
+                            <i class="fa fa-times"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}">
+                            <i class="fa fa-refresh"></i>
+                        </button>
+                    </div>
+                </div>
+
                 <div style="display: inline-block;">
                     <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>

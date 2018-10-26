@@ -480,7 +480,7 @@ module.exports = {
             addFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         addFeature();
                     }
@@ -505,7 +505,6 @@ module.exports = {
     edit: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = e;
         nonCommitedEditedFeature = {};
-
         const editFeature = () => {
             let React = require('react');
 
@@ -707,7 +706,7 @@ module.exports = {
             editFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (`id` in editedFeature && apiBridgeInstance.offlineModeIsEnforcedForLayer(editedFeature.id.replace(`v:`, ``))) {
                     if (confirm(confirmMessage)) {
                         editFeature();
                     }
@@ -795,7 +794,7 @@ module.exports = {
             deleteFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         deleteFeature();
                     }

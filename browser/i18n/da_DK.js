@@ -156,6 +156,8 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Network status": "# Network status",
+        "Set all layers to be": "# Set all layers to be",
         "Force offline mode": "Tving offline tilstand",
         "Tile": "Raster",
         "Vector": "Vektor",
@@ -178,6 +180,10 @@ module.exports = {
         "Yes": "Ja",
         "No": "Nej",
         "Add condition": "Tilføj betingelsebetingelse",
+        "Refresh cache for layer": "# Refresh cache for layer",
+        "Fetch layer data from server": "# Fetch layer data from server",
+        "Fetch layer data from cache": "# Fetch layer data from cache",
+        "Refresh existing cache for layer": "# Refresh existing cache for layer",        
         "Apply": "Anvend",
 
         // Base layers

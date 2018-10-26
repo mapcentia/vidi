@@ -20,16 +20,16 @@ class APIBridge {
     constructor() {
         console.log('APIBridge: initializing');
 
-        this._forcedOffline = false;
+        this._forcedOfflineLayers = {};
         this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
-                if (LOG) {
-                    console.log('APIBridge: in queue processor', queueItem);
-                    console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforced());
-                }
-
                 let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
 
+                if (LOG) {
+                    console.log('APIBridge: in queue processor', queueItem);
+                    console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName));
+                }
+                
                 let generalRequestParameters = {
                     dataType: 'json',
                     contentType: 'application/json',
@@ -89,7 +89,7 @@ class APIBridge {
                         let queueItemCopy = JSON.parse(JSON.stringify(queueItem));
                         delete queueItemCopy.feature.features[0].properties.gid;
 
-                        if (singletoneInstance.offlineModeIsEnforced()) {
+                        if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                             
                             if (LOG) console.log('APIBridge: offline mode is enforced, add request was not performed');
                             
@@ -109,7 +109,7 @@ class APIBridge {
                             
                             resolve();
                         } else {
-                            if (singletoneInstance.offlineModeIsEnforced()) {
+                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                                 
                                 if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
 
@@ -131,7 +131,7 @@ class APIBridge {
 
                             resolve();
                         } else {
-                            if (singletoneInstance.offlineModeIsEnforced()) {
+                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                                 
                                 if (LOG) console.log('APIBridge: offline mode is enforced, delete request was not performed');
 
@@ -193,21 +193,26 @@ class APIBridge {
     }
 
     /**
-     * Sets offline mode
-     * 
+     * Sets offline mode for specific layer
+     *
+     * @param {String}  layerKey Layer key
+     * @param {Boolean} mode     Specifies the offline mode
+     *  
      * @param {Function} listener Listening function
      */
-    setOfflineMode(mode) {
-        this._forcedOffline = mode;
+    setOfflineModeForLayer(layerKey, mode) {
+        this._forcedOfflineLayers[layerKey] = mode;
     }
 
     /**
-     * Tells if the offline mode is currently enforced
+     * Tells if the offline mode is currently enforced for specific layer
+     * 
+     * @param {String} layerKey Layer key
      * 
      * @return {Boolean}
      */
-    offlineModeIsEnforced() {
-        return this._forcedOffline;
+    offlineModeIsEnforcedForLayer(layerKey) {
+        return (this._forcedOfflineLayers[layerKey] ? true : false);
     }
 
     /**
