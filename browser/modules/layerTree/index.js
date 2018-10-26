@@ -1369,9 +1369,6 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-
-        console.log(`### newState`, newState);
-
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {

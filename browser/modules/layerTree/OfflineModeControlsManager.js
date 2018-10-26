@@ -38,10 +38,6 @@ class OfflineModeControlsManager {
         meta = metaObject;
     }
 
-    applyOfflineModeSettings(settings) {
-        console.log(`### got to apply ${settings}`);
-    }
-
     getOfflineModeSettings() {
         return this.offlineModeValues;
     }
@@ -61,9 +57,6 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     setAllControlsState(applicationIsOnline, apiBridgeInstance) {
-
-        console.log(`### setAllControlsState`);
-
         this._apiBridgeInstance = apiBridgeInstance;
         return new Promise((resolve, reject) => {
             if (applicationIsOnline) {
@@ -155,9 +148,6 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     updateControls() {
-
-        console.log(`### updateControls`);
-
         return new Promise((resolve, reject) => {
             this._getAvailableLayersKeys().then(layerKeys => {
 
@@ -310,9 +300,6 @@ class OfflineModeControlsManager {
         }
 
         layerKey = layerKey.replace(`v:`, ``);
-
-        console.log(`### setControlState`, layerKey, offlineMode);
-
         if (this.isVectorLayer(layerKey)) {
             this.offlineModeValues[`v:` + layerKey] = offlineMode;
         } else {

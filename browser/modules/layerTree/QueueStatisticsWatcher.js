@@ -81,26 +81,6 @@ class QueueStatisticsWatcher {
                 offlineModeControlsManager.updateControls();
             });
 
-            /*
-            if (statistics.online) {
-                // User have not decided yet whenever he want to force or not the
-                // offline mode or user already selected not to force offline mode
-
-                if (userPreferredForceOfflineMode === false || userPreferredForceOfflineMode === -1) {
-                    apiBridgeInstance.setOfflineMode(false);
-                    $('.js-toggle-offline-mode').prop('checked', false);
-                } else {
-                    apiBridgeInstance.setOfflineMode(true);
-                    $('.js-toggle-offline-mode').prop('checked', true);
-                }
-            } else {
-                if (applicationIsOnline !== false) {
-                    apiBridgeInstance.setOfflineMode(true);
-                    $('.js-toggle-offline-mode').prop('checked', true);
-                }
-            }
-            */
-
             for (let key in statistics) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);
                 if (layerControlContainer.length === 1) {
