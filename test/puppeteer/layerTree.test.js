@@ -6,17 +6,11 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Layer tree', () => {
-
-    /*
     it("should react when application goes online or offline", async () => {
         // @todo Not supported by Puppeteer right now https://github.com/GoogleChrome/puppeteer/issues/2469
     });
 
     it("should keep offline mode settings for layers after page reload", async () => {
-
-        // @todo Unstable test
-        return;
-
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
         page = await helpers.waitForPageToLoad(page);
@@ -24,6 +18,9 @@ describe('Layer tree', () => {
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(2000);
+
+        await page.screenshot({ path: './test.png' });
+        console.log(`### First error occurence`);
 
         expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
@@ -56,6 +53,17 @@ describe('Layer tree', () => {
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
     });
+
+
+
+
+    /*
+    should be able to request service worker about cached layers (preloaded layer from URL and manually loaded vector layer)
+    refreshes cache for vector layers in offline mode
+    pulls vector layer data from cache if the offline mode is enabled
+    remember choices made by user and accounts them upon application availability change
+    test all the editing cases in editor.test.js
+    test the snapshot iteraction in stateSnapshot.test.js
     */
 
     it('should load layers from page URL from same schema', async () => {

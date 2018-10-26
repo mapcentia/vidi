@@ -129,13 +129,6 @@ class OfflineModeControlsManager {
         });
 
         if (isVectorLayer === -1) {
-            /*
-            if (layerKey.indexOf(`v:`) === 0) {
-                isVectorLayer = true;
-            } else {
-                isVectorLayer = false;
-            }
-            */
             throw new Error(`Unable to detect current layer type for ${layerKey}`);
         }
 
@@ -148,6 +141,9 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     updateControls() {
+
+        console.log(`### updateControls`);
+
         return new Promise((resolve, reject) => {
             this._getAvailableLayersKeys().then(layerKeys => {
 
@@ -295,6 +291,9 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     setControlState(layerKey, offlineMode) {
+
+console.log(`### setControlState`, layerKey, offlineMode);
+
         if (layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid layer key was provided: ${layerKey}`);
         }

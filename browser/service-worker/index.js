@@ -123,7 +123,15 @@ const CACHED_VECTORS_KEY = `VIDI_CACHED_VECTORS_KEY`;
 let cachedVectorLayersKeeper = {
     set: (key, value) => {
 
-        //console.log(`### CACHED_VECTORS_KEY set`, key, value);
+
+        self.clients.matchAll().then(function (clients){
+            clients.forEach(function(client){
+                client.postMessage({
+                    msg: "@@@ set"
+                });
+            });
+        });
+
 
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
@@ -131,7 +139,15 @@ let cachedVectorLayersKeeper = {
                 storedValue[key] = value;
                 localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
 
-                    //console.log(`### CACHED_VECTORS_KEY storedValue +`);
+                    self.clients.matchAll().then(function (clients){
+                        clients.forEach(function(client){
+                            client.postMessage({
+                                msg: "@@@ set done"
+                            });
+                        });
+                    });
+
+
 
                     resolve();
                 }).catch(error => {
@@ -141,35 +157,36 @@ let cachedVectorLayersKeeper = {
         });
     },
     get: (key) => {
-
-        //console.log(`### CACHED_VECTORS_KEY get`, key);
-
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
                 if (key in storedValue) {
 
-                    //console.log(`### CACHED_VECTORS_KEY storedValue`, storedValue[key]);
+                    self.clients.matchAll().then(function (clients){
+                        clients.forEach(function(client){
+                            client.postMessage({
+                                msg: "@@@ get done " + JSON.stringify(storedValue[key])
+                            });
+                        });
+                    });
 
                     resolve(storedValue[key]);
                 } else {
-
-                    //console.log(`### CACHED_VECTORS_KEY storedValue`, false);
-
                     resolve(false);
                 }
             });
         });
     },
     getAllRecords: () => {
-
-        //console.log(`### CACHED_VECTORS_KEY getAllRecords`);
-
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
 
-                //console.log(`### CACHED_VECTORS_KEY storedValue`, storedValue);
+                /*
+                self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
+                    msg: "@@@ getAllRecords done " + JSON.stringify(storedValue)
+                }); }); });
+                */
 
                 resolve(storedValue);
             });
@@ -253,14 +270,33 @@ const normalizeTheURLForFetch = (event) => {
                     }
 
                     cleanedRequestURL += '/' + btoa(payload);
+                    resolve(cleanedRequestURL);
 
                     // @todo Implement for iOS
-                    cachedVectorLayersKeeper.get(cleanedRequestURL).then(hasRequest => {
-                        if (hasRequest === false) {
-                            cachedVectorLayersKeeper.set(cleanedRequestURL, mappedObject);
-                        }
+                    cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
+                        // Request is performed first time, got to record it in cached vector layers keeper
+                        if (record === false) {
+                            record = {};
+                            let decodedQuery = decodeURI(atob(mappedObject.q));
+                            let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                            if (matches.length === 1) {
+                                let tableName = matches[0].trim().split(`.`);
+                                record.offlineMode = false;
+                                record.layerKey = (tableName[0] + `.` + tableName[1]);
+                            } else {
+                                throw new Error(`Unable to detect the layer key`);
+                            }
 
-                        resolve(cleanedRequestURL);
+                            self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
+                                msg: "@@@ Just created a record"
+                            });});});
+
+                            cachedVectorLayersKeeper.set(cleanedRequestURL, record).then(() => {
+                                resolve(cleanedRequestURL);
+                            });
+                        } else {
+                            resolve(cleanedRequestURL);
+                        }                        
                     });
                 });
             }
@@ -369,12 +405,11 @@ self.addEventListener('message', (event) => {
             */
 
             let layers = [];
-
             cachedVectorLayersKeeper.getAllRecords().then(records => {
                 for (let key in records) {
-                    if (`meta` in records[key] && records[key].meta && `offlineMode` in records[key]) {
+                    if (`layerKey` in records[key] && records[key].layerKey && `offlineMode` in records[key]) {
                         layers.push({
-                            layerKey: (records[key].meta.f_table_schema + `.` + records[key].meta.f_table_name),
+                            layerKey: records[key].layerKey,
                             offlineMode: records[key].offlineMode
                         });
                     }
@@ -386,8 +421,8 @@ self.addEventListener('message', (event) => {
             if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
                 cachedVectorLayersKeeper.getAllRecords().then(records => {
                     for (let key in records) {
-                        if (`meta` in records[key] && records[key].meta) {
-                            let localLayerKey = (records[key].meta.f_table_schema + `.` + records[key].meta.f_table_name);
+                        if (`layerKey` in records[key] && records[key].layerKey) {
+                            let localLayerKey = records[key].layerKey;
                             if (localLayerKey === event.data.payload.layerKey) {
                                 if (event.data.action === `enableOfflineModeForLayer`) {
                                     records[key].offlineMode = true;
@@ -436,7 +471,7 @@ self.addEventListener('fetch', (event) => {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
                     return cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
-                        // If the vector layer is set to be offline, then return the cached response
+                        // If the vector layer is set to be offline, then return the cached response (if response exists)
                         if (cachedResponse && record && `offlineMode` in record && record.offlineMode) {
                             resolve(cachedResponse);
                         } else {
@@ -444,6 +479,9 @@ self.addEventListener('fetch', (event) => {
                                 if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
 
                                 if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+
+
+
                                     if (record && `q` in record) {
                                         // Detect what layer/table it is
                                         let decodedQuery = decodeURI(atob(record.q));
@@ -455,14 +493,14 @@ self.addEventListener('fetch', (event) => {
                                                 record.offlineMode = false;
                                             }
 
-                                            record.meta = {
-                                                "f_table_schema": tableName[0],
-                                                "f_table_name": tableName[1]
-                                            };
+                                            record.layerKey = (tableName[0] + `.` + tableName[1]);
 
                                             cachedVectorLayersKeeper.set(cleanedRequestURL, record);
                                         }
                                     }
+
+
+
                                 }
 
                                 // Caching the API request in case if app will go offline aftewards
