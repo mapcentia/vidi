@@ -142,6 +142,9 @@ module.exports = {
             `<div class="cartodb-popup-content">
                 <h4>Class</h4>
                 <p>{{{ class }}}</p>
+                <h4>Value</h4>
+                <p>{{{ value_0 }}}</p>
+             
              </div>`;
 
         $.each(layers, function (index, value) {
@@ -195,7 +198,7 @@ module.exports = {
 
                     isEmpty = layerObj.isEmpty();
 
-                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster :defaultTemplate;
+                    template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -358,7 +361,7 @@ module.exports = {
                 fieldStr = "*";
             }
             if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
-                sql = "SELECT rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+                sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                     "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
                     "WHERE ST_Intersects(rast,the_geom) ";
 
@@ -411,13 +414,21 @@ module.exports = {
 
         // Hardcoded field config for raster layers
         if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
-            fieldConf = {class: {
-                "alias": "Class",
-                "column": "class",
-                "id": "class",
-                "querable": true
+            fieldConf = {
+                class: {
+                    "alias": "Class",
+                    "column": "class",
+                    "id": "class",
+                    "querable": true
+                },
+                value_0: {
+                    "alias": "Value",
+                    "column": "value_0",
+                    "id": "value_0",
+                    "querable": true
                 }
             };
+
         } else {
             fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
                 && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")

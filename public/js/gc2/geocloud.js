@@ -113,7 +113,8 @@ geocloud = (function () {
             return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function (feature, layer) {},
+        onEachFeature: function (feature, layer) {
+        },
         onLoad: function () {
         },
         transformResponse: function (response) {
@@ -584,8 +585,8 @@ geocloud = (function () {
                 };
 
                 if (defaults.singleTile) {
-	            // Insert in tile pane, so non-tiled and tiled layers can be sorted
-		    options.pane = "tilePane";
+                    // Insert in tile pane, so non-tiled and tiled layers can be sorted
+                    options.pane = "tilePane";
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
@@ -789,10 +790,10 @@ geocloud = (function () {
                 }
             }
             throw new Error('Control doesn\'t have any active base layer!')
-        }
+        };
 
         /**
-         * Returns both tile and vector visible layers 
+         * Returns both tile and vector visible layers
          */
         this.getAllTypesOfVisibleLayers = function (getBaseLayers) {
             getBaseLayers = (getBaseLayers === true) ? true : false;
@@ -1659,7 +1660,7 @@ geocloud = (function () {
                                         existingLayer.push(layers[key].name);
                                     } else {
                                         lControl.removeLayer(layers[key].layer);
-                                    }                                   
+                                    }
                                 }
                             }
 

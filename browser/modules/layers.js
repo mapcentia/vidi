@@ -210,7 +210,7 @@ module.exports = {
 
             $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name,
-                    singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+                    useLiveWMS = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true); //TODO rename single_tile
 
                 if (layer === l) {
                     isBaseLayer = !!v.baselayer;
@@ -219,15 +219,12 @@ module.exports = {
                         layers: [layer],
                         db: db,
                         isBaseLayer: isBaseLayer,
-                        tileCached: !singleTiled,
-                        singleTile: singleTiled,
-                        // @todo Was somehow set to false
-                        //visibility: false,
+                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: v.f_table_name,
-                        // Single tile option
-                        type: !singleTiled ? "tms" : "wms",
+                        type: "wms", // Always use WMS protocol
                         format: "image/png",
                         uri: uri,
                         loadEvent: function () {
