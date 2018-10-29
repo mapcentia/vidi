@@ -162,9 +162,9 @@ const queryServiceWorker = (data) => {
     return new Promise((resolve, reject) => {
         var messageChannel = new MessageChannel();
         messageChannel.port1.onmessage = (event) => {
-            if(event.data.error){
+            if (event.data.error) {
                 reject(event.data.error);
-            }else{
+            } else {
                 resolve(event.data);
             }
         };
@@ -198,6 +198,10 @@ module.exports = {
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
             editingIsEnabled = true;
         }
+
+        navigator.serviceWorker.addEventListener('message', event => {
+            console.log(`### From SW`, event.data.msg);
+        });
 
         _self = this;
         queueStatistsics = new QueueStatisticsWatcher({ switchLayer, offlineModeControlsManager, layerTree: _self });
@@ -497,14 +501,6 @@ module.exports = {
 
                             if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-
-
-
-
-
-
-
-
                             /**
                              * Checks if the offline mode settings for vector layers do not conflict with the service worker cache. If
                              * there is a conflict, it is better to silently remove the conflicting offline mode settings, either
@@ -520,9 +516,18 @@ module.exports = {
                                             for (let key in offlineModeSettings) {
                                                 if (key.indexOf(`v:`) === 0) {
                                                     // Before enabling offline mode for vector layer, the service worker has to be 
-                                                    // requested if it has previously cached response for this layer                                                    
+                                                    // requested if it has previously cached response for this layer
+                                                    
+                                                    
+                                                    
+                                                    console.log(`### here 1`);
+
                                                     response.map(cachedRequest => {
                                                         if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
+
+                                                            console.log(`### here 2`, cachedRequest, offlineModeSettings[key]);
+
+
                                                             if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
                                                                 offlineModeControlsManager.setControlState(key, true);
                                                             }
