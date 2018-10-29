@@ -117,16 +117,6 @@ module.exports = module.exports = {
         applicationWideControls.prop('checked', enable);
 
         let result = new Promise((resolve, reject) => {
-
-            
-            /*
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-            
-            console.log(`### BBB 1`, registrations.length);
-            console.log(`### BBB 2`, registrations[0].active.state);
-            */
-            
-
             let vectorDataStores = layerTree.getStores();
 
             let layer = cloud.get().getLayersByName(name);
@@ -240,11 +230,6 @@ module.exports = module.exports = {
                 _self.uncheckLayerControl(name, doNotLegend);
                 resolve();
             }
-
-            /*
-            });
-            */
-
         });
 
         return result;

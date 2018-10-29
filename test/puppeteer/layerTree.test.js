@@ -5,9 +5,9 @@
 const { expect } = require("chai");
 const helpers = require("./../helpers");
 
-describe('Layer tree', () => {
+describe('Layer tree common', () => {
+    /*
     it(`should react when application goes online or offline`, async () => {
-        /*
         @todo Not supported by Puppeteer right now https://github.com/GoogleChrome/puppeteer/issues/2469
 
         Following options do not work:
@@ -49,9 +49,9 @@ describe('Layer tree', () => {
         });
 
         await helpers.sleep(8000);
-        await page.screenshot({ path: './test.png' });
-        */
+        await page.screenshot({ path: './test.png' });  
     });
+    */
 
     it(`should keep offline mode settings for layers after page reload`, async () => {
         // @todo Unstable test case
@@ -97,6 +97,8 @@ describe('Layer tree', () => {
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-refresh').prop('disabled')`)).to.be.false;
+
+        await page.close();
     });
 
     it(`pulls layer data from cache if the vector is set to be offline, pulls data from server if it is not`, async () => {
@@ -153,6 +155,8 @@ describe('Layer tree', () => {
         await helpers.sleep(2000);
 
         expect(requestWasServedFromSWCache).to.be.false;
+
+        await page.close();
     });
 
     it(`uses Service worker API in order to control offline mode settings for layers`, async () => {
@@ -283,6 +287,9 @@ describe('Layer tree', () => {
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
+
         await page._client.send('Network.enable');
 
         let apiWasRequested = false;
@@ -291,8 +298,11 @@ describe('Layer tree', () => {
                 apiWasRequested = true;
             }
         });
+
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('[type="checkbox"]').prop('checked')`)).to.be.true;
         expect(apiWasRequested).to.be.true;
+        await helpers.sleep(2000);
 
         let tilesWereRequested = false;
         await page._client.on('Network.requestWillBeSent', event => {
@@ -302,9 +312,7 @@ describe('Layer tree', () => {
         });
 
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-tile').trigger('click')`);
-
-        await helpers.sleep(1000);
-        await page.screenshot({ path: './test.png' });
+        await helpers.sleep(2000);
         expect(tilesWereRequested).to.be.true;
 
         await page.close();
