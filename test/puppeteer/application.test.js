@@ -8,7 +8,7 @@ const helpers = require("./../helpers");
 describe("Application", () => {
     it("should be able to reset the application", async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
         page = await helpers.waitForPageToLoad(page);
 
         // Accepting the dialog
@@ -44,7 +44,7 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
 
-        expect(page.url()).to.equal(`https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#stamenTonerLite/0/39.2963/-6.8335/`);
+        expect(page.url()).to.equal(`https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
     });
 
     it("should ignore invalid layer in URL", async () => {
