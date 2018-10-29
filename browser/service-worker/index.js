@@ -27,6 +27,17 @@ const localforage = require('localforage');
  */
 
 /**
+ * Broadcasting service messages to clients, mostly used for debugging and validation
+ */
+const sendMessageToClients = (data) => {
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({ msg: data });
+        });
+    });
+};
+
+/**
  * 
  */
 let ignoredExtensionsRegExps = [];
@@ -122,32 +133,13 @@ let urlsIgnoredForCaching = [{
 const CACHED_VECTORS_KEY = `VIDI_CACHED_VECTORS_KEY`;
 let cachedVectorLayersKeeper = {
     set: (key, value) => {
-
-
-        self.clients.matchAll().then(function (clients){
-            clients.forEach(function(client){
-                client.postMessage({
-                    msg: "@@@ set"
-                });
-            });
-        });
-
-
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
                 storedValue[key] = value;
                 localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
 
-                    self.clients.matchAll().then(function (clients){
-                        clients.forEach(function(client){
-                            client.postMessage({
-                                msg: "@@@ set done"
-                            });
-                        });
-                    });
-
-
+                    //sendMessageToClients("@@@ set done");
 
                     resolve();
                 }).catch(error => {
@@ -162,13 +154,7 @@ let cachedVectorLayersKeeper = {
                 if (!storedValue) storedValue = {};
                 if (key in storedValue) {
 
-                    self.clients.matchAll().then(function (clients){
-                        clients.forEach(function(client){
-                            client.postMessage({
-                                msg: "@@@ get done " + JSON.stringify(storedValue[key])
-                            });
-                        });
-                    });
+                    //sendMessageToClients("@@@ get done " + JSON.stringify(storedValue[key]));
 
                     resolve(storedValue[key]);
                 } else {
@@ -182,11 +168,7 @@ let cachedVectorLayersKeeper = {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
 
-                /*
-                self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
-                    msg: "@@@ getAllRecords done " + JSON.stringify(storedValue)
-                }); }); });
-                */
+                //sendMessageToClients("@@@ getAllRecords done " + JSON.stringify(storedValue));
 
                 resolve(storedValue);
             });
@@ -287,9 +269,11 @@ const normalizeTheURLForFetch = (event) => {
                                 throw new Error(`Unable to detect the layer key`);
                             }
 
+                            /*
                             self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
                                 msg: "@@@ Just created a record"
                             });});});
+                            */
 
                             cachedVectorLayersKeeper.set(cleanedRequestURL, record).then(() => {
                                 resolve(cleanedRequestURL);
@@ -473,15 +457,13 @@ self.addEventListener('fetch', (event) => {
                     return cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
                         // If the vector layer is set to be offline, then return the cached response (if response exists)
                         if (cachedResponse && record && `offlineMode` in record && record.offlineMode) {
+                            sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
                             resolve(cachedResponse);
                         } else {
                             return fetch(event.request).then(apiResponse => {
                                 if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
 
                                 if (cleanedRequestURL.indexOf('/api/sql') > -1) {
-
-
-
                                     if (record && `q` in record) {
                                         // Detect what layer/table it is
                                         let decodedQuery = decodeURI(atob(record.q));
