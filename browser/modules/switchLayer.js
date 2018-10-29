@@ -256,10 +256,12 @@ module.exports = module.exports = {
         if (el) {
             el.prop('checked', enable);
             if (enable && layerName.indexOf(`v:`) === 0) {
+                $(el).closest(`.layer-item`).find(`.js-toggle-opacity`).hide();
                 $(el).closest(`.layer-item`).find(`.js-toggle-filters`).show();
                 $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).show();
                 $(el).closest(`.layer-item`).find(`.js-toggle-layer-offline-mode-container`).show();
             } else {
+                $(el).closest(`.layer-item`).find(`.js-toggle-opacity`).show();
                 $(el).closest(`.layer-item`).find(`.js-toggle-filters`).hide();
                 $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).hide();
                 $(el).closest(`.layer-item`).find(`.js-toggle-layer-offline-mode-container`).show();

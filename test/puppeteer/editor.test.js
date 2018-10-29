@@ -176,24 +176,11 @@ describe('Editor', () => {
             await page.click(`#burger-btn`);
             await helpers.sleep(1000);
 
-            
-
-
-
             let layerIsSetOffline = await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`);
             if (layerIsSetOffline === false) {
                 await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
                 await helpers.sleep(1000);
             }
-
-
-
-
-
-
-
-
-
 
             await page.evaluate(`$('#layer-slide .close').trigger('click')`);
             await helpers.sleep(1000);
