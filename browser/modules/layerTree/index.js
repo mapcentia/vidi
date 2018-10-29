@@ -372,8 +372,10 @@ module.exports = {
 
                 // Emptying the tree
                 $("#layers").empty();
-
                 _self.getLayersOrderAndOfflineModeSettings().then(({ order, offlineModeSettings }) => {
+
+
+                    
 
                     try {
 
@@ -420,7 +422,6 @@ module.exports = {
                     }
 
                     if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
-                    
                     const proceedWithBuilding = () => {
                         layerTreeOrder = order;
                         if (editingIsEnabled) {
@@ -511,29 +512,17 @@ module.exports = {
                             const applyOfflineModeSettings = (settings) => {
                                 return new Promise((resolve, reject) => {
                                     queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-                                        try{
                                         if (Array.isArray(response)) {
                                             for (let key in offlineModeSettings) {
                                                 if (key.indexOf(`v:`) === 0) {
-                                                    // Before enabling offline mode for vector layer, the service worker has to be 
-                                                    // requested if it has previously cached response for this layer
-                                                    
-                                                    
-                                                    
-                                                    console.log(`### here 1`);
-
+                                                    // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                                     response.map(cachedRequest => {
                                                         if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
-
-                                                            console.log(`### here 2`, cachedRequest, offlineModeSettings[key]);
-
-
                                                             if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
                                                                 offlineModeControlsManager.setControlState(key, true);
                                                             }
                                                         }
                                                     });
-
                                                 } else {
                                                     // Enabling corresponding settings for tile layers without any checks
                                                     if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
@@ -544,7 +533,6 @@ module.exports = {
         
                                             resolve();
                                         }
-                                    }catch(e){console.log(e)};
                                     });
                                 });
                             };
@@ -1135,8 +1123,13 @@ module.exports = {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
+            let selectorLayerType = `tile`;
+            if (layerIsTheVectorOne) {
+                selectorLayerType = `vector`;
+            }
+
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));          
+                layer, selectorLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));          
 
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');

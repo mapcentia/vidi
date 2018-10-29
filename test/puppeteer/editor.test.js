@@ -176,11 +176,24 @@ describe('Editor', () => {
             await page.click(`#burger-btn`);
             await helpers.sleep(1000);
 
-            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
+            
+
+
+
+            let layerIsSetOffline = await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`);
+            if (layerIsSetOffline === false) {
+                await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
                 await helpers.sleep(1000);
             }
+
+
+
+
+
+
+
+
+
 
             await page.evaluate(`$('#layer-slide .close').trigger('click')`);
             await helpers.sleep(1000);
@@ -278,6 +291,14 @@ describe('Editor', () => {
             await page.evaluate(`$('.toggle').trigger('click');`);
         }
 
+        let layerIsSetOffline = await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`);
+        if (layerIsSetOffline) {
+            await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
+            await helpers.sleep(1000);
+        }
+
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+
         await helpers.sleep(1000);
 
         await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
@@ -300,8 +321,7 @@ describe('Editor', () => {
 
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('.toggle').trigger('click');`);
-
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
 	    await helpers.sleep(6000);
 
 	    // Created feature is already rejected by server, so checking corresponding indicator

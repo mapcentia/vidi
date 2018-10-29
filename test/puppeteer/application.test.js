@@ -6,27 +6,6 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("Application", () => {
-    it("should constantly check for connection status and keep Force offline mode selector updated", async () => {
-        let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
-        page = await helpers.waitForPageToLoad(page);
-
-        await page.click(`#burger-btn`);
-        await helpers.sleep(3000);
-        await page.screenshot({ path: './test.png' });
-        expect(await page.evaluate(`$('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
-        expect(await page.evaluate(`$('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
-
-        let forceOfflineModeIndicator;
-        forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-        expect(forceOfflineModeIndicator).to.be.false;
-
-        await page.evaluate(`$('.js-toggle-offline-mode').parent().find('.toggle').trigger('click')`);
-
-        forceOfflineModeIndicator = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-        expect(forceOfflineModeIndicator).to.be.true;
-    });
-
     it("should be able to reset the application", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);

@@ -6,6 +6,10 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("State snapshots", () => {
+    it("should store the offline mode settings, as well as apply them according to cache status", async () => {
+        // @todo Implement
+    });
+
     it("should react to authorization status change", async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL);

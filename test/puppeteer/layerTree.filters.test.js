@@ -14,7 +14,7 @@ const createPage = async () => {
     page = await helpers.waitForPageToLoad(page);
 
     await page._client.send('Network.enable');
-        
+
     await page.evaluate(`$('#search-border').trigger('click')`);
     await helpers.sleep(500);
     await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);

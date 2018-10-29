@@ -141,9 +141,6 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     updateControls() {
-
-        console.log(`### updateControls`);
-
         return new Promise((resolve, reject) => {
             this._getAvailableLayersKeys().then(layerKeys => {
 
@@ -291,9 +288,6 @@ class OfflineModeControlsManager {
      * @returns {Promise}
      */
     setControlState(layerKey, offlineMode) {
-
-console.log(`### setControlState`, layerKey, offlineMode);
-
         if (layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid layer key was provided: ${layerKey}`);
         }
