@@ -172,6 +172,7 @@ module.exports = {
         "any": "enhver",
         "all": "alle",
         "Select": "Vælg",
+        "Opacity": "Opacitet",
         "Filters": "Filtre",
         "Disable": "Deaktiver",
         "Table view": "Tabel view",

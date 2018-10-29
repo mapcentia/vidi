@@ -169,6 +169,7 @@ module.exports = {
         "any": "any",
         "all": "all",
         "Select": "Select",
+        "Opacity": "Opacity",
         "Filters": "Filters",
         "Disable": "Disable",
         "Table view": "Table view",

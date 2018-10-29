@@ -1137,6 +1137,7 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+                $(layerContainer).find(`.js-toggle-opacity`).show();
                 $(layerContainer).find(`.js-toggle-filters`).hide();
                 $(layerContainer).find(`.js-toggle-table-view`).hide();
                 $(layerContainer).find('.js-layer-settings').hide(0);
@@ -1153,6 +1154,7 @@ module.exports = {
                 $(switcher).prop('checked', true);
 
                 let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+                $(layerContainer).find(`.js-toggle-opacity`).hide();
                 $(layerContainer).find(`.js-toggle-filters`).show();
                 $(layerContainer).find(`.js-toggle-table-view`).show();
 
@@ -1265,10 +1267,16 @@ module.exports = {
                     });
                 });
 
+                if (layerIsTheTileOne === false) {
+                    $(layerContainer).find(`.js-toggle-opacity`).remove();
+                }
+
                 if (layerIsActive && defaultLayerType === `vector`) {
+                    $(layerContainer).find(`.js-toggle-opacity`).hide();
                     $(layerContainer).find(`.js-toggle-filters`).show();
                     $(layerContainer).find(`.js-toggle-table-view`).show();
                 } else {
+                    $(layerContainer).find(`.js-toggle-opacity`).show();
                     $(layerContainer).find(`.js-toggle-filters`).hide();
                     $(layerContainer).find(`.js-toggle-table-view`).hide();
                 }
