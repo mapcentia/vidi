@@ -52,11 +52,7 @@ module.exports = {
 
         var map = cloud.get().map;
 
-        backboneEvents.get().on("ready:meta", function () {
-
-            metaDataKeys = meta.getMetaDataKeys();
-
-        });
+        metaDataKeys = meta.getMetaDataKeys();
 
         // Unbind default
         $(document).unbindArrive(".info-label");
@@ -138,7 +134,6 @@ module.exports = {
             measurements.toggleMeasurements(true);
 
 
-            
         });
         $("#locale-btn").append($(".leaflet-control-locate"));
 

@@ -1,3 +1,9 @@
+<style>
+    .navbar .navbar-brand {
+        height: 48px;
+        line-height: 19px;
+    }
+</style>
 <!-- map -->
 <div id="pane">
     <div id="container">
@@ -6,13 +12,13 @@
 </div>
 
 <!-- About Modal -->
-<div class="modal fade" id="about-model" tabindex="-1" role="dialog" aria-labelledby="about-modelLabel">
+<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
                 </button>
-                <h4 class="modal-title" id="about-modelLabel">{{About}}</h4>
+                <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
             </div>
             <div class="modal-body">
                 {{{aboutBox}}}
@@ -554,7 +560,7 @@
                     <ul role="tablist">
                         <hr>
                         <li><a href="#" id="btn-reset"><i class="material-icons">replay</i>{{Reset}}</a></li>
-                        <li><a href="#" data-toggle="modal" data-target="#about-model"><i class="material-icons">question_answer</i>{{About}}</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}</a></li>
                         <li>
                             <a id="session" href="#" data-toggle="modal" data-target="#login-modal">
                                 <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>

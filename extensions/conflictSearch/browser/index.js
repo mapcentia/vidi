@@ -346,6 +346,7 @@ module.exports = module.exports = {
         } catch (e) {
         }
 
+        // TODO extensios are are initiated AFTER "ready:meta", so below is newer reached
         backboneEvents.get().on("ready:meta", function () {
             metaData = meta.getMetaData();
         })

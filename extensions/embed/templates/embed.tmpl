@@ -593,10 +593,15 @@
 
             <div class="collapse navbar-collapse">
                 <ul id="main-navbar" class="nav navbar-nav navbar-right">
-                    <li><a id="btn-about" href="#" data-toggle="modal" data-target="#about-modal">{{About}}</a></li>
-                    <li><a id="session" href="#" data-toggle="modal" data-target="#login-modal"><i
-                            class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i
-                            class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>
+                    <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i></a></li>
+                    <li>
+                        <a id="session" href="#" data-toggle="modal" data-target="#login-modal">
+                            <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>
+                            <i class="material-icons gc2-session-unlock" aria-hidden="true">lock_open</i>
+
+                        </a>
+                    </li>
+                    <li><a href="#" id="btn-reset"><i class="material-icons">replay</i></a></li>
                 </ul>
 
             </div>

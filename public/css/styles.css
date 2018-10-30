@@ -60,6 +60,10 @@ body {
   width: 100%;
   z-index: 0;
 }
+.tab-content.main-content,
+.tab-content .tab-pane {
+  height: 100%;
+}
 #menu {
   z-index: 2 !important;
 }
@@ -1099,10 +1103,6 @@ h4 small {
 }
 #info-pane > .tab-pane {
   height: 100%;
-}
-.navbar .navbar-brand {
-  height: 48px;
-  line-height: 19px;
 }
 .togglebutton {
   margin-bottom: 6px;
