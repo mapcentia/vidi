@@ -171,7 +171,21 @@ const queryServiceWorker = (data) => {
 
         navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
     });
-}
+};
+
+let setLayerOpacityRequests = [];
+const applyOpacityToLayer = (opacity, layerKey) => {
+    let opacityWasSet = false;
+    for (let key in cloud.get().map._layers) {
+        if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
+            if (cloud.get().map._layers[key].id === layerKey) {
+                opacityWasSet = true;
+                cloud.get().map._layers[key].setOpacity(opacity);
+                backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
+            }
+        }
+    }
+};
 
 /**
  *
@@ -268,12 +282,13 @@ module.exports = {
      * 
      * @return {Promise}
      */
-    getLayersOrderAndOfflineModeSettings: () => {
+    getLayerTreeSettings: () => {
         let result = new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
-                resolve({ order, offlineModeSettings });
+                let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
+                resolve({ order, offlineModeSettings, opacitySettings });
             });
         });
 
@@ -333,6 +348,15 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
 
+        backboneEvents.get().on(`doneLoading:layers`, layerKey => {
+            setLayerOpacityRequests.map((item, index) => {
+                if (item.layerKey === layerKey) {
+                    applyOpacityToLayer(item.opacity, layerKey);
+                    setLayerOpacityRequests.splice(index, 1);
+                }
+            });
+        });
+
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
@@ -368,10 +392,7 @@ module.exports = {
 
                 // Emptying the tree
                 $("#layers").empty();
-                _self.getLayersOrderAndOfflineModeSettings().then(({ order, offlineModeSettings }) => {
-
-
-                    
+                _self.getLayerTreeSettings().then(({ order, offlineModeSettings, opacitySettings }) => {
 
                     try {
 
@@ -414,6 +435,10 @@ module.exports = {
                             }
                         }
 
+                        if (`opacitySettings` in forcedState) {
+                            opacitySettings = forcedState.opacitySettings;
+                        }
+
                         if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
                     }
 
@@ -447,7 +472,7 @@ module.exports = {
                         // Filling up groups and underlying layers (except ungrouped ones)
                         for (let i = 0; i < arr.length; ++i) {
                             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                _self.createGroupRecord(arr[i], order, forcedState, opacitySettings, precheckedLayers);
                             }
                         }
 
@@ -469,6 +494,7 @@ module.exports = {
                         state.listen(MODULE_NAME, `layersOfflineModeChange`);
                         state.listen(MODULE_NAME, `activeLayersChange`);
                         state.listen(MODULE_NAME, `filtersChange`);
+                        state.listen(MODULE_NAME, `opacityChange`);
                         
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                         setTimeout(() => {
@@ -822,7 +848,7 @@ module.exports = {
      * 
      * @returns {void}
      */
-    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
+    createGroupRecord: (groupName, order, forcedState, opacitySettings, precheckedLayers) => {
         let metaData = meta.getMetaData();
         let numberOfActiveLayers = 0;        
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
@@ -899,10 +925,10 @@ module.exports = {
                     numberOfActiveLayers++;
                 }
 
-                _self.createLayerRecord(localItem.layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
+                _self.createLayerRecord(localItem.layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
                 numberOfAddedLayers++;
             } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
+                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
                 numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                 numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
             } else {
@@ -981,7 +1007,7 @@ module.exports = {
      * 
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
+    createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
 
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
@@ -1016,7 +1042,7 @@ module.exports = {
                 activeLayers++;
             }
     
-            _self.createLayerRecord(child, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
+            _self.createLayerRecord(child, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
             addedLayers++;           
         });
 
@@ -1037,7 +1063,7 @@ module.exports = {
      * 
      * @returns {void}
      */
-    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
+    createLayerRecord: (layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
         let displayInfo;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -1211,53 +1237,40 @@ module.exports = {
                 }
             });
 
+            let initialSliderValue = 1;
             if (layerIsTheTileOne) {
                 _self.setupLayerAsTileOne(layerKey);
 
                 // Opacity slider
-                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;">
+                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
                     <div class="js-opacity-slider"></div>
                 </div>`);
+
+                if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {                    
+                    if (opacitySettings[layerKey] >= 0 && opacitySettings[layerKey] <= 1) {
+                        initialSliderValue = opacitySettings[layerKey];
+                    }
+                }
 
                 $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
                     orientation: `horizontal`,
                     range: `min`,
                     min: 0,
                     max: 100,
-                    value: 60,
+                    value: (initialSliderValue * 100),
                     step: 10,
-                    start: function (event, ui) {
-                        //When moving the slider, disable panning.
-                        /*
-                        map.dragging.disable();
-                        map.once('mousedown', function (e) { 
-                            map.dragging.enable();
-                        });
-                        */
-                    },
                     slide: function (event, ui) {
-                        var sliderValue = ui.value / 100;
-                        for (let key in cloud.get().map._layers) {
-                            if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
-                                if (cloud.get().map._layers[key].id === layerKey) {
-                                    cloud.get().map._layers[key].setOpacity(sliderValue);
-                                }
-                            }
-                        }
-                        /*
-                        opacity_layer.setOpacity(slider_value);
-                        */
+                        let sliderValue = ui.value / 100;
+                        applyOpacityToLayer(sliderValue, layerKey);
                     }
                 });
 
-
-
-
-                
+                // Assuming that it not possible to set layer opacity right now
+                setLayerOpacityRequests.push({ layerKey, opacity: initialSliderValue });
 
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
-                });                
+                });
             }
 
             // Filtering is available only for vector layers
@@ -1441,11 +1454,25 @@ module.exports = {
     getState: () => {
         let activeLayers = _self.getActiveLayers();
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
+
+        let opacitySettings = {};
+        for (let key in cloud.get().map._layers) {
+            let layer = cloud.get().map._layers[key];
+            if (`id` in layer && layer.id) {
+                if (`options` in layer && layer.options && `opacity` in layer.options) {
+                    if (isNaN(layer.options.opacity) === false) {
+                        opacitySettings[layer.id] = layer.options.opacity;
+                    }
+                }
+            }
+        }
+
         let state = {
             order: layerTreeOrder,
             vectorFilters,
             activeLayers,
-            layersOfflineMode
+            layersOfflineMode,
+            opacitySettings
         };
 
         return state;
