@@ -555,7 +555,7 @@ module.exports = {
                 let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                 if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
                 $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
-                    <table id="${tableId}"></table>
+                    <div id="${tableId}"><table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>
                 </div>`);
 
                 let metaDataKeys = meta.getMetaDataKeys();
@@ -565,7 +565,8 @@ module.exports = {
                 let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
 
                 let localTable = gc2table.init({
-                    el: `#` + tableId,
+                    el: `#` + tableId + ` table`,
+                    ns: `#` + tableId,
                     geocloud2: cloud.get(),
                     store: stores[`v:` + layerKey],
                     cm: tableHeaders,

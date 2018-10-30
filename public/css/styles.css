@@ -1116,3 +1116,7 @@ h4 small {
 .brand-icon {
   margin-right: 20px;
 }
+.dialog-bottom-wide {
+  min-width: 568px;
+  max-width: 768px;
+}
