@@ -199,10 +199,6 @@ module.exports = {
             editingIsEnabled = true;
         }
 
-        navigator.serviceWorker.addEventListener('message', event => {
-            console.log(`### From SW`, event.data.msg);
-        });
-
         _self = this;
         queueStatistsics = new QueueStatisticsWatcher({ switchLayer, offlineModeControlsManager, layerTree: _self });
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
@@ -1136,13 +1132,9 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', 'tile');
                 $(switcher).prop('checked', true);
 
-                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-                $(layerContainer).find(`.js-toggle-opacity`).show();
-                $(layerContainer).find(`.js-toggle-filters`).hide();
-                $(layerContainer).find(`.js-toggle-table-view`).hide();
-                $(layerContainer).find('.js-layer-settings').hide(0);
-
+                _self.setupLayerAsTileOne(layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
@@ -1153,12 +1145,9 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', 'vector');
                 $(switcher).prop('checked', true);
 
-                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-                $(layerContainer).find(`.js-toggle-opacity`).hide();
-                $(layerContainer).find(`.js-toggle-filters`).show();
-                $(layerContainer).find(`.js-toggle-table-view`).show();
-
+                _self.setupLayerAsVectorOne(layerKey);
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
@@ -1222,10 +1211,59 @@ module.exports = {
                 }
             });
 
+            if (layerIsTheTileOne) {
+                _self.setupLayerAsTileOne(layerKey);
+
+                // Opacity slider
+                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;">
+                    <div class="js-opacity-slider"></div>
+                </div>`);
+
+                $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
+                    orientation: `horizontal`,
+                    range: `min`,
+                    min: 0,
+                    max: 100,
+                    value: 60,
+                    step: 10,
+                    start: function (event, ui) {
+                        //When moving the slider, disable panning.
+                        /*
+                        map.dragging.disable();
+                        map.once('mousedown', function (e) { 
+                            map.dragging.enable();
+                        });
+                        */
+                    },
+                    slide: function (event, ui) {
+                        var sliderValue = ui.value / 100;
+                        for (let key in cloud.get().map._layers) {
+                            if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
+                                if (cloud.get().map._layers[key].id === layerKey) {
+                                    cloud.get().map._layers[key].setOpacity(sliderValue);
+                                }
+                            }
+                        }
+                        /*
+                        opacity_layer.setOpacity(slider_value);
+                        */
+                    }
+                });
+
+
+
+
+                
+
+                $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                    $(layerContainer).find('.js-layer-settings-opacity').toggle();
+                });                
+            }
+
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
         
                 let conditions = _self.getFilterConditions(layerKey);
                 $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
@@ -1236,10 +1274,10 @@ module.exports = {
 
                 if (document.getElementById(componentContainerId)) {                   
                     ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings').hide(0);
+                    $(layerContainer).find('.js-layer-settings-filters').hide(0);
         
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                        $(layerContainer).find('.js-layer-settings').toggle();
+                        $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
 
@@ -1267,23 +1305,65 @@ module.exports = {
                     });
                 });
 
-                if (layerIsTheTileOne === false) {
-                    $(layerContainer).find(`.js-toggle-opacity`).remove();
+                if (defaultLayerType === `vector`) {
+                    _self.setupLayerAsVectorOne(layerKey);
+                } else {
+                    _self.setupLayerAsTileOne(layerKey);
+                }
+            }
+        }
+    },
+
+    /**
+     * Setups layer as the vector one
+     */
+    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled); },
+    
+    /**
+     * Setups layer as the tile one
+     */
+    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled); },
+
+    /**
+     * By design the layer control is rendered with controls both for tile and vector case, so
+     * this function regulates the visibility and initialization of layer type specific controls.
+     * 
+     * @param {Boolean} setupAsVector  Specifies if layer should be setup as the vector one
+     * @param {String}  layerKey       Layer key
+     * @param {Boolean} ignoreErrors   Specifies if errors should be ignored
+     * @param {Boolean} layerIsEnabled  Specifies if layer is enabled
+     */
+    setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
+        layerKey = layerKey.replace(`v:`, ``);
+        let container = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+        if (container.length === 1) {
+            if (setupAsVector) {
+                $(container).find(`.js-toggle-opacity`).hide();
+                if (layerIsEnabled) {
+                    $(container).find(`.js-toggle-filters`).show();
+                    $(container).find(`.js-toggle-table-view`).show();
+                } else {
+                    $(container).find(`.js-toggle-filters`).hide();
+                    $(container).find(`.js-toggle-table-view`).hide();
                 }
 
-                if (layerIsActive && defaultLayerType === `vector`) {
-                    $(layerContainer).find(`.js-toggle-opacity`).hide();
-                    $(layerContainer).find(`.js-toggle-filters`).show();
-                    $(layerContainer).find(`.js-toggle-table-view`).show();
-                } else {
-                    $(layerContainer).find(`.js-toggle-opacity`).show();
-                    $(layerContainer).find(`.js-toggle-filters`).hide();
-                    $(layerContainer).find(`.js-toggle-table-view`).hide();
-                }
+                $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
-                $(layerContainer).find(`.js-toggle-filters`).remove();
-                $(layerContainer).find(`.js-toggle-table-view`).remove();
+                if (layerIsEnabled) {
+                    $(container).find(`.js-toggle-opacity`).show();
+                } else {
+                    $(container).find(`.js-toggle-opacity`).hide();
+                }
+
+                $(container).find(`.js-toggle-filters`).hide();
+                $(container).find(`.js-toggle-table-view`).hide();
+
+                $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
             }
+        } else if (ignoreErrors === false) {
+            throw new Error(`Unable to find layer container`);
         }
     },
 

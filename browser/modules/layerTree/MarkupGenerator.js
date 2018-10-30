@@ -147,7 +147,8 @@ class MarkupGenerator {
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
             </div>
-            <div class="js-layer-settings"></div>
+            <div class="js-layer-settings-filters"></div>
+            <div class="js-layer-settings-opacity"></div>
         </li>`);
     }
 
