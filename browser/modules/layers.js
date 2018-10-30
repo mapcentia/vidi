@@ -204,66 +204,57 @@ module.exports = {
     addLayer: function (l) {
         var me = this;
         let result = new Promise((resolve, reject) => {
-            /*
-            layerTree.getLayerTreeSettings().then(({ opacitySettings }) => {
-                console.log(`### opacitySettings`, opacitySettings);
-              
-*/
+            var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
-                var isBaseLayer, layers = [], metaData = meta.getMetaData();
+            let layerWasAdded = false;
 
-                let layerWasAdded = false;
+            $.each(metaData.data, function (i, v) {
+                var layer = v.f_table_schema + "." + v.f_table_name,
+                    singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
-                $.each(metaData.data, function (i, v) {
-                    var layer = v.f_table_schema + "." + v.f_table_name,
-                        singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+                if (layer === l) {
+                    // Check if the opacity value differs from the default one
+                    isBaseLayer = !!v.baselayer;
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        host: host,
+                        layers: [layer],
+                        db: db,
+                        isBaseLayer: isBaseLayer,
+                        tileCached: !singleTiled,
+                        singleTile: singleTiled,
+                        // @todo Was somehow set to false
+                        //visibility: false,
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        name: v.f_table_name,
+                        // Single tile option
+                        type: !singleTiled ? "tms" : "wms",
+                        format: "image/png",
+                        uri: uri,
+                        loadEvent: function () {
+                            me.decrementCountLoading(layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
 
-                    if (layer === l) {
-                        // Check if the opacity value differs from the default one
+                    layers[[layer]][0].setZIndex(v.sort_id + 10000);
+                    me.reorderLayers();
 
-
-                        isBaseLayer = !!v.baselayer;
-                        layers[[layer]] = cloud.get().addTileLayers({
-                            host: host,
-                            layers: [layer],
-                            db: db,
-                            isBaseLayer: isBaseLayer,
-                            tileCached: !singleTiled,
-                            singleTile: singleTiled,
-                            // @todo Was somehow set to false
-                            //visibility: false,
-                            wrapDateLine: false,
-                            displayInLayerSwitcher: true,
-                            name: v.f_table_name,
-                            // Single tile option
-                            type: !singleTiled ? "tms" : "wms",
-                            format: "image/png",
-                            uri: uri,
-                            loadEvent: function () {
-                                me.decrementCountLoading(layer);
-                                backboneEvents.get().trigger("doneLoading:layers", layer);
-                            },
-                            loadingEvent: function () {
-                                me.incrementCountLoading(layer);
-                                backboneEvents.get().trigger("startLoading:layers", layer);
-                            },
-                            subdomains: window.gc2Options.subDomainsForTiles
-                        });
-
-                        layers[[layer]][0].setZIndex(v.sort_id + 10000);
-                        me.reorderLayers();
-
-                        console.info(`${l} was added to the map`);
-                        layerWasAdded = true;
-                        resolve();
-                    }
-                });
-
-                if (layerWasAdded === false) {
-                    console.info(`${l} was not added to the map`);
-                    reject();
+                    console.info(`${l} was added to the map`);
+                    layerWasAdded = true;
+                    resolve();
                 }
-            //});
+            });
+
+            if (layerWasAdded === false) {
+                console.info(`${l} was not added to the map`);
+                reject();
+            }
         });
 
         return result;

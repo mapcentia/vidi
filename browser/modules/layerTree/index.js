@@ -1495,7 +1495,7 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
         if (newState === false) {
-            newState = { order: false };
+            newState = { order: false, opacitySettings: {}};
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
