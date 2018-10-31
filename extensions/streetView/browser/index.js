@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -284,7 +285,7 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera");
 
         // Append to DOM
         //==============

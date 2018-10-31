@@ -1,8 +1,7 @@
-/**
- * State snapshots manager
- * 
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -28,7 +27,7 @@ const cookie = require('js-cookie');
 
 let _self = false;
 
-const exId = `state-snapshots-dialog-content`;
+const exId = `state-snapshots`;
 
 /**
  *
@@ -67,8 +66,6 @@ module.exports = {
          *
          */
         var ReactDOM = require('react-dom');
-
-        utils.createMainTab(exId, __("State snapshots"), __("StateSnapshots description"), require('./../../browser/modules/height')().max);
 
         let buttonStyle = {
             padding: `4px`,

@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -13,6 +14,7 @@ var infoClick;
 var config = require('../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
+var urlparser = require('../../../browser/modules/urlparser');
 
 /**
  *
@@ -48,6 +50,8 @@ module.exports = {
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
             backboneEvents.get().trigger("end:conflictSearchPrint", response);
+            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+
         });
 
         // When conflict search is done, enable the print button

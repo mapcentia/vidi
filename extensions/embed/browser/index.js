@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -51,11 +52,7 @@ module.exports = {
 
         var map = cloud.get().map;
 
-        backboneEvents.get().on("ready:meta", function () {
-
-            metaDataKeys = meta.getMetaDataKeys();
-
-        });
+        metaDataKeys = meta.getMetaDataKeys();
 
         // Unbind default
         $(document).unbindArrive(".info-label");
@@ -120,67 +117,6 @@ module.exports = {
             }, 500)
         });
 
-        // Bottom dialog
-        $(".close-hide").on("click touchstart", function (e) {
-            var id = ($(this)).parent().parent().attr('id');
-
-            // If print when deactivate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", false);
-                print.activate();
-            }
-
-            $("#" + id).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            });
-        });
-
-        $(".expand-less").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: (($("#" + id).height()*-1)+30) + "px"
-            }, 500, function () {
-                $("#" + id + " .expand-less").hide();
-                $("#" + id + " .expand-more").show();
-            });
-        });
-
-        $(".expand-more").on("click touchstart", function () {
-
-            var id = ($(this)).parent().parent().attr('id');
-
-            $("#" + id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $("#" + id + " .expand-less").show();
-                $("#" + id + " .expand-more").hide();
-            });
-        });
-
-        $(".map-tool-btn").on("click", function (e) {
-
-            e.preventDefault();
-
-            var id = ($(this)).attr('href');
-
-            // If print when activate
-            if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", true);
-                print.activate();
-            }
-
-            $(id).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(id + " .expand-less").show();
-                $(id + " .expand-more").hide();
-            })
-        });
 
         $("#zoom-in-btn").on("click", function () {
             map.zoomIn();
@@ -198,7 +134,6 @@ module.exports = {
             measurements.toggleMeasurements(true);
 
 
-            
         });
         $("#locale-btn").append($(".leaflet-control-locate"));
 

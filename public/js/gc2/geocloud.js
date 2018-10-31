@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 /*global Ext:false */
 /*global $:false */
 /*global jQuery:false */
@@ -55,6 +61,8 @@ geocloud = (function () {
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         HERENORMALDAYGREY = "hereNormalDayGrey",
+        GEODKBRIGHT = "geodkBright",
+        LUFTFOTOSERIER2017 = "luftfotoserier2017",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
@@ -105,7 +113,8 @@ geocloud = (function () {
             return L.circleMarker(latlng);
         },
         //Only leaflet
-        onEachFeature: function (feature, layer) {},
+        onEachFeature: function (feature, layer) {
+        },
         onLoad: function () {
         },
         transformResponse: function (response) {
@@ -157,14 +166,15 @@ geocloud = (function () {
                         style: this.defaults.styleMap
                     });
                     this.layer.id = this.defaults.name;
-                    break
+                    break;
 
                 case 'leaflet':
                     this.layer = L.geoJson(null, {
                         style: this.defaults.styleMap,
                         pointToLayer: this.defaults.pointToLayer,
                         onEachFeature: this.defaults.onEachFeature,
-                        interactive: this.defaults.clickable
+                        interactive: this.defaults.clickable,
+                        bubblingMouseEvents: false
                     });
                     this.layer.id = this.defaults.name;
                     break;
@@ -575,6 +585,8 @@ geocloud = (function () {
                 };
 
                 if (defaults.singleTile) {
+                    // Insert in tile pane, so non-tiled and tiled layers can be sorted
+                    options.pane = "tilePane";
                     l = new L.nonTiledLayer.wms(url, options);
                 } else {
                     l = new L.TileLayer.WMS(url, options);
@@ -778,10 +790,10 @@ geocloud = (function () {
                 }
             }
             throw new Error('Control doesn\'t have any active base layer!')
-        }
+        };
 
         /**
-         * Returns both tile and vector visible layers 
+         * Returns both tile and vector visible layers
          */
         this.getAllTypesOfVisibleLayers = function (getBaseLayers) {
             getBaseLayers = (getBaseLayers === true) ? true : false;
@@ -1571,6 +1583,41 @@ geocloud = (function () {
             }());
 
         };
+
+        //ol2 and leaflet
+        this.addGeoDk = function (name, layer) {
+            var l,
+                url = "https://gc2.io/mapcache/baselayers/tms/";
+
+            switch (MAPLIB) {
+                case "ol2":
+                    l = new OpenLayers.Layer.TMS(name, url, {
+                        layername: layer,
+                        type: 'png',
+                        attribution: "&copy; Geodatastyrelsen",
+                        resolutions: resolutions,
+                        wrapDateLine: true
+                    });
+                    this.map.addLayer(l);
+                    l.setVisibility(false);
+                    break;
+                case "leaflet":
+                    l = new L.TileLayer(url + "1.0.0/" + layer + "/{z}/{x}/{y}.png", {
+                        tms: true,
+                        attribution: "",
+                        maxZoom: 21,
+                        maxNativeZoom: 19
+
+                    });
+                    lControl.addBaseLayer(l);
+                    console.log(l)
+                    break;
+            }
+            l.baseLayer = true;
+            l.id = name;
+            return (l);
+        };
+
         //ol2, ol3 and leaflet
         this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
             var me = this;
@@ -1613,7 +1660,7 @@ geocloud = (function () {
                                         existingLayer.push(layers[key].name);
                                     } else {
                                         lControl.removeLayer(layers[key].layer);
-                                    }                                   
+                                    }
                                 }
                             }
 
@@ -1736,6 +1783,12 @@ geocloud = (function () {
                     break;
                 case "hereNormalNightGrey":
                     o = this.addHere("hereNormalNightGrey");
+                    break;
+                case "geodkBright":
+                    o = this.addGeoDk("geodkBright", "geodk.bright");
+                    break;
+                case "luftfotoserier2017":
+                    o = this.addGeoDk("luftfotoserier2017", "luftfotoserier.geodanmark_2017_12_5cm");
                     break;
                 default : // Try to add as tile layer
                     o = this.addTileLayers($.extend({
@@ -2357,6 +2410,8 @@ geocloud = (function () {
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,
+        GEODKBRIGHT: GEODKBRIGHT,
+        LUFTFOTOSERIER2017: LUFTFOTOSERIER2017,
         setHost: setHost
     };
 }());
@@ -2456,3 +2511,4 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
+

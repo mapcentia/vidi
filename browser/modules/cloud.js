@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -75,7 +76,10 @@ module.exports = {
             icon: "fa fa-location-arrow",
             iconLoading: "fa fa-circle-o-notch fa-spin",
             keepCurrentZoomLevel: true,
-            drawCircle: false
+            drawCircle: false,
+            locateOptions: {
+                enableHighAccuracy: true
+            }
         }).addTo(map);
 
         /**

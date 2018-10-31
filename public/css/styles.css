@@ -35,6 +35,9 @@ body {
   width: 100%;
   right: 0;
   border: 0;
+  overflow: scroll;
+  height: calc(100vh - 30px);
+  background-color: white;
 }
 #legend {
   position: relative;
@@ -57,8 +60,9 @@ body {
   width: 100%;
   z-index: 0;
 }
-.tab-content > .tab-pane {
-  height: calc(100vh - 142px);
+.tab-content.main-content,
+.tab-content .tab-pane {
+  height: 100%;
 }
 #menu {
   z-index: 2 !important;
@@ -161,7 +165,7 @@ input[type="checkbox"] {
 .dropdown-menu > li > a {
   font-weight: 500;
   font-family: 'Roboto', sans-serif, sans-serif !important;
-  padding: 6px 10px !important;
+  padding: 6px 10px;
   text-decoration: none !important;
 }
 .nav-tabs > .active {
@@ -175,6 +179,7 @@ input[type="checkbox"] {
 .navbar {
   border-radius: 0;
   min-height: 0;
+  margin-bottom: 0;
 }
 .legend-text {
   margin-left: 5px;
@@ -188,6 +193,9 @@ input[type="checkbox"] {
   vertical-align: top !important;
   font-weight: 300;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+.leaflet-top {
+  top: 50px;
 }
 /*
 .leaflet-top {
@@ -532,7 +540,7 @@ div.olControlZoom {
   margin-bottom: 10px;
 }
 .custom-popup .leaflet-popup-content {
-  margin: 7px 12px !important;
+  margin: 7px 20px 7px 12px !important;
   max-height: 250px;
   overflow: auto;
 }
@@ -581,6 +589,7 @@ body {
   width: 100%;
   height: 100%;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
+  position: fixed;
 }
 .navmenu-brand {
   display: block;
@@ -593,18 +602,29 @@ body {
 }
 #info-modal,
 #info-modal-top {
-  position: absolute;
+  position: fixed;
   top: 0;
   z-index: 3000;
-  width: 510px;
   height: 100%;
   background-color: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  display: none;
+  display: inline;
+}
+#module-container {
+  position: fixed;
+  top: 0;
+  z-index: 2000;
+  height: 100%;
+  background-color: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  display: inline;
+  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 .slide-right {
   right: -100%;
+  position: fixed;
 }
 .slide-left {
   left: -100%;
@@ -684,6 +704,20 @@ body {
 }
 #main-tabs {
   overflow: hidden !important;
+}
+#side-panel hr {
+  margin-left: -20px;
+}
+#side-panel ul {
+  overflow: hidden !important;
+  list-style-type: none;
+  padding: 0px 19px;
+}
+#side-panel ul li {
+  padding: 7px 0;
+}
+#side-panel ul li .material-icons {
+  margin-right: 17px;
 }
 .list-group .list-group-separator:before {
   width: 100%;
@@ -775,7 +809,8 @@ body {
 #info-modal .modal-body img {
   width: 100%;
 }
-#info-modal-body-wrapper {
+#info-modal-body-wrapper,
+#module-container-wrapper {
   overflow: auto;
   height: calc(100vh - 48px);
 }
@@ -900,6 +935,9 @@ h4 small {
 .fixed-table-body .card-view .title {
   vertical-align: top;
 }
+.fixed-table-body {
+  height: 100%;
+}
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
@@ -989,7 +1027,7 @@ h4 small {
   display: none;
 }
 #pane {
-  right: 40px;
+  right: 0;
 }
 #search-border {
   position: relative;
@@ -999,26 +1037,27 @@ h4 small {
 }
 #search-ribbon {
   min-width: 100px;
-  width: 550px;
-  right: -510px;
   top: 0;
   position: absolute;
-  height: 100%;
+  height: 48px;
   background-color: white;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 #search-ribbon > div > i {
-  top: 20px;
-  font-size: 1.5em;
+  top: 15px;
+  font-size: 1.4em;
   line-height: 1em;
   color: #1f4164;
-  padding: 0 .4em 0 .4em;
+  padding-left: 11px;
   position: absolute;
   cursor: pointer;
 }
 #search-container {
   padding-left: 40px;
   height: 100%;
+}
+#search-content {
+  height: calc(100vh - 78px);
 }
 .feature-attribute-editing-form {
   position: relative;
@@ -1045,7 +1084,9 @@ h4 small {
 }
 #map,
 #pane,
-#search-ribbon {
+#search-ribbon,
+#module-container,
+#info-modal {
   -webkit-transition: all 500ms ease-out;
   -moz-transition: all 500ms ease-out;
   -o-transition: all 500ms ease-out;
@@ -1065,4 +1106,17 @@ h4 small {
 }
 .togglebutton {
   margin-bottom: 6px;
+}
+.help-btn {
+  position: fixed;
+  top: 14px;
+  color: rgba(0, 0, 0, 0.26);
+  cursor: help;
+}
+.brand-icon {
+  margin-right: 20px;
+}
+.dialog-bottom-wide {
+  min-width: 568px;
+  max-width: 768px;
 }

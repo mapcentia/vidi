@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -53,16 +54,16 @@ module.exports = {
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
-
-                if (stop) {
-                    me.getVersion();
-                    return;
-                }
-
-                if (window.vidiConfig.defaultConfig) {
+                if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
                     configFile = window.vidiConfig.defaultConfig;
-                    stop = true;
-                    loadConfig();
+                    if (!stop) {
+                        stop = true;
+                        loadConfig();
+                    } else {
+                        me.getVersion();
+                    }
+                } else {
+                    me.getVersion();
                 }
             }).done(function () {
                 me.getVersion();
@@ -269,7 +270,11 @@ module.exports = {
                             $.each(vidiConfig.extensions.browser, function (i, v) {
                                 $.each(v[Object.keys(v)[0]], function (n, m) {
                                     if (window.vidiConfig.enabledExtensions.indexOf(Object.keys(v)[0]) > -1) {
-                                        modules.extensions[Object.keys(v)[0]][m].init();
+                                        try {
+                                            modules.extensions[Object.keys(v)[0]][m].init();
+                                        } catch (e) {
+                                            console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
+                                        }
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
                                         if (enabledExtensionIndex > -1) {
                                             enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
@@ -277,25 +282,10 @@ module.exports = {
                                     }
                                 })
                             });
-
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
                             }
                         }
-                    }
-
-                    // Init some GUI stuff after modules are loaded
-                    // ============================================
-                    $("[data-toggle=tooltip]").tooltip();
-
-                    $.material.init();
-                    touchScroll(".tab-pane");
-                    touchScroll("#info-modal-body-wrapper");
-                    $("#loadscreentext").html(__("Loading data"));
-                    if (window.vidiConfig.activateMainTab) {
-                        setTimeout(function () {
-                            $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
-                        }, 200);
                     }
 
                     $(window).resize(function () {

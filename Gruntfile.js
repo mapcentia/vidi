@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 module.exports = function (grunt) {
     "use strict";
     grunt.initConfig({
@@ -167,7 +173,10 @@ module.exports = function (grunt) {
                 options: {
                     transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify'],
                     watch: true,
-                    keepAlive: true
+                    keepAlive: true,
+                    browserifyOptions: {
+                        debug: true
+                    }
                 }
             }
         },
@@ -316,7 +325,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-git');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-less');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-processhtml');
     grunt.loadNpmTasks('grunt-cache-bust');

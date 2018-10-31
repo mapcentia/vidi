@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -205,21 +206,12 @@ module.exports = module.exports = {
             reset.init();
         });
 
-        $("#info-modal button").on("click", function () {
-            if (!$(this).data("extraClickHandlerIsEnabled")) {
-                $("#info-modal").animate({
-                    right: "-" + $("#myNavmenu").width() + "px"
-                }, 200, () => {
-                    $("#info-modal.slide-right").hide();
-                });
-            }
-        });
 
         $("#searchclear").on("click", function () {
             backboneEvents.get().trigger("clear:search");
         });
 
-        backboneEvents.get().on("ready:meta", function () {
+        backboneEvents.get().on("allDoneLoading:layers", function () {
             metaDataKeys = meta.getMetaDataKeys();
 
             if (!isStarted) {
@@ -229,7 +221,7 @@ module.exports = module.exports = {
                         if ($(document).width() > 1024) {
                             $("#search-border").trigger("click");
                         }
-                    }, 2000
+                    }, 200
                 );
 
                 setTimeout(
@@ -427,6 +419,23 @@ module.exports = module.exports = {
 
         });
 
+        // Init some GUI stuff after modules are loaded
+        // ============================================
+        $("[data-toggle=tooltip]").tooltip();
+        try {
+            $.material.init();
+        } catch (e) {
+            console.warn("Material Design could not be initiated");
+        }
+
+        touchScroll(".tab-pane");
+        touchScroll("#info-modal-body-wrapper");
+        $("#loadscreentext").html(__("Loading data"));
+        if (window.vidiConfig.activateMainTab) {
+            setTimeout(function () {
+                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+            }, 200);
+        }
 
         // HACK. Arrive.js seems to mess up Wkhtmltopdf,
         // so we don't bind events on print HTML page.
@@ -454,17 +463,16 @@ module.exports = module.exports = {
 
                     for (var key in  metaDataKeys[t]) {
                         if (metaDataKeys[t].hasOwnProperty(key)) {
-                            console.log(key + " -> " + metaDataKeys[t][key]);
                             if (key === "lastmodified") {
-                                metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+                                //metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
                             }
                         }
                     }
 
                     html = html ? Mustache.render(html, metaDataKeys[t]) : "";
 
-                    $("#info-modal.slide-right").show();
-                    $("#info-modal.slide-right").animate({right: "0"}, 200);
+                    //$("#info-modal.slide-right").show();
+                    $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(title || name);
                     $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
                     legend.init([t], "#info-modal-legend");
@@ -472,35 +480,163 @@ module.exports = module.exports = {
                 });
             });
 
+
             $(document).arrive('[data-scale-ul]', function () {
                 $(this).on("click", function (e) {
                     $("#select-scale").val($(this).data('scale-ul')).trigger("change");
                 });
             });
 
-
             // Set up the open/close functions for side panel
             var searchPanelOpen
+
+            var width = 600;
+
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
+            $("#module-container").css("width", (width - 100) + "px");
+            $("#info-modal").css("width", (width - 100) + "px");
+
+            $("#main-tabs a").on("click", function (e) {
+                $("#module-container.slide-right").css("right", "0");
+                searchShowFull();
+            });
+
+            $(document).arrive("#main-tabs a", function () {
+                $(this).on("click", function (e) {
+                    $("#module-container.slide-right").css("right", "0");
+                    searchShowFull();
+                });
+            });
+
+
+            $("#info-modal .modal-header button").on("click", function () {
+                if (!$(this).data("extraClickHandlerIsEnabled")) {
+                    infoModalHide();
+                }
+            });
+
+
+            $("#module-container .modal-header button").on("click", function () {
+                searchShow();
+                if (!$(this).data("extraClickHandlerIsEnabled")) {
+                    moduleContainerHide();
+                }
+            });
+
+            var infoModalHide = function () {
+                $("#info-modal").css("right", "-" + (width - 100) + "px");
+            }
+
+            var moduleContainerHide = function () {
+                $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+            }
+
             var searchShow = function () {
+                $("#search-ribbon").css("right", "-" + (width - 300) + "px");
+                $("#pane").css("right", "260px");
+                $('#map').css("width", "calc(100% - 150px)");
+                searchPanelOpen = true;
+            }
+
+            var searchShowFull = function () {
                 $("#search-ribbon").css("right", "0");
-                $("#pane").css("right", "550px");
-                $('#map').css("width", "calc(100% - 275px)");
+                $("#pane").css("right", (width - 40) + "px");
+                $('#map').css("width", "calc(100% - " + (width / 2) + "px");
                 searchPanelOpen = true;
             }
 
             var searchHide = function () {
-                $("#pane").css("right", "40px");
+                $("#pane").css("right", "0");
                 $('#map').css("width", "100%");
-                $("#search-ribbon").css("right", "-510px");
+                $("#search-ribbon").css("right", "-" + (width - 40) + "px");
                 searchPanelOpen = false
             };
+
             $('#search-border').click(function () {
                 if (searchPanelOpen) {
                     searchHide();
+                    infoModalHide();
+                    moduleContainerHide();
                 } else {
-                    searchShow()
+                    searchShow();
                 }
+            });
+
+            // Bottom dialog
+            $(".close-hide").on("click touchstart", function (e) {
+                var id = ($(this)).parent().parent().attr('id');
+
+                // If print when deactivate
+                if ($(this).data('module') === "print") {
+                    $("#print-btn").prop("checked", false);
+                    print.activate();
+                }
+
+                // If legend when deactivate
+                if ($(this).data('module') === "legend") {
+                    $("#legend-content").append($("#legend"));
+                    $("#btn-show-legend-in-map").prop("disabled", false);
+                }
+
+                $("#" + id).animate({
+                    bottom: "-100%"
+                }, 500, function () {
+                    $(id + " .expand-less").show();
+                    $(id + " .expand-more").hide();
+                });
+            });
+
+            $(".expand-less").on("click touchstart", function () {
+
+                var id = ($(this)).parent().parent().attr('id');
+
+                $("#" + id).animate({
+                    bottom: (($("#" + id).height() * -1) + 30) + "px"
+                }, 500, function () {
+                    $("#" + id + " .expand-less").hide();
+                    $("#" + id + " .expand-more").show();
+                });
+            });
+
+            $(".expand-more").on("click touchstart", function () {
+
+                var id = ($(this)).parent().parent().attr('id');
+
+                $("#" + id).animate({
+                    bottom: "0"
+                }, 500, function () {
+                    $("#" + id + " .expand-less").show();
+                    $("#" + id + " .expand-more").hide();
+                });
+            });
+
+            $(".map-tool-btn").on("click", function (e) {
+
+                e.preventDefault();
+
+                var id = ($(this)).attr('href');
+
+                // If print when activate
+                if ($(this).data('module') === "print") {
+                    $("#print-btn").prop("checked", true);
+                    print.activate();
+                }
+
+
+                // If legend when deactivate
+                if ($(this).data('module') === "legend") {
+                    $("#legend-dialog .modal-body").append($("#legend"));
+                    $("#btn-show-legend-in-map").prop("disabled", true);
+                }
+
+                $(id).animate({
+                    bottom: "0"
+                }, 500, function () {
+                    $(id + " .expand-less").show();
+                    $(id + " .expand-more").hide();
+                })
             });
         }
     }
 };
+
