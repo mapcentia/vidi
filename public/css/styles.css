@@ -165,7 +165,7 @@ input[type="checkbox"] {
 .dropdown-menu > li > a {
   font-weight: 500;
   font-family: 'Roboto', sans-serif, sans-serif !important;
-  padding: 6px 10px !important;
+  padding: 6px 10px;
   text-decoration: none !important;
 }
 .nav-tabs > .active {
