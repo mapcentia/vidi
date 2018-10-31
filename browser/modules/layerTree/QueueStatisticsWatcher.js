@@ -1,3 +1,9 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 /**
  * Watching queue changes and displaying them in layerTree
  * 
@@ -15,14 +21,13 @@ let accumulatedDiff = [];
 
 let lastStatistics = false;
 
-let switchLayer = false;
-
-let layerTree = false;
+let switchLayer = false, layerTree = false, offlineModeControlsManager = false;
 
 class QueueStatisticsWatcher {
     constructor(o) {
         switchLayer = o.switchLayer;
         layerTree = o.layerTree;
+        offlineModeControlsManager = o.offlineModeControlsManager;
     }
 
     setLastStatistics(newLastStatistics) {
@@ -78,36 +83,9 @@ class QueueStatisticsWatcher {
                 theStatisticsPanelWasDrawn = true;
             }
 
-            if (statistics.online) {
-                /*
-                    User have not decided yet whenever he want to force or not the
-                    offline mode or user already selected not to force offline mode
-                */
-                if (userPreferredForceOfflineMode === false || userPreferredForceOfflineMode === -1) {
-                    apiBridgeInstance.setOfflineMode(false);
-                    $('.js-toggle-offline-mode').prop('checked', false);
-                } else {
-                    apiBridgeInstance.setOfflineMode(true);
-                    $('.js-toggle-offline-mode').prop('checked', true);
-                }
-
-                $('.js-toggle-offline-mode').prop('disabled', false);
-                applicationIsOnline = true;
-                $('.js-app-is-online-badge').removeClass('hidden');
-            } else {
-                if (applicationIsOnline !== false) {
-                    apiBridgeInstance.setOfflineMode(true);
-                    $('.js-toggle-offline-mode').prop('checked', true);
-                }
-
-                $('.js-toggle-offline-mode').prop('disabled', true);
-                applicationIsOnline = false;
-                $('.js-app-is-offline-badge').removeClass('hidden');
-            }
-
-            if (applicationIsOnline !== -1) {
-                $('.js-app-is-pending-badge').remove();
-            }
+            offlineModeControlsManager.setAllControlsState(statistics.online, apiBridgeInstance).then(() => {
+                offlineModeControlsManager.updateControls();
+            });
 
             for (let key in statistics) {
                 let layerControlContainer = $(`[data-gc2-layer-key="${key}"]`);

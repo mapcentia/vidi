@@ -8,8 +8,13 @@ const sleepFunction = (ms) => {
 module.exports = {
     // @todo Independent development server has to be deployed in order to handle e2e tests
     API_URL: `https://vidi.alexshumilov.ru:8081/api`,
+    // Deployment with default template
+    PAGE_URL_DEFAULT: `https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    // Deployment with embedded template
+    PAGE_URL_EMBEDDED: `https://vidi.alexshumilov.ru:8082/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    // @todo Remove obsolete constant
     PAGE_URL: `https://vidi.alexshumilov.ru:8082/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
-    PAGE_URL_BASE: `https://vidi.alexshumilov.ru:8082/`,
+    PAGE_URL_BASE: `https://vidi.alexshumilov.ru:8081/`,
     PAGE_LOAD_TIMEOUT: 1000,
     EMULATED_SCREEN: {
         viewport: {

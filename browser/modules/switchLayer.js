@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -78,7 +79,7 @@ module.exports = module.exports = {
      * 
      * @returns {Promise}
      */
-    init: function (name, enable, doNotLegend, forceTileReload) {
+    init: function (name, enable, doNotLegend, forceTileReload, setupControls = true) {
         if (!name) {
             throw new Error(`Layer name is undefined`);
         }
@@ -150,7 +151,7 @@ module.exports = module.exports = {
                     layerTree.setSelectorValue(name, 'tile');
 
                     layers.addLayer(name).then(() => {
-                        _self.checkLayerControl(name, doNotLegend);
+                        _self.checkLayerControl(name, doNotLegend, setupControls);
 
                         tileLayer = cloud.get().getLayersByName(tileLayerId);
 
@@ -175,7 +176,7 @@ module.exports = module.exports = {
                                 let currentLayers = layers.getLayers();
                                 if (currentLayers && Array.isArray(currentLayers)) {
                                     layers.getLayers().split(',').map(layerToActivate => {
-                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                        _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
                                     });
                                 }
 
@@ -201,7 +202,7 @@ module.exports = module.exports = {
 
                         backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
 
-                        _self.checkLayerControl(name, doNotLegend);
+                        _self.checkLayerControl(name, doNotLegend, setupControls);
                         resolve();
                     } else {
                         meta.init(tileLayerId, true, true).then(layerMeta => {
@@ -211,7 +212,7 @@ module.exports = module.exports = {
                                 let currentLayers = layers.getLayers();
                                 if (currentLayers && Array.isArray(currentLayers)) {
                                     layers.getLayers().split(',').map(layerToActivate => {
-                                        _self.checkLayerControl(layerToActivate, doNotLegend);
+                                        _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
                                     });
                                 }
 
@@ -227,7 +228,7 @@ module.exports = module.exports = {
                     }
                 }
             } else {
-                _self.uncheckLayerControl(name, doNotLegend);
+                _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 resolve();
             }
         });
@@ -238,7 +239,7 @@ module.exports = module.exports = {
     /**
      * Toggles the layer control
      */
-    _toggleLayerControl: (enable = false, layerName, doNotLegend) => {
+    _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
             if (!controlElement || controlElement.length !== 1) {
@@ -255,12 +256,12 @@ module.exports = module.exports = {
         let el = getLayerSwitchControl();
         if (el) {
             el.prop('checked', enable);
-            if (enable && layerName.indexOf(`v:`) === 0) {
-                $(el).closest(`.layer-item`).find(`.js-toggle-filters`).show();
-                $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).show();
-            } else {
-                $(el).closest(`.layer-item`).find(`.js-toggle-filters`).hide();
-                $(el).closest(`.layer-item`).find(`.js-toggle-table-view`).hide();
+            if (setupControls) {        
+                if (layerName.indexOf(`v:`) === 0) {
+                    layerTree.setupLayerAsVectorOne(layerName, true, enable);
+                } else {
+                    layerTree.setupLayerAsTileOne(layerName, true, enable);
+                }
             }
 
             _self.update(doNotLegend, el);
@@ -272,8 +273,8 @@ module.exports = module.exports = {
      * 
      * @param {String} layerName Name of the layer
      */
-    checkLayerControl: (layerName, doNotLegend) => {
-        _self._toggleLayerControl(true, layerName, doNotLegend);
+    checkLayerControl: (layerName, doNotLegend, setupControls = true) => {
+        _self._toggleLayerControl(true, layerName, doNotLegend, setupControls);
     },
 
     /**
@@ -281,8 +282,8 @@ module.exports = module.exports = {
      * 
      * @param {String} layerName Name of the layer
      */
-    uncheckLayerControl: (layerName, doNotLegend) => {
-        _self._toggleLayerControl(false, layerName, doNotLegend);
+    uncheckLayerControl: (layerName, doNotLegend, setupControls = true) => {
+        _self._toggleLayerControl(false, layerName, doNotLegend, setupControls);
     },
 
     /**

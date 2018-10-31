@@ -1,7 +1,12 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var router = express.Router();
 var configUrl = require('../config/config.js').configUrl;
-var request = require('request');
 var fetchUrl = require('fetch').fetchUrl;
 
 router.get('/api/template/:db/:file', function (req, response) {

@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -47,7 +48,6 @@ module.exports = module.exports = {
                 if (str.split(".")[1]) {
                     layers.addLayer(str);
                 }
-
                 console.info(str + " is added as base layer.");
             }
 

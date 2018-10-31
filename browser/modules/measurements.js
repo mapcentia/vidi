@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -157,7 +158,7 @@ module.exports = {
                     container.style.backgroundColor = 'white';
                     container.style.width = `30px`;
                     container.style.height = `30px`;
-                    container.title = `Measure distance`;
+                    container.title = __(`Measure distance`);
 
                     container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
                         <span class="fa fa-ruler"></span>
@@ -184,9 +185,7 @@ module.exports = {
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
             $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
-
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
-
             drawOn = true;
 
             L.drawLocal = require('./drawLocales/draw.js');            

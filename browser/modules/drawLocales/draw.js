@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 module.exports = {
     draw: {
         toolbar: {
@@ -81,8 +87,8 @@ module.exports = {
                     text: __('Cancel')
                 },
                 clearAll: {
-                    title: __('Cancel editing, discards all changes.'),
-                    text: __('Cancel')
+                    title: __('Clear all drawings.'),
+                    text: __('Clear all')
                 }
             },
             buttons: {

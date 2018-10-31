@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -129,7 +130,7 @@ module.exports = {
             }
         };
 
-        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, utils.__("Coordinates", dict), utils.__("Info", dict), require('./../../../browser/modules/height')().max, "my_location");
 
 
         // Create React component

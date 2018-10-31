@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -11,7 +12,7 @@ const NUMBER_OF_SIMULTANEOUS_REQUESTS = 8;
 /**
  * Browser detection
  */
-const { detect } = require('detect-browser');
+const {detect} = require('detect-browser');
 const browser = detect();
 
 /**
@@ -124,7 +125,7 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
-        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Offline map"), __("OfflineMap block description"), require('./../../../browser/modules/height')().max, "get_app");
 
         // Allowed zoom levels
         const minimalZoomLevel = 10;
@@ -169,7 +170,7 @@ module.exports = {
              *
              */
             componentDidMount() {
-                let drawControlFull = new L.Control.Draw({ draw: { polyline: false } });
+                let drawControlFull = new L.Control.Draw({draw: {polyline: false}});
 
                 this.refreshStatus();
                 this.setState({
@@ -191,34 +192,34 @@ module.exports = {
                         });
 
                         setTimeout(checkServiceWorkerRegistration, 2000);
-                    }     
+                    }
                 };
 
                 setTimeout(checkServiceWorkerRegistration, 1000);
 
                 mapObj.on('zoomend', (e) => {
                     if (mapObj.getZoom() <= this.state.newAreaZoomMax) {
-                        this.setState({ newAreaZoomMin: mapObj.getZoom() });
+                        this.setState({newAreaZoomMin: mapObj.getZoom()});
                     } else {
-                        this.setState({ newAreaZoomMin: this.state.newAreaZoomMax });
+                        this.setState({newAreaZoomMin: this.state.newAreaZoomMax});
                     }
                 });
             }
 
             componentWillUnmount() {
-                alert(`www`);
+                //alert(`www`);
             }
 
             /**
              * Generates all URL for fetching the underlying tile set for specified boundary
-             * 
+             *
              * @param {*} map Leaflet map instance
              * @param {*} bounds bounds object
              * @param {*} tileLayer tile layer
              * @param {*} minZoom minimum map zoom
              * @param {*} maxZoom maximum map zoom
              */
-            getTileUrls (map, bounds, tileLayer, minZoom, maxZoom) {
+            getTileUrls(map, bounds, tileLayer, minZoom, maxZoom) {
                 if (!tileLayer) throw new Error('Tile layer is undefined');
                 let urls = [];
 
@@ -253,10 +254,10 @@ module.exports = {
 
             /**
              * Fetches tiles in background
-             * 
+             *
              * @param {*} tileURLs Tile URLs
              */
-            fetchAndCacheTiles (tileURLs, onloadCallback, onerrorCallback) {
+            fetchAndCacheTiles(tileURLs, onloadCallback, onerrorCallback) {
                 var fetchTileQueue = async.queue((requestURL, callback) => {
                     let img = new Image();
                     img.onload = () => {
@@ -272,8 +273,10 @@ module.exports = {
                     img.src = requestURL;
                 }, NUMBER_OF_SIMULTANEOUS_REQUESTS);
 
-                fetchTileQueue.drain = () => {};
-                fetchTileQueue.push(tileURLs, (err) => {});
+                fetchTileQueue.drain = () => {
+                };
+                fetchTileQueue.push(tileURLs, (err) => {
+                });
             };
 
             checkAllURLsAreNotCached(item) {
@@ -283,7 +286,7 @@ module.exports = {
                         for (let i = 0; i < item.data.tileURLs.length; i++) {
                             promises.push(cache.match(item.data.tileURLs[i]));
                         }
-    
+
                         Promise.all(promises).then(values => {
                             let allURLsAreNotCached = true;
                             values.map(item => {
@@ -330,11 +333,11 @@ module.exports = {
 
                                     navigator.serviceWorker.controller.postMessage({force: true});
                                     this.fetchAndCacheTiles(item.data.tileURLs, () => {
-                                        this.setState({ mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1) });
+                                        this.setState({mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1)});
                                         checkRefreshStatus();
                                     }, () => {
                                         console.log('Unable to fetch tile');
-                                        this.setState({ mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad-- });
+                                        this.setState({mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad--});
                                         checkRefreshStatus();
                                     });
                                 });
@@ -362,7 +365,7 @@ module.exports = {
                             this.deleteMapArea(item).then(() => {
                                 cachedAreasManagerInstance.delete(item.id).then(() => {
                                     this.refreshStatus();
-                                }); 
+                                });
                             });
                         }
                     }
@@ -424,7 +427,7 @@ module.exports = {
 
                     let tileURLs = this.getTileUrls(mapObj, this.state.newAreaExtent, layer,
                         this.state.newAreaZoomMin, this.state.newAreaZoomMax);
-                    
+
                     this.setState({
                         tilesLoaded: 0,
                         tilesLeftToLoad: tileURLs.length
@@ -434,21 +437,21 @@ module.exports = {
 
                     // @todo What if there are 1000 tiles - 1000 updates?
                     this.fetchAndCacheTiles(tileURLs, () => {
-                        this.setState({ tilesLoaded: (this.state.tilesLoaded + 1) });
+                        this.setState({tilesLoaded: (this.state.tilesLoaded + 1)});
                         this.attemptToSaveCachedArea(tileURLs, layer);
                     }, () => {
                         console.log('Unable to fetch tile');
-                        this.setState({ tilesLeftToLoad: this.state.tilesLeftToLoad-- });
+                        this.setState({tilesLeftToLoad: this.state.tilesLeftToLoad--});
                         this.attemptToSaveCachedArea(tileURLs, layer);
                     });
 
-                    this.setState({ loading: true });
+                    this.setState({loading: true});
                 }
             }
 
             refreshStatus() {
                 cachedAreasManagerInstance.getAll().then(existingCachedAreas => {
-                    this.setState({ existingCachedAreas });
+                    this.setState({existingCachedAreas});
                 });
 
                 const bytesToSize = (bytes) => {
@@ -485,7 +488,7 @@ module.exports = {
             }
 
             setComment(e) {
-                this.setState({ newAreaComment: e.target.value });
+                this.setState({newAreaComment: e.target.value});
             }
 
             setMinZoom(e) {
@@ -502,10 +505,10 @@ module.exports = {
             setExtent(e) {
                 this.state.drawRectangleControl.enable();
                 $(`#offline-map-dialog`).find(`.expand-less`).trigger(`click`);
-                
+
                 mapObj.on('draw:created', (e) => {
                     $(`#offline-map-dialog`).find(`.expand-more`).trigger(`click`);
-                    
+
                     if (this.state.drawnExtentLayer) {
                         mapObj.removeLayer(this.state.drawnExtentLayer);
                     }
@@ -546,8 +549,10 @@ module.exports = {
             render() {
                 const showExtentButton = this.state.newAreaExtent ? (
                     <span>
-                        <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Redefine")}</button>
-                        <button type="button" className="btn btn-primary" onClick={this.clearExtent}>{__("Clear")}</button>
+                        <button type="button" className="btn btn-primary"
+                                onClick={this.setExtent}>{__("Redefine")}</button>
+                        <button type="button" className="btn btn-primary"
+                                onClick={this.clearExtent}>{__("Clear")}</button>
                     </span>
                 ) : (
                     <button type="button" className="btn btn-primary" onClick={this.setExtent}>{__("Define")}</button>
@@ -567,8 +572,10 @@ module.exports = {
 
                 let loadingOverlay = false;
                 if (this.state.loading) {
-                    loadingOverlay = (<LoadingOverlay tilesLoaded={this.state.tilesLoaded} tilesLeftToLoad={this.state.tilesLeftToLoad}>
-                        <button onClick={this.clearAddForm} className="btn btn-primary" type="button">{__("Store another")}</button>
+                    loadingOverlay = (<LoadingOverlay tilesLoaded={this.state.tilesLoaded}
+                                                      tilesLeftToLoad={this.state.tilesLeftToLoad}>
+                        <button onClick={this.clearAddForm} className="btn btn-primary"
+                                type="button">{__("Store another")}</button>
                     </LoadingOverlay>);
                 }
 
@@ -586,13 +593,14 @@ module.exports = {
                 let existingCachedMapListBlock = false;
                 if (pageIsSecured) {
                     if (this.state.cacheIsAvailable === -1) {
-                        cacheNotification = (<div className="alert alert-success" role="alert" onClick={this.reloadPage} style={{
-                            textDecoration: 'underline',
-                            cursor: 'pointer',
-                            textAlign: 'center'
-                        }}>
-                            {__("Please reload the page")}
-                        </div>);
+                        cacheNotification = (
+                            <div className="alert alert-success" role="alert" onClick={this.reloadPage} style={{
+                                textDecoration: 'underline',
+                                cursor: 'pointer',
+                                textAlign: 'center'
+                            }}>
+                                {__("Please reload the page")}
+                            </div>);
                     } else if (this.state.cacheIsAvailable === 0) {
                         cacheNotification = (<div className="alert alert-warning" role="alert" style={{
                             textAlign: 'center'
@@ -612,11 +620,13 @@ module.exports = {
                                         data-parent="#layers"
                                         id="collapseOfflineMap1-trigger"
                                         href="#collapseOfflineMap1"
-                                        aria-expanded="true"><i className="material-icons">&#xE906;</i> {__("Store map area")}</a>
+                                        aria-expanded="true"><i
+                                        className="material-icons">&#xE906;</i> {__("Store map area")}</a>
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap1" role="tabpanel">
-                                <div id="collapseOfflineMap1" className="accordion-body collapse" aria-expanded="true" style={{position: 'relative'}}>
+                                <div id="collapseOfflineMap1" className="accordion-body collapse" aria-expanded="true"
+                                     style={{position: 'relative'}}>
                                     {loadingOverlay}
                                     <div className="container-fluid">
                                         <div className="row">
@@ -627,23 +637,33 @@ module.exports = {
                                                 </div>
                                                 <div>
                                                     <h4>{__("Comment")}</h4>
-                                                    <textarea className="form-control" id="offline-map-comment" onChange={this.setComment} placeholder={__('Saved tiles will be used in...')}></textarea>
+                                                    <textarea className="form-control" id="offline-map-comment"
+                                                              onChange={this.setComment}
+                                                              placeholder={__('Saved tiles will be used in...')}></textarea>
                                                 </div>
                                                 <div>
                                                     <h4>{__("Zoom")} {required}</h4>
                                                     <div className="container-fluid">
                                                         <div className="row">
                                                             <div className="col-md-6">
-                                                                <select className="form-control" id="offline-map-zoom_min" onChange={this.setMinZoom} value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
+                                                                <select className="form-control"
+                                                                        id="offline-map-zoom_min"
+                                                                        onChange={this.setMinZoom}
+                                                                        value={this.state.newAreaZoomMin}>{zoomMinOptions}</select>
                                                             </div>
                                                             <div className="col-md-6">
-                                                                <select className="form-control" id="offline-map-zoom_max" onChange={this.setMaxZoom} defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
+                                                                <select className="form-control"
+                                                                        id="offline-map-zoom_max"
+                                                                        onChange={this.setMaxZoom}
+                                                                        defaultValue={this.state.newAreaZoomMax}>{zoomMaxOptions}</select>
                                                             </div>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 <div>
-                                                    <button type="button" className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')} onClick={this.onSave}>
+                                                    <button type="button"
+                                                            className={"btn btn-primary btn-block " + (this.formIsValid() ? '' : 'disabled')}
+                                                            onClick={this.onSave}>
                                                         <i className="material-icons">&#xE906;</i> {__("Store")}
                                                     </button>
                                                 </div>
@@ -666,15 +686,21 @@ module.exports = {
                                         data-parent="#layers"
                                         id="collapseOfflineMap2-trigger"
                                         href="#collapseOfflineMap2"
-                                        aria-expanded="true"><i className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
+                                        aria-expanded="true"><i
+                                        className="material-icons">&#xE896;</i> {__("Stored map areas")}</a>
                                 </h4>
                             </div>
                             <ul className="list-group" id="group-collapseOfflineMap2" role="tabpanel">
-                                <div id="collapseOfflineMap2" className="accordion-body collapse in" aria-expanded="true">
+                                <div id="collapseOfflineMap2" className="accordion-body collapse in"
+                                     aria-expanded="true">
                                     {mapAreasRefreshOverlay}
                                     <MapAreaList
-                                        onMapAreaRefresh={(item) => {this.onMapAreaRefresh(item)}}
-                                        onMapAreaDelete={(item) => {this.onMapAreaDelete(item)}}
+                                        onMapAreaRefresh={(item) => {
+                                            this.onMapAreaRefresh(item)
+                                        }}
+                                        onMapAreaDelete={(item) => {
+                                            this.onMapAreaDelete(item)
+                                        }}
                                         mapObj={mapObj}
                                         items={this.state.existingCachedAreas}/>
                                 </div>
@@ -682,13 +708,14 @@ module.exports = {
                         </div>);
                     }
                 } else {
-                    securedPageNotification = (<div className="alert alert-warning" role="alert" onClick={this.switchProtocol} style={{
-                        textDecoration: 'underline',
-                        cursor: 'pointer',
-                        textAlign: 'center'
-                    }}>
-                        {__("Please use the secured version of page (HTTPS enabled)")}
-                    </div>);
+                    securedPageNotification = (
+                        <div className="alert alert-warning" role="alert" onClick={this.switchProtocol} style={{
+                            textDecoration: 'underline',
+                            cursor: 'pointer',
+                            textAlign: 'center'
+                        }}>
+                            {__("Please use the secured version of page (HTTPS enabled)")}
+                        </div>);
                 }
 
                 let availableSpaceNotification = (<div className="available-space-container">
@@ -730,7 +757,7 @@ module.exports = {
         if (document.getElementById(exId)) {
             try {
                 ReactDOM.render(
-                    <OfflineMap />,
+                    <OfflineMap/>,
                     document.getElementById(exId)
                 );
             } catch (e) {
