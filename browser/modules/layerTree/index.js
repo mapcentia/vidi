@@ -1080,7 +1080,7 @@ module.exports = {
      * @returns {void}
      */
     createLayerRecord: (layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
-        let displayInfo;
+        let displayInfo = `none`;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
@@ -1108,7 +1108,7 @@ module.exports = {
                     }
 
                     if (`meta_desc` in parsedMeta) {
-                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? "visible" : "hidden";
+                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `inline-block` : `none`;
                     }
 
                     if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
@@ -1143,15 +1143,7 @@ module.exports = {
 
             let layerTypeSelector = false;
             if (singleTypeLayer) {
-                if (layerIsTheTileOne) {
-                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                        ${tileLayerIcon}
-                    </div>`;
-                } else if (layerIsTheVectorOne) {
-                    layerTypeSelector = `<div style="display: inline-block; vertical-align: middle;">
-                        ${vectorLayerIcon}
-                    </div>`;
-                }
+                layerTypeSelector = ``;
             } else {
                 layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
             }

@@ -74,10 +74,8 @@ class MarkupGenerator {
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
 
-        return (`<li
-            class="layer-item list-group-item"
-            data-gc2-layer-key="${layerKeyWithGeom}"
-            style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
+        return (`
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
                     <div class="checkbox" style="width: 34px;">
@@ -119,12 +117,6 @@ class MarkupGenerator {
                     </button>
                 </div>
 
-                <div style="display: inline-block;">
-                    ${addButton}
-                    <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
-                        style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
-                </div>
-
                 <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
                     <div class="btn-group" role="group">
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}">
@@ -146,6 +138,11 @@ class MarkupGenerator {
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+
+                <div style="float: right; padding-top: 10px; padding-right: 10px;">
+                    ${addButton}
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="display: ${displayInfo}; visibility: visible;" class="info-label" data-gc2-id="${layerKey}">Info</a>
+                </div>
             </div>
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-opacity"></div>
