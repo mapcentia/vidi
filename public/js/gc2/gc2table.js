@@ -226,7 +226,8 @@ var gc2table = (function () {
                         m.map._layers[id].bindPopup(renderedText || str, {
                             className: "custom-popup gc2table-custom-popup",
                             autoPan: autoPan,
-                            closeButton: true
+                            closeButton: true,
+                            minWidth: 160
                         }).openPopup();
 
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
