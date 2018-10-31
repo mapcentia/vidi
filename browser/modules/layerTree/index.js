@@ -1237,6 +1237,9 @@ module.exports = {
                 }
             });
 
+            $(layerContainer).find('.js-layer-settings-filters').hide(0);
+            $(layerContainer).find('.js-layer-settings-opacity').hide(0);
+
             let initialSliderValue = 1;
             if (layerIsTheTileOne) {
                 _self.setupLayerAsTileOne(layerKey);
@@ -1358,22 +1361,22 @@ module.exports = {
                 } else {
                     $(container).find(`.js-toggle-filters`).hide();
                     $(container).find(`.js-toggle-table-view`).hide();
+                    $(container).find('.js-layer-settings-filters').hide(0);
                 }
 
-                $(container).find('.js-layer-settings-filters').hide(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show();
                 } else {
                     $(container).find(`.js-toggle-opacity`).hide();
+                    $(container).find('.js-layer-settings-opacity').hide(0);
                 }
 
                 $(container).find(`.js-toggle-filters`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
 
                 $(container).find('.js-layer-settings-filters').hide(0);
-                $(container).find('.js-layer-settings-opacity').hide(0);
             }
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
