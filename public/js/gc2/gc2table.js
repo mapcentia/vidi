@@ -200,7 +200,11 @@ var gc2table = (function () {
                     var row = $('*[data-uniqueid="' + id + '"]');
                     row.addClass("selected");
                     if (setSelectedStyle) {
-                        m.map._layers[id].setStyle(styleSelected);
+                        try {
+                            m.map._layers[id].setStyle(styleSelected);
+                        } catch (e) {
+                            console.warn(e.message);
+                        }
                     }
 
                     if (openPopUp) {
