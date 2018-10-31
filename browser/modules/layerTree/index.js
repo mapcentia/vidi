@@ -1356,7 +1356,7 @@ module.exports = {
      * @param {Boolean} setupAsVector  Specifies if layer should be setup as the vector one
      * @param {String}  layerKey       Layer key
      * @param {Boolean} ignoreErrors   Specifies if errors should be ignored
-     * @param {Boolean} layerIsEnabled  Specifies if layer is enabled
+     * @param {Boolean} layerIsEnabled Specifies if layer is enabled
      */
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
@@ -1522,7 +1522,7 @@ module.exports = {
      */
     reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false) => {
         return new Promise((resolve, reject) => {
-            switchLayer.init(layerId, false, doNotLegend, forceTileRedraw).then(() => {
+            switchLayer.init(layerId, false, doNotLegend, forceTileRedraw, false).then(() => {
                 switchLayer.init(layerId, true, doNotLegend, forceTileRedraw).then(() => {
                     resolve();
                 });
