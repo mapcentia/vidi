@@ -348,13 +348,29 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
 
+        /**
+         * Opacity settings needs to be applied when layer is loaded. As layer loading takes some
+         * time, the application of opacity setting has to be posponed as well. The setLayerOpacityRequests
+         * contains opacity settings for layers and is cleaned up on every run.
+         */
         backboneEvents.get().on(`doneLoading:layers`, layerKey => {
-            setLayerOpacityRequests.map((item, index) => {
+            for (let i = (setLayerOpacityRequests.length - 1); i >= 0; i--) {
+                let item = setLayerOpacityRequests[i];
                 if (item.layerKey === layerKey) {
                     applyOpacityToLayer(item.opacity, layerKey);
-                    setLayerOpacityRequests.splice(index, 1);
+                    if (i >= 1) {
+                        for (let j = (i - 1); j >= 0; j--) {
+                            let subItem = setLayerOpacityRequests[j];
+                            if (subItem.layerKey === layerKey) {
+                                // Remove irrelevant opacity settings
+                                setLayerOpacityRequests.splice(j, 1);
+                            }
+                        }
+                    }
+
+                    break;
                 }
-            });
+            }
         });
 
         let result = false;
@@ -1265,6 +1281,7 @@ module.exports = {
                     slide: function (event, ui) {
                         let sliderValue = ui.value / 100;
                         applyOpacityToLayer(sliderValue, layerKey);
+                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
                     }
                 });
 
