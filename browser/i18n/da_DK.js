@@ -34,6 +34,7 @@ module.exports = {
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Clear map": "Ryd kortet",
+
         // Drawing
         "Cancel drawing": " Afbryd tegning",
         "Cancel": "Afbryd",
@@ -66,6 +67,9 @@ module.exports = {
         "Drag handles, or marker to edit drawing.": "Træk håndtag, eller markør for at ændre tegning.",
         "Click cancel to undo changes.": "Klik afbryd for at omgøre ændring.",
         "Click on a drawing to remove": " Klik på en tegning for at slette.",
+        "Clear all": "Slet alle",
+        "Clear all drawings.": "Slet alle tegninger.",
+
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
@@ -150,7 +154,6 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
-        "Cancel": "Fortryd",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 

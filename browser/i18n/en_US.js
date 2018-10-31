@@ -34,6 +34,7 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Clear map": "Clear map",
+
         // Drawing
         "Cancel drawing": "Cancel drawing",
         "Cancel": "Cancel",
@@ -66,6 +67,9 @@ module.exports = {
         "Drag handles, or marker to edit drawing.": "Drag handles, or marker to edit drawing.",
         "Click cancel to undo changes.": "Click cancel to undo changes.",
         "Click on a drawing to remove": "Click on a drawing to remove",
+        "Clear all": "Clear all",
+        "Clear all drawings.": "Clear all drawings.",
+
         // Report
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",

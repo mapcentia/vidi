@@ -87,8 +87,8 @@ module.exports = {
                     text: __('Cancel')
                 },
                 clearAll: {
-                    title: __('Cancel editing, discards all changes.'),
-                    text: __('Cancel')
+                    title: __('Clear all drawings.'),
+                    text: __('Clear all')
                 }
             },
             buttons: {
