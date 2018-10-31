@@ -213,6 +213,7 @@ module.exports = {
                     singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
 
                 if (layer === l) {
+                    // Check if the opacity value differs from the default one
                     isBaseLayer = !!v.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         host: host,

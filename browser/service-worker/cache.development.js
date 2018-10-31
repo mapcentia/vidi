@@ -127,6 +127,7 @@ let urlsToCache = [
     '/js/gc2/geocloud.js',
     '/js/point-clusterer.js',
     '/js/bundle.js',
+    '/js/lib/jquery-ui/jquery-ui.min.css',
     '/css/styles.css',
     '/css/styles.css',
     '/css/font-awesome.v520.regular.css',

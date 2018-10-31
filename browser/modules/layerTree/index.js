@@ -171,7 +171,21 @@ const queryServiceWorker = (data) => {
 
         navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
     });
-}
+};
+
+let setLayerOpacityRequests = [];
+const applyOpacityToLayer = (opacity, layerKey) => {
+    let opacityWasSet = false;
+    for (let key in cloud.get().map._layers) {
+        if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
+            if (cloud.get().map._layers[key].id === layerKey) {
+                opacityWasSet = true;
+                cloud.get().map._layers[key].setOpacity(opacity);
+                backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
+            }
+        }
+    }
+};
 
 /**
  *
@@ -198,10 +212,6 @@ module.exports = {
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
             editingIsEnabled = true;
         }
-
-        navigator.serviceWorker.addEventListener('message', event => {
-            console.log(`### From SW`, event.data.msg);
-        });
 
         _self = this;
         queueStatistsics = new QueueStatisticsWatcher({ switchLayer, offlineModeControlsManager, layerTree: _self });
@@ -272,12 +282,13 @@ module.exports = {
      * 
      * @return {Promise}
      */
-    getLayersOrderAndOfflineModeSettings: () => {
+    getLayerTreeSettings: () => {
         let result = new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
-                resolve({ order, offlineModeSettings });
+                let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
+                resolve({ order, offlineModeSettings, opacitySettings });
             });
         });
 
@@ -337,6 +348,15 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
 
+        backboneEvents.get().on(`doneLoading:layers`, layerKey => {
+            setLayerOpacityRequests.map((item, index) => {
+                if (item.layerKey === layerKey) {
+                    applyOpacityToLayer(item.opacity, layerKey);
+                    setLayerOpacityRequests.splice(index, 1);
+                }
+            });
+        });
+
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
@@ -372,10 +392,7 @@ module.exports = {
 
                 // Emptying the tree
                 $("#layers").empty();
-                _self.getLayersOrderAndOfflineModeSettings().then(({ order, offlineModeSettings }) => {
-
-
-                    
+                _self.getLayerTreeSettings().then(({ order, offlineModeSettings, opacitySettings }) => {
 
                     try {
 
@@ -418,6 +435,10 @@ module.exports = {
                             }
                         }
 
+                        if (`opacitySettings` in forcedState) {
+                            opacitySettings = forcedState.opacitySettings;
+                        }
+
                         if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
                     }
 
@@ -451,7 +472,7 @@ module.exports = {
                         // Filling up groups and underlying layers (except ungrouped ones)
                         for (let i = 0; i < arr.length; ++i) {
                             if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                _self.createGroupRecord(arr[i], order, forcedState, opacitySettings, precheckedLayers);
                             }
                         }
 
@@ -473,6 +494,7 @@ module.exports = {
                         state.listen(MODULE_NAME, `layersOfflineModeChange`);
                         state.listen(MODULE_NAME, `activeLayersChange`);
                         state.listen(MODULE_NAME, `filtersChange`);
+                        state.listen(MODULE_NAME, `opacityChange`);
                         
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                         setTimeout(() => {
@@ -826,7 +848,7 @@ module.exports = {
      * 
      * @returns {void}
      */
-    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
+    createGroupRecord: (groupName, order, forcedState, opacitySettings, precheckedLayers) => {
         let metaData = meta.getMetaData();
         let numberOfActiveLayers = 0;        
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
@@ -903,10 +925,10 @@ module.exports = {
                     numberOfActiveLayers++;
                 }
 
-                _self.createLayerRecord(localItem.layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
+                _self.createLayerRecord(localItem.layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
                 numberOfAddedLayers++;
             } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
+                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
                 numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                 numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
             } else {
@@ -985,7 +1007,7 @@ module.exports = {
      * 
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
+    createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
 
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
@@ -1020,7 +1042,7 @@ module.exports = {
                 activeLayers++;
             }
     
-            _self.createLayerRecord(child, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
+            _self.createLayerRecord(child, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
             addedLayers++;           
         });
 
@@ -1041,7 +1063,7 @@ module.exports = {
      * 
      * @returns {void}
      */
-    createLayerRecord: (layer, forcedState, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
+    createLayerRecord: (layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
         let displayInfo;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -1136,13 +1158,9 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', 'tile');
                 $(switcher).prop('checked', true);
 
-                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-                $(layerContainer).find(`.js-toggle-opacity`).show();
-                $(layerContainer).find(`.js-toggle-filters`).hide();
-                $(layerContainer).find(`.js-toggle-table-view`).hide();
-                $(layerContainer).find('.js-layer-settings').hide(0);
-
+                _self.setupLayerAsTileOne(layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
@@ -1153,12 +1171,9 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', 'vector');
                 $(switcher).prop('checked', true);
 
-                let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-                $(layerContainer).find(`.js-toggle-opacity`).hide();
-                $(layerContainer).find(`.js-toggle-filters`).show();
-                $(layerContainer).find(`.js-toggle-table-view`).show();
-
+                _self.setupLayerAsVectorOne(layerKey);
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
@@ -1222,10 +1237,46 @@ module.exports = {
                 }
             });
 
+            let initialSliderValue = 1;
+            if (layerIsTheTileOne) {
+                _self.setupLayerAsTileOne(layerKey);
+
+                // Opacity slider
+                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                    <div class="js-opacity-slider"></div>
+                </div>`);
+
+                if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {                    
+                    if (opacitySettings[layerKey] >= 0 && opacitySettings[layerKey] <= 1) {
+                        initialSliderValue = opacitySettings[layerKey];
+                    }
+                }
+
+                $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
+                    orientation: `horizontal`,
+                    range: `min`,
+                    min: 0,
+                    max: 100,
+                    value: (initialSliderValue * 100),
+                    step: 10,
+                    slide: function (event, ui) {
+                        let sliderValue = ui.value / 100;
+                        applyOpacityToLayer(sliderValue, layerKey);
+                    }
+                });
+
+                // Assuming that it not possible to set layer opacity right now
+                setLayerOpacityRequests.push({ layerKey, opacity: initialSliderValue });
+
+                $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                    $(layerContainer).find('.js-layer-settings-opacity').toggle();
+                });
+            }
+
             // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
         
                 let conditions = _self.getFilterConditions(layerKey);
                 $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
@@ -1236,10 +1287,10 @@ module.exports = {
 
                 if (document.getElementById(componentContainerId)) {                   
                     ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings').hide(0);
+                    $(layerContainer).find('.js-layer-settings-filters').hide(0);
         
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                        $(layerContainer).find('.js-layer-settings').toggle();
+                        $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
 
@@ -1267,23 +1318,65 @@ module.exports = {
                     });
                 });
 
-                if (layerIsTheTileOne === false) {
-                    $(layerContainer).find(`.js-toggle-opacity`).remove();
+                if (defaultLayerType === `vector`) {
+                    _self.setupLayerAsVectorOne(layerKey);
+                } else {
+                    _self.setupLayerAsTileOne(layerKey);
+                }
+            }
+        }
+    },
+
+    /**
+     * Setups layer as the vector one
+     */
+    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled); },
+    
+    /**
+     * Setups layer as the tile one
+     */
+    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled); },
+
+    /**
+     * By design the layer control is rendered with controls both for tile and vector case, so
+     * this function regulates the visibility and initialization of layer type specific controls.
+     * 
+     * @param {Boolean} setupAsVector  Specifies if layer should be setup as the vector one
+     * @param {String}  layerKey       Layer key
+     * @param {Boolean} ignoreErrors   Specifies if errors should be ignored
+     * @param {Boolean} layerIsEnabled  Specifies if layer is enabled
+     */
+    setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
+        layerKey = layerKey.replace(`v:`, ``);
+        let container = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+        if (container.length === 1) {
+            if (setupAsVector) {
+                $(container).find(`.js-toggle-opacity`).hide();
+                if (layerIsEnabled) {
+                    $(container).find(`.js-toggle-filters`).show();
+                    $(container).find(`.js-toggle-table-view`).show();
+                } else {
+                    $(container).find(`.js-toggle-filters`).hide();
+                    $(container).find(`.js-toggle-table-view`).hide();
                 }
 
-                if (layerIsActive && defaultLayerType === `vector`) {
-                    $(layerContainer).find(`.js-toggle-opacity`).hide();
-                    $(layerContainer).find(`.js-toggle-filters`).show();
-                    $(layerContainer).find(`.js-toggle-table-view`).show();
-                } else {
-                    $(layerContainer).find(`.js-toggle-opacity`).show();
-                    $(layerContainer).find(`.js-toggle-filters`).hide();
-                    $(layerContainer).find(`.js-toggle-table-view`).hide();
-                }
+                $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
-                $(layerContainer).find(`.js-toggle-filters`).remove();
-                $(layerContainer).find(`.js-toggle-table-view`).remove();
+                if (layerIsEnabled) {
+                    $(container).find(`.js-toggle-opacity`).show();
+                } else {
+                    $(container).find(`.js-toggle-opacity`).hide();
+                }
+
+                $(container).find(`.js-toggle-filters`).hide();
+                $(container).find(`.js-toggle-table-view`).hide();
+
+                $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
             }
+        } else if (ignoreErrors === false) {
+            throw new Error(`Unable to find layer container`);
         }
     },
 
@@ -1361,11 +1454,25 @@ module.exports = {
     getState: () => {
         let activeLayers = _self.getActiveLayers();
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
+
+        let opacitySettings = {};
+        for (let key in cloud.get().map._layers) {
+            let layer = cloud.get().map._layers[key];
+            if (`id` in layer && layer.id) {
+                if (`options` in layer && layer.options && `opacity` in layer.options) {
+                    if (isNaN(layer.options.opacity) === false) {
+                        opacitySettings[layer.id] = layer.options.opacity;
+                    }
+                }
+            }
+        }
+
         let state = {
             order: layerTreeOrder,
             vectorFilters,
             activeLayers,
-            layersOfflineMode
+            layersOfflineMode,
+            opacitySettings
         };
 
         return state;
@@ -1388,7 +1495,7 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
         if (newState === false) {
-            newState = { order: false };
+            newState = { order: false, opacitySettings: {}};
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }

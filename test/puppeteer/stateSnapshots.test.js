@@ -339,4 +339,58 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('[data-gc2-id="public.test_poly"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="test.polygon"]').prop('checked')`)).to.be.false;
     });
+
+    it("should store layer-specific settings", async () => {
+        // @todo Check for filters
+        // @todo Check for offline mode settings
+
+        let page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL_DEFAULT + `public.test_poly`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
+
+        // Accepting dialogs
+        page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Open state snapshot manager
+        await page.click(`[href="#state-snapshots-dialog-content-content"]`);
+        await helpers.sleep(2000);
+
+        // Add snapshot
+        await page.type(`.js-browser-owned input`, `Plain snapshot`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Change layer opacity 
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.click('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider');
+        await helpers.sleep(1000);
+
+        // Open state snapshot manager
+        await page.click(`[href="#state-snapshots-dialog-content-content"]`);
+        await helpers.sleep(2000);
+
+        // Add snapshot
+        await page.type(`.js-browser-owned input`, `Altered opacity snapshot`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Check if current opacity is 0.5
+        let layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        expect(layerOpacity).to.equal(`0.5`);
+
+        // Applying first state snapshot
+        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Check if current opacity is 1 as it was initially
+        layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        expect(layerOpacity).to.equal(`1`);
+    });
 });

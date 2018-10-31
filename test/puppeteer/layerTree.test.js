@@ -18,8 +18,8 @@ describe('Layer tree common', () => {
 
         Following options do not work:
         - using page.setOfflineMode(true)
-        - using the DevTolls protocol, the Network.emulateNetworkConditions({ offline: true })
-        - using the DevTolls protocol, the Network.requestServedFromCache()
+        - using the DevTools protocol, the Network.emulateNetworkConditions({ offline: true })
+        - using the DevTools protocol, the Network.requestServedFromCache()
         - intercepting responses and checking if they were served from cache ()
 
         When offline application mode becomes available, following cases has to be processed:
