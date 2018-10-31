@@ -1120,3 +1120,7 @@ h4 small {
   min-width: 568px;
   max-width: 768px;
 }
+.leaflet-measure-path-measurement {
+  font-size: 12px;
+  font-weight: bold;
+}
