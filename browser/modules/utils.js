@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -15,22 +16,25 @@ module.exports = {
         return this;
     },
     init: function () {
-
     },
-    createMainTab: function (id, name, info) {
-        $('<li role="presentation"><a href="#' + id + '-content" aria-controls role="tab" data-toggle="tab">' + name + '</a></li>').appendTo("#main-tabs");
+    createMainTab: function (id, name, info, height, icon) {
+        let el = `#${id}-content`;
+        icon = icon || "help";
+        $(`<li role="presentation"><a href="#${id}-content" aria-controls role="tab" data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}"
+                                class="material-icons">${icon}</i>${name}</a></li>`).appendTo("#main-tabs");
+        $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
+        $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
+            $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
+                <button type="button" class="close" data-dismiss="alert">×</button>${info}
+            </div>`);
+        });
+        $(`<div></div>`).appendTo(el);
+        $(`<div id="${id}"></div>`).appendTo(el);
 
-        $('<div role="tabpanel" class="tab-pane fade" id="' + id + '-content">' +
-            '<div class="alert alert-dismissible alert-info" role="alert">' +
-            '<button type="button" class="close" data-dismiss="alert">×</button>' +
-            info +
-            '</div>' +
-            '<div id="' + id + '"></div>' +
-            '</div>').appendTo("#side-panel .main-content");
     },
 
     createNavItem: function (id, dropdown) {
-      $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
+        $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
     },
 
     injectCSS: function (css) {

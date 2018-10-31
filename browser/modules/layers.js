@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -98,7 +99,7 @@ module.exports = {
         for (var key in layers) {
             if (layers[key].baseLayer !== true) {
                 if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                    if (typeof layers[key]._tiles === "object" || layers[key].id && layers[key].id.startsWith('v:')) {
+                    if ((typeof layers[key]._tiles === "object" || typeof layers[key]._wmsUrl !== "undefined") || (layers[key].id && layers[key].id.startsWith('v:'))) {
                         if (searchedLayerKey) {
                             if (searchedLayerKey === layers[key].id) {
                                 mapLayers.push(layers[key]);
@@ -110,7 +111,6 @@ module.exports = {
                 }
             }
         }
-
         return mapLayers;
     },
 
@@ -210,24 +210,22 @@ module.exports = {
 
             $.each(metaData.data, function (i, v) {
                 var layer = v.f_table_schema + "." + v.f_table_name,
-                    singleTiled = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true);
+                    useLiveWMS = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true); //TODO rename single_tile
 
                 if (layer === l) {
+                    // Check if the opacity value differs from the default one
                     isBaseLayer = !!v.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         host: host,
                         layers: [layer],
                         db: db,
                         isBaseLayer: isBaseLayer,
-                        tileCached: !singleTiled,
-                        singleTile: singleTiled,
-                        // @todo Was somehow set to false
-                        //visibility: false,
+                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
                         name: v.f_table_name,
-                        // Single tile option
-                        type: !singleTiled ? "tms" : "wms",
+                        type: "wms", // Always use WMS protocol
                         format: "image/png",
                         uri: uri,
                         loadEvent: function () {

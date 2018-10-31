@@ -1,3 +1,9 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 /**
  * Development assets to cache
  */
@@ -127,6 +133,7 @@ let urlsToCache = [
     '/js/gc2/geocloud.js',
     '/js/point-clusterer.js',
     '/js/bundle.js',
+    '/js/lib/jquery-ui/jquery-ui.min.css',
     '/css/styles.css',
     '/css/styles.css',
     '/css/font-awesome.v520.regular.css',

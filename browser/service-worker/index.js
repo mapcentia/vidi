@@ -1,3 +1,9 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
@@ -8,6 +14,8 @@ const LOG_FETCH_EVENTS = false;
  */
 const { detect } = require('detect-browser');
 const browser = detect();
+
+const localforage = require('localforage');
 
 /**
  * ServiceWorker. Caches all requests, some requests are processed in specific way:
@@ -23,6 +31,17 @@ const browser = detect();
  * actual service worker file change. The update will be centralized and performed by setting the different 
  * app version in the configuration file.
  */
+
+/**
+ * Broadcasting service messages to clients, mostly used for debugging and validation
+ */
+const sendMessageToClients = (data) => {
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({ msg: data });
+        });
+    });
+};
 
 /**
  * 
@@ -111,7 +130,63 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/version.json'
+}, {
+    regExp: true,
+    requested: 'geocloud.envirogissolutions.co.za/api'
+}, {
+    regExp: true,
+    requested: 'geofyn.mapcentia.com/api'
 }];
+
+
+/**
+ * Keeping mapping of request hashed parameters to theirs initial form
+ */
+const CACHED_VECTORS_KEY = `VIDI_CACHED_VECTORS_KEY`;
+let cachedVectorLayersKeeper = {
+    set: (key, value) => {
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+                storedValue[key] = value;
+                localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
+
+                    //sendMessageToClients("@@@ set done");
+
+                    resolve();
+                }).catch(error => {
+                    console.error(`Unable to store value`)
+                });
+            });
+        });
+    },
+    get: (key) => {
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+                if (key in storedValue) {
+
+                    //sendMessageToClients("@@@ get done " + JSON.stringify(storedValue[key]));
+
+                    resolve(storedValue[key]);
+                } else {
+                    resolve(false);
+                }
+            });
+        });
+    },
+    getAllRecords: () => {
+        return new Promise((resolve, reject) => {
+            localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
+                if (!storedValue) storedValue = {};
+
+                //sendMessageToClients("@@@ getAllRecords done " + JSON.stringify(storedValue));
+
+                resolve(storedValue);
+            });
+        });
+    }
+};
 
 /**
  * Cleaning up and substituting with local URLs provided address
@@ -178,13 +253,47 @@ const normalizeTheURLForFetch = (event) => {
             } else {
                 clonedRequest.formData().then((formdata) => {
                     let payload = '';
+                    let mappedObject = {};
                     for (var p of formdata) {
+                        let splitParameter = p.toString().split(',');
+                        if (splitParameter.length === 2) {
+                            mappedObject[splitParameter[0]] = splitParameter[1];
+                        }
+
                         payload += p.toString();
                     }
-    
+
                     cleanedRequestURL += '/' + btoa(payload);
-    
                     resolve(cleanedRequestURL);
+
+                    // @todo Implement for iOS
+                    cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
+                        // Request is performed first time, got to record it in cached vector layers keeper
+                        if (record === false) {
+                            record = {};
+                            let decodedQuery = decodeURI(atob(mappedObject.q));
+                            let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                            if (matches.length === 1) {
+                                let tableName = matches[0].trim().split(`.`);
+                                record.offlineMode = false;
+                                record.layerKey = (tableName[0] + `.` + tableName[1]);
+                            } else {
+                                throw new Error(`Unable to detect the layer key`);
+                            }
+
+                            /*
+                            self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
+                                msg: "@@@ Just created a record"
+                            });});});
+                            */
+
+                            cachedVectorLayersKeeper.set(cleanedRequestURL, record).then(() => {
+                                resolve(cleanedRequestURL);
+                            });
+                        } else {
+                            resolve(cleanedRequestURL);
+                        }                        
+                    });
                 });
             }
         } else {
@@ -270,8 +379,8 @@ self.addEventListener('message', (event) => {
 
             forceIgnoredExtensionsCaching = false;
         }
-    } else if (`action` in event.data && `payload` in event.data) {
-        if  (event.data.action === `addUrlIgnoredForCaching`) {
+    } else if (`action` in event.data) {
+        if (event.data.action === `addUrlIgnoredForCaching` && `payload` in event.data) {
 
             if (LOG) console.log('Service worker: adding url that should not be cached', event.data);
 
@@ -282,6 +391,50 @@ self.addEventListener('message', (event) => {
                 });
             } else {
                 throw new Error(`Invalid URL format`);
+            }
+        } else if (event.data.action === `getListOfCachedRequests`) {
+            /**
+             * { action: "getListOfCachedRequests" }
+             * 
+             * 
+             * @returns {Array} of cached layer names
+            */
+
+            let layers = [];
+            cachedVectorLayersKeeper.getAllRecords().then(records => {
+                for (let key in records) {
+                    if (`layerKey` in records[key] && records[key].layerKey && `offlineMode` in records[key]) {
+                        layers.push({
+                            layerKey: records[key].layerKey,
+                            offlineMode: records[key].offlineMode
+                        });
+                    }
+                }
+
+                event.ports[0].postMessage(layers);
+            });
+        } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
+            if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
+                cachedVectorLayersKeeper.getAllRecords().then(records => {
+                    for (let key in records) {
+                        if (`layerKey` in records[key] && records[key].layerKey) {
+                            let localLayerKey = records[key].layerKey;
+                            if (localLayerKey === event.data.payload.layerKey) {
+                                if (event.data.action === `enableOfflineModeForLayer`) {
+                                    records[key].offlineMode = true;
+                                } else if (event.data.action === `disableOfflineModeForLayer`) {
+                                    records[key].offlineMode = false;
+                                }
+
+                                cachedVectorLayersKeeper.set(key, records[key]).then(() => {
+                                    event.ports[0].postMessage(true);
+                                });
+                            }
+                        }
+                    }
+                });
+            } else {
+                throw new Error(`Invalid payload for ${event.data.action} action`);
             }
         } else {
             throw new Error(`Unrecognized action`);
@@ -313,20 +466,51 @@ self.addEventListener('fetch', (event) => {
         } else {
             let result = new Promise((resolve, reject) => {
                 return caches.open(CACHE_NAME).then((cache) => {
-                    return fetch(event.request).then(apiResponse => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
-                        // Caching the API request in case if app will go offline aftewards
-                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                            resolve(apiResponse);
-                        }).catch(error => {
-                            throw new Error('Unable to put the response in cache');
-                            reject();
-                        });
-                    }).catch(error => {
-                        if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
-                        resolve(cachedResponse);
+                    return cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
+                        // If the vector layer is set to be offline, then return the cached response (if response exists)
+                        if (cachedResponse && record && `offlineMode` in record && record.offlineMode) {
+                            sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
+                            resolve(cachedResponse);
+                        } else {
+                            return fetch(event.request).then(apiResponse => {
+                                if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+
+                                if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                                    if (record && `q` in record) {
+                                        // Detect what layer/table it is
+                                        let decodedQuery = decodeURI(atob(record.q));
+                                        let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
+                                        if (matches.length === 1) {
+                                            let tableName = matches[0].trim().split(`.`);
+
+                                            if (`offlineMode` in record === false) {
+                                                record.offlineMode = false;
+                                            }
+
+                                            record.layerKey = (tableName[0] + `.` + tableName[1]);
+
+                                            cachedVectorLayersKeeper.set(cleanedRequestURL, record);
+                                        }
+                                    }
+
+
+
+                                }
+
+                                // Caching the API request in case if app will go offline aftewards
+                                return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                                    resolve(apiResponse);
+                                }).catch(() => {
+                                    throw new Error('Unable to put the response in cache');
+                                    reject();
+                                });
+                            }).catch(error => {
+                                if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
+                                resolve(cachedResponse);
+                            });
+                        }
                     });
-                }).catch(error => {
+                }).catch(() => {
                     throw new Error('Unable to open cache');
                     reject();
                 });
