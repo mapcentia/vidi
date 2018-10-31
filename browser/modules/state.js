@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -108,6 +109,12 @@ var stateSnapshots;
 var listened = {};
 
 var p, hashArr = hash.replace("#", "").split("/");
+
+// TODO Dirty Hack,
+// Because extensions are not being set before State resolves.
+// So we hard code reportRender, which sets up a listener on event "on:customData"
+// and hard code the call to reportRender.render in state::initializeFromHashPart
+var reportRender = require('../../extensions/conflictSearch/browser/reportRender');
 
 /**
  * Returns internaly stored global state
@@ -336,6 +343,8 @@ module.exports = {
 
                             if (response.data.customData !== null) {
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
+                                // TODO HACK:
+                                reportRender.render(response.data.customData);
                             }
 
                             // Recreate print

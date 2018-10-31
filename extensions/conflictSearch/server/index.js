@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var request = require("request");
 var router = express.Router();
@@ -65,7 +71,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
                 geomField = metaDataFinal.data[count].f_geometry_column;
 
-                if (buffer > 0) {
+                if (buffer > 10000000) {
                     sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
                 } else {
                     sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
@@ -177,7 +183,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                             if (err) {
                                 console.log(err);
                             } else {
-                                console.log("Repport saved");
+                                console.log("Report saved");
                             }
                         });
                         return;

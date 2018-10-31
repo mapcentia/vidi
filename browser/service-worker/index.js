@@ -1,3 +1,9 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
@@ -124,6 +130,12 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/version.json'
+}, {
+    regExp: true,
+    requested: 'geocloud.envirogissolutions.co.za/api'
+}, {
+    regExp: true,
+    requested: 'geofyn.mapcentia.com/api'
 }];
 
 

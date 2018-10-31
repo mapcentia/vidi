@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 module.exports = {
     dict: {
         /* Start of viewer and widget */
@@ -28,6 +34,7 @@ module.exports = {
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
         "Clear map": "Clear map",
+
         // Drawing
         "Cancel drawing": "Cancel drawing",
         "Cancel": "Cancel",
@@ -60,6 +67,9 @@ module.exports = {
         "Drag handles, or marker to edit drawing.": "Drag handles, or marker to edit drawing.",
         "Click cancel to undo changes.": "Click cancel to undo changes.",
         "Click on a drawing to remove": "Click on a drawing to remove",
+        "Clear all": "Clear all",
+        "Clear all drawings.": "Clear all drawings.",
+
         // Report
         "Get as PDF": "Get as PDF",
         "Conflicts": "Conflicts",
@@ -240,12 +250,13 @@ module.exports = {
         "Add local state snapshot to user's ones": "Add local snapshot to user's ones",
         "copy link": "Copy link",
         "New title": "New title",
-        "StateSnapshots description": "Save and share the current state of the application",
+        "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
 
         //Measurements
         "Expand measurements control": "Activate measurements control",
         "Collapse measurements control": "Deactivate measurements control",
         "Measure the distance": "Measure distance",
+        "Measure distance": "Measure distance",
         "Measure the area": "Measure area",
         "Delete all measurements": "Delete all measurements",
 
@@ -263,5 +274,8 @@ module.exports = {
         "Borehole": "# Borehole",
         "No plots were created yet": "# No plots were created yet",
         "Please select the measurement": "# Please select the measurement",
+
+        "Show legend on top the map": "Show legend on top the map"
+
     }
 };

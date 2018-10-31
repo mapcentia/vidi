@@ -1,11 +1,48 @@
-# vidi
-Vidi (View) is a new map viewer for GC2 and CartoDB.
+# What is MapCentia Vidi
+Vidi is a modern take on web GIS. It is the front-end for [GC2](https://github.com/mapcentia/geocloud2)
+
+## What does Vidi?
+Out-of-the-box Vidi is a web-GIS application with a lot of basic functionality. It is also a framework for building web-based applications. 
+
+## What is the goal for Vidi?
+The Vidi project aims to make it easy for organizations to use open source software for building geo-spatial applications.
+
+## Key features of Vidi
+- Ready to use front-end for GC2.
+- Handles non-tiled, tiled and vector layers.
+- Advanced query of data using geometry and buffers.
+- Drawing tools. Add measurements, styles and labels.
+- Scaled PDF print based on Mustache template.
+- Vector layers can be filtered. An arbitrary number of filter expressions can be applied. 
+- Table view of vector layers. See the attributes and link to the geometry on the map.
+- Customize how the looks by adding your own Mustache templates.
+- Vidi is a Progressive Web App (PWA).
+    - Vidi starts without network. And always starts quick.
+    - Vector layers are cached, so they can be used without network.
+    - A change in source code will generated a new version hash, which will trigger the Service Workers to re-install the application.
+    - Base layers can be partial caches in browser for use without network.
+    - Editor. Both tile and vector layers can be edited. Edits can be done without network.
+- Side-by-side base layers. Swipe between two base layers.
+- Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings. You can share a project by sharing a URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.  
+- Kepler.gl module. Select layers in Vidi and start Kepler.gl with them. Kepler.gl is embedded in Vidi.
+- Extension mechanism. Write your own modules 1)
+
+1) Vidi is written in Node.js and uses Browserify for the front-end. I.e. that both front- and back-end extensions are written in javascript with CommonJS Modules, which means that you need a minimum of skill sets to expand and customize Vidi.
+
+![Standard Vidi](https://i.imgur.com/9HxfuNe.jpg "Vidi looks good!")
+
+## How to try Vidi
+Head over to gc2.mapcentia.com, create a PostGIS database and start uploading data. Then start Vidi from the dashboard.
+
+Or just try it [here](https://dev.geofyn.dk/app/geofyn/?config=kitchensink.json)
+
+## How to install Vidi
 
 [Install instructions](https://github.com/mapcentia/vidi/wiki/Install-Vidi)
 
 ---
 
-# Testing ![alt text](https://api.travis-ci.org/sashuk/vidi.svg?branch=develop "Current build status")
+## Testing ![alt text](https://api.travis-ci.org/sashuk/vidi.svg?branch=develop "Current build status")
 
 The `test` folder contains
 

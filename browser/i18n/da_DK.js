@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 module.exports = {
     dict: {
         /* Start of viewer and widget */
@@ -21,13 +27,14 @@ module.exports = {
         "Number of objects": "Antal objekter",
         "Show": "Vis",
         "Severity": "Alvorlighed",
-        "Info text": "Når du klikker på et tændt lag, vises resultatet her. Slå 'Avanceret søgning' til for at søge med flader, buffer mv.",
+        "Info text": "Når du klikker på et tændt lag, vises resultatet her. Slå \\'Avanceret søgning\\' til for at søge med flader, buffer mv.",
         "Baselayers": "Baggrund",
         "Print report": "Print rapport",
         "Search with this object": "Søg med dette objekt",
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
         "Clear map": "Ryd kortet",
+
         // Drawing
         "Cancel drawing": " Afbryd tegning",
         "Cancel": "Afbryd",
@@ -60,6 +67,9 @@ module.exports = {
         "Drag handles, or marker to edit drawing.": "Træk håndtag, eller markør for at ændre tegning.",
         "Click cancel to undo changes.": "Klik afbryd for at omgøre ændring.",
         "Click on a drawing to remove": " Klik på en tegning for at slette.",
+        "Clear all": "Slet alle",
+        "Clear all drawings.": "Slet alle tegninger.",
+
         // Report
         "Get as PDF": "Hent som PDF",
         "Conflicts": "Konflikter",
@@ -71,7 +81,7 @@ module.exports = {
         "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
         "Help text baselayers": "Vælg baggrundskort.",
         "Help text legend": "Signatur for tændte overlejringskort",
-        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under 'Standard stilart for tegninger' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
+        "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
         "Activate drawing tools": "Aktivér tegneværktøjer",
         "Activate print tools": "Aktivér printværktøjer",
@@ -144,7 +154,6 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
-        "Cancel": "Fortryd",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
@@ -246,9 +255,11 @@ module.exports = {
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
 
         //Measurements
+        "Measure distance": "# Measure distance",
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
+        "Measure distance": "Mål objekter",
         "Measure the area": "Mål areal",
         "Delete all measurements": "Slet alle målinger",
 
@@ -266,5 +277,7 @@ module.exports = {
         "Borehole": "# Borehole",
         "No plots were created yet": "# No plots were created yet",
         "Please select the measurement": "# Please select the measurement",
+
+        "Show legend on top the map": "Vis signaturen ovenpå kortet"
     }
 };
