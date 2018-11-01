@@ -230,6 +230,9 @@ class OfflineModeControlsManager {
         } else {
             $(layerRecord).find(`.js-refresh`).hide();
         }
+
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`padding`, `4px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`min-width`, `20px`);
     }
 
     /**
@@ -254,6 +257,9 @@ class OfflineModeControlsManager {
         } else {
             $(layerRecord).find(`.js-refresh`).hide();
         }
+
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`padding`, `4px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`min-width`, `20px`);
     }
 
     /**
@@ -277,6 +283,9 @@ class OfflineModeControlsManager {
         } else {
             $(layerRecord).find(`.js-refresh`).hide();
         }
+
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`padding`, `4px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`min-width`, `20px`);
     }
 
     /**
