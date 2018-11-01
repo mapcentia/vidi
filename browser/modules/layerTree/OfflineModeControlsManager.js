@@ -38,6 +38,8 @@ class OfflineModeControlsManager {
     // Global application offline mode
     _globalApplicationOfflineMode = false;
 
+    _layersWithPredictedLayerType = [];
+
     _apiBridgeInstance = false;
 
     constructor(metaObject) {
@@ -83,7 +85,7 @@ class OfflineModeControlsManager {
             existingMeta.data.map(layer => {
                 if (layer && layer.meta) {
                     let parsedMeta = JSON.parse(layer.meta);
-                    if (parsedMeta && typeof parsedMeta === `object`) {
+                    if (parsedMeta && typeof parsedMeta === `object` && `layergroup` in layer && layer.layergroup) {
                         layerKeys.push(layer.f_table_schema + '.' + layer.f_table_name);
                     }
                 }
@@ -106,9 +108,12 @@ class OfflineModeControlsManager {
     isVectorLayer(layerKey) {
         let isVectorLayer = -1;
 
+        let metaIsMissingTypeDefinition = false;
         let existingMeta = meta.getMetaData();
+        let layerData = false;
         existingMeta.data.map(layer => {
             if (((layer.f_table_schema + '.' + layer.f_table_name) === layerKey) && layer.meta) {
+                layerData = layer;
                 let parsedMeta = JSON.parse(layer.meta);
                 if (parsedMeta && typeof parsedMeta === `object`) {
                     if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt', 't'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
@@ -129,13 +134,26 @@ class OfflineModeControlsManager {
                                 throw new Error(`Unable the find layer container for ${layerKey}`);
                             }                           
                         }
+                    } else {
+                        metaIsMissingTypeDefinition = true;
                     }
                 }
+
+                return false;
             }
         });
 
         if (isVectorLayer === -1) {
-            throw new Error(`Unable to detect current layer type for ${layerKey}`);
+            if (this._layersWithPredictedLayerType.indexOf(layerKey) === -1) {
+                this._layersWithPredictedLayerType.push(layerKey);
+                if (metaIsMissingTypeDefinition) {
+                    console.warn(`Unable to detect current layer type for ${layerKey}, fallback type: tile (meta does not have layer type definition)`, layerData);
+                } else {
+                    console.error(`Unable to detect current layer type for ${layerKey}, fallback type: tile`);
+                }
+            }
+
+            isVectorLayer = false;
         }
 
         return isVectorLayer;
