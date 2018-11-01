@@ -125,13 +125,13 @@ class MarkupGenerator {
 
                 <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
                     <div class="btn-group" role="group">
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px">
                             <i class="fa fa-signal"></i>
                         </button>
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px">
                             <i class="fa fa-times"></i>
                         </button>
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px">
                             <i class="fa fa-refresh"></i>
                         </button>
                     </div>
@@ -147,7 +147,7 @@ class MarkupGenerator {
 
                 <div style="float: right; padding-top: 10px; padding-right: 10px;">
                     ${addButton}
-                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="display: ${displayInfo}; visibility: visible;" class="info-label" data-gc2-id="${layerKey}">Info</a>
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>
             <div class="js-layer-settings-filters"></div>
