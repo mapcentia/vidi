@@ -207,6 +207,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
 
         // OfflineMap
+        "tiles failed to load": "# tiles failed to load",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
         "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
         "Extent": "kortområde",

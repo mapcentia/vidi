@@ -205,6 +205,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
 
         // OfflineMap
+        "tiles failed to load": "# tiles failed to load",
         "OfflineMap block description": "Here specific map areas can be stored to be used offline",
         "OfflineMap instructions": "Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
         "Extent": "Extent",
