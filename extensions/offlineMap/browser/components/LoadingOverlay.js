@@ -38,11 +38,17 @@ class MapAreaListItem extends React.Component {
                 {this.props.children}
             </div>);
         } else {
+            let failedTilesWarning = false;
+            if (this.props.tilesFailed > 0) {
+                failedTilesWarning = (<h5 style={{color: `darkred`}}>{this.props.tilesFailed} {__("tiles failed to load")}</h5>);
+            }
+
             content = (<div>
                 <h4>{__("Processing tiles")} ({this.props.tilesLoaded} {__("of")} {this.props.tilesLeftToLoad})</h4>
                 <div className="progress">
                     <div className="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style={{width: ((this.props.tilesLoaded / this.props.tilesLeftToLoad * 100) + '%')}}></div>
                 </div>
+                {failedTilesWarning}
             </div>);
         }
 
