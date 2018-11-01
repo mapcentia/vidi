@@ -1114,7 +1114,7 @@ module.exports = {
      * @returns {void}
      */
     createLayerRecord: (layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName, subgroupId = false, base64SubgroupName = false) => {
-        let displayInfo = `none`;
+        let displayInfo = `hidden`;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
@@ -1142,7 +1142,7 @@ module.exports = {
                     }
 
                     if (`meta_desc` in parsedMeta) {
-                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `inline-block` : `none`;
+                        displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
 
                     if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
@@ -1396,6 +1396,13 @@ module.exports = {
         layerKey = layerKey.replace(`v:`, ``);
         let container = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
         if (container.length === 1) {
+            if (setupAsVector) {
+                $(container).find(`.js-toggle-layer-offline-mode-container`).show();
+            } else {
+                $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
+            }
+
+
             if (setupAsVector) {
                 $(container).find(`.js-toggle-opacity`).hide();
                 if (layerIsEnabled) {
