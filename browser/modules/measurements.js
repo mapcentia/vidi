@@ -11,6 +11,12 @@ const MODULE_NAME = `measurements`;
 const drawTools = require(`./drawTools`);
 
 /**
+ * Browser detection
+ */
+const { detect } = require('detect-browser');
+const browser = detect();
+
+/**
  * @type {*|exports|module.exports}
  */
 let cloud, state, serializeLayers, backboneEvents, utils;
@@ -333,7 +339,7 @@ module.exports = {
 
         l.setStyle(defaultMeasurementsStyle);
 
-        if (type === 'polyline') {
+        if (type === 'polyline' && browser && [`ie`, `edge`].indexOf(browser.name) === -1) {
             window.lag = l.showExtremities(defaultExtermitiesStyle.pattern, defaultExtermitiesStyle.size, defaultExtermitiesStyle.where);
             l._extremities = defaultExtermitiesStyle;
         }
