@@ -19,7 +19,6 @@ module.exports = {
 
     "backend": "gc2",
 
-
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
     // Carto is hardcoded to carto.com
@@ -28,7 +27,6 @@ module.exports = {
     "gc2": {
         "host": "GC2_HOST"
     },
-
 
     // ===============================================================
     // Configuration of print templates.
@@ -132,17 +130,17 @@ module.exports = {
 
     "extensions": {
         "browser": [
-            //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
-            //{"layerSearch": ["index", "controller"]},
+            {"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             {"streetView": ["index"]},
             {"coordinates": ["index"]},
             {"offlineMap": ["index"]},
-            {"session": ["index"]}
+            {"session": ["index"]},
+            {"editor": ["index"]},
+
         ],
         "server": [
-            /*{conflictSearch: ["index"]},*/
-            /*{layerSearch: ["index", "indexInEs"]},*/
-            {"session": ["index"]}
+            {"conflictSearch": ["index"]},
+            {"session": ["index"]},
         ]
     },
 
@@ -179,7 +177,7 @@ module.exports = {
     // (Database name in GC2 and account name in Carto)
     // ==========================================================
 
-    "autoLoadingConfig": true,
+    "autoLoadingConfig": false,
 
 
     // ====================================================================================
@@ -216,10 +214,12 @@ module.exports = {
     // ===================================================
 
     "enabledExtensions": [
-        /*"conflictSearch",*/
+        "conflictSearch",
         "streetView",
-        "layerSearch",
-        "coordinates"
+        "session",
+        "coordinates",
+        "offlineMap",
+        "editor",
     ],
 
 
