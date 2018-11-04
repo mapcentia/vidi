@@ -14,6 +14,7 @@ module.exports = {
 
     // ========================================
     // Which back-end is used. "gc2" or "carto"
+    // ONLY GC2 IS SUPPORTED
     // ========================================
 
     "backend": "gc2",
@@ -25,7 +26,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "https://gc2.mapcentia.com"
+        "host": "GC2_HOST"
     },
 
 
