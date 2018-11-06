@@ -75,6 +75,7 @@
     "pg-escape": "^0.2.0",
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
+    "puppeteer": "^1.10.0",
     "react": "^15.4.2",
     "react-addons": "^0.9.1-deprecated",
     "react-dom": "^15.4.2",

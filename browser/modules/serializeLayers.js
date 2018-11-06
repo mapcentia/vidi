@@ -268,7 +268,7 @@ var _encoders = {
                     featureGeoJson.type = "Marker";
                     featureGeoJson.feature = feature.feature;
                     featureGeoJson._vidi_marker_text = feature._vidi_marker_text;
-                }else if (feature.feature.properties.type === "circlemarker") {
+                }else if (feature instanceof L.CircleMarker) {
                     featureGeoJson = {_latlng: feature._latlng};
                     featureGeoJson.type = "CircleMarker";
                     featureGeoJson.feature = feature.feature;
