@@ -19,6 +19,7 @@ module.exports = {
 
     "backend": "gc2",
 
+
     // ==========================================
     // GC2 host. Both HTTP and HTTPS is supported
     // Carto is hardcoded to carto.com
@@ -27,6 +28,7 @@ module.exports = {
     "gc2": {
         "host": "GC2_HOST"
     },
+
 
     // ===============================================================
     // Configuration of print templates.
@@ -37,8 +39,7 @@ module.exports = {
 
     "print": {
         "templates": {
-
-
+            
             // ================================
             // The "print" template is build-in
             // ================================
