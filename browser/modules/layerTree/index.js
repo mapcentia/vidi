@@ -15,6 +15,8 @@ const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
+const SYSTEM_FIELD_PREFIX = `gc2_`;
+
 const SQL_QUERY_LIMIT = 500;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
@@ -664,6 +666,14 @@ module.exports = {
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
         }
 
+        if (`versioning` in layer && layer.versioning) {
+            if (whereClause) {
+                whereClause = ` (${whereClause}) AND gc2_version_end_date is null `;
+            } else {
+                whereClause = ` gc2_version_end_date is null `;
+            }
+        }
+
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
@@ -802,7 +812,24 @@ module.exports = {
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {
         event.originalEvent.clickedOnFeature = true;
-        let renderedText = Mustache.render(defaultTemplate, feature.properties);
+
+        let properties = JSON.parse(JSON.stringify(feature.properties));
+        for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
+                    delete properties[key];
+                }
+            }
+        }
+
+        var i = properties._vidi_content.fields.length;
+        while (i--) {
+            if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) { 
+                properties._vidi_content.fields.splice(i, 1);
+            } 
+        }
+
+        let renderedText = Mustache.render(defaultTemplate, properties);
         let managePopup = L.popup({
             autoPan: false,
             className: `js-vector-layer-popup`
@@ -1165,7 +1192,7 @@ module.exports = {
             if (layerIsTheVectorOne) {
                 _self.createStore(layer);
             }
-
+            
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
             let layerTypeSelector = false;
@@ -1547,6 +1574,15 @@ module.exports = {
         }
 
         return _self.create(newState);
+    },
+
+    /**
+     * Returns the module-wide constant value
+     * 
+     * @returns {String}
+     */
+    getSystemFieldPrefix: () => {
+        return SYSTEM_FIELD_PREFIX;
     },
 
     /**

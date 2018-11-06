@@ -1120,3 +1120,6 @@ h4 small {
   min-width: 568px;
   max-width: 768px;
 }
+.js-vector-layer-popup .leaflet-popup-content {
+  min-width: 100px;
+}
