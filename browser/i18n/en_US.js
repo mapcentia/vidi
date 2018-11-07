@@ -163,8 +163,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
-        "Network status": "# Network status",
-        "Set all layers to be": "# Set all layers to be",
+        "Network status": "Network status",
+        "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",
         "Tile": "Raster",
         "Vector": "Vector",
@@ -188,9 +188,9 @@ module.exports = {
         "Yes": "Yes",
         "No": "No",
         "Add condition": "Add condition",
-        "Refresh cache for layer": "# Refresh cache for layer",
-        "Fetch layer data from server": "# Fetch layer data from server",
-        "Fetch layer data from cache": "# Fetch layer data from cache",
+        "Refresh cache for layer": "Refresh cache for layer",
+        "Fetch layer data from server": "Fetch data from server",
+        "Fetch layer data from cache": "Fetch data from cache",
         "Refresh existing cache for layer": "# Refresh existing cache for layer",
         "Apply": "Apply",
 
