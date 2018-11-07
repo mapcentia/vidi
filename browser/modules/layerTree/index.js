@@ -533,12 +533,14 @@ module.exports = {
 
                             if (activeLayers) {   
                                 activeLayers.map(layerName => {
-                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                    let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
+
+                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
                                         if (layerName.indexOf(`v:`) === 0) {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
                                         } else {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                         }
                                     } else {
                                         $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
@@ -783,12 +785,14 @@ module.exports = {
 
                             if (editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                    editor.edit(layer, layerKey + ".the_geom", null, true);
+                                    let layerMeta = meta.getMetaByKey(layerKey);
+                                    editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
                                 });
 
                                 $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
                                     if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                        editor.delete(layer, layerKey + ".the_geom", null, true);
+                                        let layerMeta = meta.getMetaByKey(layerKey);
+                                        editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
                                     }
                                 });
                             } else {
@@ -1414,14 +1418,16 @@ module.exports = {
      */
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
-        let container = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+
+        let layerMeta = meta.getMetaByKey(layerKey);
+
+        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show();
             } else {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
             }
-
 
             if (setupAsVector) {
                 $(container).find(`.js-toggle-opacity`).hide();

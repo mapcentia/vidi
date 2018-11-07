@@ -80,7 +80,10 @@ class OfflineModeControlsManager {
                 if (layer && layer.meta) {
                     let parsedMeta = JSON.parse(layer.meta);
                     if (parsedMeta && typeof parsedMeta === `object` && `layergroup` in layer && layer.layergroup) {
-                        layerKeys.push(layer.f_table_schema + '.' + layer.f_table_name);
+                        layerKeys.push({
+                            layerKey: (layer.f_table_schema + '.' + layer.f_table_name),
+                            geomColumn: layer.f_geometry_column
+                        });
                     }
                 }
             });
@@ -116,7 +119,7 @@ class OfflineModeControlsManager {
                         } else if (parsedMeta.vidi_layer_type === 't') {
                             isVectorLayer = false;
                         } else {
-                            let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+                            let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${layer.f_geometry_column}"]`);
                             if ($(layerRecord).length === 1) {
                                 let type = $(layerRecord).find('.js-show-layer-control').data('gc2-layer-type');
                                 if (type === `vector`) {
@@ -141,7 +144,7 @@ class OfflineModeControlsManager {
             if (this._layersWithPredictedLayerType.indexOf(layerKey) === -1) {
                 this._layersWithPredictedLayerType.push(layerKey);
                 if (metaIsMissingTypeDefinition) {
-                    console.warn(`Unable to detect current layer type for ${layerKey}, fallback type: tile (meta does not have layer type definition)`, layerData);
+                    console.warn(`Unable to detect current layer type for ${layerKey}, fallback type: tile (meta does not have layer type definition)`);
                 } else {
                     console.error(`Unable to detect current layer type for ${layerKey}, fallback type: tile`);
                 }
@@ -167,8 +170,8 @@ class OfflineModeControlsManager {
                 */
                 try{
 
-                layerKeys.map(layerKey => {
-                    let layerRecord = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+                layerKeys.map(({layerKey, geomColumn }) => {
+                    let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${geomColumn}"]`);
                     if ($(layerRecord).length === 1) {
                         let isVectorLayer = this.isVectorLayer(layerKey);
 
