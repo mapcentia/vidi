@@ -15,6 +15,8 @@ const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
+const SYSTEM_FIELD_PREFIX = `gc2_`;
+
 const SQL_QUERY_LIMIT = 500;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
@@ -531,12 +533,14 @@ module.exports = {
 
                             if (activeLayers) {   
                                 activeLayers.map(layerName => {
-                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                    let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
+
+                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
                                         if (layerName.indexOf(`v:`) === 0) {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
                                         } else {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.the_geom"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                         }
                                     } else {
                                         $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
@@ -664,6 +668,14 @@ module.exports = {
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
         }
 
+        if (`versioning` in layer && layer.versioning) {
+            if (whereClause) {
+                whereClause = ` (${whereClause}) AND gc2_version_end_date is null `;
+            } else {
+                whereClause = ` gc2_version_end_date is null `;
+            }
+        }
+
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
 
@@ -773,12 +785,14 @@ module.exports = {
 
                             if (editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                    editor.edit(layer, layerKey + ".the_geom", null, true);
+                                    let layerMeta = meta.getMetaByKey(layerKey);
+                                    editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
                                 });
 
                                 $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
                                     if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                        editor.delete(layer, layerKey + ".the_geom", null, true);
+                                        let layerMeta = meta.getMetaByKey(layerKey);
+                                        editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
                                     }
                                 });
                             } else {
@@ -797,13 +811,29 @@ module.exports = {
                 }
             },
             pointToLayer: pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : null
-
         });
     },
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {
         event.originalEvent.clickedOnFeature = true;
-        let renderedText = Mustache.render(defaultTemplate, feature.properties);
+
+        let properties = JSON.parse(JSON.stringify(feature.properties));
+        for (var key in properties) {
+            if (properties.hasOwnProperty(key)) {
+                if (key.indexOf(SYSTEM_FIELD_PREFIX) === 0) {
+                    delete properties[key];
+                }
+            }
+        }
+
+        var i = properties._vidi_content.fields.length;
+        while (i--) {
+            if (properties._vidi_content.fields[i].title.indexOf(SYSTEM_FIELD_PREFIX) === 0 || properties._vidi_content.fields[i].title === `_id`) { 
+                properties._vidi_content.fields.splice(i, 1);
+            } 
+        }
+
+        let renderedText = Mustache.render(defaultTemplate, properties);
         let managePopup = L.popup({
             autoPan: false,
             className: `js-vector-layer-popup`
@@ -1166,7 +1196,7 @@ module.exports = {
             if (layerIsTheVectorOne) {
                 _self.createStore(layer);
             }
-
+            
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
             let layerTypeSelector = false;
@@ -1388,14 +1418,16 @@ module.exports = {
      */
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
-        let container = $(`[data-gc2-layer-key="${layerKey}.the_geom"]`);
+
+        let layerMeta = meta.getMetaByKey(layerKey);
+
+        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show();
             } else {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
             }
-
 
             if (setupAsVector) {
                 $(container).find(`.js-toggle-opacity`).hide();
@@ -1548,6 +1580,15 @@ module.exports = {
         }
 
         return _self.create(newState);
+    },
+
+    /**
+     * Returns the module-wide constant value
+     * 
+     * @returns {String}
+     */
+    getSystemFieldPrefix: () => {
+        return SYSTEM_FIELD_PREFIX;
     },
 
     /**
