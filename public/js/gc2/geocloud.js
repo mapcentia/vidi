@@ -234,25 +234,29 @@ geocloud = (function () {
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
         this.load = function (doNotShowAlertOnError) {
-
             try {
                 me.abort();
             } catch (e) {
                 console.error(e.message);
             }
 
-            try {
-                map = me.map;
-                sql = this.sql;
+            sql = this.sql;
+
+            map = me.layer._map;
+            if (map) {
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
-                sql = sql.replace("{centerY}", map.getCenter().lon.toString());
-                sql = sql.replace("{minX}", map.getExtent().left);
-                sql = sql.replace("{maxX}", map.getExtent().right);
-                sql = sql.replace("{minY}", map.getExtent().bottom);
-                sql = sql.replace("{maxY}", map.getExtent().top);
-                sql = sql.replace("{bbox}", map.getExtent().toString());
-            } catch (e) {
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{minX}", map.getBounds().getWest());
+                sql = sql.replace("{maxX}", map.getBounds().getEast());
+                sql = sql.replace("{minY}", map.getBounds().getSouth());
+                sql = sql.replace("{maxY}", map.getBounds().getNorth());
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
             }
+
             me.loading();
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
