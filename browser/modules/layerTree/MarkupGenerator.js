@@ -7,14 +7,15 @@
 /**
  * Generates HTML chunks that are later used in layerTree module, no logic or any interaction
  * should be implemented here, only raw markup.
- * 
+ *
  * @todo Rewrite layerTree using React or Angular
  */
 
 const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
 
 class MarkupGenerator {
-    constructor() {}
+    constructor() {
+    }
 
     getAddButton(layerKeyWithGeom) {
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
@@ -137,7 +138,9 @@ class MarkupGenerator {
                 </div>
 
                 <div style="display: inline-block;">
-                    <a href="javascript:void(0);" class="js-toggle-opacity">${__(`Opacity`)}</a>
+                    <a href="javascript:void(0);" class="js-toggle-opacity">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
+                    </a>
                     <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
                 </div>
