@@ -169,6 +169,16 @@ class OfflineModeControlsManager {
      */
     updateControls() {
         return new Promise((resolve, reject) => {
+            if (this._globalApplicationOfflineMode) {
+                $('.js-app-is-pending-badge').remove();
+                $('.js-app-is-online-badge').addClass('hidden');
+                $('.js-app-is-offline-badge').removeClass('hidden');
+            } else {
+                $('.js-app-is-pending-badge').remove();
+                $('.js-app-is-online-badge').removeClass('hidden');
+                $('.js-app-is-offline-badge').addClass('hidden');
+            }
+
             this._getAvailableLayersKeys().then(layerKeys => {
 
                 /*
@@ -179,45 +189,41 @@ class OfflineModeControlsManager {
                 layerKeys.map(({layerKey, geomColumn }) => {
                     let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${geomColumn}"]`);
                     if ($(layerRecord).length === 1) {
-                        let isVectorLayer = this.isVectorLayer(layerKey);
+                        // Updating offline mode controls only for visible layer controls
+                        if ($(layerRecord).is(`:visible`)) {
+                            let isVectorLayer = this.isVectorLayer(layerKey);                           
+                            if (isVectorLayer) {
+                                let isAlreadyCached = false;
+                                this.cachedLayers.map(cachedLayer => {
+                                    if (cachedLayer.layerKey === layerKey) {
+                                        isAlreadyCached = true;
+                                        return false;
+                                    }
+                                });
 
-                        let isAlreadyCached = false;
-                        this.cachedLayers.map(cachedLayer => {
-                            if (cachedLayer.layerKey === layerKey) {
-                                isAlreadyCached = true;
-                                return false;
-                            }
-                        });
-
-                        let offlineMode = false;
-                        let requestedLayerKey = (this.isVectorLayer(layerKey) ? (`v:` + layerKey) : layerKey);
-                        if (requestedLayerKey in this.offlineModeValues) {
-                            if ([true, false].indexOf(this.offlineModeValues[requestedLayerKey]) !== -1) {
-                                offlineMode = this.offlineModeValues[requestedLayerKey];
-                            } else {
-                                throw new Error(`Invalid offline mode for ${requestedLayerKey}`);
-                            }
-                        }
-
-                        if (this._globalApplicationOfflineMode) {
-                            $('.js-app-is-online-badge').addClass('hidden');
-                            $('.js-app-is-offline-badge').removeClass('hidden');
-                            $('.js-app-is-pending-badge').remove();
-
-                            if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
-                            this.setRecordDisabled(layerRecord, isVectorLayer);
-                        } else {
-                            $('.js-app-is-online-badge').removeClass('hidden');
-                            $('.js-app-is-offline-badge').addClass('hidden');
-                            $('.js-app-is-pending-badge').remove();
-
-                            if (isAlreadyCached && isVectorLayer || isVectorLayer === false) {
-                                if (offlineMode) {
+                                let offlineMode = false;
+                                let requestedLayerKey = (this.isVectorLayer(layerKey) ? (`v:` + layerKey) : layerKey);
+                                if (requestedLayerKey in this.offlineModeValues) {
+                                    if ([true, false].indexOf(this.offlineModeValues[requestedLayerKey]) !== -1) {
+                                        offlineMode = this.offlineModeValues[requestedLayerKey];
+                                    } else {
+                                        throw new Error(`Invalid offline mode for ${requestedLayerKey}`);
+                                    }
+                                }
+                                
+                                if (this._globalApplicationOfflineMode) {
                                     if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
-                                    this.setRecordOffline(layerRecord, isVectorLayer);
+                                    this.setRecordDisabled(layerRecord, isVectorLayer);
                                 } else {
-                                    if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, false);
-                                    this.setRecordOnline(layerRecord, isVectorLayer);
+                                    if (isAlreadyCached && isVectorLayer || isVectorLayer === false) {
+                                        if (offlineMode) {
+                                            if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
+                                            this.setRecordOffline(layerRecord, isVectorLayer);
+                                        } else {
+                                            if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, false);
+                                            this.setRecordOnline(layerRecord, isVectorLayer);
+                                        }
+                                    }
                                 }
                             }
                         }
