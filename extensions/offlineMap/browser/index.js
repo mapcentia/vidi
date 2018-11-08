@@ -184,7 +184,7 @@ module.exports = {
                 });
 
                 const checkServiceWorkerRegistration = () => {
-                    if (navigator.serviceWorker.controller) {
+                    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                         this.setState({
                             cacheIsAvailable: 1
                         });

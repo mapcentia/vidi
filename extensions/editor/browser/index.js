@@ -270,7 +270,7 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column) {
+            if (key !== pkey && key !== f_geometry_column && key.indexOf(layerTree.getSystemFieldPrefix()) !== 0) {
                 let title = key;
                 if (fieldConf[key] !== undefined && fieldConf[key].alias) {
                     title = fieldConf[key].alias;
@@ -378,15 +378,6 @@ module.exports = {
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
-
-            /*
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-            */
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
