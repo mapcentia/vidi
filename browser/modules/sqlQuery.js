@@ -427,7 +427,7 @@ module.exports = {
             var fields = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
-                    if (name.indexOf(layerTree.getSystemFieldPrefix()) !== 0) {
+                    if (name.indexOf(layerTree.getSystemFieldPrefix()) !== 0 && name !== `_id`) {
                         fields.push({
                             title: name,
                             value: feature.properties[name]

@@ -408,10 +408,8 @@ module.exports = {
                 let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
                 let parsedMeta = _self.parseLayerMeta(layerDescription);
                 if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
-                    console.log(`### this store needs to be updated on moveend`, stores[layerKey]);
                     stores[layerKey].abort();
                     stores[layerKey].load();
-                    console.log(`### reloaded`);
                 }
             }
         });
@@ -739,8 +737,6 @@ module.exports = {
             whereClauses = whereClauses.map(item => `(${item})`);
             sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
         }
-
-        console.log(`### sql for ${layerKey}`, sql);
 
         stores['v:' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
