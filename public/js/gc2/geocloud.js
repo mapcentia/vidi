@@ -242,8 +242,14 @@ geocloud = (function () {
 
             sql = this.sql;
 
+            var dynamicQueryIsUsed = false;
             map = me.layer._map;
             if (map) {
+                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
+                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
+                    dynamicQueryIsUsed = true;
+                }
+
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
                 sql = sql.replace("{centerY}", map.getCenter().lng.toString());
                 sql = sql.replace("{minX}", map.getBounds().getWest());
@@ -269,6 +275,7 @@ geocloud = (function () {
                     if (response.success === false && doNotShowAlertOnError === undefined) {
                         alert(response.message);
                     }
+
                     if (response.success === true) {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
@@ -287,6 +294,10 @@ geocloud = (function () {
 
                                     break;
                                 case "leaflet":
+                                    if (dynamicQueryIsUsed) {
+                                        me.layer.clearLayers();
+                                    }
+
                                     me.layer.addData(response);
                                     break;
                             }
