@@ -399,6 +399,33 @@ module.exports = {
             }
         });
 
+        /**
+         * Some vector layer needs to be reloaded when the map view is changed if the dynamic
+         * loading is enabled for the layer.
+         */
+        cloud.get().on(`moveend`, () => {
+            let activeLayers = _self.getActiveLayers();
+
+            for (let layerKey in stores) {
+                let layerIsEnabled = false;
+                for (let i = 0; i < activeLayers.length; i++) {
+                    if (activeLayers[i].replace(`v:`, ``) === layerKey.replace(`v:`, ``)) {
+                        layerIsEnabled = true;
+                        break;
+                    }
+                }
+
+                if (layerIsEnabled) {
+                    let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
+                    let parsedMeta = _self.parseLayerMeta(layerDescription);
+                    if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        stores[layerKey].abort();
+                        stores[layerKey].load();
+                    }
+                }
+            }
+        });
+
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
@@ -656,6 +683,29 @@ module.exports = {
     },
 
     /**
+     * Parsed layer meta object
+     * 
+     * @returns {Object|Boolean}
+     */
+    parseLayerMeta: (layerDescription) => {
+        let parsedMeta = false;
+        if (!layerDescription) throw new Error(`Layer description object has to be provided`);
+        let layerKey = (layerDescription.f_table_schema + `.` + layerDescription.f_table_name);
+        if (layerDescription.meta) {
+            try {
+                let preParsedMeta = JSON.parse(layerDescription.meta);
+                if (typeof preParsedMeta == 'object' && preParsedMeta instanceof Object && !(preParsedMeta instanceof Array)) {
+                    parsedMeta = preParsedMeta;
+                }
+            } catch (e) {
+                console.warn(`Unable to parse meta for ${layerKey}`);
+            }
+        }
+
+        return parsedMeta;
+    },
+
+    /**
      * Creates SQL store for vector layers
      *
      * @param {Object} layer Layer description
@@ -665,14 +715,15 @@ module.exports = {
     createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
-        let whereClause = false;
+        let whereClauses = [];
+
         if (layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
             if (conditions.length > 0) {
                 if (vectorFilters[layerKey].match === `any`) {
-                    whereClause = conditions.join(` OR `);
+                    whereClauses.push(conditions.join(` OR `));
                 } else if (vectorFilters[layerKey].match === `all`) {
-                    whereClause = conditions.join(` AND `);
+                    whereClauses.push(conditions.join(` AND `));
                 } else {
                     throw new Error(`Invalid match type value`);
                 }
@@ -681,18 +732,26 @@ module.exports = {
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
         }
 
+        // Checking if versioning is enabled for layer
         if (`versioning` in layer && layer.versioning) {
-            if (whereClause) {
-                whereClause = ` (${whereClause}) AND gc2_version_end_date is null `;
-            } else {
-                whereClause = ` gc2_version_end_date is null `;
-            }
+            whereClauses.push(`gc2_version_end_date is null`);
         }
 
+        // Checking if dynamic load is enabled for layer
+        let layerMeta = _self.parseLayerMeta(layer);
+        if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
+            whereClauses.push(`ST_Intersects(${layer.f_geometry_column}, ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+        }
+
+        // Gathering all WHERE clauses
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
-        if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+        }
 
         stores['v:' + layerKey] = new geocloud.sqlStore({
+            map: cloud.get().map,
             jsonp: false,
             method: "POST",
             host: "",
@@ -775,15 +834,9 @@ module.exports = {
                             let layerIsEditable = false;
                             let metaDataKeys = meta.getMetaDataKeys();
                             if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
-                                try {
-                                    let parsedMeta = JSON.parse(metaDataKeys[layerKey].meta);
-                                    if (parsedMeta && typeof parsedMeta === `object`) {
-                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                            layerIsEditable = true;
-                                        }
-                                    }
-                                } catch (e) {
-                                    console.warn(`Unable to parse meta for ${layerKey}`);
+                                let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
+                                if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                    layerIsEditable = true;
                                 }
                             } else {
                                 throw new Error(`metaDataKeys[${layerKey}] is undefined`);
@@ -949,19 +1002,11 @@ module.exports = {
             if (metaData.data[u].layergroup == groupName) {
                 let layer = metaData.data[u];
 
-                if (layer.meta) {
-                    let parsedMeta = false;
-                    try {
-                        parsedMeta = JSON.parse(layer.meta);
-                    } catch (e) {
-                        console.log(e);
-                    }
-
-                    if (parsedMeta && typeof parsedMeta === 'object' && `vidi_sub_group` in parsedMeta) {
-                        layer.subGroup = parsedMeta[`vidi_sub_group`];
-                    } else {
-                        layer.subGroup = false;
-                    }
+                let parsedMeta = _self.parseLayerMeta(layer);
+                if (parsedMeta && `vidi_sub_group` in parsedMeta) {
+                    layer.subGroup = parsedMeta.vidi_sub_group;
+                } else {
+                    layer.subGroup = false;
                 }
 
                 if (layer.subGroup) {
@@ -1171,9 +1216,10 @@ module.exports = {
             let defaultLayerType = 'tile';
 
             let layerIsEditable = false;
+            let parsedMeta = false;
             if (layer && layer.meta) {
-                let parsedMeta = JSON.parse(layer.meta);
-                if (parsedMeta && typeof parsedMeta === `object`) {
+                parsedMeta = _self.parseLayerMeta(layer);
+                if (parsedMeta) {
                     if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
                         layerIsEditable = true;
                     }

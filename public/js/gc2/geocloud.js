@@ -234,25 +234,35 @@ geocloud = (function () {
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
         this.load = function (doNotShowAlertOnError) {
-
             try {
                 me.abort();
             } catch (e) {
                 console.error(e.message);
             }
 
-            try {
-                map = me.map;
-                sql = this.sql;
+            sql = this.sql;
+
+            var dynamicQueryIsUsed = false;
+            map = me.layer._map;
+            if (map) {
+                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
+                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
+                    dynamicQueryIsUsed = true;
+                }
+
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
-                sql = sql.replace("{centerY}", map.getCenter().lon.toString());
-                sql = sql.replace("{minX}", map.getExtent().left);
-                sql = sql.replace("{maxX}", map.getExtent().right);
-                sql = sql.replace("{minY}", map.getExtent().bottom);
-                sql = sql.replace("{maxY}", map.getExtent().top);
-                sql = sql.replace("{bbox}", map.getExtent().toString());
-            } catch (e) {
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{minX}", map.getBounds().getWest());
+                sql = sql.replace("{maxX}", map.getBounds().getEast());
+                sql = sql.replace("{minY}", map.getBounds().getSouth());
+                sql = sql.replace("{maxY}", map.getBounds().getNorth());
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
             }
+
             me.loading();
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
@@ -265,6 +275,7 @@ geocloud = (function () {
                     if (response.success === false && doNotShowAlertOnError === undefined) {
                         alert(response.message);
                     }
+
                     if (response.success === true) {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
@@ -283,6 +294,10 @@ geocloud = (function () {
 
                                     break;
                                 case "leaflet":
+                                    if (dynamicQueryIsUsed) {
+                                        me.layer.clearLayers();
+                                    }
+
                                     me.layer.addData(response);
                                     break;
                             }
