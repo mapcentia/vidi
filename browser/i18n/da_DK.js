@@ -197,7 +197,7 @@ module.exports = {
         "Apply": "Anvend",
 
         // Base layers
-        "Side-by-side mode": "Side-by-side tilstand",
+        "Side-by-side mode": "Dobbelt baggrundskort",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
