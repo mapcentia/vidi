@@ -150,9 +150,6 @@ let cachedVectorLayersKeeper = {
                 if (!storedValue) storedValue = {};
                 storedValue[key] = value;
                 localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
-
-                    //sendMessageToClients("@@@ set done");
-
                     resolve();
                 }).catch(error => {
                     console.error(`Unable to store value`)
@@ -165,9 +162,6 @@ let cachedVectorLayersKeeper = {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
                 if (key in storedValue) {
-
-                    //sendMessageToClients("@@@ get done " + JSON.stringify(storedValue[key]));
-
                     resolve(storedValue[key]);
                 } else {
                     resolve(false);
@@ -179,9 +173,6 @@ let cachedVectorLayersKeeper = {
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
-
-                //sendMessageToClients("@@@ getAllRecords done " + JSON.stringify(storedValue));
-
                 resolve(storedValue);
             });
         });
@@ -492,9 +483,6 @@ self.addEventListener('fetch', (event) => {
                                             cachedVectorLayersKeeper.set(cleanedRequestURL, record);
                                         }
                                     }
-
-
-
                                 }
 
                                 // Caching the API request in case if app will go offline aftewards
@@ -540,6 +528,8 @@ self.addEventListener('fetch', (event) => {
         return false;
         //return fetch(event.request);
     } else {
+        if (LOG_FETCH_EVENTS) console.log(`Service worker: not bypassing the ${event.request.url} request`);
+
         event.respondWith(normalizeTheURLForFetch(event).then(cleanedRequestURL => {
             let detectNoSlashPathRegExp = /\/app\/[\w]+\/[\w]+$/;
             if (cleanedRequestURL.match(detectNoSlashPathRegExp) && cleanedRequestURL.match(detectNoSlashPathRegExp).length === 1) {
