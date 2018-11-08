@@ -273,8 +273,9 @@ module.exports = {
         if (layerTreeWasBuilt === false || _self.isReady() == false) {
             return;
         } else {
-            _self._setupToggleOfflineModeControlsForLayers();
-            queueStatistsics.processStatisticsUpdate(statistics, forceLayerUpdate, skipLastStatisticsCheck, userPreferredForceOfflineMode, apiBridgeInstance);
+            _self._setupToggleOfflineModeControlsForLayers().then(() => {
+                queueStatistsics.processStatisticsUpdate(statistics, forceLayerUpdate, skipLastStatisticsCheck, userPreferredForceOfflineMode, apiBridgeInstance);
+            });
         }
     },
 
@@ -337,20 +338,30 @@ module.exports = {
     },
 
     _setupToggleOfflineModeControlsForLayers() {
-        $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
-        if (`serviceWorker` in navigator) {
-            navigator.serviceWorker.getRegistrations().then(registrations => {
-                if (registrations.length === 1 && registrations[0].active !== null) {
-                    queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-                        if (Array.isArray(response)) {
-                            offlineModeControlsManager.setCachedLayers(response).then(() => {
-                                offlineModeControlsManager.updateControls();
-                            });
-                        }
-                    });
-                }
-            });
-        }
+        return new Promise((resolve, reject) => {
+            $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
+            if (`serviceWorker` in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length === 1 && registrations[0].active !== null) {
+                        queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                            if (Array.isArray(response)) {
+                                offlineModeControlsManager.setCachedLayers(response).then(() => {
+                                    offlineModeControlsManager.updateControls().then(() => {
+                                        resolve();
+                                    });
+                                });
+                            } else {
+                                resolve();
+                            }
+                        });
+                    } else {
+                        resolve();
+                    }
+                });
+            } else {
+                resolve();
+            }
+        });
     },
 
     /**
@@ -507,99 +518,101 @@ module.exports = {
                             }
                         }
 
-                        $(`#layers_list`).sortable({
-                            axis: 'y',
-                            stop: (event, ui) => {
-                                _self.calculateOrder();
-                                backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                                layers.reorderLayers();
-                            }
-                        });
+                        _self._setupToggleOfflineModeControlsForLayers().then(() => {
+                            $(`#layers_list`).sortable({
+                                axis: 'y',
+                                stop: (event, ui) => {
+                                    _self.calculateOrder();
+                                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                                    layers.reorderLayers();
+                                }
+                            });
 
-                        if (queueStatistsics.getLastStatistics()) {
-                            _self.statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
-                        }
-
-                        layers.reorderLayers();
-                        state.listen(MODULE_NAME, `sorted`);
-                        state.listen(MODULE_NAME, `layersOfflineModeChange`);
-                        state.listen(MODULE_NAME, `activeLayersChange`);
-                        state.listen(MODULE_NAME, `filtersChange`);
-                        state.listen(MODULE_NAME, `opacityChange`);
-                        
-                        backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                        setTimeout(() => {
-                            if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
-
-                            if (activeLayers) {   
-                                activeLayers.map(layerName => {
-                                    let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
-
-                                    if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                        if (layerName.indexOf(`v:`) === 0) {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
-                                        } else {
-                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
-                                        }
-                                    } else {
-                                        $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
-                                    }
-                                });
-
-                                legend.init();
+                            if (queueStatistsics.getLastStatistics()) {
+                                _self.statisticsHandler(queueStatistsics.getLastStatistics(), false, true);
                             }
 
-                            layerTreeIsReady = true;
-                            treeIsBeingBuilt = false;
-                            backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
-                            backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                            layers.reorderLayers();
+                            state.listen(MODULE_NAME, `sorted`);
+                            state.listen(MODULE_NAME, `layersOfflineModeChange`);
+                            state.listen(MODULE_NAME, `activeLayersChange`);
+                            state.listen(MODULE_NAME, `filtersChange`);
+                            state.listen(MODULE_NAME, `opacityChange`);
+                            
+                            backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                            setTimeout(() => {
+                                if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
 
-                            if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
+                                if (activeLayers) {   
+                                    activeLayers.map(layerName => {
+                                        let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
 
-                            /**
-                             * Checks if the offline mode settings for vector layers do not conflict with the service worker cache. If
-                             * there is a conflict, it is better to silently remove the conflicting offline mode settings, either
-                             * explain user that his service worker cache for specific layer does not exist.
-                             *
-                             * @returns {Promise} 
-                             */
-                            const applyOfflineModeSettings = (settings) => {
-                                return new Promise((resolve, reject) => {
-                                    queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-                                        if (Array.isArray(response)) {
-                                            for (let key in offlineModeSettings) {
-                                                if (key.indexOf(`v:`) === 0) {
-                                                    // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
-                                                    response.map(cachedRequest => {
-                                                        if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
-                                                            if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                                offlineModeControlsManager.setControlState(key, true);
-                                                            }
-                                                        }
-                                                    });
-                                                } else {
-                                                    // Enabling corresponding settings for tile layers without any checks
-                                                    if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                        offlineModeControlsManager.setControlState(key, offlineModeSettings[key]);
-                                                    }
-                                                }
+                                        if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                            if (layerName.indexOf(`v:`) === 0) {
+                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                            } else {
+                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                             }
-        
-                                            resolve();
+                                        } else {
+                                            $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
                                         }
                                     });
-                                });
-                            };
 
-                            if (offlineModeSettings && Object.keys(offlineModeSettings).length > 0) {
-                                applyOfflineModeSettings(offlineModeSettings).then(() => {
+                                    legend.init();
+                                }
+
+                                layerTreeIsReady = true;
+                                treeIsBeingBuilt = false;
+                                backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+
+                                if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
+
+                                /**
+                                 * Checks if the offline mode settings for vector layers do not conflict with the service worker cache. If
+                                 * there is a conflict, it is better to silently remove the conflicting offline mode settings, either
+                                 * explain user that his service worker cache for specific layer does not exist.
+                                 *
+                                 * @returns {Promise} 
+                                 */
+                                const applyOfflineModeSettings = (settings) => {
+                                    return new Promise((resolve, reject) => {
+                                        queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                                            if (Array.isArray(response)) {
+                                                for (let key in offlineModeSettings) {
+                                                    if (key.indexOf(`v:`) === 0) {
+                                                        // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
+                                                        response.map(cachedRequest => {
+                                                            if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
+                                                                if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
+                                                                    offlineModeControlsManager.setControlState(key, true);
+                                                                }
+                                                            }
+                                                        });
+                                                    } else {
+                                                        // Enabling corresponding settings for tile layers without any checks
+                                                        if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
+                                                            offlineModeControlsManager.setControlState(key, offlineModeSettings[key]);
+                                                        }
+                                                    }
+                                                }
+            
+                                                resolve();
+                                            }
+                                        });
+                                    });
+                                };
+
+                                if (offlineModeSettings && Object.keys(offlineModeSettings).length > 0) {
+                                    applyOfflineModeSettings(offlineModeSettings).then(() => {
+                                        resolve();
+                                    });
+                                } else {
                                     resolve();
-                                });
-                            } else {
-                                resolve();
-                            }
-                        }, 1000);
+                                }
+                            }, 1000);
+                        });
                     }
 
                     if (layersThatAreNotInMeta.length > 0) {
@@ -1269,8 +1282,6 @@ module.exports = {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
 
-            _self._setupToggleOfflineModeControlsForLayers();
-
             let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
             $(layerContainer).find(`.js-set-online, .js-set-offline`).click(e => {
                 e.preventDefault();
@@ -1290,8 +1301,9 @@ module.exports = {
                         action: serviceWorkerAPIKey,
                         payload: { layerKey }
                     }).then(() => { 
-                        _self._setupToggleOfflineModeControlsForLayers();
-                        backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
+                        _self._setupToggleOfflineModeControlsForLayers().then(() => {
+                            backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
+                        });
                     });
                 } else {
                     offlineModeControlsManager.updateControls().then(() => {
