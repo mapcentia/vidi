@@ -404,12 +404,24 @@ module.exports = {
          * loading is enabled for the layer.
          */
         cloud.get().on(`moveend`, () => {
+            let activeLayers = _self.getActiveLayers();
+
             for (let layerKey in stores) {
-                let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
-                let parsedMeta = _self.parseLayerMeta(layerDescription);
-                if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
-                    stores[layerKey].abort();
-                    stores[layerKey].load();
+                let layerIsEnabled = false;
+                for (let i = 0; i < activeLayers.length; i++) {
+                    if (activeLayers[i].replace(`v:`, ``) === layerKey.replace(`v:`, ``)) {
+                        layerIsEnabled = true;
+                        break;
+                    }
+                }
+
+                if (layerIsEnabled) {
+                    let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
+                    let parsedMeta = _self.parseLayerMeta(layerDescription);
+                    if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        stores[layerKey].abort();
+                        stores[layerKey].load();
+                    }
                 }
             }
         });
