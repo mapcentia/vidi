@@ -399,6 +399,23 @@ module.exports = {
             }
         });
 
+        /**
+         * Some vector layer needs to be reloaded when the map view is changed if the dynamic
+         * loading is enabled for the layer.
+         */
+        cloud.get().on(`moveend`, () => {
+            for (let layerKey in stores) {
+                let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
+                let parsedMeta = _self.parseLayerMeta(layerDescription);
+                if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                    console.log(`### this store needs to be updated on moveend`, stores[layerKey]);
+                    stores[layerKey].abort();
+                    stores[layerKey].load();
+                    console.log(`### reloaded`);
+                }
+            }
+        });
+
         let result = false;
         if (treeIsBeingBuilt) {
             result = new Promise((resolve, reject) => {
@@ -688,14 +705,15 @@ module.exports = {
     createStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
-        let whereClause = false;
+        let whereClauses = [];
+
         if (layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
             if (conditions.length > 0) {
                 if (vectorFilters[layerKey].match === `any`) {
-                    whereClause = conditions.join(` OR `);
+                    whereClauses.push(conditions.join(` OR `));
                 } else if (vectorFilters[layerKey].match === `all`) {
-                    whereClause = conditions.join(` AND `);
+                    whereClauses.push(conditions.join(` AND `));
                 } else {
                     throw new Error(`Invalid match type value`);
                 }
@@ -706,25 +724,26 @@ module.exports = {
 
         // Checking if versioning is enabled for layer
         if (`versioning` in layer && layer.versioning) {
-            if (whereClause) {
-                whereClause = ` (${whereClause}) AND gc2_version_end_date is null `;
-            } else {
-                whereClause = ` gc2_version_end_date is null `;
-            }
+            whereClauses.push(`gc2_version_end_date is null`);
         }
 
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
         if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
-            console.log(`### ${layerKey} has dynamic load strategy`);
+            whereClauses.push(`ST_Intersects(${layer.f_geometry_column}, ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
         }
 
-
-
+        // Gathering all WHERE clauses
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
-        if (whereClause) sql = `SELECT * FROM ${layerKey} WHERE (${whereClause}) LIMIT ${SQL_QUERY_LIMIT}`;
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+        }
+
+        console.log(`### sql for ${layerKey}`, sql);
 
         stores['v:' + layerKey] = new geocloud.sqlStore({
+            map: cloud.get().map,
             jsonp: false,
             method: "POST",
             host: "",
@@ -1189,8 +1208,9 @@ module.exports = {
             let defaultLayerType = 'tile';
 
             let layerIsEditable = false;
+            let parsedMeta = false;
             if (layer && layer.meta) {
-                let parsedMeta = _self.parseLayerMeta(layer);
+                parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
                     if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
                         layerIsEditable = true;
