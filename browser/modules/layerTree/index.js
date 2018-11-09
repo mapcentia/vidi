@@ -426,7 +426,8 @@ module.exports = {
                     let needToReload = true;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
                         let currentMapBBox = cloud.get().map.getBounds();
-                        if (stores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                        if (`buffered_bbox` in stores[layerKey] && stores[layerKey].buffered_bbox
+                            && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                             needToReload = false;
                         }
                     }
