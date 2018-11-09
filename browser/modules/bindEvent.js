@@ -495,6 +495,7 @@ module.exports = module.exports = {
             $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
             $("#module-container").css("width", (width - 100) + "px");
             $("#info-modal").css("width", (width - 100) + "px");
+            $(".navmenu").css("width", (width) + "px");
             $(".slide-right").css("right", "-" + (width - 100) + "px");
 
 
