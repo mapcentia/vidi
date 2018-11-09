@@ -797,7 +797,9 @@ module.exports = {
                     usingCartodb: false
                 });
 
-                localTable.loadDataInTable(true);
+                if ($(`#${tableId}_container`).is(`:visible`)) {
+                    localTable.loadDataInTable(true);
+                }
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1436,6 +1438,13 @@ module.exports = {
                     $(`.js-table-view-container`).hide();
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+
+                    // If data has not been loaded yet, then load it
+                    if ($(`#${tableId}`).children().length === 0) {
+                        console.log(`### Table for ${activeOpenedTable} appears to be empty, loading data`);
+                        tables[activeOpenedTable].loadDataInTable(true);
+                    }
+
                     $(`#${tableId}_container`).show();
 
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
