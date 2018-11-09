@@ -233,6 +233,9 @@ geocloud = (function () {
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
+
+        this.buffered_bbox = false;
+
         this.load = function (doNotShowAlertOnError) {
             try {
                 me.abort();
@@ -250,12 +253,17 @@ geocloud = (function () {
                     dynamicQueryIsUsed = true;
                 }
 
+                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
+                var extendedBounds = map.getBounds().pad(1);
+                this.buffered_bbox = extendedBounds;
+
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
                 sql = sql.replace("{centerY}", map.getCenter().lng.toString());
-                sql = sql.replace("{minX}", map.getBounds().getWest());
-                sql = sql.replace("{maxX}", map.getBounds().getEast());
-                sql = sql.replace("{minY}", map.getBounds().getSouth());
-                sql = sql.replace("{maxY}", map.getBounds().getNorth());
+                sql = sql.replace("{maxY}", extendedBounds.getNorth());
+                sql = sql.replace("{maxX}", extendedBounds.getEast());
+                sql = sql.replace("{minY}", extendedBounds.getSouth());
+                sql = sql.replace("{minX}", extendedBounds.getWest());
+
                 if (sql.indexOf("{bbox}") !== -1) {
                     console.warn("The bounding box ({bbox}) was not replaced in SQL query");
                 }

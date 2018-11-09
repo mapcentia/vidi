@@ -73,6 +73,8 @@ var defaultTemplate = `<div class="cartodb-popup-content">
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+import noUiSlider from 'nouislider';
+
 import LayerFilter from './LayerFilter';
 import {relative} from 'path';
 import {
@@ -418,7 +420,19 @@ module.exports = {
                 if (layerIsEnabled) {
                     let layerDescription = meta.getMetaByKey(layerKey.replace(`v:`, ``));
                     let parsedMeta = _self.parseLayerMeta(layerDescription);
+
+                    // Reload should always occur except times when current bbox is completely inside
+                    // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
+                    let needToReload = true;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        let currentMapBBox = cloud.get().map.getBounds();
+                        if (`buffered_bbox` in stores[layerKey] && stores[layerKey].buffered_bbox
+                            && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                            needToReload = false;
+                        }
+                    }
+
+                    if (needToReload) {
                         stores[layerKey].abort();
                         stores[layerKey].load();
                     }
@@ -797,7 +811,9 @@ module.exports = {
                     usingCartodb: false
                 });
 
-                localTable.loadDataInTable(true);
+                if ($(`#${tableId}_container`).is(`:visible`)) {
+                    localTable.loadDataInTable(true);
+                }
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1370,7 +1386,7 @@ module.exports = {
 
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
-                    <div class="js-opacity-slider"></div>
+                    <div class="js-opacity-slider slider shor slider-material-orange"></div>
                 </div>`);
 
                 if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {                    
@@ -1379,18 +1395,21 @@ module.exports = {
                     }
                 }
 
-                $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
-                    orientation: `horizontal`,
-                    range: `min`,
-                    min: 0,
-                    max: 100,
-                    value: (initialSliderValue * 100),
+                let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
+                noUiSlider.create(slider, {
+                    start: (initialSliderValue * 100),
+                    connect: `lower`,
                     step: 10,
-                    slide: function (event, ui) {
-                        let sliderValue = ui.value / 100;
-                        applyOpacityToLayer(sliderValue, layerKey);
-                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
+                    range: {
+                        'min': 0,
+                        'max': 100
                     }
+                });
+
+                slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                    let sliderValue = (parseFloat(values[handle]) / 100);
+                    applyOpacityToLayer(sliderValue, layerKey);
+                    setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
                 });
 
                 // Assuming that it not possible to set layer opacity right now
@@ -1436,6 +1455,13 @@ module.exports = {
                     $(`.js-table-view-container`).hide();
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+
+                    // If data has not been loaded yet, then load it
+                    if ($(`#${tableId}`).children().length === 0) {
+                        console.log(`### Table for ${activeOpenedTable} appears to be empty, loading data`);
+                        tables[activeOpenedTable].loadDataInTable(true);
+                    }
+
                     $(`#${tableId}_container`).show();
 
                     $("#" + TABLE_VIEW_CONTAINER_ID).animate({
