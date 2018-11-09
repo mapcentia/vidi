@@ -1034,6 +1034,7 @@ h4 small {
   height: 100%;
 }
 #search-ribbon {
+  position: fixed;
   min-width: 100px;
   top: 0;
   position: absolute;
