@@ -265,6 +265,8 @@ module.exports = {
                     distance = drawTools.getDistance(drawLayer);
                 }
 
+                console.log(`### area distance`, area, distance);
+
                 drawLayer._vidi_type = `measurements`;
                 drawLayer.feature = {
                     properties: {
@@ -321,7 +323,26 @@ module.exports = {
     setStyle: (l, type) => {
         l.hideMeasurements();
 
-        l.showMeasurements({ showTotal: true });
+        l.showMeasurements({
+            showTotal: true,
+            formatArea: (areaInSquareMeters) => {
+                let result = Math.round(areaInSquareMeters);
+                let ha = (Math.round(areaInSquareMeters / 10000 * 100) / 100);
+                let km2 = (Math.round(areaInSquareMeters / 1000000 * 100) / 100);
+                if (areaInSquareMeters < 10000) {
+                    // Display square meters
+                    result = (Math.round(areaInSquareMeters) + ' m2');
+                } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
+                    // Display hectars
+                    result = (ha + ' ha');
+                } else if (areaInSquareMeters >= 1000000) {
+                    // Display square kilometers and hectars
+                    result = (km2 + ' km2 (' + ha + ' ha)');
+                }
+
+                return result;
+            }
+        });
 
         let defaultMeasurementsStyle = {
             dashArray: `none`,
