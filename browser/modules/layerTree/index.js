@@ -423,8 +423,9 @@ module.exports = {
 
                     // Reload should always occur except times when current bbox is completely inside
                     // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
-                    let needToReload = true;
+                    let needToReload;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        needToReload = true
                         let currentMapBBox = cloud.get().map.getBounds();
                         if (`buffered_bbox` in stores[layerKey] && stores[layerKey].buffered_bbox
                             && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
