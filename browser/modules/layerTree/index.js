@@ -11,7 +11,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -1381,24 +1381,6 @@ module.exports = {
                     }
                 }
 
-                /*
-                // Old slider                
-                $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
-                    orientation: `horizontal`,
-                    range: `min`,
-                    min: 0,
-                    max: 100,
-                    value: (initialSliderValue * 100),
-                    step: 10,
-                    slide: function (event, ui) {
-                        let sliderValue = ui.value / 100;
-                        applyOpacityToLayer(sliderValue, layerKey);
-                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
-                    }
-                });
-                */
-                
-                // New slider
                 let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
                 noUiSlider.create(slider, {
                     start: (initialSliderValue * 100),
@@ -1415,7 +1397,6 @@ module.exports = {
                     applyOpacityToLayer(sliderValue, layerKey);
                     setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
                 });
-
 
                 // Assuming that it not possible to set layer opacity right now
                 setLayerOpacityRequests.push({ layerKey, opacity: initialSliderValue });
