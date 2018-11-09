@@ -455,8 +455,77 @@ self.addEventListener('fetch', (event) => {
         if (cleanedRequestURL.indexOf('/api/feature') !== -1) {
             return fetch(event.request);
         } else {
-            let result = new Promise((resolve, reject) => {
+            let result = new Promise((resolve, reject) => {               
                 return caches.open(CACHE_NAME).then((cache) => {
+                    if (cleanedRequestURL.indexOf('/api/sql') > -1) {
+                        // Requests to api/sql (vector layers) are affected by offline mode settings
+
+                        /*
+                        get layer key
+                        if ( dynamic query ) {
+                            get requested bbox
+                            if ( cleanedRequestURL in localforage exists and it is set to be offline ) {
+                                get cached bbox
+                                if (requested bbox inside of the cached bbox) {
+                                    if ( cachedResponse exists) {
+                                        return cachedResponse
+                                    } else {
+                                        return realResponse
+                                    }
+                                } else {
+                                    get realResponse
+                                    set new bbox for cleanedRequestURL in localforage
+                                    set new cached response for cleanedRequestURL in SW cache
+                                    return realResponse
+                                }
+                            } else {
+                                get realResponse
+                                set new bbox for cleanedRequestURL in localforage
+                                set new cached response for cleanedRequestURL in SW cache
+                                return realResponse
+                            }
+                        } else {
+                            if ( cleanedRequestURL in localforage exists and it is set to be offline ) {
+                                if ( cachedResponse exists) {
+                                    return cachedResponse
+                                } else {
+                                    return false
+                                }
+                            } else {
+                                return realResponse
+                            }
+                        }
+                        */
+
+                        
+
+
+
+
+                    } else {
+                        // Regular API request, always trying to perform it
+                        return fetch(event.request).then(apiResponse => {
+
+                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed despite the existence of cached request');
+
+                            // Caching the API request in case if app will go offline aftewards
+                            return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                                resolve(apiResponse);
+                            }).catch(() => {
+                                throw new Error('Unable to put the response in cache');
+                            })
+                        }).catch(() => {
+
+                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the previously cached response');
+
+                            // @todo Check if cachedResponse could be null
+
+                            resolve(cachedResponse);
+                        });
+                    }
+
+                    /*
+                    // Old API querying routine
                     return cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
                         // If the vector layer is set to be offline, then return the cached response (if response exists)
                         if (cachedResponse && record && `offlineMode` in record && record.offlineMode) {
@@ -498,6 +567,7 @@ self.addEventListener('fetch', (event) => {
                             });
                         }
                     });
+                    */
                 }).catch(() => {
                     throw new Error('Unable to open cache');
                     reject();
