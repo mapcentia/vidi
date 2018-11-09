@@ -73,6 +73,8 @@ var defaultTemplate = `<div class="cartodb-popup-content">
 var React = require('react');
 var ReactDOM = require('react-dom');
 
+import noUiSlider from 'nouislider';
+
 import LayerFilter from './LayerFilter';
 import {relative} from 'path';
 import {
@@ -1372,7 +1374,7 @@ module.exports = {
 
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
-                    <div class="js-opacity-slider"></div>
+                    <div class="js-opacity-slider slider shor slider-material-orange"></div>
                 </div>`);
 
                 if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {                    
@@ -1381,18 +1383,21 @@ module.exports = {
                     }
                 }
 
-                $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).slider({
-                    orientation: `horizontal`,
-                    range: `min`,
-                    min: 0,
-                    max: 100,
-                    value: (initialSliderValue * 100),
+                let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
+                noUiSlider.create(slider, {
+                    start: (initialSliderValue * 100),
+                    connect: `lower`,
                     step: 10,
-                    slide: function (event, ui) {
-                        let sliderValue = ui.value / 100;
-                        applyOpacityToLayer(sliderValue, layerKey);
-                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
+                    range: {
+                        'min': 0,
+                        'max': 100
                     }
+                });
+
+                slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                    let sliderValue = (parseFloat(values[handle]) / 100);
+                    applyOpacityToLayer(sliderValue, layerKey);
+                    setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
                 });
 
                 // Assuming that it not possible to set layer opacity right now
