@@ -103,6 +103,9 @@ var urlVars = urlparser.urlVars;
 var showdown = require('showdown');
 var converter = new showdown.Converter();
 
+var jRespond = require('jrespond');
+
+
 require('dom-shims');
 require('arrive');
 
@@ -488,16 +491,7 @@ module.exports = module.exports = {
             });
 
             // Set up the open/close functions for side panel
-            var searchPanelOpen
-
-            var width = 600;
-
-            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
-            $("#module-container").css("width", (width - 100) + "px");
-            $("#info-modal").css("width", (width - 100) + "px");
-            $(".navmenu").css("width", (width) + "px");
-            $(".slide-right").css("right", "-" + (width - 100) + "px");
-
+            var searchPanelOpen, width, collapsedWidth = 250;
 
             $("#main-tabs a").on("click", function (e) {
                 $("#module-container.slide-right").css("right", "0");
@@ -526,6 +520,14 @@ module.exports = module.exports = {
                 }
             });
 
+            let setWidth = function (width) {
+                $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
+                $("#module-container").css("width", (width - 100) + "px");
+                $("#info-modal").css("width", (width - 100) + "px");
+                $(".navmenu").css("width", (width) + "px");
+                $(".slide-right").css("right", "-" + (width - 100) + "px");
+            };
+
             var infoModalHide = function () {
                 $("#info-modal").css("right", "-" + (width - 100) + "px");
             }
@@ -535,9 +537,9 @@ module.exports = module.exports = {
             }
 
             var searchShow = function () {
-                $("#search-ribbon").css("right", "-" + (width - 300) + "px");
-                $("#pane").css("right", "260px");
-                $('#map').css("width", "calc(100% - 150px)");
+                $("#search-ribbon").css("right", "-" + (width - collapsedWidth) + "px");
+                $("#pane").css("right", (collapsedWidth - 40) + "px");
+                $('#map').css("width", "calc(100% - " + (collapsedWidth/2) + "px)");
                 searchPanelOpen = true;
             }
 
@@ -554,6 +556,61 @@ module.exports = module.exports = {
                 $("#search-ribbon").css("right", "-" + (width - 40) + "px");
                 searchPanelOpen = false
             };
+
+            var jRes = jRespond([
+                {
+                    label: 'phone',
+                    enter: 0,
+                    exit: 500
+                },
+                {
+                    label: 'tablet',
+                    enter: 501,
+                    exit: 1024
+                },
+                {
+                    label: 'desktop',
+                    enter: 1024,
+                    exit: 10000
+                }
+            ]);
+
+            jRes.addFunc({
+                breakpoint: ['phone'],
+                enter: function () {
+                    searchHide()
+                    width = 400;
+                    setWidth(width)
+                },
+                exit: function () {
+                    console.log("Exit phone");
+
+                }
+            });
+            jRes.addFunc({
+                breakpoint: ['tablet'],
+                enter: function () {
+                    searchHide()
+                    width = 500;
+                    setWidth(width)
+                },
+                exit: function () {
+                    console.log("Exit tablet");
+
+                }
+            });
+            jRes.addFunc({
+                breakpoint: ['desktop'],
+                enter: function () {
+                    searchHide()
+                    width = 700;
+                    setWidth(width)
+                },
+                exit: function () {
+                    console.log("Exit desktop");
+
+                }
+            });
 
             $('#search-border').click(function () {
                 if (searchPanelOpen) {
