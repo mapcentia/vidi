@@ -145,19 +145,27 @@ let urlsIgnoredForCaching = [{
 const CACHED_VECTORS_KEY = `VIDI_CACHED_VECTORS_KEY`;
 let cachedVectorLayersKeeper = {
     set: (key, value) => {
+        if (!key || key.split(`.`) !== 2) {
+            throw new Error(`Invalid layer key ${key}`);
+        }
+
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
                 storedValue[key] = value;
                 localforage.setItem(CACHED_VECTORS_KEY, storedValue).then(() => {
                     resolve();
-                }).catch(error => {
-                    console.error(`Unable to store value`)
+                }).catch(() => {
+                    throw new Error(`Unable to store value`);
                 });
             });
         });
     },
     get: (key) => {
+        if (!key || key.split(`.`) !== 2) {
+            throw new Error(`Invalid layer key ${key}`);
+        }
+
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
@@ -169,7 +177,7 @@ let cachedVectorLayersKeeper = {
             });
         });
     },
-    getAllRecords: () => {
+    getAll: () => {
         return new Promise((resolve, reject) => {
             localforage.getItem(CACHED_VECTORS_KEY).then(storedValue => {
                 if (!storedValue) storedValue = {};
@@ -259,26 +267,23 @@ const normalizeTheURLForFetch = (event) => {
 
                     // @todo Implement for iOS
                     cachedVectorLayersKeeper.get(cleanedRequestURL).then(record => {
-                        // Request is performed first time, got to record it in cached vector layers keeper
+                        // Request is performed first time and has to be saved in cached vector layers keeper
                         if (record === false) {
                             record = {};
+                            let layerKey = false;
                             let decodedQuery = decodeURI(atob(mappedObject.q));
                             let matches = decodedQuery.match(/\s+\w*\.\w*\s+/);
                             if (matches.length === 1) {
                                 let tableName = matches[0].trim().split(`.`);
                                 record.offlineMode = false;
-                                record.layerKey = (tableName[0] + `.` + tableName[1]);
+                                layerKey = (tableName[0] + `.` + tableName[1]);
+                                record.layerKey = layerKey;
+                                record.cleanedRequestURL = cleanedRequestURL;
                             } else {
                                 throw new Error(`Unable to detect the layer key`);
                             }
 
-                            /*
-                            self.clients.matchAll().then(function (clients){ clients.forEach(function(client){ client.postMessage({
-                                msg: "@@@ Just created a record"
-                            });});});
-                            */
-
-                            cachedVectorLayersKeeper.set(cleanedRequestURL, record).then(() => {
+                            cachedVectorLayersKeeper.set(layerKey, record).then(() => {
                                 resolve(cleanedRequestURL);
                             });
                         } else {
@@ -392,7 +397,9 @@ self.addEventListener('message', (event) => {
             */
 
             let layers = [];
-            cachedVectorLayersKeeper.getAllRecords().then(records => {
+
+            // @todo Refactor
+            cachedVectorLayersKeeper.getAll().then(records => {
                 for (let key in records) {
                     if (`layerKey` in records[key] && records[key].layerKey && `offlineMode` in records[key]) {
                         layers.push({
@@ -404,9 +411,12 @@ self.addEventListener('message', (event) => {
 
                 event.ports[0].postMessage(layers);
             });
+
         } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
             if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
-                cachedVectorLayersKeeper.getAllRecords().then(records => {
+
+                // @todo Refactor
+                cachedVectorLayersKeeper.getAll().then(records => {
                     for (let key in records) {
                         if (`layerKey` in records[key] && records[key].layerKey) {
                             let localLayerKey = records[key].layerKey;
@@ -424,6 +434,7 @@ self.addEventListener('message', (event) => {
                         }
                     }
                 });
+
             } else {
                 throw new Error(`Invalid payload for ${event.data.action} action`);
             }
@@ -460,6 +471,14 @@ self.addEventListener('fetch', (event) => {
                     if (cleanedRequestURL.indexOf('/api/sql') > -1) {
                         // Requests to api/sql (vector layers) are affected by offline mode settings
 
+
+
+
+
+
+
+
+
                         /*
                         get layer key
                         if ( dynamic query ) {
@@ -473,16 +492,22 @@ self.addEventListener('fetch', (event) => {
                                         return realResponse
                                     }
                                 } else {
-                                    get realResponse
+                                    if (get realResponse) {
+                                        set new bbox for cleanedRequestURL in localforage
+                                        set new cached response for cleanedRequestURL in SW cache
+                                        return realResponse
+                                    } else {
+                                        return false
+                                    }
+                                }
+                            } else {
+                                if (get realResponse) {
                                     set new bbox for cleanedRequestURL in localforage
                                     set new cached response for cleanedRequestURL in SW cache
                                     return realResponse
+                                } else {
+                                    return false
                                 }
-                            } else {
-                                get realResponse
-                                set new bbox for cleanedRequestURL in localforage
-                                set new cached response for cleanedRequestURL in SW cache
-                                return realResponse
                             }
                         } else {
                             if ( cleanedRequestURL in localforage exists and it is set to be offline ) {
