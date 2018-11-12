@@ -194,6 +194,7 @@ module.exports = {
         "Fetch layer data from server": "Hent data fra server",
         "Fetch layer data from cache": "Hent data fra cache",
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
+        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Anvend",
 
         // Base layers

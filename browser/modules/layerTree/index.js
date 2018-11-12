@@ -627,15 +627,10 @@ module.exports = {
                                                         response.map(cachedRequest => {
                                                             if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
                                                                 if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                                    offlineModeControlsManager.setControlState(key, true);
+                                                                    offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
                                                                 }
                                                             }
                                                         });
-                                                    } else {
-                                                        // Enabling corresponding settings for tile layers without any checks
-                                                        if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                            offlineModeControlsManager.setControlState(key, offlineModeSettings[key]);
-                                                        }
                                                     }
                                                 }
             
