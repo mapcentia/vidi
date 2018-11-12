@@ -196,11 +196,13 @@ class OfflineModeControlsManager {
                         if ($(layerRecord).is(`:visible`)) {
                             let isVectorLayer = this.isVectorLayer(layerKey);                           
                             if (isVectorLayer) {
+                                let offlineMode = false;
                                 let isAlreadyCached = false;
                                 let cachedWithinTheBBox = false;
                                 this.cachedLayers.map(cachedLayer => {
                                     if (cachedLayer.layerKey === layerKey) {
                                         isAlreadyCached = true;
+                                        offlineMode = cachedLayer.offlineMode;
                                         if (cachedLayer.bbox) {
                                             cachedWithinTheBBox = true;
                                         }
@@ -208,8 +210,7 @@ class OfflineModeControlsManager {
                                         return false;
                                     }
                                 });
-
-                                let offlineMode = false;
+                                
                                 let requestedLayerKey = (this.isVectorLayer(layerKey) ? (`v:` + layerKey) : layerKey);
                                 if (requestedLayerKey in this.offlineModeValues) {
                                     if ([true, false].indexOf(this.offlineModeValues[requestedLayerKey]) !== -1) {

@@ -347,6 +347,9 @@ module.exports = {
                     if (registrations.length === 1 && registrations[0].active !== null) {
                         queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
                             if (Array.isArray(response)) {
+
+                                console.log(`### _setupToggleOfflineModeControlsForLayers`, response);
+
                                 offlineModeControlsManager.setCachedLayers(response).then(() => {
                                     offlineModeControlsManager.updateControls().then(() => {
                                         resolve();
@@ -507,6 +510,7 @@ module.exports = {
                             });
                         }
 
+                        offlineModeSettings = {};
                         if (`layersOfflineMode` in forcedState) {
                             offlineModeSettings = forcedState.layersOfflineMode;
                             for (let key in offlineModeSettings) {
@@ -621,26 +625,49 @@ module.exports = {
                                     return new Promise((resolve, reject) => {
                                         queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
                                             if (Array.isArray(response)) {
-                                                for (let key in offlineModeSettings) {
-                                                    if (key.indexOf(`v:`) === 0) {
-                                                        // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
-                                                        response.map(cachedRequest => {
-                                                            if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
-                                                                if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                                    offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
-                                                                }
-                                                            }
+                                                if (Object.keys(settings).length === 0) {
+                                                    // Empty object means that all layers should have the offline mode to be turned off
+                                                    response.map(cachedRequest => {
+
+                                                        console.log(`### disabling offline mode for `, cachedRequest.layerKey);
+
+                                                        queryServiceWorker({
+                                                            action: `disableOfflineModeForLayer`,
+                                                            payload: { layerKey: cachedRequest.layerKey }
                                                         });
+                                                    });
+                                                } else {
+                                                    for (let key in offlineModeSettings) {
+                                                        if (key.indexOf(`v:`) === 0) {
+                                                            // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
+                                                            response.map(cachedRequest => {
+                                                                if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
+                                                                    let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
+                                                                    if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
+                                                                        serviceWorkerAPIKey = `enableOfflineModeForLayer`;
+                                                                        offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
+                                                                    } else {
+                                                                        offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
+                                                                    }
+    
+                                                                    queryServiceWorker({
+                                                                        action: serviceWorkerAPIKey,
+                                                                        payload: { layerKey }
+                                                                    });
+                                                                }
+                                                            });
+                                                        }
                                                     }
                                                 }
-            
+
                                                 resolve();
                                             }
                                         });
                                     });
                                 };
 
-                                if (offlineModeSettings && Object.keys(offlineModeSettings).length > 0) {
+                                console.log(`### offlineModeSettings`, offlineModeSettings);
+                                if (offlineModeSettings !== false) {
                                     applyOfflineModeSettings(offlineModeSettings).then(() => {
                                         resolve();
                                     });
@@ -1640,6 +1667,9 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+        console.log(`### apply state`, newState);
+
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {
@@ -1653,7 +1683,11 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
         if (newState === false) {
-            newState = { order: false, opacitySettings: {}};
+            newState = {
+                order: false,
+                opacitySettings: {},
+                layersOfflineMode: {}
+            };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
