@@ -8,6 +8,7 @@ const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
 const LOG_FETCH_EVENTS = false;
+const LOG_OFFLINE_MODE_EVENTS = true;
 
 /**
  * Browser detection
@@ -517,7 +518,7 @@ self.addEventListener('fetch', (event) => {
                          */
                         const getSuitableResponseForVectorLayerRequest = (cleanedRequestURL) => {
 
-                            console.log(`@@@ getting suitable response for vector layer request`);
+                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Getting suitable response for vector layer request`);
 
                             return new Promise((resolve, reject) => {
                                 URLToPostDataKeeper.get(cleanedRequestURL).then(requestPOSTData => {
@@ -526,17 +527,17 @@ self.addEventListener('fetch', (event) => {
                                         if (requestPOSTData.bbox) {
                                             // Dynamic query
 
-                                            console.log(`@@@ ${requestPOSTData.layerKey} request has bbox:`, requestPOSTData.bbox);
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestPOSTData.layerKey} request has bbox:`, requestPOSTData.bbox);
 
                                             if (cacheSettings && cacheSettings.offlineMode) {
                                                 // Offline mode is enabled for layer
 
-                                                console.log(`@@@ ${requestPOSTData.layerKey} offline mode is enabled`);
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestPOSTData.layerKey} offline mode is enabled`);
 
                                                 if (cacheSettings.bbox) {
                                                     // Previous request to vector layer was dynamic
 
-                                                    console.log(`@@@ previous request to vector layer was dynamic, bbox:`, cacheSettings.bbox);
+                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was dynamic, bbox:`, cacheSettings.bbox);
 
                                                     let responseForPreviousQueryCanBeUsed = false;
                                                     if (requestPOSTData.bbox.north === cacheSettings.bbox.north && requestPOSTData.bbox.east === cacheSettings.bbox.east &&
@@ -549,13 +550,13 @@ self.addEventListener('fetch', (event) => {
                                                         responseForPreviousQueryCanBeUsed = true;
                                                     }
 
-                                                    console.log(`@@@ response for previous request can be used`, responseForPreviousQueryCanBeUsed);
+                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Response for previous request can be used`, responseForPreviousQueryCanBeUsed);
 
                                                     if (responseForPreviousQueryCanBeUsed) {
                                                         // Previous request to vector layer was dynamic
                                                         caches.match(cacheSettings.cleanedRequestURL).then(response => {
 
-                                                            console.log(`@@@ previous request response`, response);
+                                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request response`, response);
 
                                                             resolve({ 
                                                                 response,
@@ -571,7 +572,7 @@ self.addEventListener('fetch', (event) => {
                                                 } else {
                                                     // Previous request to vector layer was static
 
-                                                    console.log(`@@@ previous request to vector layer was static`);
+                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was static`);
 
                                                     resolve({ 
                                                         response: false,
@@ -581,7 +582,7 @@ self.addEventListener('fetch', (event) => {
                                             } else {
                                                 // Offline mode is disabled for layer
 
-                                                console.log(`@@@ ${requestPOSTData.layerKey} offline mode is disabled`);
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestPOSTData.layerKey} offline mode is disabled`);
 
                                                 resolve({
                                                     response: false,
@@ -591,12 +592,12 @@ self.addEventListener('fetch', (event) => {
                                         } else {
                                             // Static query
 
-                                            console.log(`@@@ static query`);
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Static query`);
 
                                             if (cacheSettings && cacheSettings.offlineMode) {
                                                 // Offline mode is enabled for layer
 
-                                                console.log(`@@@ offline mode is enabled for layer`);
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is enabled for layer`);
 
                                                 if (cachedResponse) {
                                                     resolve({ 
@@ -612,7 +613,7 @@ self.addEventListener('fetch', (event) => {
                                             } else {
                                                 // Offline mode is disabled for layer
 
-                                                console.log(`@@@ offline mode is disabled for layer`);
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is disabled for layer`);
 
                                                 resolve({ 
                                                     response: false,
@@ -639,7 +640,7 @@ self.addEventListener('fetch', (event) => {
 
                         return getSuitableResponseForVectorLayerRequest(cleanedRequestURL).then(result => {
 
-                            console.log(`@@@ getSuitableResponseForVectorLayerRequest result:`, result);
+                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`getSuitableResponseForVectorLayerRequest result:`, result);
 
                             if (result && result.response) {
                                 resolve(result.response);
@@ -647,8 +648,7 @@ self.addEventListener('fetch', (event) => {
                                 return fetch(event.request).then(apiResponse => {
                                     
                                     if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed');
-
-                                    console.log(`@@@ layer vector was requested, storing response in cache and updating the cache settings`);
+                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Layer vector was requested, storing response in cache and updating the cache settings`);
 
                                     if (result.requestPOSTData) {
                                         return cacheSettingsKeeper.get(result.requestPOSTData.layerKey).then(data => {
@@ -660,7 +660,7 @@ self.addEventListener('fetch', (event) => {
                                             newData.bbox = result.requestPOSTData.bbox;
                                             newData.offlineMode = data.offlineMode;
 
-                                            console.log(`@@@ storing cache settings`, newData);
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Storing cache settings`, newData);
 
                                             // Storing the cache settings for vector layer
                                             return cacheSettingsKeeper.set(result.requestPOSTData.layerKey, newData).then(() => {
@@ -730,11 +730,7 @@ self.addEventListener('fetch', (event) => {
 
     if (requestShouldBeBypassed) {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: bypassing the ${event.request.url} request`);
-
-        return false;
-
-        // @todo Is is truly the "return false"?
-        //return fetch(event.request);
+        return fetch(event.request);
     } else {
         if (LOG_FETCH_EVENTS) console.log(`Service worker: not bypassing the ${event.request.url} request`);
 

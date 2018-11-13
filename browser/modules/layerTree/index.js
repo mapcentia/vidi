@@ -177,16 +177,20 @@ let editor = false;
  */
 const queryServiceWorker = (data) => {
     return new Promise((resolve, reject) => {
-        var messageChannel = new MessageChannel();
-        messageChannel.port1.onmessage = (event) => {
-            if (event.data.error) {
-                reject(event.data.error);
-            } else {
-                resolve(event.data);
-            }
-        };
+        if (navigator.serviceWorker.controller) {
+            let messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = (event) => {
+                if (event.data.error) {
+                    reject(event.data.error);
+                } else {
+                    resolve(event.data);
+                }
+            };
 
-        navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
+            navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
+        } else {
+            console.error(`Unable to query service worker as it is not registered yet`);
+        }
     });
 };
 
@@ -347,9 +351,6 @@ module.exports = {
                     if (registrations.length === 1 && registrations[0].active !== null) {
                         queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
                             if (Array.isArray(response)) {
-
-                                console.log(`### _setupToggleOfflineModeControlsForLayers`, response);
-
                                 offlineModeControlsManager.setCachedLayers(response).then(() => {
                                     offlineModeControlsManager.updateControls().then(() => {
                                         resolve();
@@ -378,6 +379,35 @@ module.exports = {
         if (LOG) console.log(`${MODULE_NAME}: create`, treeIsBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
+
+
+        /**
+         * There can be noncompleted requests to service worker
+         
+        backboneEvents.get().on(`ready:serviceWorker`, () => {
+            if (serviceWorkerMessageQueue.length > 0) {
+                let promises = [];
+                serviceWorkerMessageQueue.map(request => {
+                    promises.push(new Promise((localResolve, localReject) => {
+                        let messageChannel = new MessageChannel();
+                        messageChannel.port1.onmessage = (event) => {
+                            if (event.data.error) {
+                                localReject(event.data.error);
+                            } else {
+                                localResolve(event.data);
+                            }
+                        };
+
+                        navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
+                    }));
+                });
+
+                Promise.all(promises).then(() => {
+                    console.log(`### pending requests to service worker were delievered`);
+                });
+            }
+        });
+        */
 
         /**
          * Opacity settings needs to be applied when layer is loaded. As layer loading takes some
@@ -614,63 +644,20 @@ module.exports = {
 
                                 if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                                /**
-                                 * Checks if the offline mode settings for vector layers do not conflict with the service worker cache. If
-                                 * there is a conflict, it is better to silently remove the conflicting offline mode settings, either
-                                 * explain user that his service worker cache for specific layer does not exist.
-                                 *
-                                 * @returns {Promise} 
-                                 */
-                                const applyOfflineModeSettings = (settings) => {
-                                    return new Promise((resolve, reject) => {
-                                        queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
-                                            if (Array.isArray(response)) {
-                                                if (Object.keys(settings).length === 0) {
-                                                    // Empty object means that all layers should have the offline mode to be turned off
-                                                    response.map(cachedRequest => {
-
-                                                        console.log(`### disabling offline mode for `, cachedRequest.layerKey);
-
-                                                        queryServiceWorker({
-                                                            action: `disableOfflineModeForLayer`,
-                                                            payload: { layerKey: cachedRequest.layerKey }
-                                                        });
-                                                    });
-                                                } else {
-                                                    for (let key in offlineModeSettings) {
-                                                        if (key.indexOf(`v:`) === 0) {
-                                                            // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
-                                                            response.map(cachedRequest => {
-                                                                if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
-                                                                    let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
-                                                                    if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
-                                                                        serviceWorkerAPIKey = `enableOfflineModeForLayer`;
-                                                                        offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
-                                                                    } else {
-                                                                        offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
-                                                                    }
-    
-                                                                    queryServiceWorker({
-                                                                        action: serviceWorkerAPIKey,
-                                                                        payload: { layerKey }
-                                                                    });
-                                                                }
-                                                            });
-                                                        }
-                                                    }
-                                                }
-
-                                                resolve();
-                                            }
-                                        });
-                                    });
-                                };
-
-                                console.log(`### offlineModeSettings`, offlineModeSettings);
                                 if (offlineModeSettings !== false) {
-                                    applyOfflineModeSettings(offlineModeSettings).then(() => {
+                                    if (navigator.serviceWorker.controller) {
+                                        _self._applyOfflineModeSettings(offlineModeSettings).then(() => {
+                                            resolve();
+                                        });
+                                    } else {
+                                        backboneEvents.get().once(`ready:serviceWorker`, () => {
+                                            setTimeout(() => {
+                                                _self._applyOfflineModeSettings(offlineModeSettings);
+                                            }, 1000);
+                                        });
+
                                         resolve();
-                                    });
+                                    }
                                 } else {
                                     resolve();
                                 }
@@ -707,6 +694,75 @@ module.exports = {
         }
 
         return result;
+    },
+
+    /**
+     * Checks if the offline mode settings for vector layers do not conflict with the service worker cache. If
+     * there is a conflict, it is better to silently remove the conflicting offline mode settings, either
+     * explain user that his service worker cache for specific layer does not exist.
+     *
+     * @returns {Promise} 
+     */
+    _applyOfflineModeSettings: (settings) => {
+        return new Promise((resolve, reject) => {
+            queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                if (Array.isArray(response)) {
+                    if (Object.keys(settings).length === 0) {
+                        // Empty object means that all layers should have the offline mode to be turned off
+                        let promises = [];
+                        response.map(cachedRequest => {
+                            promises.push(queryServiceWorker({
+                                action: `disableOfflineModeForLayer`,
+                                payload: { layerKey: cachedRequest.layerKey }
+                            }));
+                        });
+
+                        Promise.all(promises).then(() => {
+                            offlineModeControlsManager.reset().then(() => {
+                                offlineModeControlsManager.updateControls().then(() => {
+                                    resolve();
+                                });
+                            });
+                        });
+                    } else {
+                        let promises = [];
+                        for (let key in settings) {
+                            if (key.indexOf(`v:`) === 0) {
+                                // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
+                                response.map(cachedRequest => {
+                                    if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
+                                        let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
+                                        if (settings[key] === `true` || settings[key] === true) {
+                                            serviceWorkerAPIKey = `enableOfflineModeForLayer`;
+                                            offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
+                                        } else {
+                                            offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
+                                        }
+
+                                        promises.push(queryServiceWorker({
+                                            action: serviceWorkerAPIKey,
+                                            payload: { layerKey: cachedRequest.layerKey }
+                                        }));
+                                    }
+                                });
+                            }
+                        }
+
+                        if (promises.length === 0) {
+                            resolve();
+                        } else {
+                            Promise.all(promises).then(() => {
+                                resolve();
+                            });
+                        }
+                    }
+                } else {
+                    console.error(`Invalid response from service worker`, response);
+                }
+            }).catch(error => {
+                console.error(`Error occured while querying the service worker`, error);
+            });
+        });
     },
 
     /**
