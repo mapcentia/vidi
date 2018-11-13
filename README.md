@@ -27,7 +27,7 @@ The Vidi project aims to make it easy for organizations to use open source softw
 
 1) Vidi is written in Node.js and uses Browserify for the front-end. I.e. that both front- and back-end extensions are written in javascript with CommonJS Modules, which means that you need a minimum of skill sets to expand and customize Vidi.
 
-![Standard Vidi](https://i.imgur.com/9HxfuNe.jpg "Vidi looks good!")
+![Standard Vidi](https://i.imgur.com/QbmByqV.png "Vidi looks good!")
 
 ## How to try Vidi
 Head over to gc2.mapcentia.com, create a PostGIS database and start uploading data. Then start Vidi from the dashboard.
