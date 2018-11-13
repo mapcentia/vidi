@@ -7,25 +7,23 @@ Out-of-the-box Vidi is a web-GIS application with a lot of basic functionality. 
 ## What is the goal for Vidi?
 The Vidi project aims to make it easy for organizations to use open source software for building geo-spatial applications.
 
-## Key features of Vidi
-- Ready to use front-end for GC2.
-- Handles non-tiled, tiled and vector layers.
-- Advanced query of data using geometry and buffers.
-- Drawing tools. Add measurements, styles and labels.
-- Scaled PDF print based on Mustache template.
-- Vector layers can be filtered. An arbitrary number of filter expressions can be applied. 
-- Table view of vector layers. See the attributes and link to the geometry on the map.
+## Vidi enables you to 
+- Display GC2 layers as either non-tiled, tiled or vector.
+- Query data using geometry and buffers.
+- Add drawings with measurements, styles and labels.
+- Print scaled PDF maps based on Mustache templates.
+- Filter vector layers. An arbitrary number of filter expressions can be applied. 
+- View table of vector layers. See the attributes and link to the geometry on the map.
 - Customize how the looks by adding your own Mustache templates.
-- Vidi is a Progressive Web App (PWA).
-    - Vidi starts without network. And always starts quick.
-    - Vector layers are cached, so they can be used without network.
-    - A change in source code will generated a new version hash, which will trigger the Service Workers to re-install the application.
-    - Base layers can be partial caches in browser for use without network.
-    - Editor. Both tile and vector layers can be edited. Edits can be done without network.
-- Side-by-side base layers. Swipe between two base layers.
-- Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings. You can share a project by sharing a URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.  
-- Kepler.gl module. Select layers in Vidi and start Kepler.gl with them. Kepler.gl is embedded in Vidi.
-- Extension mechanism. Write your own modules 1)
+- Use side-by-side swipe base layers. Swipe between two base layers.
+- Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings.  
+- Select layers in Vidi and start Kepler.gl with them. Kepler.gl is embedded in Vidi.
+- Write your own modules with an extension mechanism. 1)
+- Use Vidi as a Progressive Web App (PWA).
+    - Start Vidi without network.
+    - Caches vector layers in browser, so they can be used without network.
+    - Partial caches tiled baselayers in browser for use without network.
+    - Edits data without network. Transactions are queue and submitted when online again.
 
 1) Vidi is written in Node.js and uses Browserify for the front-end. I.e. that both front- and back-end extensions are written in javascript with CommonJS Modules, which means that you need a minimum of skill sets to expand and customize Vidi.
 
