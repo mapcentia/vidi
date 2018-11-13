@@ -380,35 +380,6 @@ module.exports = {
 
         queueStatistsics.setLastStatistics(false);
 
-
-        /**
-         * There can be noncompleted requests to service worker
-         
-        backboneEvents.get().on(`ready:serviceWorker`, () => {
-            if (serviceWorkerMessageQueue.length > 0) {
-                let promises = [];
-                serviceWorkerMessageQueue.map(request => {
-                    promises.push(new Promise((localResolve, localReject) => {
-                        let messageChannel = new MessageChannel();
-                        messageChannel.port1.onmessage = (event) => {
-                            if (event.data.error) {
-                                localReject(event.data.error);
-                            } else {
-                                localResolve(event.data);
-                            }
-                        };
-
-                        navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
-                    }));
-                });
-
-                Promise.all(promises).then(() => {
-                    console.log(`### pending requests to service worker were delievered`);
-                });
-            }
-        });
-        */
-
         /**
          * Opacity settings needs to be applied when layer is loaded. As layer loading takes some
          * time, the application of opacity setting has to be posponed as well. The setLayerOpacityRequests
@@ -1536,7 +1507,6 @@ module.exports = {
 
                     // If data has not been loaded yet, then load it
                     if ($(`#${tableId}`).children().length === 0) {
-                        console.log(`### Table for ${activeOpenedTable} appears to be empty, loading data`);
                         tables[activeOpenedTable].loadDataInTable(true);
                     }
 
@@ -1723,9 +1693,6 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-
-        console.log(`### apply state`, newState);
-
         // Setting vector filters
         if (newState !== false && `vectorFilters` in newState) {
             for (let key in newState.vectorFilters) {

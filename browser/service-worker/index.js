@@ -8,7 +8,7 @@ const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
 const LOG_FETCH_EVENTS = false;
-const LOG_OFFLINE_MODE_EVENTS = true;
+const LOG_OFFLINE_MODE_EVENTS = false;
 
 /**
  * Browser detection
