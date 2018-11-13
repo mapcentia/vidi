@@ -17,7 +17,7 @@ const MODULE_NAME = `layerTree`;
 
 const SYSTEM_FIELD_PREFIX = `gc2_`;
 
-const SQL_QUERY_LIMIT = 500;
+const SQL_QUERY_LIMIT = 2000;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
