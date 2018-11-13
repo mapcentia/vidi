@@ -35,6 +35,9 @@ class OfflineModeControlsManager {
     // Keeping the offline mode control state for layes (user-defined)
     offlineModeValues = {};
 
+    // Remembering what layers have an only bbox area cached
+    vectorLayersCachedWithingTheBBox = [];
+
     // Global application offline mode
     _globalApplicationOfflineMode = false;
 
@@ -46,13 +49,36 @@ class OfflineModeControlsManager {
         meta = metaObject;
     }
 
+    /**
+     * Resets the controls manager
+     * 
+     * @returns {Promise}
+     */
+    reset() {
+        return new Promise((resolve, reject) => {
+            this.cachedLayers = [];
+            this.offlineModeValues = {};
+            this.vectorLayersCachedWithingTheBBox = [];
+            resolve();
+        });
+    }
+
     getOfflineModeSettings() {
         return this.offlineModeValues;
     }
 
+    /**
+     * Sets cached layers
+     * 
+     * @returns {Promise}
+     */
     setCachedLayers(cachedLayers) {
         return new Promise((resolve, reject) => {
             this.cachedLayers = cachedLayers;
+            this.cachedLayers.map(cachedLayer => {
+                this.offlineModeValues[cachedLayer.layerKey] = cachedLayer.offlineMode;
+            });
+
             resolve();
         });
     }
@@ -194,9 +220,14 @@ class OfflineModeControlsManager {
                             let isVectorLayer = this.isVectorLayer(layerKey);                           
                             if (isVectorLayer) {
                                 let isAlreadyCached = false;
+                                let cachedWithinTheBBox = false;
                                 this.cachedLayers.map(cachedLayer => {
                                     if (cachedLayer.layerKey === layerKey) {
                                         isAlreadyCached = true;
+                                        if (cachedLayer.bbox) {
+                                            cachedWithinTheBBox = true;
+                                        }
+
                                         return false;
                                     }
                                 });
@@ -210,7 +241,11 @@ class OfflineModeControlsManager {
                                         throw new Error(`Invalid offline mode for ${requestedLayerKey}`);
                                     }
                                 }
-                                
+
+                                if (!cachedWithinTheBBox && this.vectorLayersCachedWithingTheBBox.indexOf(layerKey) !== -1) {
+                                    cachedWithinTheBBox = true;
+                                }
+
                                 if (this._globalApplicationOfflineMode) {
                                     if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
                                     this.setRecordDisabled(layerRecord, isVectorLayer);
@@ -218,10 +253,10 @@ class OfflineModeControlsManager {
                                     if (isAlreadyCached && isVectorLayer || isVectorLayer === false) {
                                         if (offlineMode) {
                                             if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, true);
-                                            this.setRecordOffline(layerRecord, isVectorLayer);
+                                            this.setRecordOffline(layerRecord, isVectorLayer, cachedWithinTheBBox);
                                         } else {
                                             if (this._apiBridgeInstance) this._apiBridgeInstance.setOfflineModeForLayer(layerKey, false);
-                                            this.setRecordOnline(layerRecord, isVectorLayer);
+                                            this.setRecordOnline(layerRecord, isVectorLayer, cachedWithinTheBBox);
                                         }
                                     }
                                 }
@@ -244,12 +279,22 @@ class OfflineModeControlsManager {
     /**
      * Modifies the control according to the online state 
      * 
-     * @param {HTMLElement} layerRecord   Layer record HTML element
-     * @param {Boolean}     isVectorLayer Specifies if the layer is the vector one
+     * @param {HTMLElement} layerRecord         Layer record HTML element
+     * @param {Boolean}     isVectorLayer       Specifies if the layer is the vector one
+     * @param {Boolean}     cachedWithinTheBBox Specifies if the layer is cached only within the specific bounding box
      * 
      * @returns {void}
      */
-    setRecordOnline(layerRecord, isVectorLayer = true) {
+    setRecordOnline(layerRecord, isVectorLayer = true, cachedWithinTheBBox = false) {
+        $(layerRecord).find(`.js-bbox`).prop(`disabled`, true);
+        if (cachedWithinTheBBox) {
+            $(layerRecord).find(`.js-bbox`).attr(`style`, ``);
+            $(layerRecord).find(`.js-bbox`).css(`background-color`, `white`);
+            $(layerRecord).find(`.js-bbox`).css(`color`, `goldenrod`);
+        } else {
+            $(layerRecord).find(`.js-bbox`).remove();
+        }
+
         $(layerRecord).find(`.js-set-online`).prop(`disabled`, true);
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, false);
         $(layerRecord).find(`.js-refresh`).prop(`disabled`, true);
@@ -264,19 +309,27 @@ class OfflineModeControlsManager {
             $(layerRecord).find(`.js-refresh`).hide();
         }
 
-        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`padding`, `4px`);
-        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`min-width`, `20px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh,.js-bbox`).css(`padding`, `4px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh,.js-bbox`).css(`min-width`, `20px`);
     }
 
     /**
      * Modifies the control according to the offline state 
      * 
-     * @param {HTMLElement} layerRecord   Layer record HTML element
-     * @param {Boolean}     isVectorLayer Specifies if the layer is the vector one
+     * @param {HTMLElement} layerRecord         Layer record HTML element
+     * @param {Boolean}     isVectorLayer       Specifies if the layer is the vector one
+     * @param {Boolean}     cachedWithinTheBBox Specifies if the layer is cached only within the specific bounding box
      * 
      * @returns {void}
      */
-    setRecordOffline(layerRecord, isVectorLayer = true) {
+    setRecordOffline(layerRecord, isVectorLayer = true, cachedWithinTheBBox = false) {
+        $(layerRecord).find(`.js-bbox`).prop(`disabled`, true);
+        if (cachedWithinTheBBox) {
+            $(layerRecord).find(`.js-bbox`).attr(`style`, ``);
+            $(layerRecord).find(`.js-bbox`).css(`background-color`, `white`);
+            $(layerRecord).find(`.js-bbox`).css(`color`, `goldenrod`);
+        }
+
         $(layerRecord).find(`.js-set-online`).prop(`disabled`, false);
         $(layerRecord).find(`.js-set-offline`).prop(`disabled`, true);
         $(layerRecord).find(`.js-refresh`).prop(`disabled`, false);
@@ -291,8 +344,8 @@ class OfflineModeControlsManager {
             $(layerRecord).find(`.js-refresh`).hide();
         }
 
-        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`padding`, `4px`);
-        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh`).css(`min-width`, `20px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh,.js-bbox`).css(`padding`, `4px`);
+        $(layerRecord).find(`.js-set-online,.js-set-offline,.js-refresh,.js-bbox`).css(`min-width`, `20px`);
     }
 
     /**
@@ -329,7 +382,7 @@ class OfflineModeControlsManager {
      * 
      * @returns {Promise}
      */
-    setControlState(layerKey, offlineMode) {
+    setControlState(layerKey, offlineMode, bbox = false) {
         if (layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid layer key was provided: ${layerKey}`);
         }
@@ -339,6 +392,10 @@ class OfflineModeControlsManager {
             this.offlineModeValues[`v:` + layerKey] = offlineMode;
         } else {
             this.offlineModeValues[layerKey] = offlineMode;
+        }
+
+        if (bbox && this.vectorLayersCachedWithingTheBBox.indexOf(layerKey) === -1) {
+            this.vectorLayersCachedWithingTheBBox.push(layerKey);
         }
 
         this.updateControls();

@@ -49,17 +49,25 @@ module.exports = {
     },
 
     /**
-     * @returns {Object}
+     * Returns current map parameters, if the map have not been
+     * initialized yet, then the "false" is returned
+     * 
+     * @returns {Object|Boolean}
      */
     getCurrentMapParameters: () => {
         let p = geocloud.transformPoint(cloud.get().getCenter().x, cloud.get().getCenter().y, "EPSG:900913", "EPSG:4326");
-        return {
-            layers: (layers.getLayers() ? layers.getLayers().split(",") : []),
-            baseLayer: cloud.get().getBaseLayerName(),
-            zoom: Math.round(cloud.get().getZoom()).toString(),
-            x: (Math.round(p.x * 10000) / 10000).toString(),
-            y: (Math.round(p.y * 10000) / 10000).toString()
-        };
+        let result = false;
+        if (cloud.get().getBaseLayerName()) {
+            result = {
+                layers: (layers.getLayers() ? layers.getLayers().split(",") : []),
+                baseLayer: cloud.get().getBaseLayerName(),
+                zoom: Math.round(cloud.get().getZoom()).toString(),
+                x: (Math.round(p.x * 10000) / 10000).toString(),
+                y: (Math.round(p.y * 10000) / 10000).toString()
+            };
+        }
+
+        return result;
     },
 
     applyMapParameters: (parameters) => {
@@ -78,23 +86,27 @@ module.exports = {
 
     /**
      * @private
-     * @returns {string}
+     * @returns {string|boolean}
      */
     anchor: (scheme) => {
         let mapParameters = _self.getCurrentMapParameters();
-        var layerStr;
-        if (layers.getLayers() && scheme) {
-            let newArr = [];
-            let arr = mapParameters.layers;
-            $.each(arr, function (i, v) {
-                newArr.push(scheme + "." + v.split(".")[1])
-            });
-            layerStr = newArr.reverse().join(",");
+        if (mapParameters) {
+            var layerStr;
+            if (layers.getLayers() && scheme) {
+                let newArr = [];
+                let arr = mapParameters.layers;
+                $.each(arr, function (i, v) {
+                    newArr.push(scheme + "." + v.split(".")[1])
+                });
+                layerStr = newArr.reverse().join(",");
+            } else {
+                layerStr = (mapParameters.layers) ? mapParameters.layers.reverse().join(",") : ""
+            }
+    
+            return `#${mapParameters.baseLayer}/${mapParameters.zoom}/${mapParameters.x}/${mapParameters.y}/${layerStr}`;
         } else {
-            layerStr = (mapParameters.layers) ? mapParameters.layers.reverse().join(",") : ""
+            return ``;
         }
-
-        return `#${mapParameters.baseLayer}/${mapParameters.zoom}/${mapParameters.x}/${mapParameters.y}/${layerStr}`;
     },
 
     /**

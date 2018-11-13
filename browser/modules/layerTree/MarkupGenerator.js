@@ -134,6 +134,9 @@ class MarkupGenerator {
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px">
                             <i class="fa fa-refresh"></i>
                         </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                            <i class="fa fa-exclamation"></i>
+                        </button>
                     </div>
                 </div>
 
