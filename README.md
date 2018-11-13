@@ -14,7 +14,7 @@ The Vidi project aims to make it easy for organizations to use open source softw
 - Print scaled PDF maps based on Mustache templates.
 - Filter vector layers. An arbitrary number of filter expressions can be applied. 
 - View table of vector layers. See the attributes and link to the geometry on the map.
-- Customize how the looks by adding your own Mustache templates.
+- Customize the looks by adding your own Mustache templates.
 - Use side-by-side swipe base layers. Swipe between two base layers.
 - Save, restore and share projects. A project comprises the extent of the map, which background map is visible and which layers are turned on, which filters are applied as well as your drawings.  
 - Select layers in Vidi and start Kepler.gl with them. Kepler.gl is embedded in Vidi.
