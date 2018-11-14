@@ -9,22 +9,7 @@
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var backboneEvents;
-
-/**
- * @type {*|exports|module.exports}
- */
-var meta;
-
-/**
- * @type {*|exports|module.exports}
- */
-var advancedInfo;
+var cloud, backboneEvents, meta, layerTree, advancedInfo;
 
 /**
  * @type {*|exports|module.exports}
@@ -75,6 +60,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        layerTree = o.layerTree;
         advancedInfo = o.advancedInfo;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
@@ -438,17 +424,20 @@ module.exports = {
         let cm = [];
         let out = [];
         $.each(features, function (i, feature) {
-            var fi = [];
+            var fields = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
-                    fi.push({
-                        title: name,
-                        value: feature.properties[name]
-                    });
-                    out.push([name, 0, name, false]);
+                    if (name.indexOf(layerTree.getSystemFieldPrefix()) !== 0 && name !== `_id` && name !== `_vidi_content`) {
+                        fields.push({
+                            title: name,
+                            value: feature.properties[name]
+                        });
+
+                        out.push([name, 0, name, false]);
+                    }
                 });
             } else {
-                $.each(sortObject(fieldConf), function (name, property) {
+                $.each(sortObject(fieldConf), (name, property) => {
                     if (property.value.querable) {
                         let value = feature.properties[property.key];
                         if (property.value.link) {
@@ -466,20 +455,22 @@ module.exports = {
                             </a>`;
                             }
                         }
-                        fi.push({title: property.value.alias || property.key, value});
+
+                        fields.push({title: property.value.alias || property.key, value});
                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                         if (feature.properties[property.key] !== undefined) {
                             out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                         }
                     }
                 });
+
                 out.sort(function (a, b) {
                     return a[1] - b[1];
                 });
             }
 
             feature.properties._vidi_content = {};
-            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
+            feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
                     cm.push({

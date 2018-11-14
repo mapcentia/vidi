@@ -163,8 +163,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
-        "Network status": "# Network status",
-        "Set all layers to be": "# Set all layers to be",
+        "Network status": "Network status",
+        "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",
         "Tile": "Raster",
         "Vector": "Vector",
@@ -188,10 +188,11 @@ module.exports = {
         "Yes": "Yes",
         "No": "No",
         "Add condition": "Add condition",
-        "Refresh cache for layer": "# Refresh cache for layer",
-        "Fetch layer data from server": "# Fetch layer data from server",
-        "Fetch layer data from cache": "# Fetch layer data from cache",
-        "Refresh existing cache for layer": "# Refresh existing cache for layer",
+        "Refresh cache for layer": "Refresh cache for layer",
+        "Fetch layer data from server": "Fetch data from server",
+        "Fetch layer data from cache": "Fetch data from cache",
+        "Refresh existing cache for layer": "Refresh existing cache for layer",
+        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
 
         // Base layers
@@ -201,8 +202,8 @@ module.exports = {
         "Not authorized to perform this action": "Not authorized to perform this action",
 
         //Editor
-        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
-        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+        "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
+        "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
 
         // OfflineMap
         "tiles failed to load": "# tiles failed to load",

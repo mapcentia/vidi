@@ -1,4 +1,3 @@
-
 /*
  * @author     Alexander Shumilov
  * @copyright  2013-2018 MapCentia ApS
@@ -129,10 +128,13 @@ class MarkupGenerator {
                             <i class="fa fa-signal"></i>
                         </button>
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px">
-                            <i class="fa fa-times"></i>
+                            <i class="fas fa-database"></i>
                         </button>
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px">
                             <i class="fa fa-refresh"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                            <i class="fa fa-exclamation"></i>
                         </button>
                     </div>
                 </div>
