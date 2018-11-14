@@ -159,8 +159,6 @@ class OfflineModeControlsManager {
                                 } else if (type === `tile`) {
                                     isVectorLayer = false;
                                 }
-                            } else {
-                                throw new Error(`Unable the find layer container for ${layerKey}`);
                             }                           
                         }
                     } else {
@@ -262,9 +260,6 @@ class OfflineModeControlsManager {
                                 }
                             }
                         }
-                    } else {
-                        console.error(`Unable the find layer container for ${layerKey}`);
-                        reject();
                     }
                 });
 

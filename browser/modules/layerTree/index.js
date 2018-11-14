@@ -1445,21 +1445,23 @@ module.exports = {
                 }
 
                 let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
-                noUiSlider.create(slider, {
-                    start: (initialSliderValue * 100),
-                    connect: `lower`,
-                    step: 10,
-                    range: {
-                        'min': 0,
-                        'max': 100
-                    }
-                });
+                if (slider) {
+                    noUiSlider.create(slider, {
+                        start: (initialSliderValue * 100),
+                        connect: `lower`,
+                        step: 10,
+                        range: {
+                            'min': 0,
+                            'max': 100
+                        }
+                    });
 
-                slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                    let sliderValue = (parseFloat(values[handle]) / 100);
-                    applyOpacityToLayer(sliderValue, layerKey);
-                    setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
-                });
+                    slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                        let sliderValue = (parseFloat(values[handle]) / 100);
+                        applyOpacityToLayer(sliderValue, layerKey);
+                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
+                    });
+                }
 
                 // Assuming that it not possible to set layer opacity right now
                 setLayerOpacityRequests.push({ layerKey, opacity: initialSliderValue });
