@@ -54,17 +54,25 @@ describe('Editor', () => {
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
             await helpers.sleep(1000);
+
+            await page.screenshot({ path: './test0.png' });
+
             await page.focus('#root_id');
             await page.keyboard.type('2000');
             await page.focus('#root_stringfield');
             await page.keyboard.type('333');
             await helpers.sleep(1000);
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
-            await helpers.sleep(4000);
+            await helpers.sleep(6000);
+
+            await page.screenshot({ path: './test1.png' });
 
             // Ensure that the feature was added
             await page.click(`#map`);
             await helpers.sleep(1000);
+
+            await page.screenshot({ path: './test2.png' });
+
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
             await helpers.sleep(4000);
 
@@ -269,7 +277,7 @@ describe('Editor', () => {
             dialog.accept();
         });
 
-        // Selecting point on map and open the attribute editing dialog
+        // Select point on map and open the attribute editing dialog
         await page.click(`#burger-btn`);
         await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
 
@@ -302,7 +310,6 @@ describe('Editor', () => {
         await helpers.sleep(4000);
 
         // Created feature is not rejected by server yet, so checking the failed indicator
-        
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.true;
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.false;
 

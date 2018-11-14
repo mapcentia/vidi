@@ -9,6 +9,10 @@ describe('Base layers', () => {
     it('should allow switching base layers', async () => {
         let page = await browser.newPage();
 
+        await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#stamenTonerLite/8/9.7971/55.7688/`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
+
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
         let geodkBrightWasRequested = false;
@@ -26,16 +30,12 @@ describe('Base layers', () => {
             interceptedRequest.continue();
         });
 
-        await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#stamenTonerLite/8/9.7971/55.7688/`);
-        await page.emulate(helpers.EMULATED_SCREEN);
-        page = await helpers.waitForPageToLoad(page);
-
-        await page.click(`#base-layers-btn`);
+        await page.click(`[href="#baselayer-content"]`);
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('[data-gc2-base-id="stamenTonerLite"]').find('input').trigger('click')`);
-        await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-base-id="geodk.bright"]').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('[data-gc2-base-id="stamenTonerLite"]').find('input').trigger('click')`);
         await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-base-id="osm"]').find('input').trigger('click')`);
         await helpers.sleep(2000);
