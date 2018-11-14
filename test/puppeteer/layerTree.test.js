@@ -7,12 +7,6 @@ const helpers = require("./../helpers");
 
 describe('Layer tree common', () => {
     /*
-    it(`should display table view for vector layers`, async () => {
-        @todo Table view check for both templates
-    });
-    */
-
-    /*
     it(`should react when application goes online or offline`, async () => {
         @todo Not supported by Puppeteer right now https://github.com/GoogleChrome/puppeteer/issues/2469
 
