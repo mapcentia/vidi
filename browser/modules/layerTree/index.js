@@ -411,7 +411,6 @@ module.exports = {
          */
         cloud.get().on(`moveend`, () => {
             let activeLayers = _self.getActiveLayers();
-
             for (let layerKey in stores) {
                 let layerIsEnabled = false;
                 for (let i = 0; i < activeLayers.length; i++) {
@@ -430,10 +429,13 @@ module.exports = {
                     let needToReload = true;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
                         let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in stores[layerKey] && stores[layerKey].buffered_bbox
-                            && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
-                            needToReload = false;
+                        if (`buffered_bbox` in stores[layerKey]) {
+                            if (stores[layerKey].buffered_bbox === false || stores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                                needToReload = false;
+                            }
                         }
+                    } else {
+                        needToReload = false;
                     }
 
                     if (needToReload) {
