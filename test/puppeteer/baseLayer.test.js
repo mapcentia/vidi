@@ -45,10 +45,14 @@ describe('Base layers', () => {
 
     it('should be able to show base layers side-by-side and restore the side-by-side mode after page reload', async () => {
         let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL}`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
 
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
 
+        /*
         await page.setRequestInterception(true);
         page.on('request', interceptedRequest => {
             if (interceptedRequest.url().indexOf(`tile.openstreetmap.org`) !== -1) {
@@ -59,10 +63,7 @@ describe('Base layers', () => {
 
             interceptedRequest.continue();
         });
-
-        await page.goto(`${helpers.PAGE_URL}`);
-        await page.emulate(helpers.EMULATED_SCREEN);
-        page = await helpers.waitForPageToLoad(page);
+        */
 
         await page.click(`#base-layers-btn`);
         await helpers.sleep(1000);
@@ -74,6 +75,7 @@ describe('Base layers', () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-base-id="osm"]').find('input').trigger('click')`);
         await helpers.sleep(2000);
+
         expect(osmWasRequested).to.be.true;
         expect(stamenTonerLiteWasRequested).to.be.true;
 
