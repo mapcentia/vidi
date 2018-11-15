@@ -190,6 +190,8 @@ const queryServiceWorker = (data) => {
             navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
         } else {
             console.error(`Unable to query service worker as it is not registered yet`);
+            console.trace(`queryServiceWorker() was called`);
+            reject();
         }
     });
 };
