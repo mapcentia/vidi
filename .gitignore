@@ -15,6 +15,9 @@ coverageQueue
 public/js/build
 public/css/build
 
+## Application version file
+public/version.json
+
 ## Directory-based project format:
 .idea/
 # if you remove the above rule, at least ignore the following:
