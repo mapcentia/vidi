@@ -101,18 +101,18 @@ class Queue {
                 } else {
                     if (typeof location !== 'undefined' && location && location.protocol.indexOf('https') === -1) {
                         if (onlineStatusCanBeRetrievedAtSomePoint) {
-                            console.warn(`Unable the determine the online status (the service worker is not registered)`);
+                            console.warn(`Unable to determine the online status (the service worker is not registered)`);
                             onlineStatusCanBeRetrievedAtSomePoint = false;
                         }
                     } else if (textStatus === `success`) {
                         attemptsToCheckOnlineStatus++;
                         if (attemptsToCheckOnlineStatus <= onlineStatusCheckLimit) {
-                            console.warn(`Unable the determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${onlineStatusCheckLimit}`);
+                            console.warn(`Unable to determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${onlineStatusCheckLimit}`);
                         } else if (attemptsToCheckOnlineStatus === (onlineStatusCheckLimit + 1)) {
                             console.warn(`Limit of connection check attempts exceeded, please reload page to activate service worker`);
                         }
                     } else {
-                        console.warn(`Unable the determine the online status (the service worker is starting up)`);
+                        console.warn(`Unable to determine the online status (the service worker is starting up)`);
                     }
                 }
             }).always(() => {

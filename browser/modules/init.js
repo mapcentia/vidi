@@ -302,8 +302,13 @@ module.exports = {
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
-                console.log('Service worker registration succeeded');
-                backboneEvents.get().trigger(`ready:serviceWorker`);
+                let checkInterval = setInterval(() => {
+                    if (navigator.serviceWorker.controller) {
+                        console.log('Service worker was registered and activated');
+                        backboneEvents.get().trigger(`ready:serviceWorker`);
+                        clearInterval(checkInterval);
+                    }
+                }, 1000);                    
             }).catch(error => {
                 console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });

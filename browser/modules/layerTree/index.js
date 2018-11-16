@@ -190,7 +190,6 @@ const queryServiceWorker = (data) => {
             navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
         } else {
             console.error(`Unable to query service worker as it is not registered yet`);
-            console.trace(`queryServiceWorker() was called`);
             reject();
         }
     });
@@ -348,7 +347,7 @@ module.exports = {
     _setupToggleOfflineModeControlsForLayers() {
         return new Promise((resolve, reject) => {
             $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
-            if (`serviceWorker` in navigator) {
+            if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     if (registrations.length === 1 && registrations[0].active !== null) {
                         queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
