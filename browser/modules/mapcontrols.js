@@ -106,6 +106,12 @@ module.exports = {
             defaultMapExtentControl = new DefaultMapExtentControl();
             cloud.get().map.addControl(defaultMapExtentControl);
         }
+
+        let historyControl = new L.HistoryControl({
+            orientation: 'vertical',
+            backTooltip: __(`Previous extent`),
+            forwardTooltip: __(`Next extent`)
+        }).addTo(cloud.get().map);
     },
 
     /**

@@ -204,6 +204,8 @@ module.exports = {
         "Map controls": "# Map controls",
         "Clear map": "# Clear map",
         "Default map extent": "# Default map extent",
+        "Previous extent": "# Previous extent",
+        "Next extent": "# Next extent",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
