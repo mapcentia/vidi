@@ -198,6 +198,13 @@ module.exports = {
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
 
+        // Map controls
+        "Map controls": "# Map controls",
+        "Clear map": "# Clear map",
+        "Default map extent": "# Default map extent",
+        "Previous extent": "# Previous extent",
+        "Next extent": "# Next extent",
+
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
 
