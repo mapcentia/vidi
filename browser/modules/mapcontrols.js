@@ -97,21 +97,58 @@ module.exports = {
 
             let container = `#floating-container-secondary`;
 
-            $(container).append($(ClearMapControlOptions.template).attr(`class`, buttonClass).attr(`style`, buttonStyle)[0].outerHTML);
+            $(container).append($(ClearMapControlOptions.template).attr(`class`, buttonClass).attr(`style`, `padding-top: 6px;`)[0].outerHTML);
             $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);
+
+            let historyControl = new L.HistoryControl().addTo(cloud.get().map);
+
+            $(container).append(`<a title="${__(`Previous extent`)}"
+                id="mapcontrols-history-backward"
+                class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
+                <span class="fa fa-chevron-left"></span>
+            </a>`);
+
+            $(container).append(`<a title="${__(`Next extent`)}"
+                id="mapcontrols-history-forward"
+                class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
+                <span class="fa fa-chevron-right"></span>
+            </a>`);
+
+            $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);
+
+            $(`#mapcontrols-history-backward`).click(() => {
+                historyControl.goBack();
+            });
+
+            $(`#mapcontrols-history-forward`).click(() => {
+                historyControl.goForward();
+            });
+
+            cloud.get().map.on('historybackenabled', (location) => {
+                $(`#mapcontrols-history-backward`).attr(`style`, `color: black; padding-top: 6px;`);
+            });
+            cloud.get().map.on('historybackdisabled', (location) => {
+                $(`#mapcontrols-history-backward`).attr(`style`, `color: lightgray; padding-top: 6px;`);
+            });
+            cloud.get().map.on('historyforwardenabled', (location) => {
+                $(`#mapcontrols-history-forward`).attr(`style`, `color: black; padding-top: 6px;`);
+            });
+            cloud.get().map.on('historyforwarddisabled', (location) => {
+                $(`#mapcontrols-history-forward`).attr(`style`, `color: lightgray; padding-top: 6px;`);
+            });
         } else {
             clearMapControl = new ClearMapControl();
             cloud.get().map.addControl(clearMapControl);
 
             defaultMapExtentControl = new DefaultMapExtentControl();
             cloud.get().map.addControl(defaultMapExtentControl);
-        }
 
-        let historyControl = new L.HistoryControl({
-            orientation: 'vertical',
-            backTooltip: __(`Previous extent`),
-            forwardTooltip: __(`Next extent`)
-        }).addTo(cloud.get().map);
+            let historyControl = new L.HistoryControl({
+                orientation: 'vertical',
+                backTooltip: __(`Previous extent`),
+                forwardTooltip: __(`Next extent`)
+            }).addTo(cloud.get().map);
+        }
     },
 
     /**
