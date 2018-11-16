@@ -210,7 +210,7 @@ module.exports = {
 
         // Calling mandatory init method
         [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`].map(name => {
+            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`].map(name => {
             modules[name].init();
         });
 
@@ -308,7 +308,7 @@ module.exports = {
                         backboneEvents.get().trigger(`ready:serviceWorker`);
                         clearInterval(checkInterval);
                     }
-                }, 1000);                    
+                }, 1000);
             }).catch(error => {
                 console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });

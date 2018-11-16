@@ -166,7 +166,7 @@ module.exports = {
                     container.style.height = `30px`;
                     container.title = __(`Measure distance`);
 
-                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
+                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none;">
                         <span class="fa fa-ruler"></span>
                     </a>`)[0];
 
@@ -190,7 +190,7 @@ module.exports = {
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
 
@@ -297,7 +297,7 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ruler"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ruler"></span>');
 
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
 
