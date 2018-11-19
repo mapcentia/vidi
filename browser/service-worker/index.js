@@ -157,9 +157,13 @@ class Keeper {
                 storedValue[key] = value;
                 localforage.setItem(this._cacheKey, storedValue).then(() => {
                     resolve();
-                }).catch(() => {
-                    throw new Error(`Unable to store value`);
+                }).catch(error => {
+                    console.error(`localforage failed to perform operation`, error);  
+                    reject();
                 });
+            }).catch(error => {
+                console.error(`localforage failed to perform operation`, error);  
+                reject();
             });
         });
     }
@@ -174,6 +178,9 @@ class Keeper {
                 } else {
                     resolve(false);
                 }
+            }).catch(error => {
+                console.error(`localforage failed to perform operation`, error);  
+                reject();  
             });
         });
     }
@@ -183,6 +190,9 @@ class Keeper {
             localforage.getItem(this._cacheKey).then(storedValue => {
                 if (!storedValue) storedValue = {};
                 resolve(storedValue);
+            }).catch(error => {
+                console.error(`localforage failed to perform operation`, error);  
+                reject();
             });
         });
     }
@@ -324,9 +334,15 @@ const normalizeTheURLForFetch = (event) => {
 
                             URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
                                 resolve(cleanedRequestURL);
-                            });
+                            }).catch(() => {
+                                reject();
+                            });;
                         }
+                    }).catch(() => {
+                        reject();
                     });
+                }).catch(() => {
+                    reject();
                 });
             }
         } else {
