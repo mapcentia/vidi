@@ -152,7 +152,9 @@ module.exports = {
             let rubberbandControl = L.Control.boxzoom({
                 position:'topright',
                 iconClasses: 'fa fa-object-ungroup',
-                title: __(`Click here then draw a square on the map, to zoom in to an area`)
+                title: __(`Click here then draw a square on the map, to zoom in to an area`),
+                enableShiftDrag: true,
+                keepOn: true
             }).addTo(cloud.get().map);
         }
     },
@@ -173,4 +175,3 @@ module.exports = {
         });
     },
 };
-

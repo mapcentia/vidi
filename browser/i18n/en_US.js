@@ -192,19 +192,19 @@ module.exports = {
         "Fetch layer data from server": "Fetch data from server",
         "Fetch layer data from cache": "Fetch data from cache",
         "Refresh existing cache for layer": "Refresh existing cache for layer",
-        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
+        "Dynamic layer is cached only within the last requested bounding box": "Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
 
         // Map controls
-        "Map controls": "# Map controls",
-        "Clear map": "# Clear map",
-        "Default map extent": "# Default map extent",
-        "Previous extent": "# Previous extent",
-        "Next extent": "# Next extent",
-        "Click here then draw a square on the map, to zoom in to an area": "# Click here then draw a square on the map, to zoom in to an area",
+        "Map controls": "Map controls",
+        "Clear map": "Clear map",
+        "Default map extent": "Default map extent",
+        "Previous extent": "Previous extent",
+        "Next extent": "Next extent",
+        "Click here then draw a square on the map, to zoom in to an area": "Click here then draw a square on the map, to zoom in to an area",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
@@ -214,7 +214,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
 
         // OfflineMap
-        "tiles failed to load": "# tiles failed to load",
+        "tiles failed to load": "tiles failed to load",
         "OfflineMap block description": "Here specific map areas can be stored to be used offline",
         "OfflineMap instructions": "Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
         "Extent": "Extent",
@@ -245,7 +245,7 @@ module.exports = {
         "Define": "Define",
         "Redefine": "Redefine",
         "Show on map": "Show on map",
-        "Store map area": "# Store map area",
+        "Store map area": "Store map area",
 
         //StateSnapshots
         "State snapshots": "State snapshots",
@@ -277,15 +277,15 @@ module.exports = {
         "No layers available": "No layers available",
 
         //Boreholes
-        "Plots": "# Plots",
-        "Available plots": "# Available plots",
-        "At least one y axis has to be provided": "# At least one y axis has to be provided",
-        "Data series": "# Data series",
-        "Borehole": "# Borehole",
-        "No plots were created yet": "# No plots were created yet",
-        "Please select the measurement": "# Please select the measurement",
+        "Plots": "Plots",
+        "Available plots": "Available plots",
+        "At least one y axis has to be provided": "At least one y axis has to be provided",
+        "Data series": "Data series",
+        "Borehole": "Borehole",
+        "No plots were created yet": "No plots were created yet",
+        "Please select the measurement": "Please select the measurement",
 
-        "Show legend on top the map": "Show legend on top the map"
+        "Show legend on top the map": "Show legend on top of the map"
 
     }
 };
