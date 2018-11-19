@@ -127,7 +127,7 @@ let urlsIgnoredForCaching = [{
     requested: 'bam.nr-data.net'
 }, {
     regExp: true,
-    requested: 'gc2.io/api'
+    requested: 'https://gc2.io/api'
 }, {
     regExp: true,
     requested: '/version.json'
