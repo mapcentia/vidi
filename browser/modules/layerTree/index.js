@@ -170,6 +170,8 @@ let extensions = false;
 
 let editor = false;
 
+let qstore = [];
+
 /**
  * Communicating with the service workied via MessageChannel interface
  * 
@@ -1473,6 +1475,10 @@ module.exports = {
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
+
+                $(layerContainer).find(`.js-toggle-search`).click(() => {
+                    $(layerContainer).find('.js-layer-settings-search').toggle();
+                });
             }
 
             // Filtering is available only for vector layers
@@ -1507,7 +1513,6 @@ module.exports = {
                     tables[activeOpenedTable].assignEventListeners();
 
                     $(`.js-table-view-container`).hide();
-                    $(`.js-table-view-container`).hide();
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
 
@@ -1531,6 +1536,28 @@ module.exports = {
                 } else {
                     _self.setupLayerAsTileOne(layerKey);
                 }
+            }
+
+            // For all types of layers
+            $(layerContainer).find('.js-layer-settings-search').append(
+                `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                    <div>
+                        <div class="form-group">
+                            <input type="test" class="js-search form-control" placeholder="Search">
+                        </div>
+                    </div>
+                 </div>`
+            );
+
+            let search = $(layerContainer).find('.js-layer-settings-search').find(`.js-search`).get(0);
+            console.log(search)
+            if (search) {
+                $(search).on(`change`, (e) => {
+                    console.log(e.target.value);
+                    console.log(layer);
+                    backboneEvents.get().trigger("sqlQuery:clear");
+                    sqlQuery.init(qstore, null, "3857", null, null, null, "1=1", [`${layer.f_table_schema}.${layer.f_table_name}`]);
+                });
             }
         }
     },
@@ -1592,6 +1619,18 @@ module.exports = {
 
                 $(container).find('.js-layer-settings-filters').hide(0);
             }
+            $(container).find(`.js-toggle-search`).hide();
+
+            // For both vector and tile
+            if (layerIsEnabled) {
+                $(container).find(`.js-toggle-search`).show();
+            } else {
+                $(container).find(`.js-toggle-search`).hide();
+                $(container).find('.js-layer-settings-search').hide(0);
+
+            }
+
+
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
         }
@@ -1818,5 +1857,10 @@ module.exports = {
 
     load: function (id) {
         stores[id].load();
-    }
+    },
+
+    resetSearch: function () {
+        sqlQuery.reset(qstore);
+    },
+
 };

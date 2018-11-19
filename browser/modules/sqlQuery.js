@@ -71,14 +71,16 @@ module.exports = {
     },
 
     /**
+     *
      * @param qstore
      * @param wkt
      * @param proj
      * @param callBack
      * @param num
-     * @param point
+     * @param infoClickPoint
+     * @param whereClouse
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClouse, includes) {
         var layers, count = {index: 0}, hit = false, distance,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -145,6 +147,10 @@ module.exports = {
 
             if (!metaDataKeys[value]) {
                 throw new Error(`metaDataKeys[${value}] is undefined`);
+            }
+
+            if (includes && includes.indexOf(value) === -1) {
+                return true;
             }
 
             var isEmpty = true;
@@ -346,37 +352,45 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
-            if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
-                sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
-                    "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
-                    "WHERE ST_Intersects(rast,the_geom) ";
+            if (!whereClouse) {
+                if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
+                    sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+                        "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
+                        "WHERE ST_Intersects(rast,the_geom) ";
 
-                qstore[index].custom_data = [
-                    value,
-                    cloud.get().map.getSize().x,
-                    cloud.get().map.getSize().y,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
-                    cloud.get().getExtent().left,
-                    cloud.get().getExtent().bottom,
-                    cloud.get().getExtent().right,
-                    cloud.get().getExtent().top
-                ];
+                    qstore[index].custom_data = [
+                        value,
+                        cloud.get().map.getSize().x,
+                        cloud.get().map.getSize().y,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
+                        cloud.get().getExtent().left,
+                        cloud.get().getExtent().bottom,
+                        cloud.get().getExtent().right,
+                        cloud.get().getExtent().top
+                    ];
 
-            } else {
-                if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
-                    }
-                    sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
+                    if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                    } else {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        qstore[index].custom_data = "";
                     }
-                    qstore[index].custom_data = "";
                 }
+            } else {
+                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClouse;
+                if (versioning) {
+                    sql = sql + " AND gc2_version_end_date IS NULL ";
+                }
+                qstore[index].custom_data = "";
             }
             sql = sql + " LIMIT " + (num || 500);
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
