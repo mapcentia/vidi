@@ -204,6 +204,7 @@ module.exports = {
         "Default map extent": "# Default map extent",
         "Previous extent": "# Previous extent",
         "Next extent": "# Next extent",
+        "Click here then draw a square on the map, to zoom in to an area": "# Click here then draw a square on the map, to zoom in to an area",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
