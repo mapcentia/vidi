@@ -303,59 +303,63 @@ const normalizeTheURLForFetch = (event) => {
                  * @returns {void}
                  */
                 const proceedWithRequestData = (method, mappedObject, cleanedRequestURL) => {
-                    URLToPostDataKeeper.get(cleanedRequestURL).then(record => {
-                        // Request is performed first time and has to be saved in cached vector layers keeper
-                        if (record) {
-                            resolve(cleanedRequestURL);
-                        } else {
-                            let decodedQuery = false;
-                            record = {};
-                            if (`q` in mappedObject && mappedObject.q) {
-                                if (method === `POST`) {
-                                    decodedQuery = decodeURI(atob(mappedObject.q));
-                                } else if (method === `GET`) {
-                                    decodedQuery = mappedObject.q;
+                    if (`q` in mappedObject) {
+                        URLToPostDataKeeper.get(cleanedRequestURL).then(record => {
+                            // Request is performed first time and has to be saved in cached vector layers keeper
+                            if (record) {
+                                resolve(cleanedRequestURL);
+                            } else {
+                                let decodedQuery = false;
+                                record = {};
+                                if (`q` in mappedObject && mappedObject.q) {
+                                    if (method === `POST`) {
+                                        decodedQuery = decodeURI(atob(mappedObject.q));
+                                    } else if (method === `GET`) {
+                                        decodedQuery = mappedObject.q;
+                                    } else {
+                                        console.error(`Unable to decode query`);
+                                        reject();
+                                    }
                                 } else {
-                                    console.error(`Unable to decode query`);
+                                    console.error(`Unable to extract the query from api/sql request`);
                                     reject();
                                 }
-                            } else {
-                                console.error(`Unable to extract the query from api/sql request`);
-                                reject();
-                            }
 
-                            let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
-                            if (matches.length === 1) {
-                                let tableName = matches[0].trim().split(`.`);
+                                let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
+                                if (matches.length === 1) {
+                                    let tableName = matches[0].trim().split(`.`);
 
-                                record.layerKey = (tableName[0] + `.` + tableName[1]);
-                                record.cleanedRequestURL = cleanedRequestURL;
-                                record.bbox = false;
-                                if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
-                                    if (bboxCoordinates.length === 5) {
-                                        record.bbox = {
-                                            north: parseFloat(bboxCoordinates[3]),
-                                            east: parseFloat(bboxCoordinates[2]),
-                                            south: parseFloat(bboxCoordinates[1]),
-                                            west: parseFloat(bboxCoordinates[0])
-                                        };
+                                    record.layerKey = (tableName[0] + `.` + tableName[1]);
+                                    record.cleanedRequestURL = cleanedRequestURL;
+                                    record.bbox = false;
+                                    if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
+                                        let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                        if (bboxCoordinates.length === 5) {
+                                            record.bbox = {
+                                                north: parseFloat(bboxCoordinates[3]),
+                                                east: parseFloat(bboxCoordinates[2]),
+                                                south: parseFloat(bboxCoordinates[1]),
+                                                west: parseFloat(bboxCoordinates[0])
+                                            };
+                                        }
                                     }
+                                } else {
+                                    console.error(`Unable to detect the layer key`);
+                                    reject();
                                 }
-                            } else {
-                                console.error(`Unable to detect the layer key`);
-                                reject();
+                                
+                                URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
+                                    resolve(cleanedRequestURL);
+                                }).catch(() => {
+                                    reject();
+                                });
                             }
-                            
-                            URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
-                                resolve(cleanedRequestURL);
-                            }).catch(() => {
-                                reject();
-                            });
-                        }
-                    }).catch(() => {
-                        reject();
-                    });
+                        }).catch(() => {
+                            reject();
+                        });
+                    } else {
+                        resolve(cleanedRequestURL);
+                    }
                 };
 
                 if (clonedRequest.method === `POST`) {
@@ -579,93 +583,51 @@ self.addEventListener('fetch', (event) => {
                          * 
                          * @returns {Promise} That resolves to the response or false if request should be really be made
                          */
-                        const getSuitableResponseForVectorLayerRequest = (cleanedRequestURL) => {
+                        const getSuitableResponseForVectorLayerRequest = (cleanedRequestURL, requestData) => {
 
-                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Getting suitable response for vector layer request`);
+                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Getting suitable response for vector layer request`, cleanedRequestURL);
 
                             return new Promise((resolve, reject) => {
-                                URLToPostDataKeeper.get(cleanedRequestURL).then(requestData => {
-                                    cacheSettingsKeeper.get(requestData.layerKey).then(cacheSettings => {
-                                        if (!requestData) throw new Error(`Unable to find the POST data for request ${cleanedRequestURL}`);
-                                        if (requestData.bbox) {
-                                            // Dynamic query
+                                cacheSettingsKeeper.get(requestData.layerKey).then(cacheSettings => {
+                                    if (!requestData) throw new Error(`Unable to find the POST data for request ${cleanedRequestURL}`);
+                                    if (requestData.bbox) {
+                                        // Dynamic query
 
-                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} request has bbox:`, requestData.bbox);
+                                        if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} request has bbox:`, requestData.bbox);
 
-                                            if (cacheSettings && cacheSettings.offlineMode) {
-                                                // Offline mode is enabled for layer
+                                        if (cacheSettings && cacheSettings.offlineMode) {
+                                            // Offline mode is enabled for layer
 
-                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} offline mode is enabled`);
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} offline mode is enabled`);
 
-                                                if (cacheSettings.bbox) {
+                                            if (cacheSettings.bbox) {
+                                                // Previous request to vector layer was dynamic
+
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was dynamic, bbox:`, cacheSettings.bbox);
+
+                                                let responseForPreviousQueryCanBeUsed = false;
+                                                if (requestData.bbox.north === cacheSettings.bbox.north && requestData.bbox.east === cacheSettings.bbox.east &&
+                                                    requestData.bbox.south === cacheSettings.bbox.south && requestData.bbox.west === cacheSettings.bbox.west) {
+                                                    // Exactly the same bounding box
+                                                    responseForPreviousQueryCanBeUsed = true;
+                                                } else if (requestData.bbox.north <= cacheSettings.bbox.north && requestData.bbox.east <= cacheSettings.bbox.east &&
+                                                    requestData.bbox.south >= cacheSettings.bbox.south && requestData.bbox.west >= cacheSettings.bbox.west) {
+                                                    // Requested bounding box is inside of the already requested bounding box
+                                                    responseForPreviousQueryCanBeUsed = true;
+                                                }
+
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Response for previous request can be used`, responseForPreviousQueryCanBeUsed);
+
+                                                if (responseForPreviousQueryCanBeUsed) {
                                                     // Previous request to vector layer was dynamic
+                                                    caches.match(cacheSettings.cleanedRequestURL).then(response => {
 
-                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was dynamic, bbox:`, cacheSettings.bbox);
+                                                        if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request response`, response);
 
-                                                    let responseForPreviousQueryCanBeUsed = false;
-                                                    if (requestData.bbox.north === cacheSettings.bbox.north && requestData.bbox.east === cacheSettings.bbox.east &&
-                                                        requestData.bbox.south === cacheSettings.bbox.south && requestData.bbox.west === cacheSettings.bbox.west) {
-                                                        // Exactly the same bounding box
-                                                        responseForPreviousQueryCanBeUsed = true;
-                                                    } else if (requestData.bbox.north <= cacheSettings.bbox.north && requestData.bbox.east <= cacheSettings.bbox.east &&
-                                                        requestData.bbox.south >= cacheSettings.bbox.south && requestData.bbox.west >= cacheSettings.bbox.west) {
-                                                        // Requested bounding box is inside of the already requested bounding box
-                                                        responseForPreviousQueryCanBeUsed = true;
-                                                    }
-
-                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Response for previous request can be used`, responseForPreviousQueryCanBeUsed);
-
-                                                    if (responseForPreviousQueryCanBeUsed) {
-                                                        // Previous request to vector layer was dynamic
-                                                        caches.match(cacheSettings.cleanedRequestURL).then(response => {
-
-                                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request response`, response);
-
-                                                            resolve({ 
-                                                                response,
-                                                                requestData
-                                                            });
-                                                        });
-                                                    } else {
                                                         resolve({ 
-                                                            response: false,
+                                                            response,
                                                             requestData
                                                         });
-                                                    }
-                                                } else {
-                                                    // Previous request to vector layer was static
-
-                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was static`);
-
-                                                    resolve({ 
-                                                        response: false,
-                                                        requestData
-                                                    });
-                                                }                                   
-                                            } else {
-                                                // Offline mode is disabled for layer
-
-                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} offline mode is disabled`);
-
-                                                resolve({
-                                                    response: false,
-                                                    requestData
-                                                });
-                                            }
-                                        } else {
-                                            // Static query
-
-                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Static query`);
-
-                                            if (cacheSettings && cacheSettings.offlineMode) {
-                                                // Offline mode is enabled for layer
-
-                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is enabled for layer`);
-
-                                                if (cachedResponse) {
-                                                    resolve({ 
-                                                        response: cachedResponse,
-                                                        requestData
                                                     });
                                                 } else {
                                                     resolve({ 
@@ -674,75 +636,123 @@ self.addEventListener('fetch', (event) => {
                                                     });
                                                 }
                                             } else {
-                                                // Offline mode is disabled for layer
+                                                // Previous request to vector layer was static
 
-                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is disabled for layer`);
+                                                if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request to vector layer was static`);
 
                                                 resolve({ 
                                                     response: false,
                                                     requestData
                                                 });
-                                            }
-                                        }
-                                    }).catch(() => {
-                                        console.error(`Unable to get cache settings for ${requestData.layerKey}`);  
-                                        resolve({ 
-                                            response: false,
-                                            requestData
-                                        });
-                                    });
+                                            }                                   
+                                        } else {
+                                            // Offline mode is disabled for layer
 
-                                }).catch(error => {
-                                    console.error(`Unable to get POST data for ${cleanedRequestURL}`, error);  
-                                    reject();
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`${requestData.layerKey} offline mode is disabled`);
+
+                                            resolve({
+                                                response: false,
+                                                requestData
+                                            });
+                                        }
+                                    } else {
+                                        // Static query
+
+                                        if (LOG_OFFLINE_MODE_EVENTS) console.log(`Static query`);
+
+                                        if (cacheSettings && cacheSettings.offlineMode) {
+                                            // Offline mode is enabled for layer
+
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is enabled for layer`);
+
+                                            if (cachedResponse) {
+                                                resolve({ 
+                                                    response: cachedResponse,
+                                                    requestData
+                                                });
+                                            } else {
+                                                resolve({ 
+                                                    response: false,
+                                                    requestData
+                                                });
+                                            }
+                                        } else {
+                                            // Offline mode is disabled for layer
+
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is disabled for layer`);
+
+                                            resolve({ 
+                                                response: false,
+                                                requestData
+                                            });
+                                        }
+                                    }
+                                }).catch(() => {
+                                    console.error(`Unable to get cache settings for ${requestData.layerKey}`);  
+                                    resolve({ 
+                                        response: false,
+                                        requestData
+                                    });
                                 });
                             });
                         };
 
-                        return getSuitableResponseForVectorLayerRequest(cleanedRequestURL).then(result => {
+                        return URLToPostDataKeeper.get(cleanedRequestURL).then(requestData => {
+                            if (requestData && `layerKey` in requestData && requestData.layerKey) {
+                                // This is the vector layer request
+                                return getSuitableResponseForVectorLayerRequest(cleanedRequestURL, requestData).then(result => {
+                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`getSuitableResponseForVectorLayerRequest result:`, result);
 
-                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`getSuitableResponseForVectorLayerRequest result:`, result);
-
-                            if (result && result.response) {
-                                resolve(result.response);
-                            } else {
-                                return fetch(event.request).then(apiResponse => {
-                                    
-                                    if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed');
-                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Layer vector was requested, storing response in cache and updating the cache settings`);
-
-                                    if (result.requestData) {
-                                        return cacheSettingsKeeper.get(result.requestData.layerKey).then(data => {
-                                            if (!data) data = { offlineMode: false };
-
-                                            let newData = {};
-                                            newData.layerKey = result.requestData.layerKey;
-                                            newData.cleanedRequestURL = cleanedRequestURL;
-                                            newData.bbox = result.requestData.bbox;
-                                            newData.offlineMode = data.offlineMode;
-
-                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Storing cache settings`, newData);
-
-                                            // Storing the cache settings for vector layer
-                                            return cacheSettingsKeeper.set(result.requestData.layerKey, newData).then(() => {
-                                                // Caching the vector layer request
-                                                return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
-                                                    resolve(apiResponse);
-                                                }).catch(() => {
-                                                    throw new Error('Unable to put the response in cache');
-                                                });
-                                            });
-                                        });
+                                    if (result && result.response) {
+                                        resolve(result.response);
                                     } else {
-                                        throw new Error(`Unable to get the request POST data`);
+                                        return fetch(event.request).then(apiResponse => {
+                                            
+                                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request was performed');
+                                            if (LOG_OFFLINE_MODE_EVENTS) console.log(`Layer vector was requested, storing response in cache and updating the cache settings`);
+
+                                            if (result.requestData) {
+                                                return cacheSettingsKeeper.get(result.requestData.layerKey).then(data => {
+                                                    if (!data) data = { offlineMode: false };
+
+                                                    let newData = {};
+                                                    newData.layerKey = result.requestData.layerKey;
+                                                    newData.cleanedRequestURL = cleanedRequestURL;
+                                                    newData.bbox = result.requestData.bbox;
+                                                    newData.offlineMode = data.offlineMode;
+
+                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Storing cache settings`, newData);
+
+                                                    // Storing the cache settings for vector layer
+                                                    return cacheSettingsKeeper.set(result.requestData.layerKey, newData).then(() => {
+                                                        // Caching the vector layer request
+                                                        return cache.put(cleanedRequestURL, apiResponse.clone()).then(() => {
+                                                            resolve(apiResponse);
+                                                        }).catch(() => {
+                                                            throw new Error('Unable to put the response in cache');
+                                                        });
+                                                    });
+                                                });
+                                            } else {
+                                                throw new Error(`Unable to get the request POST data`);
+                                            }
+                                        }).catch(() => {
+
+                                            if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
+
+                                            resolve(cachedResponse);
+                                        });
                                     }
-                                }).catch(() => {
-
-                                    if (LOG_FETCH_EVENTS) console.log('Service worker: API request failed, using the cached response');
-
-                                    resolve(cachedResponse);
+                                });
+                            } else {
+                                // Regular API request
+                                return fetch(event.request).then(apiResponse => {
+                                    resolve(apiResponse);  
                                 });
                             }
+                        }).catch(error => {
+                            console.error(`Unable to get POST data for ${cleanedRequestURL}`, error);  
+                            reject();
                         });
                     } else {
                         // Regular API request, always trying to perform it
