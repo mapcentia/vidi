@@ -619,7 +619,7 @@ module.exports = {
 
                                 if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                                if (offlineModeSettings !== false) {
+                                if (offlineModeSettings !== false && `serviceWorker` in navigator) {
                                     if (navigator.serviceWorker.controller) {
                                         _self._applyOfflineModeSettings(offlineModeSettings).then(() => {
                                             resolve();
@@ -807,7 +807,7 @@ module.exports = {
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
         if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
-            whereClauses.push(`ST_Intersects(${layer.f_geometry_column}, ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
         }
 
         // Gathering all WHERE clauses

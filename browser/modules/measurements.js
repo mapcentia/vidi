@@ -160,13 +160,10 @@ module.exports = {
                     position: 'topright'
                 },
                 onAdd: function (map) {
-                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-                    container.style.backgroundColor = 'white';
-                    container.style.width = `30px`;
-                    container.style.height = `30px`;
+                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-measurements');
                     container.title = __(`Measure distance`);
 
-                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none;">
+                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none; background-color: white;">
                         <span class="fa fa-ruler"></span>
                     </a>`)[0];
 
@@ -180,6 +177,14 @@ module.exports = {
 
             measurementControlButton = new MeasurementControl();
             cloud.get().map.addControl(measurementControlButton);
+
+            setTimeout(() => {
+                $(`.leaflet-control`).each((index, item) => {
+                    if ($(item).html() === ``) {
+                        $(item).remove();
+                    }
+                });
+            }, 100);
         }
         cloud.get().map.addLayer(drawnItems);
     },
@@ -227,7 +232,12 @@ module.exports = {
                 }
             });
 
-            cloud.get().map.addControl(drawControl);
+            if ($(`.leaflet-control-measurements div`).length === 0) {
+                $(`.leaflet-control-measurements`).append(`<div class="appended-leaflet-control"></div>`)
+            }
+
+            $(`.leaflet-control-measurements div`).append(drawControl.onAdd(cloud.get().map));
+            $(`.leaflet-control-measurements .appended-leaflet-control`).show();
 
             let eventsToUnbind = [`created`, `drawstart`, `drawstop`, `editstart`, `editstop`, `deletestart`, `deletestop`, `deleted`, `created`, `edited`];
             eventsToUnbind.map(item => {
@@ -264,8 +274,6 @@ module.exports = {
                 } else if (type === 'polyline') {
                     distance = drawTools.getDistance(drawLayer);
                 }
-
-                console.log(`### area distance`, area, distance);
 
                 drawLayer._vidi_type = `measurements`;
                 drawLayer.feature = {
@@ -308,6 +316,8 @@ module.exports = {
             }
 
             if (drawControl) {
+                $(`.leaflet-control-measurements div`).empty();
+                $(`.leaflet-control-measurements .appended-leaflet-control`).hide();
                 cloud.get().map.removeControl(drawControl);
             }
 
