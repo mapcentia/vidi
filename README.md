@@ -1,7 +1,7 @@
-# What is MapCentia Vidi
+# What is Vidi?
 Vidi is a modern take on web GIS. It is the front-end for [GC2](https://github.com/mapcentia/geocloud2)
 
-GC2 is part of the [OSGeo Community Project GC2/Vidi](https://www.osgeo.org/projects/gc2-vidi/)
+Vidi is part of the [OSGeo Community Project GC2/Vidi](https://www.osgeo.org/projects/gc2-vidi/)
 
 <img title="GC2 is a OSGeo Community Project" src="https://github.com/OSGeo/osgeo/blob/master/incubation/community/OSGeo_community.png" alt="drawing" width="200"/>
 
