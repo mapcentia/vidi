@@ -17,7 +17,7 @@ const MODULE_NAME = `layerTree`;
 
 const SYSTEM_FIELD_PREFIX = `gc2_`;
 
-const SQL_QUERY_LIMIT = 500;
+const SQL_QUERY_LIMIT = 2000;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
@@ -427,8 +427,9 @@ module.exports = {
 
                     // Reload should always occur except times when current bbox is completely inside
                     // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
-                    let needToReload = true;
+                    let needToReload;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        needToReload = true
                         let currentMapBBox = cloud.get().map.getBounds();
                         if (`buffered_bbox` in stores[layerKey]) {
                             if (stores[layerKey].buffered_bbox === false || stores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {

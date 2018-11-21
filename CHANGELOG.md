@@ -4,8 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [Unreleased]
-- Specific vector layers can be cached in browser including applied filters. 
+## [2018.1] - 2018-19-11
+### Added
+- Specific vector layers can be set to offline. If offline the cached version of the vector layer is always used. Also if browser is reloaded.
+- Control to switch all vector layers on and off. See above.
+- Vector layers can now be set to two different load strategies: Static and Dynamic. The former is default and will load the entire layer at once. The latter will load only whats inside the view port (plus a buffer) and fetch new data when needed (when zoom/pan occurs). The load strategy is controlled by the GC2 `load_strategy` meta setting. Can be either `s` or `d`.  
+- New map controls: Reset zoom, set previous/next extent and box-zoom. The latter now has a button, before this could only be achieved by holding shift down and drag the zoom box. 
+- Opacity slider for all tile layers.
+
+### Fixed
+- Preset base layer in URL will not longer change to `undefined` when resizing browser during refresh.
+- System field with prefix `gc2_` is no longer displayed in Editor attribute form.
+- Stalling of print is fixed. 
 
 
 ## [2018.1.0.RC1] - 2018-10-9
@@ -41,5 +51,5 @@ and this project adheres to [CalVer](https://calver.org/).
 - Calculation of area on drawing module now works.
 
 ### Security
-- A lot of modules are updated.
+- A lot of modules where updated.
 

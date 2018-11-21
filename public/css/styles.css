@@ -586,7 +586,6 @@ body {
   border: none;
 }
 .navmenu {
-  width: 100%;
   height: 100%;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
   position: fixed;
@@ -623,7 +622,6 @@ body {
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 .slide-right {
-  right: -100%;
   position: fixed;
 }
 .slide-left {
@@ -1036,9 +1034,9 @@ h4 small {
   height: 100%;
 }
 #search-ribbon {
+  position: fixed;
   min-width: 100px;
   top: 0;
-  position: absolute;
   height: 48px;
   background-color: white;
   box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
