@@ -159,7 +159,8 @@
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
                                 <div id="place-search">
-                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')">
+                                        <i class="material-icons help-btn">help_outline</i></div>
                                     <div></div>
                                     <div class="places">
                                         <div class="btn-group">
@@ -171,7 +172,8 @@
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="info-content">
-                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
                                     <label>
@@ -195,23 +197,27 @@
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                                 <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="layers" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="base-layer-list"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="legend-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
                                 <div id="legend" class="legend"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="draw-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
                                     <label>
@@ -229,7 +235,8 @@
 
                                         <div class="row">
                                             <div class="col-lg-12">
-                                                <div style="margin: 15px 0 0 10px "><h4>{{{Settings for all new drawings}}}</h4>
+                                                <div style="margin: 15px 0 0 10px ">
+                                                    <h4>{{{Settings for all new drawings}}}</h4>
                                                 </div>
                                             </div>
                                         </div>
@@ -416,12 +423,14 @@
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="state-snapshots" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="print-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')"><i class="material-icons help-btn">help_outline</i></div>
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
 
                                 <div class="togglebutton">
@@ -432,7 +441,8 @@
                                 <div class="btn-toolbar bs-component" style="margin: 0;">
                                     <div class="btn-group">
                                         <button id="start-print-btn" class="btn btn-raised" style="width: 130px"
-                                                data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}" disabled><i class='fa fa-cog fa-lg'></i> {{Make PDF}}
+                                                data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}" disabled>
+                                            <i class='fa fa-cog fa-lg'></i> {{Make PDF}}
                                         </button>
                                     </div>
                                     <fieldset disabled id="get-print-fieldset">
@@ -445,8 +455,8 @@
                                                data-toggle="dropdown"><span class="caret"></span></a>
                                             <ul class="dropdown-menu">
                                                 <li><a href="javascript:void(0)" id="download-pdf">{{Download}}</a></li>
-                                                <li><a target="_blank" href="javascript:void(0)" id="open-html">{{Open
-                                                        HTML page}}</a>
+                                                <li>
+                                                    <a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a>
                                                 </li>
                                             </ul>
                                         </div>
@@ -529,7 +539,8 @@
             <div class="navbar navbar-default">
                 <div class="container-fluid">
                     <div class="navbar-header">
-                        <a class="navbar-brand" href="javascript:void(0)"><i class="material-icons brand-icon">fullscreen</i>{{brandName}}</a>
+                        <a class="navbar-brand" href="javascript:void(0)"><i class="material-icons brand-icon">fullscreen</i>{{brandName}}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -540,41 +551,50 @@
                     <ul class="" role="tablist" id="main-tabs">
                         <li role="presentation"><a href="#search-content" aria-controls="search-content"
                                                    role="tab" data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Search}}"
-                                                                                   class="material-icons">search</i><span class="module-title">{{Search}}</span></a></li>
+                                                                                   class="material-icons">search</i><span class="module-title">{{Search}}</span></a>
+                        </li>
 
                         <li role="presentation"><a href="#info-content" aria-controls="info-content" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Info}}"
-                                                                        class="material-icons">info</i><span class="module-title">{{Info}}</span></a></li>
+                                                                        class="material-icons">info</i><span class="module-title">{{Info}}</span></a>
+                        </li>
 
                         <li role="presentation"><a href="#layer-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Layers}}"
-                                                                        class="material-icons">layers</i><span class="module-title">{{Layers}}</span></a></li>
+                                                                        class="material-icons">layers</i><span class="module-title">{{Layers}}</span></a>
+                        </li>
 
                         <li role="presentation"><a href="#baselayer-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Baselayers}}"
-                                                                        class="material-icons">map</i><span class="module-title">{{Baselayers}}</span></a></li>
+                                                                        class="material-icons">map</i><span class="module-title">{{Baselayers}}</span></a>
+                        </li>
 
                         <li role="presentation"><a href="#legend-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Legend}}"
-                                                                        class="material-icons">format_color_text</i><span class="module-title">{{Legend}}</span></a></li>
+                                                                        class="material-icons">format_color_text</i><span class="module-title">{{Legend}}</span></a>
+                        </li>
 
                         <li role="presentation"><a href="#draw-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Draw}}"
-                                                                        class="material-icons">create</i><span class="module-title">{{Draw}}</a></li>
+                                                                        class="material-icons">create</i><span class="module-title">{{Draw}}
+                        </a></li>
 
                         <li role="presentation"><a href="#state-snapshots-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{State snapshots}}"
-                                                                        class="material-icons">camera</i><span class="module-title">{{State snapshots}}</a></li>
+                                                                        class="material-icons">camera</i><span class="module-title">{{State snapshots}}
+                        </a></li>
 
                         <li role="presentation"><a href="#print-content" aria-controls="" role="tab"
                                                    data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="{{Print}}"
-                                                                        class="material-icons">print</i><span class="module-title">{{Print}}</a></li>
+                                                                        class="material-icons">print</i><span class="module-title">{{Print}}
+                        </a></li>
                         <hr>
                     </ul>
                     <ul role="tablist">
                         <hr>
                         <li><a href="#" id="btn-reset"><i class="material-icons">replay</i>{{Reset}}</a></li>
-                        <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}
+                        </a></li>
                         <li>
                             <a id="session" href="#" data-toggle="modal" data-target="#login-modal">
                                 <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>
