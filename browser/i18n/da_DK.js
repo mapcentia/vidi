@@ -287,7 +287,6 @@ module.exports = {
         "Borehole": "Borehuller",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
-
         "Show legend on top the map": "Vis signaturen ovenpå kortet"
     }
 };
