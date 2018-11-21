@@ -20,9 +20,7 @@ let _self = false;
 let embedModeIsEnabled = false;
 
 const buttonsStyle = {
-    backgroundColor: `white`,
-    width: `30px`,
-    height: `30px`
+    
 };
 
 /**
@@ -42,7 +40,7 @@ let ClearMapControl = L.Control.extend({
     options: { position: 'topright' },
     onAdd: () => {
         let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-        container.style = buttonsStyle;
+        $(container).attr(`style`, `backgroundColor: white, width: 30px, height: 30px`);
         $(container).append(ClearMapControlOptions.template)[0].onclick = ClearMapControlOptions.onclick;
         return container;
     }
