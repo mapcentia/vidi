@@ -44,13 +44,13 @@ class SearchFieldComponent extends React.Component {
                 <button
                     className="btn btn-xs btn-primary"
                     onClick={this.onSearch.bind(this)}
-                    disabled={!this.state.searchTerm}
                     style={buttonStyle}>
                     <i className="material-icons">search</i>
                 </button>
                 <button
                     className="btn btn-xs btn-primary"
                     onClick={this.onClear.bind(this)}
+                    disabled={!this.state.searchTerm}
                     style={buttonStyle}>
                     <i className="material-icons">clear</i>
                 </button>
