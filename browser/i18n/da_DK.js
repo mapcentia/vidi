@@ -281,9 +281,10 @@ module.exports = {
 
         //Boreholes
         "Plots": "# Plots",
-        "Available plots": "# Available plots",
+        "Found plots": "# Found plots",
         "At least one y axis has to be provided": "# At least one y axis has to be provided",
         "Data series": "# Data series",
+        "Found data series": "# Found data series",
         "Borehole": "# Borehole",
         "No plots were created yet": "# No plots were created yet",
         "Please select the measurement": "# Please select the measurement",
