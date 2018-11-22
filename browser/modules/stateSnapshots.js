@@ -327,6 +327,7 @@ module.exports = {
                         </button>);
                     }
 
+                    // @todo Insert the configuration file
                     let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
 
                     let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
@@ -377,7 +378,7 @@ module.exports = {
                                 {importButton}
                             </div>
                             <div>
-                                <div className="input-group">
+                                <div className="input-group form-group">
                                     <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
                                     <input className="form-control" type="text" defaultValue={permaLink}/>
                                 </div>
@@ -441,7 +442,7 @@ module.exports = {
                     {overlay}
                     <div>
                         <div className="js-browser-owned">
-                            <div>
+                            <div class="form-group">
                                 <h4>
                                     {__(`Local snapshots`)} 
                                     <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
