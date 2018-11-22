@@ -99,7 +99,7 @@
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
     "prop-types": "^15.6.2",
-    "puppeteer": "^1.7.0",
+    "puppeteer": "1.8.0",
     "react": "^16.5.1",
     "react-addons": "^0.9.1-deprecated",
     "react-bootstrap": "^0.32.4",
