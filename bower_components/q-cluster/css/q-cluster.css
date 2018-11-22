@@ -1,0 +1,85 @@
+/* Source: clusters.scss */
+.q-marker-cluster {
+  background-color: white;
+  color: white;
+  background-clip: border-box;
+  text-align: center;
+  font-size: 9px;
+  font-family: Arial;
+  border-radius: 50%; }
+
+.q-marker-cluster.active-marker {
+  background-color: #ffde01;
+  border: 3px solid #ffde01; }
+
+.q-marker-cluster > div {
+  margin-left: 2px;
+  margin-top: 2px;
+  text-align: center;
+  border-radius: 50%;
+  background-color: #666; }
+
+.q-marker-cluster > div > span, .q-marker-cluster > div > div > span {
+  position: relative;
+  top: 0.1em; }
+
+.q-marker-cluster-single {
+  background-color: initial;
+  border-radius: 50%;
+  width: 20px !important;
+  height: 20px !important;
+  margin-left: -10px !important;
+  margin-top: -10px !important; }
+
+.q-marker-cluster-single > div {
+  width: 16px;
+  height: 16px; }
+
+.q-marker-cluster-single > div > div > span {
+  line-height: 16px; }
+
+.q-marker-cluster-small {
+  width: 34px !important;
+  height: 34px !important;
+  margin-left: -17px !important;
+  margin-top: -17px !important; }
+
+.q-marker-cluster-small > div {
+  width: 30px;
+  height: 30px; }
+
+.q-marker-cluster-small > div > span {
+  line-height: 30px; }
+
+.q-marker-cluster-medium {
+  width: 50px !important;
+  height: 50px !important;
+  margin-left: -25px !important;
+  margin-top: -25px !important; }
+
+.q-marker-cluster-medium > div {
+  width: 46px;
+  height: 46px;
+  border-radius: 50px; }
+
+.q-marker-cluster-medium > div > span {
+  line-height: 46px; }
+
+.q-marker-cluster-large {
+  border-radius: 66px;
+  width: 66px !important;
+  height: 66px !important;
+  margin-left: -33px !important;
+  margin-top: -33px !important; }
+
+.q-marker-cluster-large > div {
+  width: 62px;
+  height: 62px; }
+
+.q-marker-cluster-large > div > span {
+  line-height: 62px; }
+
+.clusterDonut {
+  position: absolute;
+  top: 0px;
+  left: 0px; }

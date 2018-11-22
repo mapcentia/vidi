@@ -181,7 +181,7 @@ module.exports = {
         "any": "enhver",
         "all": "alle",
         "Select": "Vælg",
-        "Opacity": "Opacitet",
+        "Opacity": "Gennemsigtighed",
         "Filters": "Filtre",
         "Disable": "Deaktiver",
         "Table view": "Tabel view",
@@ -194,28 +194,29 @@ module.exports = {
         "Fetch layer data from server": "Hent data fra server",
         "Fetch layer data from cache": "Hent data fra cache",
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
-        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
+        "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
 
         // Base layers
-        "Side-by-side mode": "Side-by-side tilstand",
+        "Side-by-side mode": "Dobbelt baggrundskort",
 
         // Map controls
-        "Map controls": "# Map controls",
-        "Clear map": "# Clear map",
-        "Default map extent": "# Default map extent",
-        "Previous extent": "# Previous extent",
-        "Next extent": "# Next extent",
+        "Map controls": "Kort knapper",
+        "Clear map": "Ryd kortet",
+        "Default map extent": "Går tilbage til start udsnittet",
+        "Previous extent": "Forrige udsnit",
+        "Next extent": "Næste udsnit",
+        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter et firkant på kortet for at zoome til et område område",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
-        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+        "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
 
         // OfflineMap
-        "tiles failed to load": "# tiles failed to load",
+        "tiles failed to load": "fliser mangler at indlæse",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
         "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
         "Extent": "kortområde",
@@ -227,7 +228,7 @@ module.exports = {
         "Delete map area?": "Slet kortområde?",
         "Refresh map area?": "Opdater kortområde?",
         "No map areas have been stored yet": "Ingen kortområder er gemt endnu",
-        "Saved tiles will be used in...": "# Saved tiles will be used in...",
+        "Saved tiles will be used in...": "Gemte fliser vil blive brugt i...",
         "Processing tiles": "Processerer kort-fliser ",
         "Please reload the page": "Genindlæs venligst siden",
         "Checking the cache status": "Tjekker cache status",
@@ -264,7 +265,7 @@ module.exports = {
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
 
         //Measurements
-        "Measure distance": "# Measure distance",
+        "Measure distance": "Mål afstand",
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
@@ -278,15 +279,15 @@ module.exports = {
         "Visible": "Synlige",
         "No layers available": "Ingen synlige lag",
 
-        //Boreholes
-        "Plots": "# Plots",
-        "Available plots": "# Available plots",
-        "At least one y axis has to be provided": "# At least one y axis has to be provided",
-        "Data series": "# Data series",
-        "Borehole": "# Borehole",
-        "No plots were created yet": "# No plots were created yet",
-        "Please select the measurement": "# Please select the measurement",
-
+        //WatsonC
+        "Plots": "Grafer",
+        "Uncategorized": "# Uncategorized",
+        "Available plots": "Tilgængelige grafer",
+        "At least one y axis has to be provided": "Der skal være mindst en y-akse",
+        "Data series": "Data serier",
+        "Borehole": "Borehuller",
+        "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
+        "Please select the measurement": "Vælg venligst målingen",
         "Show legend on top the map": "Vis signaturen ovenpå kortet"
     }
 };
