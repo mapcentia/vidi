@@ -1,6 +1,6 @@
 [submodule "extensions/keplergl"]
 	path = extensions/keplergl
-	url = https://github.com/sashuk/keplegl.git
+	url = https://github.com/sashuk/keplergl.git
 [submodule "extensions/watsonc"]
 	path = extensions/watsonc
 	url = https://github.com/sashuk/watsonc.git
