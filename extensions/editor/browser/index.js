@@ -270,7 +270,7 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column) {
+            if (key !== pkey && key !== f_geometry_column && key.indexOf(layerTree.getSystemFieldPrefix()) !== 0) {
                 let title = key;
                 if (fieldConf[key] !== undefined && fieldConf[key].alias) {
                     title = fieldConf[key].alias;
@@ -379,15 +379,6 @@ module.exports = {
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
-            /*
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-            */
-
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
                 editor = cloud.get().map.editTools.startPolygon();
@@ -481,7 +472,7 @@ module.exports = {
             addFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         addFeature();
                     }
@@ -506,7 +497,6 @@ module.exports = {
     edit: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = e;
         nonCommitedEditedFeature = {};
-
         const editFeature = () => {
             let React = require('react');
 
@@ -708,7 +698,7 @@ module.exports = {
             editFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (`id` in editedFeature && apiBridgeInstance.offlineModeIsEnforcedForLayer(editedFeature.id.replace(`v:`, ``))) {
                     if (confirm(confirmMessage)) {
                         editFeature();
                     }
@@ -796,7 +786,7 @@ module.exports = {
             deleteFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         deleteFeature();
                     }

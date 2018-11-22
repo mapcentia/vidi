@@ -163,6 +163,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Network status": "Network status",
+        "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",
         "Tile": "Raster",
         "Vector": "Vector",
@@ -177,6 +179,7 @@ module.exports = {
         "any": "any",
         "all": "all",
         "Select": "Select",
+        "Opacity": "Opacity",
         "Filters": "Filters",
         "Disable": "Disable",
         "Table view": "Table view",
@@ -185,19 +188,32 @@ module.exports = {
         "Yes": "Yes",
         "No": "No",
         "Add condition": "Add condition",
+        "Refresh cache for layer": "Refresh cache for layer",
+        "Fetch layer data from server": "Fetch data from server",
+        "Fetch layer data from cache": "Fetch data from cache",
+        "Refresh existing cache for layer": "Refresh existing cache for layer",
+        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
 
+        // Map controls
+        "Map controls": "# Map controls",
+        "Clear map": "# Clear map",
+        "Default map extent": "# Default map extent",
+        "Previous extent": "# Previous extent",
+        "Next extent": "# Next extent",
+
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
 
         //Editor
-        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
-        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+        "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
+        "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
 
         // OfflineMap
+        "tiles failed to load": "# tiles failed to load",
         "OfflineMap block description": "Here specific map areas can be stored to be used offline",
         "OfflineMap instructions": "Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
         "Extent": "Extent",

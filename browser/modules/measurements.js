@@ -11,6 +11,12 @@ const MODULE_NAME = `measurements`;
 const drawTools = require(`./drawTools`);
 
 /**
+ * Browser detection
+ */
+const { detect } = require('detect-browser');
+const browser = detect();
+
+/**
  * @type {*|exports|module.exports}
  */
 let cloud, state, serializeLayers, backboneEvents, utils;
@@ -160,7 +166,7 @@ module.exports = {
                     container.style.height = `30px`;
                     container.title = __(`Measure distance`);
 
-                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
+                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none;">
                         <span class="fa fa-ruler"></span>
                     </a>`)[0];
 
@@ -184,7 +190,7 @@ module.exports = {
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
 
@@ -259,6 +265,8 @@ module.exports = {
                     distance = drawTools.getDistance(drawLayer);
                 }
 
+                console.log(`### area distance`, area, distance);
+
                 drawLayer._vidi_type = `measurements`;
                 drawLayer.feature = {
                     properties: {
@@ -289,7 +297,7 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ruler"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ruler"></span>');
 
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
 
@@ -315,7 +323,26 @@ module.exports = {
     setStyle: (l, type) => {
         l.hideMeasurements();
 
-        l.showMeasurements({ showTotal: true });
+        l.showMeasurements({
+            showTotal: true,
+            formatArea: (areaInSquareMeters) => {
+                let result = Math.round(areaInSquareMeters);
+                let ha = (Math.round(areaInSquareMeters / 10000 * 100) / 100);
+                let km2 = (Math.round(areaInSquareMeters / 1000000 * 100) / 100);
+                if (areaInSquareMeters < 10000) {
+                    // Display square meters
+                    result = (Math.round(areaInSquareMeters) + ' m2');
+                } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
+                    // Display hectars
+                    result = (ha + ' ha');
+                } else if (areaInSquareMeters >= 1000000) {
+                    // Display square kilometers and hectars
+                    result = (km2 + ' km2 (' + ha + ' ha)');
+                }
+
+                return result;
+            }
+        });
 
         let defaultMeasurementsStyle = {
             dashArray: `none`,
@@ -333,7 +360,7 @@ module.exports = {
 
         l.setStyle(defaultMeasurementsStyle);
 
-        if (type === 'polyline') {
+        if (type === 'polyline' && browser && [`ie`, `edge`].indexOf(browser.name) === -1) {
             window.lag = l.showExtremities(defaultExtermitiesStyle.pattern, defaultExtermitiesStyle.size, defaultExtermitiesStyle.where);
             l._extremities = defaultExtermitiesStyle;
         }

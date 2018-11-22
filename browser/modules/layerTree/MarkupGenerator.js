@@ -1,4 +1,3 @@
-
 /*
  * @author     Alexander Shumilov
  * @copyright  2013-2018 MapCentia ApS
@@ -39,14 +38,23 @@ class MarkupGenerator {
     }
 
     getToggleOfflineModeSelectorEnabled() {
-        return (`<div class="togglebutton">
-                    <label>
-                        <input class="js-toggle-offline-mode" type="checkbox"> ${__('Force offline mode')}
-                        <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;"><i class="fa fa-ellipsis-h"></i> ${__('Pending')}</span>
-                        <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;"><i class="fa fa-signal"></i> Online</span>
-                        <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;"><i class="fa fa-times"></i> Offline</span>
-                    </label>
-                 </div>`);
+        return (`<div class="panel panel-default">
+            <div class="panel-body">
+                ${__('Network status')}
+                <span class="badge js-app-is-pending-badge" style="background-color: #C0C0C0;">
+                    <i class="fa fa-ellipsis-h"></i> ${__('Pending')}
+                </span>
+                <span class="badge js-app-is-online-badge hidden" style="background-color: #28a745;">
+                    <i class="fa fa-signal"></i> Online
+                </span>
+                <span class="badge js-app-is-offline-badge hidden" style="background-color: #dc3545;">
+                    <i class="fa fa-times"></i> Offline
+                </span>
+                <span class="js-set-all-layer-offline-mode-container">
+                    ${__('Set all layers to be')}: <a href="javascript:void(0);" class="js-set-all-layer-to-be-online">${__('Online')}</a> | <a href="javascript:void(0);" class="js-set-all-layer-to-be-offline">${__('Offline')}</a>
+                </span>
+            </div>
+        </div>`);
     }
 
     getToggleOfflineModeSelectorDisabled() {
@@ -71,10 +79,8 @@ class MarkupGenerator {
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
 
-        return (`<li
-            class="layer-item list-group-item"
-            data-gc2-layer-key="${layerKeyWithGeom}"
-            style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
+        return (`
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
                     <div class="checkbox" style="width: 34px;">
@@ -116,20 +122,38 @@ class MarkupGenerator {
                     </button>
                 </div>
 
-                <div style="display: inline-block;">
-                    ${addButton}
-                    <span data-toggle="tooltip" data-placement="left" title="${tooltip}"
-                        style="visibility: ${displayInfo}" class="info-label label label-primary" data-gc2-id="${layerKey}">Info</span>
+                <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
+                    <div class="btn-group" role="group">
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px">
+                            <i class="fa fa-signal"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px">
+                            <i class="fas fa-database"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px">
+                            <i class="fa fa-refresh"></i>
+                        </button>
+                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                            <i class="fa fa-exclamation"></i>
+                        </button>
+                    </div>
                 </div>
-                
+
                 <div style="display: inline-block;">
+                    <a href="javascript:void(0);" class="js-toggle-opacity">${__(`Opacity`)}</a>
                     <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
                 </div>
 
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+
+                <div style="float: right; padding-top: 10px; padding-right: 10px;">
+                    ${addButton}
+                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
+                </div>
             </div>
-            <div class="js-layer-settings"></div>
+            <div class="js-layer-settings-filters"></div>
+            <div class="js-layer-settings-opacity"></div>
         </li>`);
     }
 

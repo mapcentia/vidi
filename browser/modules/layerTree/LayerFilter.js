@@ -279,6 +279,8 @@ class LayerFilter extends React.Component {
             }
 
             let divStyle = { display: `inline-block`, paddingRight: `10px` };
+            let controlDivStyle = divStyle;
+            controlDivStyle.maxWidth = `160px`;
             filterControls.push(<div key={`column_` + index}>
                 <div className="form-group" style={divStyle}>
                     <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
@@ -287,7 +289,7 @@ class LayerFilter extends React.Component {
                 </div>
                 <div className="form-group" style={divStyle}>{fieldControl}</div>
                 <div className="form-group" style={divStyle}>{expressionControl}</div>
-                <div className="form-group" style={divStyle}>{control}</div>
+                <div className="form-group" style={controlDivStyle}>{control}</div>
                 <div style={divStyle}>{ruleValidityIndicator}</div>
             </div>);
         });

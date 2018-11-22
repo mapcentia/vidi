@@ -165,6 +165,8 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Network status": "Netværk status",
+        "Set all layers to be": "Sæt alle lag til",
         "Force offline mode": "Tving offline tilstand",
         "Tile": "Raster",
         "Vector": "Vektor",
@@ -179,6 +181,7 @@ module.exports = {
         "any": "enhver",
         "all": "alle",
         "Select": "Vælg",
+        "Opacity": "Opacitet",
         "Filters": "Filtre",
         "Disable": "Deaktiver",
         "Table view": "Tabel view",
@@ -187,10 +190,22 @@ module.exports = {
         "Yes": "Ja",
         "No": "Nej",
         "Add condition": "Tilføj betingelsebetingelse",
+        "Refresh cache for layer": "Genindlæs cache for lag",
+        "Fetch layer data from server": "Hent data fra server",
+        "Fetch layer data from cache": "Hent data fra cache",
+        "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
+        "Dynamic layer is cached only within the last requested bounding box": "# Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Anvend",
 
         // Base layers
         "Side-by-side mode": "Side-by-side tilstand",
+
+        // Map controls
+        "Map controls": "# Map controls",
+        "Clear map": "# Clear map",
+        "Default map extent": "# Default map extent",
+        "Previous extent": "# Previous extent",
+        "Next extent": "# Next extent",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
@@ -200,6 +215,7 @@ module.exports = {
         "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
 
         // OfflineMap
+        "tiles failed to load": "# tiles failed to load",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
         "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
         "Extent": "kortområde",

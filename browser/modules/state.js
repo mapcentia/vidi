@@ -14,52 +14,7 @@ const MODULE_NAME = `state`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var setting;
-
-/**
- * @type {*|exports|module.exports}
- */
-var baseLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var setBaseLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var switchLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var legend;
-
-/**
- * @type {*|exports|module.exports}
- */
-var print;
-
-/**
- * @type {*|exports|module.exports}
- */
-var draw;
-
-/**
- * @type {*|exports|module.exports}
- */
-var advancedInfo;
-
-/**
- * @type {*|exports|module.exports}
- */
-var meta;
+var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, advancedInfo, meta;
 
 /**
  * @type {*|exports|module.exports}
@@ -336,6 +291,13 @@ module.exports = {
                         },
                         scriptCharset: "utf-8",
                         success: function (response) {
+                            // Server replies have different structure
+                            if (`anchor` in response.data === false && `bounds` in response.data === false && `data` in response.data && response.data.data) {
+                                if (`anchor` in response.data.data && `bounds` in response.data.data) {
+                                    response.data = response.data.data;
+                                }
+                            }
+
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -582,10 +544,18 @@ module.exports = {
      * 
      * @return {Promise}
      */
-    resetState: () => {
+    resetState: (customModulesToReset = []) => {
         let appliedStatePromises = [];
-        for (let key in listened) {
-            appliedStatePromises.push(listened[key].applyState(false));
+        if (customModulesToReset.length > 0) {
+            for (let key in listened) {
+                if (customModulesToReset.indexOf(key) !== -1) {
+                    appliedStatePromises.push(listened[key].applyState(false));
+                }
+            }
+        } else {
+            for (let key in listened) {
+                appliedStatePromises.push(listened[key].applyState(false));
+            }
         }
 
         return Promise.all(appliedStatePromises).then(() => {
