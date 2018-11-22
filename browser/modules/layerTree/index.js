@@ -1340,7 +1340,7 @@ module.exports = {
             }
 
             let selectorLayerType = `tile`;
-            if (layerIsTheVectorOne) {
+            if (layerIsTheVectorOne && layerIsTheTileOne === false) {
                 selectorLayerType = `vector`;
             }
 
