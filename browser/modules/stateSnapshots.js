@@ -327,8 +327,13 @@ module.exports = {
                         </button>);
                     }
 
-                    // @todo Insert the configuration file
-                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
+                    let queryParameters = urlparser.uriObj.search(true);
+                    let configString = ``;
+                    if (`config` in queryParameters && queryParameters.config) {
+                        configString = `&config=${queryParameters.config}`;
+                    }
+
+                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}${configString}`;
 
                     let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
                     if (item.title) {
@@ -442,7 +447,7 @@ module.exports = {
                     {overlay}
                     <div>
                         <div className="js-browser-owned">
-                            <div class="form-group">
+                            <div className="form-group">
                                 <h4>
                                     {__(`Local snapshots`)} 
                                     <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
