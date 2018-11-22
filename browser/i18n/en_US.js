@@ -276,8 +276,9 @@ module.exports = {
         "Visible": "Visible",
         "No layers available": "No layers available",
 
-        //Boreholes
+        //WatsonC
         "Plots": "Plots",
+        "Uncategorized": "# Uncategorized",
         "Available plots": "Available plots",
         "At least one y axis has to be provided": "At least one y axis has to be provided",
         "Data series": "Data series",

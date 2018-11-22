@@ -279,8 +279,9 @@ module.exports = {
         "Visible": "Synlige",
         "No layers available": "Ingen synlige lag",
 
-        //Boreholes
+        //WatsonC
         "Plots": "Grafer",
+        "Uncategorized": "# Uncategorized",
         "Available plots": "Tilgængelige grafer",
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
