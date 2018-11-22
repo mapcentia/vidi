@@ -58,7 +58,7 @@ Open the vidi.env file with your preferred text editor and set the variables. Th
 
 ```bash
 # Public DNS of your GC2 server (if GC2 is running local you can use http://localhost:8080)
-GC2_HOST=https://hello.world
+GC2_HOST=http://localhost:8080
 
 # Wanted timezone
 TIMEZONE=CET
