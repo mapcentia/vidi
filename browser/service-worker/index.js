@@ -39,17 +39,6 @@ const localforage = require('localforage');
  */
 
 /**
- * Broadcasting service messages to clients, mostly used for debugging and validation
- */
-const sendMessageToClients = (data) => {
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-            client.postMessage({ msg: data });
-        });
-    });
-};
-
-/**
  * 
  */
 let ignoredExtensionsRegExps = [];
@@ -278,90 +267,130 @@ const normalizeTheURLForFetch = (event) => {
         let cleanedRequestURL = normalizeTheURL(URL);
         if (event && event.request.url.indexOf('/api/sql') !== -1) {
             let clonedRequest = event.request.clone();
-            if (browser.name === 'safari' || browser.name === 'ios') {
-                let rawResult = "";
-                let reader = clonedRequest.body.getReader();
-                reader.read().then(function processText({ done, value }) {
-                    if (done) {
-                        cleanedRequestURL += '/' + btoa(rawResult);
-                        resolve(cleanedRequestURL);
-                        return;
-                    }
-    
-                    rawResult += value;
-                    return reader.read().then(processText);
-                });
-            } else {
-                /**
-                 * Proceeds with requests after request data is extracted depending on the request type. The actual
-                 * function is not depending on the request type.
-                 * 
-                 * @param {String} method            Original request method
-                 * @param {Object} mappedObject      Contains extracted data from either the POST or GET parameters
-                 * @param {String} cleanedRequestURL Update request URL
-                 * 
-                 * @returns {void}
-                 */
-                const proceedWithRequestData = (method, mappedObject, cleanedRequestURL) => {
-                    if (`q` in mappedObject) {
-                        URLToPostDataKeeper.get(cleanedRequestURL).then(record => {
-                            // Request is performed first time and has to be saved in cached vector layers keeper
-                            if (record) {
-                                resolve(cleanedRequestURL);
-                            } else {
-                                let decodedQuery = false;
-                                record = {};
-                                if (`q` in mappedObject && mappedObject.q) {
-                                    if (method === `POST`) {
-                                        decodedQuery = decodeURI(atob(mappedObject.q));
-                                    } else if (method === `GET`) {
-                                        decodedQuery = mappedObject.q;
-                                    } else {
-                                        console.error(`Unable to decode query`);
-                                        reject();
-                                    }
+            
+            /**
+             * Proceeds with requests after request data is extracted depending on the request type. The actual
+             * function is not depending on the request type.
+             * 
+             * @param {String} method            Original request method
+             * @param {Object} mappedObject      Contains extracted data from either the POST or GET parameters
+             * @param {String} cleanedRequestURL Update request URL
+             * 
+             * @returns {void}
+             */
+            const proceedWithRequestData = (method, mappedObject, cleanedRequestURL) => {
+                if (`q` in mappedObject) {
+                    URLToPostDataKeeper.get(cleanedRequestURL).then(record => {
+                        // Request is performed first time and has to be saved in cached vector layers keeper
+                        if (record) {
+                            resolve(cleanedRequestURL);
+                        } else {
+                            let decodedQuery = false;
+
+                            record = {};
+                            if (`q` in mappedObject && mappedObject.q) {
+                                if (method === `POST`) {
+                                    let cleanedString = mappedObject.q.replace(/%3D/g, '');
+                                    let decodedString = atob(cleanedString);
+                                    decodedQuery = decodeURI(decodedString);
+                                } else if (method === `GET`) {
+                                    decodedQuery = mappedObject.q;
                                 } else {
-                                    console.error(`Unable to extract the query from api/sql request`);
+                                    console.error(`Unable to decode query`);
                                     reject();
                                 }
+                            } else {
+                                console.error(`Unable to extract the query from api/sql request`);
+                                reject();
+                            }
 
-                                let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
-                                if (matches.length === 1) {
-                                    let tableName = matches[0].trim().split(`.`);
+                            let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
+                            if (matches.length === 1) {
+                                let tableName = matches[0].trim().split(`.`);
 
-                                    record.layerKey = (tableName[0] + `.` + tableName[1]);
-                                    record.cleanedRequestURL = cleanedRequestURL;
-                                    record.bbox = false;
-                                    if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
-                                        let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
-                                        if (bboxCoordinates.length === 5) {
-                                            record.bbox = {
-                                                north: parseFloat(bboxCoordinates[3]),
-                                                east: parseFloat(bboxCoordinates[2]),
-                                                south: parseFloat(bboxCoordinates[1]),
-                                                west: parseFloat(bboxCoordinates[0])
-                                            };
+                                record.layerKey = (tableName[0] + `.` + tableName[1]);
+                                record.cleanedRequestURL = cleanedRequestURL;
+                                record.bbox = false;
+                                if (decodedQuery.indexOf(`ST_Intersects`) !== -1 && decodedQuery.indexOf(`ST_Transform`) && decodedQuery.indexOf(`ST_MakeEnvelope`)) {
+                                    let bboxCoordinates = decodeURIComponent(decodedQuery.substring((decodedQuery.indexOf(`(`, decodedQuery.indexOf(`ST_MakeEnvelope`)) + 1), decodedQuery.indexOf(`)`, decodedQuery.indexOf(`ST_MakeEnvelope`)))).split(`,`).map(a => a.trim());
+                                    if (bboxCoordinates.length === 5) {
+                                        record.bbox = {
+                                            north: parseFloat(bboxCoordinates[3]),
+                                            east: parseFloat(bboxCoordinates[2]),
+                                            south: parseFloat(bboxCoordinates[1]),
+                                            west: parseFloat(bboxCoordinates[0])
+                                        };
+                                    }
+                                }
+                            } else {
+                                console.error(`Unable to detect the layer key`);
+                                reject();
+                            }
+
+                            URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
+                                resolve(cleanedRequestURL);
+                            }).catch(() => {
+                                reject();
+                            });
+                        }
+                    }).catch(() => {
+                        reject();
+                    });
+                } else {
+                    resolve(cleanedRequestURL);
+                }
+            };
+            
+            if (browser.name === 'safari' || browser.name === 'ios') {
+                if (clonedRequest.method === `POST`) {
+                    let rawResult = ``;
+                    let data = false;
+                    let reader = clonedRequest.body.getReader();
+                    reader.read().then(function processText({ done, value }) {
+                        if (done) {
+                            const DecodeUInt8arr = (uint8array) => {
+                                return new TextDecoder("utf-8").decode(uint8array);
+                            };
+
+                            let mappedObject = {};
+                            let decodedData = DecodeUInt8arr(data);
+                            let splitDecodeData = decodedData.split(`&`);
+                            if (splitDecodeData.length > 0) {
+                                splitDecodeData.map(item => {
+                                    if (item.indexOf(`=`) !== -1) {
+                                        let splitParameter = item.split(`=`);
+                                        if (splitParameter.length === 2) {
+                                            mappedObject[splitParameter[0]] = splitParameter[1];
                                         }
                                     }
-                                } else {
-                                    console.error(`Unable to detect the layer key`);
-                                    reject();
-                                }
-                                
-                                URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
-                                    resolve(cleanedRequestURL);
-                                }).catch(() => {
-                                    reject();
                                 });
                             }
-                        }).catch(() => {
-                            reject();
-                        });
-                    } else {
-                        resolve(cleanedRequestURL);
-                    }
-                };
 
+                            cleanedRequestURL += '/' + btoa(rawResult);
+                            proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                            
+                            return;
+                        }
+        
+                        data = value;
+                        rawResult += value;
+
+                        return reader.read().then(processText);
+                    });
+                } else if (clonedRequest.method === `GET`) {
+                    let mappedObject = {};
+                    let parsedQuery = new uriJs(clonedRequest.url);
+                    let queryParameters = parsedQuery.search(true);
+                    if (`q` in queryParameters && queryParameters.q) {
+                        mappedObject.q = queryParameters.q;
+                    }
+
+                    proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                } else {
+                    console.error(`Invalid request type`);
+                    reject();
+                }
+            } else {
                 if (clonedRequest.method === `POST`) {
                     clonedRequest.formData().then(formdata => {
                         let mappedObject = {};
