@@ -1374,7 +1374,7 @@ module.exports = {
             });
 
             if (base64SubgroupName) {
-                $(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
+                $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
             } else {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
