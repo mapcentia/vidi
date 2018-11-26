@@ -17,7 +17,7 @@ const MODULE_NAME = `layerTree`;
 
 const SYSTEM_FIELD_PREFIX = `gc2_`;
 
-const SQL_QUERY_LIMIT = 500;
+const SQL_QUERY_LIMIT = 2000;
 
 const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
 
@@ -190,6 +190,7 @@ const queryServiceWorker = (data) => {
             navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
         } else {
             console.error(`Unable to query service worker as it is not registered yet`);
+            reject();
         }
     });
 };
@@ -346,7 +347,7 @@ module.exports = {
     _setupToggleOfflineModeControlsForLayers() {
         return new Promise((resolve, reject) => {
             $(`.js-toggle-layer-offline-mode-container`).find(`button`).prop(`disabled`, true);
-            if (`serviceWorker` in navigator) {
+            if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     if (registrations.length === 1 && registrations[0].active !== null) {
                         queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
@@ -411,7 +412,6 @@ module.exports = {
          */
         cloud.get().on(`moveend`, () => {
             let activeLayers = _self.getActiveLayers();
-
             for (let layerKey in stores) {
                 let layerIsEnabled = false;
                 for (let i = 0; i < activeLayers.length; i++) {
@@ -427,13 +427,17 @@ module.exports = {
 
                     // Reload should always occur except times when current bbox is completely inside
                     // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
-                    let needToReload = true;
+                    let needToReload;
                     if (parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                        needToReload = true
                         let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in stores[layerKey] && stores[layerKey].buffered_bbox
-                            && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
-                            needToReload = false;
+                        if (`buffered_bbox` in stores[layerKey]) {
+                            if (stores[layerKey].buffered_bbox === false || stores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                                needToReload = false;
+                            }
                         }
+                    } else {
+                        needToReload = false;
                     }
 
                     if (needToReload) {
@@ -615,7 +619,7 @@ module.exports = {
 
                                 if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                                if (offlineModeSettings !== false) {
+                                if (offlineModeSettings !== false && `serviceWorker` in navigator) {
                                     if (navigator.serviceWorker.controller) {
                                         _self._applyOfflineModeSettings(offlineModeSettings).then(() => {
                                             resolve();
@@ -803,7 +807,7 @@ module.exports = {
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
         if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
-            whereClauses.push(`ST_Intersects(${layer.f_geometry_column}, ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
         }
 
         // Gathering all WHERE clauses
@@ -1336,7 +1340,7 @@ module.exports = {
             }
 
             let selectorLayerType = `tile`;
-            if (layerIsTheVectorOne) {
+            if (layerIsTheVectorOne && layerIsTheTileOne === false) {
                 selectorLayerType = `vector`;
             }
 
@@ -1370,7 +1374,7 @@ module.exports = {
             });
 
             if (base64SubgroupName) {
-                $(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
+                $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
             } else {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }

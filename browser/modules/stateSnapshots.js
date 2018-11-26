@@ -327,7 +327,13 @@ module.exports = {
                         </button>);
                     }
 
-                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}`;
+                    let queryParameters = urlparser.uriObj.search(true);
+                    let configString = ``;
+                    if (`config` in queryParameters && queryParameters.config) {
+                        configString = `&config=${queryParameters.config}`;
+                    }
+
+                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}${configString}`;
 
                     let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
                     if (item.title) {
@@ -377,7 +383,7 @@ module.exports = {
                                 {importButton}
                             </div>
                             <div>
-                                <div className="input-group">
+                                <div className="input-group form-group">
                                     <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
                                     <input className="form-control" type="text" defaultValue={permaLink}/>
                                 </div>
@@ -441,7 +447,7 @@ module.exports = {
                     {overlay}
                     <div>
                         <div className="js-browser-owned">
-                            <div>
+                            <div className="form-group">
                                 <h4>
                                     {__(`Local snapshots`)} 
                                     <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>

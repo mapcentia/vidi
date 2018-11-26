@@ -1,0 +1,3 @@
+[submodule "extensions/keplergl"]
+	path = extensions/keplergl
+	url = https://github.com/sashuk/keplergl.git

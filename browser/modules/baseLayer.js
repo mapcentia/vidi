@@ -99,10 +99,12 @@ module.exports = module.exports = {
             backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
         });
 
-        _self.getSideBySideModeStatus().then(sideBySideModeStatus => {
-            if (sideBySideModeStatus && sideBySideModeStatus.length === 2) {
-                _self.toggleSideBySideControl(sideBySideModeStatus);
-            }
+        backboneEvents.get().once(`allDoneLoading:layers`, () => {
+            _self.getSideBySideModeStatus().then(sideBySideModeStatus => {
+                if (sideBySideModeStatus && sideBySideModeStatus.length === 2) {
+                    _self.toggleSideBySideControl(sideBySideModeStatus);
+                }
+            });
         });
 
         state.listen(MODULE_NAME, `side-by-side-mode-change`);
@@ -335,6 +337,9 @@ module.exports = module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+        console.log(`### apply state for base layer`, newState);
+
         if (newState === false) {
             let availableBaseLayers = _self.getAvailableBaseLayers();
             if (Array.isArray(availableBaseLayers) && availableBaseLayers.length > 0) {

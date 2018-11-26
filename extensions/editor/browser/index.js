@@ -288,6 +288,9 @@ module.exports = {
                         case `integer`:
                             properties[key].type = `integer`;
                             break;
+                        case `double precision`:
+                            properties[key].type = `number`;
+                            break;
                         case `date`:
                             properties[key].format = `date-time`;
                             break;
@@ -488,6 +491,8 @@ module.exports = {
     },
 
 
+    // @todo the initial value is not parsed as number
+
     /**
      * Change existing feature
      * @param e
@@ -584,11 +589,24 @@ module.exports = {
             delete eventFeatureCopy.properties._id;
 
             // Set NULL values to undefined, because NULL is a type
-            Object.keys(eventFeatureCopy.properties).map(function (key) {
+            Object.keys(eventFeatureCopy.properties).map(key => {
                 if (eventFeatureCopy.properties[key] === null) {
                     eventFeatureCopy.properties[key] = undefined;
                 }
             });
+
+            // Transform field values according to their types
+            Object.keys(fields).map(key => {
+                switch (fields[key].type) {
+                    case `double precision`:
+                        if (eventFeatureCopy.properties[key]) {
+                            eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
+                        }
+                    default:
+                        break;
+                }
+            });
+
 
             /**
              * Commit to GC2

@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
- * Title field for
+ * Title field
  */
 class TitleFieldComponent extends React.Component {
     constructor(props) {
@@ -26,9 +26,16 @@ class TitleFieldComponent extends React.Component {
         this.setState({ title: event.target.value });
     }
 
-    onSave(event) {
+    onSave() {
         this.props.onAdd(this.state.title);
         this.setState({ title: '' });
+    }
+
+    handleKeyPress(event) {
+        if (event.key === `Enter` && this.state.title) {
+            this.props.onAdd(this.state.title);
+            this.setState({ title: '' });
+        }
     }
 
     render() {
@@ -47,8 +54,22 @@ class TitleFieldComponent extends React.Component {
             </button>);
         }
 
-        return (<div className="input-group" style={{ width: '50%', display: 'inline-table', paddingLeft: '8px' }}>
-            <input value={this.state.title} type="text" className="form-control" placeholder={__("New title")} onChange={this.onChange.bind(this)}/>
+        let containerStyle = { width: '50%', display: 'inline-table', paddingLeft: '8px' };
+        if (`customStyle` in this.props && this.props.customStyle) {
+            for (let key in this.props.customStyle) {
+                containerStyle[key] = this.props.customStyle[key];
+            }
+        }
+
+        return (<div className="input-group" style={containerStyle}>
+            <input
+                id={(this.props.id ? this.props.id : ``)}
+                value={this.state.title}
+                type="text"
+                className="form-control"
+                placeholder={__("New title")}
+                onChange={this.onChange.bind(this)}
+                onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
                     className="btn btn-xs btn-primary"

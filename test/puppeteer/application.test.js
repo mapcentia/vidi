@@ -29,7 +29,8 @@ describe("Application", () => {
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
 
         // Click the reset button
         await page.click(`#btn-reset`);
@@ -42,9 +43,10 @@ describe("Application", () => {
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
 
-        expect(page.url()).to.equal(`https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
+        expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
     });
 
     it("should ignore invalid layer in URL", async () => {
