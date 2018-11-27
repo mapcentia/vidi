@@ -62,8 +62,6 @@ describe('Editor', () => {
             await page.click(`#map`);
             await helpers.sleep(1000);
 
-            await page.screenshot({ path: './test1.png' });
-
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
             await helpers.sleep(4000);
 

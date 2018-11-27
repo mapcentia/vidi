@@ -53,9 +53,9 @@ describe('Layer tree common', () => {
     });
     */
 
-    it(`should keep offline mode settings for layers after page reload`, async () => {
-        // @todo Unstable test case
+    // @todo Test the multiple layer type selector
 
+    it(`should keep offline mode settings for layers after page reload`, async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -63,12 +63,12 @@ describe('Layer tree common', () => {
 
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
-        await helpers.sleep(2000);
+        await helpers.sleep(4000);
 
         expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').is(':visible')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').is(':visible')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
@@ -90,8 +90,8 @@ describe('Layer tree common', () => {
 
         expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
-        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-online').is(':visible')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').is(':visible')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_line.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
@@ -232,7 +232,7 @@ describe('Layer tree common', () => {
 
     it('should load layers from page URL from same schema', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+        await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test,public.test_poly`);
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
@@ -252,7 +252,7 @@ describe('Layer tree common', () => {
 
     it('should load layers from page URL from different schemas', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
+        await page.goto(`${helpers.PAGE_URL_EMBEDDED}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
@@ -276,7 +276,8 @@ describe('Layer tree common', () => {
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
 
         await page.close();
     });
@@ -299,19 +300,19 @@ describe('Layer tree common', () => {
             }
         });
 
-        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-vector').trigger('click')`);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('[type="checkbox"]').trigger('click')`);
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('[type="checkbox"]').prop('checked')`)).to.be.true;
         expect(apiWasRequested).to.be.true;
         await helpers.sleep(2000);
 
         let tilesWereRequested = false;
         await page._client.on('Network.requestWillBeSent', event => {
-            if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test`) !== -1) {
+            if (event.request.url.indexOf(`wms?service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
                 tilesWereRequested = true;
             }
         });
 
-        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-type-selector-tile').trigger('click')`);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('[type="checkbox"]').trigger('click')`);
         await helpers.sleep(2000);
         expect(tilesWereRequested).to.be.true;
 
@@ -341,19 +342,19 @@ describe('Layer tree common', () => {
 
     it('should load tile layers', async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
-        page = await helpers.waitForPageToLoad(page);
-
-        await page.click(`#burger-btn`);
         await page._client.send('Network.enable');
 
         let tilesWereRequested = false;
         await page._client.on('Network.requestWillBeSent', event => {
-            if (event.request.url.indexOf(`mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly`) !== -1) {
+            if (event.request.url.indexOf(`wms?service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
                 tilesWereRequested = true;
             }
         });
 
+        await page.goto(helpers.PAGE_URL);
+        page = await helpers.waitForPageToLoad(page);
+
+        await page.click(`#burger-btn`);
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
         expect(tilesWereRequested).to.be.true;
 
@@ -369,7 +370,8 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Public group`);
 
         let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw');
         let box = await e.boundingBox();
@@ -382,13 +384,13 @@ describe('Layer tree common', () => {
         await page.mouse.click(1, 1);
         await helpers.sleep(1000);
 
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
-        await helpers.sleep(helpers.PAGE_LOAD_TIMEOUT);
-        await page.click(`#burger-btn`);
+        await page.reload();
+        page = await helpers.waitForPageToLoad(page);
         await helpers.sleep(1000);
 
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Public group`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Dynamic load test`);
 
         await page.close();
     });
