@@ -817,6 +817,7 @@ module.exports = {
             sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
         }
 
+        console.log(`### layerKey property`, layerKey, pointToLayer.hasOwnProperty('v:' + layerKey));
         stores['v:' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
@@ -945,7 +946,9 @@ module.exports = {
                     });
                 }
             },
-            pointToLayer: pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : null
+            pointToLayer: (pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : (feature, latlng) => {
+                return L.circleMarker(latlng);
+            })
         });
     },
 

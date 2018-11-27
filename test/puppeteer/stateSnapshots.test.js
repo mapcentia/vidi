@@ -18,7 +18,7 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
 
         // Sign in
         await page.evaluate(`$('.gc2-session-unlock').trigger('click')`);
@@ -34,7 +34,7 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
        
         // Check if user-owned state snapshots tab was shown
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(2);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(2);
     });
 
     it("should capture current state and save it as browser-owned", async () => {
@@ -49,20 +49,21 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
-        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
+        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
-        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
 
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
+        await helpers.sleep(2000);
 
         // Snapshot is displayed after the browser reload
-        await page.reload(helpers.PAGE_LOAD_TIMEOUT);
+        await page.reload();
         page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
@@ -70,8 +71,8 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
 
         // Check if browser-owned state snapshots were loaded
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
-        let numberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
+        let numberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
         expect(numberOfStateSnapshots > 0).to.be.true;
     });
 
@@ -87,7 +88,7 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
 
         // Sign in
         await page.evaluate(`$('.gc2-session-unlock').trigger('click')`);
@@ -102,15 +103,15 @@ describe("State snapshots", () => {
         await page.evaluate(`$('#login-modal').find('[data-dismiss="modal"]').first().trigger('click');`);
         await helpers.sleep(2000);
 
-        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);
+        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-user-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
         await page.type(`.js-user-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').eq(1).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').eq(1).find('button').first().trigger('click')`);
         await helpers.sleep(3000);
 
-        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);
+        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-user-owned').find('.panel-default').length`);
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
     });
 
@@ -126,15 +127,15 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
-        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
+        let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
 
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
-        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
+        let currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
 
         // Sign in
@@ -150,22 +151,22 @@ describe("State snapshots", () => {
         await page.evaluate(`$('#login-modal').find('[data-dismiss="modal"]').first().trigger('click');`);
         await helpers.sleep(2000);
 
-        initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').first().find('button').eq(3).trigger('click')`);
+        initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-user-owned').find('.panel-default').length`);
+        await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').first().find('button').eq(3).trigger('click')`);
         await helpers.sleep(2000);
-        currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-user-owned').find('.panel-default').length`);       
+        currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-user-owned').find('.panel-default').length`);       
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots - 1)).to.be.true;
 
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(4000);
-        initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').first().find('button').eq(2).trigger('click')`);
+        initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);
+        await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').first().find('button').eq(2).trigger('click')`);
         await helpers.sleep(4000);
 
-        currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('.panel-default').length`);       
+        currentNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('.panel-default').length`);       
         expect(initialNumberOfStateSnapshots === (currentNumberOfStateSnapshots + 1)).to.be.true;
     });
 
@@ -181,15 +182,15 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').length`)).to.equal(1);
+        expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(1);
 
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
-        let linkURL = await page.evaluate(`$('#state-snapshots-dialog-content').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
+        let linkURL = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
 
         let statePage = await browser.newPage();
         await statePage.setRequestInterception(true);
@@ -236,7 +237,7 @@ describe("State snapshots", () => {
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         // Reload page without dynamic layer turned on
@@ -251,7 +252,7 @@ describe("State snapshots", () => {
 
         // Applying first state snapshot
         await helpers.sleep(2000);
-        await newPage.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await newPage.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
 
         await helpers.sleep(6000);
 
@@ -286,7 +287,7 @@ describe("State snapshots", () => {
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         // Turn on another two layers
@@ -305,23 +306,23 @@ describe("State snapshots", () => {
         // Clicking the Add state snapshot button
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
         
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').length`)).to.equal(2);
+        expect(await page.evaluate(`$('#state-snapshots').find('.panel-default').length`)).to.equal(2);
 
         // Applying first state snapshot
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
 
         // Checking if the Apply button is disabled while state snapshot is being activated
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.true;
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.true;
 
         await helpers.sleep(4000);
 
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.false;
-        expect(await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.false;
 
         expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
@@ -331,7 +332,7 @@ describe("State snapshots", () => {
 
         // Applying second state snapshot
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(1).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(1).find('button').first().trigger('click')`);
         await helpers.sleep(4000);
         expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.false;
@@ -353,13 +354,13 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Open state snapshot manager
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Add snapshot
         await page.type(`.js-browser-owned input`, `Plain snapshot`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         // Change layer opacity 
@@ -372,25 +373,25 @@ describe("State snapshots", () => {
         await helpers.sleep(1000);
 
         // Open state snapshot manager
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Add snapshot
         await page.type(`.js-browser-owned input`, `Altered opacity snapshot`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         // Check if current opacity is 0.5
-        let layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        let layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`0.5`);
 
         // Applying first state snapshot
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         // Check if current opacity is 1 as it was initially
-        layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`1`);
     });
 });

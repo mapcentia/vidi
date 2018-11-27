@@ -26,9 +26,16 @@ class TitleFieldComponent extends React.Component {
         this.setState({ title: event.target.value });
     }
 
-    onSave(event) {
+    onSave() {
         this.props.onAdd(this.state.title);
         this.setState({ title: '' });
+    }
+
+    handleKeyPress(event) {
+        if (event.key === `Enter` && this.state.title) {
+            this.props.onAdd(this.state.title);
+            this.setState({ title: '' });
+        }
     }
 
     render() {
@@ -55,7 +62,14 @@ class TitleFieldComponent extends React.Component {
         }
 
         return (<div className="input-group" style={containerStyle}>
-            <input id={(this.props.id ? this.props.id : ``)} value={this.state.title} type="text" className="form-control" placeholder={__("New title")} onChange={this.onChange.bind(this)}/>
+            <input
+                id={(this.props.id ? this.props.id : ``)}
+                value={this.state.title}
+                type="text"
+                className="form-control"
+                placeholder={__("New title")}
+                onChange={this.onChange.bind(this)}
+                onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
                     className="btn btn-xs btn-primary"

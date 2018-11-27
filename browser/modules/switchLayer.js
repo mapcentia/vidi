@@ -79,7 +79,7 @@ module.exports = module.exports = {
      * 
      * @returns {Promise}
      */
-    init: function (name, enable, doNotLegend, forceTileReload, setupControls = true) {
+    init: function (name, enable, doNotLegend, forceTileReload, setupControls = true, failedBefore = false) {
         if (!name) {
             throw new Error(`Layer name is undefined`);
         }
@@ -204,6 +204,14 @@ module.exports = module.exports = {
 
                         _self.checkLayerControl(name, doNotLegend, setupControls);
                         resolve();
+                    } else if (failedBefore !== false) {
+                        if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
+                            console.error(`Failed to switch layer while attempting to get the vector data store for ${name} (probably it is not the vector layer)`);
+                        } else {
+                            console.error(`Unknown switch layer failure for ${name}`);
+                        }
+
+                        resolve();
                     } else {
                         meta.init(tileLayerId, true, true).then(layerMeta => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
@@ -216,7 +224,9 @@ module.exports = module.exports = {
                                     });
                                 }
 
-                                _self.init(name, true).then(() => {
+                                _self.init(name, true, false, false, true, {
+                                    reason: `NO_VECTOR_DATA_STORE`
+                                }).then(() => {
                                     resolve();
                                 });
                             });
