@@ -945,7 +945,9 @@ module.exports = {
                     });
                 }
             },
-            pointToLayer: pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : null
+            pointToLayer: pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : function (feature, latlng) {
+                return L.circleMarker(latlng);
+            }
         });
     },
 
