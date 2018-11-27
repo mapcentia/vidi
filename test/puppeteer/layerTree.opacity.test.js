@@ -24,7 +24,7 @@ describe('Layer tree opacity', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').is(':visible')`)).to.be.true;
-        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-toggle-opacity').is(':visible')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-toggle-opacity').is(':visible')`)).to.be.false;
 
         await page.close();
     });
@@ -40,13 +40,13 @@ describe('Layer tree opacity', () => {
         await helpers.sleep(2000);
 
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').trigger('click')`);
-        let layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        let layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`1`);
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').is(':visible')`)).to.be.true;
         await helpers.sleep(1000);
 
         await page.click('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider');
-        layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
+        layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`0.5`);
 
         await page.close();
@@ -80,9 +80,12 @@ describe('Layer tree opacity', () => {
         // Open and click the slider
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').trigger('click')`);
         await helpers.sleep(1000);
-        let sliderValue = await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider').slider('value')`);
-        let layerOpacity = await page.evaluate(`$('[src^="https://gc2.mapcentia.com/mapcache/aleksandrshumilov/tms/1.0.0/public.test_poly"]').parent().parent().css('opacity')`);
-        expect(sliderValue).to.equal(50);
+
+        await page.screenshot({ path: './test.png' });
+
+        let sliderValue = await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider .noUi-origin').attr('style')`);
+        let layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
+        expect(sliderValue).to.equal(`left: 50%;`);
         expect(layerOpacity).to.equal(`0.5`);
     });
 });
