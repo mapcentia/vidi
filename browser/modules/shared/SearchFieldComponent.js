@@ -27,6 +27,12 @@ class SearchFieldComponent extends React.Component {
         this.props.onSearch(this.state.searchTerm);
     }
 
+    handleKeyPress(event) {
+        if (event.key === `Enter` && this.state.searchTerm) {
+            this.props.onSearch(this.state.searchTerm);
+        }
+    }
+
     onClear() {
         this.setState({ searchTerm: `` });
         this.props.onSearch(``);
@@ -39,7 +45,13 @@ class SearchFieldComponent extends React.Component {
         };
 
         return (<div className="input-group" style={{ display: 'inline-table' }} key="aaa">
-            <input id={(this.props.id ? this.props.id : ``)} value={this.state.searchTerm} type="text" className="form-control" placeholder={__("Search")} onChange={this.onChange.bind(this)}/>
+            <input
+                id={(this.props.id ? this.props.id : ``)}
+                value={this.state.searchTerm}
+                type="text" className="form-control"
+                placeholder={__("Search")}
+                onChange={this.onChange.bind(this)}
+                onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
                     className="btn btn-xs btn-primary"

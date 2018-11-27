@@ -817,6 +817,7 @@ module.exports = {
             sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
         }
 
+        console.log(`### layerKey property`, layerKey, pointToLayer.hasOwnProperty('v:' + layerKey));
         stores['v:' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
@@ -945,9 +946,9 @@ module.exports = {
                     });
                 }
             },
-            pointToLayer: pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : function (feature, latlng) {
+            pointToLayer: (pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
-            }
+            })
         });
     },
 
@@ -1376,7 +1377,7 @@ module.exports = {
             });
 
             if (base64SubgroupName) {
-                $(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
+                $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
             } else {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
