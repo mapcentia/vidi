@@ -173,15 +173,6 @@ module.exports = {
      */
     startApp: function () {
 
-        // Load style sheet
-        //===================
-
-        $('<link/>').attr({
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: '/css/styles.css'
-        }).appendTo('head');
-
         // Add the tooltip div
         // ===================
 
