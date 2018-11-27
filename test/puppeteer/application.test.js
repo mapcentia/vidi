@@ -51,7 +51,7 @@ describe("Application", () => {
 
     it("should ignore invalid layer in URL", async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}test.polygon,public.test_poly_invalid_layer,v:public.test_line`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}test.polygon,public.test_poly_invalid_layer,v:public.test_line`);
         page = await helpers.waitForPageToLoad(page);
 
         // Accepting the dialog

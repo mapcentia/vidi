@@ -89,7 +89,7 @@ describe('Layer tree filters', () => {
 
         expect(numberOfFilteredItems).to.equal(4);
 
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);   
+        await page.click(`[href="#state-snapshots-content"]`);   
         await helpers.sleep(1000);
 
         // Create state snapshot
@@ -107,10 +107,10 @@ describe('Layer tree filters', () => {
         // Restore snapshot
         await page.evaluate(`$('#search-border').trigger('click')`);
         await helpers.sleep(500);
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);   
+        await page.click(`[href="#state-snapshots-content"]`);   
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
         expect(numberOfFilteredItems).to.equal(4);
 

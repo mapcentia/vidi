@@ -52,7 +52,6 @@ describe('Base layers', () => {
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
 
-        /*
         await page.setRequestInterception(true);
         page.on('request', interceptedRequest => {
             if (interceptedRequest.url().indexOf(`tile.openstreetmap.org`) !== -1) {
@@ -63,7 +62,6 @@ describe('Base layers', () => {
 
             interceptedRequest.continue();
         });
-        */
 
         await page.click(`#base-layers-btn`);
         await helpers.sleep(1000);
@@ -88,6 +86,7 @@ describe('Base layers', () => {
         // Reloading page
         await page.reload();
         page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
     });
