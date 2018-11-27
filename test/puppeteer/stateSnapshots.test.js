@@ -372,8 +372,6 @@ describe("State snapshots", () => {
         await page.click('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider');
         await helpers.sleep(1000);
 
-        
-
         // Open state snapshot manager
         await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
