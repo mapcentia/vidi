@@ -817,6 +817,7 @@ module.exports = {
             sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
         }
 
+        console.log(`### layerKey property`, layerKey, pointToLayer.hasOwnProperty('v:' + layerKey));
         stores['v:' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
