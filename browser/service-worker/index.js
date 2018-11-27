@@ -133,6 +133,16 @@ let urlsIgnoredForCaching = [{
     requested: 'geofyn.mapcentia.com/api'
 }];
 
+/**
+ * Broadcasting service messages to clients, mostly used for debugging and validation
+ */
+const sendMessageToClients = (data) => {
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({ msg: data });
+        });
+    });
+};
 
 /**
  * Storing key-value pairs in memory
@@ -653,6 +663,8 @@ self.addEventListener('fetch', (event) => {
 
                                                         if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request response`, response);
 
+                                                        sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
+
                                                         resolve({ 
                                                             response,
                                                             requestData
@@ -695,6 +707,8 @@ self.addEventListener('fetch', (event) => {
                                             if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is enabled for layer`);
 
                                             if (cachedResponse) {
+                                                sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
+
                                                 resolve({ 
                                                     response: cachedResponse,
                                                     requestData
