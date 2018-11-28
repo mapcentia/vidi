@@ -1573,10 +1573,8 @@ module.exports = {
             if (setupAsVector) {
                 $(container).find(`.js-toggle-opacity`).hide();
                 if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-filters`).show();
                     $(container).find(`.js-toggle-table-view`).show();
                 } else {
-                    $(container).find(`.js-toggle-filters`).hide();
                     $(container).find(`.js-toggle-table-view`).hide();
                     $(container).find('.js-layer-settings-filters').hide(0);
                 }
@@ -1592,7 +1590,6 @@ module.exports = {
 
                 $(container).find(`.js-toggle-filters`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
-
                 $(container).find('.js-layer-settings-filters').hide(0);
             }
         } else if (ignoreErrors === false) {

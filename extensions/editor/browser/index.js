@@ -53,6 +53,14 @@ const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
+const serviceWorkerCheck = () => {
+    if (('serviceWorker' in navigator) === false || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        const message = __(`The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)`);
+        console.warn(message);
+        alert(message);
+    }
+};
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -374,6 +382,8 @@ module.exports = {
         }
 
         const addFeature = () => {
+            serviceWorkerCheck();
+
             me.stopEdit();
             infoClick.deactivate();
   
@@ -503,6 +513,8 @@ module.exports = {
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
+            serviceWorkerCheck();
+
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -773,6 +785,8 @@ module.exports = {
             gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
 
         const deleteFeature = () => {
+            serviceWorkerCheck();
+
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
 

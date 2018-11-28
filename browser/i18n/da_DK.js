@@ -214,6 +214,7 @@ module.exports = {
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "# The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
@@ -288,6 +289,7 @@ module.exports = {
         "Borehole": "Borehuller",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
-        "Show legend on top the map": "Vis signaturen ovenpå kortet"
+        "Show legend on top the map": "Vis signaturen ovenpå kortet",
+        "Not all measurements in plot were loaded by this moment": "# Not all measurements in plot were loaded by this moment"
     }
 };
