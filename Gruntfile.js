@@ -7,8 +7,6 @@
 module.exports = function (grunt) {
     "use strict";
 
-    const posthtmlInlineAssets = require('posthtml-inline-assets');
-
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         env: {
