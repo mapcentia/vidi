@@ -195,8 +195,8 @@ module.exports = function (grunt) {
         uglify: {
             publish: {
                 options: {
-                    //sourceMap: true,
-                    //sourceMapIncludeSources: true,
+                    sourceMap: true,
+                    sourceMapIncludeSources: true,
                     compress: false
                 },
                 files: {
@@ -230,7 +230,6 @@ module.exports = function (grunt) {
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
-                        //'public/js/lib/raphael/raphael.min.js',
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
