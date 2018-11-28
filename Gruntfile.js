@@ -185,8 +185,8 @@ module.exports = function (grunt) {
         uglify: {
             publish: {
                 options: {
-                    sourceMap: true,
-                    sourceMapIncludeSources: true,
+                    //sourceMap: true,
+                    //sourceMapIncludeSources: true,
                     compress: false
                 },
                 files: {
@@ -302,6 +302,12 @@ module.exports = function (grunt) {
                     verbose: true,
                 }
             }
+        },
+
+        inline: {
+            dist: {
+                src: './public/index.html'
+            }
         }
     });
 
@@ -339,6 +345,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-bower-task');
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
+    grunt.loadNpmTasks('grunt-inline');
 
     grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
     grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
