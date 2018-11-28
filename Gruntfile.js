@@ -49,6 +49,16 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/css/build/all.min.css': [
+                        // Material Design fonts
+                        'public/fonts/fonts.css',
+                        'public/icons/material-icons.css',
+                        // jQuery UI
+                        'public/js/lib/jquery-ui/jquery-ui.min.css',
+                        // Font Awesome
+                        'public/css/font-awesome.min.css',
+                        'public/css/font-awesome.v520.solid.css',
+                        'public/css/font-awesome.v520.regular.css',
+                        'public/css/font-awesome.v520.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
