@@ -286,7 +286,7 @@ module.exports = {
         "Borehole": "Borehole",
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
-
-        "Show legend on top the map": "Show legend on top of the map"
+        "Show legend on top the map": "Show legend on top of the map",
+        "Not all measurements in plot were loaded by this moment": "# Not all measurements in plot were loaded by this moment"
     }
 };
