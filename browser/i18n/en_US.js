@@ -212,6 +212,7 @@ module.exports = {
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "# The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
