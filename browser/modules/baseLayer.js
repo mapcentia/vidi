@@ -6,6 +6,8 @@
 
 'use strict';
 
+import noUiSlider from 'nouislider';
+
 const MODULE_NAME = `baseLayer`;
 
 /**
@@ -28,6 +30,8 @@ let activeBaseLayer = false;
 let activeSideBySideLayer = false;
 
 let sideBySideEnabled = false;
+
+const SIDE_BY_SIDE_MODES = [`side-by-side`, `overlay`];
 
 /**
  *
@@ -268,6 +272,95 @@ module.exports = module.exports = {
             $("#base-layer-list").append(appendedCode).promise().then(() => {
                 if (sideBySideEnabled) {
                     disableInputs();
+
+/*
+
+*/
+
+/*
+                    const sideBySideModeControl = (`<div>
+                        <div style="display: flex;">
+                            <div>
+                                <h5>${__(`Display layers`)}</h5>
+                            </div>
+                            <div>
+                                <div class="togglebutton">
+                                    <label>
+                                        <input class="js-toggle-side-by-side-mode" type="checkbox">
+                                        <span class="toggle"></span> ${__(`Side by side`)}
+                                    </label>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="togglebutton">
+                                    <label>
+                                        <input class="js-toggle-side-by-side-mode" type="checkbox">
+                                        <span class="toggle"></span> ${__(`Overlap`)}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`);
+                    */
+
+                    // @todo Translations
+                    const sideBySideModeControl = (`<div>
+                        <div style="display: flex; padding-top: 20px;">
+                            <div>
+                                <h5>${__(`Display layers`)}:</h5>
+                            </div>
+                            <div style="padding-top: 8px;">
+                                <div class="radio radio-primary" style="float: left; width: 30px;">
+                                    <label class="baselayer-label">
+                                        <input type="radio" name="side-by-side-mode" value="${SIDE_BY_SIDE_MODES[0]}">
+                                        <span class="circle"></span>
+                                        <span class="check"></span> 
+                                    </label>
+                                </div>
+                                <div style="float: left;">${__(`Side by side`)}</div>
+                            </div>
+                            <div style="padding-top: 8px;">
+                                <div class="radio radio-primary" style="float: left; width: 30px;">
+                                    <label class="baselayer-label">
+                                        <input type="radio" name="side-by-side-mode" value="${SIDE_BY_SIDE_MODES[1]}">
+                                        <span class="circle"></span>
+                                        <span class="check"></span> 
+                                    </label>
+                                </div>
+                                <div style="float: left;">${__(`Overlap`)}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                                <div class="js-side-by-side-layer-opacity-slider slider shor slider-material-orange"></div>
+                            </div>
+                        </div>
+                   </div>`);
+
+                    $("#base-layer-list").append(sideBySideModeControl);
+
+                    let slider = $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).get(0);
+
+                    console.log(`### slider`, slider);
+                    if (slider) {
+                        noUiSlider.create(slider, {
+                            start: 70,
+                            connect: `lower`,
+                            step: 10,
+                            range: {
+                                'min': 0,
+                                'max': 100
+                            }
+                        });
+   
+                        /*
+                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                            let sliderValue = (parseFloat(values[handle]) / 100);
+                            applyOpacityToLayer(sliderValue, layerKey);
+                            setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
+                        });
+                        */
+                    }
                 }
 
                 $(`[name="baselayers"]`).off();
@@ -324,11 +417,9 @@ module.exports = module.exports = {
             if (!layer1Id || !layer2Id) {
                 throw new Error(`Unable to detect layer identifiers (${layer1Id}, ${layer2Id}`);
             } else {
-                state = {
-                    sideBySideMode: [layer1Id, layer2Id]
-                }
-            }           
-        } 
+                state = { sideBySideMode: [layer1Id, layer2Id] }
+            }
+        }
 
         return state;
     },
