@@ -1579,6 +1579,7 @@ module.exports = {
                     $(container).find('.js-layer-settings-filters').hide(0);
                 }
 
+                $(container).find(`.js-toggle-filters`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
                 if (layerIsEnabled) {
