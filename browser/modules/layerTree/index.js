@@ -1476,7 +1476,7 @@ module.exports = {
                 _self.setupLayerAsTileOne(layerKey);
 
                 // Opacity slider
-                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
                     <div class="js-opacity-slider slider shor slider-material-orange"></div>
                 </div>`);
 

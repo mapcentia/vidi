@@ -1153,8 +1153,6 @@ h4 small {
   margin-bottom: 6px;
 }
 .help-btn {
-  position: fixed;
-  top: 14px;
   color: rgba(0, 0, 0, 0.26);
   cursor: help;
 }
@@ -1182,6 +1180,17 @@ h4 small {
 .navbar .navbar-brand {
   padding-top: 10px !important;
   padding-bottom: 10px !important;
+}
+#module-container-body {
+  padding: 0 4px 4px 0;
+}
+.bootstrap-table .table:not(.table-condensed),
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
+.bootstrap-table .table:not(.table-condensed) > thead > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+  padding: 3px 6px !important;
 }
 @media (min-width: 769px) {
   .navbar .navbar-brand {
