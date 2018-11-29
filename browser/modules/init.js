@@ -18,6 +18,8 @@ require('snackbarjs');
 const semver = require('semver');
 require("bootstrap");
 
+const cookie = require('js-cookie');
+
 module.exports = {
 
     /**
@@ -36,6 +38,10 @@ module.exports = {
      */
     init: function () {
         var me = this, configFile, stop = false;
+
+        if (typeof urlVars.session === "string") {
+            cookie.set("connect.gc2", urlVars.session, {expires: 1});
+        }
 
         var loadConfig = function () {
             $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
