@@ -96,6 +96,7 @@ let urlparser = require('./../urlparser');
  * @type {*|exports|module.exports}
  */
 import OfflineModeControlsManager from './OfflineModeControlsManager';
+
 let offlineModeControlsManager = false;
 
 /**
@@ -171,6 +172,13 @@ let extensions = false;
 let editor = false;
 
 /**
+ *
+ * @type {showdown.Converter}
+ */
+const showdown = require('showdown');
+const converter = new showdown.Converter();
+
+/**
  * Communicating with the service workied via MessageChannel interface
  *
  * @returns {Promise}
@@ -236,7 +244,7 @@ module.exports = {
         }
 
         _self = this;
-        queueStatistsics = new QueueStatisticsWatcher({ switchLayer, offlineModeControlsManager, layerTree: _self });
+        queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self});
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self.statisticsHandler(statistics, forceLayerUpdate);
         });
@@ -311,7 +319,7 @@ module.exports = {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                resolve({ order, offlineModeSettings, opacitySettings });
+                resolve({order, offlineModeSettings, opacitySettings});
             });
         });
 
@@ -350,7 +358,7 @@ module.exports = {
             if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     if (registrations.length === 1 && registrations[0].active !== null) {
-                        queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+                        queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                             if (Array.isArray(response)) {
                                 offlineModeControlsManager.setCachedLayers(response).then(() => {
                                     offlineModeControlsManager.updateControls().then(() => {
@@ -483,7 +491,7 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({ order, offlineModeSettings, opacitySettings }) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, opacitySettings}) => {
 
                         try {
 
@@ -643,7 +651,7 @@ module.exports = {
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
                                 layersThatAreNotInMeta.map(item => {
-                                    fetchMetaRequests.push(meta.init(item ,true, true))
+                                    fetchMetaRequests.push(meta.init(item, true, true))
                                 });
 
                                 Promise.all(fetchMetaRequests).then(() => {
@@ -653,7 +661,7 @@ module.exports = {
                                 proceedWithBuilding();
                             }
 
-                        }catch(e) {
+                        } catch (e) {
                             console.log(e);
                         }
 
@@ -680,7 +688,7 @@ module.exports = {
      */
     _applyOfflineModeSettings: (settings) => {
         return new Promise((resolve, reject) => {
-            queryServiceWorker({ action: `getListOfCachedRequests` }).then(response => {
+            queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                 if (Array.isArray(response)) {
                     if (Object.keys(settings).length === 0) {
                         // Empty object means that all layers should have the offline mode to be turned off
@@ -688,7 +696,7 @@ module.exports = {
                         response.map(cachedRequest => {
                             promises.push(queryServiceWorker({
                                 action: `disableOfflineModeForLayer`,
-                                payload: { layerKey: cachedRequest.layerKey }
+                                payload: {layerKey: cachedRequest.layerKey}
                             }));
                         });
 
@@ -716,7 +724,7 @@ module.exports = {
 
                                         promises.push(queryServiceWorker({
                                             action: serviceWorkerAPIKey,
-                                            payload: { layerKey: cachedRequest.layerKey }
+                                            payload: {layerKey: cachedRequest.layerKey}
                                         }));
                                     }
                                 });
@@ -1132,7 +1140,7 @@ module.exports = {
                 _self.createLayerRecord(localItem.layer, forcedState, opacitySettings, precheckedLayers, base64GroupName, layerIsActive, activeLayerName);
                 numberOfAddedLayers++;
             } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                let { activeLayers, addedLayers } = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
+                let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
                 numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                 numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
             } else {
@@ -1376,6 +1384,33 @@ module.exports = {
                 offlineModeControlsManager.updateControls();
             });
 
+            $(layerControlRecord).find('.info-label').first().on('click', (e, data) => {
+                let html,
+                    name = layer.f_table_name || null,
+                    title = layer.f_table_title || null,
+                    abstract = layer.f_table_abstract || null;
+
+                html = (parsedMeta !== null
+                    && typeof parsedMeta.meta_desc !== "undefined"
+                    && parsedMeta.meta_desc !== "") ?
+                    converter.makeHtml(parsedMeta.meta_desc) : abstract;
+
+                moment.locale('da');
+
+
+                //metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+
+                html = html ? Mustache.render(html, parsedMeta) : "";
+
+                //$("#info-modal.slide-right").show();
+                $("#info-modal.slide-right").css("right", "0");
+                $("#info-modal .modal-title").html(title || name);
+                $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
+                legend.init([`${layer.f_table_schema}.${layer.f_table_name}`], "#info-modal-legend");
+                e.stopPropagation();
+
+            });
+
             if (base64SubgroupName) {
                 $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
             } else {
@@ -1399,7 +1434,7 @@ module.exports = {
                 if (offlineModeControlsManager.isVectorLayer(layerKey)) {
                     queryServiceWorker({
                         action: serviceWorkerAPIKey,
-                        payload: { layerKey }
+                        payload: {layerKey}
                     }).then(() => {
                         _self._setupToggleOfflineModeControlsForLayers().then(() => {
                             backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
@@ -1419,12 +1454,12 @@ module.exports = {
                 if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
                     queryServiceWorker({
                         action: `disableOfflineModeForLayer`,
-                        payload: { layerKey }
+                        payload: {layerKey}
                     }).then(() => {
                         _self.reloadLayer(`v:` + layerKey).then(() => {
                             queryServiceWorker({
                                 action: `enableOfflineModeForLayer`,
-                                payload: { layerKey }
+                                payload: {layerKey}
                             }).then(() => {
                                 _self._setupToggleOfflineModeControlsForLayers()
                             });
@@ -1466,12 +1501,12 @@ module.exports = {
                     slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                         let sliderValue = (parseFloat(values[handle]) / 100);
                         applyOpacityToLayer(sliderValue, layerKey);
-                        setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
+                        setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                     });
                 }
 
                 // Assuming that it not possible to set layer opacity right now
-                setLayerOpacityRequests.push({ layerKey, opacity: initialSliderValue });
+                setLayerOpacityRequests.push({layerKey, opacity: initialSliderValue});
 
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
@@ -1491,7 +1526,8 @@ module.exports = {
                 }
 
                 if (document.getElementById(componentContainerId)) {
-                    ReactDOM.render(<LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
+                    ReactDOM.render(
+                        <LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
@@ -1541,12 +1577,16 @@ module.exports = {
     /**
      * Setups layer as the vector one
      */
-    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled); },
+    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => {
+        _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled);
+    },
 
     /**
      * Setups layer as the tile one
      */
-    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => { _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled); },
+    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => {
+        _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled);
+    },
 
     /**
      * By design the layer control is rendered with controls both for tile and vector case, so
