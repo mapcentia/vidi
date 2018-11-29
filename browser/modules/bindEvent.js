@@ -613,12 +613,20 @@ module.exports = module.exports = {
             });
 
             $('#search-border').click(function () {
+                let id = $("#search-border i");
                 if (searchPanelOpen) {
                     searchHide();
                     infoModalHide();
                     moduleContainerHide();
+                    id.removeClass("fa-times");
+                    id.addClass("fa-reorder");
+                    id.css("padding-left", "12px")
+
                 } else {
                     searchShow();
+                    id.removeClass("fa-reorder");
+                    id.addClass("fa-times");
+                    id.css("padding-left", "14px")
                 }
             });
 
@@ -695,6 +703,12 @@ module.exports = module.exports = {
                     $(id + " .expand-less").show();
                     $(id + " .expand-more").hide();
                 })
+            });
+
+            $("#side-panel ul li a").on("click", function (e) {
+                let id = ($(this));
+                $("#side-panel ul li").removeClass("active");
+                id.addClass("active");
             });
         }
     }

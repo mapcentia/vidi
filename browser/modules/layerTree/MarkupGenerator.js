@@ -144,14 +144,16 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
-                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
-                    <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
-                </div>
-
-                <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-
-                <div style="float: right; padding-top: 10px; padding-right: 10px;">
-                    ${addButton}
+                    <a href="javascript:void(0);" class="js-toggle-filters">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                        (<span class="js-toggle-filters-number-of-filters">0</span>)
+                    </a>
+                    <a href="javascript:void(0);" class="js-toggle-table-view">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                        </a>
+                    </div>
+                    <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                    <div style="float: right; padding-top: 10px; padding-right: 10px;">${addButton}
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>
