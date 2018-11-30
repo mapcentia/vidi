@@ -769,7 +769,7 @@ body {
   margin: 0 !important;
 }
 .list-group-item {
-  padding: 16px;
+  padding: 10px 14px;
   overflow: visible !important;
 }
 .leaflet-control-measure .leaflet-control-measure-toggle,
