@@ -197,6 +197,10 @@ module.exports = {
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
+        "Display two layers at once": "# Display two layers at once",
+        "Side-by-side": "# Side-by-side",
+        "Overlap": "# Overlap",
+        "Display layers": "# Display layers",
 
         // Map controls
         "Map controls": "Map controls",

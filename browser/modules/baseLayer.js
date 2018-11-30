@@ -27,11 +27,15 @@ let sideBySideControl = false;
 
 let activeBaseLayer = false;
 
-let activeSideBySideLayer = false;
+let activeTwoLayersModeLayer = false;
 
-let sideBySideEnabled = false;
+let twoLayersAtOnceEnabled = false;
 
-const SIDE_BY_SIDE_MODES = [`side-by-side`, `overlay`];
+let overlayOpacity = 0;
+
+const TWO_LAYERS_AT_ONCE_MODES = [`side-by-side`, `overlay`];
+
+let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
 
 /**
  *
@@ -84,19 +88,19 @@ module.exports = module.exports = {
         $("#base-layer-list").append(`
                 <div class="togglebutton">
                     <label>
-                        <input class="js-toggle-side-by-side-mode" type="checkbox"> ${__(`Side-by-side mode`)}
+                        <input class="js-two-layers-at-once-control" type="checkbox"> ${__(`Display two layers at once`)}
                     </label>
                 </div>`);
 
-        $(`.js-toggle-side-by-side-mode`).off();
-        $(`.js-toggle-side-by-side-mode`).change((event) => {
-            sideBySideEnabled = $(event.target).is(':checked');
-
-            if (sideBySideEnabled) {
-                activeSideBySideLayer = false;
+        $(`.js-two-layers-at-once-control`).off();
+        $(`.js-two-layers-at-once-control`).change((event) => {
+            $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
+            twoLayersAtOnceEnabled = $(event.target).is(':checked');
+            if (twoLayersAtOnceEnabled) {
+                activeTwoLayersModeLayer = false;
                 _self.drawBaseLayersControl();
             } else {
-                _self.destroySideBySideControl();
+                _self.destroyLeafletSideBySideControl();
                 setBaseLayer.init(activeBaseLayer);
             }
 
@@ -122,26 +126,29 @@ module.exports = module.exports = {
      * 
      */
     toggleSideBySideControl: (layers) => {
+
+        console.log(`### toggleSideBySideControl`);
+
         let result = false;
         if (layers === false || layers === `false`) {
             result = new Promise((resolve, reject) => {
-                if ($('.js-toggle-side-by-side-mode').is(':checked')) {
-                    $(`.js-toggle-side-by-side-mode`).trigger(`click`);
+                if ($('.js-two-layers-at-once-control').is(':checked')) {
+                    $(`.js-two-layers-at-once-control`).trigger(`click`);
                     resolve();
                 } else {
                     resolve();
                 }
             });
         } else if (layers && layers.length === 2) {
-            // Disable the side-by-side mode
-            _self.destroySideBySideControl();
+            // Reset the side-by-side control
+            _self.destroyLeafletSideBySideControl();
 
-            activeSideBySideLayer = false;
-            sideBySideEnabled = false;
-            $(`.js-toggle-side-by-side-mode`).prop(`checked`, false);
-
+            activeTwoLayersModeLayer = false;
+            twoLayersAtOnceEnabled = false;
+            $(`.js-two-layers-at-once-control`).prop(`checked`, false);
+            // Simulate the enabling of the side-by-side control
             result = new Promise((resolve, reject) => {
-                $(`.js-toggle-side-by-side-mode`).trigger(`click`);
+                $(`.js-two-layers-at-once-control`).trigger(`click`);
                 setTimeout(() => {
                     _self.drawBaseLayersControl().then(() => {
                         $(`[name="baselayers"][value="${layers[0]}"]`).trigger('click');
@@ -159,7 +166,7 @@ module.exports = module.exports = {
         }
     },
 
-    destroySideBySideControl: () => {
+    destroyLeafletSideBySideControl: () => {
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
 
@@ -177,7 +184,13 @@ module.exports = module.exports = {
     },
 
     drawBaseLayersControl: () => {
+
+        console.log(`### drawBaseLayersControl`);
+
         let result = new Promise((resolve, reject) => {
+            // Resetting the side-by-side mode
+            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+
             // Delete current layers
             $(`.js-base-layer-control`).remove();
             baseLayers = [];
@@ -201,10 +214,10 @@ module.exports = module.exports = {
                 }
 
                 let sideBySideLayerControl = ``;
-                if (sideBySideEnabled) {
+                if (twoLayersAtOnceEnabled) {
                     sideBySideLayerControl = `<div class='radio radio-primary base-layer-item' data-gc2-side-by-side-base-id='${layerId}' style='float: left;'>
                         <label class='side-by-side-baselayers-label'>
-                            <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeSideBySideLayer ? `checked=""` : ``}>
+                            <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
                         </label>
                     </div>`;
                 }
@@ -229,82 +242,74 @@ module.exports = module.exports = {
                 }
 
                 // Disabling inputs of base layers
-                if (activeSideBySideLayer) {
+                if (activeTwoLayersModeLayer) {
                     $(`[data-gc2-base-id]`).find('[name="baselayers"]').prop('disabled', false);
-                    $(`[data-gc2-base-id="${activeSideBySideLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
+                    $(`[data-gc2-base-id="${activeTwoLayersModeLayer}"]`).find('[name="baselayers"]').prop('disabled', true);
                 }
             }
 
             /**
              * Shows two layers side by side and reactivates the radio button controls
              */
-            const showTwoLayersSideBySide = () => {
+            const drawTwoLayersAtOnce = () => {
                 disableInputs();
 
-                if (activeSideBySideLayer === false) {
+                if (activeTwoLayersModeLayer === false) {
                     throw new Error(`Unable to detect the side-by-side layer`);
                 }
 
-                if (activeBaseLayer === activeSideBySideLayer) {
+                if (activeBaseLayer === activeTwoLayersModeLayer) {
                     throw new Error(`Active and side-by-side layers are the same`);
                 }
 
                 if (sideBySideControl) {
-                    _self.destroySideBySideControl();
+                    _self.destroyLeafletSideBySideControl();
                 }
 
-                let layer1 = _self.addBaseLayer(activeBaseLayer);
-                if (Array.isArray(layer1)) layer1 = layer1.pop();
-                layer1._vidi_side_by_side = true;
-                layer1.addTo(cloud.get().map);
+                if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[0]) {
+                    let layer1 = _self.addBaseLayer(activeBaseLayer);
+                    if (Array.isArray(layer1)) layer1 = layer1.pop();
+                    layer1._vidi_side_by_side = true;
+                    layer1.addTo(cloud.get().map);
+    
+                    let layer2  = _self.addBaseLayer(activeTwoLayersModeLayer);
+                    if (Array.isArray(layer2)) layer2 = layer2.pop();
+                    layer2._vidi_side_by_side = true;
+                    layer2.addTo(cloud.get().map);
+    
+                    cloud.get().map.invalidateSize();
+                    sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+    
+                    backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+                } else if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
 
-                let layer2  = _self.addBaseLayer(activeSideBySideLayer);
-                if (Array.isArray(layer2)) layer2 = layer2.pop();
-                layer2._vidi_side_by_side = true;
-                layer2.addTo(cloud.get().map);
+                    // add overlay with specific opacity value
+                    // keep the reference to the layer in order to manipulate its style later on slider update
 
-                cloud.get().map.invalidateSize();
-                sideBySideControl = L.control.sideBySide(layer1, layer2).addTo(cloud.get().map);
+                    console.log(`### got to draw the overlay`);
 
-                backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
+
+
+                } else {
+                    throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
+                }
             };
 
             $("#base-layer-list").append(appendedCode).promise().then(() => {
-                if (sideBySideEnabled) {
+                if (twoLayersAtOnceEnabled) {
                     disableInputs();
 
-/*
+                    let selectedSideBySide = ``;
+                    let selectedOverlay = ``;
+                    if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[0]) {
+                        selectedSideBySide = `checked="checked"`;
+                    } else if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
+                        selectedOverlay = `checked="checked"`;
+                    } else {
+                        throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
+                    }
 
-*/
-
-/*
-                    const sideBySideModeControl = (`<div>
-                        <div style="display: flex;">
-                            <div>
-                                <h5>${__(`Display layers`)}</h5>
-                            </div>
-                            <div>
-                                <div class="togglebutton">
-                                    <label>
-                                        <input class="js-toggle-side-by-side-mode" type="checkbox">
-                                        <span class="toggle"></span> ${__(`Side by side`)}
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="togglebutton">
-                                    <label>
-                                        <input class="js-toggle-side-by-side-mode" type="checkbox">
-                                        <span class="toggle"></span> ${__(`Overlap`)}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>`);
-                    */
-
-                    // @todo Translations
-                    const sideBySideModeControl = (`<div>
+                    const twoLayersAtOnceModeControl = (`<div class="js-two-layers-at-once-mode-control-container">
                         <div style="display: flex; padding-top: 20px;">
                             <div>
                                 <h5>${__(`Display layers`)}:</h5>
@@ -312,17 +317,17 @@ module.exports = module.exports = {
                             <div style="padding-top: 8px;">
                                 <div class="radio radio-primary" style="float: left; width: 30px;">
                                     <label class="baselayer-label">
-                                        <input type="radio" name="side-by-side-mode" value="${SIDE_BY_SIDE_MODES[0]}">
+                                        <input type="radio" name="side-by-side-mode" ${selectedSideBySide} value="${TWO_LAYERS_AT_ONCE_MODES[0]}" >
                                         <span class="circle"></span>
                                         <span class="check"></span> 
                                     </label>
                                 </div>
-                                <div style="float: left;">${__(`Side by side`)}</div>
+                                <div style="float: left;">${__(`Side-by-side`)}</div>
                             </div>
                             <div style="padding-top: 8px;">
                                 <div class="radio radio-primary" style="float: left; width: 30px;">
                                     <label class="baselayer-label">
-                                        <input type="radio" name="side-by-side-mode" value="${SIDE_BY_SIDE_MODES[1]}">
+                                        <input type="radio" name="side-by-side-mode" ${selectedOverlay} value="${TWO_LAYERS_AT_ONCE_MODES[1]}">
                                         <span class="circle"></span>
                                         <span class="check"></span> 
                                     </label>
@@ -335,31 +340,62 @@ module.exports = module.exports = {
                                 <div class="js-side-by-side-layer-opacity-slider slider shor slider-material-orange"></div>
                             </div>
                         </div>
-                   </div>`);
+                    </div>`);
 
-                    $("#base-layer-list").append(sideBySideModeControl);
+                    const initiateSlider = (initialValue) => {
+                        if (!(initialValue >= 0 && initialValue <= 100)) {
+                            throw new Error(`Invalid initial value for slider`);
+                        }
 
-                    let slider = $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).get(0);
-
-                    console.log(`### slider`, slider);
-                    if (slider) {
-                        noUiSlider.create(slider, {
-                            start: 70,
-                            connect: `lower`,
-                            step: 10,
-                            range: {
-                                'min': 0,
-                                'max': 100
+                        let slider = $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).get(0);
+                        if (slider) {
+                            if (`noUiSlider` in slider) {
+                                slider.noUiSlider.destroy();
                             }
-                        });
-   
-                        /*
-                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                            let sliderValue = (parseFloat(values[handle]) / 100);
-                            applyOpacityToLayer(sliderValue, layerKey);
-                            setLayerOpacityRequests.push({ layerKey, opacity: sliderValue });
-                        });
-                        */
+
+                            noUiSlider.create(slider, {
+                                start: initialValue,
+                                connect: `lower`,
+                                step: 10,
+                                range: {
+                                    'min': 0,
+                                    'max': 100
+                                }
+                            });
+       
+                            slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                                let sliderValue = (parseFloat(values[handle]) / 100);
+                                overlayOpacity = sliderValue;
+                            });
+                        } else {
+                            throw new Error(`Unable to find the slider container node`);
+                        }
+                    };
+
+                    $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
+                    $("#base-layer-list").append(twoLayersAtOnceModeControl);
+                    console.log(`### appending`);
+                    $("#base-layer-list").find(`input[type=radio][name=side-by-side-mode]`).change(function () {
+                        if (this.value === TWO_LAYERS_AT_ONCE_MODES[0]) {
+                            $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).hide(0);
+                            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
+                            if (activeTwoLayersModeLayer !== false) {
+                                drawTwoLayersAtOnce();
+                            }
+                        } else if (this.value === TWO_LAYERS_AT_ONCE_MODES[1]) {
+                            initiateSlider(50);
+                            $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).show(0);
+                            currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[1];
+                            if (activeTwoLayersModeLayer !== false) {
+                                drawTwoLayersAtOnce();
+                            }
+                        } else {
+                            throw new Error(`Invalid two layers at once mode value (${this.value})`);
+                        }
+                    });
+
+                    if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[1]) {
+                        initiateSlider(50);
                     }
                 }
 
@@ -368,8 +404,8 @@ module.exports = module.exports = {
                     activeBaseLayer = $(event.target).val();
                     event.stopPropagation();
 
-                    if ($('.js-toggle-side-by-side-mode').is(':checked') && activeSideBySideLayer !== false) {
-                        showTwoLayersSideBySide();
+                    if ($('.js-two-layers-at-once-control').is(':checked') && activeTwoLayersModeLayer !== false) {
+                        drawTwoLayersAtOnce();
                     } else {
                         setBaseLayer.init(activeBaseLayer);
                     }
@@ -377,10 +413,10 @@ module.exports = module.exports = {
 
                 $('[data-gc2-side-by-side-base-id]').off();
                 $('[data-gc2-side-by-side-base-id]').change(event => {
-                    activeSideBySideLayer = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
+                    activeTwoLayersModeLayer = $(event.target).closest('.base-layer-item').data('gc2-side-by-side-base-id');
                     event.stopPropagation();
 
-                    showTwoLayersSideBySide();
+                    drawTwoLayersAtOnce();
                 });
 
                 resolve();
@@ -465,18 +501,15 @@ module.exports = module.exports = {
      * @return {Object} Layer object
      */
     addBaseLayer: function (id) {
+
+        console.log(`### addBaseLayer`);
+
         var customBaseLayer, bl, result = false;
-
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
-
             bl = window.setBaseLayers[i];
-
             if (bl.id === id) {
-
                 if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
-
                     customBaseLayer = new L.TileLayer(bl.url, {
-
                         attribution: bl.attribution,
 
                         // Set zoom levels from config, if they are there, else default
@@ -485,18 +518,14 @@ module.exports = module.exports = {
                         minZoom: typeof bl.minZoom !== "undefined" ? bl.minZoom : 0,
                         maxZoom: typeof bl.maxZoom !== "undefined" ? bl.maxZoom : 20,
                         maxNativeZoom: typeof bl.maxNativeZoom !== "undefined" ? bl.maxNativeZoom : 18
-
                     });
 
                     customBaseLayer.baseLayer = true;
                     customBaseLayer.id = bl.id;
 
                     result = cloud.get().addLayer(customBaseLayer, bl.name, true);
-
                 } else {
-
                     result = cloud.get().addBaseLayer(bl.id, bl.db, bl.config, bl.host || null);
-
                 }
             }
         }
