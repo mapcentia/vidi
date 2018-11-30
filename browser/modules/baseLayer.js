@@ -33,6 +33,8 @@ let twoLayersAtOnceEnabled = false;
 
 let overlayOpacity = 0;
 
+let overlayLayer = false;
+
 const TWO_LAYERS_AT_ONCE_MODES = [`side-by-side`, `overlay`];
 
 let currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
@@ -167,12 +169,27 @@ module.exports = module.exports = {
     },
 
     destroyLeafletSideBySideControl: () => {
+
+        console.log(`### destroyLeafletSideBySideControl`);
+
         if (sideBySideControl) sideBySideControl.remove();
         sideBySideControl = false;
 
         // Delete previously initialized side-by-side layers
         for (let key in cloud.get().map._layers) {
-            if (`_vidi_side_by_side` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_side_by_side) {
+            if (`_vidi_twolayersatonce_sidebyside` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_twolayersatonce_sidebyside) {
+                cloud.get().map.removeLayer(cloud.get().map._layers[key]);
+            }
+        }
+    },
+
+    destroyLeafletOverlayControl: () => {
+
+        console.log(`### destroyLeafletOverlayControl`);
+
+        // Delete previously initialized overlay layers
+        for (let key in cloud.get().map._layers) {
+            if (`_vidi_twolayersatonce_overlay` in cloud.get().map._layers[key] && cloud.get().map._layers[key]._vidi_twolayersatonce_overlay) {
                 cloud.get().map.removeLayer(cloud.get().map._layers[key]);
             }
         }
@@ -266,15 +283,21 @@ module.exports = module.exports = {
                     _self.destroyLeafletSideBySideControl();
                 }
 
+                if (overlayLayer) {
+                    _self.destroyLeafletOverlayControl();
+                }
+
+                console.log(`### drawTwoLayersAtOnce`, currentTwoLayersAtOnceMode);
+
                 if (currentTwoLayersAtOnceMode === TWO_LAYERS_AT_ONCE_MODES[0]) {
                     let layer1 = _self.addBaseLayer(activeBaseLayer);
                     if (Array.isArray(layer1)) layer1 = layer1.pop();
-                    layer1._vidi_side_by_side = true;
+                    layer1._vidi_twolayersatonce_sidebyside = true;
                     layer1.addTo(cloud.get().map);
     
                     let layer2  = _self.addBaseLayer(activeTwoLayersModeLayer);
                     if (Array.isArray(layer2)) layer2 = layer2.pop();
-                    layer2._vidi_side_by_side = true;
+                    layer2._vidi_twolayersatonce_sidebyside = true;
                     layer2.addTo(cloud.get().map);
     
                     cloud.get().map.invalidateSize();
@@ -286,10 +309,22 @@ module.exports = module.exports = {
                     // add overlay with specific opacity value
                     // keep the reference to the layer in order to manipulate its style later on slider update
 
-                    console.log(`### got to draw the overlay`);
+                    let layer1 = _self.addBaseLayer(activeBaseLayer);
+                    if (Array.isArray(layer1)) layer1 = layer1.pop();
+                    layer1._vidi_twolayersatonce_overlay = true;
+                    layer1.addTo(cloud.get().map);
+    
+                    let layer2  = _self.addBaseLayer(activeTwoLayersModeLayer);
+                    if (Array.isArray(layer2)) layer2 = layer2.pop();
+                    layer2._vidi_twolayersatonce_overlay = true;
+                    layer2.addTo(cloud.get().map);
 
+                    cloud.get().map.invalidateSize();
 
-
+                    overlayLayer = layer2;
+                    overlayLayer.setOpacity(overlayOpacity);
+                    
+                    backboneEvents.get().trigger(`${MODULE_NAME}:side-by-side-mode-change`);
                 } else {
                     throw new Error(`Invalid two layers at once mode value (${currentTwoLayersAtOnceMode})`);
                 }
@@ -366,6 +401,9 @@ module.exports = module.exports = {
                             slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                                 let sliderValue = (parseFloat(values[handle]) / 100);
                                 overlayOpacity = sliderValue;
+                                if (overlayLayer) {
+                                    overlayLayer.setOpacity(overlayOpacity);
+                                }
                             });
                         } else {
                             throw new Error(`Unable to find the slider container node`);
@@ -374,8 +412,11 @@ module.exports = module.exports = {
 
                     $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
                     $("#base-layer-list").append(twoLayersAtOnceModeControl);
-                    console.log(`### appending`);
                     $("#base-layer-list").find(`input[type=radio][name=side-by-side-mode]`).change(function () {
+
+
+                        console.log(`### this.value`, this.value);
+
                         if (this.value === TWO_LAYERS_AT_ONCE_MODES[0]) {
                             $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).hide(0);
                             currentTwoLayersAtOnceMode = TWO_LAYERS_AT_ONCE_MODES[0];
@@ -500,7 +541,7 @@ module.exports = module.exports = {
      * 
      * @return {Object} Layer object
      */
-    addBaseLayer: function (id) {
+    addBaseLayer: function (id, options = false) {
 
         console.log(`### addBaseLayer`);
 
