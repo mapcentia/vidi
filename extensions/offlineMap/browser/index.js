@@ -474,7 +474,7 @@ module.exports = {
                     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
                 };
 
-                if (browser && browser.name.toLowerCase() !== 'safari' && browser.name.toLowerCase() !== 'ios') {
+                if (browser && browser.name.toLowerCase() !== 'safari' && browser.name.toLowerCase() !== 'ios' && `webkitTemporaryStorage` in navigator) {
                     navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
                         this.setState({
                             storageUsed: bytesToSize(usedBytes),

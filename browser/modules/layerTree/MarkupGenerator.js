@@ -26,7 +26,7 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name) {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-            <div class="panel-heading" role="tab">
+            <div class="panel-heading" role="tab" style="padding: 8px 15px;">
                 <h4 class="panel-title">
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
@@ -81,10 +81,10 @@ class MarkupGenerator {
         let tooltip = layer.f_table_abstract || ``;
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 40px; margin-top: 10px; border-bottom: 1px solid #CCC; background-color: white;">
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 4px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
-                    <div class="checkbox" style="width: 34px;">
+                    <div class="checkbox" style="width: 34px; top: 2px">
                         <label>
                             <input type="checkbox"
                                 ${(layerIsActive ? `checked="checked"` : ``)}
@@ -149,14 +149,16 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
-                    <a href="javascript:void(0);" class="js-toggle-filters">${__(`Filters`)} (<span class="js-toggle-filters-number-of-filters">0</span>)</a>
-                    <a href="javascript:void(0);" class="js-toggle-table-view">${__(`Table view`)}</a>
-                </div>
-
-                <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-
-                <div style="float: right; padding-top: 10px; padding-right: 10px;">
-                    ${addButton}
+                    <a href="javascript:void(0);" class="js-toggle-filters">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                        (<span class="js-toggle-filters-number-of-filters">0</span>)
+                    </a>
+                    <a href="javascript:void(0);" class="js-toggle-table-view">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                        </a>
+                    </div>
+                    <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                    <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>

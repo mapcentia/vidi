@@ -1,4 +1,4 @@
-/*@import "../../config/_styles.less";*/
+@import "./public/js/lib/bootstrap-material-design/less/_variables.less";
 
 body {
   margin: 0;
@@ -76,8 +76,6 @@ body {
 .tab-content.main-content, .tab-content .tab-pane {
   height: 100%;
 }
-
-
 
 #menu {
   z-index: 2 !important;
@@ -832,7 +830,7 @@ body {
   left: inherit !important;
 }
 
-#main-tabs  {
+#main-tabs {
   overflow: hidden !important;
 
 }
@@ -841,10 +839,10 @@ body {
   margin-left: -20px;
 }
 
-#side-panel ul  {
+#side-panel ul {
   overflow: hidden !important;
   list-style-type: none;
-  padding: 0px 19px;
+  padding: 0px 17px;
 }
 
 #side-panel ul li {
@@ -853,6 +851,19 @@ body {
 
 #side-panel ul li .material-icons {
   margin-right: 17px;
+  padding: 2px;
+  border-radius: 50%;
+
+}
+
+#side-panel ul li .material-icons:hover {
+  background-color: #eeeeee;
+
+}
+
+#side-panel ul li.active .material-icons {
+  background-color: @brand-info;
+  color: white;
 }
 
 .list-group .list-group-separator:before {
@@ -861,7 +872,7 @@ body {
 }
 
 .list-group-item {
-  padding: 16px;
+  padding: 10px 14px;
   overflow: visible !important;
 }
 
@@ -1233,7 +1244,7 @@ h4 small {
 #search-border {
   position: relative;
   float: left;
-  width: 32px;
+  width: 40px;
   height: 100%;
 }
 
@@ -1251,7 +1262,7 @@ h4 small {
   font-size: 1.4em;
   line-height: 1em;
   color: #1f4164;
-  padding-left:11px;
+  padding-left: 12px;
   position: absolute;
   cursor: pointer;
 }
@@ -1318,19 +1329,13 @@ h4 small {
   height: 100%;
 }
 
-//.navbar .navbar-brand {
-//  height: 48px;
-//  line-height: 19px;
-//}
-
 .togglebutton {
   margin-bottom: 6px;
 }
 
 .help-btn {
-  position: fixed;
-  top: 14px;
-  color: rgba(0,0,0, 0.26);
+  //position: fixed;
+  color: rgba(0, 0, 0, 0.26);
   cursor: help;
 }
 
@@ -1346,4 +1351,50 @@ h4 small {
 .leaflet-measure-path-measurement {
   font-size: 12px;
   font-weight: bold;
+}
+
+.appended-leaflet-control {
+  padding-top: 6px;
+  padding-bottom: 6px;
+}
+
+.leaflet-control-custom .appended-leaflet-control li a {
+  width: 100% !important;
+}
+
+.navbar .navbar-brand i {
+  font-size: 30px;
+}
+
+.navbar .navbar-brand {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+#module-container-body {
+  padding: 0 4px 4px 0;
+}
+
+.bootstrap-table .table:not(.table-condensed),
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
+.bootstrap-table .table:not(.table-condensed) > thead > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+  padding: 3px 6px !important;
+}
+
+@media (min-width: 769px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 0;
+
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 16px;
+  }
 }

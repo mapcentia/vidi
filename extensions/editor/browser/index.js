@@ -53,6 +53,14 @@ const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
+const serviceWorkerCheck = () => {
+    if (('serviceWorker' in navigator) === false || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        const message = __(`The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)`);
+        console.warn(message);
+        alert(message);
+    }
+};
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -288,6 +296,9 @@ module.exports = {
                         case `integer`:
                             properties[key].type = `integer`;
                             break;
+                        case `double precision`:
+                            properties[key].type = `number`;
+                            break;
                         case `date`:
                             properties[key].format = `date-time`;
                             break;
@@ -371,6 +382,8 @@ module.exports = {
         }
 
         const addFeature = () => {
+            serviceWorkerCheck();
+
             me.stopEdit();
             infoClick.deactivate();
   
@@ -488,6 +501,8 @@ module.exports = {
     },
 
 
+    // @todo the initial value is not parsed as number
+
     /**
      * Change existing feature
      * @param e
@@ -498,6 +513,8 @@ module.exports = {
         editedFeature = e;
         nonCommitedEditedFeature = {};
         const editFeature = () => {
+            serviceWorkerCheck();
+
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -584,11 +601,24 @@ module.exports = {
             delete eventFeatureCopy.properties._id;
 
             // Set NULL values to undefined, because NULL is a type
-            Object.keys(eventFeatureCopy.properties).map(function (key) {
+            Object.keys(eventFeatureCopy.properties).map(key => {
                 if (eventFeatureCopy.properties[key] === null) {
                     eventFeatureCopy.properties[key] = undefined;
                 }
             });
+
+            // Transform field values according to their types
+            Object.keys(fields).map(key => {
+                switch (fields[key].type) {
+                    case `double precision`:
+                        if (eventFeatureCopy.properties[key]) {
+                            eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
+                        }
+                    default:
+                        break;
+                }
+            });
+
 
             /**
              * Commit to GC2
@@ -755,6 +785,8 @@ module.exports = {
             gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
 
         const deleteFeature = () => {
+            serviceWorkerCheck();
+
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
 
