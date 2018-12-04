@@ -284,6 +284,7 @@ module.exports = {
 
         //WatsonC
         "Time series": "Time series",
+        "Filter measurements": "Filter measurements",
         "Found time series": "Found time series",
         "Plots": "Plots",
         "units": "units",

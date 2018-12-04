@@ -287,6 +287,7 @@ module.exports = {
 
         //WatsonC
         "Time series": "Tidsserier",
+        "Filter measurements": "Filtrér målinger",
         "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
         "units": "Enheder",
