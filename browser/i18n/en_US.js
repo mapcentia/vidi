@@ -305,6 +305,7 @@ module.exports = {
         "Like": "Like",
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
-        "No searchable fields on layer": "No searchable fields on layer"
+        "No searchable fields on layer": "No searchable fields on layer",
+        "Method": "Method"
     }
 };

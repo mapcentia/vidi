@@ -1582,7 +1582,7 @@ module.exports = {
                     <div>
                         <form class="form" onsubmit="return false">
                             <div class="form-group">
-                                <input type="test" class="js-search-input form-control" placeholder="Search">
+                                <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
                             </div>
 		                    <div class="form-inline">
                                 <div class="form-group">
