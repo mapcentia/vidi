@@ -10,7 +10,7 @@ module.exports = {
         "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
-        "Main page": "# Main page",
+        "Main page": "Hovedside",
         "Search": "Søg",
         "Result": "Resultat",
         "Info": "Info",
@@ -287,7 +287,7 @@ module.exports = {
 
         //WatsonC
         "Time series": "Tidsserie",
-        "Found time series": "# Found time series",
+        "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
         "units": "Enheder",
         "updated at": "Opdateret",
@@ -296,7 +296,7 @@ module.exports = {
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
         "Borehole": "Borehuller",
-        "No time series were created yet": "# No time series were created yet",
+        "No time series were created yet": "Ingen tidsserier oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
         "Show legend on top the map": "Vis signaturen ovenpå kortet",
