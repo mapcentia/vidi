@@ -112,9 +112,12 @@ module.exports = module.exports = {
                     </label>
                 </div>`);
 
+        // Creating js-two-layers-at-once-mode-control-container-wrapper
+        $("#base-layer-list").append(`<div id ="js-two-layers-at-once-mode-control-container-wrapper"></div>`);
+
         $(`.js-two-layers-at-once-control`).off();
         $(`.js-two-layers-at-once-control`).change((event) => {
-            $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
+            $(`#js-two-layers-at-once-mode-control-container-wrapper`).find(`.js-two-layers-at-once-mode-control-container`).remove();
             twoLayersAtOnceEnabled = $(event.target).is(':checked');
             if (twoLayersAtOnceEnabled) {
                 activeTwoLayersModeLayer = false;
@@ -345,7 +348,7 @@ module.exports = module.exports = {
                     }
 
                     const twoLayersAtOnceModeControl = (`<div class="js-two-layers-at-once-mode-control-container">
-                        <div style="display: flex; padding-top: 20px;">
+                        <div style="display: flex; padding-top: 10px;">
                             <div>
                                 <h5>${__(`Display layers`)}:</h5>
                             </div>
@@ -371,7 +374,7 @@ module.exports = module.exports = {
                             </div>
                         </div>
                         <div>
-                            <div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                            <div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 0;">
                                 <div class="js-side-by-side-layer-opacity-slider slider shor slider-material-orange"></div>
                             </div>
                         </div>
@@ -412,7 +415,7 @@ module.exports = module.exports = {
                     };
 
                     $(`#base-layer-list`).find(`.js-two-layers-at-once-mode-control-container`).remove();
-                    $("#base-layer-list").append(twoLayersAtOnceModeControl);
+                    $("#js-two-layers-at-once-mode-control-container-wrapper").append(twoLayersAtOnceModeControl);
                     $("#base-layer-list").find(`input[type=radio][name=two-layers-at-once-mode]`).change(function () {
                         if (this.value === TWO_LAYERS_AT_ONCE_MODES[0]) {
                             $("#base-layer-list").find(`.js-side-by-side-layer-opacity-slider`).hide(0);
