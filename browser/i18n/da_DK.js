@@ -10,7 +10,7 @@ module.exports = {
         "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
-        "Main page": "# Main page",
+        "Main page": "Forside",
         "Search": "Søg",
         "Result": "Resultat",
         "Info": "Info",
@@ -200,10 +200,10 @@ module.exports = {
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
-        "Display two layers at once": "# Display two layers at once",
-        "Side-by-side": "# Side-by-side",
-        "Overlap": "# Overlap",
-        "Display layers": "# Display layers",
+        "Display two layers at once": "Vis to lag samtidig",
+        "Side-by-side": "Side ved side",
+        "Overlap": "Overlap",
+        "Display layers": "Vis lag",
 
         // Map controls
         "Map controls": "Kort knapper",
@@ -286,19 +286,16 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
-        "Time series": "Tidsserie",
-        "Found time series": "# Found time series",
+        "Time series": "Tidsserier",
+        "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
-        "units": "# units",
-        "updated at": "# updated at",
-        "Uncategorized": "# Uncategorized",
+        "units": "enheder",
+        "updated at": "opdateret",
+        "Uncategorized": "Ukategoriserede",
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
         "Borehole": "Borehuller",
-        "No time series were created yet": "# No time series were created yet",
+        "No time series were created yet": "Ingen tidsserier er oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
-        "Please select the measurement": "Vælg venligst målingen",
-        "Show legend on top the map": "Vis signaturen ovenpå kortet",
-        "Not all measurements in plot were loaded by this moment": "# Not all measurements in plot were loaded by this moment"
     }
 };
