@@ -6,6 +6,23 @@
 
 module.exports = function (grunt) {
     "use strict";
+
+    // Detecting optional theme
+    let theme = false;
+    process.argv.forEach(val => {
+        if (val.indexOf(`--theme=`) !== -1) {
+            theme = val.replace(`--theme=`, ``);
+        }
+    });
+
+    // Default build parameters
+    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+    let lessConfig = { "public/css/styles.css": "public/less/styles.default.less" };
+    if (theme && theme === 'watsonc') {
+        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        lessConfig = { "public/css/styles.css": "public/less/styles." + theme + ".less" };
+    }
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         env: {
@@ -28,9 +45,7 @@ module.exports = function (grunt) {
                     optimization: 2
                 },
                 files: [
-                    {
-                        "public/css/styles.css": "public/less/styles.less" // destination file and source file
-                    },
+                    lessConfig,
                     {
                         expand: true,        // Enable dynamic expansion.
                         cwd: 'extensions',  // Src matches are relative to this path.
@@ -270,7 +285,7 @@ module.exports = function (grunt) {
         shell: {
             default: {
                 command: [
-                    'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
+                    copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
                 ].join('&&')
             }
@@ -340,7 +355,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
+    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
     grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
