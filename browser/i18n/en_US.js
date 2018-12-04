@@ -198,10 +198,10 @@ module.exports = {
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
-        "Display two layers at once": "# Display two layers at once",
-        "Side-by-side": "# Side-by-side",
-        "Overlap": "# Overlap",
-        "Display layers": "# Display layers",
+        "Display two layers at once": "Display two base layers at once",
+        "Side-by-side": "Side-by-side",
+        "Overlap": "Overlap",
+        "Display layers": "Display layers as",
 
         // Map controls
         "Map controls": "Map controls",
@@ -217,7 +217,7 @@ module.exports = {
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
-        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "# The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
@@ -286,9 +286,10 @@ module.exports = {
         "Time series": "Time series",
         "Found time series": "# Found time series",
         "Plots": "Plots",
-        "units": "# units",
-        "updated at": "# updated at",
-        "Uncategorized": "# Uncategorized",
+        "units": "units",
+        "updated at": "updated at",
+        "Uncategorized": "Uncategorized",
+        "Available plots": "Available plots",
         "At least one y axis has to be provided": "At least one y axis has to be provided",
         "Data series": "Data series",
         "Borehole": "Borehole",
@@ -296,6 +297,6 @@ module.exports = {
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
         "Show legend on top the map": "Show legend on top of the map",
-        "Not all measurements in plot were loaded by this moment": "# Not all measurements in plot were loaded by this moment"
+        "Not all measurements in plot were loaded by this moment": "Not all measurements in plot were loaded by this moment"
     }
 };

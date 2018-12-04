@@ -131,6 +131,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'geofyn.mapcentia.com/api'
+},{
+    regExp: true,
+    requested: 'https://rm.mapcentia.com/api'
 }];
 
 /**
