@@ -1584,33 +1584,35 @@ module.exports = {
                             <div class="form-group">
                                 <input type="test" class="js-search-input form-control" placeholder="Search">
                             </div>
-		            <div class="form-inline">
-                            <div class="form-group">
-                                <label>${__("Method")}</label>
-                                <select class="form-control js-search-method">
-                                  <option value="similarity">${__("Similarity")}</option>
-                                  <option value="like">${__("Like")}</option>
-                                </select>
+		                    <div class="form-inline">
+                                <div class="form-group">
+                                    <label>${__("Method")}</label>
+                                    <select class="form-control js-search-method">
+                                      <option value="like">${__("Like")}</option>
+                                      <option value="tsvector">${__("Tsvector")}</option>                                      
+                                      <option value="similarity">${__("Similarity")}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>${__("Similarity")}</label>
+                                    <select class="form-control js-search-similarity">
+                                      <option value="1">100 %</option>
+                                      <option value="0.9">90 %</option>
+                                      <option value="0.8" selected>80 %</option>
+                                      <option value="0.7">70 %</option>
+                                      <option value="0.6">60 %</option>
+                                      <option value="0.5">50 %</option>
+                                      <option value="0.4">40 %</option>
+                                      <option value="0.3">30 %</option>
+                                      <option value="0.2">20 %</option>
+                                      <option value="0.1">10 %</option>
+                                    </select>
+                                </div>
+		                    </div>
+		                    <div class="alert alert-warning no-searchable-fields" style="display: none;">
+                                ${__("No searchable fields on layer")}
                             </div>
-                            <div class="form-group">
-                                <label>${__("Similarity")}</label>
-                                <select class="form-control js-search-similarity">
-                                  <option value="1">100 %</option>
-                                  <option value="0.9">90 %</option>
-                                  <option value="0.8" selected>80 %</option>
-                                  <option value="0.7">70 %</option>
-                                  <option value="0.6">60 %</option>
-                                  <option value="0.5">50 %</option>
-                                  <option value="0.4">40 %</option>
-                                  <option value="0.3">30 %</option>
-                                  <option value="0.2">20 %</option>
-                                  <option value="0.1">10 %</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="display: inline-block; padding-right: 10px; max-width: 160px;">
-                                <button class="btn js-search-button" type="button"><i class="fa fa-search"></i></button>
-                            </div>
-		            </div>
+                            <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
                         </form>
                     </div>
                  </div>`
@@ -1618,51 +1620,60 @@ module.exports = {
 
             let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
             if (search) {
-                    let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
-		    $.each(fieldConf , function(i, val) {
-		       if (typeof val.searchable === "boolean" && val.searchable === true) {
-			       countSearchFields.push(i);
-		       }
+                let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
+                $.each(fieldConf, function (i, val) {
+                    if (typeof val.searchable === "boolean" && val.searchable === true) {
+                        countSearchFields.push(i);
+                    }
+                });
+                if (countSearchFields.length === 0) {
+                    $(search).find('input, textarea, button, select').attr('disabled', 'true');
+                    $(search).find('.no-searchable-fields').show();
+                } else {
+                    $(search).find('.searchable-fields').show();
+                    $.each(countSearchFields, function (i, val) {
+                        $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
                     });
-			if (countSearchFields.length === 0) {
-				alert()
-				$(e.target).closest('form').children(':input').attr('disabled', 'disabled');
-			}
-
-                $(search).on(`change`, (e) => {
-		    let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [],whereClauses = [];	
-                    $.each(fieldConf , function(i, val) {
-		       if (typeof val.searchable === "boolean" && val.searchable === true) {
-			       searchFields.push(i);
-		       }
+                }
+                $(search).on('change', (e) => {
+                    let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
+                    $.each(fieldConf, function (i, val) {
+                        if (typeof val.searchable === "boolean" && val.searchable === true) {
+                            searchFields.push(i);
+                        }
                     });
                     let searchStr = $(e.target).closest('form').find('.js-search-input').get(0).value,
-	                method = $(e.target).closest('form').find('.js-search-method').get(0).value,
+                        method = $(e.target).closest('form').find('.js-search-method').get(0).value,
                         similarity = $(e.target).closest('form').find('.js-search-similarity').get(0).value;
-			if (method !== "similarity"){
-				$($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", true)
-			} else {
-				$($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", false)
-			}
-			switch (method) {
-				case "similarity":
-				    $.each(searchFields , function(i, val) {
-					    whereClauses.push(`similarity(${val}, '${searchStr}') >= ${similarity}`);	
-				    })
-				break;
-				case "like":
-				    $.each(searchFields , function(i, val) {
-					    whereClauses.push(`${val} LIKE '%${searchStr}%'`);	
-				    })
-				break;
-			}
-			console.log(whereClauses);
-			    if (searchStr !== "") {
-				    let whereClause = whereClauses.join(" OR ");
-				    console.log(whereClause);
-				    backboneEvents.get().trigger("sqlQuery:clear");
-				    sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`]);
-			    }
+                    if (method !== "similarity") {
+                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", true)
+                    } else {
+                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", false)
+                    }
+                    switch (method) {
+                        case "similarity":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`similarity(${val}::TEXT, '${searchStr}'::TEXT) >= ${similarity}`);
+                            });
+                            break;
+                        case "like":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`${val}::TEXT ILIKE '%${searchStr}%'::TEXT`);
+                            });
+                            break;
+                        case "tsvector":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`to_tsvector('danish', ${val}::TEXT) @@ to_tsquery('danish', '${searchStr}'::TEXT)`);
+                            });
+                            break;
+                    }
+                    console.log(whereClauses);
+                    if (searchStr !== "") {
+                        let whereClause = whereClauses.join(" OR ");
+                        console.log(whereClause);
+                        backboneEvents.get().trigger("sqlQuery:clear");
+                        sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`]);
+                    }
 
                 });
             }

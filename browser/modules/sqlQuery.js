@@ -35,11 +35,8 @@ var db = urlparser.db;
 var JSONSchemaForm = require("react-jsonschema-form");
 const Form = JSONSchemaForm.default;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
+var jquery = require('jquery');
+require('snackbarjs');
 
 var extensions;
 
@@ -182,7 +179,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql,
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
                         template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
@@ -279,16 +276,16 @@ module.exports = {
                     }
                     count.index++;
                     if (count.index === layers.length) {
-                        //$('#info-tab a:first').tab('show');
-
                         if (!hit) {
                             $('#modal-info-body').hide();
+                            jquery.snackbar({
+                                content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
+                                htmlAllowed: true,
+                                timeout: 2000
+                            });
+                        } else {
+                            $('#main-tabs a[href="#info-content"]').tab('show');
                         }
-                        $("#info-content button").click(function (e) {
-                            //clearDrawItems();
-                            //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
-                        });
-                        $('#main-tabs a[href="#info-content"]').tab('show');
                     }
                 };
             }
