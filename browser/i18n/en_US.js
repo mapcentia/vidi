@@ -286,6 +286,7 @@ module.exports = {
         "Drag and drop measurement to add it to time series": "Drag and drop measurement to add it to time series",
         "Remove from time series": "Remove from time series",
         "Time series": "Time series",
+        "Water level": "Water level",
         "Filter measurements": "Filter measurements",
         "Found time series": "Found time series",
         "Plots": "Plots",

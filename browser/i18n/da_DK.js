@@ -289,6 +289,7 @@ module.exports = {
         "Drag and drop measurement to add it to time series": "Træk og slip måling for at tilføje det til tidsserier",
         "Remove from time series": "Fjern fra tidsserier",
         "Time series": "Tidsserier",
+        "Water level": "Vandstand",
         "Filter measurements": "Filtrér målinger",
         "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
