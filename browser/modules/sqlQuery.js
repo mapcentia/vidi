@@ -76,12 +76,12 @@ module.exports = {
      * @param num
      * @param infoClickPoint
      * @param whereClouse
+     * @param includes
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClouse, includes) {
-        var layers, count = {index: 0}, hit = false, distance,
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClouse, includes, zoomToResult) {
+        let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
-        let editor = false;
         if (`editor` in extensions) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
@@ -89,6 +89,9 @@ module.exports = {
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
+
+        // Set layers to passed array of layers if set
+        layers = includes || layers;
 
         // Remove not queryable layers from array
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -133,6 +136,7 @@ module.exports = {
              </div>`;
 
         $.each(layers, function (index, value) {
+
             // No need to search in the already displayed vector layer
             if (value.indexOf('v:') === 0) {
                 return true;
@@ -144,10 +148,6 @@ module.exports = {
 
             if (!metaDataKeys[value]) {
                 throw new Error(`metaDataKeys[${value}] is undefined`);
-            }
-
-            if (includes && includes.indexOf(value) === -1) {
-                return true;
             }
 
             var isEmpty = true;
@@ -285,6 +285,9 @@ module.exports = {
                             });
                         } else {
                             $('#main-tabs a[href="#info-content"]').tab('show');
+                            if (zoomToResult) {
+                                cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId]);
+                            }
                         }
                     }
                 };

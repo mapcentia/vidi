@@ -1667,12 +1667,10 @@ module.exports = {
                             });
                             break;
                     }
-                    console.log(whereClauses);
                     if (searchStr !== "") {
                         let whereClause = whereClauses.join(" OR ");
-                        console.log(whereClause);
                         backboneEvents.get().trigger("sqlQuery:clear");
-                        sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`]);
+                        sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`], true);
                     }
 
                 });
