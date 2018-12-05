@@ -295,7 +295,7 @@ module.exports = {
         "Available plots": "Tilgængelige grafer",
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
-        "Borehole": "Borehuller",
+        "Borehole": "DGU",
         "No time series were created yet": "Ingen tidsserier oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
