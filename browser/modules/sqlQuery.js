@@ -286,7 +286,7 @@ module.exports = {
                         } else {
                             $('#main-tabs a[href="#info-content"]').tab('show');
                             if (zoomToResult) {
-                                cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId]);
+                                cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
                         }
                     }
