@@ -283,6 +283,8 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Drag and drop measurement to add it to time series": "Drag and drop measurement to add it to time series",
+        "Remove from time series": "Remove from time series",
         "Time series": "Time series",
         "Filter measurements": "Filter measurements",
         "Found time series": "Found time series",

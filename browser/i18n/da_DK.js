@@ -286,6 +286,8 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Drag and drop measurement to add it to time series": "Træk og slip mål for at tilføje det til tidsserier",
+        "Remove from time series": "Fjern fra tidsserier",
         "Time series": "Tidsserier",
         "Filter measurements": "Filtrér målinger",
         "Found time series": "Fundne tidsserier",

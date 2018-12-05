@@ -54,12 +54,14 @@ class SearchFieldComponent extends React.Component {
                 onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
+                    title={__(`Search`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSearch.bind(this)}
                     style={buttonStyle}>
                     <i className="material-icons">search</i>
                 </button>
                 <button
+                    title={__(`Clear`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onClear.bind(this)}
                     disabled={!this.state.searchTerm}
