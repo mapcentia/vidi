@@ -1576,7 +1576,7 @@ module.exports = {
                 }
             }
 
-            // For all types of layers
+            // PostgreSQL search is for all types of layers
             $(layerContainer).find('.js-layer-settings-search').append(
                 `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
                     <div>
@@ -1617,7 +1617,6 @@ module.exports = {
                     </div>
                  </div>`
             );
-
             let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
             if (search) {
                 let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
@@ -1672,7 +1671,6 @@ module.exports = {
                         backboneEvents.get().trigger("sqlQuery:clear");
                         sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`], true);
                     }
-
                 });
             }
         }
