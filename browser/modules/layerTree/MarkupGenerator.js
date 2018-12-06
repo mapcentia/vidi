@@ -81,7 +81,7 @@ class MarkupGenerator {
         let tooltip = layer.f_table_abstract || ``;
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 4px; border-bottom: 1px solid #CCC; background-color: white;">
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
                     <div class="checkbox" style="width: 34px; top: 2px">
