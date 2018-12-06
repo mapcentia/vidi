@@ -10,7 +10,7 @@ module.exports = {
         "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
-        "Main page": "Forside",
+        "Main page": "Hovedside",
         "Search": "Søg",
         "Result": "Resultat",
         "Info": "Info",
