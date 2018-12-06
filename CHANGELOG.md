@@ -4,7 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [2018.1] - 2018-19-11
+## [2018.2.0.rc1] - 2018-07-12
+### Added
+- New mode for double base-layers: Overlay base-layers, where the opacity of the top one can be changed
+
+### Changed
+- Filters can now be applied before switching a vector layer on.
+- Table view are moved inside the layer tree, which makes it possible to see more than one table at a time.
+- Table view clicks now pan to feature - not zooming.
+- Popups for raster and vectors are now similar.
+
+### Fixed
+- When clicking in a table with points, panning now works.
+- Workaround missing Service Workers features in Edge 17/18.
+- Some smaller issues were fixed.
+
+## [2018.1] - 2018-07-12
 ### Added
 - Specific vector layers can be set to offline. If offline the cached version of the vector layer is always used. Also if browser is reloaded.
 - Control to switch all vector layers on and off. See above.
