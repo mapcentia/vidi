@@ -169,18 +169,14 @@ class MarkupGenerator {
     }
 
     getEditingButtons() {
-        return `<div class="btn-group btn-group-justified">
-            <div class="btn-group">
-                <button class="btn btn-primary btn-xs ge-start-edit">
-                    <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-primary btn-xs ge-delete">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-            </div>
-        </div>`;
+        return `<div class="cartodb-popup-content">
+                    <button class="btn btn-primary btn-xs ge-start-edit">
+                        <i class="fa fa-pencil-alt" aria-hidden="true" ></i>
+                    </button>
+                    <button class="btn btn-danger btn-xs ge-delete">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>`;
     }
 
     getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {

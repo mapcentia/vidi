@@ -831,18 +831,15 @@ module.exports = {
                     cm: tableHeaders,
                     autoUpdate: false,
                     autoPan: false,
-                    openPopUp: true,
+                    openPopUp: false,
                     setViewOnSelect: true,
                     responsive: false,
                     callCustomOnload: true,
-                    assignFeatureEventListenersOnDataLoad: false,
+                    assignFeatureEventListenersOnDataLoad: true,
                     height: 250,
                     locale: window._vidiLocale.replace("_", "-"),
-                    template: template,
-                    usingCartodb: false
+                    template: template
                 });
-
-                localTable.assignEventListeners();
 
                 localTable.loadDataInTable(true);
 
@@ -951,10 +948,11 @@ module.exports = {
         let renderedText = Mustache.render(defaultTemplate, properties);
         let managePopup = L.popup({
             autoPan: false,
-            className: `js-vector-layer-popup`
+            minWidth: 160,
+            className: `js-vector-layer-popup custom-popup`
         }).setLatLng(event.latlng).setContent(`<div>
-            <div>${renderedText}</div>
             ${additionalControls}
+            <div>${renderedText}</div>
         </div>`).openOn(cloud.get().map);
     },
 
