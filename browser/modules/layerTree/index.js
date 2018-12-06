@@ -178,6 +178,8 @@ let editor = false;
 const showdown = require('showdown');
 const converter = new showdown.Converter();
 
+let qstore = [];
+
 /**
  * Communicating with the service workied via MessageChannel interface
  *
@@ -250,38 +252,6 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").on("click", function () {
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: (($("#" + TABLE_VIEW_CONTAINER_ID).height() * -1) + 30) + "px"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").hide();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").show();
-            });
-        });
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").on("click", function () {
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
-            });
-        });
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".close-hide").on("click", function () {
-            tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
-            tables[activeOpenedTable].destroy();
-
-            activeOpenedTable = false;
-
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
-            });
-        });
     },
 
     statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
@@ -843,7 +813,7 @@ module.exports = {
 
                 let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                 if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
-                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
+                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID + `-${tableId}`).append(`<div class="js-table-view-container" id="${tableId}_container">
                     <div id="${tableId}"><table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>
                 </div>`);
 
@@ -866,15 +836,15 @@ module.exports = {
                     responsive: false,
                     callCustomOnload: true,
                     assignFeatureEventListenersOnDataLoad: false,
-                    height: 400,
+                    height: 250,
                     locale: window._vidiLocale.replace("_", "-"),
                     template: template,
                     usingCartodb: false
                 });
 
-                if ($(`#${tableId}_container`).is(`:visible`)) {
-                    localTable.loadDataInTable(true);
-                }
+                localTable.assignEventListeners();
+
+                localTable.loadDataInTable(true);
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1469,6 +1439,7 @@ module.exports = {
 
             $(layerContainer).find('.js-layer-settings-filters').hide(0);
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
+            $(layerContainer).find('.js-layer-settings-table').hide(0);
 
             let initialSliderValue = 1;
             if (layerIsTheTileOne) {
@@ -1508,7 +1479,13 @@ module.exports = {
                 setLayerOpacityRequests.push({layerKey, opacity: initialSliderValue});
 
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
+                });
+
+                $(layerContainer).find(`.js-toggle-search`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-search'));
+                    $(layerContainer).find('.js-layer-settings-search').toggle();
                 });
             }
 
@@ -1530,22 +1507,28 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-filters'));
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
 
                 // Table view
                 $(layerContainer).find(`.js-toggle-table-view`).click(() => {
-                    if (activeOpenedTable) {
-                        tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
-                        tables[activeOpenedTable].destroy();
-                    }
+
+
+                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                    $(layerContainer).find('.js-layer-settings-table').toggle();
+
+                    // if (activeOpenedTable) {
+                    //     tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
+                    //     tables[activeOpenedTable].destroy();
+                    // }
 
                     activeOpenedTable = `v:` + layerKey;
-                    tables[activeOpenedTable].assignEventListeners();
+                    //tables[activeOpenedTable].assignEventListeners();
 
-                    $(`.js-table-view-container`).hide();
-                    $(`.js-table-view-container`).hide();
+                    //$(`.js-table-view-container`).hide();
+
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
 
@@ -1556,12 +1539,12 @@ module.exports = {
 
                     $(`#${tableId}_container`).show();
 
-                    $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                        bottom: "0"
-                    }, 500, function () {
-                        $(".expand-less").show();
-                        $(".expand-more").hide();
-                    });
+                    // $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                    //     bottom: "0"
+                    // }, 500, function () {
+                    //     $(".expand-less").show();
+                    //     $(".expand-more").hide();
+                    // });
                 });
 
                 if (defaultLayerType === `vector`) {
@@ -1570,6 +1553,113 @@ module.exports = {
                     _self.setupLayerAsTileOne(layerKey);
                 }
             }
+
+            // PostgreSQL search is for all types of layers
+            $(layerContainer).find('.js-layer-settings-search').append(
+                `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                    <div>
+                        <form class="form" onsubmit="return false">
+                            <div class="form-group">
+                                <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
+                            </div>
+		                    <div class="form-inline">
+                                <div class="form-group">
+                                    <label>${__("Method")}</label>
+                                    <select class="form-control js-search-method">
+                                      <option value="like">${__("Like")}</option>
+                                      <option value="tsvector">${__("Tsvector")}</option>                                      
+                                      <option value="similarity">${__("Similarity")}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>${__("Similarity")}</label>
+                                    <select class="form-control js-search-similarity">
+                                      <option value="1">100 %</option>
+                                      <option value="0.9">90 %</option>
+                                      <option value="0.8" selected>80 %</option>
+                                      <option value="0.7">70 %</option>
+                                      <option value="0.6">60 %</option>
+                                      <option value="0.5">50 %</option>
+                                      <option value="0.4">40 %</option>
+                                      <option value="0.3">30 %</option>
+                                      <option value="0.2">20 %</option>
+                                      <option value="0.1">10 %</option>
+                                    </select>
+                                </div>
+		                    </div>
+		                    <div class="alert alert-warning no-searchable-fields" style="display: none;">
+                                ${__("No searchable fields on layer")}
+                            </div>
+                            <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
+                        </form>
+                    </div>
+                 </div>`
+            );
+            let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
+            if (search) {
+                let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
+                $.each(fieldConf, function (i, val) {
+                    if (typeof val.searchable === "boolean" && val.searchable === true) {
+                        countSearchFields.push(i);
+                    }
+                });
+                if (countSearchFields.length === 0) {
+                    $(search).find('input, textarea, button, select').attr('disabled', 'true');
+                    $(search).find('.no-searchable-fields').show();
+                } else {
+                    $(search).find('.searchable-fields').show();
+                    $.each(countSearchFields, function (i, val) {
+                        $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
+                    });
+                }
+                $(search).on('change', (e) => {
+                    let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
+                    $.each(fieldConf, function (i, val) {
+                        if (typeof val.searchable === "boolean" && val.searchable === true) {
+                            searchFields.push(i);
+                        }
+                    });
+                    let searchStr = $(e.target).closest('form').find('.js-search-input').get(0).value,
+                        method = $(e.target).closest('form').find('.js-search-method').get(0).value,
+                        similarity = $(e.target).closest('form').find('.js-search-similarity').get(0).value;
+                    if (method !== "similarity") {
+                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", true)
+                    } else {
+                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", false)
+                    }
+                    switch (method) {
+                        case "similarity":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`similarity(${val}::TEXT, '${searchStr}'::TEXT) >= ${similarity}`);
+                            });
+                            break;
+                        case "like":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`${val}::TEXT ILIKE '%${searchStr}%'::TEXT`);
+                            });
+                            break;
+                        case "tsvector":
+                            $.each(searchFields, function (i, val) {
+                                whereClauses.push(`to_tsvector('danish', ${val}::TEXT) @@ to_tsquery('danish', '${searchStr}'::TEXT)`);
+                            });
+                            break;
+                    }
+                    if (searchStr !== "") {
+                        let whereClause = whereClauses.join(" OR ");
+                        backboneEvents.get().trigger("sqlQuery:clear");
+                        sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`], true);
+                    }
+                });
+            }
+        }
+    },
+
+    _selectIcon: (e) => {
+        let className = 'active';
+        if (e.hasClass(className)) {
+            e.removeClass(className);
+        } else {
+            e.addClass(className);
         }
     },
 
@@ -1616,6 +1706,7 @@ module.exports = {
                 } else {
                     $(container).find(`.js-toggle-table-view`).hide();
                     $(container).find('.js-layer-settings-filters').hide(0);
+                    $(container).find('.js-layer-settings-table').hide(0);
                 }
 
                 $(container).find(`.js-toggle-filters`).show(0);
@@ -1631,6 +1722,17 @@ module.exports = {
                 $(container).find(`.js-toggle-filters`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-table').hide(0);
+            }
+            $(container).find(`.js-toggle-search`).hide();
+
+            // For both vector and tile
+            if (layerIsEnabled) {
+                $(container).find(`.js-toggle-search`).show();
+            } else {
+                $(container).find(`.js-toggle-search`).hide();
+                $(container).find('.js-layer-settings-search').hide(0);
+                $('#layers_list .layer-item.list-group-item a').removeClass('active');
             }
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
@@ -1858,5 +1960,10 @@ module.exports = {
 
     load: function (id) {
         stores[id].load();
-    }
+    },
+
+    resetSearch: function () {
+        sqlQuery.reset(qstore);
+    },
+
 };
