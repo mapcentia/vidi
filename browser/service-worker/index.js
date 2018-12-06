@@ -131,8 +131,21 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'geofyn.mapcentia.com/api'
+},{
+    regExp: true,
+    requested: 'https://rm.mapcentia.com/api'
 }];
 
+/**
+ * Broadcasting service messages to clients, mostly used for debugging and validation
+ */
+const sendMessageToClients = (data) => {
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({ msg: data });
+        });
+    });
+};
 
 /**
  * Storing key-value pairs in memory
@@ -340,8 +353,52 @@ const normalizeTheURLForFetch = (event) => {
                     resolve(cleanedRequestURL);
                 }
             };
-            
-            if (browser.name === 'safari' || browser.name === 'ios') {
+
+            /**
+             * GET requests are processed same way for all browsers
+             */
+            const processGETRequest = (clonedRequest) => {
+                let mappedObject = {};
+                let parsedQuery = new uriJs(clonedRequest.url);
+                let queryParameters = parsedQuery.search(true);
+                if (`q` in queryParameters && queryParameters.q) {
+                    mappedObject.q = queryParameters.q;
+                }
+
+                proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+            };
+
+            if (browser.name === 'edge') {
+                if (clonedRequest.method === `POST`) {
+                    clonedRequest.text().then(data => {
+                        let mappedObject = {};
+                        let splitDecodeData = data.split(`&`);
+                        if (splitDecodeData.length > 0) {
+                            splitDecodeData.map(item => {
+                                if (item.indexOf(`=`) !== -1) {
+                                    let splitParameter = item.split(`=`);
+                                    if (splitParameter.length === 2) {
+                                        mappedObject[splitParameter[0]] = splitParameter[1];
+                                    }
+                                }
+                            });
+                        }
+
+                        cleanedRequestURL += '/' + btoa(data);
+                        proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+
+                        return;
+                    }).catch(error => {
+                        console.error(`Unable to read POST data`);
+                        reject();
+                    });
+                } else if (clonedRequest.method === `GET`) {
+                    processGETRequest(clonedRequest);
+                } else {
+                    console.error(`Invalid request type`);
+                    reject();
+                }
+            } else if (browser.name === 'safari' || browser.name === 'ios') {
                 if (clonedRequest.method === `POST`) {
                     let rawResult = ``;
                     let data = false;
@@ -378,14 +435,7 @@ const normalizeTheURLForFetch = (event) => {
                         return reader.read().then(processText);
                     });
                 } else if (clonedRequest.method === `GET`) {
-                    let mappedObject = {};
-                    let parsedQuery = new uriJs(clonedRequest.url);
-                    let queryParameters = parsedQuery.search(true);
-                    if (`q` in queryParameters && queryParameters.q) {
-                        mappedObject.q = queryParameters.q;
-                    }
-
-                    proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                    processGETRequest(clonedRequest);
                 } else {
                     console.error(`Invalid request type`);
                     reject();
@@ -412,14 +462,7 @@ const normalizeTheURLForFetch = (event) => {
                         reject();
                     });
                 } else if (clonedRequest.method === `GET`) {
-                    let mappedObject = {};
-                    let parsedQuery = new uriJs(clonedRequest.url);
-                    let queryParameters = parsedQuery.search(true);
-                    if (`q` in queryParameters && queryParameters.q) {
-                        mappedObject.q = queryParameters.q;
-                    }
-
-                    proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                    processGETRequest(clonedRequest);
                 } else {
                     console.error(`Invalid request type`);
                     reject();
@@ -653,6 +696,8 @@ self.addEventListener('fetch', (event) => {
 
                                                         if (LOG_OFFLINE_MODE_EVENTS) console.log(`Previous request response`, response);
 
+                                                        sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
+
                                                         resolve({ 
                                                             response,
                                                             requestData
@@ -695,6 +740,8 @@ self.addEventListener('fetch', (event) => {
                                             if (LOG_OFFLINE_MODE_EVENTS) console.log(`Offline mode is enabled for layer`);
 
                                             if (cachedResponse) {
+                                                sendMessageToClients(`RESPONSE_CACHED_DUE_TO_OFFLINE_MODE_SETTINGS`);
+
                                                 resolve({ 
                                                     response: cachedResponse,
                                                     requestData

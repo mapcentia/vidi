@@ -10,6 +10,7 @@ module.exports = {
         "About": "About",
         "Meters": "Meters",
         "Buffer": "Buffer",
+        "Main page": "Main page",
         "Search": "Search",
         "Result": "Result",
         "Info": "Info",
@@ -197,6 +198,10 @@ module.exports = {
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
+        "Display two layers at once": "Display two base layers at once",
+        "Side-by-side": "Side-by-side",
+        "Overlap": "Overlap",
+        "Display layers": "Display layers as",
 
         // Map controls
         "Map controls": "Map controls",
@@ -212,6 +217,7 @@ module.exports = {
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
         "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
 
         // OfflineMap
         "tiles failed to load": "tiles failed to load",
@@ -277,15 +283,25 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Drag and drop measurement to add it to time series": "Drag and drop measurement to add it to time series",
+        "Remove from time series": "Remove from time series",
+        "Time series": "Time series",
+        "Water level": "Water level",
+        "Select data": "Select data",
+        "Filter measurements": "Filter measurements",
+        "Found time series": "Found time series",
         "Plots": "Plots",
-        "Uncategorized": "# Uncategorized",
+        "units": "units",
+        "updated at": "updated at",
+        "Uncategorized": "Uncategorized",
         "Available plots": "Available plots",
         "At least one y axis has to be provided": "At least one y axis has to be provided",
         "Data series": "Data series",
         "Borehole": "Borehole",
+        "No time series were created yet": "No time series were created yet",
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
-
-        "Show legend on top the map": "Show legend on top of the map"
+        "Show legend on top the map": "Show legend on top of the map",
+        "Not all measurements in plot were loaded by this moment": "Not all measurements in plot were loaded by this moment"
     }
 };

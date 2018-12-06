@@ -12,17 +12,25 @@
     <meta name="google" value="notranslate">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Preload fonts. -->
+    <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Build -->
+    <!-- build:css /css/build/all.min.css -->
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="/fonts/fonts.css">
     <link rel="stylesheet" href="/icons/material-icons.css">
     <!-- jQuery UI -->
     <link rel="stylesheet" href="/js/lib/jquery-ui/jquery-ui.min.css">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.solid.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.regular.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.css"/>
-    <!-- build:css /css/build/all.min.css -->
     <!-- Leafet -->
     <link rel="stylesheet" href="/js/lib/leaflet/leaflet.css">
     <link rel="stylesheet" href="/js/lib/leaflet-history/leaflet-history.css">
@@ -127,7 +135,6 @@
 <script src="/js/lib/jrespond/jRespond.js"></script>
 <script src="/js/lib/mustache.js/mustache.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
-<script src="/js/lib/raphael/raphael.min.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
 <script src="/js/lib/momentjs/moment-with-locales.js"></script>
 <script src="/js/lib/d3/d3.js"></script>

@@ -26,9 +26,16 @@ class TitleFieldComponent extends React.Component {
         this.setState({ title: event.target.value });
     }
 
-    onSave(event) {
+    onSave() {
         this.props.onAdd(this.state.title);
         this.setState({ title: '' });
+    }
+
+    handleKeyPress(event) {
+        if (event.key === `Enter` && this.state.title) {
+            this.props.onAdd(this.state.title);
+            this.setState({ title: '' });
+        }
     }
 
     render() {
@@ -40,6 +47,7 @@ class TitleFieldComponent extends React.Component {
         let cancelControl = false;
         if (this.props.onCancel) {
             cancelControl = (<button
+                title={__(`Cancel`)}
                 className="btn btn-xs btn-primary"
                 onClick={this.props.onCancel}
                 style={buttonStyle}>
@@ -55,14 +63,22 @@ class TitleFieldComponent extends React.Component {
         }
 
         return (<div className="input-group" style={containerStyle}>
-            <input id={(this.props.id ? this.props.id : ``)} value={this.state.title} type="text" className="form-control" placeholder={__("New title")} onChange={this.onChange.bind(this)}/>
+            <input
+                id={(this.props.id ? this.props.id : ``)}
+                value={this.state.title}
+                type="text"
+                className="form-control"
+                placeholder={__("New title")}
+                onChange={this.onChange.bind(this)}
+                onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
+                    title={__(`Save`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSave.bind(this)}
                     disabled={!this.state.title}
                     style={buttonStyle}>
-                    <i className="material-icons">save</i>
+                    <i className="material-icons">save</i>{(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
                 {cancelControl}
             </span>

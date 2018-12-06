@@ -40,13 +40,15 @@ describe('Editor', () => {
                 await page.click(`#map`);
                 await helpers.sleep(1000);
             }
-
+            
             // Adding feature
             await page.click(`#burger-btn`);
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
             await helpers.sleep(1000);
+
+            await page.screenshot({ path: './test0.png' });
             
             await page.focus('#root_id');
             await page.keyboard.type('2000');
@@ -59,8 +61,6 @@ describe('Editor', () => {
             // Ensure that the feature was added
             await page.click(`#map`);
             await helpers.sleep(1000);
-
-            await page.screenshot({ path: './test0.png' });
 
             expect(await page.evaluate(`$('.ge-delete').is(':visible')`)).to.be.true;
             await helpers.sleep(4000);
