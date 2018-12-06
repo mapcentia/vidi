@@ -109,9 +109,9 @@ body {
   width: 225px;
 }
 /*.popover-inner {
-      overflow: auto;
-      max-height: 400px;
-  }*/
+    overflow: auto;
+    max-height: 400px;
+}*/
 img {
   max-width: none !important;
 }
@@ -195,12 +195,14 @@ input[type="checkbox"] {
   line-height: 1.428571429;
   vertical-align: top;
   border-top: 1px solid #f5f5f5;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
   border-bottom: 0px;
 }
 .nav-tabs > li > a,
 .dropdown-menu > li > a {
   font-weight: 500;
+  font-family: 'Roboto', sans-serif, sans-serif !important;
   padding: 6px 10px;
   text-decoration: none !important;
 }
@@ -210,6 +212,7 @@ input[type="checkbox"] {
 .pane input,
 .pane textarea {
   font-weight: 300;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .navbar {
   border-radius: 0;
@@ -227,33 +230,34 @@ input[type="checkbox"] {
 .popover-content span {
   vertical-align: top !important;
   font-weight: 300;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .leaflet-top {
   top: 50px;
 }
 /*
-  .leaflet-top {
-      right: 0px !important;
-      left: auto !important;
-      opacity: 0.8;
-      top: auto !important;
-      bottom: 0px !important;
-  }
-  
-  .leaflet-control-zoom {
-      right: 10px !important;
-      bottom: 40px !important;
-  }
-  
-  .leaflet-control-zoom a, .leaflet-control-zoom a:hover {
-      height: 30px !important;
-      width: 30px !important;
-      font-size: 15px;
-      font-weight: normal;
-      text-decoration: none;
-      line-height: 30px !important;
-  }
-  */
+.leaflet-top {
+    right: 0px !important;
+    left: auto !important;
+    opacity: 0.8;
+    top: auto !important;
+    bottom: 0px !important;
+}
+
+.leaflet-control-zoom {
+    right: 10px !important;
+    bottom: 40px !important;
+}
+
+.leaflet-control-zoom a, .leaflet-control-zoom a:hover {
+    height: 30px !important;
+    width: 30px !important;
+    font-size: 15px;
+    font-weight: normal;
+    text-decoration: none;
+    line-height: 30px !important;
+}
+*/
 .ol-zoom,
 .olControlZoom {
   right: 20px;
@@ -743,7 +747,7 @@ body {
 #side-panel ul {
   overflow: hidden !important;
   list-style-type: none;
-  padding: 0px 19px;
+  padding: 0px 17px;
 }
 #side-panel ul li {
   padding: 7px 0;
@@ -752,6 +756,13 @@ body {
   margin-right: 17px;
   padding: 2px;
   border-radius: 50%;
+}
+#side-panel ul li .material-icons:hover {
+  background-color: #eeeeee;
+}
+#side-panel ul li.active .material-icons {
+  background-color: #03a9f4;
+  color: white;
 }
 .list-group .list-group-separator:before {
   width: 100%;
@@ -767,10 +778,10 @@ body {
   height: 26px;
 }
 /* Template-specific stuff
-   *
-   * Customizations just for the template; these are not necessary for anything
-   * with disabling the responsiveness.
-   */
+ *
+ * Customizations just for the template; these are not necessary for anything
+ * with disabling the responsiveness.
+ */
 /* Finesse the page header spacing */
 .page-header {
   margin-bottom: 30px;
@@ -779,10 +790,10 @@ body {
   margin-bottom: 10px;
 }
 /* Non-responsive overrides
-   *
-   * Utilitze the following CSS to disable the responsive-ness of the container,
-   * grid system, and navbar.
-   */
+ *
+ * Utilitze the following CSS to disable the responsive-ness of the container,
+ * grid system, and navbar.
+ */
 /* Reset the container */
 /* Always float the navbar header */
 .navbar-header {
@@ -1066,7 +1077,7 @@ h4 small {
 #search-border {
   position: relative;
   float: left;
-  width: 32px;
+  width: 40px;
   height: 100%;
 }
 #search-ribbon {
@@ -1082,7 +1093,7 @@ h4 small {
   font-size: 1.4em;
   line-height: 1em;
   color: #1f4164;
-  padding-left: 11px;
+  padding-left: 12px;
   position: absolute;
   cursor: pointer;
 }
@@ -1163,6 +1174,13 @@ h4 small {
 .leaflet-control-custom .appended-leaflet-control li a {
   width: 100% !important;
 }
+.navbar .navbar-brand i {
+  font-size: 30px;
+}
+.navbar .navbar-brand {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
 #module-container-body {
   padding: 0 4px 4px 0;
 }
@@ -1174,12 +1192,24 @@ h4 small {
 .bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
   padding: 3px 6px !important;
 }
-.fixed-table-container thead th .th-inner,
-.fixed-table-container tbody td .th-inner {
-  padding: 3px;
-  font-size: 12px;
+@media (min-width: 769px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 0;
+  }
 }
-.js-table-view-container td {
-  font-size: 11px !important;
-  padding: 3px;
+@media (max-width: 768px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 16px;
+  }
+}
+#layers_list .layer-item.list-group-item a {
+  display: inline-block;
+  border-radius: 50%;
+  padding: 1px;
+}
+#layers_list .layer-item.list-group-item .active {
+  background-color: #03a9f4;
+  color: white;
 }

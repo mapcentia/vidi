@@ -844,9 +844,7 @@ module.exports = {
 
                 localTable.assignEventListeners();
 
-                //if ($(`#${tableId}_container`).is(`:visible`)) {
-                    localTable.loadDataInTable(true);
-                //}
+                localTable.loadDataInTable(true);
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1481,11 +1479,12 @@ module.exports = {
                 setLayerOpacityRequests.push({layerKey, opacity: initialSliderValue});
 
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
 
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-search i'));
+                    _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
                 });
             }
@@ -1508,6 +1507,7 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-filters'));
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
@@ -1515,6 +1515,8 @@ module.exports = {
                 // Table view
                 $(layerContainer).find(`.js-toggle-table-view`).click(() => {
 
+
+                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                     $(layerContainer).find('.js-layer-settings-table').toggle();
 
                     // if (activeOpenedTable) {
@@ -1652,8 +1654,13 @@ module.exports = {
         }
     },
 
-    _selectIcon: (e) =>{
-        e.css('background-color', 'red')
+    _selectIcon: (e) => {
+        let className = 'active';
+        if (e.hasClass(className)) {
+            e.removeClass(className);
+        } else {
+            e.addClass(className);
+        }
     },
 
     /**
@@ -1715,6 +1722,7 @@ module.exports = {
                 $(container).find(`.js-toggle-filters`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-table').hide(0);
             }
             $(container).find(`.js-toggle-search`).hide();
 
@@ -1724,10 +1732,8 @@ module.exports = {
             } else {
                 $(container).find(`.js-toggle-search`).hide();
                 $(container).find('.js-layer-settings-search').hide(0);
-
+                $('#layers_list .layer-item.list-group-item a').removeClass('active');
             }
-
-
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
         }
