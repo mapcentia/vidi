@@ -101,6 +101,7 @@ var _makeSearch = function () {
     var primitive, coord,
         layer, buffer = parseFloat($("#buffer-value").val());
 
+
     for (var prop in drawnItems._layers) {
         layer = drawnItems._layers[prop];
         break;
@@ -139,6 +140,8 @@ var _makeSearch = function () {
             "dashArray": '5,3'
         }).addTo(bufferItems);
         l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
+        // Reset all SQL Query layers, in case another tools has
+        // created a layer while this one was switch on
         sqlQuery.init(qstore, buffered.toText(), "4326");
     }
 };
@@ -170,7 +173,11 @@ module.exports = {
         if ($("#advanced-info-btn").is(':checked')) {
             backboneEvents.get().trigger("advancedInfo:turnedOn");
 
+            // Reset all SQL Query layers
+            backboneEvents.get().trigger("sqlQuery:clear");
+
             $("#buffer").show();
+
 
            // L.drawLocal = require('./drawLocales/advancedInfo.js');
             drawControl = new L.Control.Draw({
@@ -234,7 +241,8 @@ module.exports = {
                 drawnItems.addLayer(e.layer);
             });
             cloud.get().map.on('draw:drawstart', function (e) {
-                _clearDrawItems();
+                // Clear all SQL query layers
+                backboneEvents.get().trigger("sqlQuery:clear");
             });
             cloud.get().map.on('draw:drawstop', function (e) {
                 _makeSearch();
@@ -328,6 +336,8 @@ module.exports = {
      */
     getBufferLayer: function () {
         return bufferItems;
-    }
+    },
+
+    reset: () => _clearDrawItems()
 };
 

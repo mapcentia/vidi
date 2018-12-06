@@ -300,11 +300,20 @@ module.exports = {
         "Available plots": "Tilgængelige grafer",
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
-        "Borehole": "Borehuller",
+        "Borehole": "DGU",
         "No time series were created yet": "Ingen tidsserier er oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
         "Show legend on top the map": "Vis signaturen ovenpå kortet",
-        "Not all measurements in plot were loaded by this moment": "Ikke alle værdier i grafen er indlæst i dette øjeblik"
+        "Not all measurements in plot were loaded by this moment": "Ikke alle værdier i grafen er indlæst i dette øjeblik",
+
+        // Search
+        "Didn't find anything": "Fandt ikke noget",
+        "Searchable fields": "Søgbare felter",
+        "Like": "Like",
+        "Similarity": "Similarity",
+        "Tsvector": "Tsvector",
+        "No searchable fields on layer": "Ingen søgbare felter på laget",
+        "Method": "Metode"
     }
 };

@@ -141,6 +141,11 @@ class MarkupGenerator {
                 </div>
 
                 <div style="display: inline-block;">
+               
+                    <a href="javascript:void(0);" class="js-toggle-search">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                    </a>
+                    
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
@@ -159,6 +164,7 @@ class MarkupGenerator {
             </div>
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-opacity"></div>
+            <div class="js-layer-settings-search"></div>
         </li>`);
     }
 
