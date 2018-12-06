@@ -286,7 +286,12 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
-        "Time series": "Tidsserie",
+        "Drag and drop measurement to add it to time series": "Træk og slip måling for at tilføje det til tidsserier",
+        "Remove from time series": "Fjern fra tidsserier",
+        "Time series": "Tidsserier",
+        "Water level": "Vandstand",
+        "Select data": "Vælg data",
+        "Filter measurements": "Filtrér målinger",
         "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
         "units": "Enheder",
@@ -296,7 +301,7 @@ module.exports = {
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
         "Borehole": "Borehuller",
-        "No time series were created yet": "Ingen tidsserier oprettet endnu",
+        "No time series were created yet": "Ingen tidsserier er oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
         "Show legend on top the map": "Vis signaturen ovenpå kortet",
