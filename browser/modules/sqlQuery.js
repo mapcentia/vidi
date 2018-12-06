@@ -191,7 +191,7 @@ module.exports = {
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
-                        $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
+                        $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
                         $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
                             '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
                             '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
@@ -211,7 +211,7 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: false,
-                            height: 400,
+                            height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
@@ -288,6 +288,9 @@ module.exports = {
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
+                            setTimeout(()=>{
+                                $('#modal-info-body table').bootstrapTable('resetView');
+                            }, 300);
                         }
                     }
                 };

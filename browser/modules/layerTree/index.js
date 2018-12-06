@@ -1507,7 +1507,7 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                        _self._selectIcon($(layerContainer).find('.js-toggle-filters'));
+                        _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
@@ -1515,36 +1515,22 @@ module.exports = {
                 // Table view
                 $(layerContainer).find(`.js-toggle-table-view`).click(() => {
 
-
                     _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                     $(layerContainer).find('.js-layer-settings-table').toggle();
 
-                    // if (activeOpenedTable) {
-                    //     tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
-                    //     tables[activeOpenedTable].destroy();
-                    // }
-
                     activeOpenedTable = `v:` + layerKey;
-                    //tables[activeOpenedTable].assignEventListeners();
-
-                    //$(`.js-table-view-container`).hide();
 
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+
+                    // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
+                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
 
                     // If data has not been loaded yet, then load it
                     if ($(`#${tableId}`).children().length === 0) {
                         tables[activeOpenedTable].loadDataInTable(true);
                     }
 
-                    $(`#${tableId}_container`).show();
-
-                    // $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                    //     bottom: "0"
-                    // }, 500, function () {
-                    //     $(".expand-less").show();
-                    //     $(".expand-more").hide();
-                    // });
                 });
 
                 if (defaultLayerType === `vector`) {
@@ -1733,6 +1719,8 @@ module.exports = {
                 $(container).find(`.js-toggle-search`).hide();
                 $(container).find('.js-layer-settings-search').hide(0);
                 $('#layers_list .layer-item.list-group-item a').removeClass('active');
+                // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                $(`.js-layer-settings-table table`).bootstrapTable('resetView');
             }
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
