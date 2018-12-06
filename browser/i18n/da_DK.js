@@ -290,6 +290,7 @@ module.exports = {
         "Remove from time series": "Fjern fra tidsserier",
         "Time series": "Tidsserier",
         "Water level": "Vandstand",
+        "Select data": "Vælg data",
         "Filter measurements": "Filtrér målinger",
         "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",

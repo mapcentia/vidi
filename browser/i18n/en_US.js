@@ -287,6 +287,7 @@ module.exports = {
         "Remove from time series": "Remove from time series",
         "Time series": "Time series",
         "Water level": "Water level",
+        "Select data": "Select data",
         "Filter measurements": "Filter measurements",
         "Found time series": "Found time series",
         "Plots": "Plots",
