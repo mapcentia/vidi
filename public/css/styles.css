@@ -1206,6 +1206,8 @@ h4 small {
 }
 #layers_list .layer-item.list-group-item a {
   display: inline-block;
+  border-radius: 50%;
+  padding: 1px;
 }
 #layers_list .layer-item.list-group-item .active {
   background-color: #03a9f4;

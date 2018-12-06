@@ -151,8 +151,8 @@ class MarkupGenerator {
                     </a>
                     <a href="javascript:void(0);" class="js-toggle-filters">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                        (<span class="js-toggle-filters-number-of-filters">0</span>)
                     </a>
+                    (<span class="js-toggle-filters-number-of-filters">0</span>)
                     <a href="javascript:void(0);" class="js-toggle-table-view">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                         </a>
@@ -165,6 +165,8 @@ class MarkupGenerator {
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-opacity"></div>
             <div class="js-layer-settings-search"></div>
+            <div class="js-layer-settings-table" id="vector-layer-table-view-form-table_view_${layerKey.replace(".", "_")}"></div>
+            </div>
         </li>`);
     }
 

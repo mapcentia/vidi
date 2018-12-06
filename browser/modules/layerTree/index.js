@@ -252,38 +252,6 @@ module.exports = {
         });
 
         state.listenTo('layerTree', _self);
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").on("click", function () {
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: (($("#" + TABLE_VIEW_CONTAINER_ID).height() * -1) + 30) + "px"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").hide();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").show();
-            });
-        });
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").on("click", function () {
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
-            });
-        });
-
-        $(`#` + TABLE_VIEW_CONTAINER_ID).find(".close-hide").on("click", function () {
-            tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
-            tables[activeOpenedTable].destroy();
-
-            activeOpenedTable = false;
-
-            $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                bottom: "-100%"
-            }, 500, function () {
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-less").show();
-                $(`#` + TABLE_VIEW_CONTAINER_ID).find(".expand-more").hide();
-            });
-        });
     },
 
     statisticsHandler: (statistics, forceLayerUpdate, skipLastStatisticsCheck) => {
@@ -845,7 +813,7 @@ module.exports = {
 
                 let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                 if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
-                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID).append(`<div class="js-table-view-container" id="${tableId}_container">
+                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID + `-${tableId}`).append(`<div class="js-table-view-container" id="${tableId}_container">
                     <div id="${tableId}"><table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>
                 </div>`);
 
@@ -868,15 +836,15 @@ module.exports = {
                     responsive: false,
                     callCustomOnload: true,
                     assignFeatureEventListenersOnDataLoad: false,
-                    height: 400,
+                    height: 250,
                     locale: window._vidiLocale.replace("_", "-"),
                     template: template,
                     usingCartodb: false
                 });
 
-                if ($(`#${tableId}_container`).is(`:visible`)) {
-                    localTable.loadDataInTable(true);
-                }
+                localTable.assignEventListeners();
+
+                localTable.loadDataInTable(true);
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1471,6 +1439,7 @@ module.exports = {
 
             $(layerContainer).find('.js-layer-settings-filters').hide(0);
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
+            $(layerContainer).find('.js-layer-settings-table').hide(0);
 
             let initialSliderValue = 1;
             if (layerIsTheTileOne) {
@@ -1510,10 +1479,12 @@ module.exports = {
                 setLayerOpacityRequests.push({layerKey, opacity: initialSliderValue});
 
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
 
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                     $(layerContainer).find('.js-layer-settings-search').toggle();
                 });
             }
@@ -1536,21 +1507,28 @@ module.exports = {
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-filters'));
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
 
                 // Table view
                 $(layerContainer).find(`.js-toggle-table-view`).click(() => {
-                    if (activeOpenedTable) {
-                        tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
-                        tables[activeOpenedTable].destroy();
-                    }
+
+
+                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                    $(layerContainer).find('.js-layer-settings-table').toggle();
+
+                    // if (activeOpenedTable) {
+                    //     tables[activeOpenedTable].object.trigger(`clearSelection_${tables[activeOpenedTable].uid}`);
+                    //     tables[activeOpenedTable].destroy();
+                    // }
 
                     activeOpenedTable = `v:` + layerKey;
-                    tables[activeOpenedTable].assignEventListeners();
+                    //tables[activeOpenedTable].assignEventListeners();
 
-                    $(`.js-table-view-container`).hide();
+                    //$(`.js-table-view-container`).hide();
+
                     let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
                     if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
 
@@ -1561,12 +1539,12 @@ module.exports = {
 
                     $(`#${tableId}_container`).show();
 
-                    $("#" + TABLE_VIEW_CONTAINER_ID).animate({
-                        bottom: "0"
-                    }, 500, function () {
-                        $(".expand-less").show();
-                        $(".expand-more").hide();
-                    });
+                    // $("#" + TABLE_VIEW_CONTAINER_ID).animate({
+                    //     bottom: "0"
+                    // }, 500, function () {
+                    //     $(".expand-less").show();
+                    //     $(".expand-more").hide();
+                    // });
                 });
 
                 if (defaultLayerType === `vector`) {
@@ -1676,6 +1654,15 @@ module.exports = {
         }
     },
 
+    _selectIcon: (e) => {
+        let className = 'active';
+        if (e.hasClass(className)) {
+            e.removeClass(className);
+        } else {
+            e.addClass(className);
+        }
+    },
+
     /**
      * Setups layer as the vector one
      */
@@ -1719,6 +1706,7 @@ module.exports = {
                 } else {
                     $(container).find(`.js-toggle-table-view`).hide();
                     $(container).find('.js-layer-settings-filters').hide(0);
+                    $(container).find('.js-layer-settings-table').hide(0);
                 }
 
                 $(container).find(`.js-toggle-filters`).show(0);
@@ -1734,6 +1722,7 @@ module.exports = {
                 $(container).find(`.js-toggle-filters`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-table').hide(0);
             }
             $(container).find(`.js-toggle-search`).hide();
 
@@ -1743,10 +1732,8 @@ module.exports = {
             } else {
                 $(container).find(`.js-toggle-search`).hide();
                 $(container).find('.js-layer-settings-search').hide(0);
-
+                $('#layers_list .layer-item.list-group-item a').removeClass('active');
             }
-
-
         } else if (ignoreErrors === false) {
             throw new Error(`Unable to find layer container`);
         }

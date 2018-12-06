@@ -17,7 +17,7 @@ module.exports = function (grunt) {
 
     // Default build parameters
     let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-    let lessConfig = { "public/css/styles.css": "public/less/styles.default.less" };
+    let lessConfig = { "public/css/styles.css": "public/less/styles.less" };
     if (theme && theme === 'watsonc') {
         copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
         lessConfig = { "public/css/styles.css": "public/less/styles." + theme + ".less" };
