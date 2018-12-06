@@ -47,6 +47,7 @@ class TitleFieldComponent extends React.Component {
         let cancelControl = false;
         if (this.props.onCancel) {
             cancelControl = (<button
+                title={__(`Cancel`)}
                 className="btn btn-xs btn-primary"
                 onClick={this.props.onCancel}
                 style={buttonStyle}>
@@ -72,11 +73,12 @@ class TitleFieldComponent extends React.Component {
                 onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
+                    title={__(`Save`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSave.bind(this)}
                     disabled={!this.state.title}
                     style={buttonStyle}>
-                    <i className="material-icons">save</i>
+                    <i className="material-icons">save</i>{(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
                 {cancelControl}
             </span>
