@@ -1480,11 +1480,6 @@ module.exports = {
                     _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
-
-                $(layerContainer).find(`.js-toggle-search`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-search'));
-                    $(layerContainer).find('.js-layer-settings-search').toggle();
-                });
             }
 
             // Filtering is available only for vector layers
@@ -1537,6 +1532,11 @@ module.exports = {
                     _self.setupLayerAsTileOne(layerKey);
                 }
             }
+
+            $(layerContainer).find(`.js-toggle-search`).click(() => {
+                _self._selectIcon($(layerContainer).find('.js-toggle-search'));
+                $(layerContainer).find('.js-layer-settings-search').toggle();
+            });
 
             // PostgreSQL search is for all types of layers
             $(layerContainer).find('.js-layer-settings-search').append(
