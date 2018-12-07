@@ -527,7 +527,7 @@ module.exports = {
                                 if (`layersOfflineMode` in forcedState) {
                                     offlineModeSettings = forcedState.layersOfflineMode;
                                     for (let key in offlineModeSettings) {
-                                        if (offlineModeSettings[key] === `true`) {
+                                        if (offlineModeSettings[key] === `true` || offlineModeSettings[key]) {
                                             offlineModeSettings[key] = true;
                                         } else {
                                             offlineModeSettings[key] = false;
@@ -711,11 +711,12 @@ module.exports = {
                         let promises = [];
                         for (let key in settings) {
                             if (key.indexOf(`v:`) === 0) {
+                                let keyWithoutPrefix = key.replace(`v:`, ``);
                                 // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                 response.map(cachedRequest => {
-                                    if (cachedRequest.layerKey === key.replace(`v:`, ``)) {
+                                    if (cachedRequest.layerKey === keyWithoutPrefix) {
                                         let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
-                                        if (settings[key] === `true` || settings[key] === true) {
+                                        if (settings[keyWithoutPrefix] === `true` || settings[keyWithoutPrefix] === true) {
                                             serviceWorkerAPIKey = `enableOfflineModeForLayer`;
                                             offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
                                         } else {
@@ -734,7 +735,7 @@ module.exports = {
                         if (promises.length === 0) {
                             resolve();
                         } else {
-                            Promise.all(promises).then(() => {
+                            Promise.all(promises).then((results) => {
                                 resolve();
                             });
                         }
