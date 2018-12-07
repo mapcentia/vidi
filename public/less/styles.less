@@ -853,6 +853,8 @@ body {
   
   #side-panel ul li .material-icons {
     margin-right: 17px;
+    padding: 2px;
+    border-radius: 50%;
   }
   
   .list-group .list-group-separator:before {
@@ -861,7 +863,7 @@ body {
   }
   
   .list-group-item {
-    padding: 16px;
+    padding: 10px 14px;
     overflow: visible !important;
   }
   
@@ -1328,8 +1330,6 @@ body {
   }
   
   .help-btn {
-    position: fixed;
-    top: 14px;
     color: rgba(0,0,0, 0.26);
     cursor: help;
   }
@@ -1354,3 +1354,15 @@ body {
   .leaflet-control-custom .appended-leaflet-control li a {
       width: 100% !important;
   }
+
+#module-container-body {
+  padding: 0 4px 4px 0;
+}
+.bootstrap-table .table:not(.table-condensed),
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
+.bootstrap-table .table:not(.table-condensed) > thead > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+  padding: 3px 6px !important;
+}
