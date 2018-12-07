@@ -318,8 +318,9 @@ module.exports = {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
+                let initialVectorFilters = ((initialState && `vectorFilters` in initialState) ? initialState.vectorFilters : false);
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                resolve({order, offlineModeSettings, opacitySettings});
+                resolve({order, offlineModeSettings, initialVectorFilters, opacitySettings});
             });
         });
 
@@ -491,9 +492,13 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, opacitySettings}) => {
 
                         try {
+
+                            if (vectorFilters) {
+                                vectorFilters = initialVectorFilters;
+                            }
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
                                 console.error(`Invalid order object`, order);
