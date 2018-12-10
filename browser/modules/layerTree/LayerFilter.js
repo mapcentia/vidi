@@ -55,7 +55,7 @@ class LayerFilter extends React.Component {
         };
     }
 
-    onRuleDelete(event, index) {
+    onRuleDelete(index) {
         let filters = this.state.filters;
         filters.columns.splice(index, 1);
         this.setState({ filters });
