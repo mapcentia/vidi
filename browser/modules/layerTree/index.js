@@ -798,7 +798,7 @@ module.exports = {
 
         let whereClauses = [];
 
-        if (layerKey in vectorFilters) {
+        if (vectorFilters && layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
             if (conditions.length > 0) {
                 if (vectorFilters[layerKey].match === `any`) {
@@ -1003,7 +1003,7 @@ module.exports = {
         let layer = meta.getMetaByKey(layerKey);
 
         let conditions = [];
-        if (layerKey in vectorFilters) {
+        if (vectorFilters && layerKey in vectorFilters) {
             vectorFilters[layerKey].columns.map((column, index) => {
                 if (column.fieldname && column.value) {
                     for (let key in layer.fields) {
@@ -1526,7 +1526,7 @@ module.exports = {
                 let conditions = _self.getFilterConditions(layerKey);
                 $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
                 let filters = {};
-                if (layerKey in vectorFilters) {
+                if (vectorFilters && layerKey in vectorFilters) {
                     filters = vectorFilters[layerKey];
                 }
 
@@ -1738,6 +1738,8 @@ module.exports = {
             opacitySettings
         };
 
+        console.log(`### getting state`, state);
+
         return state;
     },
 
@@ -1766,6 +1768,8 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
+
+        console.log(`### applying state`, newState);
 
         return _self.create(newState);
     },
