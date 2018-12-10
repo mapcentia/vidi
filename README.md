@@ -45,7 +45,7 @@ First get the docker-compose file:
 
 ```bash
 git clone https://github.com/mapcentia/dockerfiles.git
-cd dockerfiles/docker-compose/vidi
+cd dockerfiles/docker-compose/standalone/vidi
 ```  
 
 Second you have to set some environment variables. Rename the `vidi.env.dist` file to `vidi.env`:    
@@ -73,7 +73,7 @@ Finally deploy the container:
 docker-compose up
 ```
 
-When request Vidi at http://localhost:3000/app/[database]/public. Just make sure, there are some layers in `public` schema and they're in a Group.
+Then request Vidi at http://localhost:3000/app/[database]/public. Just make sure, there are some layers in `public` schema and they're in a Group.
 
 ---
 
