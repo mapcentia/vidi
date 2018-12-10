@@ -1722,7 +1722,7 @@ module.exports = {
             } else {
                 $(container).find(`.js-toggle-search`).hide();
                 $(container).find('.js-layer-settings-search').hide(0);
-                $('#layers_list .layer-item.list-group-item a').removeClass('active');
+                $(container).find('a').removeClass('active');
                 // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                 $(`.js-layer-settings-table table`).bootstrapTable('resetView');
             }
