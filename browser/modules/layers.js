@@ -205,8 +205,6 @@ module.exports = {
      * @returns {Promise}
      */
     addLayer: function (l, appendedFiltersString = false) {
-        console.log(`### appendedFiltersString`, appendedFiltersString);
-
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
