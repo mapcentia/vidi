@@ -75,7 +75,8 @@ var ReactDOM = require('react-dom');
 
 import noUiSlider from 'nouislider';
 
-import LayerFilter from './LayerFilter';
+import TileLayerFilter from './TileLayerFilter';
+import VectorLayerFilter from './VectorLayerFilter';
 import {relative} from 'path';
 import {
     validateFilters,
@@ -166,6 +167,7 @@ let treeIsBeingBuilt = false;
 let userPreferredForceOfflineMode = -1;
 
 let vectorFilters = {};
+let tileFilters = {};
 
 let extensions = false;
 
@@ -319,8 +321,9 @@ module.exports = {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
                 let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
+                let initialTileFilters = ((initialState && `tileFilters` in initialState && typeof initialState.tileFilters === `object`) ? initialState.tileFilters : {});
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                resolve({order, offlineModeSettings, initialVectorFilters, opacitySettings});
+                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings});
             });
         });
 
@@ -492,12 +495,16 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings}) => {
 
                         try {
 
                             if (vectorFilters) {
                                 vectorFilters = initialVectorFilters;
+                            }
+
+                            if (initialTileFilters) {
+                                tileFilters = initialTileFilters;
                             }
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
@@ -1469,18 +1476,13 @@ module.exports = {
 
                 moment.locale('da');
 
-
-                //metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
-
                 html = html ? Mustache.render(html, parsedMeta) : "";
 
-                //$("#info-modal.slide-right").show();
                 $("#info-modal.slide-right").css("right", "0");
                 $("#info-modal .modal-title").html(title || name);
                 $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
                 legend.init([`${layer.f_table_schema}.${layer.f_table_name}`], "#info-modal-legend");
                 e.stopPropagation();
-
             });
 
             if (base64SubgroupName) {
@@ -1583,6 +1585,10 @@ module.exports = {
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
+
+                $(layerContainer).find(`.js-toggle-tile-filters`).click(() => {
+                    $(layerContainer).find('.js-layer-settings-tile-filters').toggle();
+                });
             }
 
             // Filtering is available only for vector layers
@@ -1599,7 +1605,7 @@ module.exports = {
 
                 if (document.getElementById(componentContainerId)) {
                     ReactDOM.render(
-                        <LayerFilter layer={layer} filters={filters} onApply={_self.onApplyFiltersHandler}/>, document.getElementById(componentContainerId));
+                        <VectorLayerFilter layer={layer} filters={filters} onApply={_self.onApplyVectorFiltersHandler}/>, document.getElementById(componentContainerId));
                     $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                     $(layerContainer).find(`.js-toggle-filters`).click(() => {
@@ -1642,6 +1648,30 @@ module.exports = {
                 } else {
                     _self.setupLayerAsTileOne(layerKey);
                 }
+            } else {
+                if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+                    let parsedWMSFilters = false;
+                    try {
+                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                        parsedWMSFilters = parsedWMSFiltersLocal;
+                    } catch (e) {}
+
+                    if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
+                        let componentContainerId = `layer-settings-tile-filters-${layerKey}`;
+                        $(layerContainer).find('.js-layer-settings-tile-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(<TileLayerFilter
+                                layerKey={layerKey}
+                                filters={parsedWMSFilters}
+                                disabledFilters={tileFilters[layerKey]}
+                                onApply={_self.onApplyTileFiltersHandler}/>,
+                                document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-tile-filters').hide(0);
+                        }
+                    }
+                } else {
+                    $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                }
             }
         }
     },
@@ -1683,6 +1713,7 @@ module.exports = {
             }
 
             if (setupAsVector) {
+                $(container).find(`.js-toggle-tile-filters`).hide();
                 $(container).find(`.js-toggle-opacity`).hide();
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-table-view`).show();
@@ -1695,8 +1726,10 @@ module.exports = {
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
                 if (layerIsEnabled) {
+                    $(container).find(`.js-toggle-tile-filters`).show();
                     $(container).find(`.js-toggle-opacity`).show();
                 } else {
+                    $(container).find(`.js-toggle-tile-filters`).hide();
                     $(container).find(`.js-toggle-opacity`).hide();
                     $(container).find('.js-layer-settings-opacity').hide(0);
                 }
@@ -1710,7 +1743,7 @@ module.exports = {
         }
     },
 
-    onApplyFiltersHandler: ({layerKey, filters}) => {
+    onApplyVectorFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
 
         let correspondingLayer = meta.getMetaByKey(layerKey);
@@ -1720,6 +1753,12 @@ module.exports = {
 
         _self.createStore(correspondingLayer);
         _self.reloadLayer(`v:` + layerKey);
+    },
+
+    onApplyTileFiltersHandler: ({layerKey, filters}) => {
+        tileFilters[layerKey] = filters;
+        backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
+        _self.reloadLayer(layerKey);
     },
 
     /**
@@ -1800,6 +1839,7 @@ module.exports = {
         let state = {
             order: layerTreeOrder,
             vectorFilters,
+            tileFilters,
             activeLayers,
             layersOfflineMode,
             opacitySettings
@@ -1821,6 +1861,13 @@ module.exports = {
             vectorFilters = newState.vectorFilters;
         } else {
             vectorFilters = {};
+        }
+
+        // Setting tile filters
+        if (newState !== false && `tileFilters` in newState && typeof newState.tileFilters === `array`) {
+            tileFilters = newState.tileFilters;
+        } else {
+            tileFilters = {};
         }
 
         queueStatistsics.setLastStatistics(false);

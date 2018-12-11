@@ -34,7 +34,7 @@ const DUMMY_RULE = {
     value: ``
 };
 
-class LayerFilter extends React.Component {
+class VectorLayerFilter extends React.Component {
     constructor(props) {
         super(props);
 
@@ -314,10 +314,10 @@ class LayerFilter extends React.Component {
     }
 }
 
-LayerFilter.propTypes = {
+VectorLayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
     filters: PropTypes.object.isRequired,
     onApply: PropTypes.func.isRequired,
 };
 
-export default LayerFilter;
+export default VectorLayerFilter;
