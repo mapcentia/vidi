@@ -1691,6 +1691,45 @@ module.exports = {
     },
 
     /**
+     * Returns tile filter string for specific tile layer
+     */
+    getLayerFilterString: (layerKey) => {
+        if (!layerKey || layerKey.length === 0 || layerKey.indexOf(`v:`) === 0) {
+            throw new Error(`Invalid tile layer name ${layerKey}`);
+        }
+
+        let filters = false;
+        if (tileFilters && layerKey in tileFilters && tileFilters[layerKey]) {
+            filters = tileFilters[layerKey];
+        }
+
+        let layerDescription = meta.getMetaByKey(layerKey);
+        let parsedMeta = _self.parseLayerMeta(layerDescription);
+        let parameterString = false;
+        if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+            let parsedWMSFilters = false;
+            try {
+                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                parsedWMSFilters = parsedWMSFiltersLocal;
+            } catch (e) {}
+
+            parameterString = `&filters=`;
+            let appliedFilters = {};
+            if (parsedWMSFilters) {
+                for (let key in parsedWMSFilters) {
+                    if (filters === false || filters.indexOf(key) === -1) {
+                        appliedFilters[key] = parsedWMSFilters[key];
+                    }
+                }
+            }
+
+            parameterString = parameterString + JSON.stringify(appliedFilters);
+        }
+
+        return parameterString;
+    },
+
+    /**
      * By design the layer control is rendered with controls both for tile and vector case, so
      * this function regulates the visibility and initialization of layer type specific controls.
      *

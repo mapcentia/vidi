@@ -197,11 +197,16 @@ module.exports = {
     },
 
     /**
-     *
-     * @param l
+     * Adds raster layer
+     * 
+     * @param {String} l                     Layer key
+     * @param {String} appendedFiltersString Optional filter string
+     * 
      * @returns {Promise}
      */
-    addLayer: function (l) {
+    addLayer: function (l, appendedFiltersString = false) {
+        console.log(`### appendedFiltersString`, appendedFiltersString);
+
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -216,6 +221,7 @@ module.exports = {
                     // Check if the opacity value differs from the default one
                     isBaseLayer = !!v.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
+                        additionalURLParameters: (appendedFiltersString ? appendedFiltersString : ''),
                         host: host,
                         layers: [layer],
                         db: db,
