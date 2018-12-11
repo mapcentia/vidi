@@ -563,7 +563,7 @@ geocloud = (function () {
 
         if (!defaults.tileCached) {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?";
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
             } else {
                 uri = defaults.uri;
             }

@@ -376,12 +376,7 @@ class OfflineModeControlsManager {
         }
 
         layerKey = layerKey.replace(`v:`, ``);
-        if (this.isVectorLayer(layerKey)) {
-            this.offlineModeValues[`v:` + layerKey] = offlineMode;
-        } else {
-            this.offlineModeValues[layerKey] = offlineMode;
-        }
-
+        this.offlineModeValues[layerKey] = offlineMode;
         if (bbox && this.vectorLayersCachedWithingTheBBox.indexOf(layerKey) === -1) {
             this.vectorLayersCachedWithingTheBBox.push(layerKey);
         }
