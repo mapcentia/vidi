@@ -303,6 +303,16 @@ module.exports = module.exports = {
             infoClick.reset();
         });
 
+        // Clear all query layers and deactivate tools
+        // ===========================================
+        backboneEvents.get().on("sqlQuery:clear", ()=>{
+            console.info("Resting SQL Query");
+            infoClick.reset();
+            advancedInfo.reset();
+            layerTree.resetSearch();
+        });
+
+
         // Layer loading
         // =============
         backboneEvents.get().on("startLoading:layers", function (e) {

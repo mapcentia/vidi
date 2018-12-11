@@ -1,0 +1,28 @@
+{
+  "name": "leaflet-measure-path",
+  "version": "1.3.1",
+  "homepage": "https://github.com/perliedman/leaflet-measure-path",
+  "authors": [
+    "Per Liedman <per@liedman.net> (http://www.liedman.net/)"
+  ],
+  "description": "Show measurements on Leaflet paths",
+  "keywords": [
+    "leaflet",
+    "measurement",
+    "path"
+  ],
+  "license": "ISC",
+  "main": [
+    "leaflet-measure-path.js",
+    "leaflet-measure-path.css"
+  ],
+  "_release": "1.3.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v1.3.1",
+    "commit": "4fb3f16132abd7e66dc020d1d28536a8ad4e8a81"
+  },
+  "_source": "https://github.com/perliedman/leaflet-measure-path.git",
+  "_target": "^1.3.1",
+  "_originalSource": "leaflet-measure-path"
+}

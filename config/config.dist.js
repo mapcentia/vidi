@@ -14,6 +14,7 @@ module.exports = {
 
     // ========================================
     // Which back-end is used. "gc2" or "carto"
+    // ONLY GC2 IS SUPPORTED
     // ========================================
 
     "backend": "gc2",
@@ -25,7 +26,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "https://gc2.mapcentia.com"
+        "host": "GC2_HOST"
     },
 
 
@@ -38,8 +39,7 @@ module.exports = {
 
     "print": {
         "templates": {
-
-
+            
             // ================================
             // The "print" template is build-in
             // ================================
@@ -131,17 +131,17 @@ module.exports = {
 
     "extensions": {
         "browser": [
-            //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
-            //{"layerSearch": ["index", "controller"]},
+            {"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             {"streetView": ["index"]},
             {"coordinates": ["index"]},
             {"offlineMap": ["index"]},
-            {"session": ["index"]}
+            {"session": ["index"]},
+            {"editor": ["index"]},
+
         ],
         "server": [
-            /*{conflictSearch: ["index"]},*/
-            /*{layerSearch: ["index", "indexInEs"]},*/
-            {"session": ["index"]}
+            {"conflictSearch": ["index"]},
+            {"session": ["index"]},
         ]
     },
 
@@ -178,7 +178,7 @@ module.exports = {
     // (Database name in GC2 and account name in Carto)
     // ==========================================================
 
-    "autoLoadingConfig": true,
+    "autoLoadingConfig": false,
 
 
     // ====================================================================================
@@ -215,10 +215,12 @@ module.exports = {
     // ===================================================
 
     "enabledExtensions": [
-        /*"conflictSearch",*/
+        "conflictSearch",
         "streetView",
-        "layerSearch",
-        "coordinates"
+        "session",
+        "coordinates",
+        "offlineMap",
+        "editor",
     ],
 
 

@@ -1,0 +1,28 @@
+{
+  "name": "jspdf-autotable",
+  "homepage": "https://github.com/simonbengtsson/jspdf-autotable",
+  "description": "Generate PDF tables or lists with javascript and jsPDF",
+  "main": "dist/jspdf.plugin.autotable.js",
+  "dependencies": {
+    "jspdf": "~1.0.178"
+  },
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "pdf",
+    "table"
+  ],
+  "license": "MIT",
+  "ignore": [],
+  "version": "2.0.14",
+  "_release": "2.0.14",
+  "_resolution": {
+    "type": "version",
+    "tag": "v2.0.14",
+    "commit": "a1f9c9520c3bdc49958eec310b73e5424f12c673"
+  },
+  "_source": "https://github.com/someatoms/jsPDF-AutoTable.git",
+  "_target": "2.0.9 || 2.0.14",
+  "_originalSource": "jspdf-autotable"
+}
