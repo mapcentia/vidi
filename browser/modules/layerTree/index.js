@@ -318,7 +318,7 @@ module.exports = {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
-                let initialVectorFilters = ((initialState && `vectorFilters` in initialState) ? initialState.vectorFilters : false);
+                let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
                 resolve({order, offlineModeSettings, initialVectorFilters, opacitySettings});
             });
@@ -532,7 +532,7 @@ module.exports = {
                                 if (`layersOfflineMode` in forcedState) {
                                     offlineModeSettings = forcedState.layersOfflineMode;
                                     for (let key in offlineModeSettings) {
-                                        if (offlineModeSettings[key] === `true` || offlineModeSettings[key]) {
+                                        if (offlineModeSettings[key] === `true` || offlineModeSettings[key] === true) {
                                             offlineModeSettings[key] = true;
                                         } else {
                                             offlineModeSettings[key] = false;
@@ -606,48 +606,116 @@ module.exports = {
                                     setTimeout(() => {
                                         if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
 
-                                        if (activeLayers) {
-                                            activeLayers.map(layerName => {
-                                                let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
-
-                                                if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                                    $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                                    if (layerName.indexOf(`v:`) === 0) {
-                                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
-                                                    } else {
-                                                        $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
-                                                    }
-                                                } else {
-                                                    $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
+                                        const turnOnActiveLayersAndFinishBuilding = () => {
+                                            return new Promise((localResolve, reject) => {
+                                                if (activeLayers) {
+                                                    activeLayers.map(layerName => {
+                                                        let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
+        
+                                                        if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                                            if (layerName.indexOf(`v:`) === 0) {
+                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                                            } else {
+                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                                            }
+                                                        } else {
+                                                            $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
+                                                        }
+                                                    });
+        
+                                                    legend.init();
                                                 }
+        
+                                                layerTreeIsReady = true;
+                                                treeIsBeingBuilt = false;
+                                                backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
+                                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+        
+                                                if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
+        
+                                                localResolve();
                                             });
+                                        };
 
-                                            legend.init();
-                                        }
+                                        const setOfflineModeSettingsForCache = () => {
+                                            return new Promise((localResolve, reject) => {
+                                                queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
+                                                    let promisesContent = [];
+                                                    if (Object.keys(offlineModeSettings).length > 0) {
 
-                                        layerTreeIsReady = true;
-                                        treeIsBeingBuilt = false;
-                                        backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
-                                        backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
 
-                                        if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
 
-                                        if (offlineModeSettings !== false && `serviceWorker` in navigator) {
-                                            if (navigator.serviceWorker.controller) {
-                                                _self._applyOfflineModeSettings(offlineModeSettings).then(() => {
-                                                    resolve();
+                                                        currentCachedRequests.map(cachedRequest => {
+                                                            let setOfflineModeForCurrentCachedRequestTo = false;
+                                                            for (let key in offlineModeSettings) {
+                                                                if (cachedRequest.layerKey.replace(`v:`, ``) === key.replace(`v:`, ``)) {
+                                                                    setOfflineModeForCurrentCachedRequestTo = offlineModeSettings[key];
+                                                                }
+                                                            }
+
+                                                            if (setOfflineModeForCurrentCachedRequestTo) {
+                                                                promisesContent.push({
+                                                                    action: `enableOfflineModeForLayer`,
+                                                                    payload: { layerKey: cachedRequest.layerKey }
+                                                                });
+                                                            } else {
+                                                                promisesContent.push({
+                                                                    action: `disableOfflineModeForLayer`,
+                                                                    payload: { layerKey: cachedRequest.layerKey }
+                                                                });
+                                                            }
+                                                        });
+
+                                                        for (let key in offlineModeSettings) {
+                                                            let offlineModeSettingWasApplied = false;
+                                                            promisesContent.map(item => {
+                                                                if (item.payload.layerKey.replace(`v:`, ``) === key.replace(`v:`, ``)) {
+                                                                    offlineModeSettingWasApplied = true;
+                                                                }
+                                                            });
+
+                                                            if (offlineModeSettingWasApplied === false) {
+                                                                if (offlineModeSettings[key]) {
+                                                                    console.warn(`Unable to make ${key} offline, as it has not been cached before`);
+                                                                }
+                                                            }
+                                                        }
+                                                    } else {
+                                                        // Disabling offline mode for all layers
+                                                        currentCachedRequests.map(cachedRequest => {
+                                                            if (cachedRequest.offlineMode) {
+                                                                promisesContent.push({
+                                                                    action: `disableOfflineModeForLayer`,
+                                                                    payload: { layerKey: cachedRequest.layerKey }
+                                                                });
+                                                            }
+                                                        });
+                                                    }
+
+                                                    let promises = [];
+                                                    promisesContent.map(item => promises.push(queryServiceWorker(item)));
+                                                    Promise.all(promises).then(() => {
+                                                        turnOnActiveLayersAndFinishBuilding().then(() => {
+                                                            queryServiceWorker({action: `getListOfCachedRequests`}).then(localResolve);
+                                                        });
+                                                    });
                                                 });
-                                            } else {
-                                                backboneEvents.get().once(`ready:serviceWorker`, () => {
-                                                    setTimeout(() => {
-                                                        _self._applyOfflineModeSettings(offlineModeSettings);
-                                                    }, 1000);
-                                                });
+                                            });
+                                        };
 
-                                                resolve();
-                                            }
+                                        if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
+                                            setOfflineModeSettingsForCache().then(resolve);
                                         } else {
-                                            resolve();
+                                            backboneEvents.get().once(`ready:serviceWorker`, () => {
+                                                setTimeout(() => {
+                                                    if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
+                                                        setOfflineModeSettingsForCache().then(resolve);
+                                                    } else {
+                                                        turnOnActiveLayersAndFinishBuilding().then(resolve);
+                                                    }
+                                                }, 1000);
+                                            });
                                         }
                                     }, 1000);
                                 });
@@ -716,18 +784,17 @@ module.exports = {
                         let promises = [];
                         for (let key in settings) {
                             if (key.indexOf(`v:`) === 0) {
-                                let keyWithoutPrefix = key.replace(`v:`, ``);
                                 // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                 response.map(cachedRequest => {
-                                    if (cachedRequest.layerKey === keyWithoutPrefix) {
+                                    if (cachedRequest.layerKey === key) {
                                         let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
-                                        if (settings[keyWithoutPrefix] === `true` || settings[keyWithoutPrefix] === true) {
+                                        if (settings[key] === `true` || settings[key] === true) {
                                             serviceWorkerAPIKey = `enableOfflineModeForLayer`;
                                             offlineModeControlsManager.setControlState(key, true, cachedRequest.bbox);
                                         } else {
                                             offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
                                         }
-
+                                        
                                         promises.push(queryServiceWorker({
                                             action: serviceWorkerAPIKey,
                                             payload: {layerKey: cachedRequest.layerKey}
@@ -1738,8 +1805,6 @@ module.exports = {
             opacitySettings
         };
 
-        console.log(`### getting state`, state);
-
         return state;
     },
 
@@ -1748,7 +1813,7 @@ module.exports = {
      */
     applyState: (newState) => {
         // Setting vector filters
-        if (newState !== false && `vectorFilters` in newState) {
+        if (newState !== false && `vectorFilters` in newState && typeof newState.vectorFilters === `object`) {
             for (let key in newState.vectorFilters) {
                 validateFilters(newState.vectorFilters[key]);
             }
@@ -1768,8 +1833,6 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-
-        console.log(`### applying state`, newState);
 
         return _self.create(newState);
     },
