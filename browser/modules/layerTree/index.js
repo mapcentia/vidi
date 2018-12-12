@@ -1652,16 +1652,17 @@ module.exports = {
                     _self.setupLayerAsTileOne(layerKey);
                 }
             } else {
-                if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+                if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
                     let parsedWMSFilters = false;
                     try {
-                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                         parsedWMSFilters = parsedWMSFiltersLocal;
                     } catch (e) {}
 
                     if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
                         let componentContainerId = `layer-settings-tile-filters-${layerKey}`;
                         $(layerContainer).find('.js-layer-settings-tile-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        
                         if (document.getElementById(componentContainerId)) {
                             ReactDOM.render(<TileLayerFilter
                                 layerKey={layerKey}
@@ -1821,10 +1822,10 @@ module.exports = {
         let layerDescription = meta.getMetaByKey(layerKey);
         let parsedMeta = _self.parseLayerMeta(layerDescription);
         let parameterString = false;
-        if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+        if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
             let parsedWMSFilters = false;
             try {
-                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                 parsedWMSFilters = parsedWMSFiltersLocal;
             } catch (e) {}
 

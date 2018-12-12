@@ -13,15 +13,10 @@ class TileLayerFilter extends React.Component {
 
         let filters = [];
         for (let key in props.filters) {
-            let splitFilter = props.filters[key].split(`=`);
-            if (splitFilter.length === 2) {
-                filters.push({
-                    name: key,
-                    value: props.filters[key]
-                });
-            } else {
-                console.warn(`Invalid filter was provided for ${props.layerKey}: ${props.filters[key]}`);
-            }
+            filters.push({
+                name: key,
+                value: props.filters[key]
+            });
         }
 
         let disabledFilters = [];
