@@ -164,6 +164,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Load strategy": "# Load strategy",
         "Network status": "Network status",
         "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",

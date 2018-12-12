@@ -77,6 +77,7 @@ import noUiSlider from 'nouislider';
 
 import TileLayerFilter from './TileLayerFilter';
 import VectorLayerFilter from './VectorLayerFilter';
+import LoadStrategyToggle from './LoadStrategyToggle';
 import {relative} from 'path';
 import {
     validateFilters,
@@ -97,7 +98,6 @@ let urlparser = require('./../urlparser');
  * @type {*|exports|module.exports}
  */
 import OfflineModeControlsManager from './OfflineModeControlsManager';
-
 let offlineModeControlsManager = false;
 
 /**
@@ -1515,6 +1515,7 @@ module.exports = {
             });
 
             $(layerContainer).find('.js-layer-settings-filters').hide(0);
+            $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
             $(layerContainer).find('.js-layer-settings-table').hide(0);
 
@@ -1565,8 +1566,8 @@ module.exports = {
                 });
             }
 
-            // Filtering is available only for vector layers
             if (layerIsTheVectorOne) {
+                // Vector layer filters
                 let componentContainerId = `layer-settings-filters-${layerKey}`;
                 $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
 
@@ -1588,9 +1589,26 @@ module.exports = {
                     });
                 }
 
+                // Load strategy
+                if (`load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
+                    
+                    // @todo Depends on local saved values
+                    let value = true;
+
+                    componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<LoadStrategyToggle initialValue={value} onChange={_self.onChangeLoadStrategyHandler}/>,
+                            document.getElementById(componentContainerId));
+                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                        });
+                    }
+                }
+
                 // Table view
                 $(layerContainer).find(`.js-toggle-table-view`).click(() => {
-
                     _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                     $(layerContainer).find('.js-layer-settings-table').toggle();
 
@@ -1818,9 +1836,7 @@ module.exports = {
      */
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
-
         let layerMeta = meta.getMetaByKey(layerKey);
-
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
@@ -1837,10 +1853,12 @@ module.exports = {
                 } else {
                     $(container).find(`.js-toggle-table-view`).hide();
                     $(container).find('.js-layer-settings-filters').hide(0);
+                    $(container).find('.js-layer-settings-load-strategy').hide(0);
                     $(container).find('.js-layer-settings-table').hide(0);
                 }
 
                 $(container).find(`.js-toggle-filters`).show(0);
+                $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
                 if (layerIsEnabled) {
@@ -1854,8 +1872,10 @@ module.exports = {
                 }
 
                 $(container).find(`.js-toggle-filters`).hide();
+                $(container).find(`.js-toggle-load-strategy`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
             }
             $(container).find(`.js-toggle-search`).hide();
@@ -1874,6 +1894,8 @@ module.exports = {
             throw new Error(`Unable to find layer container`);
         }
     },
+
+    onChangeLoadStrategyHandler: ({layerKey, filters}) => {},
 
     onApplyVectorFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
