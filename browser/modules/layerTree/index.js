@@ -291,8 +291,6 @@ module.exports = {
     getLayerTreeSettings: () => {
         let result = new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
-                console.log(`### initialState`, initialState);
-
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
                 let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
@@ -740,9 +738,7 @@ module.exports = {
                     console.log(e);
                 }
 
-
             });
-
         }
 
         return result;
@@ -882,7 +878,6 @@ module.exports = {
 
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
-        console.log(layerKey, layersWithDisabledDynamicLoading);
         if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
             if (layersWithDisabledDynamicLoading.indexOf(layerKey) === -1) {
                 whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
@@ -1648,7 +1643,6 @@ module.exports = {
                     if ($(`#${tableId}`).children().length === 0) {
                         tables[activeOpenedTable].loadDataInTable(true);
                     }
-
                 });
 
                 if (defaultLayerType === `vector`) {
@@ -1657,7 +1651,7 @@ module.exports = {
                     _self.setupLayerAsTileOne(layerKey);
                 }
             } else {
-                if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+                if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
                     let parsedWMSFilters = false;
                     try {
                         let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
@@ -1670,6 +1664,7 @@ module.exports = {
                     if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
                         let componentContainerId = `layer-settings-tile-filters-${layerKey}`;
                         $(layerContainer).find('.js-layer-settings-tile-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        
                         if (document.getElementById(componentContainerId)) {
                             ReactDOM.render(<TileLayerFilter
                                 layerKey={layerKey}
@@ -1679,6 +1674,8 @@ module.exports = {
                                 document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-tile-filters').hide(0);
                         }
+                    } else {
+                        $(layerContainer).find(`.js-toggle-tile-filters`).remove();
                     }
                 } else {
                     $(layerContainer).find(`.js-toggle-tile-filters`).remove();
@@ -1829,14 +1826,12 @@ module.exports = {
         let layerDescription = meta.getMetaByKey(layerKey);
         let parsedMeta = _self.parseLayerMeta(layerDescription);
         let parameterString = false;
-        if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+        if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
             let parsedWMSFilters = false;
             try {
                 let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                 parsedWMSFilters = parsedWMSFiltersLocal;
-            } catch (e) {
-                console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
-            }
+            } catch (e) {}
 
             parameterString = `&filters=`;
             let appliedFilters = {};
@@ -1866,15 +1861,11 @@ module.exports = {
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
         let layerMeta = meta.getMetaByKey(layerKey);
+        let parsedMeta = _self.parseLayerMeta(layerMeta);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show();
-            } else {
-                $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
-            }
-
-            if (setupAsVector) {
                 $(container).find(`.js-toggle-tile-filters`).hide();
                 $(container).find(`.js-toggle-opacity`).hide();
                 if (layerIsEnabled) {
@@ -1890,9 +1881,14 @@ module.exports = {
                 $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
+                $(container).find(`.js-toggle-tile-filters`).hide();
+                $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
+
                 if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-tile-filters`).show();
                     $(container).find(`.js-toggle-opacity`).show();
+                    if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+                        $(container).find(`.js-toggle-tile-filters`).show();
+                    }                   
                 } else {
                     $(container).find(`.js-toggle-tile-filters`).hide();
                     $(container).find(`.js-toggle-opacity`).hide();
@@ -2039,7 +2035,6 @@ module.exports = {
             layersWithDisabledDynamicLoading
         };
 
-        console.log(state);
         return state;
     },
 
