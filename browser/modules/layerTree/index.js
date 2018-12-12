@@ -1814,9 +1814,11 @@ module.exports = {
      * Returns tile filter string for specific tile layer
      */
     getLayerFilterString: (layerKey) => {
-        if (!layerKey || layerKey.length === 0 || layerKey.indexOf(`v:`) === 0) {
+        if (!layerKey || layerKey.length === 0 || layerKey.indexOf(`v:`) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
+
+        let tableName = layerKey.split(`.`)[1];
 
         let filters = false;
         if (tileFilters && layerKey in tileFilters && tileFilters[layerKey]) {
@@ -1835,10 +1837,11 @@ module.exports = {
 
             parameterString = `&filters=`;
             let appliedFilters = {};
+            appliedFilters[tableName] = [];
             if (parsedWMSFilters) {
                 for (let key in parsedWMSFilters) {
                     if (filters === false || filters.indexOf(key) === -1) {
-                        appliedFilters[key] = parsedWMSFilters[key];
+                        appliedFilters[tableName].push(parsedWMSFilters[key]);
                     }
                 }
             }
