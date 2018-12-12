@@ -81,7 +81,7 @@ class MarkupGenerator {
         let tooltip = layer.f_table_abstract || ``;
 
         return (`
-        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 4px; border-bottom: 1px solid #CCC; background-color: white;">
+        <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
                 <div style="display: inline-block;">
                     <div class="checkbox" style="width: 34px; top: 2px">
@@ -141,44 +141,45 @@ class MarkupGenerator {
                 </div>
 
                 <div style="display: inline-block;">
+                    <a href="javascript:void(0);" class="js-toggle-search">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                    </a>
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
                     <a href="javascript:void(0);" class="js-toggle-tile-filters">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                    <a href="javascript:void(0);" class="js-toggle-table-view">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                     </a>
                     <a href="javascript:void(0);" class="js-toggle-filters">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                        (<span class="js-toggle-filters-number-of-filters">0</span>)
                     </a>
-                    <a href="javascript:void(0);" class="js-toggle-table-view">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                        </a>
+                    <span class="js-toggle-filters">(<span class="js-toggle-filters-number-of-filters">0</span>)</span>
                     </div>
-                    <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-                    <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
+                <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>
             <div class="js-layer-settings-tile-filters"></div>
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-opacity"></div>
+            <div class="js-layer-settings-search"></div>
+            <div class="js-layer-settings-table" id="vector-layer-table-view-form-table_view_${layerKey.replace(".", "_")}"></div>
+            </div>
         </li>`);
     }
 
     getEditingButtons() {
-        return `<div class="btn-group btn-group-justified">
-            <div class="btn-group">
-                <button class="btn btn-primary btn-xs ge-start-edit">
-                    <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                </button>
-            </div>
-            <div class="btn-group">
-                <button class="btn btn-primary btn-xs ge-delete">
-                    <i class="fa fa-trash" aria-hidden="true"></i>
-                </button>
-            </div>
-        </div>`;
+        return `<div class="cartodb-popup-content">
+                    <button class="btn btn-primary btn-xs ge-start-edit">
+                        <i class="fa fa-pencil-alt" aria-hidden="true" ></i>
+                    </button>
+                    <button class="btn btn-danger btn-xs ge-delete">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>`;
     }
 
     getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {

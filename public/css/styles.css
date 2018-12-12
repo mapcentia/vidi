@@ -1,4 +1,9 @@
 /*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+/*
 
 To get this list of colors inject jQuery at http://www.google.com/design/spec/style/color.html#color-color-palette
 
@@ -197,7 +202,7 @@ input[type="checkbox"] {
   border-top: 1px solid #f5f5f5;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
-  border-bottom: 0px;
+  border-bottom: 0;
 }
 .nav-tabs > li > a,
 .dropdown-menu > li > a {
@@ -983,6 +988,16 @@ h4 small {
 .fixed-table-body {
   height: 100%;
 }
+.fixed-table-container thead th .th-inner {
+  font-size: 12px;
+  padding: 3px;
+}
+.fixed-table-container td {
+  font-size: 11px;
+}
+.js-layer-settings-table {
+  padding: 5px;
+}
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
@@ -1203,4 +1218,13 @@ h4 small {
     margin-left: 0 !important;
     padding-left: 16px;
   }
+}
+#layers_list .layer-item.list-group-item a {
+  display: inline-block;
+  border-radius: 50%;
+  padding: 1px;
+}
+#layers_list .layer-item.list-group-item .active {
+  background-color: #03a9f4;
+  color: white;
 }

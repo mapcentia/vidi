@@ -1,0 +1,30 @@
+{
+  "author": "Houston Engineering, Inc",
+  "name": "leaflet.wms",
+  "version": "0.2.0",
+  "description": "A Leaflet plugin for working with Web Map services, providing: single-tile/untiled/nontiled layers, shared WMS sources, and GetFeatureInfo-powered identify",
+  "license": "MIT",
+  "homepage": "https://github.com/heigeo/leaflet.wms",
+  "bugs": {
+    "url": "https://github.com/heigeo/leaflet.wms/issues"
+  },
+  "main": "dist/leaflet.wms.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "build": "uglifyjs --output dist/leaflet.wms.js src/leaflet.wms.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/heigeo/leaflet.wms.git"
+  },
+  "keywords": [
+    "javascript",
+    "leaflet",
+    "wms"
+  ],
+  "dependencies": {
+    "uglify-js": "^2.7.3"
+  }
+}

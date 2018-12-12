@@ -803,10 +803,10 @@ geocloud = (function () {
             return layerArr;
         };
         this.getActiveBaseLayer = function () {
-            var layers = lControl._layers
+            var layers = lControl._layers;
             for (var layerId in layers) {
                 if (layers.hasOwnProperty(layerId)) {
-                    var layer = layers[layerId]
+                    var layer = layers[layerId];
                     if (!layer.overlay && lControl._map.hasLayer(layer.layer)) {
                         return layer
                     }
