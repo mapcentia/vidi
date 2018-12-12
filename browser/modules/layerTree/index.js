@@ -1850,6 +1850,7 @@ module.exports = {
                     $(container).find(`.js-toggle-tile-filters`).hide();
                     $(container).find(`.js-toggle-opacity`).hide();
                     $(container).find('.js-layer-settings-opacity').hide(0);
+                    $(container).find('.js-layer-settings-tile-filters').hide(0);
                 }
 
                 $(container).find(`.js-toggle-filters`).hide();
