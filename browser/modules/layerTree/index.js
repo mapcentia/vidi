@@ -1620,7 +1620,9 @@ module.exports = {
                     try {
                         let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                         parsedWMSFilters = parsedWMSFiltersLocal;
-                    } catch (e) {}
+                    } catch (e) {
+                        console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                    }
 
                     if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
                         let componentContainerId = `layer-settings-tile-filters-${layerKey}`;
@@ -1789,7 +1791,9 @@ module.exports = {
             try {
                 let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                 parsedWMSFilters = parsedWMSFiltersLocal;
-            } catch (e) {}
+            } catch (e) {
+                console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+            }
 
             parameterString = `&filters=`;
             let appliedFilters = {};
