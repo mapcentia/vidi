@@ -551,6 +551,10 @@ module.exports = {
                                     opacitySettings = forcedState.opacitySettings;
                                 }
 
+                                if (`tileFilters` in forcedState && forcedState.tileFilters) {
+                                    tileFilters = forcedState.tileFilters;
+                                } 
+
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
                             }
 
