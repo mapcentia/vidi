@@ -1622,6 +1622,7 @@ module.exports = {
                         parsedWMSFilters = parsedWMSFiltersLocal;
                     } catch (e) {
                         console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                        $(layerContainer).find(`.js-toggle-tile-filters`).remove();
                     }
 
                     if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
