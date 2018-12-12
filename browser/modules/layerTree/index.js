@@ -1615,10 +1615,10 @@ module.exports = {
                     _self.setupLayerAsTileOne(layerKey);
                 }
             } else {
-                if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+                if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
                     let parsedWMSFilters = false;
                     try {
-                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                         parsedWMSFilters = parsedWMSFiltersLocal;
                     } catch (e) {}
 
@@ -1784,10 +1784,10 @@ module.exports = {
         let layerDescription = meta.getMetaByKey(layerKey);
         let parsedMeta = _self.parseLayerMeta(layerDescription);
         let parameterString = false;
-        if (parsedMeta && parsedMeta && `WMS filters` in parsedMeta && parsedMeta[`WMS filters`]) {
+        if (parsedMeta && parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
             let parsedWMSFilters = false;
             try {
-                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`WMS filters`]);
+                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
                 parsedWMSFilters = parsedWMSFiltersLocal;
             } catch (e) {}
 
