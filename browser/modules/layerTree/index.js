@@ -167,7 +167,10 @@ let treeIsBeingBuilt = false;
 let userPreferredForceOfflineMode = -1;
 
 let vectorFilters = {};
+
 let tileFilters = {};
+
+let layersWithDisabledDynamicLoading = [];
 
 let extensions = false;
 
@@ -288,12 +291,15 @@ module.exports = {
     getLayerTreeSettings: () => {
         let result = new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
+                console.log(`### initialState`, initialState);
+
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
                 let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
                 let initialTileFilters = ((initialState && `tileFilters` in initialState && typeof initialState.tileFilters === `object`) ? initialState.tileFilters : {});
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings});
+                let initialLayersWithDisabledDynamicLoading = ((initialState && `layersWithDisabledDynamicLoading` in initialState) ? initialState.layersWithDisabledDynamicLoading : []);
+                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings, initialLayersWithDisabledDynamicLoading});
             });
         });
 
@@ -465,7 +471,7 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialLayersWithDisabledDynamicLoading, initialTileFilters, opacitySettings}) => {
 
                         try {
 
@@ -475,6 +481,10 @@ module.exports = {
 
                             if (initialTileFilters) {
                                 tileFilters = initialTileFilters;
+                            }
+
+                            if (initialLayersWithDisabledDynamicLoading) {
+                                layersWithDisabledDynamicLoading = initialLayersWithDisabledDynamicLoading;
                             }
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
@@ -523,8 +533,12 @@ module.exports = {
 
                                 if (`tileFilters` in forcedState && forcedState.tileFilters) {
                                     tileFilters = forcedState.tileFilters;
-                                } 
+                                }
 
+                                if (`layersWithDisabledDynamicLoading` in forcedState && forcedState.layersWithDisabledDynamicLoading) {
+                                    layersWithDisabledDynamicLoading = forcedState.layersWithDisabledDynamicLoading;
+                                }
+                               
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
                             }
 
@@ -582,6 +596,7 @@ module.exports = {
                                     state.listen(MODULE_NAME, `activeLayersChange`);
                                     state.listen(MODULE_NAME, `filtersChange`);
                                     state.listen(MODULE_NAME, `opacityChange`);
+                                    state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
@@ -845,7 +860,6 @@ module.exports = {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
         let whereClauses = [];
-
         if (vectorFilters && layerKey in vectorFilters) {
             let conditions = _self.getFilterConditions(layerKey);
             if (conditions.length > 0) {
@@ -868,8 +882,11 @@ module.exports = {
 
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
+        console.log(layerKey, layersWithDisabledDynamicLoading);
         if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
-            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+            if (layersWithDisabledDynamicLoading.indexOf(layerKey) === -1) {
+                whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+            }
         }
 
         // Gathering all WHERE clauses
@@ -1591,20 +1608,27 @@ module.exports = {
 
                 // Load strategy
                 if (`load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
-                    
-                    // @todo Depends on local saved values
                     let value = true;
+                    if (layersWithDisabledDynamicLoading.indexOf(layerKey) !== -1) {
+                        value = false;
+                    }
 
                     componentContainerId = `layer-settings-load-strategy-${layerKey}`;
                     $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<LoadStrategyToggle initialValue={value} onChange={_self.onChangeLoadStrategyHandler}/>,
+                        ReactDOM.render(<LoadStrategyToggle
+                            layerKey={layerKey}
+                            initialValue={value}
+                            onChange={_self.onChangeLoadStrategyHandler}/>,
                             document.getElementById(componentContainerId));
                         $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
                         $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
                             $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
                         });
                     }
+                } else {
+                    $(layerContainer).find('.js-toggle-load-strategy').remove();
+                    $(layerContainer).find('.js-layer-settings-load-strategy').remove();
                 }
 
                 // Table view
@@ -1895,7 +1919,18 @@ module.exports = {
         }
     },
 
-    onChangeLoadStrategyHandler: ({layerKey, filters}) => {},
+    onChangeLoadStrategyHandler: ({layerKey, dynamicLoadIsEnabled}) => {
+        if (dynamicLoadIsEnabled && layersWithDisabledDynamicLoading.indexOf(layerKey) !== -1) {
+            layersWithDisabledDynamicLoading.splice(layersWithDisabledDynamicLoading.indexOf(layerKey), 1);
+        } else if (dynamicLoadIsEnabled === false && layersWithDisabledDynamicLoading.indexOf(layerKey) === -1) {
+            layersWithDisabledDynamicLoading.push(layerKey);
+        }
+
+        let correspondingLayer = meta.getMetaByKey(layerKey);
+        backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
+        _self.createStore(correspondingLayer);
+        _self.reloadLayer(`v:` + layerKey);       
+    },
 
     onApplyVectorFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
@@ -1904,7 +1939,6 @@ module.exports = {
 
         vectorFilters[layerKey] = filters;
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
-
         _self.createStore(correspondingLayer);
         _self.reloadLayer(`v:` + layerKey);
     },
@@ -1996,9 +2030,11 @@ module.exports = {
             tileFilters,
             activeLayers,
             layersOfflineMode,
-            opacitySettings
+            opacitySettings,
+            layersWithDisabledDynamicLoading
         };
 
+        console.log(state);
         return state;
     },
 
