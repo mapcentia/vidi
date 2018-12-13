@@ -1575,6 +1575,7 @@ module.exports = {
                 });
 
                 $(layerContainer).find(`.js-toggle-tile-filters`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-tile-filters'));
                     $(layerContainer).find('.js-layer-settings-tile-filters').toggle();
                 });
             }
@@ -1619,6 +1620,7 @@ module.exports = {
                             document.getElementById(componentContainerId));
                         $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
                         $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
                             $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
                         });
                     }
@@ -1819,7 +1821,7 @@ module.exports = {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
-        let tableName = layerKey.split(`.`)[1];
+        let tableName = layerKey;
 
         let filters = false;
         if (tileFilters && layerKey in tileFilters && tileFilters[layerKey]) {
