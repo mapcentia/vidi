@@ -78,7 +78,7 @@ describe("Application", () => {
 
     it("should update coordinates upon map changes", async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
