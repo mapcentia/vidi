@@ -170,7 +170,7 @@ let vectorFilters = {};
 
 let tileFilters = {};
 
-let layersWithDisabledDynamicLoading = [];
+let dynamicLoad = {};
 
 let extensions = false;
 
@@ -296,8 +296,8 @@ module.exports = {
                 let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
                 let initialTileFilters = ((initialState && `tileFilters` in initialState && typeof initialState.tileFilters === `object`) ? initialState.tileFilters : {});
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                let initialLayersWithDisabledDynamicLoading = ((initialState && `layersWithDisabledDynamicLoading` in initialState) ? initialState.layersWithDisabledDynamicLoading : []);
-                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings, initialLayersWithDisabledDynamicLoading});
+                let initialDynamicLoad = ((initialState && `dynamicLoad` in initialState) ? initialState.dynamicLoad : {});
+                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings, initialDynamicLoad});
             });
         });
 
@@ -469,7 +469,7 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialLayersWithDisabledDynamicLoading, initialTileFilters, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialDynamicLoad, initialTileFilters, opacitySettings}) => {
 
                         try {
 
@@ -481,8 +481,8 @@ module.exports = {
                                 tileFilters = initialTileFilters;
                             }
 
-                            if (initialLayersWithDisabledDynamicLoading) {
-                                layersWithDisabledDynamicLoading = initialLayersWithDisabledDynamicLoading;
+                            if (initialDynamicLoad) {
+                                dynamicLoad = initialDynamicLoad;
                             }
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
@@ -533,11 +533,19 @@ module.exports = {
                                     tileFilters = forcedState.tileFilters;
                                 }
 
-                                if (`layersWithDisabledDynamicLoading` in forcedState && forcedState.layersWithDisabledDynamicLoading) {
-                                    layersWithDisabledDynamicLoading = forcedState.layersWithDisabledDynamicLoading;
+                                if (`dynamicLoad` in forcedState && forcedState.dynamicLoad) {
+                                    dynamicLoad = forcedState.dynamicLoad;
                                 }
                                
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
+                            }
+
+                            for (let key in dynamicLoad) {
+                                if (dynamicLoad[key] === `true` || dynamicLoad[key] === true) {
+                                    dynamicLoad[key] = true;
+                                } else {
+                                    dynamicLoad[key] = false;
+                                }
                             }
 
                             if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
@@ -879,11 +887,11 @@ module.exports = {
 
         // Checking if dynamic load is enabled for layer
         let layerMeta = _self.parseLayerMeta(layer);
-        if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
-            if (layersWithDisabledDynamicLoading.indexOf(layerKey) === -1) {
+        //if (layerMeta && `load_strategy` in layerMeta && layerMeta.load_strategy === `d`) {
+            if (layerKey in dynamicLoad && dynamicLoad[layerKey] === true) {
                 whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
             }
-        }
+        //}
 
         // Gathering all WHERE clauses
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
@@ -1386,15 +1394,30 @@ module.exports = {
                 }
             }
 
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+
+            if (layerIsTheVectorOne) {
+                // Filling up default dynamic load values if they are absent
+                if (layerKey in dynamicLoad === false || [true, false].indexOf(dynamicLoad[layerKey]) === -1) {
+                    if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
+                        if (parsedMeta.load_strategy === `d`) {
+                            dynamicLoad[layerKey] = true;
+                        } else if (parsedMeta.load_strategy === `s`) {
+                            dynamicLoad[layerKey] = false;
+                        } else {
+                            console.warn(`Invalid default dynamic load value "${parsedMeta.load_strategy}" for layer ${layerKey}`);
+                        }
+                    }
+                }
+            }
+
             if (layerIsActive) {
                 if (activeLayerName.indexOf(`v:`) === 0) {
                     selectorLabel = vectorLayerIcon;
                     defaultLayerType = 'vector';
                 }
             }
-
-            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
-            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
             if (layerIsTheVectorOne) {
                 _self.createStore(layer);
@@ -1602,29 +1625,23 @@ module.exports = {
                     });
                 }
 
-                // Load strategy
-                if (`load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`) {
-                    let value = true;
-                    if (layersWithDisabledDynamicLoading.indexOf(layerKey) !== -1) {
-                        value = false;
-                    }
+                if (!dynamicLoad[layerKey] && dynamicLoad[layerKey] !== false) {
+                    throw new Error(`No dynamic load value for ${layerKey}`);
+                }
 
-                    componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<LoadStrategyToggle
-                            layerKey={layerKey}
-                            initialValue={value}
-                            onChange={_self.onChangeLoadStrategyHandler}/>,
-                            document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                        });
-                    }
-                } else {
-                    $(layerContainer).find('.js-toggle-load-strategy').remove();
-                    $(layerContainer).find('.js-layer-settings-load-strategy').remove();
+                // Load strategy
+                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                if (document.getElementById(componentContainerId)) {
+                    ReactDOM.render(<LoadStrategyToggle
+                        layerKey={layerKey}
+                        initialValue={dynamicLoad[layerKey]}
+                        onChange={_self.onChangeLoadStrategyHandler}/>,
+                        document.getElementById(componentContainerId));
+                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                    });
                 }
 
                 // Table view
@@ -1927,12 +1944,7 @@ module.exports = {
     },
 
     onChangeLoadStrategyHandler: ({layerKey, dynamicLoadIsEnabled}) => {
-        if (dynamicLoadIsEnabled && layersWithDisabledDynamicLoading.indexOf(layerKey) !== -1) {
-            layersWithDisabledDynamicLoading.splice(layersWithDisabledDynamicLoading.indexOf(layerKey), 1);
-        } else if (dynamicLoadIsEnabled === false && layersWithDisabledDynamicLoading.indexOf(layerKey) === -1) {
-            layersWithDisabledDynamicLoading.push(layerKey);
-        }
-
+        dynamicLoad[layerKey] = dynamicLoadIsEnabled;
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
         _self.createStore(correspondingLayer);
@@ -2038,7 +2050,7 @@ module.exports = {
             activeLayers,
             layersOfflineMode,
             opacitySettings,
-            layersWithDisabledDynamicLoading
+            dynamicLoad
         };
 
         return state;
