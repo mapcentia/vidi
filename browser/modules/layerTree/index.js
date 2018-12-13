@@ -1625,8 +1625,9 @@ module.exports = {
                     });
                 }
 
-                if (!dynamicLoad[layerKey] && dynamicLoad[layerKey] !== false) {
-                    throw new Error(`No dynamic load value for ${layerKey}`);
+                let value = false;
+                if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
+                    value = dynamicLoad[layerKey];
                 }
 
                 // Load strategy
@@ -1635,7 +1636,7 @@ module.exports = {
                 if (document.getElementById(componentContainerId)) {
                     ReactDOM.render(<LoadStrategyToggle
                         layerKey={layerKey}
-                        initialValue={dynamicLoad[layerKey]}
+                        initialValue={value}
                         onChange={_self.onChangeLoadStrategyHandler}/>,
                         document.getElementById(componentContainerId));
                     $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
