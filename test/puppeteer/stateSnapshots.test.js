@@ -179,6 +179,10 @@ describe("State snapshots", () => {
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
 
+        // Turning on the layer
+        await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
+        await helpers.sleep(1000);
+
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
         await helpers.sleep(2000);
@@ -189,27 +193,15 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
-
         let linkURL = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
+        await page.close();
 
         let statePage = await browser.newPage();
-        await statePage.setRequestInterception(true);
-        let stateWasRequested = false;
-        statePage.on('request', interceptedRequest => {
-            if (interceptedRequest.url().indexOf('state-snapshot') !== -1) {
-                if (interceptedRequest.url().indexOf(linkURL.split('=')[1]) !== -1) {
-                    stateWasRequested = true;
-                }
-            }
-
-            interceptedRequest.continue();
-        });
-
         await statePage.goto(linkURL);
         await statePage.emulate(helpers.EMULATED_SCREEN);
         statePage = await helpers.waitForPageToLoad(statePage);
-
-        expect(stateWasRequested).to.be.true;
+        await helpers.sleep(2000);
+        expect(await statePage.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
     });
 
     it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
