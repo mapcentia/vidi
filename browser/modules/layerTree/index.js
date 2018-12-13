@@ -698,18 +698,22 @@ module.exports = {
                                             });
                                         };
 
-                                        if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
-                                            setOfflineModeSettingsForCache().then(resolve);
+                                        if (`serviceWorker` in navigator) {
+                                            if (navigator.serviceWorker.controller) {
+                                                setOfflineModeSettingsForCache().then(resolve);
+                                            } else {
+                                                backboneEvents.get().once(`ready:serviceWorker`, () => {
+                                                    setTimeout(() => {
+                                                        if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
+                                                            setOfflineModeSettingsForCache().then(resolve);
+                                                        } else {
+                                                            turnOnActiveLayersAndFinishBuilding().then(resolve);
+                                                        }
+                                                    }, 1000);
+                                                });
+                                            }
                                         } else {
-                                            backboneEvents.get().once(`ready:serviceWorker`, () => {
-                                                setTimeout(() => {
-                                                    if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
-                                                        setOfflineModeSettingsForCache().then(resolve);
-                                                    } else {
-                                                        turnOnActiveLayersAndFinishBuilding().then(resolve);
-                                                    }
-                                                }, 1000);
-                                            });
+                                            turnOnActiveLayersAndFinishBuilding().then(resolve);
                                         }
                                     }, 1000);
                                 });
