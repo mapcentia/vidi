@@ -6,6 +6,12 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("Application", () => {
+    it("should be able to launch if service workers are not available", async () => {
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        page = await helpers.waitForPageToLoad(page);
+    });
+
     it("should be able to reset the application", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_DEFAULT}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);
