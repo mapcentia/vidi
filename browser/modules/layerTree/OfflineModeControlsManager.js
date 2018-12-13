@@ -204,18 +204,12 @@ class OfflineModeControlsManager {
             }
 
             this._getAvailableLayersKeys().then(layerKeys => {
-
-                /*
-                    @todo Remove the try/catch
-                */
-                try{
-
                 layerKeys.map(({layerKey, geomColumn }) => {
                     let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${geomColumn}"]`);
                     if ($(layerRecord).length === 1) {
                         // Updating offline mode controls only for visible layer controls
                         if ($(layerRecord).is(`:visible`)) {
-                            let isVectorLayer = this.isVectorLayer(layerKey);                           
+                            let isVectorLayer = this.isVectorLayer(layerKey);
                             if (isVectorLayer) {
                                 let isAlreadyCached = false;
                                 let cachedWithinTheBBox = false;
@@ -231,12 +225,11 @@ class OfflineModeControlsManager {
                                 });
 
                                 let offlineMode = false;
-                                let requestedLayerKey = (this.isVectorLayer(layerKey) ? (`v:` + layerKey) : layerKey);
-                                if (requestedLayerKey in this.offlineModeValues) {
-                                    if ([true, false].indexOf(this.offlineModeValues[requestedLayerKey]) !== -1) {
-                                        offlineMode = this.offlineModeValues[requestedLayerKey];
+                                if (layerKey in this.offlineModeValues) {
+                                    if ([true, false].indexOf(this.offlineModeValues[layerKey]) !== -1) {
+                                        offlineMode = this.offlineModeValues[layerKey];
                                     } else {
-                                        throw new Error(`Invalid offline mode for ${requestedLayerKey}`);
+                                        throw new Error(`Invalid offline mode for ${layerKey}`);
                                     }
                                 }
 
@@ -264,9 +257,9 @@ class OfflineModeControlsManager {
                 });
 
                 resolve();
-
-                }catch(e){console.log(e)};
-
+            }).catch(error => {
+                console.error(error);
+                reject();
             });
         });
     }
@@ -383,12 +376,7 @@ class OfflineModeControlsManager {
         }
 
         layerKey = layerKey.replace(`v:`, ``);
-        if (this.isVectorLayer(layerKey)) {
-            this.offlineModeValues[`v:` + layerKey] = offlineMode;
-        } else {
-            this.offlineModeValues[layerKey] = offlineMode;
-        }
-
+        this.offlineModeValues[layerKey] = offlineMode;
         if (bbox && this.vectorLayersCachedWithingTheBBox.indexOf(layerKey) === -1) {
             this.vectorLayersCachedWithingTheBBox.push(layerKey);
         }

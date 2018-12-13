@@ -296,7 +296,11 @@ var gc2table = (function () {
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
                                     if (setViewOnSelect) {
-                                        m.map.fitBounds(layer.getBounds());
+                                        try {
+                                            m.map.panTo(layer.getBounds().getCenter());
+                                        } catch (e) {
+                                            m.map.panTo(layer.getLatLng());
+                                        }
                                     }
                                 }, 100);
                                 onSelect(id, layer);

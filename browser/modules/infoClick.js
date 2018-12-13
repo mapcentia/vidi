@@ -8,6 +8,7 @@
 
 var urlparser = require('./urlparser');
 var cloud;
+var backboneEvents;
 var clicktimer;
 var meta;
 var sqlQuery;
@@ -23,6 +24,7 @@ module.exports = {
         cloud = o.cloud;
         meta = o.meta;
         sqlQuery = o.sqlQuery;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
@@ -33,6 +35,9 @@ module.exports = {
             if (active === false || e.originalEvent.clickedOnFeature) {
                 return;
             }
+
+            // Reset all SQL Query layers
+            backboneEvents.get().trigger("sqlQuery:clear");
 
             var event = new geocloud.clickEvent(e, cloud.get());
             if (clicktimer) {

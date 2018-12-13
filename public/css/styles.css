@@ -1,4 +1,47 @@
-/*@import "../../config/_styles.less";*/
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+/*
+
+To get this list of colors inject jQuery at http://www.google.com/design/spec/style/color.html#color-color-palette
+
+Then, run this script to get the list.
+
+
+(function() {
+  var colors = {}, main = {};
+  $(".color-group").each(function() {
+    var color = $(this).find(".name").text().trim().toLowerCase().replace(" ", "-");
+    colors[color] = {};
+
+    $(this).find(".color").not(".main-color").each(function() {
+      var shade = $(this).find(".shade").text().trim(),
+          hex   = $(this).find(".hex").text().trim();
+
+      colors[color][shade] = hex;
+    });
+    main[color] = color + "-" + $(this).find(".main-color .shade").text().trim();
+
+  });
+  var LESS = "";
+  $.each(colors, function(name, shades) {
+    LESS += "\n\n";
+    $.each(shades, function(shade, hex) {
+      LESS += "@" + name + "-" + shade + ": " + hex + ";\n";
+    });
+    if (main[name]) {
+      LESS += "@" + name + ": " + main[name] + ";\n";
+    }
+  });
+  console.log(LESS);
+})();
+
+
+*/
+/* ANIMATION */
+/* SHADOWS */
 body {
   margin: 0;
   padding: 0;
@@ -159,7 +202,7 @@ input[type="checkbox"] {
   border-top: 1px solid #f5f5f5;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
-  border-bottom: 0px;
+  border-bottom: 0;
 }
 .nav-tabs > li > a,
 .dropdown-menu > li > a {
@@ -709,20 +752,29 @@ body {
 #side-panel ul {
   overflow: hidden !important;
   list-style-type: none;
-  padding: 0px 19px;
+  padding: 0px 17px;
 }
 #side-panel ul li {
   padding: 7px 0;
 }
 #side-panel ul li .material-icons {
   margin-right: 17px;
+  padding: 2px;
+  border-radius: 50%;
+}
+#side-panel ul li .material-icons:hover {
+  background-color: #eeeeee;
+}
+#side-panel ul li.active .material-icons {
+  background-color: #03a9f4;
+  color: white;
 }
 .list-group .list-group-separator:before {
   width: 100%;
   margin: 0 !important;
 }
 .list-group-item {
-  padding: 16px;
+  padding: 10px 14px;
   overflow: visible !important;
 }
 .leaflet-control-measure .leaflet-control-measure-toggle,
@@ -936,6 +988,16 @@ h4 small {
 .fixed-table-body {
   height: 100%;
 }
+.fixed-table-container thead th .th-inner {
+  font-size: 12px;
+  padding: 3px;
+}
+.fixed-table-container td {
+  font-size: 11px;
+}
+.js-layer-settings-table {
+  padding: 5px;
+}
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
   padding: 5px;
@@ -1030,7 +1092,7 @@ h4 small {
 #search-border {
   position: relative;
   float: left;
-  width: 32px;
+  width: 40px;
   height: 100%;
 }
 #search-ribbon {
@@ -1046,7 +1108,7 @@ h4 small {
   font-size: 1.4em;
   line-height: 1em;
   color: #1f4164;
-  padding-left: 11px;
+  padding-left: 12px;
   position: absolute;
   cursor: pointer;
 }
@@ -1106,8 +1168,6 @@ h4 small {
   margin-bottom: 6px;
 }
 .help-btn {
-  position: fixed;
-  top: 14px;
   color: rgba(0, 0, 0, 0.26);
   cursor: help;
 }
@@ -1128,4 +1188,43 @@ h4 small {
 }
 .leaflet-control-custom .appended-leaflet-control li a {
   width: 100% !important;
+}
+.navbar .navbar-brand i {
+  font-size: 30px;
+}
+.navbar .navbar-brand {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+#module-container-body {
+  padding: 0 4px 4px 0;
+}
+.bootstrap-table .table:not(.table-condensed),
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
+.bootstrap-table .table:not(.table-condensed) > thead > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+  padding: 3px 6px !important;
+}
+@media (min-width: 769px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 0;
+  }
+}
+@media (max-width: 768px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 16px;
+  }
+}
+#layers_list .layer-item.list-group-item a {
+  display: inline-block;
+  border-radius: 50%;
+  padding: 1px;
+}
+#layers_list .layer-item.list-group-item .active {
+  background-color: #03a9f4;
+  color: white;
 }

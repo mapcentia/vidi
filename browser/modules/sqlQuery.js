@@ -35,11 +35,8 @@ var db = urlparser.db;
 var JSONSchemaForm = require("react-jsonschema-form");
 const Form = JSONSchemaForm.default;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
+var jquery = require('jquery');
+require('snackbarjs');
 
 var extensions;
 
@@ -71,18 +68,20 @@ module.exports = {
     },
 
     /**
+     *
      * @param qstore
      * @param wkt
      * @param proj
      * @param callBack
      * @param num
-     * @param point
+     * @param infoClickPoint
+     * @param whereClouse
+     * @param includes
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint) {
-        var layers, count = {index: 0}, hit = false, distance,
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClouse, includes, zoomToResult) {
+        let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
-        let editor = false;
         if (`editor` in extensions) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
@@ -90,6 +89,9 @@ module.exports = {
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
+
+        // Set layers to passed array of layers if set
+        layers = includes || layers;
 
         // Remove not queryable layers from array
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -105,12 +107,12 @@ module.exports = {
          * @type {string}
          */
         var defaultTemplate =
-            `<div class="cartodb-popup-content">
+                `<div class="cartodb-popup-content">
                 <div class="form-group gc2-edit-tools" style="visibility: hidden">
                     <button class="btn btn-primary btn-xs popup-edit-btn">
                         <i class="fa fa-pencil-alt" aria-hidden="true"></i>
                     </button>
-                    <button class="btn btn-primary btn-xs popup-delete-btn">
+                    <button class="btn btn-danger btn-xs popup-delete-btn">
                         <i class="fa fa-trash" aria-hidden="true"></i></button>
                 </div>
                 {{#_vidi_content.fields}}
@@ -134,6 +136,7 @@ module.exports = {
              </div>`;
 
         $.each(layers, function (index, value) {
+
             // No need to search in the already displayed vector layer
             if (value.indexOf('v:') === 0) {
                 return true;
@@ -176,7 +179,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql,
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
                         template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
@@ -188,7 +191,7 @@ module.exports = {
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
-                        $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
+                        $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
                         $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
                             '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
                             '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
@@ -208,7 +211,7 @@ module.exports = {
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: false,
-                            height: 400,
+                            height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
@@ -273,16 +276,22 @@ module.exports = {
                     }
                     count.index++;
                     if (count.index === layers.length) {
-                        //$('#info-tab a:first').tab('show');
-
                         if (!hit) {
                             $('#modal-info-body').hide();
+                            jquery.snackbar({
+                                content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
+                                htmlAllowed: true,
+                                timeout: 2000
+                            });
+                        } else {
+                            $('#main-tabs a[href="#info-content"]').tab('show');
+                            if (zoomToResult) {
+                                cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
+                            }
+                            setTimeout(()=>{
+                                $('#modal-info-body table').bootstrapTable('resetView');
+                            }, 300);
                         }
-                        $("#info-content button").click(function (e) {
-                            //clearDrawItems();
-                            //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
-                        });
-                        $('#main-tabs a[href="#info-content"]').tab('show');
                     }
                 };
             }
@@ -346,37 +355,45 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
-            if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
-                sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
-                    "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
-                    "WHERE ST_Intersects(rast,the_geom) ";
+            if (!whereClouse) {
+                if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
+                    sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+                        "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
+                        "WHERE ST_Intersects(rast,the_geom) ";
 
-                qstore[index].custom_data = [
-                    value,
-                    cloud.get().map.getSize().x,
-                    cloud.get().map.getSize().y,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
-                    cloud.get().getExtent().left,
-                    cloud.get().getExtent().bottom,
-                    cloud.get().getExtent().right,
-                    cloud.get().getExtent().top
-                ];
+                    qstore[index].custom_data = [
+                        value,
+                        cloud.get().map.getSize().x,
+                        cloud.get().map.getSize().y,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
+                        cloud.get().getExtent().left,
+                        cloud.get().getExtent().bottom,
+                        cloud.get().getExtent().right,
+                        cloud.get().getExtent().top
+                    ];
 
-            } else {
-                if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
-                    }
-                    sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                 } else {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
+                    if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                    } else {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        qstore[index].custom_data = "";
                     }
-                    qstore[index].custom_data = "";
                 }
+            } else {
+                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClouse;
+                if (versioning) {
+                    sql = sql + " AND gc2_version_end_date IS NULL ";
+                }
+                qstore[index].custom_data = "";
             }
             sql = sql + " LIMIT " + (num || 500);
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);

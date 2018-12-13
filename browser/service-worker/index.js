@@ -131,6 +131,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: 'geofyn.mapcentia.com/api'
+},{
+    regExp: true,
+    requested: 'https://rm.mapcentia.com/api'
 }];
 
 /**
@@ -350,8 +353,52 @@ const normalizeTheURLForFetch = (event) => {
                     resolve(cleanedRequestURL);
                 }
             };
-            
-            if (browser.name === 'safari' || browser.name === 'ios') {
+
+            /**
+             * GET requests are processed same way for all browsers
+             */
+            const processGETRequest = (clonedRequest) => {
+                let mappedObject = {};
+                let parsedQuery = new uriJs(clonedRequest.url);
+                let queryParameters = parsedQuery.search(true);
+                if (`q` in queryParameters && queryParameters.q) {
+                    mappedObject.q = queryParameters.q;
+                }
+
+                proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+            };
+
+            if (browser.name === 'edge') {
+                if (clonedRequest.method === `POST`) {
+                    clonedRequest.text().then(data => {
+                        let mappedObject = {};
+                        let splitDecodeData = data.split(`&`);
+                        if (splitDecodeData.length > 0) {
+                            splitDecodeData.map(item => {
+                                if (item.indexOf(`=`) !== -1) {
+                                    let splitParameter = item.split(`=`);
+                                    if (splitParameter.length === 2) {
+                                        mappedObject[splitParameter[0]] = splitParameter[1];
+                                    }
+                                }
+                            });
+                        }
+
+                        cleanedRequestURL += '/' + btoa(data);
+                        proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+
+                        return;
+                    }).catch(error => {
+                        console.error(`Unable to read POST data`);
+                        reject();
+                    });
+                } else if (clonedRequest.method === `GET`) {
+                    processGETRequest(clonedRequest);
+                } else {
+                    console.error(`Invalid request type`);
+                    reject();
+                }
+            } else if (browser.name === 'safari' || browser.name === 'ios') {
                 if (clonedRequest.method === `POST`) {
                     let rawResult = ``;
                     let data = false;
@@ -388,14 +435,7 @@ const normalizeTheURLForFetch = (event) => {
                         return reader.read().then(processText);
                     });
                 } else if (clonedRequest.method === `GET`) {
-                    let mappedObject = {};
-                    let parsedQuery = new uriJs(clonedRequest.url);
-                    let queryParameters = parsedQuery.search(true);
-                    if (`q` in queryParameters && queryParameters.q) {
-                        mappedObject.q = queryParameters.q;
-                    }
-
-                    proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                    processGETRequest(clonedRequest);
                 } else {
                     console.error(`Invalid request type`);
                     reject();
@@ -422,14 +462,7 @@ const normalizeTheURLForFetch = (event) => {
                         reject();
                     });
                 } else if (clonedRequest.method === `GET`) {
-                    let mappedObject = {};
-                    let parsedQuery = new uriJs(clonedRequest.url);
-                    let queryParameters = parsedQuery.search(true);
-                    if (`q` in queryParameters && queryParameters.q) {
-                        mappedObject.q = queryParameters.q;
-                    }
-
-                    proceedWithRequestData(clonedRequest.method, mappedObject, cleanedRequestURL);
+                    processGETRequest(clonedRequest);
                 } else {
                     console.error(`Invalid request type`);
                     reject();
@@ -555,6 +588,11 @@ self.addEventListener('message', (event) => {
         } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
             if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
                 cacheSettingsKeeper.getAll().then(records => {
+                    const reportFailure = (error) => {
+                        if (error) console.error(error);
+                        event.ports[0].postMessage(false);
+                    };
+
                     let messageWasSent = false;
                     for (let key in records) {
                         if (records[key].layerKey === event.data.payload.layerKey) {
@@ -564,15 +602,18 @@ self.addEventListener('message', (event) => {
                                 records[key].offlineMode = false;
                             }
 
+                            let currentTime = new Date();
+                            records[key].created = currentTime.getTime();
+
+                            messageWasSent = true;
                             cacheSettingsKeeper.set(key, records[key]).then(() => {
-                                messageWasSent = true;
                                 event.ports[0].postMessage(true);
-                            });
+                            }).catch(reportFailure);
                         }
                     }
 
                     if (messageWasSent === false) {
-                        event.ports[0].postMessage(false);
+                        reportFailure(`${event.data.payload.layerKey} was not found in cache settings`);
                     }
                 });
             } else {
@@ -758,11 +799,15 @@ self.addEventListener('fetch', (event) => {
                                                 return cacheSettingsKeeper.get(result.requestData.layerKey).then(data => {
                                                     if (!data) data = { offlineMode: false };
 
+                                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Getting existing cache settings`, data);
+
+                                                    let currentTime = new Date();
                                                     let newData = {};
                                                     newData.layerKey = result.requestData.layerKey;
                                                     newData.cleanedRequestURL = cleanedRequestURL;
                                                     newData.bbox = result.requestData.bbox;
                                                     newData.offlineMode = data.offlineMode;
+                                                    newData.created = currentTime.getTime();
 
                                                     if (LOG_OFFLINE_MODE_EVENTS) console.log(`Storing cache settings`, newData);
 

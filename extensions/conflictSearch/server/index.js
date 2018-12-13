@@ -29,7 +29,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField,
+    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField, srid,
         startTime, hits = {}, hit, metaDataFinal = {data: []}, metaDataKeys = [], queryables = [];
 
     request.get(url, function (err, res, body) {
@@ -70,12 +70,9 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 table = metaDataFinal.data[count].f_table_schema + "." + metaDataFinal.data[count].f_table_name;
 
                 geomField = metaDataFinal.data[count].f_geometry_column;
+                srid = metaDataFinal.data[count].srid;
 
-                if (buffer > 10000000) {
-                    sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
-                } else {
-                    sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
-                }
+                sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
 
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
 

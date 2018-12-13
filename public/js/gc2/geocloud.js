@@ -563,7 +563,7 @@ geocloud = (function () {
 
         if (!defaults.tileCached) {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?";
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
             } else {
                 uri = defaults.uri;
             }
@@ -803,10 +803,10 @@ geocloud = (function () {
             return layerArr;
         };
         this.getActiveBaseLayer = function () {
-            var layers = lControl._layers
+            var layers = lControl._layers;
             for (var layerId in layers) {
                 if (layers.hasOwnProperty(layerId)) {
-                    var layer = layers[layerId]
+                    var layer = layers[layerId];
                     if (!layer.overlay && lControl._map.hasLayer(layer.layer)) {
                         return layer
                     }

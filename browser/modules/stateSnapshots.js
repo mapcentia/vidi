@@ -138,12 +138,13 @@ module.exports = {
                     $.ajax({
                         url: API_URL,
                         method: 'POST',
+                        contentType: 'application/json; charset=utf-8',
                         dataType: 'json',
-                        data: {
+                        data: JSON.stringify({
                             title,
                             anonymous,
                             snapshot: state
-                        }
+                        })
                     }).then(() => {
                         _self.setState({ loading: false });
                         _self.refreshSnapshotsList();
@@ -203,7 +204,8 @@ module.exports = {
                         url: API_URL,
                         method: 'PUT',
                         dataType: 'json',
-                        data
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify(data)
                     }).then(data => {
                         _self.refreshSnapshotsList();
                         _self.setState({
@@ -235,7 +237,8 @@ module.exports = {
                         url: `${API_URL}/${item.id}`,
                         method: 'PUT',
                         dataType: 'json',
-                        data: { anonymous: false }
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ anonymous: false })
                     }).then(data => {
                         _self.refreshSnapshotsList();
                     });
@@ -254,7 +257,8 @@ module.exports = {
                             url: `${API_URL}/${item.id}`,
                             method: 'PUT',
                             dataType: 'json',
-                            data: { anonymous: false }
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ anonymous: false })
                         }));
                     });
 

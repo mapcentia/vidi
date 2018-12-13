@@ -150,7 +150,7 @@ module.exports = module.exports = {
 
                     layerTree.setSelectorValue(name, 'tile');
 
-                    layers.addLayer(name).then(() => {
+                    layers.addLayer(name, layerTree.getLayerFilterString(name)).then(() => {
                         _self.checkLayerControl(name, doNotLegend, setupControls);
 
                         tileLayer = cloud.get().getLayersByName(tileLayerId);

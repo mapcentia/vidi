@@ -96,13 +96,6 @@ var urlparser = require('./urlparser');
  */
 var urlVars = urlparser.urlVars;
 
-/**
- *
- * @type {showdown.Converter}
- */
-var showdown = require('showdown');
-var converter = new showdown.Converter();
-
 var jRespond = require('jrespond');
 
 
@@ -310,6 +303,16 @@ module.exports = module.exports = {
             infoClick.reset();
         });
 
+        // Clear all query layers and deactivate tools
+        // ===========================================
+        backboneEvents.get().on("sqlQuery:clear", ()=>{
+            console.info("Resting SQL Query");
+            infoClick.reset();
+            advancedInfo.reset();
+            layerTree.resetSearch();
+        });
+
+
         // Layer loading
         // =============
         backboneEvents.get().on("startLoading:layers", function (e) {
@@ -440,263 +443,241 @@ module.exports = module.exports = {
             }, 200);
         }
 
-        // HACK. Arrive.js seems to mess up Wkhtmltopdf,
-        // so we don't bind events on print HTML page.
-        // =============================================
+        $(document).arrive('[data-toggle="tooltip"]', function () {
+            $(this).tooltip()
+        });
 
-        if (!urlVars.px && !urlVars.py) {
-            $(document).arrive('[data-toggle="tooltip"]', function () {
-                $(this).tooltip()
+        $(document).arrive('[data-scale-ul]', function () {
+            $(this).on("click", function (e) {
+                $("#select-scale").val($(this).data('scale-ul')).trigger("change");
             });
+        });
 
-            $(document).arrive('.info-label', function () {
-                $(this).on("click", function (e) {
-                    var t = ($(this).data('gc2-id')), html,
-                        meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                        name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                        title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                        abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
+        // Set up the open/close functions for side panel
+        var searchPanelOpen, width, collapsedWidth = 250;
 
-                    html = (meta !== null
-                        && typeof meta.meta_desc !== "undefined"
-                        && meta.meta_desc !== "") ?
-                        converter.makeHtml(meta.meta_desc) : abstract;
+        $("#main-tabs a").on("click", function (e) {
+            $("#module-container.slide-right").css("right", "0");
+            searchShowFull();
+        });
 
-                    moment.locale('da');
-
-                    for (var key in  metaDataKeys[t]) {
-                        if (metaDataKeys[t].hasOwnProperty(key)) {
-                            if (key === "lastmodified") {
-                                //metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
-                            }
-                        }
-                    }
-
-                    html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-
-                    //$("#info-modal.slide-right").show();
-                    $("#info-modal.slide-right").css("right", "0");
-                    $("#info-modal .modal-title").html(title || name);
-                    $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-                    legend.init([t], "#info-modal-legend");
-                    e.stopPropagation();
-                });
-            });
-
-
-            $(document).arrive('[data-scale-ul]', function () {
-                $(this).on("click", function (e) {
-                    $("#select-scale").val($(this).data('scale-ul')).trigger("change");
-                });
-            });
-
-            // Set up the open/close functions for side panel
-            var searchPanelOpen, width, collapsedWidth = 250;
-
-            $("#main-tabs a").on("click", function (e) {
+        $(document).arrive("#main-tabs a", function () {
+            $(this).on("click", function (e) {
                 $("#module-container.slide-right").css("right", "0");
                 searchShowFull();
             });
-
-            $(document).arrive("#main-tabs a", function () {
-                $(this).on("click", function (e) {
-                    $("#module-container.slide-right").css("right", "0");
-                    searchShowFull();
-                });
-            });
+        });
 
 
-            $("#info-modal .modal-header button").on("click", function () {
-                if (!$(this).data("extraClickHandlerIsEnabled")) {
-                    infoModalHide();
-                }
-            });
-
-
-            $("#module-container .modal-header button").on("click", function () {
-                searchShow();
-                if (!$(this).data("extraClickHandlerIsEnabled")) {
-                    moduleContainerHide();
-                }
-            });
-
-            let setWidth = function (width) {
-                $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
-                $("#module-container").css("width", (width - 100) + "px");
-                $("#info-modal").css("width", (width - 100) + "px");
-                $(".navmenu").css("width", (width) + "px");
-                $(".slide-right").css("right", "-" + (width - 100) + "px");
-            };
-
-            var infoModalHide = function () {
-                $("#info-modal").css("right", "-" + (width - 100) + "px");
+        $("#info-modal .modal-header button").on("click", function () {
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                infoModalHide();
+                // Ikke den
             }
+        });
 
-            var moduleContainerHide = function () {
-                $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+
+        $("#module-container .modal-header button").on("click", function () {
+            searchShow();
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                moduleContainerHide();
+                $("#side-panel ul li").removeClass("active");
             }
+        });
 
-            var searchShow = function () {
-                $("#search-ribbon").css("right", "-" + (width - collapsedWidth) + "px");
-                $("#pane").css("right", (collapsedWidth - 40) + "px");
-                $('#map').css("width", "calc(100% - " + (collapsedWidth/2) + "px)");
-                searchPanelOpen = true;
-            }
+        let setWidth = function (width) {
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
+            $("#module-container").css("width", (width - 100) + "px");
+            $("#info-modal").css("width", (width - 100) + "px");
+            $(".navmenu").css("width", (width) + "px");
+            $(".slide-right").css("right", "-" + (width - 100) + "px");
+        };
 
-            var searchShowFull = function () {
-                $("#search-ribbon").css("right", "0");
-                $("#pane").css("right", (width - 40) + "px");
-                $('#map').css("width", "calc(100% - " + (width / 2) + "px");
-                searchPanelOpen = true;
-            }
-
-            var searchHide = function () {
-                $("#pane").css("right", "0");
-                $('#map').css("width", "100%");
-                $("#search-ribbon").css("right", "-" + (width - 40) + "px");
-                searchPanelOpen = false
-            };
-
-            var jRes = jRespond([
-                {
-                    label: 'phone',
-                    enter: 0,
-                    exit: 500
-                },
-                {
-                    label: 'tablet',
-                    enter: 501,
-                    exit: 1024
-                },
-                {
-                    label: 'desktop',
-                    enter: 1024,
-                    exit: 10000
-                }
-            ]);
-
-            jRes.addFunc({
-                breakpoint: ['phone'],
-                enter: function () {
-                    searchHide()
-                    width = 400;
-                    setWidth(width)
-                },
-                exit: function () {
-                    console.log("Exit phone");
-
-                }
-            });
-            jRes.addFunc({
-                breakpoint: ['tablet'],
-                enter: function () {
-                    searchHide()
-                    width = 500;
-                    setWidth(width)
-                },
-                exit: function () {
-                    console.log("Exit tablet");
-
-                }
-            });
-            jRes.addFunc({
-                breakpoint: ['desktop'],
-                enter: function () {
-                    searchHide()
-                    width = 700;
-                    setWidth(width)
-                },
-                exit: function () {
-                    console.log("Exit desktop");
-
-                }
-            });
-
-            $('#search-border').click(function () {
-                if (searchPanelOpen) {
-                    searchHide();
-                    infoModalHide();
-                    moduleContainerHide();
-                } else {
-                    searchShow();
-                }
-            });
-
-            // Bottom dialog
-            $(".close-hide").on("click touchstart", function (e) {
-                var id = ($(this)).parent().parent().attr('id');
-
-                // If print when deactivate
-                if ($(this).data('module') === "print") {
-                    $("#print-btn").prop("checked", false);
-                    print.activate();
-                }
-
-                // If legend when deactivate
-                if ($(this).data('module') === "legend") {
-                    $("#legend-content").append($("#legend"));
-                    $("#btn-show-legend-in-map").prop("disabled", false);
-                }
-
-                $("#" + id).animate({
-                    bottom: "-100%"
-                }, 500, function () {
-                    $(id + " .expand-less").show();
-                    $(id + " .expand-more").hide();
-                });
-            });
-
-            $(".expand-less").on("click touchstart", function () {
-
-                var id = ($(this)).parent().parent().attr('id');
-
-                $("#" + id).animate({
-                    bottom: (($("#" + id).height() * -1) + 30) + "px"
-                }, 500, function () {
-                    $("#" + id + " .expand-less").hide();
-                    $("#" + id + " .expand-more").show();
-                });
-            });
-
-            $(".expand-more").on("click touchstart", function () {
-
-                var id = ($(this)).parent().parent().attr('id');
-
-                $("#" + id).animate({
-                    bottom: "0"
-                }, 500, function () {
-                    $("#" + id + " .expand-less").show();
-                    $("#" + id + " .expand-more").hide();
-                });
-            });
-
-            $(".map-tool-btn").on("click", function (e) {
-
-                e.preventDefault();
-
-                var id = ($(this)).attr('href');
-
-                // If print when activate
-                if ($(this).data('module') === "print") {
-                    $("#print-btn").prop("checked", true);
-                    print.activate();
-                }
-
-
-                // If legend when deactivate
-                if ($(this).data('module') === "legend") {
-                    $("#legend-dialog .modal-body").append($("#legend"));
-                    $("#btn-show-legend-in-map").prop("disabled", true);
-                }
-
-                $(id).animate({
-                    bottom: "0"
-                }, 500, function () {
-                    $(id + " .expand-less").show();
-                    $(id + " .expand-more").hide();
-                })
-            });
+        var infoModalHide = function () {
+            $("#info-modal").css("right", "-" + (width - 100) + "px");
         }
+
+        var moduleContainerHide = function () {
+            $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+        }
+
+        var searchShow = function () {
+            $("#search-ribbon").css("right", "-" + (width - collapsedWidth) + "px");
+            $("#pane").css("right", (collapsedWidth - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (collapsedWidth / 2) + "px)");
+            searchPanelOpen = true;
+        }
+
+        var searchShowFull = function () {
+            $("#search-ribbon").css("right", "0");
+            $("#pane").css("right", (width - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (width / 2) + "px");
+            searchPanelOpen = true;
+        }
+
+        var searchHide = function () {
+            $("#pane").css("right", "0");
+            $('#map').css("width", "100%");
+            $("#search-ribbon").css("right", "-" + (width - 40) + "px");
+            searchPanelOpen = false;
+            $("#side-panel ul li").removeClass("active");
+        };
+
+        var jRes = jRespond([
+            {
+                label: 'phone',
+                enter: 0,
+                exit: 500
+            },
+            {
+                label: 'tablet',
+                enter: 501,
+                exit: 1024
+            },
+            {
+                label: 'desktop',
+                enter: 1024,
+                exit: 10000
+            }
+        ]);
+
+        jRes.addFunc({
+            breakpoint: ['phone'],
+            enter: function () {
+                searchHide()
+                width = 400;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit phone");
+
+            }
+        });
+        jRes.addFunc({
+            breakpoint: ['tablet'],
+            enter: function () {
+                searchHide()
+                width = 500;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit tablet");
+
+            }
+        });
+        jRes.addFunc({
+            breakpoint: ['desktop'],
+            enter: function () {
+                searchHide()
+                width = 700;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit desktop");
+
+            }
+        });
+
+        $('#search-border').click(function () {
+            let id = $("#search-border i");
+            if (searchPanelOpen) {
+                searchHide();
+                infoModalHide();
+                moduleContainerHide();
+                id.removeClass("fa-times");
+                id.addClass("fa-reorder");
+                id.css("padding-left", "12px")
+
+            } else {
+                searchShow();
+                id.removeClass("fa-reorder");
+                id.addClass("fa-times");
+                id.css("padding-left", "14px")
+            }
+        });
+
+        // Bottom dialog
+        $(".close-hide").on("click touchstart", function (e) {
+            var id = ($(this)).parent().parent().attr('id');
+
+            // If print when deactivate
+            if ($(this).data('module') === "print") {
+                $("#print-btn").prop("checked", false);
+                print.activate();
+            }
+
+            // If legend when deactivate
+            if ($(this).data('module') === "legend") {
+                $("#legend-content").append($("#legend"));
+                $("#btn-show-legend-in-map").prop("disabled", false);
+            }
+
+            $("#" + id).animate({
+                bottom: "-100%"
+            }, 500, function () {
+                $(id + " .expand-less").show();
+                $(id + " .expand-more").hide();
+            });
+        });
+
+        $(".expand-less").on("click touchstart", function () {
+
+            var id = ($(this)).parent().parent().attr('id');
+
+            $("#" + id).animate({
+                bottom: (($("#" + id).height() * -1) + 30) + "px"
+            }, 500, function () {
+                $("#" + id + " .expand-less").hide();
+                $("#" + id + " .expand-more").show();
+            });
+        });
+
+        $(".expand-more").on("click touchstart", function () {
+
+            var id = ($(this)).parent().parent().attr('id');
+
+            $("#" + id).animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#" + id + " .expand-less").show();
+                $("#" + id + " .expand-more").hide();
+            });
+        });
+
+        $(".map-tool-btn").on("click", function (e) {
+
+            e.preventDefault();
+
+            var id = ($(this)).attr('href');
+
+            // If print when activate
+            if ($(this).data('module') === "print") {
+                $("#print-btn").prop("checked", true);
+                print.activate();
+            }
+
+
+            // If legend when deactivate
+            if ($(this).data('module') === "legend") {
+                $("#legend-dialog .modal-body").append($("#legend"));
+                $("#btn-show-legend-in-map").prop("disabled", true);
+            }
+
+            $(id).animate({
+                bottom: "0"
+            }, 500, function () {
+                $(id + " .expand-less").show();
+                $(id + " .expand-more").hide();
+            })
+        });
+
+        // Module icons
+        $("#side-panel ul li a").on("click", function (e) {
+            let id = ($(this));
+            $("#side-panel ul li").removeClass("active");
+            id.addClass("active");
+        });
+
     }
 };
 

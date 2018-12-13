@@ -1,5 +1,9 @@
-# What is MapCentia Vidi
+# What is Vidi?
 Vidi is a modern take on web GIS. It is the front-end for [GC2](https://github.com/mapcentia/geocloud2)
+
+Vidi is part of the [OSGeo Community Project GC2/Vidi](https://www.osgeo.org/projects/gc2-vidi/)
+
+<img title="GC2 is a OSGeo Community Project" src="https://github.com/OSGeo/osgeo/blob/master/incubation/community/OSGeo_community.png" alt="drawing" width="200"/>
 
 ## What does Vidi?
 Out-of-the-box Vidi is a web-GIS application with a lot of basic functionality. It is also a framework for building web-based applications. 
@@ -27,16 +31,49 @@ The Vidi project aims to make it easy for organizations to use open source softw
 
 1) Vidi is written in Node.js and uses Browserify for the front-end. I.e. that both front- and back-end extensions are written in javascript with CommonJS Modules, which means that you need a minimum of skill sets to expand and customize Vidi.
 
-![Standard Vidi](https://i.imgur.com/9HxfuNe.jpg "Vidi looks good!")
+![Standard Vidi](https://i.imgur.com/QbmByqV.png "Vidi looks good!")
 
 ## How to try Vidi
 Head over to gc2.mapcentia.com, create a PostGIS database and start uploading data. Then start Vidi from the dashboard.
 
-Or just try it [here](https://dev.geofyn.dk/app/geofyn/?config=kitchensink.json)
+Or just try it [here](https://map.gc2.io/app/demo_c/public)
 
 ## How to install Vidi
+We've made a [Docker](https://docs.docker.com/cs-engine/1.12/) image, so it easy to get going. You can get the service up and running by using a [docker-compose](https://docs.docker.com/compose/install/) file.
 
-[Install instructions](https://github.com/mapcentia/vidi/wiki/Install-Vidi)
+First get the docker-compose file:
+
+```bash
+git clone https://github.com/mapcentia/dockerfiles.git
+cd dockerfiles/docker-compose/vidi
+```  
+
+Second you have to set some environment variables. Rename the `vidi.env.dist` file to `vidi.env`:    
+
+```bash
+mv vidi.env.dist vidi.env
+```  
+
+Open the vidi.env file with your preferred text editor and set the variables. The content should be like this:
+
+```bash
+# Public DNS of your GC2 server (if GC2 is running local you can use http://localhost:8080)
+GC2_HOST=http://localhost:8080
+
+# Wanted timezone
+TIMEZONE=CET
+
+# Wanted localw
+LOCALE=en_US.UTF-8
+```
+
+Finally deploy the container:
+
+```bash
+docker-compose up
+```
+
+When request Vidi at http://localhost:3000/app/[database]/public. Just make sure, there are some layers in `public` schema and they're in a Group.
 
 ---
 

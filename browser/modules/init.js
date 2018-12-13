@@ -18,6 +18,8 @@ require('snackbarjs');
 const semver = require('semver');
 require("bootstrap");
 
+const cookie = require('js-cookie');
+
 module.exports = {
 
     /**
@@ -36,6 +38,10 @@ module.exports = {
      */
     init: function () {
         var me = this, configFile, stop = false;
+
+        if (typeof urlVars.session === "string") {
+            cookie.set("connect.gc2", urlVars.session, {expires: 1});
+        }
 
         var loadConfig = function () {
             $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
@@ -173,15 +179,6 @@ module.exports = {
      */
     startApp: function () {
 
-        // Load style sheet
-        //===================
-
-        $('<link/>').attr({
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: '/css/styles.css'
-        }).appendTo('head');
-
         // Add the tooltip div
         // ===================
 
@@ -252,8 +249,8 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./../../extensions/*/browser/*.js', {glob: true});
-                        require('./../../extensions/*/browser/*/*.js', {glob: true});
+                        require('./../../extensions/!(vectorLayers)/browser/*.js', {glob: true});
+                        require('./../../extensions/!(vectorLayers)/browser/*/*.js', {glob: true});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -295,7 +292,7 @@ module.exports = {
                     });
 
                 } catch (e) {
-                    console.error("Could not perform application initialization", e.message);
+                    console.error("Could not perform application initialization", e.message, e);
                 }
             });
         });

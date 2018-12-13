@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"Layer tree filters\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer --grep \"(if user is not authorized)\""
   },
   "repository": {
     "type": "git",
@@ -98,7 +98,7 @@
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
     "prop-types": "^15.6.2",
-    "puppeteer": "1.8.0",
+    "puppeteer": "1.7.0",
     "react": "^16.5.1",
     "react-addons": "^0.9.1-deprecated",
     "react-bootstrap": "^0.32.4",
@@ -108,6 +108,9 @@
     "react-dropzone": "^5.1.0",
     "react-jsonschema-form": "^1.0.4",
     "react-plotly.js": "^2.2.0",
+    "react-router": "^4.3.1",
+    "react-router-redux": "^4.0.8",
+    "redux-thunk": "^2.3.0",
     "reproject": "^1.1.1",
     "request": "^2.81.0",
     "require-globify": "^1.4.0",

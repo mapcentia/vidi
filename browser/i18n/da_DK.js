@@ -10,6 +10,7 @@ module.exports = {
         "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
+        "Main page": "Hovedside",
         "Search": "Søg",
         "Result": "Resultat",
         "Info": "Info",
@@ -79,7 +80,7 @@ module.exports = {
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
         "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
-        "Help text baselayers": "Vælg baggrundskort.",
+        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",
         "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
@@ -165,6 +166,8 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Dynamic load": "Dynamisk load",
+        "Load strategy": "Load strategi",
         "Network status": "Netværk status",
         "Set all layers to be": "Sæt alle lag til",
         "Force offline mode": "Tving offline tilstand",
@@ -199,6 +202,10 @@ module.exports = {
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",
+        "Display two layers at once": "Vis to baggrundskort på en gang",
+        "Side-by-side": "Swipe",
+        "Overlap": "Overlap",
+        "Display layers": "Vis baggrundskort som",
 
         // Map controls
         "Map controls": "Kort knapper",
@@ -214,6 +221,7 @@ module.exports = {
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
         "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
 
         // OfflineMap
         "tiles failed to load": "fliser mangler at indlæse",
@@ -280,14 +288,34 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Drag and drop measurement to add it to time series": "Træk og slip måling for at tilføje det til tidsserier",
+        "Remove from time series": "Fjern fra tidsserier",
+        "Time series": "Tidsserier",
+        "Water level": "Vandstand",
+        "Select data": "Vælg data",
+        "Filter measurements": "Filtrér målinger",
+        "Found time series": "Fundne tidsserier",
         "Plots": "Grafer",
-        "Uncategorized": "# Uncategorized",
+        "units": "Enheder",
+        "updated at": "Opdateret",
+        "Uncategorized": "Ikke kategoriseret",
         "Available plots": "Tilgængelige grafer",
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
-        "Borehole": "Borehuller",
+        "Borehole": "DGU",
+        "No time series were created yet": "Ingen tidsserier er oprettet endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
-        "Show legend on top the map": "Vis signaturen ovenpå kortet"
+        "Show legend on top the map": "Vis signaturen ovenpå kortet",
+        "Not all measurements in plot were loaded by this moment": "Ikke alle værdier i grafen er indlæst i dette øjeblik",
+
+        // Search
+        "Didn't find anything": "Fandt ikke noget",
+        "Searchable fields": "Søgbare felter",
+        "Like": "Like",
+        "Similarity": "Similarity",
+        "Tsvector": "Tsvector",
+        "No searchable fields on layer": "Ingen søgbare felter på laget",
+        "Method": "Metode"
     }
 };
