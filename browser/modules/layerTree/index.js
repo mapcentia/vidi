@@ -637,9 +637,6 @@ module.exports = {
                                                 queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
                                                     let promisesContent = [];
                                                     if (Object.keys(offlineModeSettings).length > 0) {
-
-
-
                                                         currentCachedRequests.map(cachedRequest => {
                                                             let setOfflineModeForCurrentCachedRequestTo = false;
                                                             for (let key in offlineModeSettings) {
@@ -1829,28 +1826,30 @@ module.exports = {
             filters = tileFilters[layerKey];
         }
 
-        let layerDescription = meta.getMetaByKey(layerKey);
-        let parsedMeta = _self.parseLayerMeta(layerDescription);
         let parameterString = false;
-        if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-            let parsedWMSFilters = false;
-            try {
-                let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
-                parsedWMSFilters = parsedWMSFiltersLocal;
-            } catch (e) {}
-
-            parameterString = `&filters=`;
-            let appliedFilters = {};
-            appliedFilters[tableName] = [];
-            if (parsedWMSFilters) {
-                for (let key in parsedWMSFilters) {
-                    if (filters === false || filters.indexOf(key) === -1) {
-                        appliedFilters[tableName].push(parsedWMSFilters[key]);
+        let layerDescription = meta.getMetaByKey(layerKey, false);
+        if (layerDescription) {
+            let parsedMeta = _self.parseLayerMeta(layerDescription);
+            if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+                let parsedWMSFilters = false;
+                try {
+                    let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
+                    parsedWMSFilters = parsedWMSFiltersLocal;
+                } catch (e) {}
+    
+                parameterString = `&filters=`;
+                let appliedFilters = {};
+                appliedFilters[tableName] = [];
+                if (parsedWMSFilters) {
+                    for (let key in parsedWMSFilters) {
+                        if (filters === false || filters.indexOf(key) === -1) {
+                            appliedFilters[tableName].push(parsedWMSFilters[key]);
+                        }
                     }
                 }
+    
+                parameterString = parameterString + JSON.stringify(appliedFilters);
             }
-
-            parameterString = parameterString + JSON.stringify(appliedFilters);
         }
 
         return parameterString;
