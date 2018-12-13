@@ -28,16 +28,19 @@ module.exports = {
     waitForPageToLoad: async (page) => {
         let loadedPage = new Promise((resolve, reject) => {
             page.on('console', async (msg) => {
-                //console.log(msg.text());
+                console.log(msg.text());
                 if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                     await sleepFunction(1000);
                     resolve(page);
                 } else if (msg.text().indexOf(`Limit of connection check attempts exceeded`) !== -1) {
-                    reject(`Unable to load the page`);
+                    reject(new Error(`Unable to load the page`));
                 }
             });
         });
     
         return await loadedPage;
+    },
+    img: async (page, path = `./test.png`) => {
+        await page.screenshot({ path });
     }
 };

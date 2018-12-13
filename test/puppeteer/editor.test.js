@@ -47,8 +47,6 @@ describe('Editor', () => {
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
             await helpers.sleep(1000);
-
-            await page.screenshot({ path: './test0.png' });
             
             await page.focus('#root_id');
             await page.keyboard.type('2000');
@@ -188,7 +186,8 @@ describe('Editor', () => {
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
-            await mouse.click(markerPosition.left + 10 - 24, markerPosition.top + 10 - 48);
+            await page.evaluate(`$('.js-vector-layer-popup').find('.ge-start-edit').trigger('click')`);
+            await helpers.sleep(500);
 
             // Editing attributes of the selected feature
             await helpers.sleep(2000);
@@ -223,15 +222,6 @@ describe('Editor', () => {
             await page.click(`#burger-btn`);
             await helpers.sleep(1000);
 
-            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
-                await helpers.sleep(1000);
-            }
-
-            await page.evaluate(`$('#layer-slide .close').trigger('click')`);
-            await helpers.sleep(1000);
-
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await helpers.sleep(1000);
             await page.evaluate(`$('.js-clear').trigger('click')`);
@@ -242,7 +232,8 @@ describe('Editor', () => {
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
-            await mouse.click(markerPosition.left + 10 + 24, markerPosition.top + 10 - 48);
+            await page.evaluate(`$('.js-vector-layer-popup').find('.ge-delete').trigger('click')`);
+            await helpers.sleep(500);
 
             // Checking if the queue indicator shows that element was added to the queue
             await helpers.sleep(10000);
