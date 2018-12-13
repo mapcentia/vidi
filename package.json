@@ -51,6 +51,8 @@
     "reactify": "^1.1.1"
   },
   "dependencies": {
+    "@material-ui/core": "^3.6.2",
+    "@material-ui/icons": "^3.0.1",
     "@turf/turf": "^5.1.6",
     "arrive": "^2.3.1",
     "async": "^2.6.0",
@@ -86,6 +88,7 @@
     "js-cookie": "^2.2.0",
     "jsts": "^1.1.2",
     "kepler.gl": "0.0.27",
+    "leaflet.markercluster": "^1.4.1",
     "localforage": "^1.7.1",
     "lz-string": "^1.4.4",
     "md5": "^2.2.1",
