@@ -10,7 +10,6 @@ const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTone
 const createPage = async () => {
     let page = await browser.newPage();
     await page.emulate(helpers.EMULATED_SCREEN);
-    console.log(PAGE_URL);
     await page.goto(PAGE_URL, { timeout: 0 });
     page = await helpers.waitForPageToLoad(page);
 
@@ -76,6 +75,11 @@ describe('Layer tree filters', () => {
     it('should store filters in state snapshot', async () => {
         let page = await createPage();
 
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
         let numberOfFilteredItems = false;
         page.on(`response`, async response => {
             if (response.url().indexOf(`/api/sql/aleksandrshumilov`) !== -1) {
@@ -103,6 +107,21 @@ describe('Layer tree filters', () => {
         await page.reload();
         await helpers.sleep(5000);
 
+        // Checking if filters are after reload
+        expect(numberOfFilteredItems).to.equal(4);
+        await helpers.sleep(1000);
+
+        // Checking if reset drops filters
+        await page.click(`#btn-reset`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#search-border').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[data-gc2-id="test.testpointfilters"]').first().trigger('click')`);
+        await helpers.sleep(2000);
         expect(numberOfFilteredItems).to.equal(7);
 
         // Restore snapshot
