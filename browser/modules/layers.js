@@ -199,25 +199,25 @@ module.exports = {
     /**
      * Adds raster layer
      * 
-     * @param {String} l                     Layer key
+     * @param {String} layerKey              Layer key
      * @param {String} appendedFiltersString Optional filter string
      * 
      * @returns {Promise}
      */
-    addLayer: function (l, appendedFiltersString = false) {
+    addLayer: function (layerKey, appendedFiltersString = false) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
             let layerWasAdded = false;
 
-            $.each(metaData.data, function (i, v) {
-                var layer = v.f_table_schema + "." + v.f_table_name,
-                    useLiveWMS = (JSON.parse(v.meta) !== null && JSON.parse(v.meta).single_tile !== undefined && JSON.parse(v.meta).single_tile === true); //TODO rename single_tile
+            $.each(metaData.data, function (i, layerDescription) {
+                var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
+                let useLiveWMS = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true); //TODO rename single_tile
 
-                if (layer === l) {
+                if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
-                    isBaseLayer = !!v.baselayer;
+                    isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters: (appendedFiltersString ? appendedFiltersString : ''),
                         host: host,
@@ -228,7 +228,7 @@ module.exports = {
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
-                        name: v.f_table_name,
+                        name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
                         uri: uri,
@@ -243,17 +243,20 @@ module.exports = {
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
 
-                    layers[[layer]][0].setZIndex(v.sort_id + 10000);
+                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
                     me.reorderLayers();
 
-                    console.info(`${l} was added to the map`);
+                    
                     layerWasAdded = true;
-                    resolve();
+                    return false;
                 }
             });
 
-            if (layerWasAdded === false) {
-                console.info(`${l} was not added to the map`);
+            if (layerWasAdded) {
+                console.info(`${layerKey} was added to the map`);
+                resolve();
+            } else {
+                console.warn(`${layerKey} was not added to the map`);
                 reject();
             }
         });
