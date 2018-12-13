@@ -533,6 +533,10 @@ module.exports = {
                                     tileFilters = forcedState.tileFilters;
                                 }
 
+                                if (`vectorFilters` in forcedState && forcedState.vectorFilters) {
+                                    vectorFilters = forcedState.vectorFilters;
+                                }
+
                                 if (`dynamicLoad` in forcedState && forcedState.dynamicLoad) {
                                     dynamicLoad = forcedState.dynamicLoad;
                                 }
