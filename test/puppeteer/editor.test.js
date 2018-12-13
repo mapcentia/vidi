@@ -9,7 +9,7 @@ describe('Editor', () => {
     describe('(if user is authorized)', () => {
         it('should add, update and delete features', async () => {
             let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test`);
+            await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -125,7 +125,7 @@ describe('Editor', () => {
     describe('(if user is not authorized)', () => {
         it('should put add feature request to the queue', async () => {
             let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+            await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -161,7 +161,7 @@ describe('Editor', () => {
 
         it('should put update feature request to the queue', async () => {
 	        let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test`);
+            await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -211,7 +211,7 @@ describe('Editor', () => {
 
         it('should put delete feature request to the queue', async () => {
 	        let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test`);
+            await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -257,7 +257,7 @@ describe('Editor', () => {
 
     it('should react to Force offline mode setting', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+        await page.goto(`${helpers.PAGE_URL_EMBEDDED}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -266,28 +266,28 @@ describe('Editor', () => {
             dialog.accept();
         });
 
-        // Select point on map and open the attribute editing dialog
         await page.click(`#burger-btn`);
+        // Open layer group
         await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-
-        let offlineModeIsOn = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-        if (offlineModeIsOn === false) {
-            await page.evaluate(`$('.toggle').trigger('click');`);
-        }
-
-        let layerIsSetOffline = await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`);
-        if (layerIsSetOffline) {
-            await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
-            await helpers.sleep(1000);
-        }
-
+        await helpers.sleep(1000);
+        // Enable layer
+        await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
+        // Check if offline mode controls are enabled
+        await helpers.sleep(6000);
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;
+        await helpers.sleep(1000);
+        // Enable the offline mode
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
+	    await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
-
         await helpers.sleep(1000);
 
+        // Add feature
         await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
+        await helpers.sleep(1000);
         await page.click(`#map`);
-
         await helpers.sleep(1000);
 
         // Filling in attributes of the added feature
@@ -301,9 +301,9 @@ describe('Editor', () => {
         // Created feature is not rejected by server yet, so checking the failed indicator
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.true;
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.false;
-
         await helpers.sleep(1000);
 
+        // Disable the offline mode
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
 	    await helpers.sleep(6000);
 
