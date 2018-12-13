@@ -12,7 +12,7 @@ describe("State snapshots", () => {
 
     it("should react to authorization status change", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
@@ -39,7 +39,7 @@ describe("State snapshots", () => {
 
     it("should capture current state and save it as browser-owned", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -78,7 +78,7 @@ describe("State snapshots", () => {
 
     it("should capture current state and save it as user-owned", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -117,7 +117,7 @@ describe("State snapshots", () => {
 
     it("should make browser-owned state snapshots user-owned ones and delete them", async () => {
         let page = await browser.newPage();   
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -172,7 +172,7 @@ describe("State snapshots", () => {
 
     it("should create permalink that will make possible to share state snapshot", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -214,7 +214,7 @@ describe("State snapshots", () => {
 
     it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL + `test.polygon`);
+        await page.goto(helpers.PAGE_URL_EMBEDDED + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -242,7 +242,7 @@ describe("State snapshots", () => {
 
         // Reload page without dynamic layer turned on
         let newPage = await browser.newPage();
-        await newPage.goto(helpers.PAGE_URL);
+        await newPage.goto(helpers.PAGE_URL_EMBEDDED);
         await newPage.emulate(helpers.EMULATED_SCREEN);
         newPage = await helpers.waitForPageToLoad(newPage);
 
@@ -262,7 +262,7 @@ describe("State snapshots", () => {
 
     it("should restore multiple snapshots with initial and dynamic layers in URL", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL + `test.polygon`);
+        await page.goto(helpers.PAGE_URL_EMBEDDED + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 

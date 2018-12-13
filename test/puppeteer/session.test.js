@@ -8,7 +8,7 @@ const helpers = require("./../helpers");
 describe('Session', () => {
     it('should login with correct credentials', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -33,7 +33,7 @@ describe('Session', () => {
 
     it('should not login with invalid credentials', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 

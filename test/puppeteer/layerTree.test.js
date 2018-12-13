@@ -284,7 +284,7 @@ describe('Layer tree common', () => {
 
     it('should load vector and tile layers', async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
@@ -321,7 +321,7 @@ describe('Layer tree common', () => {
 
     it('should load vector layers', async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
@@ -351,7 +351,7 @@ describe('Layer tree common', () => {
             }
         });
 
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
@@ -363,7 +363,7 @@ describe('Layer tree common', () => {
 
     it('should keep layer and layer group order', async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
         await page.click(`#burger-btn`);
