@@ -500,7 +500,7 @@ module.exports = {
             if (urlVars.state) {
                 stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
                     if (state) {
-                        this.applyState(state.snapshot);
+                        this.applyState(state.snapshot).then(initResolve);
                     } else {
                         initializeFromHashPart();
                     }
