@@ -2088,7 +2088,9 @@ module.exports = {
             newState = {
                 order: false,
                 opacitySettings: {},
-                layersOfflineMode: {}
+                layersOfflineMode: {},
+                tileFilters: {},
+                vectorFilters: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
