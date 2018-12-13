@@ -45,7 +45,7 @@ describe('Base layers', () => {
 
     it('should be able to show base layers side-by-side and restore the side-by-side mode after page reload', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}`);
+        await page.goto(`${helpers.PAGE_URL_EMBEDDED}`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
