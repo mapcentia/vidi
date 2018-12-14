@@ -109,7 +109,7 @@ describe('Layer tree common', () => {
 
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
-        await helpers.sleep(4000);
+        await helpers.sleep(8000);
 
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;

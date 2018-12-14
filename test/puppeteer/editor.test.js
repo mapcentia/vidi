@@ -199,7 +199,7 @@ describe('Editor', () => {
             // Checking if the queue indicator shows that element was added to the queue
             await page.click(`#burger-btn`);
             await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-            await helpers.sleep(4000);
+            await helpers.sleep(10000);
 
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
 
