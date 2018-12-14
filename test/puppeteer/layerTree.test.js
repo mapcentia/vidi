@@ -63,7 +63,7 @@ describe('Layer tree common', () => {
 
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
-        await helpers.sleep(4000);
+        await helpers.sleep(8000);
 
         expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
