@@ -649,60 +649,25 @@ module.exports = {
                                                 queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
                                                     let promisesContent = [];
                                                     if (Object.keys(offlineModeSettings).length > 0) {
-                                                        currentCachedRequests.map(cachedRequest => {
-                                                            let setOfflineModeForCurrentCachedRequestTo = false;
-                                                            for (let key in offlineModeSettings) {
-                                                                if (cachedRequest.layerKey.replace(`v:`, ``) === key.replace(`v:`, ``)) {
-                                                                    setOfflineModeForCurrentCachedRequestTo = offlineModeSettings[key];
-                                                                }
-                                                            }
-
-                                                            if (setOfflineModeForCurrentCachedRequestTo) {
-                                                                promisesContent.push({
-                                                                    action: `enableOfflineModeForLayer`,
-                                                                    payload: { layerKey: cachedRequest.layerKey }
+                                                        queryServiceWorker({
+                                                            action: `batchSetOfflineModeForLayers`,
+                                                            payload: offlineModeSettings
+                                                        }).then(result => {
+                                                            turnOnActiveLayersAndFinishBuilding().then(() => {
+                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                    localResolve();
                                                                 });
-                                                            } else {
-                                                                promisesContent.push({
-                                                                    action: `disableOfflineModeForLayer`,
-                                                                    payload: { layerKey: cachedRequest.layerKey }
-                                                                });
-                                                            }
-                                                        });
-
-                                                        for (let key in offlineModeSettings) {
-                                                            let offlineModeSettingWasApplied = false;
-                                                            promisesContent.map(item => {
-                                                                if (item.payload.layerKey.replace(`v:`, ``) === key.replace(`v:`, ``)) {
-                                                                    offlineModeSettingWasApplied = true;
-                                                                }
                                                             });
-
-                                                            if (offlineModeSettingWasApplied === false) {
-                                                                if (offlineModeSettings[key]) {
-                                                                    console.warn(`Unable to make ${key} offline, as it has not been cached before`);
-                                                                }
-                                                            }
-                                                        }
+                                                        });
                                                     } else {
-                                                        // Disabling offline mode for all layers
-                                                        currentCachedRequests.map(cachedRequest => {
-                                                            if (cachedRequest.offlineMode) {
-                                                                promisesContent.push({
-                                                                    action: `disableOfflineModeForLayer`,
-                                                                    payload: { layerKey: cachedRequest.layerKey }
+                                                        queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
+                                                            turnOnActiveLayersAndFinishBuilding().then(() => {
+                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                    localResolve();
                                                                 });
-                                                            }
+                                                            });
                                                         });
                                                     }
-
-                                                    let promises = [];
-                                                    promisesContent.map(item => promises.push(queryServiceWorker(item)));
-                                                    Promise.all(promises).then(() => {
-                                                        turnOnActiveLayersAndFinishBuilding().then(() => {
-                                                            queryServiceWorker({action: `getListOfCachedRequests`}).then(localResolve);
-                                                        });
-                                                    });
                                                 });
                                             });
                                         };
