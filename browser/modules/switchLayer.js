@@ -147,9 +147,7 @@ module.exports = module.exports = {
                 if (layerType === 'tile') {
                     // Only one layer at a time, so using the tile layer identifier
                     layers.incrementCountLoading(tileLayerId);
-
                     layerTree.setSelectorValue(name, 'tile');
-
                     layers.addLayer(name, layerTree.getLayerFilterString(name)).then(() => {
                         _self.checkLayerControl(name, doNotLegend, setupControls);
 

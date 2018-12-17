@@ -164,6 +164,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Dynamic load": "Dynamic load",
+        "Load strategy": "Load strategy",
         "Network status": "Network status",
         "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",
