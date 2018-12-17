@@ -13,7 +13,7 @@ let browser = false;
 puppeteer.launch({
     headless: true,
     timeout: 10000,
-    args: ["--no-sandbox"]
+    args: ["--no-sandbox", "--ignore-certificate-errors", "--enable-features=NetworkService"]
 }).then(instance => {
     browser = instance;
 });
@@ -28,7 +28,7 @@ router.post('/api/print', function (req, response) {
     var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
-    }); 
+    });
 
     // TODO
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), async (err) => {
@@ -37,7 +37,7 @@ router.post('/api/print', function (req, response) {
             return;
         }
 
-        let url = q.applicationHost + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !=="" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime+ '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
+        let url = q.applicationHost + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log(`Printing ` + url);
 
         const page = await browser.newPage();
@@ -54,7 +54,7 @@ router.post('/api/print', function (req, response) {
                     }).then(() => {
                         console.log('Done');
                         page.close();
-                        response.send({ success: true, key, url });
+                        response.send({success: true, key, url});
                     });
                 }, 2000);
             }

@@ -7,9 +7,10 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [2018.2.0.rc1] - 2018-07-12
 ### Added
 - New mode for double base-layers: Overlay base-layers, where the opacity of the top one can be changed
+- Filters for WMS single tile layers. Predefine filters in GC2 Meta, which will be displayed as checkboxes in a layertree panel. For now only supports QGIS layers.
 
 ### Changed
-- Filters can now be applied before switching a vector layer on.
+- Vector filters can now be applied before switching a vector layer on.
 - Table view are moved inside the layer tree, which makes it possible to see more than one table at a time.
 - Table view clicks now pan to feature - not zooming.
 - Popups for raster and vectors are now similar.
@@ -17,6 +18,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - When clicking in a table with points, panning now works.
 - Workaround missing Service Workers features in Edge 17/18.
+- Filters work in Edge 17/18.
 - Some smaller issues were fixed.
 
 ## [2018.1] - 2018-07-12
