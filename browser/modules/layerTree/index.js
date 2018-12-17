@@ -1891,6 +1891,7 @@ module.exports = {
                 }
 
                 $(container).find(`.js-toggle-filters`).hide();
+                $(container).find(`.js-toggle-filters-number-of-filters`).hide();
                 $(container).find(`.js-toggle-load-strategy`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
