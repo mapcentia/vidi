@@ -6,10 +6,6 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("State snapshots", () => {
-    it("should store the offline mode settings, as well as apply them according to cache status", async () => {
-        // @todo Implement
-    });
-
     it("should react to authorization status change", async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_EMBEDDED);
@@ -334,9 +330,6 @@ describe("State snapshots", () => {
     });
 
     it("should store layer-specific settings", async () => {
-        // @todo Check for filters
-        // @todo Check for offline mode settings
-
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -349,19 +342,28 @@ describe("State snapshots", () => {
         await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"] input').first().trigger('click')`);
+        await helpers.sleep(6000);
+
         // Add snapshot
         await page.type(`.js-browser-owned input`, `Plain snapshot`);
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
-        // Change layer opacity 
+        // Open layers tab
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(1000);
+
+        // Change layer opacity 
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').trigger('click')`);
         await helpers.sleep(1000);
         await page.click('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider');
+        await helpers.sleep(1000);
+
+        // Set offline mode
+        await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').trigger('click')`);
         await helpers.sleep(1000);
 
         // Open state snapshot manager
@@ -369,7 +371,7 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
 
         // Add snapshot
-        await page.type(`.js-browser-owned input`, `Altered opacity snapshot`);
+        await page.type(`.js-browser-owned input`, `Altered snapshot`);
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
@@ -382,8 +384,34 @@ describe("State snapshots", () => {
         await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
+        // Open layers tab
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(6000);
+
         // Check if current opacity is 1 as it was initially
         layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`1`);
+
+        // Check if offline mode is disabled
+        expect(await page.evaluate(`$('.js-set-online[data-layer-key="public.test"]').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').prop('disabled')`)).to.be.false;
+
+        // Applying second state snapshot
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(1).find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Open layers tab
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(6000);
+
+        // Check if current opacity is 1 as it was initially
+        layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
+        expect(layerOpacity).to.equal(`0.5`);
+
+        // Check if offline mode is disabled
+        expect(await page.evaluate(`$('.js-set-online[data-layer-key="public.test"]').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').prop('disabled')`)).to.be.true;
     });
 });
