@@ -22,9 +22,6 @@ When offline application mode becomes available, following cases has to be proce
 
 Puppeteer:
 - how service worker returns the cached response depending on offline mode settings
-- reset function should also reset base layer and zoom to max extent
-- single tile layers
-- toggle vector and tile layer with using control, filters have to appear and dissappear correctly
-- test Disable button in filters
-- validate input in filters
+- toggle dynamic mode of requesting vector layers
+- test Disable button in filters and validate input in filters
 - test the overlap mode for base layers
