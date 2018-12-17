@@ -15,7 +15,7 @@ Any module can benefit in following ways from using the `state` module API:
 
 For example, there is a module `demo` that controls the map base layer. Module sets the base layer using its string identifier and it can return the identifier of the current base layer. In order to set the previously selected base layer after page refresh and keep the base layer setting in state snapshots following modification were made to module:
 
-```
+```javascript
 'use strict';
 const MODULE_NAME = `demo`;
 let _self = false;
