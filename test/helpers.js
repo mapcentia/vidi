@@ -33,11 +33,14 @@ module.exports = {
                     await sleepFunction(1000);
                     resolve(page);
                 } else if (msg.text().indexOf(`Limit of connection check attempts exceeded`) !== -1) {
-                    reject(`Unable to load the page`);
+                    reject(new Error(`Unable to load the page`));
                 }
             });
         });
     
         return await loadedPage;
+    },
+    img: async (page, path = `./test.png`) => {
+        await page.screenshot({ path });
     }
 };
