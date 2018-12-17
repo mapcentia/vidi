@@ -181,7 +181,7 @@ module.exports = module.exports = {
                     }
                 }
 
-                switchLayer.init(prefix + $(e.target).data(`gc2-id`), $(e.target).prop(`checked`), doNotLegend);
+                switchLayer.init(prefix + $(e.target).attr(`data-gc2-id`), $(e.target).prop(`checked`), doNotLegend);
                 e.stopPropagation();
 
                 backboneEvents.get().trigger(`layerTree:activeLayersChange`);

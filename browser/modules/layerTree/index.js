@@ -1567,6 +1567,7 @@ module.exports = {
                 });
 
                 $(layerContainer).find(`.js-toggle-tile-filters`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-tile-filters'));
                     $(layerContainer).find('.js-layer-settings-tile-filters').toggle();
                 });
             }
@@ -1599,19 +1600,24 @@ module.exports = {
                     value = dynamicLoad[layerKey];
                 }
 
-                // Load strategy
-                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                if (document.getElementById(componentContainerId)) {
-                    ReactDOM.render(<LoadStrategyToggle
-                        layerKey={layerKey}
-                        initialValue={value}
-                        onChange={_self.onChangeLoadStrategyHandler}/>,
-                        document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                    });
+
+                    componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<LoadStrategyToggle
+                            layerKey={layerKey}
+                            initialValue={value}
+                            onChange={_self.onChangeLoadStrategyHandler}/>,
+                            document.getElementById(componentContainerId));
+                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                        });
+                    }
+                } else {
+                    $(layerContainer).find('.js-toggle-load-strategy').remove();
+                    $(layerContainer).find('.js-layer-settings-load-strategy').remove();
                 }
 
                 // Table view
@@ -1806,7 +1812,7 @@ module.exports = {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
-        let tableName = layerKey.split(`.`)[1];
+        let tableName = layerKey;
 
         let filters = false;
         if (tileFilters && layerKey in tileFilters && tileFilters[layerKey]) {
