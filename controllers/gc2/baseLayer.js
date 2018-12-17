@@ -25,7 +25,7 @@ router.get('/api/baselayer', function (req, response) {
 
             return;
         }
-
+        body+= ";window.gc2host='" + config.host + "';";
         response.send((body));
     })
 });
