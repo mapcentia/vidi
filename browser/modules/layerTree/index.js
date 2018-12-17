@@ -1600,24 +1600,19 @@ module.exports = {
                     value = dynamicLoad[layerKey];
                 }
 
-
-                    componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<LoadStrategyToggle
-                            layerKey={layerKey}
-                            initialValue={value}
-                            onChange={_self.onChangeLoadStrategyHandler}/>,
-                            document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                        });
-                    }
-                } else {
-                    $(layerContainer).find('.js-toggle-load-strategy').remove();
-                    $(layerContainer).find('.js-layer-settings-load-strategy').remove();
+                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                if (document.getElementById(componentContainerId)) {
+                    ReactDOM.render(<LoadStrategyToggle
+                        layerKey={layerKey}
+                        initialValue={value}
+                        onChange={_self.onChangeLoadStrategyHandler}/>,
+                        document.getElementById(componentContainerId));
+                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                    });
                 }
 
                 // Table view
