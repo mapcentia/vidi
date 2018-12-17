@@ -1,10 +1,10 @@
-### State snapshots API
+### State API
 
-The `stateSnapshots` is the Vidi module, which to manages states of the Vidi application. State of the application is the list of settings that are active now, like map extent, zoom level, list of displayed layers etc. `stateSnapshots` module allows creating state snapshots (making a snapshot of the actual application state) and sharing it with collaborators (using the user interface of sharing it via link).
+The `state` is the Vidi module, which manages global state of the Vidi application. State of the application is the list of settings that are active now, like map extent, zoom level, list of displayed layers etc. `stateSnapshots` module allows creating state snapshots  and sharing them with collaborators (using the user interface of sharing it via link).
 
 ### Usage in modules
 
-Any module can benefit in following ways from using the `stateSnapshots` module API:
+Any module can benefit in following ways from using the `state` module API:
 
 1. Restoring module state after page refresh;
 2. Storing and sharing module state via state snapshots.
@@ -13,9 +13,9 @@ Any module can benefit in following ways from using the `stateSnapshots` module 
 
 ### Integration of modules
 
-For example, there is a module `demoModule` that controls the map base layer. Module sets the base layer using its string identifier and it can return the identifier of the current base layer. In order to set the previously selected base layer after page refresh and keep the base layer setting in state snapshots following modification were made to module:
+For example, there is a module `demo` that controls the map base layer. Module sets the base layer using its string identifier and it can return the identifier of the current base layer. In order to set the previously selected base layer after page refresh and keep the base layer setting in state snapshots following modification were made to module:
 
-```
+```javascript
 'use strict';
 const MODULE_NAME = `demo`;
 let _self = false;
