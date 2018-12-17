@@ -6,8 +6,6 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Base layers', () => {
-    // @todo Test the overlap mode
-
     it('should allow switching base layers', async () => {
         let page = await browser.newPage();
 

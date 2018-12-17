@@ -6,55 +6,6 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Layer tree common', () => {
-    /*
-    it(`should react when application goes online or offline`, async () => {
-        @todo Not supported by Puppeteer right now https://github.com/GoogleChrome/puppeteer/issues/2469
-
-        Following options do not work:
-        - using page.setOfflineMode(true)
-        - using the DevTools protocol, the Network.emulateNetworkConditions({ offline: true })
-        - using the DevTools protocol, the Network.requestServedFromCache()
-        - intercepting responses and checking if they were served from cache ()
-
-        When offline application mode becomes available, following cases has to be processed:
-        - how layer offline mode controls react to changes in application availability
-
-        Raw talking to DevTools is not working as well:
-
-        let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
-        await page.emulate(helpers.EMULATED_SCREEN);
-        page = await helpers.waitForPageToLoad(page);
-
-        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
-        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
-        await helpers.sleep(2000);
-
-        let SWTarget = false;
-        let targets = await browser.targets();
-        targets.map(target => {
-            if (target.type() === `service_worker`) {
-                SWTarget = target;
-                return false;
-            }
-        });
-
-        const client = await SWTarget.createCDPSession();
-        await client.send('Network.enable');
-        await client.send('Network.emulateNetworkConditions', {
-            offline: true,
-            latency: 0,
-            downloadThroughput: -1,
-            uploadThroughput: -1
-        });
-
-        await helpers.sleep(8000);
-        await page.screenshot({ path: './test.png' });  
-    });
-    */
-
-    // @todo Test the multiple layer type selector
-
     it(`should keep offline mode settings for layers after page reload`, async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
