@@ -38,6 +38,17 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
 
+        // Change the base layer
+        await page.evaluate(`$('[href="#baselayer-content"]').trigger('click');`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[name="baselayers"][value="osm"]').trigger('click');`);
+        await helpers.sleep(1000);
+
+        // Change the zoom level
+        const button = await page.$('#map');
+        await button.click({ clickCount: 2 });
+        await helpers.sleep(1000);
+
         // Click the reset button
         await page.click(`#btn-reset`);
         await helpers.sleep(4000);
@@ -78,7 +89,7 @@ describe("Application", () => {
 
     it("should update coordinates upon map changes", async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         page = await helpers.waitForPageToLoad(page);
 
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);

@@ -8,7 +8,7 @@ const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
 const LOG = false;
 const LOG_FETCH_EVENTS = false;
-const LOG_OFFLINE_MODE_EVENTS = false;
+const LOG_OFFLINE_MODE_EVENTS = true;
 
 /**
  * Browser detection
@@ -156,14 +156,36 @@ class Keeper {
         this._inputParameterCheckFunction = inputParameterCheckFunction;
     }
 
+    batchSet(records) {
+        return new Promise((resolve, reject) => {
+            localforage.setItem(this._cacheKey, records).then(() => {
+                //this.get(key).then(storedValue => {
+                    resolve();
+                //});
+            }).catch(error => {
+                console.error(`localforage failed to perform operation`, error);  
+                reject();
+            });
+        });
+    }
+
     set(key, value) {
         this._inputParameterCheckFunction(key, value);
+        let initialCreated = value.created;
         return new Promise((resolve, reject) => {
             localforage.getItem(this._cacheKey).then(storedValue => {
                 if (!storedValue) storedValue = {};
-                storedValue[key] = value;
-                localforage.setItem(this._cacheKey, storedValue).then(() => {
-                    resolve();
+                let valueCopy = JSON.parse(JSON.stringify(storedValue));
+                valueCopy[key] = JSON.parse(JSON.stringify(value));
+                localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                    // Checking if value was really saved
+                    this.get(key).then(storedValue => {
+                        if (storedValue.created !== initialCreated) {
+                            throw new Error(`Value was not really saved in localforage`, JSON.stringify(value));
+                        }
+
+                        resolve();
+                    });
                 }).catch(error => {
                     console.error(`localforage failed to perform operation`, error);  
                     reject();
@@ -552,6 +574,11 @@ self.addEventListener('message', (event) => {
             forceIgnoredExtensionsCaching = false;
         }
     } else if (`action` in event.data) {
+        const reportFailure = (error) => {
+            if (error) console.error(error);
+            event.ports[0].postMessage(false);
+        };
+
         if (event.data.action === `addUrlIgnoredForCaching` && `payload` in event.data) {
 
             if (LOG) console.log('Service worker: adding url that should not be cached', event.data);
@@ -585,14 +612,40 @@ self.addEventListener('message', (event) => {
 
                 event.ports[0].postMessage(layers);
             });
+        } else if (event.data.action === `disableOfflineModeForAll`) {
+            cacheSettingsKeeper.getAll().then(records => {
+                let recordsCopy = JSON.parse(JSON.stringify(records));
+                for (let key in recordsCopy) {
+                    recordsCopy[key].offlineMode = false;
+                }
+
+                cacheSettingsKeeper.batchSet(recordsCopy).then(() => {
+                    event.ports[0].postMessage(true);
+                }).catch(reportFailure);
+            });
+        } else if ((event.data.action === `batchSetOfflineModeForLayers`) && `payload` in event.data) {
+            if (event.data.payload) {
+                cacheSettingsKeeper.getAll().then(records => {
+                    let recordsCopy = JSON.parse(JSON.stringify(records));
+                    let offlineModeSettings = JSON.parse(JSON.stringify(event.data.payload));
+                    for (let key in recordsCopy) {
+                        for (let layerKey in offlineModeSettings) {
+                            if (key === layerKey) {
+                                recordsCopy[key].offlineMode = offlineModeSettings[layerKey];
+                            }
+                        }
+                    }
+
+                    cacheSettingsKeeper.batchSet(recordsCopy).then(() => {
+                        event.ports[0].postMessage(true);
+                    }).catch(reportFailure);
+                });
+            } else {
+                throw new Error(`Invalid parameters for batchEnableOfflineModeForLayers`);
+            }
         } else if ((event.data.action === `enableOfflineModeForLayer` || event.data.action === `disableOfflineModeForLayer`) && `payload` in event.data) {
             if (event.data.payload && `layerKey` in event.data.payload && event.data.payload.layerKey) {
                 cacheSettingsKeeper.getAll().then(records => {
-                    const reportFailure = (error) => {
-                        if (error) console.error(error);
-                        event.ports[0].postMessage(false);
-                    };
-
                     let messageWasSent = false;
                     for (let key in records) {
                         if (records[key].layerKey === event.data.payload.layerKey) {
@@ -604,7 +657,6 @@ self.addEventListener('message', (event) => {
 
                             let currentTime = new Date();
                             records[key].created = currentTime.getTime();
-
                             messageWasSent = true;
                             cacheSettingsKeeper.set(key, records[key]).then(() => {
                                 event.ports[0].postMessage(true);
@@ -670,6 +722,7 @@ self.addEventListener('fetch', (event) => {
                             return new Promise((resolve, reject) => {
                                 cacheSettingsKeeper.get(requestData.layerKey).then(cacheSettings => {
                                     if (!requestData) throw new Error(`Unable to find the POST data for request ${cleanedRequestURL}`);
+                                    cacheSettingsKeeper.getAll().then(records => {
                                     if (requestData.bbox) {
                                         // Dynamic query
 
@@ -771,6 +824,13 @@ self.addEventListener('fetch', (event) => {
                                             });
                                         }
                                     }
+
+
+                                });
+
+
+
+
                                 }).catch(() => {
                                     console.error(`Unable to get cache settings for ${requestData.layerKey}`);  
                                     resolve({ 

@@ -6,13 +6,9 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe("State snapshots", () => {
-    it("should store the offline mode settings, as well as apply them according to cache status", async () => {
-        // @todo Implement
-    });
-
     it("should react to authorization status change", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
@@ -39,7 +35,7 @@ describe("State snapshots", () => {
 
     it("should capture current state and save it as browser-owned", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -78,7 +74,7 @@ describe("State snapshots", () => {
 
     it("should capture current state and save it as user-owned", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -117,7 +113,7 @@ describe("State snapshots", () => {
 
     it("should make browser-owned state snapshots user-owned ones and delete them", async () => {
         let page = await browser.newPage();   
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -172,12 +168,16 @@ describe("State snapshots", () => {
 
     it("should create permalink that will make possible to share state snapshot", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL);
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
         // Accepting dialogs
         page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Turning on the layer
+        await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
+        await helpers.sleep(1000);
 
         // Open state snapshot manager
         await page.click(`#state-snapshots-dialog-btn`);
@@ -189,32 +189,20 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
-
         let linkURL = await page.evaluate(`$('#state-snapshots').find('.js-browser-owned').find('input[type="text"]').eq(1).val()`);
+        await page.close();
 
         let statePage = await browser.newPage();
-        await statePage.setRequestInterception(true);
-        let stateWasRequested = false;
-        statePage.on('request', interceptedRequest => {
-            if (interceptedRequest.url().indexOf('state-snapshot') !== -1) {
-                if (interceptedRequest.url().indexOf(linkURL.split('=')[1]) !== -1) {
-                    stateWasRequested = true;
-                }
-            }
-
-            interceptedRequest.continue();
-        });
-
         await statePage.goto(linkURL);
         await statePage.emulate(helpers.EMULATED_SCREEN);
         statePage = await helpers.waitForPageToLoad(statePage);
-
-        expect(stateWasRequested).to.be.true;
+        await helpers.sleep(2000);
+        expect(await statePage.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
     });
 
     it("should restore multiple snapshots with dynamic layers in state snapshot", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL + `test.polygon`);
+        await page.goto(helpers.PAGE_URL_EMBEDDED + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -242,7 +230,7 @@ describe("State snapshots", () => {
 
         // Reload page without dynamic layer turned on
         let newPage = await browser.newPage();
-        await newPage.goto(helpers.PAGE_URL);
+        await newPage.goto(helpers.PAGE_URL_EMBEDDED);
         await newPage.emulate(helpers.EMULATED_SCREEN);
         newPage = await helpers.waitForPageToLoad(newPage);
 
@@ -262,7 +250,7 @@ describe("State snapshots", () => {
 
     it("should restore multiple snapshots with initial and dynamic layers in URL", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL + `test.polygon`);
+        await page.goto(helpers.PAGE_URL_EMBEDDED + `test.polygon`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -342,9 +330,6 @@ describe("State snapshots", () => {
     });
 
     it("should store layer-specific settings", async () => {
-        // @todo Check for filters
-        // @todo Check for offline mode settings
-
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -357,19 +342,28 @@ describe("State snapshots", () => {
         await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"] input').first().trigger('click')`);
+        await helpers.sleep(6000);
+
         // Add snapshot
         await page.type(`.js-browser-owned input`, `Plain snapshot`);
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
-        // Change layer opacity 
+        // Open layers tab
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(1000);
+
+        // Change layer opacity 
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.js-toggle-opacity').trigger('click')`);
         await helpers.sleep(1000);
         await page.click('[data-gc2-layer-key="public.test_poly.the_geom"] .js-opacity-slider');
+        await helpers.sleep(1000);
+
+        // Set offline mode
+        await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').trigger('click')`);
         await helpers.sleep(1000);
 
         // Open state snapshot manager
@@ -377,7 +371,7 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
 
         // Add snapshot
-        await page.type(`.js-browser-owned input`, `Altered opacity snapshot`);
+        await page.type(`.js-browser-owned input`, `Altered snapshot`);
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
@@ -390,8 +384,34 @@ describe("State snapshots", () => {
         await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
+        // Open layers tab
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(6000);
+
         // Check if current opacity is 1 as it was initially
         layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
         expect(layerOpacity).to.equal(`1`);
+
+        // Check if offline mode is disabled
+        expect(await page.evaluate(`$('.js-set-online[data-layer-key="public.test"]').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').prop('disabled')`)).to.be.false;
+
+        // Applying second state snapshot
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(1).find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Open layers tab
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(6000);
+
+        // Check if current opacity is 1 as it was initially
+        layerOpacity = await page.evaluate(`$('.leaflet-tile-pane > .leaflet-image-layer').css('opacity')`);
+        expect(layerOpacity).to.equal(`0.5`);
+
+        // Check if offline mode is disabled
+        expect(await page.evaluate(`$('.js-set-online[data-layer-key="public.test"]').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('.js-set-offline[data-layer-key="public.test"]').prop('disabled')`)).to.be.true;
     });
 });

@@ -1642,7 +1642,7 @@ geocloud = (function () {
         };
 
         //ol2, ol3 and leaflet
-        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
+        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent, tileErrorEvent) {
             var me = this;
             var layers;
             (function poll() {
@@ -1707,11 +1707,18 @@ geocloud = (function () {
                                                 }
                                             }
 
+                                            if (!tileErrorEvent) {
+                                                tileErrorEvent = function () {}
+                                            }
+
                                             layers[key].layer.off("load");
                                             layers[key].layer.on("load", loadEvent);
 
                                             layers[key].layer.off("loading");
                                             layers[key].layer.on("loading", loadingEvent);
+
+                                            layers[key].layer.off("tileerror");
+                                            layers[key].layer.on("tileerror", tileErrorEvent);
 
                                             me.map.addLayer(layers[key].layer);
                                         }

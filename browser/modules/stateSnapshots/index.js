@@ -6,11 +6,9 @@
 
 'use strict';
 
-const md5 = require(`md5`);
-
 const API_URL = `/api/state-snapshots`;
 
-import TitleFieldComponent from './shared/TitleFieldComponent';
+import TitleFieldComponent from './../shared/TitleFieldComponent';
 
 /**
  * @type {*|exports|module.exports}

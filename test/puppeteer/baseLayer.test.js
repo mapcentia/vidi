@@ -52,8 +52,7 @@ describe('Base layers', () => {
         let osmWasRequested = false;
         let stamenTonerLiteWasRequested = false;
 
-        await page.setRequestInterception(true);
-        page.on('request', interceptedRequest => {
+        const logRequest = interceptedRequest => {
             if (interceptedRequest.url().indexOf(`tile.openstreetmap.org`) !== -1) {
                 osmWasRequested = true;
             } else if (interceptedRequest.url().indexOf(`fastly.net/toner-lite`) !== -1) {
@@ -61,12 +60,15 @@ describe('Base layers', () => {
             }
 
             interceptedRequest.continue();
-        });
+        };
+
+        await page.setRequestInterception(true);
+        page.on('request', logRequest);
 
         await page.click(`#base-layers-btn`);
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('.js-toggle-side-by-side-mode').trigger('click')`);
+        await page.evaluate(`$('.js-two-layers-at-once-control').trigger('click')`);
         await helpers.sleep(1000);
 
         await page.evaluate(`$('[data-gc2-base-id="stamenTonerLite"]').find('input').trigger('click')`);
@@ -82,11 +84,14 @@ describe('Base layers', () => {
         expect(stamenTonerLiteWasRequested).to.be.true;
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
+        await page.setRequestInterception(false);
+        page.removeListener('request', logRequest);
 
         // Reloading page
         await page.reload();
         page = await helpers.waitForPageToLoad(page);
         await helpers.sleep(1000);
+        await helpers.img(page);
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
     });

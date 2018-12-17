@@ -13,7 +13,7 @@ describe("OfflineMap", () => {
         }
 
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
+        await page.goto(helpers.PAGE_URL_EMBEDDED.replace('public/#osm/13/', 'public/#osm/17/'));
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -126,7 +126,7 @@ describe("OfflineMap", () => {
 
         // Checking if map is truly stored across all tabs
         let newPage = await browser.newPage();
-        await newPage.goto(helpers.PAGE_URL.replace('public/#osm/13/', 'public/#osm/17/'));
+        await newPage.goto(helpers.PAGE_URL_EMBEDDED.replace('public/#osm/13/', 'public/#osm/17/'));
         await newPage.emulate(helpers.EMULATED_SCREEN);
         newPage = await helpers.waitForPageToLoad(newPage);
 
