@@ -24,6 +24,9 @@ var backboneEvents;
 
 var activeBaseLayer;
 
+var _self = false;
+
+var failedLayers = [];
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -36,6 +39,7 @@ module.exports = module.exports = {
         baseLayer = o.baseLayer;
         backboneEvents = o.backboneEvents;
 
+        _self = this;
         return this;
     },
     init: function (str) {
@@ -48,6 +52,7 @@ module.exports = module.exports = {
                 if (str.split(".")[1]) {
                     layers.addLayer(str);
                 }
+
                 console.info(str + " is added as base layer.");
             }
 
@@ -72,6 +77,7 @@ module.exports = module.exports = {
                                         backboneEvents.get().trigger("startLoading:layers", layerName);
                                     },
                                 }, v.overlays[u].config));
+
                                 // Set prefix on id, so the layer will not be returned by layers.getLayers
                                 l[0].id = "__hidden." + v.overlays[u].id;
                             }
@@ -80,10 +86,35 @@ module.exports = module.exports = {
                 });
             }
 
+            let numberOfErroredTiles = 0;
             cloud.get().setBaseLayer(str, (e) => {
-                backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                if (numberOfErroredTiles > 0) {
+                    console.warn(`Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`);
+
+                    let alternativeLayer = false;
+                    failedLayers.push(str);
+                    window.setBaseLayers.map(item => {
+                        if (failedLayers.indexOf(item.id) === -1) {
+                            alternativeLayer = item.id;
+                            return false;
+                        }
+                    });
+
+                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                    if (alternativeLayer === false) {
+                        console.error(`Unable to load any of available base layers`);
+                    } else {
+                        setTimeout(() => {
+                            _self.init(alternativeLayer);
+                        });
+                    }
+                } else {
+                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                }
             }, (e) => {
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
+            }, (e) => {
+                numberOfErroredTiles++;
             });
 
             baseLayer.redraw(str);
