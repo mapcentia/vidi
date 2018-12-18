@@ -200,6 +200,30 @@ module.exports = {
     },
 
     /**
+     * Deletes the meta data object
+     * @param {String} layerKey Layer key
+     */
+    deleteMetaData: function (layerKey) {
+        if (layerKey in metaDataKeys) {
+            delete metaDataKeys[layerKey];
+        }
+
+        let deletedIndex = false;
+        metaData.data.map(existingMetaLayer => {
+            if ((existingMetaLayer.f_table_schema + '.' + existingMetaLayer.f_table_name) === layerKey) {
+                deletedIndex = true;
+                return false;
+            }
+        });
+
+        if (deletedIndex === false) {
+            console.warn(`Meta data for ${layerKey} was not deleted`);
+        } else {
+            metaData.data.splice(deletedIndex, 1);
+        }
+    },
+
+    /**
      * Returns meta object for the specified layer idenfitier
      * 
      * @param {String} layerKey Layer identifier

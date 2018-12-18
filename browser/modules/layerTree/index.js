@@ -1148,7 +1148,7 @@ module.exports = {
 
         // Creating simulated layer description object
         let simulatedMetaData = {
-            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + ')'),
+            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             fieldconf: '[]',
@@ -1522,6 +1522,31 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
+
+            if (isVirtual) {
+                $(layerControlRecord).find(`.js-toggle-filters`).remove();
+                $(layerControlRecord).find(`.js-toggle-load-strategy`).remove();
+                $(layerControlRecord).find(`.js-delete-virtual-layer`).click(() => {
+                    let deletedIndex = false;
+                    virtualLayers.map((item, index) => {
+                        if (item.key === layerKey) {
+                            deletedIndex = index;
+                        }
+                    });
+
+                    if (deletedIndex === false) {
+                        throw new Error(`Unable to find layer ${layerKey}`);
+                    } else {
+                        virtualLayers.splice(deletedIndex, 1);
+                        meta.deleteMetaData(layerKey);
+                        switchLayer.init(layerKey, false).then(() => {
+                            _self.create(false, [`virtualLayers`]).then(() => {
+                                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                            });
+                        });
+                    }
+                });
+            }
 
             $(layerControlRecord).find('.info-label').first().on('click', (e, data) => {
                 let html,
