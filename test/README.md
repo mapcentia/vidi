@@ -25,3 +25,4 @@ Puppeteer:
 - toggle dynamic mode of requesting vector layers
 - test Disable button in filters and validate input in filters
 - test the overlap mode for base layers
+- test creating, sorting, saving of virtual layers

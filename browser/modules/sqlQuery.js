@@ -9,7 +9,7 @@
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, backboneEvents, meta, layerTree, advancedInfo;
+var cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
 
 /**
  * @type {*|exports|module.exports}
@@ -59,6 +59,7 @@ module.exports = {
         meta = o.meta;
         layerTree = o.layerTree;
         advancedInfo = o.advancedInfo;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
         extensions = o.extensions;
@@ -192,9 +193,20 @@ module.exports = {
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
-                            '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
-                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
+                        $("#info-pane").append(`<div class="tab-pane" id="_${storeId}">
+                            <div>
+                                <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                                </a> 
+                                <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> Excel
+                                </a>
+                                <a class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
+                                </a>
+                            </div>
+                            <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
+                        </div>`);
 
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
@@ -269,11 +281,18 @@ module.exports = {
                         $("#_download_geojson_" + storeId).click(function () {
                             download(sql, "geojson");
                         });
-
-
+                        $("#_create_layer_" + storeId).click(function () {
+                            // Remove query results and open them as created virtual layer in layerTree
+                            layerTree.createVirtualLayer(layerObj).then(newLayerKey => {
+                                switchLayer.init(newLayerKey, true);
+                            }).catch(error => {
+                                console.error(`Error occured while creating the virtual layer`, error);
+                            });
+                        });
                     } else {
                         layerObj.reset();
                     }
+
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {

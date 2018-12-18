@@ -164,6 +164,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Create virtual layer": "Create virtual layer",
+        "Virtual layers": "Virtual layers",
         "Dynamic load": "Dynamic load",
         "Load strategy": "Load strategy",
         "Network status": "Network status",
