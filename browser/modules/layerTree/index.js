@@ -10,7 +10,7 @@
 
 'use strict';
 
-const LOG = false;
+const LOG = true;
 
 const MODULE_NAME = `layerTree`;
 
@@ -262,7 +262,6 @@ module.exports = {
         }
     },
 
-
     /**
      * Returns layers order in corresponding groups
      *
@@ -275,9 +274,10 @@ module.exports = {
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
                 let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
                 let initialTileFilters = ((initialState && `tileFilters` in initialState && typeof initialState.tileFilters === `object`) ? initialState.tileFilters : {});
+                let initialVirtualLayers = ((initialState && `virtualLayers` in initialState && typeof initialState.virtualLayers === `object`) ? initialState.virtualLayers : []);
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
                 let initialDynamicLoad = ((initialState && `dynamicLoad` in initialState) ? initialState.dynamicLoad : {});
-                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, opacitySettings, initialDynamicLoad});
+                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, initialVirtualLayers, opacitySettings, initialDynamicLoad});
             });
         });
 
@@ -346,8 +346,16 @@ module.exports = {
         let result = new Promise((resolve, reject) => {
             let timestamp = new Date().getTime();
             let key = (VIRTUAL_LAYERS_SCHEMA + `.query` + timestamp);
-            virtualLayers.push({ key, store });
-            _self.create().then(() => {
+            virtualLayers.push({
+                key,
+                store: {
+                    db: store.db,
+                    sql: store.sql
+                }
+            });
+
+            _self.create(false, [`virtualLayers`]).then(() => {
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 resolve(key);
             });
         });
@@ -359,8 +367,13 @@ module.exports = {
      * Creating request for building the tree.
      * In order to avoid race condition as simultaneous calling of run() the pending create()
      * requests are performed one by one.
+     * 
+     * @param {Object} forcedState             Externally provided state of the layerTree
+     * @param {Array}  ignoredInitialStateKeys Keys of the initial state that should be ignored
+     * 
+     * @returns {Promise}
      */
-    create: (forcedState = false) => {
+    create: (forcedState = false, ignoredInitialStateKeys = []) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, treeIsBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -467,21 +480,32 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialDynamicLoad, initialTileFilters, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialDynamicLoad,
+                        initialVirtualLayers, initialTileFilters, opacitySettings}) => {
 
                         try {
 
-                            if (vectorFilters) {
+                            if (vectorFilters && ignoredInitialStateKeys.indexOf(`vectorFilters`) === -1) {
                                 vectorFilters = initialVectorFilters;
                             }
 
-                            if (initialTileFilters) {
+                            if (initialTileFilters && ignoredInitialStateKeys.indexOf(`tileFilters`) === -1) {
                                 tileFilters = initialTileFilters;
                             }
 
-                            if (initialDynamicLoad) {
+                            if (initialDynamicLoad && ignoredInitialStateKeys.indexOf(`dynamicLoad`) === -1) {
                                 dynamicLoad = initialDynamicLoad;
                             }
+
+                            console.log(`### initialVirtualLayers`, initialVirtualLayers);
+
+
+                            if (initialVirtualLayers && ignoredInitialStateKeys.indexOf(`virtualLayers`) === -1) {
+                                virtualLayers = initialVirtualLayers;
+                            }
+
+
+                            console.log(`### virtualLayers`, virtualLayers);
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
                                 console.error(`Invalid order object`, order);
@@ -494,6 +518,14 @@ module.exports = {
                                 if (forcedState.order && layerSortingInstance.validateOrderObject(forcedState.order) === false) {
                                     console.error(forcedState.order);
                                     throw new Error(`The provided order object in forced layerTree state is invalid`);
+                                }
+
+                                if (`virtualLayers` in forcedState && forcedState.virtualLayers) {
+                                    virtualLayers = forcedState.virtualLayers;
+                                    virtualLayers.map(item => {
+                                        let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
+                                        meta.addMetaData({ data: [simulatedMetaData]});
+                                    });
                                 }
 
                                 order = forcedState.order;
@@ -1109,6 +1141,23 @@ module.exports = {
         return conditions;
     },
 
+    createSimulatedLayerDescriptionForVirtualLayer: (item) => {
+        let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
+        let date = new Date(+creationTime);
+        let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`FROM`) + 4, item.store.sql.indexOf(`WHERE`)).trim();
+
+        // Creating simulated layer description object
+        let simulatedMetaData = {
+            f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + ')'),
+            f_table_schema: VIRTUAL_LAYERS_SCHEMA,
+            f_table_name: item.key.split(`.`)[1],
+            fieldconf: '[]',
+            meta: '{\"vidi_layer_type\": \"v\"}'
+        };
+
+        return simulatedMetaData;
+    },
+
     /**
      * Generates single layer group control
      *
@@ -1143,19 +1192,7 @@ module.exports = {
         let notSortedLayersAndSubgroupsForCurrentGroup = [];
         if (isVirtualGroup) {
             virtualLayers.map(item => {
-                let creationTime = parseInt(item.key.split(`.`)[1].replace(`query`, ``));
-                let date = new Date(+creationTime);
-                let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`FROM`) + 4, item.store.sql.indexOf(`WHERE`)).trim();
-
-                // Creating simulated layer description object
-                let simulatedMetaData = {
-                    f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD`) + ')'),
-                    f_table_schema: VIRTUAL_LAYERS_SCHEMA,
-                    f_table_name: item.key.split(`.`)[1],
-                    fieldconf: '[]',
-                    meta: '{\"vidi_layer_type\": \"v\"}'
-                };
-
+                let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
                 meta.addMetaData({ data: [simulatedMetaData]});
                 notSortedLayersAndSubgroupsForCurrentGroup.push({
                     type: GROUP_CHILD_TYPE_LAYER,
@@ -2066,12 +2103,15 @@ module.exports = {
         let state = {
             order: layerTreeOrder,
             vectorFilters,
+            virtualLayers,
             tileFilters,
             activeLayers,
             layersOfflineMode,
             opacitySettings,
             dynamicLoad
         };
+
+        console.log(`### getState`, state);
 
         return state;
     },
@@ -2104,12 +2144,15 @@ module.exports = {
                 order: false,
                 opacitySettings: {},
                 layersOfflineMode: {},
+                virtualLayers: [],
                 tileFilters: {},
                 vectorFilters: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
+
+        console.log(`### applyState`, newState);
 
         return _self.create(newState);
     },

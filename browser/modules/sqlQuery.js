@@ -284,7 +284,7 @@ module.exports = {
                         $("#_create_layer_" + storeId).click(function () {
                             // Remove query results and open them as created virtual layer in layerTree
                             layerTree.createVirtualLayer(layerObj).then(newLayerKey => {
-                                switchLayer.init(newLayerKey, true);
+                                switchLayer.init(`v:` + newLayerKey, true);
                             }).catch(error => {
                                 console.error(`Error occured while creating the virtual layer`, error);
                             });

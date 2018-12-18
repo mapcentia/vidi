@@ -173,6 +173,7 @@ module.exports = {
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
 
+        let numberOfLayersAdded = 0;
         data.data.map(layerMeta => {
             let layerAlreadyExists = false;
             metaData.data.map(existingMetaLayer => {
@@ -183,6 +184,7 @@ module.exports = {
             });
 
             if (layerAlreadyExists === false) {
+                numberOfLayersAdded++;
                 metaData.data.push(layerMeta);
             }
         });
@@ -192,7 +194,9 @@ module.exports = {
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
 
-        backboneEvents.get().trigger("ready:meta");
+        if (numberOfLayersAdded.length > 0) {
+            backboneEvents.get().trigger("ready:meta");
+        }
     },
 
     /**
