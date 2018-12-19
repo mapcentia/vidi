@@ -32,7 +32,8 @@ const ClearMapControlOptions = {
         class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
         <span class="fa fa-minus-circle"></span>
     </a>`),
-    onclick: () => {
+    onclick: (e) => {
+        e.stopPropagation();
         state.resetState([`draw`, `measurements`]);
     }
 };
