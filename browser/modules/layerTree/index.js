@@ -45,8 +45,6 @@ var tableViewStores = {};
 
 var tables = {};
 
-var activeOpenedTable = false;
-
 var _self;
 
 var defaultTemplate = `<div class="cartodb-popup-content">
@@ -909,6 +907,10 @@ module.exports = {
                     template: template
                 });
 
+                if ($(tableContainerId + ` table`).is(`:visible`)) {
+                    localTable.loadDataInTable(true);
+                }
+
                 tables[`v:` + layerKey] = localTable;
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
@@ -1612,18 +1614,13 @@ module.exports = {
                     _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                     $(layerContainer).find('.js-layer-settings-table').toggle();
 
-                    activeOpenedTable = `v:` + layerKey;
-
                     let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                     if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
 
                     // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
 
-                    // If data has not been loaded yet, then load it
-                    if ($(tableContainerId + ` table`).children().length === 0) {
-                        tables[activeOpenedTable].loadDataInTable(true);
-                    }
+                    tables[`v:` + layerKey].loadDataInTable(true);
                 });
 
                 if (defaultLayerType === `vector`) {
