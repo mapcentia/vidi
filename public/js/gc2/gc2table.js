@@ -166,7 +166,7 @@ var gc2table = (function () {
 
         (function poll() {
             if (scriptsLoaded) {
-                var originalLayers, filters, filterControls, uncheckedIds = [], allUnchecked = false;
+                var originalLayers, filters, filterControls, uncheckedIds = [];
                 _.extend(object, Backbone.Events);
 
                 /**
@@ -342,7 +342,6 @@ var gc2table = (function () {
                         store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
                     });
 
-                    allUnchecked = false;
                     uncheckedIds = [];
                 });
 
@@ -355,12 +354,9 @@ var gc2table = (function () {
                         });
                         store.layer._layers[uncheckedRowItem._id].closePopup()
                     });
-
-                    allUnchecked = true;
                 });
 
                 $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
-                    allUnchecked = false;
                     if (m[pkey] === false) {
                         uncheckedIds.push(parseInt(m._id));
                         store.layer._layers[m._id].setStyle({
@@ -445,7 +441,7 @@ var gc2table = (function () {
                 };
 
                 getUncheckedIds = function () {
-                    return { uncheckedIds, allUnchecked };
+                    return uncheckedIds;
                 }
 
                 var moveEndEvent = function () {
