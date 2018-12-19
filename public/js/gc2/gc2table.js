@@ -144,7 +144,7 @@ var gc2table = (function () {
             tableBodyHeight = defaults.tableBodyHeight,
             assignFeatureEventListenersOnDataLoad = defaults.assignFeatureEventListenersOnDataLoad,
             styleSelected = defaults.styleSelected,
-            el = defaults.el, click, loadDataInTable, moveEndOff, moveEndOn,
+            el = defaults.el, click, loadDataInTable, getUncheckedIds, moveEndOff, moveEndOn,
             setSelectedStyle = defaults.setSelectedStyle,
             setViewOnSelect = defaults.setViewOnSelect,
             onSelect = defaults.onSelect,
@@ -166,7 +166,7 @@ var gc2table = (function () {
 
         (function poll() {
             if (scriptsLoaded) {
-                var originalLayers, filters, filterControls, uncheckedIds = [];
+                var originalLayers, filters, filterControls, uncheckedIds = [], allUnchecked = false;
                 _.extend(object, Backbone.Events);
 
                 /**
@@ -251,7 +251,7 @@ var gc2table = (function () {
                 $(el).append("<thead><tr></tr></thead>");
 
                 if (checkBox) {
-                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'</th>");
+                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'></th>");
                 }
 
                 $.each(cm, function (i, v) {
@@ -337,8 +337,30 @@ var gc2table = (function () {
                     onColumnSearch: filterMap
                 });
 
-                $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+                $(el).on('check-all.bs.table', function (e, m) {
+                    m.map(function(checkedRowItem) {
+                        store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
+                    });
 
+                    allUnchecked = false;
+                    uncheckedIds = [];
+                });
+
+                $(el).on('uncheck-all.bs.table', function (e, m) {
+                    m.map(function(uncheckedRowItem) {
+                        uncheckedIds.push(parseInt(uncheckedRowItem._id));
+                        store.layer._layers[uncheckedRowItem._id].setStyle({
+                            fillOpacity: 0.0,
+                            opacity: 0.2
+                        });
+                        store.layer._layers[uncheckedRowItem._id].closePopup()
+                    });
+
+                    allUnchecked = true;
+                });
+
+                $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+                    allUnchecked = false;
                     if (m[pkey] === false) {
                         uncheckedIds.push(parseInt(m._id));
                         store.layer._layers[m._id].setStyle({
@@ -422,6 +444,10 @@ var gc2table = (function () {
                     $(".fixed-table-body").css("height", tableBodyHeight + "px");
                 };
 
+                getUncheckedIds = function () {
+                    return { uncheckedIds, allUnchecked };
+                }
+
                 var moveEndEvent = function () {
                     store.reset();
                     store.load();
@@ -477,6 +503,7 @@ var gc2table = (function () {
             loadDataInTable: loadDataInTable,
             destroy: destroy,
             assignEventListeners: assignEventListeners,
+            getUncheckedIds: getUncheckedIds,
             object: object,
             uid: uid,
             store: store,
