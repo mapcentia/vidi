@@ -169,7 +169,7 @@ class MarkupGenerator {
             <div class="js-layer-settings-load-strategy"></div>
             <div class="js-layer-settings-opacity"></div>
             <div class="js-layer-settings-search"></div>
-            <div class="js-layer-settings-table" id="vector-layer-table-view-form-table_view_${layerKey.replace(".", "_")}"></div>
+            <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}"></div>
             </div>
         </li>`);
     }
