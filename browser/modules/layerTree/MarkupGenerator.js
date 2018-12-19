@@ -99,7 +99,7 @@ class MarkupGenerator {
                 <div style="display: inline-block;">${layerTypeSelector}</div>
 
                 <div style="display: inline-block;">
-                    <span>${text}${lockedLayer}</span>
+                    <span>${text}${lockedLayer} <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span></span>
                     <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                     </button>
