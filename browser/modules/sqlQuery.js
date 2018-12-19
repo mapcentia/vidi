@@ -222,7 +222,7 @@ module.exports = {
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
-                            checkBox: false,
+                            checkBox: true,
                             height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
@@ -282,8 +282,9 @@ module.exports = {
                             download(sql, "geojson");
                         });
                         $("#_create_layer_" + storeId).click(function () {
+                            let uncheckedIds = _table.getUncheckedIds();
                             // Remove query results and open them as created virtual layer in layerTree
-                            layerTree.createVirtualLayer(layerObj).then(newLayerKey => {
+                            layerTree.createVirtualLayer(layerObj, {pkey, ids: uncheckedIds}).then(newLayerKey => {
                                 switchLayer.init(`v:` + newLayerKey, true);
                             }).catch(error => {
                                 console.error(`Error occured while creating the virtual layer`, error);

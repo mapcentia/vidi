@@ -342,15 +342,30 @@ module.exports = {
      * 
      * @returns {Promise}
      */
-    createVirtualLayer: (store) => {
+    createVirtualLayer: (store, uncheckedItems) => {
         let result = new Promise((resolve, reject) => {
+            // Taking into account unchecked items
+            let query = store.sql;
+            if (uncheckedItems.ids.length > 0) {
+                let querySplit = query.split(`LIMIT`);
+
+                let additionalWhereClauses = [];
+                uncheckedItems.ids.map(item => {
+                    additionalWhereClauses.push(`AND ${uncheckedItems.pkey} <> ${item}`);
+                });
+
+                query = querySplit[0] + ` ` + additionalWhereClauses.join(` `) + ` LIMIT` + querySplit[1];
+            }
+
+            console.log(`### query`, query);
+
             let timestamp = new Date().getTime();
             let key = (VIRTUAL_LAYERS_SCHEMA + `.query` + timestamp);
             virtualLayers.push({
                 key,
                 store: {
                     db: store.db,
-                    sql: store.sql
+                    sql: query
                 }
             });
 
