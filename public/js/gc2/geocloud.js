@@ -1335,39 +1335,32 @@ geocloud = (function () {
         };
         //ol2 and leaflet
         this.addHere = function (type) {
-            var l, name, prettyName;
+            var l, name, prettyName, baseUrl,
+                aerialTilesBaseUrl = "https://{s}.aerial.maps.api.here.com",
+                baseMapTilesBaseUrl = "https://{s}.base.maps.api.here.com",
+                panoTilesBaseUrl,
+                trafficTiles,
+                path = "/maptile/2.1/";
             switch (type) {
                 case "hereNormalNightGrey":
                     name = "normal.night.grey";
-                    prettyName = "HERE Normal Night Grey"
+                    prettyName = "HERE Normal Night Grey";
+                    baseUrl = "https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/";
                     break;
                 case "hereNormalDayGrey":
                     name = "normal.day.grey";
-                    prettyName = "HERE Normal day Grey"
+                    prettyName = "HERE Normal day Grey";
                     break;
             }
-            switch (MAPLIB) {
-                case "ol2":
-                    l = new OpenLayers.Layer.XYZ(
-                        type,
-                        "https://1.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/${z}/${x}/${y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code,
-                        {
-                            attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='//api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>",
-                            resolutions: resolutions
-                        }
-                    );
-                    this.map.addLayer(l);
-                    l.setVisibility(false);
-                    break;
-                case "leaflet":
-                    l = new L.TileLayer("https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
-                        maxZoom: 21,
-                        subdomains: ["1", "2", "3", "4"],
-                        attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='https://api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>"
-                    });
-                    lControl.addBaseLayer(l, prettyName);
-                    break;
-            }
+
+            l = new L.TileLayer("https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
+                maxZoom: 21,
+                subdomains: ["1", "2", "3", "4"],
+                attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='https://api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>"
+            });
+
+            lControl.addBaseLayer(l, prettyName);
+
             l.baseLayer = true;
             l.id = type;
             return (l);
@@ -1708,7 +1701,8 @@ geocloud = (function () {
                                             }
 
                                             if (!tileErrorEvent) {
-                                                tileErrorEvent = function () {}
+                                                tileErrorEvent = function () {
+                                                }
                                             }
 
                                             layers[key].layer.off("load");
