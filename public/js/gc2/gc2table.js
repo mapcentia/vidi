@@ -115,6 +115,7 @@ var gc2table = (function () {
                 pkey: "gid",
                 checkBox: false,
                 assignFeatureEventListenersOnDataLoad: true,
+                loadDataIfHidden: false,
                 onSelect: function () {
                 },
                 onMouseOver: function () {
@@ -158,6 +159,7 @@ var gc2table = (function () {
             template = defaults.template,
             pkey = defaults.pkey,
             checkBox = defaults.checkBox,
+            loadDataIfHidden = defaults.loadDataIfHidden,
             usingCartodb = defaults.usingCartodb;
 
         var customOnLoad = false, destroy, assignEventListeners;
@@ -409,7 +411,7 @@ var gc2table = (function () {
 
                     originalLayers = jQuery.extend(true, {}, store.layer._layers);
 
-                    if ($(el).is(':visible')) {
+                    if ($(el).is(':visible') || loadDataIfHidden) {
                         $(el).bootstrapTable("load", data);
                     }
 
