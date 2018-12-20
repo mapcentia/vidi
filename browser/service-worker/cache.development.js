@@ -72,6 +72,7 @@ let urlsToCache = [
     '/js/lib/mustache.js/mustache.js',
     '/js/lib/jquery/jquery.js',
     '/js/lib/jquery-ui/jquery-ui.min.js',
+    '/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
     '/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
     '/js/lib/jquery.canvasResize.js/jquery.exif.js',
     '/js/lib/q-cluster/src/clustering.js',
