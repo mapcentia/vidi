@@ -249,7 +249,7 @@ module.exports = {
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
-                        _table.loadDataInTable();
+                        _table.loadDataInTable(false, true);
 
                         // If only one feature is selected, when activate it.
                         if (Object.keys(layerObj.layer._layers).length === 1) {
