@@ -6,6 +6,17 @@ const { expect } = require("chai");
 const helpers = require("./../helpers");
 
 describe('Base layers', () => {
+    it('should switch to first available layer if the provided one is invalid', async () => {
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_DEFAULT.replace(`#osm`, `#nonexistingbaselayer`)}`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
+
+        await helpers.sleep(2000);
+
+        expect(page.url().indexOf(`public/#stamenTonerLite`) !== -1).to.be.true;
+    });
+
     it('should allow switching base layers', async () => {
         let page = await browser.newPage();
 
