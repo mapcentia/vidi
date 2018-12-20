@@ -328,11 +328,11 @@ module.exports = {
                 };
 
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
             cloud.get().map.on('draw:deleted', function (e) {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
             cloud.get().map.on('draw:edited', function (e) {
 
@@ -357,7 +357,7 @@ module.exports = {
                 });
 
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
 
             var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
@@ -545,7 +545,7 @@ module.exports = {
             });
         }
 
-        t.loadDataInTable();
+        t.loadDataInTable(false, true);
 
         if (enableControl) {
             _self.control(true);
