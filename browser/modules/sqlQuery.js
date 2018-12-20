@@ -215,7 +215,8 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            usingCartodb: false
+                            usingCartodb: false,
+                            loadDataIfHidden: true
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
