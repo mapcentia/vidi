@@ -62,7 +62,7 @@ module.exports = {
 
         utils.createNavItem(exId, true);
 
-        $('<a href="" data-target="#" class="dropdown-toggle" data-toggle="dropdown">' + __("Languages") + '<b class="caret"></b></a>').appendTo('#' + exId);
+        $('<a href="" class="dropdown-toggle" data-toggle="dropdown">' + __("Languages") + '<b class="caret"></b></a>').appendTo('#' + exId);
 
         ul = $('<ul class="dropdown-menu"></ul>').appendTo('#' + exId);
 
