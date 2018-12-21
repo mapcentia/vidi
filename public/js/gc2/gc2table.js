@@ -175,10 +175,7 @@ var gc2table = (function () {
                 var clearSelection = function () {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
-
                         if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
-
-
                             try {
                                 v.closePopup();
                                 store.layer.resetStyle(v);
@@ -286,12 +283,28 @@ var gc2table = (function () {
                         bindEvent();
                     }, 500);
 
+                var getDatabaseIdForLayerId = function(layerId) {
+                    var databaseIdentifier = false;
+                    store.geoJSON.features.map(item => {
+                        if (parseInt(item.properties._id) === parseInt(layerId)) {
+                            databaseIdentifier = item.properties[pkey];
+                            return false;
+                        }
+                    });
+
+                    if (databaseIdentifier === false) {
+                        console.error("Unable to find primary key value for layer with identifier " + layerId);
+                    }
+
+                    return databaseIdentifier;
+                };
+
                 var bindEvent = function (e) {
                     setTimeout(function () {
-
                         $(el + ' > tbody > tr').on("click", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1 || checkBox === false) {
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
                                 object.trigger("selected" + "_" + uid, id);
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
@@ -303,6 +316,7 @@ var gc2table = (function () {
                                         }
                                     }
                                 }, 100);
+
                                 onSelect(id, layer);
                             }
                         });
@@ -310,23 +324,27 @@ var gc2table = (function () {
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
                             var id = $(this).data('uniqueid');
                             var layer = m.map._layers[id];
-                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                                 store.layer._layers[id].setStyle({
                                     fillColor: "#660000",
                                     fillOpacity: "0.6"
                                 });
+
                                 onMouseOver(id, layer);
                             }
                         });
 
                         $(el + ' > tbody > tr').on("mouseout", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                                 store.layer.resetStyle(store.layer._layers[id])
                             }
                         });
                     }, 100);
                 };
+
                 $(el).bootstrapTable({
                     uniqueId: "_id",
                     height: height,
@@ -347,28 +365,34 @@ var gc2table = (function () {
 
                 $(el).on('uncheck-all.bs.table', function (e, m) {
                     m.map(function(uncheckedRowItem) {
-                        uncheckedIds.push(parseInt(uncheckedRowItem._id));
+                        var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
+                        uncheckedIds.push(parseInt(databaseIdentifier));
+
                         store.layer._layers[uncheckedRowItem._id].setStyle({
                             fillOpacity: 0.0,
                             opacity: 0.2
                         });
+
                         store.layer._layers[uncheckedRowItem._id].closePopup()
                     });
                 });
 
                 $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
+                    var databaseIdentifier = getDatabaseIdForLayerId(m._id);
                     if (m[pkey] === false) {
-                        uncheckedIds.push(parseInt(m._id));
+                        uncheckedIds.push(parseInt(databaseIdentifier));
+
                         store.layer._layers[m._id].setStyle({
                             fillOpacity: 0.0,
                             opacity: 0.2
                         });
-                        store.layer._layers[m._id].closePopup()
 
+                        store.layer._layers[m._id].closePopup()
                     } else {
                         uncheckedIds = uncheckedIds.filter(function (item) {
-                            return item !== parseInt(m._id);
+                            return item !== parseInt(databaseIdentifier);
                         });
+
                         store.layer.resetStyle(store.layer._layers[m._id])
                     }
                 });
@@ -418,7 +442,7 @@ var gc2table = (function () {
                                 }
                             });
                         });
-                        data.push(v.feature.properties);
+                        data.push(JSON.parse(JSON.stringify(v.feature.properties)));
 
                         if (assignFeatureEventListenersOnDataLoad) {
                             assignEventListeners();

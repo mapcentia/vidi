@@ -10,7 +10,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -361,11 +361,12 @@ module.exports = {
                 key,
                 store: {
                     db: store.db,
-                    sql: query
+                    sql: query,
                 }
             });
 
             _self.create(false, [`virtualLayers`]).then(() => {
+                _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 resolve(key);
             });
@@ -610,7 +611,7 @@ module.exports = {
 
                                 let arr = notSortedGroupsArray;
 
-                                if (virtualLayers.length > 0) {
+                                if (virtualLayers.length > 0 && arr.indexOf(__(`Virtual layers`)) === -1) {
                                     arr.push(__(`Virtual layers`));
                                 }
 
@@ -1157,15 +1158,18 @@ module.exports = {
         let date = new Date(+creationTime);
         let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`FROM`) + 4, item.store.sql.indexOf(`WHERE`)).trim();
 
+        // Find the corresponding layer
+        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL);
+
         // Creating simulated layer description object
         let simulatedMetaData = {
             f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             virtual_layer: true,
-            fieldconf: '[]',
+            fieldconf: (correspondingLayer.fieldconf ? JSON.parse(JSON.stringify(correspondingLayer.fieldconf)) : ''),
             meta: '{\"vidi_layer_type\": \"v\"}',
-            layergroup: `VIRTUAL_LAYERS`
+            layergroup: __(`Virtual layers`)
         };
 
         return simulatedMetaData;
