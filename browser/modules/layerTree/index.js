@@ -20,8 +20,6 @@ const SYSTEM_FIELD_PREFIX = `gc2_`;
 
 const SQL_QUERY_LIMIT = 2000;
 
-const TABLE_VIEW_FORM_CONTAINER_ID = 'vector-layer-table-view-form';
-
 var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var layerTreeOrder = false, activeOpenedTable = false;
@@ -945,11 +943,9 @@ module.exports = {
             onLoad: (l) => {
                 if (l === undefined) return;
 
-                let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
-                if ($(`#${tableId}_container`).length > 0) $(`#${tableId}_container`).remove();
-                $(`#` + TABLE_VIEW_FORM_CONTAINER_ID + `-${tableId}`).append(`<div class="js-table-view-container" id="${tableId}_container">
-                    <div id="${tableId}"><table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>
-                </div>`);
+                let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+                $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
 
                 let metaDataKeys = meta.getMetaDataKeys();
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
@@ -958,8 +954,8 @@ module.exports = {
                 let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
 
                 let localTable = gc2table.init({
-                    el: `#` + tableId + ` table`,
-                    ns: `#` + tableId,
+                    el: tableContainerId + ` table`,
+                    ns: tableContainerId,
                     geocloud2: cloud.get(),
                     store: stores[`v:` + layerKey],
                     cm: tableHeaders,
@@ -975,7 +971,9 @@ module.exports = {
                     template: template
                 });
 
-                localTable.loadDataInTable(true);
+                if ($(tableContainerId + ` table`).is(`:visible`)) {
+                    localTable.loadDataInTable(true);
+                }
 
                 tables[`v:` + layerKey] = localTable;
 
@@ -1745,18 +1743,13 @@ module.exports = {
                     _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                     $(layerContainer).find('.js-layer-settings-table').toggle();
 
-                    activeOpenedTable = `v:` + layerKey;
-
-                    let tableId = `table_view_${layerKey.replace(`.`, `_`)}`;
-                    if ($(`#${tableId}_container`).length !== 1) throw new Error(`Unable to find the table view container`);
+                    let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                    if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
 
                     // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
 
-                    // If data has not been loaded yet, then load it
-                    if ($(`#${tableId}`).children().length === 0) {
-                        tables[activeOpenedTable].loadDataInTable(true);
-                    }
+                    tables[`v:` + layerKey].loadDataInTable(true);
                 });
 
                 if (defaultLayerType === `vector`) {

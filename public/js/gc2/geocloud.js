@@ -1642,7 +1642,7 @@ geocloud = (function () {
         };
 
         //ol2, ol3 and leaflet
-        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent, tileErrorEvent) {
+        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent, tileErrorEvent, layerNotFoundEvent) {
             var me = this;
             var layers;
             (function poll() {
@@ -1687,11 +1687,14 @@ geocloud = (function () {
                                 }
                             }
 
+                            var layerWasFound = false;
                             // Adding specified layer to map
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true) {
                                         if (layers[key].layer.id === baseLayerName) {
+                                            layerWasFound = true;
+
                                             // Move all others than Google maps back
                                             if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
                                                 layers[key].layer.setZIndex(1);
@@ -1726,7 +1729,9 @@ geocloud = (function () {
                                 }
                             }
 
-                            //
+                            if (layerWasFound === false && layerNotFoundEvent) {
+                                layerNotFoundEvent();
+                            }
 
                             break;
                     }

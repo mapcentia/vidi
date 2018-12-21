@@ -407,7 +407,7 @@ var gc2table = (function () {
                     loadDataInTable();
                 };
 
-                loadDataInTable = function (doNotCallCustomOnload) {
+                loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
                     data = [];
                     $.each(store.layer._layers, function (i, v) {
                         v.feature.properties._id = i;
@@ -427,7 +427,9 @@ var gc2table = (function () {
 
                     originalLayers = jQuery.extend(true, {}, store.layer._layers);
 
-                    $(el).bootstrapTable("load", data);
+                    if ($(el).is(':visible') || forceDataLoad) {
+                        $(el).bootstrapTable("load", data);
+                    }
 
                     bindEvent();
 
