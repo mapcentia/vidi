@@ -201,9 +201,9 @@ module.exports = {
                                 <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> Excel
                                 </a>
-                                <a class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                <button class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
-                                </a>
+                                </button>
                             </div>
                             <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
                         </div>`);
@@ -282,11 +282,16 @@ module.exports = {
                             download(sql, "geojson");
                         });
                         $("#_create_layer_" + storeId).click(function () {
+                            let _self = this;
+                            $(_self).prop(`disabled`, true);
                             let uncheckedIds = _table.getUncheckedIds();
                             // Remove query results and open them as created virtual layer in layerTree
                             layerTree.createVirtualLayer(layerObj, {pkey, ids: uncheckedIds}).then(newLayerKey => {
-                                switchLayer.init(`v:` + newLayerKey, true);
+                                switchLayer.init(`v:` + newLayerKey, true).then(() => {
+                                    $(_self).prop(`disabled`, false);
+                                });
                             }).catch(error => {
+                                $(_self).prop(`disabled`, false)
                                 console.error(`Error occured while creating the virtual layer`, error);
                             });
                         });
