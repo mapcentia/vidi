@@ -355,8 +355,6 @@ module.exports = {
                 query = querySplit[0] + ` ` + additionalWhereClauses.join(` `) + ` LIMIT` + querySplit[1];
             }
 
-            console.log(`### query`, query);
-
             let timestamp = new Date().getTime();
             let key = (VIRTUAL_LAYERS_SCHEMA + `.query` + timestamp);
             virtualLayers.push({
@@ -510,15 +508,9 @@ module.exports = {
                                 dynamicLoad = initialDynamicLoad;
                             }
 
-                            console.log(`### initialVirtualLayers`, initialVirtualLayers);
-
-
                             if (initialVirtualLayers && ignoredInitialStateKeys.indexOf(`virtualLayers`) === -1) {
                                 virtualLayers = initialVirtualLayers;
                             }
-
-
-                            console.log(`### virtualLayers`, virtualLayers);
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
                                 console.error(`Invalid order object`, order);
@@ -927,6 +919,11 @@ module.exports = {
             }
         }
 
+        let custom_data = ``;
+        if (`virtual_layer` in layer && layer.virtual_layer) {
+            custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
+        }
+
         stores['v:' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
@@ -938,6 +935,7 @@ module.exports = {
             id: 'v:' + layerKey,
             name: 'v:' + layerKey,
             lifetime: 0,
+            custom_data,
             styleMap: styles['v:' + layerKey],
             sql,
             onLoad: (l) => {
@@ -1164,8 +1162,10 @@ module.exports = {
             f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
+            virtual_layer: true,
             fieldconf: '[]',
-            meta: '{\"vidi_layer_type\": \"v\"}'
+            meta: '{\"vidi_layer_type\": \"v\"}',
+            layergroup: `VIRTUAL_LAYERS`
         };
 
         return simulatedMetaData;
@@ -2144,8 +2144,6 @@ module.exports = {
             dynamicLoad
         };
 
-        console.log(`### getState`, state);
-
         return state;
     },
 
@@ -2184,8 +2182,6 @@ module.exports = {
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
         }
-
-        console.log(`### applyState`, newState);
 
         return _self.create(newState);
     },
