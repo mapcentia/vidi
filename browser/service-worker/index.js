@@ -181,10 +181,15 @@ class Keeper {
                     // Checking if value was really saved
                     this.get(key).then(storedValue => {
                         if (storedValue.created !== initialCreated) {
-                            throw new Error(`Value was not really saved in localforage`, JSON.stringify(value));
+                            console.error(`Value was not really saved in localforage`, JSON.stringify(value));
+                            setTimeout(() => {
+                                localforage.setItem(this._cacheKey, valueCopy).then(() => {
+                                    resolve();
+                                });
+                            }, 100);
+                        } else {
+                            resolve();
                         }
-
-                        resolve();
                     });
                 }).catch(error => {
                     console.error(`localforage failed to perform operation`, error);  

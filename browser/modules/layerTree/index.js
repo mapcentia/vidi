@@ -1167,7 +1167,7 @@ module.exports = {
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             virtual_layer: true,
-            fieldconf: (correspondingLayer.fieldconf ? JSON.parse(JSON.stringify(correspondingLayer.fieldconf)) : ''),
+            fieldconf: (correspondingLayer.fieldconf ? correspondingLayer.fieldconf : null),
             meta: '{\"vidi_layer_type\": \"v\"}',
             layergroup: __(`Virtual layers`)
         };
