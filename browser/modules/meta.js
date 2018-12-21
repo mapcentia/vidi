@@ -173,6 +173,7 @@ module.exports = {
     addMetaData: function (data) {
         metaDataLatestLoaded = data;
 
+        let numberOfLayersAdded = 0;
         data.data.map(layerMeta => {
             let layerAlreadyExists = false;
             metaData.data.map(existingMetaLayer => {
@@ -183,6 +184,7 @@ module.exports = {
             });
 
             if (layerAlreadyExists === false) {
+                numberOfLayersAdded++;
                 metaData.data.push(layerMeta);
             }
         });
@@ -192,7 +194,33 @@ module.exports = {
             metaDataKeysTitle[data.data[i].f_table_title] = data.data[i].f_table_title ? data.data[i] : null;
         }
 
-        backboneEvents.get().trigger("ready:meta");
+        if (numberOfLayersAdded.length > 0) {
+            backboneEvents.get().trigger("ready:meta");
+        }
+    },
+
+    /**
+     * Deletes the meta data object
+     * @param {String} layerKey Layer key
+     */
+    deleteMetaData: function (layerKey) {
+        if (layerKey in metaDataKeys) {
+            delete metaDataKeys[layerKey];
+        }
+
+        let deletedIndex = false;
+        metaData.data.map(existingMetaLayer => {
+            if ((existingMetaLayer.f_table_schema + '.' + existingMetaLayer.f_table_name) === layerKey) {
+                deletedIndex = true;
+                return false;
+            }
+        });
+
+        if (deletedIndex === false) {
+            console.warn(`Meta data for ${layerKey} was not deleted`);
+        } else {
+            metaData.data.splice(deletedIndex, 1);
+        }
     },
 
     /**
