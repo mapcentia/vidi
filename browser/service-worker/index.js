@@ -362,6 +362,15 @@ const normalizeTheURLForFetch = (event) => {
                                 reject();
                             }
 
+                            if (`custom_data` in mappedObject && mappedObject.custom_data) {
+                                let parsedCustomData = false;
+                                try { parsedCustomData = JSON.parse(mappedObject.custom_data)} catch(e) {}
+                                if (`virtual_layer` in parsedCustomData && parsedCustomData.virtual_layer) {
+                                    record.layerKey = parsedCustomData.virtual_layer;
+                                    if (LOG_OFFLINE_MODE_EVENTS) console.log(`Request was treated as a virtual one (layerKey ${record.layerKey})`);
+                                }
+                            }
+
                             URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
                                 resolve(cleanedRequestURL);
                             }).catch(() => {
