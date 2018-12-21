@@ -1186,7 +1186,7 @@ module.exports = {
             if (virtualLayers.length > 0) {
                 isVirtualGroup = true;
             } else {
-                throw new Error(`Virtual layers group was added, but there are no existing virtual layers`);
+                return;
             }
         }
 
@@ -1757,9 +1757,9 @@ module.exports = {
                 });
 
                 if (defaultLayerType === `vector`) {
-                    _self.setupLayerAsVectorOne(layerKey);
+                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
                 } else {
-                    _self.setupLayerAsTileOne(layerKey);
+                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
                 }
             } else {
                 if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
@@ -2021,14 +2021,15 @@ module.exports = {
                 $(container).find('.js-layer-settings-table').hide(0);
             }
             $(container).find(`.js-toggle-search`).hide();
+            $(container).find('.js-layer-settings-search').hide(0);
 
             // For both vector and tile
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {
                 $(container).find(`.js-toggle-search`).hide();
-                $(container).find('.js-layer-settings-search').hide(0);
                 $(container).find('a').removeClass('active');
+
                 // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                 $(`.js-layer-settings-table table`).bootstrapTable('resetView');
             }
