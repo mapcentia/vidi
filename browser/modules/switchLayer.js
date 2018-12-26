@@ -144,7 +144,6 @@ module.exports = module.exports = {
             }
 
             if (enable) {
-                console.log(`### switchLayer`, name, layerType);
                 if (layerType === 'tile') {
                     // Only one layer at a time, so using the tile layer identifier
                     layers.incrementCountLoading(tileLayerId);

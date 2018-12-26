@@ -320,10 +320,11 @@ geocloud = (function () {
                 complete: function () {
                     me.onLoad(me);
                 }
-
             });
+
             return xhr;
         };
+
         this.abort = function () {
             xhr.abort();
         }

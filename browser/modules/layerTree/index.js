@@ -10,7 +10,7 @@
 
 'use strict';
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 
@@ -361,11 +361,12 @@ module.exports = {
                 key,
                 store: {
                     db: store.db,
-                    sql: query
+                    sql: query,
                 }
             });
 
             _self.create(false, [`virtualLayers`]).then(() => {
+                _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 resolve(key);
             });
@@ -610,7 +611,7 @@ module.exports = {
 
                                 let arr = notSortedGroupsArray;
 
-                                if (virtualLayers.length > 0) {
+                                if (virtualLayers.length > 0 && arr.indexOf(__(`Virtual layers`)) === -1) {
                                     arr.push(__(`Virtual layers`));
                                 }
 
@@ -1157,15 +1158,18 @@ module.exports = {
         let date = new Date(+creationTime);
         let layerNamesFromSQL = item.store.sql.substring(item.store.sql.indexOf(`FROM`) + 4, item.store.sql.indexOf(`WHERE`)).trim();
 
+        // Find the corresponding layer
+        let correspondingLayer = meta.getMetaByKey(layerNamesFromSQL);
+
         // Creating simulated layer description object
         let simulatedMetaData = {
             f_table_title: (__(`Query on`) + ' ' + layerNamesFromSQL + ' (' + moment(date).format(`YYYY-MM-DD HH:mm`) + '; <a href="javascript:void(0);" class="js-delete-virtual-layer"><i class="fa fa-remove"></i> ' + (__(`Delete`)).toLowerCase() + '</a>)'),
             f_table_schema: VIRTUAL_LAYERS_SCHEMA,
             f_table_name: item.key.split(`.`)[1],
             virtual_layer: true,
-            fieldconf: '[]',
+            fieldconf: (correspondingLayer.fieldconf ? correspondingLayer.fieldconf : null),
             meta: '{\"vidi_layer_type\": \"v\"}',
-            layergroup: `VIRTUAL_LAYERS`
+            layergroup: __(`Virtual layers`)
         };
 
         return simulatedMetaData;
@@ -1182,7 +1186,7 @@ module.exports = {
             if (virtualLayers.length > 0) {
                 isVirtualGroup = true;
             } else {
-                throw new Error(`Virtual layers group was added, but there are no existing virtual layers`);
+                return;
             }
         }
 
@@ -1356,8 +1360,7 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
-
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup}`);
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`);
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
         $("#collapse" + base64GroupName).append(markup);
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
@@ -1753,9 +1756,9 @@ module.exports = {
                 });
 
                 if (defaultLayerType === `vector`) {
-                    _self.setupLayerAsVectorOne(layerKey);
+                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
                 } else {
-                    _self.setupLayerAsTileOne(layerKey);
+                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
                 }
             } else {
                 if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
@@ -2018,14 +2021,15 @@ module.exports = {
                 $(container).find('.js-layer-settings-table').hide(0);
             }
             $(container).find(`.js-toggle-search`).hide();
+            $(container).find('.js-layer-settings-search').hide(0);
 
             // For both vector and tile
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {
                 $(container).find(`.js-toggle-search`).hide();
-                $(container).find('.js-layer-settings-search').hide(0);
                 $(container).find('a').removeClass('active');
+
                 // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                 $(`.js-layer-settings-table table`).bootstrapTable('resetView');
             }
