@@ -545,6 +545,7 @@ module.exports = {
      * @return {Promise}
      */
     resetState: (customModulesToReset = []) => {
+        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
         if (customModulesToReset.length > 0) {
             for (let key in listened) {
