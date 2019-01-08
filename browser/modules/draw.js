@@ -81,6 +81,18 @@ module.exports = {
     },
 
     init: () => {
+        backboneEvents.get().on("reset:all", () => {
+            _self.resetState();
+        });
+
+        backboneEvents.get().on("deactivate:all", () => {
+            _self.control(false);
+            _self.off();
+        });
+
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.control(true); });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.control(false); });
+
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 

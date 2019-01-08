@@ -53,6 +53,12 @@ module.exports = {
     },
 
     init: () => {
+        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} deactivate:all` , () => {
+            _self.toggleMeasurements(false, false);
+        });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.toggleMeasurements(); });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.toggleMeasurements(false, false); });
+
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
@@ -186,11 +192,8 @@ module.exports = {
                 });
             }, 100);
         }
-        cloud.get().map.addLayer(drawnItems);
-    },
 
-    off: () => {
-        _self.toggleMeasurements(false, false);
+        cloud.get().map.addLayer(drawnItems);
     },
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
