@@ -20,10 +20,9 @@ describe('Draw', () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('[href="#draw-content"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('#draw-btn').trigger('click')`);
-        await helpers.sleep(1000);
 
         // Draw one-segement line
+        expect(await page.evaluate(`$('.leaflet-draw-draw-polyline').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-polyline`);
         await helpers.sleep(1000);
         await page.mouse.move(100, 100);
@@ -37,6 +36,7 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Draw circle marker
+        expect(await page.evaluate(`$('.leaflet-draw-draw-circlemarker').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-circlemarker`);
         await helpers.sleep(1000);
         await page.mouse.move(400, 400);
@@ -44,6 +44,7 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Draw marker
+        expect(await page.evaluate(`$('.leaflet-draw-draw-marker').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-marker`);
         await helpers.sleep(1000);
         await page.mouse.move(300, 300);
@@ -51,6 +52,7 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Save drawings in snapshot
+        await helpers.sleep(1000);
         await page.evaluate(`$('[href="#state-snapshots-content"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.type(`.js-browser-owned input`, `test snapshot title`);

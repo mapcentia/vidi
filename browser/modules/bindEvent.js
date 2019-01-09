@@ -68,12 +68,6 @@ var metaDataKeys;
 
 /**
  *
- * @type {array}
- */
-var reset;
-
-/**
- *
  * @type {*|exports|module.exports}
  */
 let APIBridgeSingletone = require('./api-bridge');
@@ -134,7 +128,6 @@ module.exports = module.exports = {
         layers = modules.layers;
         infoClick = modules.infoClick;
         backboneEvents = modules.backboneEvents;
-        reset = modules.reset;
         setting = modules.setting;
         state = modules.state;
         return this;
@@ -280,16 +273,6 @@ module.exports = module.exports = {
                 left: e.pageX + 20,
                 top: e.pageY
             });
-        });
-
-        backboneEvents.get().on("end:print", function (response) {
-            $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#download-pdf").attr("download", response.key);
-            $("#open-html").attr("href", response.url);
-            $("#start-print-btn").button('reset');
-
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
         backboneEvents.get().on("refresh:auth", function (response) {
@@ -551,6 +534,17 @@ module.exports = module.exports = {
                 $(id + " .expand-less").show();
                 $(id + " .expand-more").hide();
             })
+        });
+
+        // Hiding all panels with visible modules
+        backboneEvents.get().on(`hide:all`, () => {
+            if ($(`.modal-header > button[class="close"]`).is(`:visible`)) {
+                $(`.modal-header > button[class="close"]`).trigger(`click`);
+            }
+        });
+
+        $(`.modal-header > button[class="close"]`).click(() => {
+            backboneEvents.get().trigger(`off:all`);
         });
 
         // Module icons

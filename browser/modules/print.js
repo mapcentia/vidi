@@ -78,6 +78,16 @@ module.exports = {
         backboneEvents.get().on(`on:${MODULE_ID}`, () => { _self.on(); });
         backboneEvents.get().on(`off:${MODULE_ID}`, () => { _self.off(); });
 
+        backboneEvents.get().on("end:print", function (response) {
+            $("#get-print-fieldset").prop("disabled", false);
+            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
+            $("#download-pdf").attr("download", response.key);
+            $("#open-html").attr("href", response.url);
+            $("#start-print-btn").button('reset');
+
+            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+        });
+
         $("#start-print-btn").on("click", function () {
             if (_self.print()) {
                 $(this).button('loading');

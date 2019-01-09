@@ -198,6 +198,9 @@ module.exports = {
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
+            backboneEvents.get().trigger(`off:all`);
+            backboneEvents.get().trigger(`hide:all`);
+
             $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
