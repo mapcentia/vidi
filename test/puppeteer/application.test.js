@@ -12,6 +12,40 @@ describe("Application", () => {
         page = await helpers.waitForPageToLoad(page);
     });
 
+    it("should take into account configuration options", async () => {
+        // Empty "activateMainTab" option
+        let page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (request.url().indexOf(`aleksandrshumilov/aleksandrshumilov.json`) !== -1) {
+                request.respond({
+                    content: 'application/json',
+                    headers: {"Access-Control-Allow-Origin": "*"},
+                    body: JSON.stringify({
+                        "brandName": "Test",
+                        "activateMainTab": "draw"
+                    })
+                });
+            } else {
+                request.continue();
+            }
+        });
+
+        await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.true;
+        await page.close();
+
+        // Non-empty "activateMainTab" option
+        let newPage = await browser.newPage();
+        await newPage.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        newPage = await helpers.waitForPageToLoad(newPage);
+        await helpers.sleep(1000);
+        expect(await newPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
+        await newPage.close();
+    });
+
     it("should have only one active module at a time", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#osm/18/39.279/-6.8352/public.test_poly`);
