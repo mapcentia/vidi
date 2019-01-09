@@ -309,7 +309,11 @@ module.exports = module.exports = {
         $("#loadscreentext").html(__("Loading data"));
         if (window.vidiConfig.activateMainTab) {
             setTimeout(function () {
-                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
+                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
+                } else {
+                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                }
             }, 200);
         }
 
