@@ -18,7 +18,7 @@ let PANEL_DOCKING_PARAMETER = 1024;
  *
  * @type {*|exports|module.exports}
  */
-let utils, state, backboneEvents, layerTree, meta, cloud, infoClick, sqlQuery;
+let utils, state, backboneEvents, layerTree, meta, cloud, sqlQuery;
 
 let apiBridgeInstance = false;
 
@@ -95,7 +95,6 @@ module.exports = {
         cloud = o.cloud;
         state = o.state;
         sqlQuery = o.sqlQuery;
-        infoClick = o.infoClick;
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -385,7 +384,6 @@ module.exports = {
             serviceWorkerCheck();
 
             me.stopEdit();
-            infoClick.deactivate();
   
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
@@ -537,7 +535,6 @@ module.exports = {
             }
 
             me.stopEdit();
-            infoClick.deactivate();
 
             e.on(`editable:editing`, () => {
                 featureWasEdited = true;
@@ -838,8 +835,6 @@ module.exports = {
      * @param e
      */
     stopEdit: function (editedFeature) {
-        infoClick.activate();
-
         let me = this;
 
         cloud.get().map.editTools.stopDrawing();
