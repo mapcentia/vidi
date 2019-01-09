@@ -838,8 +838,6 @@ module.exports = {
      * @param e
      */
     stopEdit: function (editedFeature) {
-        infoClick.activate();
-
         let me = this;
 
         cloud.get().map.editTools.stopDrawing();
