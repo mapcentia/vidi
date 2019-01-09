@@ -28,14 +28,15 @@ module.exports = {
     /**
      *
      */
-    init: function () {
-        var curUrl = window.location.href, newUrl = curUrl.split("#")[0];
-
+    init: () => {
         $("#btn-reset").off();
         $("#btn-reset").on("click", function () {
-            _self.init();
+            _self.reset();
         });
+    },
 
+    reset: () => {
+        var curUrl = window.location.href, newUrl = curUrl.split("#")[0];
         if (window.confirm(__(`Do you really want to reset the map?`))) {
             state.resetState().then(() => {
                 location.href = newUrl;

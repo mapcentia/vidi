@@ -207,7 +207,7 @@ module.exports = {
 
         // Calling mandatory init method
         [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`].map(name => {
+            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
             modules[name].init();
         });
 
