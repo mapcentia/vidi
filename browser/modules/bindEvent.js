@@ -189,20 +189,12 @@ module.exports = module.exports = {
             });
         });
 
-        // Reset
-        // =====
-        $("#btn-reset").on("click", function () {
-            reset.init();
-        });
-
-
         $("#searchclear").on("click", function () {
             backboneEvents.get().trigger("clear:search");
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             metaDataKeys = meta.getMetaDataKeys();
-
             if (!isStarted) {
                 isStarted = true;
                 setTimeout(
@@ -222,63 +214,6 @@ module.exports = module.exports = {
                 );
             }
         });
-
-
-
-        /*
-        // When reset:all is triggered, we reset all modules.
-        // Extensions must implement a listener for the reset:all event
-        // and clean up
-        // ============================================================
-        backboneEvents.get().on("reset:all", function (ignoredModules = []) {
-            console.info("Resetting all modules, except " + ignoredModules.join(`, `));
-
-            // Should be disabled by default
-            let modulesToReset = [`advancedInfo`, `drawing`, `measurements`, `print`];
-            modulesToReset.map(moduleToReset => {
-                if (ignoredModules.indexOf(moduleToReset) === -1) {
-                    backboneEvents.get().trigger(`off:${moduleToReset}`);
-                }
-            });
-        });
-        */
-
-        /*
-        backboneEvents.get().on("off:measurements", function () {
-            console.info("Stopping measurements");
-            measurements.off();
-        });
-
-        backboneEvents.get().on("off:drawing", function () {
-            console.info("Stopping drawing");
-            draw.off();
-        });
-
-        backboneEvents.get().on("off:advancedInfo", function () {
-            console.info("Stopping advanced info");
-            advancedInfo.off();
-        });
-        */
-
-        /**
-         * Processing turn on/off events for modules
-         */
-        /*
-        let modulesToReactOnEachOtherChanges = [`measurements`, `drawing`, `advancedInfo`, `infoClick`];
-        modulesToReactOnEachOtherChanges.map(module => {
-            backboneEvents.get().on(`${module}:turnedOn`, function () {
-                console.info(`${module} was turned on`);
-                // Reset all modules except caller
-                backboneEvents.get().trigger(`reset:all`, [module]);
-            });
-
-            backboneEvents.get().on(`${module}:turnedOff`, function () {
-                console.info(`${module} was turned off`);
-                // Reset all modules except caller
-                backboneEvents.get().trigger(`reset:all`, [module]);
-            });
-        });
-        */
 
         // Clear all query layers and deactivate tools
         // ===========================================
@@ -347,30 +282,13 @@ module.exports = module.exports = {
             });
         });
 
-        // Print
-        // =====
-        $("#print-btn").on("click", function () {
-            print.activate();
-            $("#get-print-fieldset").prop("disabled", true);
-        });
-
-        $("#start-print-btn").on("click", function () {
-            if (print.print()) {
-                $(this).button('loading');
-                $("#get-print-fieldset").prop("disabled", true);
-            }
-        });
-
-        backboneEvents.get().on("off:print", function () {
-            print.off();
-        });
-
         backboneEvents.get().on("end:print", function (response) {
             $("#get-print-fieldset").prop("disabled", false);
             $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
+
             console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
@@ -381,24 +299,17 @@ module.exports = module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on("refresh:meta", function (response) {
-            meta.init()
-
-                .then(function () {
-                        return setting.init();
-                    },
-
-                    function (error) {
-                        console.log(error); // Stacktrace
-                        alert("Vidi is loaded without schema. Can't set extent or add layers");
-                        backboneEvents.get().trigger("ready:meta");
-                        state.init();
-                    })
-
-                .then(function () {
-                    layerTree.create();
-                    state.init();
-                });
-
+            meta.init().then(() => {
+                return setting.init();
+            }, (error) => {
+                console.log(error); // Stacktrace
+                alert("Vidi is loaded without schema. Can't set extent or add layers");
+                backboneEvents.get().trigger("ready:meta");
+                state.init();
+            }).then(() => {
+                layerTree.create();
+                state.init();
+            });
         });
 
         // Init some GUI stuff after modules are loaded
@@ -444,14 +355,12 @@ module.exports = module.exports = {
             });
         });
 
-
         $("#info-modal .modal-header button").on("click", function () {
             if (!$(this).data("extraClickHandlerIsEnabled")) {
                 infoModalHide();
                 // Ikke den
             }
         });
-
 
         $("#module-container .modal-header button").on("click", function () {
             searchShow();
@@ -578,8 +487,7 @@ module.exports = module.exports = {
 
             // If print when deactivate
             if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", false);
-                print.activate();
+                backboneEvents.get().trigger(`off:print`);
             }
 
             // If legend when deactivate
@@ -628,10 +536,8 @@ module.exports = module.exports = {
 
             // If print when activate
             if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", true);
-                print.activate();
+                backboneEvents.get().trigger(`on:print`);
             }
-
 
             // If legend when deactivate
             if ($(this).data('module') === "legend") {
@@ -649,7 +555,7 @@ module.exports = module.exports = {
 
         // Module icons
         $("#side-panel ul li a").on("click", function (e) {
-            backboneEvents.get().trigger(`deactivate:all`);
+            backboneEvents.get().trigger(`off:all`);
 
             let moduleId = $(this).data(`module-id`);
             setTimeout(() => {

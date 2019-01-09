@@ -53,7 +53,7 @@ module.exports = {
     },
 
     init: () => {
-        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} deactivate:all` , () => {
+        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} off:all` , () => {
             _self.toggleMeasurements(false, false);
         });
         backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.toggleMeasurements(); });

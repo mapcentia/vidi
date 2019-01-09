@@ -31,7 +31,7 @@ module.exports = {
 
     init: function () {
         backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => { _self.reset(); });
-        backboneEvents.get().on(`deactivate:all`, () => {
+        backboneEvents.get().on(`off:all`, () => {
             _self.off(); 
             _self.reset();
         });
@@ -68,7 +68,6 @@ module.exports = {
      *
      */
     reset: function () {
-        console.log(`### infoClick reset`);
         sqlQuery.reset(qstore);
     },
 
@@ -77,7 +76,6 @@ module.exports = {
      * @param a {boolean}
      */
     active: function (a) {
-        console.log(`### infoClick active`, a);
         if (!a) {
             this.reset();
         }
@@ -86,12 +84,10 @@ module.exports = {
     },
 
     on: () => {
-        console.log(`### infoClick on`);
         active = true;
     },
 
     off: () => {
-        console.log(`### infoClick off`);
         active = false;
     }
 };
