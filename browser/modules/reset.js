@@ -6,7 +6,7 @@
 
 'use strict';
 
-let state;
+let state, _self = false;
 
 /**
  *
@@ -21,16 +21,22 @@ module.exports = {
      */
     set: function (o) {
         state = o.state;
+        _self = this;
         return this;
     },
 
     /**
      *
      */
-    init: function () {
-        var curUrl = window.location.href,
-            newUrl = curUrl.split("#")[0];
+    init: () => {
+        $("#btn-reset").off();
+        $("#btn-reset").on("click", function () {
+            _self.reset();
+        });
+    },
 
+    reset: () => {
+        var curUrl = window.location.href, newUrl = curUrl.split("#")[0];
         if (window.confirm(__(`Do you really want to reset the map?`))) {
             state.resetState().then(() => {
                 location.href = newUrl;

@@ -12,6 +12,85 @@ describe("Application", () => {
         page = await helpers.waitForPageToLoad(page);
     });
 
+    it("should take into account configuration options", async () => {
+        // Empty "activateMainTab" option
+        let page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (request.url().indexOf(`aleksandrshumilov/aleksandrshumilov.json`) !== -1) {
+                request.respond({
+                    content: 'application/json',
+                    headers: {"Access-Control-Allow-Origin": "*"},
+                    body: JSON.stringify({
+                        "brandName": "Test",
+                        "activateMainTab": "draw"
+                    })
+                });
+            } else {
+                request.continue();
+            }
+        });
+
+        await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.true;
+        await page.close();
+
+        // Non-empty "activateMainTab" option
+        let newPage = await browser.newPage();
+        await newPage.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        newPage = await helpers.waitForPageToLoad(newPage);
+        await helpers.sleep(1000);
+        expect(await newPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
+        await newPage.close();
+    });
+
+    it("should have only one active module at a time", async () => {
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_BASE}app/aleksandrshumilov/public/#osm/18/39.279/-6.8352/public.test_poly`);
+        page = await helpers.waitForPageToLoad(page);
+
+        let numberOfSQLRequests = 0;
+        await helpers.sleep(1000);
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (request.url().indexOf(`api/sql/aleksandrshumilov`) !== -1) {
+                numberOfSQLRequests++;
+            }
+
+            request.continue();
+        });
+
+        // Info click has to be disabled by default
+        await page.click(`#map`);
+        await helpers.sleep(1000);
+        expect(numberOfSQLRequests).to.equal(0);
+
+        await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#info-content"]').trigger('click');`);
+        await helpers.sleep(1000);
+
+        // Info click was enabled before, so it has to handle map clicks
+        await page.click(`#map`);
+        await helpers.sleep(1000);
+        expect(numberOfSQLRequests).to.equal(1);
+        expect(await page.evaluate(`$('#module-container').length`)).to.equal(1);
+        expect(await page.evaluate(`$('#module-container').css('right')`)).to.equal(`0px`);
+
+        // Enabling measurements module, so all other modules have to be hidden
+        await page.evaluate(`$('.js-measurements-control').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(await page.evaluate(`$('#module-container').css('right')`)).to.equal(`-400px`);
+        expect(await page.evaluate(`$('.leaflet-draw-draw-polyline').is(':visible')`)).to.be.true;
+
+        // Enabling draw module
+        await page.evaluate(`$('[href="#draw-content"]').trigger('click');`);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('#module-container').css('right')`)).to.equal(`0px`);
+    });
+
     it("should be able to reset the application", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_DEFAULT}test.polygon,public.urbanspatial_dar_es_salaam_luse_2002,public.test_poly,v:public.test,v:public.test_line`);

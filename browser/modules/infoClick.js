@@ -6,14 +6,15 @@
 
 'use strict';
 
-var urlparser = require('./urlparser');
+const MODULE_ID = `infoClick`;
+
 var cloud;
 var backboneEvents;
 var clicktimer;
-var meta;
 var sqlQuery;
 var qstore = [];
-var active = true;
+var active = false;
+var _self = false;
 
 /**
  *
@@ -22,15 +23,25 @@ var active = true;
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
-        meta = o.meta;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
+        _self = this;
         return this;
     },
+
     init: function () {
+        backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => { _self.reset(); });
+        backboneEvents.get().on(`off:all`, () => {
+            _self.off(); 
+            _self.reset();
+        });
+        backboneEvents.get().on(`on:${MODULE_ID}`, () => { _self.active(true); });
+        backboneEvents.get().on(`off:${MODULE_ID}`, () => { _self.active(false); });
+
         cloud.get().on("dblclick", function () {
             clicktimer = undefined;
         });
+
         cloud.get().on("click", function (e) {
             if (active === false || e.originalEvent.clickedOnFeature) {
                 return;
@@ -52,6 +63,7 @@ module.exports = {
             }
         });
     },
+
     /**
      *
      */
@@ -67,14 +79,15 @@ module.exports = {
         if (!a) {
             this.reset();
         }
+
         active = a;
     },
 
-    activate: () => {
+    on: () => {
         active = true;
     },
 
-    deactivate: () => {
+    off: () => {
         active = false;
     }
 };

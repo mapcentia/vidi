@@ -178,7 +178,9 @@ var gc2table = (function () {
                         if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
                             try {
                                 v.closePopup();
-                                store.layer.resetStyle(v);
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
                             } catch (e) {
                                 console.log(e);
                             }
@@ -284,7 +286,9 @@ var gc2table = (function () {
                     }, 500);
 
                 var getDatabaseIdForLayerId = function(layerId) {
-                    var databaseIdentifier = false;
+                    if (!store.geoJSON) return false;
+
+                    var databaseIdentifier = false;                    
                     store.geoJSON.features.map(item => {
                         if (parseInt(item.properties._id) === parseInt(layerId)) {
                             databaseIdentifier = item.properties[pkey];
@@ -339,7 +343,9 @@ var gc2table = (function () {
                             var id = $(this).data('uniqueid');
                             var databaseIdentifier = getDatabaseIdForLayerId(id);
                             if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
-                                store.layer.resetStyle(store.layer._layers[id])
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(store.layer._layers[id]);
+                                }
                             }
                         });
                     }, 100);
@@ -357,7 +363,9 @@ var gc2table = (function () {
 
                 $(el).on('check-all.bs.table', function (e, m) {
                     m.map(function(checkedRowItem) {
-                        store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
+                        if (store.layer && store.layer.resetStyle) {
+                            store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
+                        }
                     });
 
                     uncheckedIds = [];
@@ -393,7 +401,9 @@ var gc2table = (function () {
                             return item !== parseInt(databaseIdentifier);
                         });
 
-                        store.layer.resetStyle(store.layer._layers[m._id])
+                        if (store.layer && store.layer.resetStyle) {
+                            store.layer.resetStyle(store.layer._layers[m._id]);
+                        }
                     }
                 });
 
