@@ -9,7 +9,7 @@
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, backboneEvents, meta, layerTree, advancedInfo;
+var cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
 
 /**
  * @type {*|exports|module.exports}
@@ -59,6 +59,7 @@ module.exports = {
         meta = o.meta;
         layerTree = o.layerTree;
         advancedInfo = o.advancedInfo;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
         extensions = o.extensions;
@@ -75,10 +76,10 @@ module.exports = {
      * @param callBack
      * @param num
      * @param infoClickPoint
-     * @param whereClouse
+     * @param whereClause
      * @param includes
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClouse, includes, zoomToResult) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult) {
         let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -192,9 +193,20 @@ module.exports = {
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
                         $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
-                            '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
-                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
+                        $("#info-pane").append(`<div class="tab-pane" id="_${storeId}">
+                            <div>
+                                <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                                </a> 
+                                <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> Excel
+                                </a>
+                                <button class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
+                                </button>
+                            </div>
+                            <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
+                        </div>`);
 
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
@@ -210,7 +222,7 @@ module.exports = {
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
-                            checkBox: false,
+                            checkBox: true,
                             height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
@@ -255,7 +267,9 @@ module.exports = {
                         if (Object.keys(layerObj.layer._layers).length === 1) {
                             _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
                         }
+
                         hit = true;
+
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
                         // Stop the click on detail icon from bubbling up the DOM tree
@@ -269,11 +283,24 @@ module.exports = {
                         $("#_download_geojson_" + storeId).click(function () {
                             download(sql, "geojson");
                         });
-
-
+                        $("#_create_layer_" + storeId).click(function () {
+                            let _self = this;
+                            $(_self).prop(`disabled`, true);
+                            let uncheckedIds = _table.getUncheckedIds();
+                            // Remove query results and open them as created virtual layer in layerTree
+                            layerTree.createVirtualLayer(layerObj, {pkey, ids: uncheckedIds}).then(newLayerKey => {
+                                switchLayer.init(`v:` + newLayerKey, true).then(() => {
+                                    $(_self).prop(`disabled`, false);
+                                });
+                            }).catch(error => {
+                                $(_self).prop(`disabled`, false)
+                                console.error(`Error occured while creating the virtual layer`, error);
+                            });
+                        });
                     } else {
                         layerObj.reset();
                     }
+
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {
@@ -295,6 +322,7 @@ module.exports = {
                     }
                 };
             }
+
             qstore[index] = new geocloud.sqlStore({
                 jsonp: false,
                 method: "POST",
@@ -339,6 +367,7 @@ module.exports = {
 
                 }
             });
+
             cloud.get().addGeoJsonStore(qstore[index]);
 
             var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
@@ -355,7 +384,7 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
-            if (!whereClouse) {
+            if (!whereClause) {
                 if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
                         "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
@@ -372,7 +401,6 @@ module.exports = {
                         cloud.get().getExtent().right,
                         cloud.get().getExtent().top
                     ];
-
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
                         sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
@@ -389,17 +417,18 @@ module.exports = {
                     }
                 }
             } else {
-                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClouse;
+                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClause;
                 if (versioning) {
                     sql = sql + " AND gc2_version_end_date IS NULL ";
                 }
                 qstore[index].custom_data = "";
             }
+
             sql = sql + " LIMIT " + (num || 500);
+
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
-
         });
     },
 

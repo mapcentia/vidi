@@ -52,6 +52,43 @@ describe('Layer tree common', () => {
         await page.close();
     });
 
+    it(`should allow loading vector layers in both dynamic and static mode`, async () => {
+        let page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
+
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-toggle-load-strategy').trigger('click')`)
+        await helpers.sleep(1000);
+
+        let layerWasRequestedDynamically = false;
+        await page.setRequestInterception(true);
+        page.on('request', interceptedRequest => {
+            if (interceptedRequest.url().indexOf(`api/sql/aleksandrshumilov`) !== -1) {
+                if (Buffer.from(interceptedRequest._postData.split(`&`)[0].split(`=`)[1], 'base64').toString().indexOf(`ST_Transform(ST_MakeEnvelope`) !== -1) {
+                    layerWasRequestedDynamically = true;
+                } else {
+                    layerWasRequestedDynamically = false;
+                }
+            }
+
+            interceptedRequest.continue();
+        });
+
+        // Enable dynamic load
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-settings-load-strategy').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(layerWasRequestedDynamically).to.be.true;
+
+        // Disable dynamic load
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-layer-settings-load-strategy').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(layerWasRequestedDynamically).to.be.false;
+    });
+
     it(`pulls layer data from cache if the vector is set to be offline, pulls data from server if it is not`, async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + `v:public.test`);

@@ -167,6 +167,12 @@ describe('Layer tree filters', () => {
 
         expect(numberOfFilteredItems).to.equal(2);
 
+        // Testing the Disable button
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.fa-eraser').parent().first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        expect(numberOfFilteredItems).to.equal(7);
+
         await page.close();
     });
 
