@@ -1362,7 +1362,7 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`);
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
         $("#collapse" + base64GroupName).append(markup);
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
