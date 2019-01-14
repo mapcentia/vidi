@@ -87,6 +87,8 @@ let urlsToCache = [
     '/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
     '/js/lib/leaflet-history/leaflet-history.js',
     '/js/lib/leaflet-draw/leaflet.draw.js',
+    '/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
+    '/js/lib/leaflet-snap/leaflet.snap.js',
     '/js/lib/es6-shim/es6-shim.js',
     '/js/lib/q-cluster/src/utils.js',
     '/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
