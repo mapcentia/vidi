@@ -205,24 +205,9 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
             return result;
 
         // deep copy of latlngs
-        var deepCopy = layer.getLatLngs().slice(0);
-        deepCopy.map(function(item, index) {
-            if (Array.isArray(item)) {
-                deepCopy.map(function(subItem, subIndex) {
-                    if ('__vertex' in subItem) {
-                        delete deepCopy[index][subIndex].__vertex;
-                    }
-                });
-            } else {
-                if ('__vertex' in item) {
-                    delete deepCopy[index].__vertex;
-                }
-            }
-        });
-
-        //latlngs = JSON.parse(JSON.stringify(deepCopy));
-        //latlngs = layer.getLatLngs().slice(0);
-        latlngs = deepCopy;
+        // @fix No need to JSON.parse(JSON.stringify()), as values are not changed lately
+        //latlngs = JSON.parse(JSON.stringify(layer.getLatLngs().slice(0)));
+        latlngs = layer.getLatLngs().slice(0);
 
         // add the last segment for L.Polygon
         if (layer instanceof L.Polygon) {
