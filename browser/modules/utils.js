@@ -17,7 +17,10 @@ module.exports = {
     },
     init: function () {
     },
-    createMainTab: function (id, name, info, height, icon, rawIconWasProvided = false) {
+    /**
+     * @todo Remove deprecated "height" parameter
+     */
+    createMainTab: function (id, name, info, height, icon, rawIconWasProvided = false, moduleId = false) {
         let el = `#${id}-content`;
 
         let iconRaw = ``;
@@ -28,7 +31,13 @@ module.exports = {
             iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="material-icons">${icon}</i>`;
         }
 
-        $(`<li role="presentation"><a href="#${id}-content" aria-controls role="tab" data-toggle="tab">${iconRaw}${name}</a></li>`).appendTo("#main-tabs");
+        if (moduleId === false) {
+            moduleId = ``;
+        }
+
+        $(`<li role="presentation">
+            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab">${iconRaw}${name}</a>
+        </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
             $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">

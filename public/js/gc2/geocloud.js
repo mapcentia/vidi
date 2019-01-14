@@ -275,7 +275,9 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key + '&custom_data=' + this.custom_data,
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
+                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -318,10 +320,11 @@ geocloud = (function () {
                 complete: function () {
                     me.onLoad(me);
                 }
-
             });
+
             return xhr;
         };
+
         this.abort = function () {
             xhr.abort();
         }

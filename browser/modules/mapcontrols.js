@@ -11,7 +11,7 @@ const MODULE_NAME = `mapcontrols`;
 /**
  * @type {*|exports|module.exports}
  */
-let state, cloud, setting;
+let state, cloud, setting, backboneEvents;
 
 let clearMapControl, defaultMapExtentControl;
 
@@ -34,7 +34,9 @@ const ClearMapControlOptions = {
     </a>`),
     onclick: (e) => {
         e.stopPropagation();
+        backboneEvents.get().trigger(`reset:infoClick`);
         state.resetState([`draw`, `measurements`]);
+
     }
 };
 let ClearMapControl = L.Control.extend({
@@ -76,6 +78,7 @@ let DefaultMapExtentControl = L.Control.extend({
 module.exports = {
     set: function (o) {
         cloud = o.cloud;
+        backboneEvents = o.backboneEvents;
         setting = o.setting;
         state = o.state;
         _self = this;

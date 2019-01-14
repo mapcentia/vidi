@@ -53,6 +53,12 @@ module.exports = {
     },
 
     init: () => {
+        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} off:all` , () => {
+            _self.toggleMeasurements(false, false);
+        });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.toggleMeasurements(); });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.toggleMeasurements(false, false); });
+
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
@@ -186,15 +192,15 @@ module.exports = {
                 });
             }, 100);
         }
-        cloud.get().map.addLayer(drawnItems);
-    },
 
-    off: () => {
-        _self.toggleMeasurements(false, false);
+        cloud.get().map.addLayer(drawnItems);
     },
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
+            backboneEvents.get().trigger(`off:all`);
+            backboneEvents.get().trigger(`hide:all`);
+
             $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;

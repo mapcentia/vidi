@@ -68,12 +68,6 @@ var metaDataKeys;
 
 /**
  *
- * @type {array}
- */
-var reset;
-
-/**
- *
  * @type {*|exports|module.exports}
  */
 let APIBridgeSingletone = require('./api-bridge');
@@ -110,7 +104,7 @@ var layers;
 var infoClick;
 var setting;
 var state;
-
+var applicationModules = false;
 var isStarted = false;
 
 /**
@@ -118,24 +112,24 @@ var isStarted = false;
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
 module.exports = module.exports = {
-    set: function (o) {
-        draw = o.draw;
-        measurements = o.measurements;
-        advancedInfo = o.advancedInfo;
-        cloud = o.cloud;
-        print = o.print;
-        switchLayer = o.switchLayer;
-        setBaseLayer = o.setBaseLayer;
-        legend = o.legend;
-        meta = o.meta;
-        pushState = o.pushState;
-        layerTree = o.layerTree;
-        layers = o.layers;
-        infoClick = o.infoClick;
-        backboneEvents = o.backboneEvents;
-        reset = o.reset;
-        setting = o.setting;
-        state = o.state;
+    set: function (modules) {
+        applicationModules = modules;
+        draw = modules.draw;
+        measurements = modules.measurements;
+        advancedInfo = modules.advancedInfo;
+        cloud = modules.cloud;
+        print = modules.print;
+        switchLayer = modules.switchLayer;
+        setBaseLayer = modules.setBaseLayer;
+        legend = modules.legend;
+        meta = modules.meta;
+        pushState = modules.pushState;
+        layerTree = modules.layerTree;
+        layers = modules.layers;
+        infoClick = modules.infoClick;
+        backboneEvents = modules.backboneEvents;
+        setting = modules.setting;
+        state = modules.state;
         return this;
     },
     init: function (str) {
@@ -188,28 +182,12 @@ module.exports = module.exports = {
             });
         });
 
-        // Advanced info
-        // =============
-
-        $("#advanced-info-btn").on("click", function () {
-            advancedInfo.control();
-        });
-
-        // Reset
-        // =====
-
-        $("#btn-reset").on("click", function () {
-            reset.init();
-        });
-
-
         $("#searchclear").on("click", function () {
             backboneEvents.get().trigger("clear:search");
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             metaDataKeys = meta.getMetaDataKeys();
-
             if (!isStarted) {
                 isStarted = true;
                 setTimeout(
@@ -228,79 +206,6 @@ module.exports = module.exports = {
                     }, 600
                 );
             }
-
-        });
-
-        // When reset:all is triggered, we rwe reset all modules.
-        // Extensions must implement a listener for the reset:all event
-        // and clean up
-        // ============================================================
-        backboneEvents.get().on("reset:all", function (ignoredModules = []) {
-            console.info("Resets all", ignoredModules);
-
-            // Should be enabled by default
-            backboneEvents.get().trigger("on:infoClick");
-
-            // Should be disabled by default
-            let modulesToReset = [`advancedInfo`, `drawing`, `measurements`, `print`];
-            modulesToReset.map(moduleToReset => {
-                if (ignoredModules.indexOf(moduleToReset) === -1) {
-                    backboneEvents.get().trigger(`off:${moduleToReset}`);
-                }
-            });
-        });
-
-        backboneEvents.get().on("off:measurements", function () {
-            console.info("Stopping measurements");
-            measurements.off();
-        });
-
-        backboneEvents.get().on("off:drawing", function () {
-            console.info("Stopping drawing");
-            draw.off();
-        });
-
-        backboneEvents.get().on("off:advancedInfo", function () {
-            console.info("Stopping advanced info");
-            advancedInfo.off();
-        });
-
-        /**
-         * Processing turn on/off events for modules
-         */
-        let modulesToReactOnEachOtherChanges = [`measurements`, `drawing`, `advancedInfo`];
-        modulesToReactOnEachOtherChanges.map(module => {
-            backboneEvents.get().on(`${module}:turnedOn`, function () {
-                console.info(`${module} was turned on`);
-                // Reset all modules except caller
-                backboneEvents.get().trigger(`reset:all`, [module]);
-                // Disable the infoClick
-                backboneEvents.get().trigger(`off:infoClick`);
-            });
-
-            // Drawing was turned off
-            backboneEvents.get().on(`${module}:turnedOff`, function () {
-                console.info(`${module} was turned off`);
-                // Reset all modules except caller
-                backboneEvents.get().trigger(`reset:all`, [module]);
-            });
-        });
-
-        // Info click
-        // ==========
-        backboneEvents.get().on("on:infoClick", function () {
-            console.info("Activating infoClick");
-            infoClick.active(true);
-        });
-
-        backboneEvents.get().on("off:infoClick", function () {
-            console.info("Deactivating infoClick");
-            infoClick.active(false);
-        });
-
-        backboneEvents.get().on("reset:infoClick", function () {
-            console.info("Resetting infoClick");
-            infoClick.reset();
         });
 
         // Clear all query layers and deactivate tools
@@ -311,7 +216,6 @@ module.exports = module.exports = {
             advancedInfo.reset();
             layerTree.resetSearch();
         });
-
 
         // Layer loading
         // =============
@@ -371,33 +275,6 @@ module.exports = module.exports = {
             });
         });
 
-        // Print
-        // =====
-        $("#print-btn").on("click", function () {
-            print.activate();
-            $("#get-print-fieldset").prop("disabled", true);
-        });
-
-        $("#start-print-btn").on("click", function () {
-            if (print.print()) {
-                $(this).button('loading');
-                $("#get-print-fieldset").prop("disabled", true);
-            }
-        });
-
-        backboneEvents.get().on("off:print", function () {
-            print.off();
-        });
-
-        backboneEvents.get().on("end:print", function (response) {
-            $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#download-pdf").attr("download", response.key);
-            $("#open-html").attr("href", response.url);
-            $("#start-print-btn").button('reset');
-            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
-        });
-
         backboneEvents.get().on("refresh:auth", function (response) {
             apiBridgeInstance.resubmitSkippedFeatures();
         });
@@ -405,24 +282,17 @@ module.exports = module.exports = {
         // Refresh browser state. E.g. after a session start
         // =================================================
         backboneEvents.get().on("refresh:meta", function (response) {
-            meta.init()
-
-                .then(function () {
-                        return setting.init();
-                    },
-
-                    function (error) {
-                        console.log(error); // Stacktrace
-                        alert("Vidi is loaded without schema. Can't set extent or add layers");
-                        backboneEvents.get().trigger("ready:meta");
-                        state.init();
-                    })
-
-                .then(function () {
-                    layerTree.create();
-                    state.init();
-                });
-
+            meta.init().then(() => {
+                return setting.init();
+            }, (error) => {
+                console.log(error); // Stacktrace
+                alert("Vidi is loaded without schema. Can't set extent or add layers");
+                backboneEvents.get().trigger("ready:meta");
+                state.init();
+            }).then(() => {
+                layerTree.create();
+                state.init();
+            });
         });
 
         // Init some GUI stuff after modules are loaded
@@ -439,7 +309,11 @@ module.exports = module.exports = {
         $("#loadscreentext").html(__("Loading data"));
         if (window.vidiConfig.activateMainTab) {
             setTimeout(function () {
-                $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').tab('show');
+                if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
+                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
+                } else {
+                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                }
             }, 200);
         }
 
@@ -468,14 +342,12 @@ module.exports = module.exports = {
             });
         });
 
-
         $("#info-modal .modal-header button").on("click", function () {
             if (!$(this).data("extraClickHandlerIsEnabled")) {
                 infoModalHide();
                 // Ikke den
             }
         });
-
 
         $("#module-container .modal-header button").on("click", function () {
             searchShow();
@@ -602,8 +474,7 @@ module.exports = module.exports = {
 
             // If print when deactivate
             if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", false);
-                print.activate();
+                backboneEvents.get().trigger(`off:print`);
             }
 
             // If legend when deactivate
@@ -652,10 +523,8 @@ module.exports = module.exports = {
 
             // If print when activate
             if ($(this).data('module') === "print") {
-                $("#print-btn").prop("checked", true);
-                print.activate();
+                backboneEvents.get().trigger(`on:print`);
             }
-
 
             // If legend when deactivate
             if ($(this).data('module') === "legend") {
@@ -671,8 +540,32 @@ module.exports = module.exports = {
             })
         });
 
+        // Hiding all panels with visible modules
+        backboneEvents.get().on(`hide:all`, () => {
+            if ($(`.modal-header > button[class="close"]`).is(`:visible`)) {
+                $(`.modal-header > button[class="close"]`).trigger(`click`);
+            }
+        });
+
+        $(`.modal-header > button[class="close"]`).click(() => {
+            backboneEvents.get().trigger(`off:all`);
+        });
+
         // Module icons
         $("#side-panel ul li a").on("click", function (e) {
+            backboneEvents.get().trigger(`off:all`);
+
+            let moduleId = $(this).data(`module-id`);
+            setTimeout(() => {
+                if (moduleId && moduleId !== ``) {
+                    if (moduleId in applicationModules) {
+                        backboneEvents.get().trigger(`on:${moduleId}`);
+                    } else {
+                        console.error(`Module ${moduleId} was not found`);
+                    }
+                }
+            }, 100);
+
             let id = ($(this));
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
