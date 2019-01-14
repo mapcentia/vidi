@@ -192,7 +192,7 @@ module.exports = module.exports = {
                 isStarted = true;
                 setTimeout(
                     function () {
-                        if ($(document).width() > 1024) {
+                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === "undefined") {
                             $("#search-border").trigger("click");
                         }
                     }, 200
