@@ -1754,6 +1754,50 @@ module.exports = {
                 }
             }
 
+            if (layerIsTheVectorOne) {
+                if (isVirtual === false) {
+                    let value = false;
+                    if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
+                        value = dynamicLoad[layerKey];
+                    }
+
+                    let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    if (document.getElementById(componentContainerId)) {
+                        ReactDOM.render(<LoadStrategyToggle
+                            layerKey={layerKey}
+                            initialValue={value}
+                            onChange={_self.onChangeLoadStrategyHandler}/>,
+                            document.getElementById(componentContainerId));
+                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                        });
+                    }
+                }
+
+                // Table view
+                $(layerContainer).find(`.js-toggle-table-view`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                    $(layerContainer).find('.js-layer-settings-table').toggle();
+
+                    let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                    if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
+
+                    // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
+                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+
+                    tables[`v:` + layerKey].loadDataInTable(true);
+                });
+
+                if (defaultLayerType === `vector`) {
+                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
+                } else {
+                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
+                }
+            }
+
             $(layerContainer).find(`.js-toggle-search`).click(() => {
                 _self._selectIcon($(layerContainer).find('.js-toggle-search'));
                 $(layerContainer).find('.js-layer-settings-search').toggle();
