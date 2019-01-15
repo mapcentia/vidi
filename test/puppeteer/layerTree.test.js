@@ -265,7 +265,8 @@ describe('Layer tree common', () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Public group`);
 
         await page.close();
     });
@@ -359,7 +360,8 @@ describe('Layer tree common', () => {
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dynamic load test`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Snapping`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Public group`);
 
         let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw');
         let box = await e.boundingBox();

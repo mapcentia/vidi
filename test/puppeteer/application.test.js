@@ -115,7 +115,8 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Public group`);
 
         // Change the base layer
         await page.evaluate(`$('[href="#baselayer-content"]').trigger('click');`);
@@ -140,7 +141,8 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Public group`);
 
         expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
     });
