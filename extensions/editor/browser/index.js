@@ -18,7 +18,7 @@ let PANEL_DOCKING_PARAMETER = 1024;
  *
  * @type {*|exports|module.exports}
  */
-let utils, state, backboneEvents, layerTree, meta, cloud, sqlQuery;
+let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
 
 let apiBridgeInstance = false;
 
@@ -93,8 +93,8 @@ module.exports = {
         utils = o.utils;
         meta = o.meta;
         cloud = o.cloud;
-        state = o.state;
         sqlQuery = o.sqlQuery;
+        layers = o.layers;
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -537,6 +537,7 @@ module.exports = {
             me.stopEdit();
 
             e.on(`editable:editing`, () => {
+                console.log(`### edited`);
                 featureWasEdited = true;
             });
 
@@ -590,6 +591,65 @@ module.exports = {
                 default:
                     editor = e.enableEdit();
                     break;
+            }
+
+            let guideLayers = [];
+            layers.getMapLayers().map(layer => {
+                if (`id` in layer && layer.id && layer.id.indexOf(`v:`) === 0 && guideLayers.indexOf(layer.id) === -1) {
+                    guideLayers.push(layer);
+                }
+            });
+
+            // Enabling snapping only if there are visible vector layers
+            if (guideLayers.length > 0) {
+                if (e.feature.geometry.type === `Point`) {
+                    markers[0].snapediting = new L.Handler.MarkerSnap(cloud.get().map, markers[0]);                
+                    guideLayers.map(layer => { markers[0].snapediting.addGuideLayer(layer); });
+                    markers[0].snapediting.enable();
+                } else {
+                    var snap = new L.Handler.MarkerSnap(cloud.get().map);
+                    guideLayers.map(layer => { snap.addGuideLayer(layer); });
+
+                    var snapMarker = L.marker(cloud.get().map.getCenter(), {
+                        icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
+                        opacity: 1,
+                        zIndexOffset: 1000
+                    });
+
+                    snap.watchMarker(snapMarker);
+
+                    cloud.get().map.on('editable:vertex:dragstart', function (e) {
+                        snap.watchMarker(e.vertex);
+                    });
+                    cloud.get().map.on('editable:vertex:dragend', function (e) {
+                        snap.unwatchMarker(e.vertex);
+                    });
+                    cloud.get().map.on('editable:drawing:start', function () {
+                        this.on('mousemove', followMouse);
+                    });
+                    cloud.get().map.on('editable:drawing:end', function () {
+                        this.off('mousemove', followMouse);
+                        snapMarker.remove();
+                    });
+                    cloud.get().map.on('editable:drawing:click', function (e) {
+                        // Leaflet copy event data to another object when firing,
+                        // so the event object we have here is not the one fired by
+                        // Leaflet.Editable; it's not a deep copy though, so we can change
+                        // the other objects that have a reference here.
+                        var latlng = snapMarker.getLatLng();
+                        e.latlng.lat = latlng.lat;
+                        e.latlng.lng = latlng.lng;
+                    });
+                    snapMarker.on('snap', function (e) {
+                        snapMarker.addTo(cloud.get().map);
+                    });
+                    snapMarker.on('unsnap', function (e) {
+                        snapMarker.remove();
+                    });
+                    var followMouse = function (e) {
+                        snapMarker.setLatLng(e.latlng);
+                    }
+                }
             }
 
             // Delete some system attributes
@@ -835,6 +895,9 @@ module.exports = {
      * @param e
      */
     stopEdit: function (editedFeature) {
+
+
+        console.log(`### stopEdit`, editedFeature);
         let me = this;
 
         cloud.get().map.editTools.stopDrawing();
@@ -845,6 +908,10 @@ module.exports = {
 
         // If feature was edited, then reload the layer
         if (editedFeature) {
+            if (`snapediting` in editedFeature && editedFeature.snapediting) {
+                editedFeature.snapediting.disable();
+            }
+
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();

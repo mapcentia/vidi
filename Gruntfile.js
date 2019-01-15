@@ -237,7 +237,8 @@ module.exports = function (grunt) {
                         'public/js/lib/q-cluster/src/clustering.js',
                         'public/js/point-clusterer.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
-
+                        'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
+                        'public/js/lib/leaflet-snap/leaflet.snap.js',
                         'public/js/lib/jquery/jquery.js',
                         'public/js/lib/jquery-ui/jquery-ui.min.js',
                         'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
