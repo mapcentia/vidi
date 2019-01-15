@@ -9,9 +9,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - Fall back mechanism for base layers. If the current base layer responses with error codes the next one is switched no.
 - Touch drag enabled in layer tree.
 - Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
+- Visual grouping of map tools in GUI.
 
-## [2018.2.0.rc1] - 2018-07-12
-### Added
+### Changed
 - One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
 ```javascript
 module.exports = {
@@ -32,6 +32,9 @@ module.exports = {
    }
  }
  ```
+
+## [2018.2.0.rc1] - 2018-07-12
+### Added
 - New mode for double base-layers: Overlay base-layers, where the opacity of the top one can be changed
 - Filters for WMS single tile layers. Predefine filters in GC2 Meta, which will be displayed as checkboxes in a layertree panel. For now only supports QGIS layers.
 
