@@ -54,8 +54,7 @@ var ReactDOM = require('react-dom');
 import moment from 'moment';
 import noUiSlider from 'nouislider';
 
-import TileLayerFilter from './TileLayerFilter';
-import VectorLayerFilter from './VectorLayerFilter';
+import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
 import {
     validateFilters,
@@ -144,9 +143,9 @@ let treeIsBeingBuilt = false;
 
 let userPreferredForceOfflineMode = -1;
 
-let vectorFilters = {};
+let arbitraryFilters = {};
 
-let tileFilters = {};
+let predefinedFilters = {};
 
 let dynamicLoad = {};
 
@@ -270,12 +269,12 @@ module.exports = {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
-                let initialVectorFilters = ((initialState && `vectorFilters` in initialState && typeof initialState.vectorFilters === `object`) ? initialState.vectorFilters : {});
-                let initialTileFilters = ((initialState && `tileFilters` in initialState && typeof initialState.tileFilters === `object`) ? initialState.tileFilters : {});
+                let initialArbitraryFilters = ((initialState && `arbitraryFilters` in initialState && typeof initialState.arbitraryFilters === `object`) ? initialState.arbitraryFilters : {});
+                let initialPredefinedFilters = ((initialState && `predefinedFilters` in initialState && typeof initialState.predefinedFilters === `object`) ? initialState.predefinedFilters : {});
                 let initialVirtualLayers = ((initialState && `virtualLayers` in initialState && typeof initialState.virtualLayers === `object`) ? initialState.virtualLayers : []);
                 let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
                 let initialDynamicLoad = ((initialState && `dynamicLoad` in initialState) ? initialState.dynamicLoad : {});
-                resolve({order, offlineModeSettings, initialVectorFilters, initialTileFilters, initialVirtualLayers, opacitySettings, initialDynamicLoad});
+                resolve({order, offlineModeSettings, initialArbitraryFilters, initialPredefinedFilters, initialVirtualLayers, opacitySettings, initialDynamicLoad});
             });
         });
 
@@ -494,17 +493,17 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialVectorFilters, initialDynamicLoad,
-                        initialVirtualLayers, initialTileFilters, opacitySettings}) => {
+                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialArbitraryFilters, initialDynamicLoad,
+                        initialVirtualLayers, initialPredefinedFilters, opacitySettings}) => {
 
                         try {
 
-                            if (vectorFilters && ignoredInitialStateKeys.indexOf(`vectorFilters`) === -1) {
-                                vectorFilters = initialVectorFilters;
+                            if (arbitraryFilters && ignoredInitialStateKeys.indexOf(`arbitraryFilters`) === -1) {
+                                arbitraryFilters = initialArbitraryFilters;
                             }
 
-                            if (initialTileFilters && ignoredInitialStateKeys.indexOf(`tileFilters`) === -1) {
-                                tileFilters = initialTileFilters;
+                            if (initialPredefinedFilters && ignoredInitialStateKeys.indexOf(`predefinedFilters`) === -1) {
+                                predefinedFilters = initialPredefinedFilters;
                             }
 
                             if (initialDynamicLoad && ignoredInitialStateKeys.indexOf(`dynamicLoad`) === -1) {
@@ -567,12 +566,12 @@ module.exports = {
                                     opacitySettings = forcedState.opacitySettings;
                                 }
 
-                                if (`tileFilters` in forcedState && forcedState.tileFilters) {
-                                    tileFilters = forcedState.tileFilters;
+                                if (`predefinedFilters` in forcedState && forcedState.predefinedFilters) {
+                                    predefinedFilters = forcedState.predefinedFilters;
                                 }
 
-                                if (`vectorFilters` in forcedState && forcedState.vectorFilters) {
-                                    vectorFilters = forcedState.vectorFilters;
+                                if (`arbitraryFilters` in forcedState && forcedState.arbitraryFilters) {
+                                    arbitraryFilters = forcedState.arbitraryFilters;
                                 }
 
                                 if (`dynamicLoad` in forcedState && forcedState.dynamicLoad) {
@@ -890,12 +889,12 @@ module.exports = {
             }
         } else {
             let whereClauses = [];
-            if (vectorFilters && layerKey in vectorFilters) {
+            if (arbitraryFilters && layerKey in arbitraryFilters) {
                 let conditions = _self.getFilterConditions(layerKey);
                 if (conditions.length > 0) {
-                    if (vectorFilters[layerKey].match === `any`) {
+                    if (arbitraryFilters[layerKey].match === `any`) {
                         whereClauses.push(conditions.join(` OR `));
-                    } else if (vectorFilters[layerKey].match === `all`) {
+                    } else if (arbitraryFilters[layerKey].match === `all`) {
                         whereClauses.push(conditions.join(` AND `));
                     } else {
                         throw new Error(`Invalid match type value`);
@@ -1098,8 +1097,8 @@ module.exports = {
         let layer = meta.getMetaByKey(layerKey);
 
         let conditions = [];
-        if (vectorFilters && layerKey in vectorFilters) {
-            vectorFilters[layerKey].columns.map((column, index) => {
+        if (arbitraryFilters && layerKey in arbitraryFilters) {
+            arbitraryFilters[layerKey].columns.map((column, index) => {
                 if (column.fieldname && column.value) {
                     for (let key in layer.fields) {
                         if (key === column.fieldname) {
@@ -1691,106 +1690,67 @@ module.exports = {
                     _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
-
-                $(layerContainer).find(`.js-toggle-tile-filters`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-tile-filters'));
-                    $(layerContainer).find('.js-layer-settings-tile-filters').toggle();
-                });
             }
 
-            if (layerIsTheVectorOne) {
-                if (isVirtual === false) {
-                    // Vector layer filters
-                    let componentContainerId = `layer-settings-filters-${layerKey}`;
-                    $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-
-                    let conditions = _self.getFilterConditions(layerKey);
-                    $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
-                    let filters = {};
-                    if (vectorFilters && layerKey in vectorFilters) {
-                        filters = vectorFilters[layerKey];
-                    }
-
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(
-                            <VectorLayerFilter layer={layer} filters={filters} onApply={_self.onApplyVectorFiltersHandler}/>, document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-filters').hide(0);
-
-                        $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
-                            $(layerContainer).find('.js-layer-settings-filters').toggle();
-                        });
-                    }
-
-                    let value = false;
-                    if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
-                        value = dynamicLoad[layerKey];
-                    }
-
-                    componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<LoadStrategyToggle
-                            layerKey={layerKey}
-                            initialValue={value}
-                            onChange={_self.onChangeLoadStrategyHandler}/>,
-                            document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                        });
-                    }
+            if (isVirtual === false) {
+                let componentContainerId = `layer-settings-filters-${layerKey}`;
+                $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                let localArbitraryfilters = {};
+                if (arbitraryFilters && layerKey in arbitraryFilters) {
+                    localArbitraryfilters = arbitraryFilters[layerKey];
                 }
 
-                // Table view
-                $(layerContainer).find(`.js-toggle-table-view`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
-                    $(layerContainer).find('.js-layer-settings-table').toggle();
-
-                    let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                    if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
-
-                    // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
-                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-
-                    tables[`v:` + layerKey].loadDataInTable(true);
-                });
-
-                if (defaultLayerType === `vector`) {
-                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
-                } else {
-                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
-                }
-            } else {
+                let localPredefinedFilters = {};
                 if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-                    let parsedWMSFilters = false;
                     try {
-                        let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
-                        parsedWMSFilters = parsedWMSFiltersLocal;
+                        let filters = JSON.parse(parsedMeta[`wms_filters`]);
+                        localPredefinedFilters = filters;
                     } catch (e) {
                         console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
                         $(layerContainer).find(`.js-toggle-tile-filters`).remove();
                     }
+                }
 
-                    if (parsedWMSFilters && Object.keys(parsedWMSFilters).length > 0) {
-                        let componentContainerId = `layer-settings-tile-filters-${layerKey}`;
-                        $(layerContainer).find('.js-layer-settings-tile-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                        
-                        if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(<TileLayerFilter
-                                layerKey={layerKey}
-                                filters={parsedWMSFilters}
-                                disabledFilters={tileFilters[layerKey]}
-                                onApply={_self.onApplyTileFiltersHandler}/>,
-                                document.getElementById(componentContainerId));
-                            $(layerContainer).find('.js-layer-settings-tile-filters').hide(0);
-                        }
-                    } else {
-                        $(layerContainer).find(`.js-toggle-tile-filters`).remove();
-                    }
-                } else {
-                    $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                let conditions = _self.getFilterConditions(layerKey);
+                let numberOfArbitraryActiveFilters = conditions.length;
+                let numberOfPredefinedActiveFilters = Object.keys(localPredefinedFilters).length;
+
+                $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text((numberOfArbitraryActiveFilters + numberOfPredefinedActiveFilters));
+                if (document.getElementById(componentContainerId)) {
+                    ReactDOM.render(
+                        <LayerFilter
+                            layer={layer}
+                            predefinedFilters={localPredefinedFilters}
+                            arbitraryFilters={localArbitraryfilters}
+                            onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
+                            onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                            />, document.getElementById(componentContainerId));
+                    $(layerContainer).find('.js-layer-settings-filters').hide(0);
+
+                    $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
+                        $(layerContainer).find('.js-layer-settings-filters').toggle();
+                    });
+                }
+
+                let value = false;
+                if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
+                    value = dynamicLoad[layerKey];
+                }
+
+                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                if (document.getElementById(componentContainerId)) {
+                    ReactDOM.render(<LoadStrategyToggle
+                        layerKey={layerKey}
+                        initialValue={value}
+                        onChange={_self.onChangeLoadStrategyHandler}/>,
+                        document.getElementById(componentContainerId));
+                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                    });
                 }
             }
 
@@ -1934,8 +1894,8 @@ module.exports = {
         let tableName = layerKey;
 
         let filters = false;
-        if (tileFilters && layerKey in tileFilters && tileFilters[layerKey]) {
-            filters = tileFilters[layerKey];
+        if (predefinedFilters && layerKey in predefinedFilters && predefinedFilters[layerKey]) {
+            filters = predefinedFilters[layerKey];
         }
 
         let parameterString = false;
@@ -1983,13 +1943,13 @@ module.exports = {
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
-                $(container).find(`.js-toggle-layer-offline-mode-container`).show();
-                $(container).find(`.js-toggle-tile-filters`).hide();
-                $(container).find(`.js-toggle-opacity`).hide();
+                $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
+                $(container).find(`.js-toggle-tile-filters`).hide(0);
+                $(container).find(`.js-toggle-opacity`).hide(0);
                 if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-table-view`).show();
+                    $(container).find(`.js-toggle-table-view`).show(0);
                 } else {
-                    $(container).find(`.js-toggle-table-view`).hide();
+                    $(container).find(`.js-toggle-table-view`).hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                     $(container).find('.js-layer-settings-load-strategy').hide(0);
                     $(container).find('.js-layer-settings-table').hide(0);
@@ -1999,29 +1959,30 @@ module.exports = {
                 $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
-                $(container).find(`.js-toggle-tile-filters`).hide();
-                $(container).find(`.js-toggle-layer-offline-mode-container`).hide();
+                $(container).find(`.js-toggle-tile-filters`).hide(0);
+                $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
 
                 if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-opacity`).show();
+                    $(container).find(`.js-toggle-opacity`).show(0);
                     if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-                        $(container).find(`.js-toggle-tile-filters`).show();
-                    }                   
+                        $(container).find(`.js-toggle-tile-filters`).show(0);
+                    }
                 } else {
-                    $(container).find(`.js-toggle-tile-filters`).hide();
-                    $(container).find(`.js-toggle-opacity`).hide();
+                    $(container).find(`.js-toggle-tile-filters`).hide(0);
+                    $(container).find(`.js-toggle-opacity`).hide(0);
                     $(container).find('.js-layer-settings-opacity').hide(0);
-                    $(container).find('.js-layer-settings-tile-filters').hide(0);
+                    $(container).find('.js-layer-settings-filters').hide(0);
                 }
 
-                $(container).find(`.js-toggle-filters`).hide();
-                $(container).find(`.js-toggle-load-strategy`).hide();
-                $(container).find(`.js-toggle-table-view`).hide();
-                $(container).find('.js-layer-settings-filters').hide(0);
+                $(container).find(`.js-toggle-filters`).show(0);
+                $(container).find(`.js-toggle-load-strategy`).hide(0);
+                $(container).find(`.js-toggle-table-view`).hide(0);
+                
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
             }
-            $(container).find(`.js-toggle-search`).hide();
+
+            $(container).find(`.js-toggle-search`).hide(0);
             $(container).find('.js-layer-settings-search').hide(0);
 
             // For both vector and tile
@@ -2047,19 +2008,19 @@ module.exports = {
         _self.reloadLayer(`v:` + layerKey);       
     },
 
-    onApplyVectorFiltersHandler: ({layerKey, filters}) => {
+    onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
 
         let correspondingLayer = meta.getMetaByKey(layerKey);
 
-        vectorFilters[layerKey] = filters;
+        arbitraryFilters[layerKey] = filters;
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
         _self.createStore(correspondingLayer);
         _self.reloadLayer(`v:` + layerKey);
     },
 
-    onApplyTileFiltersHandler: ({layerKey, filters}) => {
-        tileFilters[layerKey] = filters;
+    onApplyPredefinedFiltersHandler: ({layerKey, filters}) => {
+        predefinedFilters[layerKey] = filters;
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
         _self.reloadLayer(layerKey);
     },
@@ -2141,9 +2102,9 @@ module.exports = {
 
         let state = {
             order: layerTreeOrder,
-            vectorFilters,
+            arbitraryFilters,
             virtualLayers,
-            tileFilters,
+            predefinedFilters,
             activeLayers,
             layersOfflineMode,
             opacitySettings,
@@ -2158,21 +2119,21 @@ module.exports = {
      */
     applyState: (newState) => {
         // Setting vector filters
-        if (newState !== false && `vectorFilters` in newState && typeof newState.vectorFilters === `object`) {
-            for (let key in newState.vectorFilters) {
-                validateFilters(newState.vectorFilters[key]);
+        if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
+            for (let key in newState.arbitraryFilters) {
+                validateFilters(newState.arbitraryFilters[key]);
             }
 
-            vectorFilters = newState.vectorFilters;
+            arbitraryFilters = newState.arbitraryFilters;
         } else {
-            vectorFilters = {};
+            arbitraryFilters = {};
         }
 
         // Setting tile filters
-        if (newState !== false && `tileFilters` in newState && typeof newState.tileFilters === `array`) {
-            tileFilters = newState.tileFilters;
+        if (newState !== false && `predefinedFilters` in newState && typeof newState.predefinedFilters === `array`) {
+            predefinedFilters = newState.predefinedFilters;
         } else {
-            tileFilters = {};
+            predefinedFilters = {};
         }
 
         queueStatistsics.setLastStatistics(false);
@@ -2182,8 +2143,8 @@ module.exports = {
                 opacitySettings: {},
                 layersOfflineMode: {},
                 virtualLayers: [],
-                tileFilters: {},
-                vectorFilters: {}
+                predefinedFilters: {},
+                arbitraryFilters: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
