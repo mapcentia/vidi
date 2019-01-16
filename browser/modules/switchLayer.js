@@ -298,7 +298,7 @@ module.exports = module.exports = {
      * Updates the number of active layers indicator for the tab
      */
     update: (doNotLegend, el) => {
-        var siblings = el.parents(".accordion-body").find("input"), c = 0;
+        var siblings = el.parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
 
         $.each(siblings, function (i, v) {
             if (v.checked) {

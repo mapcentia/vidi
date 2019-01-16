@@ -1091,15 +1091,15 @@ module.exports = {
     getActiveLayerFilters(layerKey) {
         let tableName = layerKey;
 
+        let appliedFilters = {};
+        appliedFilters[tableName] = [];
+
+        // Processing predefined filters
         let filters = false;
         if (predefinedFilters && layerKey in predefinedFilters && predefinedFilters[layerKey]) {
             filters = predefinedFilters[layerKey];
         }
 
-        let appliedFilters = {};
-        appliedFilters[tableName] = [];
-
-        // Processing predefined filters
         let layerDescription = meta.getMetaByKey(layerKey, false);
         if (layerDescription) {
             let parsedMeta = _self.parseLayerMeta(layerDescription);
