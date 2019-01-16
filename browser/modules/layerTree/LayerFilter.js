@@ -347,7 +347,7 @@ class VectorLayerFilter extends React.Component {
          * Builds the arbitrary filters tab
          */
         const buildArbitraryTab = () => {
-            return (<div>
+            return (<div className="js-arbitrary-filters">
                 <div className="form-group">
                     <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                 </div>
@@ -391,7 +391,7 @@ class VectorLayerFilter extends React.Component {
                 </div>);
             });
 
-            return (<div>{predefinedFiltersTab}</div>);
+            return (<div className="js-predefined-filters">{predefinedFiltersTab}</div>);
         }
 
         let activeFiltersTab = false;
