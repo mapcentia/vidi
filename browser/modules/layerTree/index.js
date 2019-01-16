@@ -889,20 +889,14 @@ module.exports = {
             }
         } else {
             let whereClauses = [];
-            if (arbitraryFilters && layerKey in arbitraryFilters) {
-                let conditions = _self.getFilterConditions(layerKey);
-                if (conditions.length > 0) {
-                    if (arbitraryFilters[layerKey].match === `any`) {
-                        whereClauses.push(conditions.join(` OR `));
-                    } else if (arbitraryFilters[layerKey].match === `all`) {
-                        whereClauses.push(conditions.join(` AND `));
-                    } else {
-                        throw new Error(`Invalid match type value`);
-                    }
-                }
+            let activeFilters = _self.getActiveLayerFilters(layerKey);
+            console.log(`### activeFilters`, activeFilters);
+            activeFilters.map(item => {
+                whereClauses.push(item);
+            });
 
-                $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(conditions.length);
-            }
+            $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+
 
             // Checking if versioning is enabled for layer
             if (`versioning` in layer && layer.versioning) {
@@ -1089,14 +1083,48 @@ module.exports = {
     },
 
     /**
-     * Extracts valid conditions for specified layer
+     * Returns active layer filters
      *
-     * @param {String} layerKey Vector layer identifier
+     * @param {String} layerKey Layer identifier
+     * 
+     * @returns {Array}
      */
-    getFilterConditions(layerKey) {
+    getActiveLayerFilters(layerKey) {
+        let tableName = layerKey;
+
+        let filters = false;
+        if (predefinedFilters && layerKey in predefinedFilters && predefinedFilters[layerKey]) {
+            filters = predefinedFilters[layerKey];
+        }
+
+        let appliedFilters = {};
+        appliedFilters[tableName] = [];
+
+        // Processing predefined filters
+        let layerDescription = meta.getMetaByKey(layerKey, false);
+        if (layerDescription) {
+            let parsedMeta = _self.parseLayerMeta(layerDescription);
+            if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+                let parsedWMSFilters = false;
+                try {
+                    let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
+                    parsedWMSFilters = parsedWMSFiltersLocal;
+                } catch (e) {}
+    
+                if (parsedWMSFilters) {
+                    for (let key in parsedWMSFilters) {
+                        if (filters === false || filters.indexOf(key) === -1) {
+                            appliedFilters[tableName].push(parsedWMSFilters[key]);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Processing arbitrary filters
         let layer = meta.getMetaByKey(layerKey);
 
-        let conditions = [];
+        let arbitraryConditions = [];
         if (arbitraryFilters && layerKey in arbitraryFilters) {
             arbitraryFilters[layerKey].columns.map((column, index) => {
                 if (column.fieldname && column.value) {
@@ -1112,14 +1140,14 @@ module.exports = {
                                     if (column.value === `true`) value = `TRUE`;
                                     if (column.value === `false`) value = `FALSE`;
 
-                                    conditions.push(`${column.fieldname} ${column.expression} ${value}`);
+                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
                                     break;
                                 case `date`:
                                     if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                         throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
                                     }
 
-                                    conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                     break;
                                 case `string`:
                                 case `character varying`:
@@ -1128,9 +1156,9 @@ module.exports = {
                                     }
 
                                     if (column.expression === 'like') {
-                                        conditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
                                     } else {
-                                        conditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                     }
 
                                     break;
@@ -1140,7 +1168,7 @@ module.exports = {
                                         throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
                                     }
 
-                                    conditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
+                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
                                     break;
                                 default:
                                     console.error(`Unable to process filter with type '${layer.fields[key].type}'`);
@@ -1151,7 +1179,20 @@ module.exports = {
             });
         }
 
-        return conditions;
+        if (arbitraryConditions.length > 0) {
+            let additionalConditions = ``;
+            if (arbitraryFilters[layerKey].match === `any`) {
+                additionalConditions = arbitraryConditions.join(` OR `);
+            } else if (arbitraryFilters[layerKey].match === `all`) {
+                additionalConditions = arbitraryConditions.join(` AND `);
+            } else {
+                throw new Error(`Invalid match type value`);
+            }
+
+            appliedFilters[tableName].push(`(${additionalConditions})`);
+        }
+
+        return appliedFilters[tableName];
     },
 
     createSimulatedLayerDescriptionForVirtualLayer: (item) => {
@@ -1711,11 +1752,8 @@ module.exports = {
                     }
                 }
 
-                let conditions = _self.getFilterConditions(layerKey);
-                let numberOfArbitraryActiveFilters = conditions.length;
-                let numberOfPredefinedActiveFilters = Object.keys(localPredefinedFilters).length;
-
-                $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text((numberOfArbitraryActiveFilters + numberOfPredefinedActiveFilters));
+                let activeFilters = _self.getActiveLayerFilters(layerKey);
+                $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                 if (document.getElementById(componentContainerId)) {
                     ReactDOM.render(
                         <LayerFilter
@@ -1935,38 +1973,15 @@ module.exports = {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
-        let tableName = layerKey;
-
-        let filters = false;
-        if (predefinedFilters && layerKey in predefinedFilters && predefinedFilters[layerKey]) {
-            filters = predefinedFilters[layerKey];
-        }
-
         let parameterString = false;
-        let layerDescription = meta.getMetaByKey(layerKey, false);
-        if (layerDescription) {
-            let parsedMeta = _self.parseLayerMeta(layerDescription);
-            if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-                let parsedWMSFilters = false;
-                try {
-                    let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
-                    parsedWMSFilters = parsedWMSFiltersLocal;
-                } catch (e) {}
-    
-                parameterString = `&filters=`;
-                let appliedFilters = {};
-                appliedFilters[tableName] = [];
-                if (parsedWMSFilters) {
-                    for (let key in parsedWMSFilters) {
-                        if (filters === false || filters.indexOf(key) === -1) {
-                            appliedFilters[tableName].push(parsedWMSFilters[key]);
-                        }
-                    }
-                }
-    
-                parameterString = parameterString + JSON.stringify(appliedFilters);
-            }
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        if (activeFilters.length > 0) {
+            let data = {};
+            data[layerKey] = activeFilters;
+            parameterString = `&filters=` + JSON.stringify(data);
         }
+
+        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
 
         return parameterString;
     },
@@ -2054,19 +2069,30 @@ module.exports = {
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
-
-        let correspondingLayer = meta.getMetaByKey(layerKey);
-
         arbitraryFilters[layerKey] = filters;
-        backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
-        _self.createStore(correspondingLayer);
-        _self.reloadLayer(`v:` + layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey);
     },
 
     onApplyPredefinedFiltersHandler: ({layerKey, filters}) => {
         predefinedFilters[layerKey] = filters;
+        _self.reloadLayerOnFiltersChange(layerKey);
+    },
+
+    reloadLayerOnFiltersChange: (layerKey) => {
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
-        _self.reloadLayer(layerKey);
+        _self.getActiveLayers().map(activeLayerKey => {
+            if (activeLayerKey.indexOf(layerKey) !== -1) {
+                if (activeLayerKey.indexOf(layerKey) === 0) {
+                    // Reloading as a tile layer
+                    _self.reloadLayer(layerKey);
+                } else if (activeLayerKey.indexOf(layerKey) === 2) {
+                    // Reloading as a vector layer
+                    let correspondingLayer = meta.getMetaByKey(layerKey);
+                    _self.createStore(correspondingLayer);
+                    _self.reloadLayer(`v:` + layerKey);
+                }
+            }
+        });
     },
 
     /**
