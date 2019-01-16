@@ -164,6 +164,8 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Predefined": "# Predefined",
+        "Arbitrary": "# Arbitrary",
         "No items selected": "No items selected",
         "Create virtual layer": "Create virtual layer",
         "Virtual layers": "Virtual layers",
