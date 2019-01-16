@@ -1596,7 +1596,7 @@ module.exports = {
                     } else {
                         virtualLayers.splice(deletedIndex, 1);
                         meta.deleteMetaData(layerKey);
-                        switchLayer.init(layerKey, false).then(() => {
+                        switchLayer.init(layerKey, false, true, false, false).then(() => {
                             _self.create(false, [`virtualLayers`]).then(() => {
                                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                             });

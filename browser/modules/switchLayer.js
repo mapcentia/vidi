@@ -118,6 +118,7 @@ module.exports = module.exports = {
         applicationWideControls.prop('checked', enable);
 
         let result = new Promise((resolve, reject) => {
+            try {
             let vectorDataStores = layerTree.getStores();
 
             let layer = cloud.get().getLayersByName(name);
@@ -239,6 +240,7 @@ module.exports = module.exports = {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 resolve();
             }
+        }catch(e) {console.log(e)}
         });
 
         return result;
