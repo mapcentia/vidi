@@ -1228,7 +1228,7 @@ geocloud = (function () {
             // Load Google Maps API and make sure its not loaded more than once
             if (typeof window.GoogleMapsDirty === "undefined" && !(typeof google !== "undefined" && typeof google.maps !== "undefined")) {
                 window.GoogleMapsDirty = true;
-                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places");
+                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=" + window.googleApiKey);
                 // Google Maps API is loaded
             }
 
