@@ -890,7 +890,6 @@ module.exports = {
         } else {
             let whereClauses = [];
             let activeFilters = _self.getActiveLayerFilters(layerKey);
-            console.log(`### activeFilters`, activeFilters);
             activeFilters.map(item => {
                 whereClauses.push(item);
             });
