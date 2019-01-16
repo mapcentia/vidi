@@ -429,6 +429,7 @@ class VectorLayerFilter extends React.Component {
 VectorLayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
     predefinedFilters: PropTypes.object.isRequired,
+    disabledPredefinedFilters: PropTypes.array.isRequired,
     arbitraryFilters: PropTypes.object.isRequired,
     onApplyPredefined: PropTypes.func.isRequired,
     onApplyArbitrary: PropTypes.func.isRequired,

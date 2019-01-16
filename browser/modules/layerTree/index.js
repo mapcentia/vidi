@@ -1758,6 +1758,7 @@ module.exports = {
                         <LayerFilter
                             layer={layer}
                             predefinedFilters={localPredefinedFilters}
+                            disabledPredefinedFilters={predefinedFilters[layerKey] ? predefinedFilters[layerKey] : []}
                             arbitraryFilters={localArbitraryfilters}
                             onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
                             onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
