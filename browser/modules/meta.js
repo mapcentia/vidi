@@ -209,9 +209,9 @@ module.exports = {
         }
 
         let deletedIndex = false;
-        metaData.data.map(existingMetaLayer => {
+        metaData.data.map((existingMetaLayer, index) => {
             if ((existingMetaLayer.f_table_schema + '.' + existingMetaLayer.f_table_name) === layerKey) {
-                deletedIndex = true;
+                deletedIndex = index;
                 return false;
             }
         });
