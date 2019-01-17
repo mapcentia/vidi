@@ -3,7 +3,6 @@
  * @copyright  2013-2018 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
-
 @import "./public/js/lib/bootstrap-material-design/less/_variables.less";
 
 body {
@@ -38,12 +37,45 @@ body {
   z-index: 0;
 }
 
-.leaflet-bar {
+.leaflet-control {
   border: none !important;
-  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  border-radius: 4px !important;
+  border-radius: 0 !important;
+  background-color: #eee;
+  padding: 2px;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12) !important;
 }
 
+.leaflet-touch .leaflet-control-layers, .leaflet-touch .leaflet-bar {
+  border: none;
+}
+
+.leaflet-control-boxzoom {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.leaflet-bar a, .leaflet-bar a:hover {
+  border-bottom: 1px solid #eee !important;
+}
+
+.leaflet-draw-toolbar {
+  margin-top: 2px;
+
+}
+.leaflet-draw-toolbar-top {
+  margin-top: 0;
+}
+
+.leaflet-touch .leaflet-bar a:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+
+.leaflet-touch .leaflet-bar a:last-child {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
 #side-panel {
   width: 100%;
   right: 0;
@@ -1132,6 +1164,7 @@ h4 small {
 .fixed-table-body {
   height: 100%;
 }
+
 .fixed-table-container thead th .th-inner {
   font-size: 12px;
   padding: 3px;
@@ -1372,8 +1405,8 @@ h4 small {
 }
 
 .appended-leaflet-control {
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: 2px;
+  padding-bottom: 0;
 }
 
 .leaflet-control-custom .appended-leaflet-control li a {
@@ -1427,3 +1460,4 @@ h4 small {
   background-color: @brand-info;
   color: white;
 }
+

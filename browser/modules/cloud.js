@@ -28,7 +28,7 @@ module.exports = {
     init: function () {
         var me = this;
         try {
-            geocloud.setHost(window.vidiConfig.gc2.host);
+            geocloud.setHost(window.gc2host);
         } catch (e) {
             console.info(e.message);
         }

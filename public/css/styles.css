@@ -69,10 +69,38 @@ body {
   right: 0;
   z-index: 0;
 }
-.leaflet-bar {
+.leaflet-control {
   border: none !important;
-  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12);
-  border-radius: 4px !important;
+  border-radius: 0 !important;
+  background-color: #eee;
+  padding: 2px;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12) !important;
+}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: none;
+}
+.leaflet-control-boxzoom {
+  width: 34px !important;
+  height: 34px !important;
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  border-bottom: 1px solid #eee !important;
+}
+.leaflet-draw-toolbar {
+  margin-top: 2px;
+}
+.leaflet-draw-toolbar-top {
+  margin-top: 0;
+}
+.leaflet-touch .leaflet-bar a:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.leaflet-touch .leaflet-bar a:last-child {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 #side-panel {
   width: 100%;
@@ -1183,8 +1211,8 @@ h4 small {
   font-weight: bold;
 }
 .appended-leaflet-control {
-  padding-top: 6px;
-  padding-bottom: 6px;
+  padding-top: 2px;
+  padding-bottom: 0;
 }
 .leaflet-control-custom .appended-leaflet-control li a {
   width: 100% !important;

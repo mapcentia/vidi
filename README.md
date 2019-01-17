@@ -39,41 +39,7 @@ Head over to gc2.mapcentia.com, create a PostGIS database and start uploading da
 Or just try it [here](https://map.gc2.io/app/demo_c/public)
 
 ## How to install Vidi
-We've made a [Docker](https://docs.docker.com/cs-engine/1.12/) image, so it easy to get going. You can get the service up and running by using a [docker-compose](https://docs.docker.com/compose/install/) file.
-
-First get the docker-compose file:
-
-```bash
-git clone https://github.com/mapcentia/dockerfiles.git
-cd dockerfiles/docker-compose/vidi
-```  
-
-Second you have to set some environment variables. Rename the `vidi.env.dist` file to `vidi.env`:    
-
-```bash
-mv vidi.env.dist vidi.env
-```  
-
-Open the vidi.env file with your preferred text editor and set the variables. The content should be like this:
-
-```bash
-# Public DNS of your GC2 server (if GC2 is running local you can use http://localhost:8080)
-GC2_HOST=http://localhost:8080
-
-# Wanted timezone
-TIMEZONE=CET
-
-# Wanted localw
-LOCALE=en_US.UTF-8
-```
-
-Finally deploy the container:
-
-```bash
-docker-compose up
-```
-
-When request Vidi at http://localhost:3000/app/[database]/public. Just make sure, there are some layers in `public` schema and they're in a Group.
+Install both [GC2 and Vidi](https://github.com/mapcentia/geocloud2#how-to-install-gc2-and-vidi)
 
 ---
 
