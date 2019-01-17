@@ -305,7 +305,7 @@
                 }
 
                 // Show total length for polylines
-                if (!isPolygon) {
+                if (!isPolygon && options.showTotalPolylineLength) {
                     L.marker.measurement(ll2, formatter(totalDist), options.lang.totalLength, 0, options)
                         .addTo(this._measurementLayer);
                 }
@@ -341,6 +341,7 @@
             this._measurementOptions = L.extend({
                 showOnHover: false,
                 showArea: true,
+                showTotalPolylineLength: true,
                 lang: {
                     totalArea: 'Total area',
                 }
