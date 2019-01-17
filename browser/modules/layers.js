@@ -213,7 +213,14 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let useLiveWMS = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true); //TODO rename single_tile
+                // If filters are applied, then request should not be cached
+                let useLiveWMS = (appendedFiltersString || JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true); //TODO rename single_tile
+
+                // Detect if layer is protected and route it through backend if needed
+                let mapRequestProxy = false;
+                if (layerDescription.authentication = `Read/write`) {
+                    mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
+                }   
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -224,6 +231,7 @@ module.exports = {
                         layers: [layer],
                         db: db,
                         isBaseLayer: isBaseLayer,
+                        mapRequestProxy: mapRequestProxy,
                         tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
