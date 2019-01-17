@@ -379,8 +379,9 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Snapping`);
 
         await page.close();
     });

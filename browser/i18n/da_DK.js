@@ -166,6 +166,8 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Predefined": "Foruddefineret",
+        "Arbitrary": "Vilkårlig",
         "No items selected": "Ingen emner valgt",
         "Create virtual layer": "Opret virtuelt lag",
         "Virtual layers": "Virtuelle lag",

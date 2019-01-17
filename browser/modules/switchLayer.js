@@ -118,6 +118,7 @@ module.exports = module.exports = {
         applicationWideControls.prop('checked', enable);
 
         let result = new Promise((resolve, reject) => {
+            try {
             let vectorDataStores = layerTree.getStores();
 
             let layer = cloud.get().getLayersByName(name);
@@ -239,6 +240,7 @@ module.exports = module.exports = {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 resolve();
             }
+        }catch(e) {console.log(e)}
         });
 
         return result;
@@ -298,7 +300,7 @@ module.exports = module.exports = {
      * Updates the number of active layers indicator for the tab
      */
     update: (doNotLegend, el) => {
-        var siblings = el.parents(".accordion-body").find("input"), c = 0;
+        var siblings = el.parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
 
         $.each(siblings, function (i, v) {
             if (v.checked) {

@@ -147,6 +147,7 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
+
                     <a href="javascript:void(0);" class="js-toggle-tile-filters">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
                     </a>
@@ -165,7 +166,6 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>
-            <div class="js-layer-settings-tile-filters"></div>
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-load-strategy"></div>
             <div class="js-layer-settings-opacity"></div>
