@@ -13,17 +13,7 @@ const drawTools = require(`./drawTools`);
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var state;
-
-/**
- * @type {*|exports|module.exports}
- */
-var serializeLayers;
+var cloud, utils, state, serializeLayers;
 
 /**
  *
@@ -74,6 +64,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
+        utils = o.utils;
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         _self = this;
@@ -581,7 +572,8 @@ module.exports = {
         if ($("#draw-measure").is(":checked") && type !== 'marker' && type !== 'circlemarker') {
             l.hideMeasurements();
             l.showMeasurements({
-                showTotal: $("#draw-line-total-dist").is(":checked")
+                showTotalPolylineLength: $("#draw-line-total-dist").is(":checked"),
+                formatArea: utils.formatArea
             });
         } else {
             if (type !== 'marker' && type !== 'circlemarker' ) {
