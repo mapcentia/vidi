@@ -572,6 +572,10 @@ geocloud = (function () {
             }
             url = defaults.host + uri;
             urlArray = [url];
+
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+            }
         } else {
             url = defaults.host + "/mapcache/" + defaults.db + "/wms";
             var url1 = url;
@@ -582,6 +586,7 @@ geocloud = (function () {
             // For leaflet
             url = url.replace("cdn.", "{s}.");
         }
+
         switch (MAPLIB) {
             case "ol2":
                 l = new OpenLayers.Layer.WMS(defaults.name, urlArray, {
@@ -601,7 +606,6 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
-
                 var options = {
                     layers: layer,
                     format: 'image/png',
@@ -1850,6 +1854,7 @@ geocloud = (function () {
                 host: host,
                 layers: [],
                 db: null,
+                mapRequestProxy: false,
                 singleTile: false,
                 opacity: 1,
                 isBaseLayer: false,
