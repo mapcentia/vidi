@@ -60,10 +60,13 @@ geocloud = (function () {
         DTKSKAERMKORT = "dtkSkaermkort",
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
-        HERENORMALDAYGREY = "hereNormalDayGrey",
         GEODKBRIGHT = "geodkBright",
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
+        // Here maps
+        HERENORMALDAY = "hereNormalDay",
+        HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
+
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
             4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
@@ -1345,18 +1348,24 @@ geocloud = (function () {
                 trafficTiles,
                 path = "/maptile/2.1/";
             switch (type) {
-                case "hereNormalNightGrey":
-                    name = "normal.night.grey";
-                    prettyName = "HERE Normal Night Grey";
-                    baseUrl = "https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/";
+                case HERENORMALDAY:
+                    name = "normal.day";
+                    prettyName = "HERE Normal day";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
-                case "hereNormalDayGrey":
+                case HERENORMALDAYGREY:
                     name = "normal.day.grey";
                     prettyName = "HERE Normal day Grey";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
+                case HERENORMALNIGHTGREY:
+                    name = "normal.night.grey";
+                    prettyName = "HERE Normal Night Grey";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
             }
 
-            l = new L.TileLayer("https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
+            l = new L.TileLayer(baseUrl + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
                 maxZoom: 21,
                 subdomains: ["1", "2", "3", "4"],
                 attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='https://api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>"
@@ -1810,11 +1819,14 @@ geocloud = (function () {
                 case "DigitalGlobe:Imagery":
                     o = this.addDigitalGlobe("DigitalGlobe:Imagery");
                     break;
-                case "hereNormalDayGrey":
-                    o = this.addHere("hereNormalDayGrey");
+                case HERENORMALDAY:
+                    o = this.addHere(HERENORMALDAY);
                     break;
-                case "hereNormalNightGrey":
-                    o = this.addHere("hereNormalNightGrey");
+                case HERENORMALDAYGREY:
+                    o = this.addHere(HERENORMALDAYGREY);
+                    break;
+                case HERENORMALNIGHTGREY:
+                    o = this.addHere(HERENORMALNIGHTGREY);
                     break;
                 case "geodkBright":
                     o = this.addGeoDk("geodkBright", "geodk.bright");

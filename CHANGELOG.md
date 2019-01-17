@@ -13,6 +13,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Changed
 - One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
+- Google API files are no longer requested locally, because things break when Google makes updates. The files are requested remotely and are not cached in Service Workers due to CORS issues. The Google API doesn't work offline anyway. Google API must be set in GC2 config (App.php) with the kay ``
 ```javascript
 module.exports = {
    set: function (o) {},
