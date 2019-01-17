@@ -780,7 +780,7 @@ var dom = '<div role="tabpanel"><div class="panel panel-default"><div class="pan
     '<fieldset disabled id="conflict-get-print-fieldset">' +
     '<div class="btn-group">' +
     '<a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>' +
-    '<a href="bootstrap-elements.html" data-target="#" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>' +
+    '<a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>' +
     '<ul class="dropdown-menu">' +
     '<li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>' +
     '<li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>' +
