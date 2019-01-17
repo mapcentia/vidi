@@ -127,13 +127,11 @@ let layerTreeIsReady = false;
  */
 let _onReady = false;
 
-/**
- * Keeps track of changed layers
- */
-
 const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
 const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
+
+let predefinedFiltersWarningFired = false;
 
 let layerTreeWasBuilt = false;
 
@@ -1103,17 +1101,24 @@ module.exports = {
         let layerDescription = meta.getMetaByKey(layerKey, false);
         if (layerDescription) {
             let parsedMeta = _self.parseLayerMeta(layerDescription);
-            if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-                let parsedWMSFilters = false;
+            if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
+                || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                if (!parsedMeta[`predefined_filters`] && predefinedFiltersWarningFired === false) {
+                    predefinedFiltersWarningFired = true;
+                    console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                }
+
+                let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
+                let parsedPredefinedFilters = false;
                 try {
-                    let parsedWMSFiltersLocal = JSON.parse(parsedMeta[`wms_filters`]);
-                    parsedWMSFilters = parsedWMSFiltersLocal;
+                    let parsedPredefinedFiltersLocal = JSON.parse(predefinedFiltersRaw);
+                    parsedPredefinedFilters = parsedPredefinedFiltersLocal;
                 } catch (e) {}
     
-                if (parsedWMSFilters) {
-                    for (let key in parsedWMSFilters) {
+                if (parsedPredefinedFilters) {
+                    for (let key in parsedPredefinedFilters) {
                         if (filters === false || filters.indexOf(key) === -1) {
-                            appliedFilters[tableName].push(parsedWMSFilters[key]);
+                            appliedFilters[tableName].push(parsedPredefinedFilters[key]);
                         }
                     }
                 }
@@ -1741,9 +1746,16 @@ module.exports = {
                 }
 
                 let localPredefinedFilters = {};
-                if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
+                if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
+                    || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                    if (!parsedMeta[`predefined_filters`] && predefinedFiltersWarningFired === false) {
+                        predefinedFiltersWarningFired = true;
+                        console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                    }
+
+                    let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
                     try {
-                        let filters = JSON.parse(parsedMeta[`wms_filters`]);
+                        let filters = JSON.parse(predefinedFiltersRaw);
                         localPredefinedFilters = filters;
                     } catch (e) {
                         console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
