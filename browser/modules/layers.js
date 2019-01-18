@@ -220,6 +220,7 @@ module.exports = {
                 let mapRequestProxy = false;
                 if (layerDescription.authentication = `Read/write`) {
                     mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
+                    useLiveWMS = true;
                 }   
 
                 if (layer === layerKey) {
