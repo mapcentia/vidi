@@ -1761,6 +1761,7 @@ module.exports = {
                     }
                 }
 
+                console.log(`### localPredefinedFilters`, localPredefinedFilters);
                 let activeFilters = _self.getActiveLayerFilters(layerKey);
                 $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                 if (document.getElementById(componentContainerId)) {
@@ -1779,6 +1780,8 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
+                } else {
+                    throw new Error(`Unable to find the container for filters control`);
                 }
 
                 let value = false;
@@ -1799,6 +1802,8 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
                         $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
                     });
+                } else {
+                    throw new Error(`Unable to find the container for load strategy control`);
                 }
             }
 
@@ -2008,7 +2013,6 @@ module.exports = {
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerKey.replace(`v:`, ``);
         let layerMeta = meta.getMetaByKey(layerKey);
-        let parsedMeta = _self.parseLayerMeta(layerMeta);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if (setupAsVector) {
@@ -2028,23 +2032,20 @@ module.exports = {
                 $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
             } else {
-                $(container).find(`.js-toggle-tile-filters`).hide(0);
                 $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
 
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show(0);
-                    if (parsedMeta && `wms_filters` in parsedMeta && parsedMeta[`wms_filters`]) {
-                        $(container).find(`.js-toggle-tile-filters`).show(0);
-                    }
+                    $(container).find(`.js-toggle-filters`).show(0);
+                    $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                 } else {
-                    $(container).find(`.js-toggle-tile-filters`).hide(0);
                     $(container).find(`.js-toggle-opacity`).hide(0);
+                    $(container).find(`.js-toggle-filters`).hide(0);
+                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
                     $(container).find('.js-layer-settings-opacity').hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                 }
                 
-                $(container).find(`.js-toggle-filters`).hide();
-                $(container).find(`.js-toggle-filters-number-of-filters`).hide();
                 $(container).find(`.js-toggle-load-strategy`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
@@ -2096,7 +2097,7 @@ module.exports = {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
                 if (activeLayerKey.indexOf(layerKey) === 0) {
                     // Reloading as a tile layer
-                    _self.reloadLayer(layerKey);
+                    _self.reloadLayer(layerKey, false, false, false);
                 } else if (activeLayerKey.indexOf(layerKey) === 2) {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
@@ -2249,15 +2250,18 @@ module.exports = {
      *
      * @param {String} layerId Layer identifier
      */
-    reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false) => {
+    reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false, setupControls = true) => {
         return new Promise((resolve, reject) => {
             switchLayer.init(layerId, false, doNotLegend, forceTileRedraw, false).then(() => {
-                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw).then(() => {
+                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, setupControls).then(() => {
                     resolve();
                 });
             });
         });
     },
+
+
+    
 
     /**
      * Returns list of currently enabled layers
