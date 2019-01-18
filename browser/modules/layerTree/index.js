@@ -1761,7 +1761,6 @@ module.exports = {
                     }
                 }
 
-                console.log(`### localPredefinedFilters`, localPredefinedFilters);
                 let activeFilters = _self.getActiveLayerFilters(layerKey);
                 $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                 if (document.getElementById(componentContainerId)) {
