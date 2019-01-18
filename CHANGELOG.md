@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
+## [Unreleased]
+### Added
+- Fall back mechanism for base layers. If the current base layer responses with error codes the next one is switched no.
+- Touch drag enabled in layer tree.
+- Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
+- Visual grouping of map tools in GUI.
+
+### Changed
+- One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
+- Google API files are no longer requested locally, because things break when Google makes updates. The files are requested remotely and are not cached in Service Workers due to CORS issues. The Google API doesn't work offline anyway. Google API must be set in GC2 config (App.php) with the kay ``
+```javascript
+module.exports = {
+   set: function (o) {},
+   init: function () {
+     // Reset state and clear any effects of the module
+     backboneEvents.get().on("reset:all", () => {});
+ 
+     // Stop listening to any events, deactivate controls, but
+     // keep effects of the module until they are deleted manually or reset:all is emitted
+     backboneEvents.get().on("deactivate:all", () => {});
+ 
+     // Activates module
+     backboneEvents.get().on("on:myModule", () => {});
+ 
+     // Deactivates module
+     backboneEvents.get().on("off:myModule", () => {});
+   }
+ }
+ ```
+
 ## [2018.2.0.rc1] - 2018-07-12
 ### Added
 - New mode for double base-layers: Overlay base-layers, where the opacity of the top one can be changed
@@ -19,7 +49,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - When clicking in a table with points, panning now works.
 - Workaround missing Service Workers features in Edge 17/18.
 - Filters work in Edge 17/18.
-- Some smaller issues were fixed.
+- A lot of smaller issues were fixed.
 
 ## [2018.1] - 2018-07-12
 ### Added

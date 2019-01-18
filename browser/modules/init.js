@@ -219,7 +219,7 @@ module.exports = {
             return modules.setting.init();
         }, (error) => {
             console.log(error); // Stacktrace
-            alert("Vidi is loaded without schema. Can't set extent or add layers");
+            //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
         }).then(() => {
             return modules.layerTree.create();

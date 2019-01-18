@@ -27,6 +27,9 @@ var activeBaseLayer;
 var _self = false;
 
 var failedLayers = [];
+
+var jquery = require('jquery');
+require('snackbarjs');
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -86,10 +89,16 @@ module.exports = module.exports = {
                 });
             }
 
-            let numberOfErroredTiles = 0;
+            let numberOfErroredTiles = 0,
+                timerHasStarted = false;
+            console.error("change")
             cloud.get().setBaseLayer(str, (e) => {
-                if (numberOfErroredTiles > 0) {
-                    console.warn(`Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`);
+                if (numberOfErroredTiles > 10) { // If 10 tiles fails within 10 secs the next base layer is chosen
+                    jquery.snackbar({
+                        content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
+                        htmlAllowed: true,
+                        timeout: 7000
+                    });
 
                     let alternativeLayer = false;
                     failedLayers.push(str);
@@ -110,11 +119,21 @@ module.exports = module.exports = {
                     }
                 } else {
                     backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                    if (!timerHasStarted) {
+                        timerHasStarted = true;
+                        setTimeout(() => {
+                            numberOfErroredTiles = 0;
+                            timerHasStarted = false;
+                            console.log("Timer for failed tiles was reset")
+                        }, 10000)
+                    }
+
                 }
             }, (e) => {
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
             }, (e) => {
                 numberOfErroredTiles++;
+                console.log(numberOfErroredTiles);
             }, () => {
                 console.warn(`Base layer ${str} was not found, switching to first available base layer`);
                 if (window.setBaseLayers && window.setBaseLayers.length > 0) {

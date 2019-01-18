@@ -69,32 +69,6 @@ const urlSubstitution = [{
     requested: 'https://rsdemo.alexshumilov.ru/app/alexshumilov/public/favicon.ico',
     local: '/favicon.ico'
 }, {
-    requested: 'https://maps.google.com/maps/api/js',
-    local: '/js/google-maps/index.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/common.js',
-    local: '/js/google-maps/common.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/util.js',
-    local: '/js/google-maps/util.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/controls.js',
-    local: '/js/google-maps/controls.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/places_impl.js',
-    local: '/js/google-maps/places_impl.js'
-}, {
-    regExp: true,
-    requested: 'https://maps.google.com/maps-api-v3/api/js/[\\w/]*/stats.js',
-    local: '/js/google-maps/stats.js'
-}, {
-    requested: 'https://maps.googleapis.com/maps/api/js/AuthenticationService',
-    local: '/js/google-maps/stats.js'
-}, {
     requested: 'https://gc2.io/apps/widgets/gc2table/js/gc2table.js',
     local: '/js/gc2/gc2table.js'
 }, {
@@ -134,6 +108,9 @@ let urlsIgnoredForCaching = [{
 },{
     regExp: true,
     requested: 'https://rm.mapcentia.com/api'
+},{
+    regExp: true,
+    requested: 'google'
 }];
 
 /**

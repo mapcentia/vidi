@@ -99,7 +99,7 @@ class MarkupGenerator {
                 <div style="display: inline-block;">${layerTypeSelector}</div>
 
                 <div style="display: inline-block;">
-                    <span>${text}${lockedLayer}</span>
+                    <span>${text}${lockedLayer} <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span></span>
                     <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                     </button>
@@ -147,15 +147,19 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
+
+                    <a href="javascript:void(0);" class="js-toggle-tile-filters">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                    </a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                    </a>
-                    <a href="javascript:void(0);" class="js-toggle-filters">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i> <span class="js-toggle-filters">(<span class="js-toggle-filters-number-of-filters">0</span>)</span>
                     </a>
                     <a href="javascript:void(0);" class="js-toggle-load-strategy">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
                     </a>
+                    <a href="javascript:void(0);" class="js-toggle-filters">
+                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                    </a><span class="js-toggle-filters-number-of-filters">0</span>
                 </div>
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                 <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
