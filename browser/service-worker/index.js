@@ -6,9 +6,9 @@
 
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
-const LOG_FETCH_EVENTS = false;
-const LOG_OFFLINE_MODE_EVENTS = false;
+const LOG = true;
+const LOG_FETCH_EVENTS = true;
+const LOG_OFFLINE_MODE_EVENTS = true;
 
 /**
  * Browser detection
@@ -344,7 +344,7 @@ const normalizeTheURLForFetch = (event) => {
                                 reject();
                             }
 
-                            if (`custom_data` in mappedObject && mappedObject.custom_data) {
+                            if (`custom_data` in mappedObject && mappedObject.custom_data && mappedObject.custom_data !== `null`) {
                                 let parsedCustomData = false;
                                 try { parsedCustomData = JSON.parse(mappedObject.custom_data)} catch(e) {}
                                 if (`virtual_layer` in parsedCustomData && parsedCustomData.virtual_layer) {
@@ -952,7 +952,8 @@ self.addEventListener('fetch', (event) => {
 
             return caches.match(cleanedRequestURL).then((response) => {
                 if (response) {
-                    // The request was found in cache
+                    if (LOG_FETCH_EVENTS) console.log(`Service worker: request ${event.request.url} was found in cache`);
+
                     let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
                     // API requests should not use the probably stalled cached copy if it is possible
                     if (apiCallDetectionRegExp.test(cleanedRequestURL)) {
@@ -962,7 +963,7 @@ self.addEventListener('fetch', (event) => {
                         return response;
                     }
                 } else {
-                    // The request was not found in cache
+                    if (LOG_FETCH_EVENTS) console.log(`Service worker: request ${event.request.url} was not found in cache`);
 
                     let apiCallDetectionRegExp = new RegExp(self.registration.scope + API_ROUTES_START);
                     // API requests should not use the probably stalled cached copy if it is possible
