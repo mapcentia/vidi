@@ -89,9 +89,7 @@ module.exports = module.exports = {
                 });
             }
 
-            let numberOfErroredTiles = 0,
-                timerHasStarted = false;
-            console.error("change")
+            let numberOfErroredTiles = 0, timerHasStarted = false;
             cloud.get().setBaseLayer(str, (e) => {
                 if (numberOfErroredTiles > 10) { // If 10 tiles fails within 10 secs the next base layer is chosen
                     jquery.snackbar({
@@ -127,7 +125,6 @@ module.exports = module.exports = {
                             console.log("Timer for failed tiles was reset")
                         }, 10000)
                     }
-
                 }
             }, (e) => {
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
