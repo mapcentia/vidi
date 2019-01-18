@@ -1123,77 +1123,75 @@ module.exports = {
                     }
                 }
             }
-        }
 
-        // Processing arbitrary filters
-        let layer = meta.getMetaByKey(layerKey);
+            // Processing arbitrary filters
+            let arbitraryConditions = [];
+            if (arbitraryFilters && layerKey in arbitraryFilters) {
+                arbitraryFilters[layerKey].columns.map((column, index) => {
+                    if (column.fieldname && column.value) {
+                        for (let key in layerDescription.fields) {
+                            if (key === column.fieldname) {
+                                switch (layerDescription.fields[key].type) {
+                                    case `boolean`:
+                                        if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
 
-        let arbitraryConditions = [];
-        if (arbitraryFilters && layerKey in arbitraryFilters) {
-            arbitraryFilters[layerKey].columns.map((column, index) => {
-                if (column.fieldname && column.value) {
-                    for (let key in layer.fields) {
-                        if (key === column.fieldname) {
-                            switch (layer.fields[key].type) {
-                                case `boolean`:
-                                    if (EXPRESSIONS_FOR_BOOLEANS.indexOf(column.expression) === -1) {
-                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
-                                    }
+                                        let value = `NULL`;
+                                        if (column.value === `true`) value = `TRUE`;
+                                        if (column.value === `false`) value = `FALSE`;
 
-                                    let value = `NULL`;
-                                    if (column.value === `true`) value = `TRUE`;
-                                    if (column.value === `false`) value = `FALSE`;
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
+                                        break;
+                                    case `date`:
+                                        if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
 
-                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
-                                    break;
-                                case `date`:
-                                    if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
-                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
-                                    }
-
-                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                    break;
-                                case `string`:
-                                case `character varying`:
-                                    if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
-                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
-                                    }
-
-                                    if (column.expression === 'like') {
-                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
-                                    } else {
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
-                                    }
+                                        break;
+                                    case `string`:
+                                    case `character varying`:
+                                        if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
 
-                                    break;
-                                case `integer`:
-                                case `double precision`:
-                                    if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
-                                        throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layer.fields[key].type} type)`);
-                                    }
+                                        if (column.expression === 'like') {
+                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                        } else {
+                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                        }
 
-                                    arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
-                                    break;
-                                default:
-                                    console.error(`Unable to process filter with type '${layer.fields[key].type}'`);
+                                        break;
+                                    case `integer`:
+                                    case `double precision`:
+                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
+
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
+                                        break;
+                                    default:
+                                        console.error(`Unable to process filter with type '${layerDescription.fields[key].type}'`);
+                                }
                             }
                         }
                     }
-                }
-            });
-        }
-
-        if (arbitraryConditions.length > 0) {
-            let additionalConditions = ``;
-            if (arbitraryFilters[layerKey].match === `any`) {
-                additionalConditions = arbitraryConditions.join(` OR `);
-            } else if (arbitraryFilters[layerKey].match === `all`) {
-                additionalConditions = arbitraryConditions.join(` AND `);
-            } else {
-                throw new Error(`Invalid match type value`);
+                });
             }
+        
+            if (arbitraryConditions.length > 0) {
+                let additionalConditions = ``;
+                if (arbitraryFilters[layerKey].match === `any`) {
+                    additionalConditions = arbitraryConditions.join(` OR `);
+                } else if (arbitraryFilters[layerKey].match === `all`) {
+                    additionalConditions = arbitraryConditions.join(` AND `);
+                } else {
+                    throw new Error(`Invalid match type value`);
+                }
 
-            appliedFilters[tableName].push(`(${additionalConditions})`);
+                appliedFilters[tableName].push(`(${additionalConditions})`);
+            }
         }
 
         return appliedFilters[tableName];
@@ -1406,7 +1404,7 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`);
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
         $("#collapse" + base64GroupName).append(markup);
         $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
@@ -2044,11 +2042,13 @@ module.exports = {
                     $(container).find('.js-layer-settings-opacity').hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                 }
-
-                $(container).find(`.js-toggle-filters`).show(0);
-                $(container).find(`.js-toggle-load-strategy`).hide(0);
-                $(container).find(`.js-toggle-table-view`).hide(0);
                 
+                $(container).find(`.js-toggle-filters`).hide();
+                $(container).find(`.js-toggle-filters-number-of-filters`).hide();
+                $(container).find(`.js-toggle-load-strategy`).hide();
+                $(container).find(`.js-toggle-table-view`).hide();
+                $(container).find('.js-layer-settings-filters').hide(0);
+
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
             }

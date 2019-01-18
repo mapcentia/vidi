@@ -65,7 +65,7 @@ var backboneEvents;
 let _self = false;
 
 try {
-    host = require('../../config/config.js').gc2.host;
+    host = window.gc2host;
 } catch (e) {
     console.info(e.message);
 }
