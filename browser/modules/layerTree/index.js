@@ -1779,8 +1779,6 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
-                } else {
-                    throw new Error(`Unable to find the container for filters control`);
                 }
 
                 let value = false;
@@ -1801,8 +1799,6 @@ module.exports = {
                         _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
                         $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
                     });
-                } else {
-                    throw new Error(`Unable to find the container for load strategy control`);
                 }
             }
 
