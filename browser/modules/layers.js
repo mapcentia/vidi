@@ -218,9 +218,10 @@ module.exports = {
 
                 // Detect if layer is protected and route it through backend if needed
                 let mapRequestProxy = false;
-                if (layerDescription.authentication = `Read/write`) {
+                if (layerDescription.authentication === `Read/write`) {
                     mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
-                }   
+                    useLiveWMS = true;
+                }
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one

@@ -147,10 +147,6 @@ class MarkupGenerator {
                     <a href="javascript:void(0);" class="js-toggle-opacity">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                     </a>
-
-                    <a href="javascript:void(0);" class="js-toggle-tile-filters">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                    </a>
                     <a href="javascript:void(0);" class="js-toggle-table-view">
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
                     </a>
