@@ -1,11 +1,14 @@
 /**
- * Testing Session extension
+ * Testing State snaphsots API
  */
 
 const { expect } = require(`chai`);
 const fs = require(`fs`);
 const request = require(`request`);
 const helpers = require(`./../helpers`);
+
+const AUTH_COOKIE = `connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM`;
+const TRACKER_COOKIE = `vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0`;
 
 let anonymousStateSnapshotId = false;
 let nonAnonymousStateSnapshotId = false;
@@ -21,7 +24,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should be able to create anonymous state snapshot for unauthorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -69,7 +72,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should return list of snapshots for unauthorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `GET`,
@@ -95,7 +98,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should be able to create user state snapshot for authorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -143,7 +146,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should return list of snapshots for authorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `GET`,
@@ -169,7 +172,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should fail to create state snapshot if snapshot data is missing', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -186,7 +189,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should not be able to create anonymous state snapshot for unauthorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -211,7 +214,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should seize browser-owned state snapshot for authorized user', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${anonymousStateSnapshotId}`,
             method: `PUT`,
@@ -225,7 +228,7 @@ describe('State snapshot management API', () => {
             let parsedBody = JSON.parse(body);
             expect(parsedBody.status).to.equal(`success`);
 
-            let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+            let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
             let options = {
                 url: `${helpers.API_URL}/state-snapshots`,
                 method: `GET`,
@@ -271,7 +274,7 @@ describe('State snapshot management API', () => {
             }
         };
 
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -350,7 +353,7 @@ describe('State snapshot management API', () => {
             }
         };
 
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -364,7 +367,7 @@ describe('State snapshot management API', () => {
 
             let id = response.body.id;
 
-            let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+            let cookie = request.cookie(`${TRACKER_COOKIE}`);
             let getOptions = {
                 url: `${helpers.API_URL}/state-snapshots`,
                 method: `GET`,
@@ -406,7 +409,7 @@ describe('State snapshot management API', () => {
     it('should delete browser-owned state snaphsot for owner', (done) => {
         let id = false;
 
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots`,
             method: `POST`,
@@ -430,7 +433,7 @@ describe('State snapshot management API', () => {
 
             id = response.body.id;
 
-            let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+            let cookie = request.cookie(`${TRACKER_COOKIE}`);
             let options = {
                 url: `${helpers.API_URL}/state-snapshots/${id}`,
                 method: `DELETE`,
@@ -444,7 +447,7 @@ describe('State snapshot management API', () => {
                 let parsedBody = JSON.parse(body);
                 expect(parsedBody.status).to.equal(`success`);
 
-                let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0');
+                let cookie = request.cookie(`${TRACKER_COOKIE}`);
                 let options = {
                     url: `${helpers.API_URL}/state-snapshots`,
                     method: `GET`,
@@ -488,7 +491,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should delete user-owned state snaphsot for owner', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${nonAnonymousStateSnapshotId}`,
             method: `DELETE`,
@@ -502,7 +505,7 @@ describe('State snapshot management API', () => {
             let parsedBody = JSON.parse(body);
             expect(parsedBody.status).to.equal(`success`);
 
-            let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+            let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
             let options = {
                 url: `${helpers.API_URL}/state-snapshots`,
                 method: `GET`,
@@ -529,7 +532,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should not delete user-owned state snaphsot for non-owner', (done) => {
-        let cookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0;connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM');
+        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${nonAnonymousStateSnapshotId}`,
             method: `DELETE`,
