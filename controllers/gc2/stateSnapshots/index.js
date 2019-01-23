@@ -7,8 +7,10 @@
 let fs = require('fs');
 let express = require('express');
 let router = express.Router();
+const uuid = require('uuid/v1');
+var request = require('request');
 
-const USE_KEY_VALUE_STORAGE = false;
+const USE_KEY_VALUE_STORAGE = true;
 
 const fileStorage = require('./fileStorage.js');
 
@@ -19,49 +21,155 @@ const throwError = (response, errorCode) => {
     response.json({ error: errorCode });
 };
 
+// @todo Get it from config
+const API_HOST = `https://test.gc2.io/api/v2/keyvalue`;
+
+/**
+ * Returns identifiers of the currently authenticated user
+ * 
+ * @returns {Object}
+ */
+const getCurrentUserIdentifiers = (request) => {
+    let browserId = false;
+    if (TRACKER_COOKIE_NAME in request.cookies) {
+        browserId = request.cookies[TRACKER_COOKIE_NAME];
+    }
+
+    let userId = false;
+
+
+
+    console.log(req.session);
+    if (`connect.gc2` in request.cookies) {
+
+
+
+        //userId = 100;
+    }
+
+    return { browserId, userId };
+};
 
 if (USE_KEY_VALUE_STORAGE) {
+    /**
+     * Lists available state snapshots
+     */
+    router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
+        let { browserId, userId } = getCurrentUserIdentifiers(req);
+
+        if (!browserId && !userId) {
+            res.send([]);
+        } else {
+            request({
+                method: 'GET',
+                encoding: 'utf8',
+                uri: API_HOST + `/` + req.params.dataBase
+            }, (error, response, body) => {
+                let parsedBody = false;
+                try {
+                    let localParsedBody = JSON.parse(response.body);
+                    parsedBody = localParsedBody;
+                } catch (e) {}
+
+                if (parsedBody) {
+                    // Filter by browser and user ownership
+                    let results = [];
+                    parsedBody.data.map(item => {
+                        let parsedSnapshot = JSON.parse(item.value);
+                        if (parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                            parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                            results.push({
+                                id: item.key,
+                                anonymous: (parsedSnapshot.browserId ? parsedSnapshot.browserId : parsedSnapshot.userId),
+                                snapshot: item.value
+                            });
+                        }
+                    });
+
+                    res.send(results);
+                } else {
+                    res.status(500);
+                    res.send(`External API returned invalid response`);
+                }
+            });
+        }
+    });
+
+    /**
+     * Creates state snapshot
+     */
+    router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
+        if (`snapshot` in req.body) {
+            let { browserId, userId } = getCurrentUserIdentifiers(req);
+            if ((req.body.anonymous === 'true' || req.body.anonymous === true) && browserId) {
+                let generatedKey = `state_snapshot_` + uuid();
+                request({
+                    method: 'POST',
+                    encoding: 'utf8',
+                    uri: API_HOST + `/` + req.params.dataBase + `/` + generatedKey,
+                    form: JSON.stringify({
+                        browserId: browserId,
+                        snapshot: req.body.snapshot
+                    })
+                }, (error, response, body) => {
+                    let parsedBody = false;
+                    try {
+                        let localParsedBody = JSON.parse(response.body);
+                        parsedBody = localParsedBody;
+                    } catch (e) {}
+
+                    if (parsedBody) {
+                        if (parsedBody.success) {
+                            res.json({
+                                id: generatedKey,
+                                status: 'success'
+                            });
+                        } else {
+                            throwError(res, parsedBody.message);
+                        }
+                    } else {
+                        res.status(500);
+                        res.send(`External API returned invalid response`);
+                    } 
+                });
+            } else if ((req.body.anonymous === 'false' || req.body.anonymous === false) && userId) {
+
+console.log(userId);
+
+
+                // @todo Push to GC2
+                // By this moment user has to be authorized, otherwise 403 will be returned
+
+
+
+
+/*
+
+                fileStorage.appendToSnapshots(request.body).then(id => {
+                    response.json({ id, status: 'success' });
+                }).catch(errorCode => {
+                    throwError(response, errorCode);
+                });
+                */
+            } else {
+                throwError(response, 'INVALID_SNAPSHOT_OWNERSHIP');
+            }
+        } else {
+            throwError(response, 'MISSING_DATA');
+        }
+    });
+
+
+
+
+
 
 
 } else {
-    /**
-     * Listing available state snapshots
-     */
-    router.get('/api/state-snapshots', (request, response, next) => {
-        fs.stat(fileStorage.storage, (error, stats) => {
-            if (error) fs.writeFileSync(fileStorage.storage, `[]`);
+
+    // @todo File storage should be removed
 
 
-
-
-
-            /*
-                Get all state snapshots that have current browserId (taken from
-                cookies) and (if user is authorized) userId
-            */
-
-            // Mock code <--
-            let browserId = false;
-            if (TRACKER_COOKIE_NAME in request.cookies) {
-                browserId = request.cookies[TRACKER_COOKIE_NAME];
-            }
-
-            let userId = false;
-            if (`connect.gc2` in request.cookies) {
-                userId = 100;
-            }
-            // -->
-
-
-
-            fileStorage.getSnapshots(browserId, userId).then(data => {
-                response.json(data);
-            }).catch(error => {
-                console.log(error);
-                throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-            });
-        });
-    });
 
     /**
      * Returning specific state snapshot

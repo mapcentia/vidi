@@ -13,9 +13,11 @@ const TRACKER_COOKIE = `vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0`
 let anonymousStateSnapshotId = false;
 let nonAnonymousStateSnapshotId = false;
 
+const DATABASE_NAME = `test`;
+
 describe('State snapshot management API', () => {
     it('should fail if browser does not have a tracker cookie and user is not authorized', (done) => {
-        request(`${helpers.API_URL}/state-snapshots`, (error, response, body) => {
+        request(`${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
             let parsedBody = JSON.parse(body);
             expect(parsedBody.length).to.equal(0);
@@ -26,7 +28,7 @@ describe('State snapshot management API', () => {
     it('should be able to create anonymous state snapshot for unauthorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -49,7 +51,7 @@ describe('State snapshot management API', () => {
             anonymousStateSnapshotId = response.body.id;
 
             options = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: { Cookie: cookie },
             };
@@ -74,7 +76,7 @@ describe('State snapshot management API', () => {
     it('should return list of snapshots for unauthorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `GET`,
             headers: {
                 Cookie: cookie
@@ -100,7 +102,7 @@ describe('State snapshot management API', () => {
     it('should be able to create user state snapshot for authorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -123,7 +125,7 @@ describe('State snapshot management API', () => {
             nonAnonymousStateSnapshotId = response.body.id;
 
             options = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: { Cookie: cookie },
             };
@@ -148,7 +150,7 @@ describe('State snapshot management API', () => {
     it('should return list of snapshots for authorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `GET`,
             headers: {
                 Cookie: cookie
@@ -174,7 +176,7 @@ describe('State snapshot management API', () => {
     it('should fail to create state snapshot if snapshot data is missing', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -191,7 +193,7 @@ describe('State snapshot management API', () => {
     it('should not be able to create anonymous state snapshot for unauthorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -216,7 +218,7 @@ describe('State snapshot management API', () => {
     it('should seize browser-owned state snapshot for authorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots/${anonymousStateSnapshotId}`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}`,
             method: `PUT`,
             headers: {
                 Cookie: cookie
@@ -230,7 +232,7 @@ describe('State snapshot management API', () => {
 
             let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
             let options = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: {
                     Cookie: cookie
@@ -276,7 +278,7 @@ describe('State snapshot management API', () => {
 
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -288,7 +290,7 @@ describe('State snapshot management API', () => {
 
             let id = response.body.id;
             let getOptions = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: {
                     Cookie: cookie
@@ -308,7 +310,7 @@ describe('State snapshot management API', () => {
 
                 foundItem.title = `new test title`;
                 options = {
-                    url: `${helpers.API_URL}/state-snapshots`,
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                     method: `PUT`,
                     json: true,
                     headers: { Cookie: cookie },
@@ -355,7 +357,7 @@ describe('State snapshot management API', () => {
 
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -369,7 +371,7 @@ describe('State snapshot management API', () => {
 
             let cookie = request.cookie(`${TRACKER_COOKIE}`);
             let getOptions = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: {
                     Cookie: cookie
@@ -390,7 +392,7 @@ describe('State snapshot management API', () => {
                 let failingCookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c6488000');
                 foundItem.title = `new test title`;
                 options = {
-                    url: `${helpers.API_URL}/state-snapshots`,
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                     method: `PUT`,
                     headers: { Cookie: failingCookie },
                     json: true,
@@ -411,7 +413,7 @@ describe('State snapshot management API', () => {
 
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
@@ -435,7 +437,7 @@ describe('State snapshot management API', () => {
 
             let cookie = request.cookie(`${TRACKER_COOKIE}`);
             let options = {
-                url: `${helpers.API_URL}/state-snapshots/${id}`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${id}`,
                 method: `DELETE`,
                 headers: {
                     Cookie: cookie
@@ -449,7 +451,7 @@ describe('State snapshot management API', () => {
 
                 let cookie = request.cookie(`${TRACKER_COOKIE}`);
                 let options = {
-                    url: `${helpers.API_URL}/state-snapshots`,
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                     method: `GET`,
                     headers: {
                         Cookie: cookie
@@ -477,7 +479,7 @@ describe('State snapshot management API', () => {
     it('should not delete browser-owned state snaphsot for non-owner', (done) => {
         let cookie = request.cookie('vidi-state-tracker=INVALID-2db0-49ad-860b-aa50c64887f0');
         let options = {
-            url: `${helpers.API_URL}/state-snapshots/${anonymousStateSnapshotId}`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}`,
             method: `DELETE`,
             headers: {
                 Cookie: cookie
@@ -493,7 +495,7 @@ describe('State snapshot management API', () => {
     it('should delete user-owned state snaphsot for owner', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots/${nonAnonymousStateSnapshotId}`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${nonAnonymousStateSnapshotId}`,
             method: `DELETE`,
             headers: {
                 Cookie: cookie
@@ -507,7 +509,7 @@ describe('State snapshot management API', () => {
 
             let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
             let options = {
-                url: `${helpers.API_URL}/state-snapshots`,
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
                 method: `GET`,
                 headers: {
                     Cookie: cookie
@@ -534,7 +536,7 @@ describe('State snapshot management API', () => {
     it('should not delete user-owned state snaphsot for non-owner', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots/${nonAnonymousStateSnapshotId}`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${nonAnonymousStateSnapshotId}`,
             method: `DELETE`,
             headers: {
                 Cookie: cookie
