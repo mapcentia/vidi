@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -96,8 +97,8 @@ module.exports = {
         var dict = {
 
             "Info": {
-                "da_DK": "Start Google Street View eller Mapillary op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
-                "en_US": "Start Google Street View or Mapillary from where you click on the map. The service starts in a new browser window."
+                "da_DK": "Start Google Street View, Mapillary eller skråfoto op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
+                "en_US": "Start Google Street View, Mapillary or Oblique Photo from where you click on the map. The service starts in a new browser window."
             },
 
             "Street View": {
@@ -233,6 +234,10 @@ module.exports = {
                                 case "mapillary":
                                     url = "https://www.mapillary.com/app/?lat=" + p.y + "&lng=" + p.x + "&z=17";
                                     break;
+
+                                case "skraafoto":
+                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                                    break;
                             }
 
                             parentThis.callBack(url);
@@ -250,53 +255,58 @@ module.exports = {
                 return (
 
                     <div role="tabpanel">
-                        <div className="panel panel-default">
-                            <div className="panel-body">
-                                <div className="form-group">
-                                    <div className="togglebutton">
-                                        <label><input id="streetview-btn" type="checkbox"
-                                                      checked={ this.state.active }
-                                                      onChange={this.onActive}/>{__("Activate")}
-                                        </label>
-
-                                    </div>
-                                    <h3>{__("Choose service")}</h3>
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-google" name="streetview-service"
-                                                   value="google" checked={this.state.selectedOption === 'google'}
-                                                   onChange={this.onChange}/>
-                                            Google Street View
-                                        </label>
-                                    </div>
-
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-mapillary"
-                                                   name="streetview-service" value="mapillary"
-                                                   checked={this.state.selectedOption === 'mapillary'}
-                                                   onChange={this.onChange}/>
-                                            Mapillary
-                                        </label>
-                                    </div>
-
-                                </div>
+                        <div className="form-group">
+                            <div className="togglebutton">
+                                <label><input id="streetview-btn" type="checkbox"
+                                              checked={this.state.active}
+                                              onChange={this.onActive}/>{__("Activate")}
+                                </label>
 
                             </div>
+                            <h3>{__("Choose service")}</h3>
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-google" name="streetview-service"
+                                           value="google" checked={this.state.selectedOption === 'google'}
+                                           onChange={this.onChange}/>
+                                    Google Street View
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-mapillary"
+                                           name="streetview-service" value="mapillary"
+                                           checked={this.state.selectedOption === 'mapillary'}
+                                           onChange={this.onChange}/>
+                                    Mapillary
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-skraafoto"
+                                           name="streetview-service" value="skraafoto"
+                                           checked={this.state.selectedOption === 'skraafoto'}
+                                           onChange={this.onChange}/>
+                                    Skråfoto
+                                </label>
+                            </div>
+
                         </div>
                     </div>
                 );
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera");
 
         // Append to DOM
         //==============
         try {
 
             ReactDOM.render(
-                <Streetview />,
+                <Streetview/>,
                 document.getElementById(exId)
             );
         } catch (e) {
@@ -309,10 +319,9 @@ module.exports = {
         utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
     },
 
-    setCallBack: function(fn) {
+    setCallBack: function (fn) {
         this.callBack = fn;
     }
-
 
 
 };
