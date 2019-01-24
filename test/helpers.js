@@ -6,8 +6,7 @@ const sleepFunction = (ms) => {
 };
 
 module.exports = {
-    //API_URL: `https://vidi.alexshumilov.ru:8081/api`,
-    API_URL: `https://vidi.alexshumilov.ru/api`,
+    API_URL: `https://vidi.alexshumilov.ru:8081/api`,
     // Base instance URL
     PAGE_URL_BASE: `https://vidi.alexshumilov.ru:8081/`,
     // Vidi instance with default template

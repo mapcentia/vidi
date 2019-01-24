@@ -119,7 +119,9 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
 
         if (save) {
             let generatedKey = `state_snapshot_` + uuid();
+            let currentDate = new Date();
             stateSnapshotCopy.id = generatedKey;
+            stateSnapshotCopy.created_at = currentDate.toISOString();
             request({
                 method: 'POST',
                 encoding: 'utf8',

@@ -232,11 +232,10 @@ module.exports = {
                 let _self = this;
                 if (confirm(`${__(`Add local state snapshot to user's ones`)}?`)) {
                     $.ajax({
-                        url: `${API_URL}/${vidiConfig.appDatabase}/${item.id}`,
+                        url: `${API_URL}/${vidiConfig.appDatabase}/${item.id}/seize`,
                         method: 'PUT',
                         dataType: 'json',
-                        contentType: 'application/json; charset=utf-8',
-                        data: JSON.stringify({ anonymous: false })
+                        contentType: 'application/json; charset=utf-8'
                     }).then(data => {
                         _self.refreshSnapshotsList();
                     });
@@ -274,7 +273,6 @@ module.exports = {
                 let _self = this;
 
                 this.setState({ loading: true });
-                console.log();
                 $.getJSON(API_URL + '/' + vidiConfig.appDatabase).then(data => {
                     let browserOwnerSnapshots = [];
                     let userOwnerSnapshots = [];
@@ -310,12 +308,6 @@ module.exports = {
                 let snapshotIdStyle = {
                     fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`,
                     marginRight: `10px`
-                };
-
-                let snapshotRecordRecordStyle = {
-                    padding: '4px',
-                    marginBottom: '4px',
-                    border: '1px solid grey'
                 };
 
                 const createSnapshotRecord = (item, index, local = false) => {
