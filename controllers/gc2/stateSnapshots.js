@@ -98,6 +98,36 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
     }
 });
 
+
+/**
+ * Get specific state snapshots
+ */
+router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
+    let { browserId, userId } = getCurrentUserIdentifiers(req);
+
+    if (!browserId && !userId) {
+        res.send([]);
+    } else {
+        request({
+            method: 'GET',
+            encoding: 'utf8',
+            uri: API_HOST + `/` + req.params.dataBase + '/' + req.params.id
+        }, (error, response, body) => {
+            let parsedBody = false;
+            try {
+                let localParsedBody = JSON.parse(response.body);
+                parsedBody = localParsedBody;
+            } catch (e) {}
+
+            if (parsedBody) {
+                res.send(parsedBody.data.value);
+            } else {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY');
+            }
+        });
+    }
+});
+
 /**
  * Create state snapshot
  */
@@ -177,6 +207,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                 if (parsedBody) {
                     let parsedSnapshotData = JSON.parse(parsedBody.data.value);
                     parsedSnapshotData.browserId = false;
+                    parsedSnapshotData.anonymous = false;
                     parsedSnapshotData.userId = userId;
                     request({
                         method: 'PUT',
