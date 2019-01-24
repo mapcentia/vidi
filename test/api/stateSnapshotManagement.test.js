@@ -3,11 +3,10 @@
  */
 
 const { expect } = require(`chai`);
-const fs = require(`fs`);
 const request = require(`request`);
 const helpers = require(`./../helpers`);
 
-const AUTH_COOKIE = `connect.gc2=s%3AedCHvnfxO2bcw2DGrxFCGx4sKVARTP_5.NGUmXPayGCfzD6Yr1PnloGj5OM84oR7IkqhaIGPjBEM`;
+let AUTH_COOKIE = false;
 const TRACKER_COOKIE = `vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0`;
 
 let anonymousStateSnapshotId = false;
@@ -15,7 +14,48 @@ let nonAnonymousStateSnapshotId = false;
 
 const DATABASE_NAME = `test`;
 
+const getAllSnapshots = (browser = false, user = false) => {
+    let cookieRaw = ``;
+    if (browser) {
+        cookieRaw = cookieRaw + TRACKER_COOKIE;
+    }
+
+    if (user) {
+        cookieRaw = cookieRaw + `;` + AUTH_COOKIE;
+    }
+
+    let cookie = request.cookie(cookieRaw);
+    let result = new Promise((resolve, reject) => {
+        request({
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
+            method: `GET`,
+            headers: { Cookie: cookie }
+        }, (error, response, body) => {
+            parsedBody = JSON.parse(response.body);
+            resolve(parsedBody);
+        });
+    });
+
+    return result;
+};
+
 describe('State snapshot management API', () => {
+    // Getting the authentication cookie
+    before(done => {
+        request({
+            url: `${helpers.API_URL}/session/start`,
+            method: 'POST',
+            json: true,
+            body: {
+                u: `aleksandrshumilov`,
+                p: `qewadszcx`
+            }
+        }, (error, response) => {
+            AUTH_COOKIE = response.headers[`set-cookie`][0].split(`;`)[0];
+            done();
+        });
+    });
+
     it('should fail if browser does not have a tracker cookie and user is not authorized', (done) => {
         request(`${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
@@ -56,13 +96,10 @@ describe('State snapshot management API', () => {
                 headers: { Cookie: cookie },
             };
 
-            request(options, (error, response, body) => {
-                expect(response.statusCode).to.equal(200);
-                parsedBody = JSON.parse(body);
-
+            getAllSnapshots(true).then(stateSnapshots => {
                 let wasAdded = false;
-                parsedBody.map(item => {
-                    if (item.id === anonymousStateSnapshotId && item.anonymous) {
+                stateSnapshots.map(item => {
+                    if (item.id === anonymousStateSnapshotId && item.browserId) {
                         wasAdded = true;
                     }
                 });
@@ -74,21 +111,8 @@ describe('State snapshot management API', () => {
     });
 
     it('should return list of snapshots for unauthorized user', (done) => {
-        let cookie = request.cookie(`${TRACKER_COOKIE}`);
-        let options = {
-            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
-            method: `GET`,
-            headers: {
-                Cookie: cookie
-            }
-        };
-
-        request(options, (error, response, body) => {
-            expect(response.statusCode).to.equal(200);
-            let parsedBody = JSON.parse(body);
-
-            let wasAdded = false;
-            parsedBody.map(item => {
+        getAllSnapshots(true).then(stateSnapshots => {
+            stateSnapshots.map(item => {
                 if (item.id === anonymousStateSnapshotId) {
                     wasAdded = true;
                 }
@@ -121,26 +145,15 @@ describe('State snapshot management API', () => {
 
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
-
             nonAnonymousStateSnapshotId = response.body.id;
 
-            options = {
-                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
-                method: `GET`,
-                headers: { Cookie: cookie },
-            };
-
-            request(options, (error, response, body) => {
-                expect(response.statusCode).to.equal(200);
-                parsedBody = JSON.parse(body);
-
-                let wasAdded = false;
-                parsedBody.map(item => {
-                    if (item.id === nonAnonymousStateSnapshotId && item.anonymous === false) {
+            getAllSnapshots(true, true).then(stateSnapshots => {
+                stateSnapshots.map(item => {
+                    if (item.id === nonAnonymousStateSnapshotId && item.userId) {
                         wasAdded = true;
                     }
                 });
-    
+
                 expect(wasAdded).to.be.true;
                 done();
             });
@@ -180,7 +193,7 @@ describe('State snapshot management API', () => {
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
-            body: {a: '1'}
+            body: { a: '1' }
         };
 
         request(options, (error, response, body) => {
@@ -218,18 +231,27 @@ describe('State snapshot management API', () => {
     it('should seize browser-owned state snapshot for authorized user', (done) => {
         let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
         let options = {
-            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}`,
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}/seize`,
             method: `PUT`,
             headers: {
                 Cookie: cookie
+            },
+            json: true,
+            body: {
+                snapshot: {
+                    modules: [],
+                    map: {
+                        x: 1,
+                        y: 2,
+                        zoom: 3
+                    }
+                }
             }
         };
 
-        request(options, (error, response, body) => {
+        request(options, (error, response) => {
             expect(response.statusCode).to.equal(200);
-            let parsedBody = JSON.parse(body);
-            expect(parsedBody.status).to.equal(`success`);
-
+            expect(response.body.status).to.equal(`success`);
             let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
             let options = {
                 url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
@@ -261,71 +283,56 @@ describe('State snapshot management API', () => {
     });
 
     it('should update browser-owned state snaphsot for owner', (done) => {
-        let id = false;
-
-        let body = {
-            anonymous: true,
-            title: `test`,
-            snapshot: {
-                modules: [],
-                map: {
-                    x: 1,
-                    y: 2,
-                    zoom: 3
-                }
-            }
-        };
-
         let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `POST`,
             headers: { Cookie: cookie },
             json: true,
-            body
+            body: {
+                anonymous: true,
+                title: `test`,
+                snapshot: {
+                    modules: [],
+                    map: {
+                        x: 1,
+                        y: 2,
+                        zoom: 3
+                    }
+                }
+            }
         };
 
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
-
             let id = response.body.id;
-            let getOptions = {
-                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
-                method: `GET`,
-                headers: {
-                    Cookie: cookie
-                }
-            };
 
-            request(getOptions, (error, response, body) => {
-                expect(response.statusCode).to.equal(200);
-                parsedBody = JSON.parse(body);
-
+            getAllSnapshots(true).then(stateSnapshots => {
                 let foundItem = false;
-                parsedBody.map(item => {
+                stateSnapshots.map(item => {
                     if (item.id === id) {
                         foundItem = item;
                     }
                 });
 
+                expect(foundItem !== false).to.equal(true);
+
                 foundItem.title = `new test title`;
                 options = {
-                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${foundItem.id}`,
                     method: `PUT`,
                     json: true,
                     headers: { Cookie: cookie },
                     body: foundItem
                 };
 
-                request(options, (error, response, body) => {
+                request(options, (error, response) => {
                     expect(response.statusCode).to.equal(200);
-
-                    request(getOptions, (error, response, body) => {
+                    getAllSnapshots(true).then(stateSnapshots => {
                         expect(response.statusCode).to.equal(200);
-                        parsedBody = JSON.parse(body);
-        
+
                         let foundItem = false;
-                        parsedBody.map(item => {
+                        stateSnapshots.map(item => {
                             if (item.id === id) {
                                 foundItem = item;
                             }
@@ -340,8 +347,6 @@ describe('State snapshot management API', () => {
     });
 
     it('should not update browser-owned state snaphsot for non-owner', (done) => {
-        let id = false;
-
         let body = {
             anonymous: true,
             title: `test`,
@@ -366,24 +371,12 @@ describe('State snapshot management API', () => {
 
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
-
             let id = response.body.id;
 
-            let cookie = request.cookie(`${TRACKER_COOKIE}`);
-            let getOptions = {
-                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
-                method: `GET`,
-                headers: {
-                    Cookie: cookie
-                }
-            };
-
-            request(getOptions, (error, response, body) => {
+            getAllSnapshots(true).then(stateSnapshots => {
                 expect(response.statusCode).to.equal(200);
-                parsedBody = JSON.parse(body);
-
                 let foundItem = false;
-                parsedBody.map(item => {
+                stateSnapshots.map(item => {
                     if (item.id === id) {
                         foundItem = item;
                     }
@@ -392,7 +385,7 @@ describe('State snapshot management API', () => {
                 let failingCookie = request.cookie('vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c6488000');
                 foundItem.title = `new test title`;
                 options = {
-                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${foundItem.id}`,
                     method: `PUT`,
                     headers: { Cookie: failingCookie },
                     json: true,
@@ -468,7 +461,7 @@ describe('State snapshot management API', () => {
                             wasFound = true;
                         }
                     });
-        
+
                     expect(wasFound).to.be.false;
                     done();
                 });
@@ -526,7 +519,7 @@ describe('State snapshot management API', () => {
                         wasFound = true;
                     }
                 });
-    
+
                 expect(wasFound).to.be.false;
                 done();
             });
@@ -534,7 +527,7 @@ describe('State snapshot management API', () => {
     });
 
     it('should not delete user-owned state snaphsot for non-owner', (done) => {
-        let cookie = request.cookie(`${TRACKER_COOKIE};${AUTH_COOKIE}`);
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
         let options = {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${nonAnonymousStateSnapshotId}`,
             method: `DELETE`,

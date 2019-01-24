@@ -199,7 +199,7 @@ module.exports = {
                     data.title = title;
                     data.snapshot = state;
                     $.ajax({
-                        url: API_URL,
+                        url: `${API_URL}/${data.id}`,
                         method: 'PUT',
                         dataType: 'json',
                         contentType: 'application/json; charset=utf-8',
