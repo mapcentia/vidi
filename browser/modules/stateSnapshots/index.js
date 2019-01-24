@@ -134,7 +134,7 @@ module.exports = {
 
                     state.map = anchor.getCurrentMapParameters();
                     $.ajax({
-                        url: API_URL,
+                        url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
                         contentType: 'application/json; charset=utf-8',
                         dataType: 'json',
@@ -171,7 +171,7 @@ module.exports = {
                 if (confirm(`${__(`Delete state snapshot`)}?`)) {
                     let _self = this;
                     $.ajax({
-                        url: `${API_URL}/${id}`,
+                        url: `${API_URL}/${vidiConfig.appDatabase}/${id}`,
                         method: 'DELETE',
                         dataType: 'json'
                     }).then(data => {
@@ -199,7 +199,7 @@ module.exports = {
                     data.title = title;
                     data.snapshot = state;
                     $.ajax({
-                        url: `${API_URL}/${data.id}`,
+                        url: `${API_URL}/${vidiConfig.appDatabase}/${data.id}`,
                         method: 'PUT',
                         dataType: 'json',
                         contentType: 'application/json; charset=utf-8',
@@ -232,7 +232,7 @@ module.exports = {
                 let _self = this;
                 if (confirm(`${__(`Add local state snapshot to user's ones`)}?`)) {
                     $.ajax({
-                        url: `${API_URL}/${item.id}`,
+                        url: `${API_URL}/${vidiConfig.appDatabase}/${item.id}`,
                         method: 'PUT',
                         dataType: 'json',
                         contentType: 'application/json; charset=utf-8',
@@ -252,7 +252,7 @@ module.exports = {
                     let promises = [];
                     this.state.browserOwnerSnapshots.map(item => {
                         promises.push($.ajax({
-                            url: `${API_URL}/${item.id}`,
+                            url: `${API_URL}/${vidiConfig.appDatabase}/${item.id}`,
                             method: 'PUT',
                             dataType: 'json',
                             contentType: 'application/json; charset=utf-8',
@@ -274,8 +274,8 @@ module.exports = {
                 let _self = this;
 
                 this.setState({ loading: true });
-                
-                $.getJSON(API_URL).then(data => {
+                console.log();
+                $.getJSON(API_URL + '/' + vidiConfig.appDatabase).then(data => {
                     let browserOwnerSnapshots = [];
                     let userOwnerSnapshots = [];
                     data.map(item => {
@@ -492,7 +492,7 @@ module.exports = {
         }
 
         let result = new Promise((resolve, reject) => {
-            $.getJSON(`${API_URL}/${id}`).done((data) => {
+            $.getJSON(`${API_URL}/${vidiConfig.appDatabase}/${id}`).done((data) => {
                 resolve(data);
             }).fail(() => {
                 resolve(false);
