@@ -162,7 +162,7 @@ module.exports = {
      * Sets the layer type selector presentation according to provided type
      * 
      * @param {String} name Layer name
-     * @param {String} type Layer type ("tile", "vector", "vectortile")
+     * @param {String} type Layer type
      * 
      * @returns {void}
      */
@@ -172,7 +172,7 @@ module.exports = {
             el.data('gc2-layer-type', type);
             el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[type]);
         } else {
-            throw new Error('Invalid type was provided');
+            throw new Error(`Invalid type was provided: ${type}`);
         }
     },
 
@@ -1478,9 +1478,9 @@ module.exports = {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
-            let selectorLayerType = `tile`;
+            let selectorLayerType = LAYER.RASTER_TILE;
             if (layerIsTheVectorOne && layerIsTheTileOne === false) {
-                selectorLayerType = `vector`;
+                selectorLayerType = LAYER.VECTOR;
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,

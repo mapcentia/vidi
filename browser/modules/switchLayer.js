@@ -6,6 +6,8 @@
 
 'use strict';
 
+import { LAYER } from './layerTree/constants';
+
 var backboneEvents;
 
 /**
@@ -148,7 +150,7 @@ module.exports = module.exports = {
                 if (layerType === 'tile') {
                     // Only one layer at a time, so using the tile layer identifier
                     layers.incrementCountLoading(tileLayerId);
-                    layerTree.setSelectorValue(name, 'tile');
+                    layerTree.setSelectorValue(name, LAYER.RASTER_TILE);
                     layers.addLayer(name, layerTree.getLayerFilterString(name)).then(() => {
                         _self.checkLayerControl(name, doNotLegend, setupControls);
 
@@ -189,10 +191,10 @@ module.exports = module.exports = {
                             resolve();
                         });
                     });
-                } else {
+                } else if (layerType === 'vector') {
                     layers.incrementCountLoading(vectorLayerId);
 
-                    layerTree.setSelectorValue(name, 'vector');
+                    layerTree.setSelectorValue(name, LAYER.VECTOR);
                     if (vectorLayerId in vectorDataStores) {
                         cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
                         let existingLayer = cloud.get().getLayersByName(vectorLayerId);
@@ -235,6 +237,8 @@ module.exports = module.exports = {
                             resolve();
                         });
                     }
+                } else {
+                    throw new Error(`Vector tile switching have not been implemented yet`);
                 }
             } else {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
