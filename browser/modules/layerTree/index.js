@@ -168,15 +168,9 @@ module.exports = {
      */
     setSelectorValue: (name, type) => {
         let el = $('*[data-gc2-id="' + layerTreeUtils.stripPrefix(name) + '"]');
-        if (type === 'tile') {
-            el.data('gc2-layer-type', 'tile');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.RASTER_TILE]);
-        } else if (type === 'vector') {
-            el.data('gc2-layer-type', 'vector');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.VECTOR]);
-        } else if (type === 'vectortile') {
-            el.data('gc2-layer-type', 'vectortile');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.VECTOR_TILE]);
+        if (type === LAYER.VECTOR || type === LAYER.RASTER_TILE || type === LAYER.VECTOR_TILE) {
+            el.data('gc2-layer-type', type);
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[type]);
         } else {
             throw new Error('Invalid type was provided');
         }
@@ -584,12 +578,14 @@ module.exports = {
                                                         let noPrefixName = layerTreeUtils.stripPrefix(layerName);
                                                         let layerMeta = meta.getMetaByKey(noPrefixName);
         
-                                                        if ($(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                                            
-                                                            // @todo Vector tile case
-                                                            if (layerName.indexOf(`v:`) === 0) {
+                                                        if ($(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 ||
+                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1 ||
+                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).length === 1) {
+
+                                                            if (layerName.indexOf(`${LAYER.VECTOR}:`) === 0) {
                                                                 $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                                            } else if (layerName.indexOf(`${LAYER.VECTOR_TILE}:`) === 0) {
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                                             } else {
                                                                 $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                                             }
@@ -722,7 +718,7 @@ module.exports = {
                         let promises = [];
                         for (let key in settings) {
                             // @todo Vector tile case
-                            if (key.indexOf(`v:`) === 0) {
+                            if (key.indexOf(`${LAYER.VECTOR}:`) === 0) {
                                 // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                 response.map(cachedRequest => {
                                     if (cachedRequest.layerKey === key) {
@@ -846,7 +842,7 @@ module.exports = {
             custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
         }
 
-        stores['v:' + layerKey] = new geocloud.sqlStore({
+        stores[LAYER.VECTOR + ':' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
             method: "POST",
@@ -854,11 +850,11 @@ module.exports = {
             db: db,
             uri: "/api/sql",
             clickable: true,
-            id: 'v:' + layerKey,
-            name: 'v:' + layerKey,
+            id: LAYER.VECTOR + ':' + layerKey,
+            name: LAYER.VECTOR + ':' + layerKey,
             lifetime: 0,
             custom_data,
-            styleMap: styles['v:' + layerKey],
+            styleMap: styles[LAYER.VECTOR + ':' + layerKey],
             sql,
             onLoad: (l) => {
                 if (l === undefined) return;
@@ -871,13 +867,13 @@ module.exports = {
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
                     && metaDataKeys[layerKey].infowindow.template !== "")
                     ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-                let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
                 let localTable = gc2table.init({
                     el: tableContainerId + ` table`,
                     ns: tableContainerId,
                     geocloud2: cloud.get(),
-                    store: stores[`v:` + layerKey],
+                    store: stores[LAYER.VECTOR + ':' + layerKey],
                     cm: tableHeaders,
                     autoUpdate: false,
                     autoPan: false,
@@ -895,30 +891,30 @@ module.exports = {
                     localTable.loadDataInTable(true);
                 }
 
-                tables[`v:` + layerKey] = localTable;
+                tables[LAYER.VECTOR + ':' + layerKey] = localTable;
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
-                if (typeof onLoad['v:' + layerKey] === "function") {
-                    onLoad['v:' + layerKey](l);
+                if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
+                    onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-                if (('v:' + layerKey) in onEachFeature) {
+                if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
                         Checking for correct onEachFeature structure
                     */
-                    if (`fn` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].fn ||
-                        `caller` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].caller) {
+                    if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                         throw new Error(`Invalid onEachFeature structure`);
                     }
 
-                    if (onEachFeature['v:' + layerKey].caller === `editor`) {
+                    if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                         /*
                             If the handler was set by the editor extension, then display the attributes popup and editing buttons
                         */
@@ -964,7 +960,7 @@ module.exports = {
                         });
                     }
 
-                    onEachFeature['v:' + layerKey].fn(feature, layer);
+                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
@@ -972,7 +968,7 @@ module.exports = {
                     });
                 }
             },
-            pointToLayer: (pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : (feature, latlng) => {
+            pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
             })
         });
@@ -1314,11 +1310,11 @@ module.exports = {
         if (!forcedState) {
             if (precheckedLayers && Array.isArray(precheckedLayers)) {
                 precheckedLayers.map(item => {
-                    if (item.id && item.id === `${localItem.f_table_schema}.${localItem.f_table_name}`
-                        || item.id && item.id === `v:${localItem.f_table_schema}.${localItem.f_table_name}`) {
-
-
-
+                    let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
+                    if (item.id && (item.id === name
+                        || item.id === `${LAYER.VECTOR}:${name}`
+                        || item.id === `${LAYER.RASTER_TILE}:${name}`
+                        || item.id === `${LAYER.VECTOR_TILE}:${name}`)) {
                         layerIsActive = true;
                         activeLayerName = item.id;
                     }
@@ -1406,10 +1402,11 @@ module.exports = {
         } else {
             let layerIsTheTileOne = true;
             let layerIsTheVectorOne = false;
+            let layerIsTheVectorTileOne = false;
 
             let singleTypeLayer = true;
             let selectorLabel = ICONS[LAYER.RASTER_TILE];
-            let defaultLayerType = 'tile';
+            let defaultLayerType = LAYER.RASTER_TILE;
 
             let layerIsEditable = false;
             let parsedMeta = false;
@@ -1429,7 +1426,7 @@ module.exports = {
                         singleTypeLayer = false;
 
                         if (parsedMeta.vidi_layer_type === 'v') {
-                            defaultLayerType = 'vector';
+                            defaultLayerType = LAYER.VECTOR;
                             selectorLabel = ICONS[LAYER.VECTOR];
                             singleTypeLayer = true;
                             layerIsTheTileOne = false;
@@ -1457,9 +1454,9 @@ module.exports = {
             }
 
             if (layerIsActive) {
-                if (activeLayerName.indexOf(`v:`) === 0) {
+                if (activeLayerName.indexOf(LAYER.VECTOR + ':') === 0) {
                     selectorLabel = ICONS[LAYER.VECTOR];
-                    defaultLayerType = 'vector';
+                    defaultLayerType = LAYER.VECTOR;
                 }
             }
 
@@ -1491,7 +1488,7 @@ module.exports = {
 
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', 'tile');
+                $(switcher).data('gc2-layer-type', LAYER.RASTER_TILE);
                 $(switcher).prop('checked', true);
 
                 _self.setupLayerAsTileOne(layerKey);
@@ -1504,13 +1501,26 @@ module.exports = {
 
             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', 'vector');
+                $(switcher).data('gc2-layer-type', LAYER.VECTOR);
                 $(switcher).prop('checked', true);
 
                 _self.setupLayerAsVectorOne(layerKey);
-                _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                _self.reloadLayer(`${LAYER.VECTOR}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                offlineModeControlsManager.updateControls();
+            });
+
+            $(layerControlRecord).find('.js-layer-type-selector-vector-tile').first().on('click', (e, data) => {
+                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                $(switcher).data('gc2-layer-type', LAYER.VECTOR_TILE);
+                $(switcher).prop('checked', true);
+
+                //_self.setupLayerAsVectorTileOne(layerKey);
+                _self.reloadLayer(`${LAYER.VECTOR_TILE}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
+
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR_TILE]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
@@ -1607,7 +1617,7 @@ module.exports = {
                         action: `disableOfflineModeForLayer`,
                         payload: {layerKey}
                     }).then(() => {
-                        _self.reloadLayer(`v:` + layerKey).then(() => {
+                        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey).then(() => {
                             layerTreeUtils.queryServiceWorker({
                                 action: `enableOfflineModeForLayer`,
                                 payload: {layerKey}
@@ -1768,10 +1778,10 @@ module.exports = {
                     // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
 
-                    tables[`v:` + layerKey].loadDataInTable(true);
+                    tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                 });
 
-                if (defaultLayerType === `vector`) {
+                if (defaultLayerType === LAYER.VECTOR) {
                     _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
                 } else {
                     _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
@@ -1908,10 +1918,18 @@ module.exports = {
     },
 
     /**
+     * Setups layer as the vector tile one
+     */
+    setupLayerAsVectorTileOne: (layerKey, ignoreErrors, layerIsEnabled) => {
+        throw new Error(`Not implemented yet`);
+        //_self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled);
+    },
+
+    /**
      * Returns tile filter string for specific tile layer
      */
     getLayerFilterString: (layerKey) => {
-        if (!layerKey || layerKey.length === 0 || layerKey.indexOf(`v:`) === 0 || layerKey.indexOf(`.`) === -1) {
+        if (!layerKey || [LAYER.VECTOR, LAYER.VECTOR_TILE].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
@@ -1938,7 +1956,8 @@ module.exports = {
      * @param {Boolean} layerIsEnabled Specifies if layer is enabled
      */
     setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
-        layerKey = layerKey.replace(`v:`, ``);
+        layerKey = layerTreeUtils.stripPrefix(layerKey);
+
         let layerMeta = meta.getMetaByKey(layerKey);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
@@ -2004,7 +2023,7 @@ module.exports = {
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
         _self.createStore(correspondingLayer);
-        _self.reloadLayer(`v:` + layerKey);       
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);       
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
@@ -2029,7 +2048,7 @@ module.exports = {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
-                    _self.reloadLayer(`v:` + layerKey);
+                    _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
                 }
             }
         });
