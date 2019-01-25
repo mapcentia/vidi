@@ -30,7 +30,7 @@ const getAllSnapshots = (browser = false, user = false) => {
             url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
             method: `GET`,
             headers: { Cookie: cookie }
-        }, (error, response, body) => {
+        }, (error, response) => {
             parsedBody = JSON.parse(response.body);
             resolve(parsedBody);
         });
@@ -107,6 +107,39 @@ describe('State snapshot management API', () => {
                 expect(wasAdded).to.be.true;
                 done();
             });
+        });
+    });
+
+    it('should be able to get state snapshot by its identifier', (done) => {
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
+        let options = {
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${anonymousStateSnapshotId}`,
+            method: `GET`,
+            json: true,
+            headers: { Cookie: cookie },
+        };
+
+        request(options, (error, response, body) => {
+            expect(response.statusCode).to.equal(200);
+            expect(response.body.id).to.equal(anonymousStateSnapshotId);
+            expect(response.body.anonymous).to.equal(true);
+            expect(response.body.browserId.length > 0).to.equal(true);
+            done();
+        });
+    });
+
+    it('should return 404 if the state snapshot identifier is invalid', (done) => {
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
+        let options = {
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/INVALID`,
+            method: `GET`,
+            json: true,
+            headers: { Cookie: cookie },
+        };
+
+        request(options, (error, response, body) => {
+            expect(response.statusCode).to.equal(404);
+            done();
         });
     });
 
