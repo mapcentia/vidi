@@ -112,7 +112,7 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
             method: 'GET',
             encoding: 'utf8',
             uri: API_HOST + `/` + req.params.dataBase + '/' + req.params.id
-        }, (error, response, body) => {
+        }, (error, response) => {
             let parsedBody = false;
             try {
                 let localParsedBody = JSON.parse(response.body);
@@ -120,7 +120,12 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
             } catch (e) {}
 
             if (parsedBody) {
-                res.send(parsedBody.data.value);
+                if (parsedBody.data === false) {
+                    res.status(404);
+                    res.json({ error: `NOT_FOUND` });
+                } else {
+                    res.send(parsedBody.data.value);
+                }
             } else {
                 throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY');
             }
