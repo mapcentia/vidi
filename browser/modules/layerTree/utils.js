@@ -1,3 +1,11 @@
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2019 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
+import { MODULE_NAME, LAYER } from './constants';
+
 /**
  * Communicating with the service workied via MessageChannel interface
  *
@@ -28,7 +36,7 @@ const queryServiceWorker = (data) => {
  *
  * @returns {void}
  */
-const applyOpacityToLayer = (opacity, layerKey, cloud) => {
+const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
     for (let key in cloud.get().map._layers) {
         if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
             if (cloud.get().map._layers[key].id === layerKey) {
@@ -122,9 +130,41 @@ const calculateOrder = () => {
     return layerTreeOrder;
 };
 
+/**
+ * Default template for feature popup
+ */
+const getDefaultTemplate = () => {
+    return `<div class="cartodb-popup-content">
+        <div class="form-group gc2-edit-tools">
+            {{#_vidi_content.fields}}
+                {{#title}}<h4>{{title}}</h4>{{/title}}
+                {{#value}}
+                <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                {{/value}}
+                {{^value}}
+                <p class="empty">null</p>
+                {{/value}}
+            {{/_vidi_content.fields}}
+        </div>
+    </div>`;
+};
+
+/**
+ * Removes layer type prefix from the layer name
+ * 
+ * @param {String} layerName Initial layer name
+ * 
+ * @return {String}
+ */
+const stripPrefix = (layerName) => {
+    return layerName.replace(LAYER.VECTOR + `:`, ``).replace(LAYER.VECTOR_TILE + `:`, ``).replace(LAYER.RASTER_TILE + `:`, ``);
+};
+
 module.exports = {
     queryServiceWorker,
     applyOpacityToLayer,
     getActiveLayers,
-    calculateOrder
+    calculateOrder,
+    getDefaultTemplate,
+    stripPrefix
 };
