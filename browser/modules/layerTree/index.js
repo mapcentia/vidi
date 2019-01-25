@@ -10,40 +10,14 @@
 
 'use strict';
 
-const LOG = false;
+import { LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS } from './constants';
 
-const MODULE_NAME = `layerTree`;
-
-const VIRTUAL_LAYERS_SCHEMA = `virtual_layer`;
-
-const SYSTEM_FIELD_PREFIX = `gc2_`;
-
-const SQL_QUERY_LIMIT = 2000;
-
-var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
+var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var layerTreeOrder = false;
 
 var onEachFeature = [], pointToLayer = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [];
-
-var tables = {};
-
-var _self;
-
-var defaultTemplate = `<div class="cartodb-popup-content">
-    <div class="form-group gc2-edit-tools">
-        {{#_vidi_content.fields}}
-            {{#title}}<h4>{{title}}</h4>{{/title}}
-            {{#value}}
-            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-            {{/value}}
-            {{^value}}
-            <p class="empty">null</p>
-            {{/value}}
-        {{/_vidi_content.fields}}
-    </div>
-</div>`;
+    onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [], tables = {};
 
 /**
  * Layer filters
@@ -125,15 +99,12 @@ var apiBridgeInstance = false;
 
 /**
  * Specifies if layer tree is ready
+ * @todo Minimize number of global variables
  */
-let layerTreeIsReady = false;
-
-const tileLayerIcon = `<i class="material-icons">border_all</i>`;
-
-const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
-
-let predefinedFiltersWarningFired, layerTreeWasBuilt = false, editingIsEnabled = false, treeIsBeingBuilt = false, userPreferredForceOfflineMode = -1,
-    arbitraryFilters = {}, predefinedFilters = {}, dynamicLoad = {}, extensions = false, editor = false, qstore = [], setLayerOpacityRequests = [];
+let layerTreeIsReady = false, predefinedFiltersWarningFired, layerTreeWasBuilt = false,
+    editingIsEnabled = false, treeIsBeingBuilt = false, userPreferredForceOfflineMode = -1,
+    arbitraryFilters = {}, predefinedFilters = {}, dynamicLoad = {}, extensions = false,
+    editor = false, qstore = [], setLayerOpacityRequests = [];
 
 /**
  *
@@ -187,14 +158,25 @@ module.exports = {
         }
     },
 
+    /**
+     * Sets the layer type selector presentation according to provided type
+     * 
+     * @param {String} name Layer name
+     * @param {String} type Layer type ("tile", "vector", "vectortile")
+     * 
+     * @returns {void}
+     */
     setSelectorValue: (name, type) => {
-        let el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
+        let el = $('*[data-gc2-id="' + layerTreeUtils.stripPrefix(name) + '"]');
         if (type === 'tile') {
             el.data('gc2-layer-type', 'tile');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(tileLayerIcon);
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.RASTER_TILE]);
         } else if (type === 'vector') {
             el.data('gc2-layer-type', 'vector');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(vectorLayerIcon);
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.VECTOR]);
+        } else if (type === 'vectortile') {
+            el.data('gc2-layer-type', 'vectortile');
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[LAYER.VECTOR_TILE]);
         } else {
             throw new Error('Invalid type was provided');
         }
@@ -339,7 +321,7 @@ module.exports = {
             for (let i = (setLayerOpacityRequests.length - 1); i >= 0; i--) {
                 let item = setLayerOpacityRequests[i];
                 if (item.layerKey === layerKey) {
-                    layerTreeUtils.applyOpacityToLayer(item.opacity, layerKey, cloud);
+                    layerTreeUtils.applyOpacityToLayer(item.opacity, layerKey, cloud, backboneEvents);
                     if (i >= 1) {
                         for (let j = (i - 1); j >= 0; j--) {
                             let subItem = setLayerOpacityRequests[j];
@@ -364,14 +346,14 @@ module.exports = {
             for (let layerKey in stores) {
                 let layerIsEnabled = false;
                 for (let i = 0; i < activeLayers.length; i++) {
-                    if (activeLayers[i].replace(`v:`, ``) === layerKey.replace(`v:`, ``)) {
+                    if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
                         layerIsEnabled = true;
                         break;
                     }
                 }
 
                 if (layerIsEnabled) {
-                    let layerKeyNoPrefix = layerKey.replace(`v:`, ``);
+                    let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
                     let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
                     let parsedMeta = _self.parseLayerMeta(layerDescription);
 
@@ -484,9 +466,9 @@ module.exports = {
                                 let existingMeta = meta.getMetaData();
                                 if (`data` in existingMeta) {
                                     activeLayers.map(layerName => {
-                                        let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
+                                        let correspondingMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
                                         if (correspondingMeta === false) {
-                                            layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
+                                            layersThatAreNotInMeta.push(layerTreeUtils.stripPrefix(layerName));
                                         }
                                     });
                                 }
@@ -599,17 +581,20 @@ module.exports = {
                                             return new Promise((localResolve, reject) => {
                                                 if (activeLayers) {
                                                     activeLayers.map(layerName => {
-                                                        let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
+                                                        let noPrefixName = layerTreeUtils.stripPrefix(layerName);
+                                                        let layerMeta = meta.getMetaByKey(noPrefixName);
         
-                                                        if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                                        if ($(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
+                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
+                                                            
+                                                            // @todo Vector tile case
                                                             if (layerName.indexOf(`v:`) === 0) {
-                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
                                                             } else {
-                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                                             }
                                                         } else {
-                                                            $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
+                                                            $(`#layers`).find(`input[data-gc2-id="${noPrefixName}"]`).trigger('click', [{doNotLegend: true}]);
                                                         }
                                                     });
         
@@ -736,6 +721,7 @@ module.exports = {
                     } else {
                         let promises = [];
                         for (let key in settings) {
+                            // @todo Vector tile case
                             if (key.indexOf(`v:`) === 0) {
                                 // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                 response.map(cachedRequest => {
@@ -884,7 +870,7 @@ module.exports = {
                 let metaDataKeys = meta.getMetaDataKeys();
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
                     && metaDataKeys[layerKey].infowindow.template !== "")
-                    ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
+                    ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
                 let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
 
                 let localTable = gc2table.init({
@@ -1011,7 +997,7 @@ module.exports = {
             }
         }
 
-        let renderedText = Mustache.render(defaultTemplate, properties);
+        let renderedText = Mustache.render(layerTreeUtils.getDefaultTemplate(), properties);
         let managePopup = L.popup({
             autoPan: false,
             minWidth: 160,
@@ -1330,6 +1316,9 @@ module.exports = {
                 precheckedLayers.map(item => {
                     if (item.id && item.id === `${localItem.f_table_schema}.${localItem.f_table_name}`
                         || item.id && item.id === `v:${localItem.f_table_schema}.${localItem.f_table_name}`) {
+
+
+
                         layerIsActive = true;
                         activeLayerName = item.id;
                     }
@@ -1419,7 +1408,7 @@ module.exports = {
             let layerIsTheVectorOne = false;
 
             let singleTypeLayer = true;
-            let selectorLabel = tileLayerIcon;
+            let selectorLabel = ICONS[LAYER.RASTER_TILE];
             let defaultLayerType = 'tile';
 
             let layerIsEditable = false;
@@ -1441,7 +1430,7 @@ module.exports = {
 
                         if (parsedMeta.vidi_layer_type === 'v') {
                             defaultLayerType = 'vector';
-                            selectorLabel = vectorLayerIcon;
+                            selectorLabel = ICONS[LAYER.VECTOR];
                             singleTypeLayer = true;
                             layerIsTheTileOne = false;
                         }
@@ -1469,7 +1458,7 @@ module.exports = {
 
             if (layerIsActive) {
                 if (activeLayerName.indexOf(`v:`) === 0) {
-                    selectorLabel = vectorLayerIcon;
+                    selectorLabel = ICONS[LAYER.VECTOR];
                     defaultLayerType = 'vector';
                 }
             }
@@ -1484,7 +1473,7 @@ module.exports = {
             if (singleTypeLayer) {
                 layerTypeSelector = ``;
             } else {
-                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
+                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, ICONS[LAYER.RASTER_TILE], ICONS[LAYER.VECTOR]);
             }
 
             let addButton = ``;
@@ -1508,7 +1497,7 @@ module.exports = {
                 _self.setupLayerAsTileOne(layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
 
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.RASTER_TILE]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
@@ -1521,7 +1510,7 @@ module.exports = {
                 _self.setupLayerAsVectorOne(layerKey);
                 _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
 
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
@@ -1664,7 +1653,7 @@ module.exports = {
 
                     slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                         let sliderValue = (parseFloat(values[handle]) / 100);
-                        layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud);
+                        layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
                         setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                     });
                 }
