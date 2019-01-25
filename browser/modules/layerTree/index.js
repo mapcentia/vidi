@@ -22,7 +22,7 @@ const SQL_QUERY_LIMIT = 2000;
 
 var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
-var layerTreeOrder = false, activeOpenedTable = false;
+var layerTreeOrder = false;
 
 var onEachFeature = [], pointToLayer = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [];
@@ -113,6 +113,12 @@ let APIBridgeSingletone = require('./../api-bridge');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+let layerTreeUtils = require('./utils');
+
+/**
+ *
  * @type {APIBridge}
  */
 var apiBridgeInstance = false;
@@ -122,34 +128,12 @@ var apiBridgeInstance = false;
  */
 let layerTreeIsReady = false;
 
-/**
- * Fires when the layer tree is built
- */
-let _onReady = false;
-
 const tileLayerIcon = `<i class="material-icons">border_all</i>`;
 
 const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
 
-let predefinedFiltersWarningFired = false;
-
-let layerTreeWasBuilt = false;
-
-let editingIsEnabled = false;
-
-let treeIsBeingBuilt = false;
-
-let userPreferredForceOfflineMode = -1;
-
-let arbitraryFilters = {};
-
-let predefinedFilters = {};
-
-let dynamicLoad = {};
-
-let extensions = false;
-
-let editor = false;
+let predefinedFiltersWarningFired, layerTreeWasBuilt = false, editingIsEnabled = false, treeIsBeingBuilt = false, userPreferredForceOfflineMode = -1,
+    arbitraryFilters = {}, predefinedFilters = {}, dynamicLoad = {}, extensions = false, editor = false, qstore = [], setLayerOpacityRequests = [];
 
 /**
  *
@@ -157,47 +141,6 @@ let editor = false;
  */
 const showdown = require('showdown');
 const converter = new showdown.Converter();
-
-let qstore = [];
-
-/**
- * Communicating with the service workied via MessageChannel interface
- *
- * @returns {Promise}
- */
-const queryServiceWorker = (data) => {
-    return new Promise((resolve, reject) => {
-        if (navigator.serviceWorker.controller) {
-            let messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = (event) => {
-                if (event.data.error) {
-                    reject(event.data.error);
-                } else {
-                    resolve(event.data);
-                }
-            };
-
-            navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
-        } else {
-            console.error(`Unable to query service worker as it is not registered yet`);
-            reject();
-        }
-    });
-};
-
-let setLayerOpacityRequests = [];
-const applyOpacityToLayer = (opacity, layerKey) => {
-    let opacityWasSet = false;
-    for (let key in cloud.get().map._layers) {
-        if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
-            if (cloud.get().map._layers[key].id === layerKey) {
-                opacityWasSet = true;
-                cloud.get().map._layers[key].setOpacity(opacity);
-                backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
-            }
-        }
-    }
-};
 
 /**
  *
@@ -311,7 +254,7 @@ module.exports = {
             if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     if (registrations.length === 1 && registrations[0].active !== null) {
-                        queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
+                        layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                             if (Array.isArray(response)) {
                                 offlineModeControlsManager.setCachedLayers(response).then(() => {
                                     offlineModeControlsManager.updateControls().then(() => {
@@ -396,7 +339,7 @@ module.exports = {
             for (let i = (setLayerOpacityRequests.length - 1); i >= 0; i--) {
                 let item = setLayerOpacityRequests[i];
                 if (item.layerKey === layerKey) {
-                    applyOpacityToLayer(item.opacity, layerKey);
+                    layerTreeUtils.applyOpacityToLayer(item.opacity, layerKey, cloud);
                     if (i >= 1) {
                         for (let j = (i - 1); j >= 0; j--) {
                             let subItem = setLayerOpacityRequests[j];
@@ -686,23 +629,23 @@ module.exports = {
 
                                         const setOfflineModeSettingsForCache = () => {
                                             return new Promise((localResolve, reject) => {
-                                                queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
+                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
                                                     let promisesContent = [];
                                                     if (Object.keys(offlineModeSettings).length > 0) {
-                                                        queryServiceWorker({
+                                                        layerTreeUtils.queryServiceWorker({
                                                             action: `batchSetOfflineModeForLayers`,
                                                             payload: offlineModeSettings
                                                         }).then(result => {
                                                             turnOnActiveLayersAndFinishBuilding().then(() => {
-                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
                                                                     localResolve();
                                                                 });
                                                             });
                                                         });
                                                     } else {
-                                                        queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
+                                                        layerTreeUtils.queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
                                                             turnOnActiveLayersAndFinishBuilding().then(() => {
-                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
                                                                     localResolve();
                                                                 });
                                                             });
@@ -771,13 +714,13 @@ module.exports = {
      */
     _applyOfflineModeSettings: (settings) => {
         return new Promise((resolve, reject) => {
-            queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
+            layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                 if (Array.isArray(response)) {
                     if (Object.keys(settings).length === 0) {
                         // Empty object means that all layers should have the offline mode to be turned off
                         let promises = [];
                         response.map(cachedRequest => {
-                            promises.push(queryServiceWorker({
+                            promises.push(layerTreeUtils.queryServiceWorker({
                                 action: `disableOfflineModeForLayer`,
                                 payload: {layerKey: cachedRequest.layerKey}
                             }));
@@ -805,7 +748,7 @@ module.exports = {
                                             offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
                                         }
                                         
-                                        promises.push(queryServiceWorker({
+                                        promises.push(layerTreeUtils.queryServiceWorker({
                                             action: serviceWorkerAPIKey,
                                             payload: {layerKey: cachedRequest.layerKey}
                                         }));
@@ -1651,7 +1594,7 @@ module.exports = {
 
                 offlineModeControlsManager.setControlState(layerKey, offlineModeValue);
                 if (offlineModeControlsManager.isVectorLayer(layerKey)) {
-                    queryServiceWorker({
+                    layerTreeUtils.queryServiceWorker({
                         action: serviceWorkerAPIKey,
                         payload: {layerKey}
                     }).then(() => {
@@ -1671,12 +1614,12 @@ module.exports = {
 
                 let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
                 if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
-                    queryServiceWorker({
+                    layerTreeUtils.queryServiceWorker({
                         action: `disableOfflineModeForLayer`,
                         payload: {layerKey}
                     }).then(() => {
                         _self.reloadLayer(`v:` + layerKey).then(() => {
-                            queryServiceWorker({
+                            layerTreeUtils.queryServiceWorker({
                                 action: `enableOfflineModeForLayer`,
                                 payload: {layerKey}
                             }).then(() => {
@@ -1721,7 +1664,7 @@ module.exports = {
 
                     slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                         let sliderValue = (parseFloat(values[handle]) / 100);
-                        applyOpacityToLayer(sliderValue, layerKey);
+                        layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud);
                         setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                     });
                 }
@@ -2109,54 +2052,7 @@ module.exports = {
      * @returns {void}
      */
     calculateOrder: () => {
-        layerTreeOrder = [];
-
-        $(`[id^="layer-panel-"]`).each((index, element) => {
-            let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
-            let children = [];
-
-            const processLayerRecord = (layerElement) => {
-                let layerKey = $(layerElement).data(`gc2-layer-key`);
-                let splitLayerKey = layerKey.split('.');
-                if (splitLayerKey.length !== 3) {
-                    throw new Error(`Invalid layer key (${layerKey})`);
-                }
-
-                return {
-                    id: `${splitLayerKey[0]}.${splitLayerKey[1]}`,
-                    type: GROUP_CHILD_TYPE_LAYER
-                };
-            };
-
-            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
-                if ($(layerElement).data(`gc2-layer-key`)) {
-                    // Processing layer record
-                    children.push(processLayerRecord(layerElement));
-                } else if ($(layerElement).data(`gc2-subgroup-id`)) {
-                    // Processing subgroup record
-                    let subgroupDescription = {
-                        id: $(layerElement).data(`gc2-subgroup-id`),
-                        type: GROUP_CHILD_TYPE_GROUP,
-                        children: []
-                    };
-
-                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
-                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
-                    });
-
-                    children.push(subgroupDescription);
-                } else {
-                    throw new Error(`Unable to detect the group child element`);
-                }
-            });
-
-            let readableId = atob(id);
-            if (readableId) {
-                layerTreeOrder.push({id: readableId, children});
-            } else {
-                throw new Error(`Unable to decode the layer group identifier (${id})`);
-            }
-        });
+        layerTreeOrder = layerTreeUtils.calculateOrder();
     },
 
     /**
@@ -2255,29 +2151,13 @@ module.exports = {
         });
     },
 
-
-    
-
     /**
      * Returns list of currently enabled layers
+     * 
+     * @returns {Array}
      */
     getActiveLayers: () => {
-        let activeLayerIds = [];
-        $('*[data-gc2-layer-type]').each((index, item) => {
-            let isEnabled = $(item).is(':checked');
-            if (isEnabled) {
-                if ($(item).data('gc2-layer-type') === 'tile') {
-                    activeLayerIds.push($(item).data('gc2-id'));
-                } else {
-                    activeLayerIds.push('v:' + $(item).data('gc2-id'));
-                }
-            }
-        });
-
-        activeLayerIds = activeLayerIds.filter((v, i, a) => {
-            return a.indexOf(v) === i
-        });
-        return activeLayerIds;
+        return layerTreeUtils.getActiveLayers();
     },
 
     /**
