@@ -5,6 +5,7 @@
  */
 
 import { MODULE_NAME, LAYER } from './constants';
+import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './LayerSorting';
 
 /**
  * Communicating with the service workied via MessageChannel interface
@@ -160,11 +161,91 @@ const stripPrefix = (layerName) => {
     return layerName.replace(LAYER.VECTOR + `:`, ``).replace(LAYER.VECTOR_TILE + `:`, ``).replace(LAYER.RASTER_TILE + `:`, ``);
 };
 
+/**
+ * Detects possible layer types for layer meta
+ * 
+ * @param {Object} layerDescription Layer description
+ * 
+ * @return {Object}
+ */
+const getPossibleLayerTypes = (layerDescription) => {
+    let layerTypeSpecifier = ``;
+    if (layerDescription && layerDescription.meta) {
+        let parsedMeta = JSON.parse(layerDescription.meta);
+        if (parsedMeta.vidi_layer_type) {
+            layerTypeSpecifier = parsedMeta.vidi_layer_type;
+        }
+    }
+
+    let isVectorLayer = false, isRasterTileLayer = false, isVectorTileLayer = false, isWebGLLayer = false;
+    
+    let detectedTypes = 0;
+    let specifiers = [];
+    if (layerTypeSpecifier.indexOf(LAYER.VECTOR_TILE) > -1) {
+        detectedTypes++;
+        isVectorTileLayer = true;
+        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.VECTOR_TILE, ``);
+        specifiers.push(LAYER.VECTOR_TILE);
+    }
+
+    if (layerTypeSpecifier.indexOf(LAYER.RASTER_TILE) > -1) {
+        detectedTypes++
+        isRasterTileLayer = true;
+        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.RASTER_TILE, ``);
+        specifiers.push(LAYER.RASTER_TILE);
+    }
+
+    if (layerTypeSpecifier.indexOf(LAYER.VECTOR) > -1) {
+        detectedTypes++;
+        isVectorLayer = true;
+        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.VECTOR, ``);
+        specifiers.push(LAYER.VECTOR);
+    }
+
+    if (layerTypeSpecifier.indexOf(LAYER.WEBGL) > -1) {
+        detectedTypes++;
+        isWebGLLayer = true;
+        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.WEBGL, ``);
+        specifiers.push(LAYER.WEBGL);
+    }
+
+    if (layerTypeSpecifier.length > 0) {
+        throw new Error(`Provided layer name "${layerName}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
+    }
+
+    return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
+};
+
+
+/**
+ * Detects default (fallback) layer type
+ * 
+ * @param {Object} layerMeta Layer meta
+ * 
+ * @return {Object}
+ */
+const getDefaultLayerType = (layerMeta) => {
+    let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer } = getPossibleLayerTypes(layerMeta);
+    if (isVectorLayer) {
+        return LAYER.VECTOR;
+    } else if (isRasterTileLayer) {
+        return LAYER.RASTER_TILE;
+    } else if (isVectorTileLayer) {
+        return LAYER.VECTOR_TILE;
+    } else if (isWebGLLayer) {
+        return LAYER.WEBGL;
+    } else {
+        return LAYER.RASTER_TILE;
+    }
+};
+
 module.exports = {
     queryServiceWorker,
     applyOpacityToLayer,
     getActiveLayers,
     calculateOrder,
     getDefaultTemplate,
-    stripPrefix
+    stripPrefix,
+    getPossibleLayerTypes,
+    getDefaultLayerType
 };

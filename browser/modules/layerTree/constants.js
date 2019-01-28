@@ -24,7 +24,8 @@ const SQL_QUERY_LIMIT = 2000;
 const LAYER = {
     VECTOR: `v`,
     RASTER_TILE: `t`,
-    VECTOR_TILE: `mvt`
+    VECTOR_TILE: `mvt`,
+    WEBGL: `w`
 };
 
 /**
@@ -33,7 +34,8 @@ const LAYER = {
 let icons = {};
 icons[LAYER.VECTOR] = `<i class="material-icons">gesture</i>`;
 icons[LAYER.RASTER_TILE] = `<i class="material-icons">border_all</i>`;
-icons[LAYER.VECTOR_TILE] = `<i style="color: red;">NOT_ADDED_YET</i>`;
+icons[LAYER.VECTOR_TILE] = `<i style="color: red;">NOT_ADDED_YET VECTOR_TILE</i>`;
+icons[LAYER.WEBGL] = `<i style="color: red;">NOT_ADDED_YET WEBGL</i>`;
 const ICONS = icons;
 
 export {

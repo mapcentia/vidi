@@ -11,6 +11,7 @@
  * @todo Rewrite layerTree using React or Angular
  */
 
+import { LAYER, ICONS} from './constants';
 const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
 
 class MarkupGenerator {
@@ -80,6 +81,8 @@ class MarkupGenerator {
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
 
+        console.log(`### getLayerControlRecord`, layerType);
+        
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
@@ -182,21 +185,31 @@ class MarkupGenerator {
                 </div>`;
     }
 
-    getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon) {
+    getLayerTypeSelector(selectorLabel, allowedTypes) {
+        let selectors = [];
+        if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
+            selectors.push(`<li><a class="js-layer-type-selector-vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
+        }
+
+        if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
+            selectors.push(`<li><a class="js-layer-type-selector-tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
+        }
+
+        if (allowedTypes.indexOf(LAYER.VECTOR_TILE) > -1) {
+            selectors.push(`<li><a class="js-layer-type-selector-vector-tile" href="javascript:void(0)">${ICONS[LAYER.VECTOR_TILE]} ${__('Vector tile')}</a></li>`);
+        }
+
+        if (allowedTypes.indexOf(LAYER.WEBGL) > -1) {
+            selectors.push(`<li><a class="js-layer-type-selector-webgl" href="javascript:void(0)">${ICONS[LAYER.WEBGL]} ${__('WebGL')}</a></li>`);
+        }
+
         return (`<div class="dropdown">
             <button style="padding: 2px; margin: 0px;" class="btn btn-default dropdown-toggle" type="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                 <span class="js-dropdown-label">${selectorLabel}</span>
                 <span class="caret"></span>
             </button>
-            <ul class="dropdown-menu">
-                <li>
-                    <a class="js-layer-type-selector-tile" href="javascript:void(0)">${tileLayerIcon} ${__('Tile')}</a>
-                </li>
-                <li>
-                    <a class="js-layer-type-selector-vector" href="javascript:void(0)">${vectorLayerIcon} ${__('Vector')}</a>
-                </li>
-            </ul>
+            <ul class="dropdown-menu">${selectors.join(``)}</ul>
         </div>`);
     }
 }

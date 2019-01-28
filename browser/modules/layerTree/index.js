@@ -168,7 +168,7 @@ module.exports = {
      */
     setSelectorValue: (name, type) => {
         let el = $('*[data-gc2-id="' + layerTreeUtils.stripPrefix(name) + '"]');
-        if (type === LAYER.VECTOR || type === LAYER.RASTER_TILE || type === LAYER.VECTOR_TILE) {
+        if (type === LAYER.VECTOR || type === LAYER.RASTER_TILE || type === LAYER.VECTOR_TILE || type === LAYER.WEBGL) {
             el.data('gc2-layer-type', type);
             el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[type]);
         } else {
@@ -859,6 +859,8 @@ module.exports = {
             onLoad: (l) => {
                 if (l === undefined) return;
 
+                // @todo Here goes the initialization of vector OR vector tile layer
+
                 let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                 if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
                 $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
@@ -1388,7 +1390,6 @@ module.exports = {
     createLayerRecord: (layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName,
         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
-        let displayInfo = `hidden`;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
@@ -1400,17 +1401,39 @@ module.exports = {
                 </div>
             </div>`);
         } else {
-            let layerIsTheTileOne = true;
-            let layerIsTheVectorOne = false;
-            let layerIsTheVectorTileOne = false;
+            let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let singleTypeLayer = (detectedTypes === 1);
 
-            let singleTypeLayer = true;
-            let selectorLabel = ICONS[LAYER.RASTER_TILE];
-            let defaultLayerType = LAYER.RASTER_TILE;
+            let condition = layerTreeUtils.getDefaultLayerType(layer);
+            if (layerIsActive && activeLayerName) {
+                condition = (activeLayerName.indexOf(`:`) === -1 ? LAYER.RASTER_TILE : activeLayerName.split(`:`)[0]);
+            }
+
+            // Deciding on default vector type
+            let selectorLabel, defaultLayerType;
+            switch (condition) {
+                case LAYER.VECTOR:
+                    selectorLabel = ICONS[LAYER.VECTOR];
+                    defaultLayerType = LAYER.VECTOR;
+                    break;
+                case LAYER.RASTER_TILE:
+                    selectorLabel = ICONS[LAYER.RASTER_TILE];
+                    defaultLayerType = LAYER.RASTER_TILE;
+                    break;
+                case LAYER.VECTOR_TILE:
+                    selectorLabel = ICONS[LAYER.VECTOR_TILE];
+                    defaultLayerType = LAYER.VECTOR_TILE;
+                    break;
+                case LAYER.WEBGL:
+                    selectorLabel = ICONS[LAYER.WEBGL];
+                    defaultLayerType = LAYER.WEBGL;
+                    break;
+            }
 
             let layerIsEditable = false;
+            let displayInfo = `hidden`;
             let parsedMeta = false;
-            if (layer && layer.meta) {
+            if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
                     if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
@@ -1420,25 +1443,15 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
-
-                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                        layerIsTheVectorOne = true;
-                        singleTypeLayer = false;
-
-                        if (parsedMeta.vidi_layer_type === 'v') {
-                            defaultLayerType = LAYER.VECTOR;
-                            selectorLabel = ICONS[LAYER.VECTOR];
-                            singleTypeLayer = true;
-                            layerIsTheTileOne = false;
-                        }
-                    }
                 }
             }
 
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
-            if (layerIsTheVectorOne) {
+            if (isVectorLayer) {
+                _self.createStore(layer, isVirtual);
+
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in dynamicLoad === false || [true, false].indexOf(dynamicLoad[layerKey]) === -1) {
                     if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
@@ -1453,24 +1466,11 @@ module.exports = {
                 }
             }
 
-            if (layerIsActive) {
-                if (activeLayerName.indexOf(LAYER.VECTOR + ':') === 0) {
-                    selectorLabel = ICONS[LAYER.VECTOR];
-                    defaultLayerType = LAYER.VECTOR;
-                }
-            }
-
-            if (layerIsTheVectorOne) {
-                _self.createStore(layer, isVirtual);
-            }
-
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
-            let layerTypeSelector = false;
-            if (singleTypeLayer) {
-                layerTypeSelector = ``;
-            } else {
-                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, ICONS[LAYER.RASTER_TILE], ICONS[LAYER.VECTOR]);
+            let layerTypeSelector = ``;
+            if (!singleTypeLayer) {
+                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, specifiers);
             }
 
             let addButton = ``;
@@ -1478,20 +1478,15 @@ module.exports = {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
-            let selectorLayerType = LAYER.RASTER_TILE;
-            if (layerIsTheVectorOne && layerIsTheTileOne === false) {
-                selectorLayerType = LAYER.VECTOR;
-            }
-
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, selectorLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
 
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
                 $(switcher).data('gc2-layer-type', LAYER.RASTER_TILE);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerAsTileOne(layerKey);
+                _self.setupLayerControls(LAYER.RASTER_TILE, layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.RASTER_TILE]);
@@ -1504,7 +1499,7 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', LAYER.VECTOR);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerAsVectorOne(layerKey);
+                _self.setupLayerControls(LAYER.VECTOR, layerKey);
                 _self.reloadLayer(`${LAYER.VECTOR}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
@@ -1517,7 +1512,7 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', LAYER.VECTOR_TILE);
                 $(switcher).prop('checked', true);
 
-                //_self.setupLayerAsVectorTileOne(layerKey);
+                _self.setupLayerControls(LAYER.VECTOR_TILE, layerKey);
                 _self.reloadLayer(`${LAYER.VECTOR_TILE}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR_TILE]);
@@ -1525,6 +1520,7 @@ module.exports = {
                 offlineModeControlsManager.updateControls();
             });
 
+            try {
             if (isVirtual) {
                 $(layerControlRecord).find(`.js-toggle-filters`).remove();
                 $(layerControlRecord).find(`.js-toggle-load-strategy`).remove();
@@ -1634,10 +1630,10 @@ module.exports = {
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
             $(layerContainer).find('.js-layer-settings-table').hide(0);
 
-            let initialSliderValue = 1;
-            if (layerIsTheTileOne) {
-                _self.setupLayerAsTileOne(layerKey);
+            _self.setupLayerControls(defaultLayerType, layerKey);
 
+            let initialSliderValue = 1;
+            if (isRasterTileLayer) {
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
                     <div class="js-opacity-slider slider shor slider-material-orange"></div>
@@ -1744,7 +1740,7 @@ module.exports = {
                 }
             }
 
-            if (layerIsTheVectorOne) {
+            if (isVectorLayer) {
                 if (isVirtual === false) {
                     let value = false;
                     if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
@@ -1781,11 +1777,7 @@ module.exports = {
                     tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                 });
 
-                if (defaultLayerType === LAYER.VECTOR) {
-                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
-                } else {
-                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
-                }
+                _self.setupLayerControls(defaultLayerType, layerKey, true, layerIsActive);
             }
 
             $(layerContainer).find(`.js-toggle-search`).click(() => {
@@ -1843,6 +1835,7 @@ module.exports = {
                         countSearchFields.push(i);
                     }
                 });
+
                 if (countSearchFields.length === 0) {
                     $(search).find('input, textarea, button, select').attr('disabled', 'true');
                     $(search).find('.no-searchable-fields').show();
@@ -1852,6 +1845,7 @@ module.exports = {
                         $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
                     });
                 }
+
                 $(search).on('change', (e) => {
                     let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
                     $.each(fieldConf, function (i, val) {
@@ -1891,6 +1885,9 @@ module.exports = {
                     }
                 });
             }
+
+
+        }catch(e) {console.log(e)}
         }
     },
 
@@ -1901,28 +1898,6 @@ module.exports = {
         } else {
             e.addClass(className);
         }
-    },
-
-    /**
-     * Setups layer as the vector one
-     */
-    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => {
-        _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled);
-    },
-
-    /**
-     * Setups layer as the tile one
-     */
-    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => {
-        _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled);
-    },
-
-    /**
-     * Setups layer as the vector tile one
-     */
-    setupLayerAsVectorTileOne: (layerKey, ignoreErrors, layerIsEnabled) => {
-        throw new Error(`Not implemented yet`);
-        //_self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled);
     },
 
     /**
@@ -1947,21 +1922,25 @@ module.exports = {
     },
 
     /**
-     * By design the layer control is rendered with controls both for tile and vector case, so
-     * this function regulates the visibility and initialization of layer type specific controls.
+     * Regulates the visibility and initialization of layer type specific controls.
      *
-     * @param {Boolean} setupAsVector  Specifies if layer should be setup as the vector one
-     * @param {String}  layerKey       Layer key
-     * @param {Boolean} ignoreErrors   Specifies if errors should be ignored
-     * @param {Boolean} layerIsEnabled Specifies if layer is enabled
+     * @param {Boolean} desiredSetupType Layer type to setup
+     * @param {String}  layerKey         Layer key
+     * @param {Boolean} ignoreErrors     Specifies if errors should be ignored
+     * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      */
-    setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
+    setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
+
+        console.log(`### setupLayerControls`, desiredSetupType, layerKey, layerIsEnabled);
+
         layerKey = layerTreeUtils.stripPrefix(layerKey);
 
         let layerMeta = meta.getMetaByKey(layerKey);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            if (setupAsVector) {
+            $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+
+            if (desiredSetupType === LAYER.VECTOR) {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
                 $(container).find(`.js-toggle-tile-filters`).hide(0);
                 $(container).find(`.js-toggle-opacity`).hide(0);
@@ -1977,9 +1956,7 @@ module.exports = {
                 $(container).find(`.js-toggle-filters`).show(0);
                 $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
-            } else {
-                $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
-
+            } else if (desiredSetupType === LAYER.RASTER_TILE) {
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show(0);
                     $(container).find(`.js-toggle-filters`).show(0);
@@ -1998,12 +1975,28 @@ module.exports = {
 
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
+            } else if (desiredSetupType === LAYER.VECTOR_TILE) {
+                console.warn(`Controls are not completely setup for vector tile layers`);
+
+                $(container).find(`.js-toggle-filters`).hide(0);
+                $(container).find('.js-layer-settings-filters').hide(0);
+
+                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
+
+                $(container).find(`.js-toggle-load-strategy`).hide(0);
+                $(container).find('.js-layer-settings-load-strategy').hide(0);
+
+                $(container).find(`.js-toggle-table-view`).hide();
+                $(container).find('.js-layer-settings-table').hide(0);
+            } else if (desiredSetupType === LAYER.WEBGL) {
+                console.warn(`Controls are not completely setup for WebGL layers`);
             }
 
             $(container).find(`.js-toggle-search`).hide(0);
             $(container).find('.js-layer-settings-search').hide(0);
 
-            // For both vector and tile
+            // For all layer types
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {

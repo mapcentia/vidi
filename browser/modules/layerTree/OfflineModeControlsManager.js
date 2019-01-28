@@ -1,3 +1,6 @@
+import { LAYER } from './constants';
+const layerTreeUtils = require('./utils');
+
 /*
  * @author     Alexander Shumilov
  * @copyright  2013-2018 MapCentia ApS
@@ -135,42 +138,30 @@ class OfflineModeControlsManager {
      * @throws {Error}
      */
     isVectorLayer(layerKey) {
-        let isVectorLayer = -1;
-
+        let isVectorLayerLocal = -1;
         let metaIsMissingTypeDefinition = false;
         let existingMeta = meta.getMetaData();
-        let layerData = false;
         existingMeta.data.map(layer => {
             if (((layer.f_table_schema + '.' + layer.f_table_name) === layerKey) && layer.meta) {
-                layerData = layer;
-                let parsedMeta = JSON.parse(layer.meta);
-                if (parsedMeta && typeof parsedMeta === `object`) {
-                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt', 't'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                        if (parsedMeta.vidi_layer_type === 'v') {
-                            isVectorLayer = true;
-                        } else if (parsedMeta.vidi_layer_type === 't') {
-                            isVectorLayer = false;
-                        } else {
-                            let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${layer.f_geometry_column}"]`);
-                            if ($(layerRecord).length === 1) {
-                                let type = $(layerRecord).find('.js-show-layer-control').data('gc2-layer-type');
-                                if (type === `vector`) {
-                                    isVectorLayer = true;
-                                } else if (type === `tile`) {
-                                    isVectorLayer = false;
-                                }
-                            }                           
+                let { isVectorLayer, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+                if (isVectorLayer) {
+                    isVectorLayerLocal = true;
+                    let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${layer.f_geometry_column}"]`);
+                    if ($(layerRecord).length === 1) {
+                        let type = $(layerRecord).find('.js-show-layer-control').data('gc2-layer-type');
+                        if (type !== LAYER.VECTOR) {
+                            isVectorLayerLocal = false;
                         }
-                    } else {
-                        metaIsMissingTypeDefinition = true;
                     }
+                } else {
+                    isVectorLayerLocal = false;
                 }
 
                 return false;
             }
         });
 
-        if (isVectorLayer === -1) {
+        if (isVectorLayerLocal === -1) {
             if (this._layersWithPredictedLayerType.indexOf(layerKey) === -1) {
                 this._layersWithPredictedLayerType.push(layerKey);
                 if (metaIsMissingTypeDefinition) {
@@ -180,10 +171,10 @@ class OfflineModeControlsManager {
                 }
             }
 
-            isVectorLayer = false;
+            isVectorLayerLocal = false;
         }
 
-        return isVectorLayer;
+        return isVectorLayerLocal;
     }
 
     /**
