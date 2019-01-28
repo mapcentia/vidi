@@ -8,7 +8,8 @@ let fs = require('fs');
 let express = require('express');
 let router = express.Router();
 const uuid = require('uuid/v1');
-var request = require('request');
+const request = require('request');
+const config = require('../../config/config.js');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 
@@ -18,8 +19,7 @@ const throwError = (response, error) => {
     response.json({ error });
 };
 
-// @todo Get it from config
-const API_HOST = `https://test.gc2.io/api/v2/keyvalue`;
+const API_HOST = config.gc2.host + `/api/v2/keyvalue`;
 
 /**
  * Return identifiers of the currently authenticated user
