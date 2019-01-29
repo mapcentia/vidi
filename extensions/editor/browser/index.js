@@ -521,16 +521,16 @@ module.exports = {
                 guideLayers.map(layer => { markers[0].snapediting.addGuideLayer(layer); });
                 markers[0].snapediting.enable();
             } else {
+
                 var snap = new L.Handler.MarkerSnap(cloud.get().map);
                 guideLayers.map(layer => { snap.addGuideLayer(layer); });
-
                 var snapMarker = L.marker(cloud.get().map.getCenter(), {
                     icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
                     opacity: 1,
                     zIndexOffset: 1000
                 });
 
-                snap.watchMarker(snapMarker);
+                if (featureAlreadyExist === false) snap.watchMarker(snapMarker);
 
                 cloud.get().map.on('editable:vertex:dragstart', function (e) {
                     snap.watchMarker(e.vertex);
@@ -554,6 +554,7 @@ module.exports = {
                     e.latlng.lat = latlng.lat;
                     e.latlng.lng = latlng.lng;
                 });
+
                 snapMarker.on('snap', function (e) {
                     snapMarker.addTo(cloud.get().map);
                 });
