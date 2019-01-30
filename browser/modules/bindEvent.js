@@ -6,59 +6,13 @@
 
 'use strict';
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var draw;
+import { LAYER } from './layerTree/constants';
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var measurements;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var advancedInfo;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var cloud;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var print;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var switchLayer;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var setBaseLayer;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var legend;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var meta;
+var draw, measurements, advancedInfo, cloud, print, switchLayer, setBaseLayer, legend, meta;
 
 /**
  *
@@ -166,10 +120,8 @@ module.exports = module.exports = {
                 let prefix = '';
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
-                    if ($(e.target).data('gc2-layer-type') === 'vector') {
-                        prefix = 'v:';
-                    }
-
+                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+  
                     if (data) {
                         doNotLegend = data.doNotLegend;
                     }

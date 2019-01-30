@@ -10,40 +10,14 @@
 
 'use strict';
 
-const LOG = false;
+import { LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS } from './constants';
 
-const MODULE_NAME = `layerTree`;
+var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
-const VIRTUAL_LAYERS_SCHEMA = `virtual_layer`;
-
-const SYSTEM_FIELD_PREFIX = `gc2_`;
-
-const SQL_QUERY_LIMIT = 2000;
-
-var meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
-
-var layerTreeOrder = false, activeOpenedTable = false;
+var layerTreeOrder = false;
 
 var onEachFeature = [], pointToLayer = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [];
-
-var tables = {};
-
-var _self;
-
-var defaultTemplate = `<div class="cartodb-popup-content">
-    <div class="form-group gc2-edit-tools">
-        {{#_vidi_content.fields}}
-            {{#title}}<h4>{{title}}</h4>{{/title}}
-            {{#value}}
-            <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-            {{/value}}
-            {{^value}}
-            <p class="empty">null</p>
-            {{/value}}
-        {{/_vidi_content.fields}}
-    </div>
-</div>`;
+    onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [], tables = {};
 
 /**
  * Layer filters
@@ -113,43 +87,24 @@ let APIBridgeSingletone = require('./../api-bridge');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+let layerTreeUtils = require('./utils');
+
+/**
+ *
  * @type {APIBridge}
  */
 var apiBridgeInstance = false;
 
 /**
  * Specifies if layer tree is ready
+ * @todo Minimize number of global variables
  */
-let layerTreeIsReady = false;
-
-/**
- * Fires when the layer tree is built
- */
-let _onReady = false;
-
-const tileLayerIcon = `<i class="material-icons">border_all</i>`;
-
-const vectorLayerIcon = `<i class="material-icons">gesture</i>`;
-
-let predefinedFiltersWarningFired = false;
-
-let layerTreeWasBuilt = false;
-
-let editingIsEnabled = false;
-
-let treeIsBeingBuilt = false;
-
-let userPreferredForceOfflineMode = -1;
-
-let arbitraryFilters = {};
-
-let predefinedFilters = {};
-
-let dynamicLoad = {};
-
-let extensions = false;
-
-let editor = false;
+let layerTreeIsReady = false, predefinedFiltersWarningFired, layerTreeWasBuilt = false,
+    editingIsEnabled = false, treeIsBeingBuilt = false, userPreferredForceOfflineMode = -1,
+    arbitraryFilters = {}, predefinedFilters = {}, dynamicLoad = {}, extensions = false,
+    editor = false, qstore = [], setLayerOpacityRequests = [];
 
 /**
  *
@@ -157,47 +112,6 @@ let editor = false;
  */
 const showdown = require('showdown');
 const converter = new showdown.Converter();
-
-let qstore = [];
-
-/**
- * Communicating with the service workied via MessageChannel interface
- *
- * @returns {Promise}
- */
-const queryServiceWorker = (data) => {
-    return new Promise((resolve, reject) => {
-        if (navigator.serviceWorker.controller) {
-            let messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = (event) => {
-                if (event.data.error) {
-                    reject(event.data.error);
-                } else {
-                    resolve(event.data);
-                }
-            };
-
-            navigator.serviceWorker.controller.postMessage(data, [messageChannel.port2]);
-        } else {
-            console.error(`Unable to query service worker as it is not registered yet`);
-            reject();
-        }
-    });
-};
-
-let setLayerOpacityRequests = [];
-const applyOpacityToLayer = (opacity, layerKey) => {
-    let opacityWasSet = false;
-    for (let key in cloud.get().map._layers) {
-        if (`id` in cloud.get().map._layers[key] && cloud.get().map._layers[key].id) {
-            if (cloud.get().map._layers[key].id === layerKey) {
-                opacityWasSet = true;
-                cloud.get().map._layers[key].setOpacity(opacity);
-                backboneEvents.get().trigger(`${MODULE_NAME}:opacityChange`);
-            }
-        }
-    }
-};
 
 /**
  *
@@ -244,16 +158,21 @@ module.exports = {
         }
     },
 
+    /**
+     * Sets the layer type selector presentation according to provided type
+     * 
+     * @param {String} name Layer name
+     * @param {String} type Layer type
+     * 
+     * @returns {void}
+     */
     setSelectorValue: (name, type) => {
-        let el = $('*[data-gc2-id="' + name.replace('v:', '') + '"]');
-        if (type === 'tile') {
-            el.data('gc2-layer-type', 'tile');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(tileLayerIcon);
-        } else if (type === 'vector') {
-            el.data('gc2-layer-type', 'vector');
-            el.closest('.layer-item').find('.js-dropdown-label').first().html(vectorLayerIcon);
+        let el = $('*[data-gc2-id="' + layerTreeUtils.stripPrefix(name) + '"]');
+        if (type === LAYER.VECTOR || type === LAYER.RASTER_TILE || type === LAYER.VECTOR_TILE || type === LAYER.WEBGL) {
+            el.data('gc2-layer-type', type);
+            el.closest('.layer-item').find('.js-dropdown-label').first().html(ICONS[type]);
         } else {
-            throw new Error('Invalid type was provided');
+            throw new Error(`Invalid type was provided: ${type}`);
         }
     },
 
@@ -311,7 +230,7 @@ module.exports = {
             if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
                 navigator.serviceWorker.getRegistrations().then(registrations => {
                     if (registrations.length === 1 && registrations[0].active !== null) {
-                        queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
+                        layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                             if (Array.isArray(response)) {
                                 offlineModeControlsManager.setCachedLayers(response).then(() => {
                                     offlineModeControlsManager.updateControls().then(() => {
@@ -396,7 +315,7 @@ module.exports = {
             for (let i = (setLayerOpacityRequests.length - 1); i >= 0; i--) {
                 let item = setLayerOpacityRequests[i];
                 if (item.layerKey === layerKey) {
-                    applyOpacityToLayer(item.opacity, layerKey);
+                    layerTreeUtils.applyOpacityToLayer(item.opacity, layerKey, cloud, backboneEvents);
                     if (i >= 1) {
                         for (let j = (i - 1); j >= 0; j--) {
                             let subItem = setLayerOpacityRequests[j];
@@ -421,14 +340,14 @@ module.exports = {
             for (let layerKey in stores) {
                 let layerIsEnabled = false;
                 for (let i = 0; i < activeLayers.length; i++) {
-                    if (activeLayers[i].replace(`v:`, ``) === layerKey.replace(`v:`, ``)) {
+                    if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
                         layerIsEnabled = true;
                         break;
                     }
                 }
 
                 if (layerIsEnabled) {
-                    let layerKeyNoPrefix = layerKey.replace(`v:`, ``);
+                    let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
                     let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
                     let parsedMeta = _self.parseLayerMeta(layerDescription);
 
@@ -541,9 +460,9 @@ module.exports = {
                                 let existingMeta = meta.getMetaData();
                                 if (`data` in existingMeta) {
                                     activeLayers.map(layerName => {
-                                        let correspondingMeta = meta.getMetaByKey(layerName.replace(`v:`, ``), false);
+                                        let correspondingMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(layerName), false);
                                         if (correspondingMeta === false) {
-                                            layersThatAreNotInMeta.push(layerName.replace(`v:`, ``));
+                                            layersThatAreNotInMeta.push(layerTreeUtils.stripPrefix(layerName));
                                         }
                                     });
                                 }
@@ -656,17 +575,22 @@ module.exports = {
                                             return new Promise((localResolve, reject) => {
                                                 if (activeLayers) {
                                                     activeLayers.map(layerName => {
-                                                        let layerMeta = meta.getMetaByKey(layerName.replace('v:', ''));
+                                                        let noPrefixName = layerTreeUtils.stripPrefix(layerName);
+                                                        let layerMeta = meta.getMetaByKey(noPrefixName);
         
-                                                        if ($(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 &&
-                                                            $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1) {
-                                                            if (layerName.indexOf(`v:`) === 0) {
-                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                                        if ($(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 ||
+                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1 ||
+                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).length === 1) {
+
+                                                            if (layerName.indexOf(`${LAYER.VECTOR}:`) === 0) {
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
+                                                            } else if (layerName.indexOf(`${LAYER.VECTOR_TILE}:`) === 0) {
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                                             } else {
-                                                                $(`[data-gc2-layer-key="${layerName.replace('v:', '')}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
+                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
                                                             }
                                                         } else {
-                                                            $(`#layers`).find(`input[data-gc2-id="${layerName.replace('v:', '')}"]`).trigger('click', [{doNotLegend: true}]);
+                                                            $(`#layers`).find(`input[data-gc2-id="${noPrefixName}"]`).trigger('click', [{doNotLegend: true}]);
                                                         }
                                                     });
         
@@ -686,23 +610,23 @@ module.exports = {
 
                                         const setOfflineModeSettingsForCache = () => {
                                             return new Promise((localResolve, reject) => {
-                                                queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
+                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(currentCachedRequests => {
                                                     let promisesContent = [];
                                                     if (Object.keys(offlineModeSettings).length > 0) {
-                                                        queryServiceWorker({
+                                                        layerTreeUtils.queryServiceWorker({
                                                             action: `batchSetOfflineModeForLayers`,
                                                             payload: offlineModeSettings
                                                         }).then(result => {
                                                             turnOnActiveLayersAndFinishBuilding().then(() => {
-                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
                                                                     localResolve();
                                                                 });
                                                             });
                                                         });
                                                     } else {
-                                                        queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
+                                                        layerTreeUtils.queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
                                                             turnOnActiveLayersAndFinishBuilding().then(() => {
-                                                                queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
+                                                                layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
                                                                     localResolve();
                                                                 });
                                                             });
@@ -771,13 +695,13 @@ module.exports = {
      */
     _applyOfflineModeSettings: (settings) => {
         return new Promise((resolve, reject) => {
-            queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
+            layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then(response => {
                 if (Array.isArray(response)) {
                     if (Object.keys(settings).length === 0) {
                         // Empty object means that all layers should have the offline mode to be turned off
                         let promises = [];
                         response.map(cachedRequest => {
-                            promises.push(queryServiceWorker({
+                            promises.push(layerTreeUtils.queryServiceWorker({
                                 action: `disableOfflineModeForLayer`,
                                 payload: {layerKey: cachedRequest.layerKey}
                             }));
@@ -793,7 +717,8 @@ module.exports = {
                     } else {
                         let promises = [];
                         for (let key in settings) {
-                            if (key.indexOf(`v:`) === 0) {
+                            // @todo Vector tile case
+                            if (key.indexOf(`${LAYER.VECTOR}:`) === 0) {
                                 // Offline mode for vector layer can be enabled if service worker has corresponsing request cached
                                 response.map(cachedRequest => {
                                     if (cachedRequest.layerKey === key) {
@@ -805,7 +730,7 @@ module.exports = {
                                             offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
                                         }
                                         
-                                        promises.push(queryServiceWorker({
+                                        promises.push(layerTreeUtils.queryServiceWorker({
                                             action: serviceWorkerAPIKey,
                                             payload: {layerKey: cachedRequest.layerKey}
                                         }));
@@ -917,7 +842,7 @@ module.exports = {
             custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
         }
 
-        stores['v:' + layerKey] = new geocloud.sqlStore({
+        stores[LAYER.VECTOR + ':' + layerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
             method: "POST",
@@ -925,14 +850,16 @@ module.exports = {
             db: db,
             uri: "/api/sql",
             clickable: true,
-            id: 'v:' + layerKey,
-            name: 'v:' + layerKey,
+            id: LAYER.VECTOR + ':' + layerKey,
+            name: LAYER.VECTOR + ':' + layerKey,
             lifetime: 0,
             custom_data,
-            styleMap: styles['v:' + layerKey],
+            styleMap: styles[LAYER.VECTOR + ':' + layerKey],
             sql,
             onLoad: (l) => {
                 if (l === undefined) return;
+
+                // @todo Here goes the initialization of vector OR vector tile layer
 
                 let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                 if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
@@ -941,14 +868,14 @@ module.exports = {
                 let metaDataKeys = meta.getMetaDataKeys();
                 let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
                     && metaDataKeys[layerKey].infowindow.template !== "")
-                    ? metaDataKeys[layerKey].infowindow.template : defaultTemplate;
-                let tableHeaders = sqlQuery.prepareDataForTableView(`v:` + layerKey, l.geoJSON.features);
+                    ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+                let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
                 let localTable = gc2table.init({
                     el: tableContainerId + ` table`,
                     ns: tableContainerId,
                     geocloud2: cloud.get(),
-                    store: stores[`v:` + layerKey],
+                    store: stores[LAYER.VECTOR + ':' + layerKey],
                     cm: tableHeaders,
                     autoUpdate: false,
                     autoPan: false,
@@ -966,30 +893,30 @@ module.exports = {
                     localTable.loadDataInTable(true);
                 }
 
-                tables[`v:` + layerKey] = localTable;
+                tables[LAYER.VECTOR + ':' + layerKey] = localTable;
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
-                if (typeof onLoad['v:' + layerKey] === "function") {
-                    onLoad['v:' + layerKey](l);
+                if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
+                    onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
             },
             onEachFeature: (feature, layer) => {
-                if (('v:' + layerKey) in onEachFeature) {
+                if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
                     /*
                         Checking for correct onEachFeature structure
                     */
-                    if (`fn` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].fn ||
-                        `caller` in onEachFeature['v:' + layerKey] === false || !onEachFeature['v:' + layerKey].caller) {
+                    if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
                         throw new Error(`Invalid onEachFeature structure`);
                     }
 
-                    if (onEachFeature['v:' + layerKey].caller === `editor`) {
+                    if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                         /*
                             If the handler was set by the editor extension, then display the attributes popup and editing buttons
                         */
@@ -1035,7 +962,7 @@ module.exports = {
                         });
                     }
 
-                    onEachFeature['v:' + layerKey].fn(feature, layer);
+                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
@@ -1043,7 +970,7 @@ module.exports = {
                     });
                 }
             },
-            pointToLayer: (pointToLayer.hasOwnProperty('v:' + layerKey) ? pointToLayer['v:' + layerKey] : (feature, latlng) => {
+            pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
             })
         });
@@ -1068,7 +995,7 @@ module.exports = {
             }
         }
 
-        let renderedText = Mustache.render(defaultTemplate, properties);
+        let renderedText = Mustache.render(layerTreeUtils.getDefaultTemplate(), properties);
         let managePopup = L.popup({
             autoPan: false,
             minWidth: 160,
@@ -1385,8 +1312,11 @@ module.exports = {
         if (!forcedState) {
             if (precheckedLayers && Array.isArray(precheckedLayers)) {
                 precheckedLayers.map(item => {
-                    if (item.id && item.id === `${localItem.f_table_schema}.${localItem.f_table_name}`
-                        || item.id && item.id === `v:${localItem.f_table_schema}.${localItem.f_table_name}`) {
+                    let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
+                    if (item.id && (item.id === name
+                        || item.id === `${LAYER.VECTOR}:${name}`
+                        || item.id === `${LAYER.RASTER_TILE}:${name}`
+                        || item.id === `${LAYER.VECTOR_TILE}:${name}`)) {
                         layerIsActive = true;
                         activeLayerName = item.id;
                     }
@@ -1460,7 +1390,6 @@ module.exports = {
     createLayerRecord: (layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName,
         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
-        let displayInfo = `hidden`;
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
@@ -1472,16 +1401,39 @@ module.exports = {
                 </div>
             </div>`);
         } else {
-            let layerIsTheTileOne = true;
-            let layerIsTheVectorOne = false;
+            let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let singleTypeLayer = (detectedTypes === 1);
 
-            let singleTypeLayer = true;
-            let selectorLabel = tileLayerIcon;
-            let defaultLayerType = 'tile';
+            let condition = layerTreeUtils.getDefaultLayerType(layer);
+            if (layerIsActive && activeLayerName) {
+                condition = (activeLayerName.indexOf(`:`) === -1 ? LAYER.RASTER_TILE : activeLayerName.split(`:`)[0]);
+            }
+
+            // Deciding on default vector type
+            let selectorLabel, defaultLayerType;
+            switch (condition) {
+                case LAYER.VECTOR:
+                    selectorLabel = ICONS[LAYER.VECTOR];
+                    defaultLayerType = LAYER.VECTOR;
+                    break;
+                case LAYER.RASTER_TILE:
+                    selectorLabel = ICONS[LAYER.RASTER_TILE];
+                    defaultLayerType = LAYER.RASTER_TILE;
+                    break;
+                case LAYER.VECTOR_TILE:
+                    selectorLabel = ICONS[LAYER.VECTOR_TILE];
+                    defaultLayerType = LAYER.VECTOR_TILE;
+                    break;
+                case LAYER.WEBGL:
+                    selectorLabel = ICONS[LAYER.WEBGL];
+                    defaultLayerType = LAYER.WEBGL;
+                    break;
+            }
 
             let layerIsEditable = false;
+            let displayInfo = `hidden`;
             let parsedMeta = false;
-            if (layer && layer.meta) {
+            if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
                     if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
@@ -1491,25 +1443,15 @@ module.exports = {
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
-
-                    if (`vidi_layer_type` in parsedMeta && ['v', 'tv', 'vt'].indexOf(parsedMeta.vidi_layer_type) !== -1) {
-                        layerIsTheVectorOne = true;
-                        singleTypeLayer = false;
-
-                        if (parsedMeta.vidi_layer_type === 'v') {
-                            defaultLayerType = 'vector';
-                            selectorLabel = vectorLayerIcon;
-                            singleTypeLayer = true;
-                            layerIsTheTileOne = false;
-                        }
-                    }
                 }
             }
 
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
-            if (layerIsTheVectorOne) {
+            if (isVectorLayer) {
+                _self.createStore(layer, isVirtual);
+
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in dynamicLoad === false || [true, false].indexOf(dynamicLoad[layerKey]) === -1) {
                     if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
@@ -1524,24 +1466,11 @@ module.exports = {
                 }
             }
 
-            if (layerIsActive) {
-                if (activeLayerName.indexOf(`v:`) === 0) {
-                    selectorLabel = vectorLayerIcon;
-                    defaultLayerType = 'vector';
-                }
-            }
-
-            if (layerIsTheVectorOne) {
-                _self.createStore(layer, isVirtual);
-            }
-
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
-            let layerTypeSelector = false;
-            if (singleTypeLayer) {
-                layerTypeSelector = ``;
-            } else {
-                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, tileLayerIcon, vectorLayerIcon);
+            let layerTypeSelector = ``;
+            if (!singleTypeLayer) {
+                layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, specifiers);
             }
 
             let addButton = ``;
@@ -1549,40 +1478,49 @@ module.exports = {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
-            let selectorLayerType = `tile`;
-            if (layerIsTheVectorOne && layerIsTheTileOne === false) {
-                selectorLayerType = `vector`;
-            }
-
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, selectorLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
 
             $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', 'tile');
+                $(switcher).data('gc2-layer-type', LAYER.RASTER_TILE);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerAsTileOne(layerKey);
+                _self.setupLayerControls(LAYER.RASTER_TILE, layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
 
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(tileLayerIcon);
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.RASTER_TILE]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
 
             $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', 'vector');
+                $(switcher).data('gc2-layer-type', LAYER.VECTOR);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerAsVectorOne(layerKey);
-                _self.reloadLayer('v:' + $(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                _self.setupLayerControls(LAYER.VECTOR, layerKey);
+                _self.reloadLayer(`${LAYER.VECTOR}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(vectorLayerIcon);
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
 
+            $(layerControlRecord).find('.js-layer-type-selector-vector-tile').first().on('click', (e, data) => {
+                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
+                $(switcher).data('gc2-layer-type', LAYER.VECTOR_TILE);
+                $(switcher).prop('checked', true);
+
+                _self.setupLayerControls(LAYER.VECTOR_TILE, layerKey);
+                _self.reloadLayer(`${LAYER.VECTOR_TILE}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
+
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR_TILE]);
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
+                offlineModeControlsManager.updateControls();
+            });
+
+            try {
             if (isVirtual) {
                 $(layerControlRecord).find(`.js-toggle-filters`).remove();
                 $(layerControlRecord).find(`.js-toggle-load-strategy`).remove();
@@ -1651,7 +1589,7 @@ module.exports = {
 
                 offlineModeControlsManager.setControlState(layerKey, offlineModeValue);
                 if (offlineModeControlsManager.isVectorLayer(layerKey)) {
-                    queryServiceWorker({
+                    layerTreeUtils.queryServiceWorker({
                         action: serviceWorkerAPIKey,
                         payload: {layerKey}
                     }).then(() => {
@@ -1671,12 +1609,12 @@ module.exports = {
 
                 let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
                 if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
-                    queryServiceWorker({
+                    layerTreeUtils.queryServiceWorker({
                         action: `disableOfflineModeForLayer`,
                         payload: {layerKey}
                     }).then(() => {
-                        _self.reloadLayer(`v:` + layerKey).then(() => {
-                            queryServiceWorker({
+                        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey).then(() => {
+                            layerTreeUtils.queryServiceWorker({
                                 action: `enableOfflineModeForLayer`,
                                 payload: {layerKey}
                             }).then(() => {
@@ -1692,10 +1630,10 @@ module.exports = {
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
             $(layerContainer).find('.js-layer-settings-table').hide(0);
 
-            let initialSliderValue = 1;
-            if (layerIsTheTileOne) {
-                _self.setupLayerAsTileOne(layerKey);
+            _self.setupLayerControls(defaultLayerType, layerKey);
 
+            let initialSliderValue = 1;
+            if (isRasterTileLayer) {
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
                     <div class="js-opacity-slider slider shor slider-material-orange"></div>
@@ -1721,7 +1659,7 @@ module.exports = {
 
                     slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
                         let sliderValue = (parseFloat(values[handle]) / 100);
-                        applyOpacityToLayer(sliderValue, layerKey);
+                        layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
                         setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
                     });
                 }
@@ -1802,7 +1740,7 @@ module.exports = {
                 }
             }
 
-            if (layerIsTheVectorOne) {
+            if (isVectorLayer) {
                 if (isVirtual === false) {
                     let value = false;
                     if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
@@ -1836,14 +1774,10 @@ module.exports = {
                     // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
 
-                    tables[`v:` + layerKey].loadDataInTable(true);
+                    tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                 });
 
-                if (defaultLayerType === `vector`) {
-                    _self.setupLayerAsVectorOne(layerKey, true, layerIsActive);
-                } else {
-                    _self.setupLayerAsTileOne(layerKey, true, layerIsActive);
-                }
+                _self.setupLayerControls(defaultLayerType, layerKey, true, layerIsActive);
             }
 
             $(layerContainer).find(`.js-toggle-search`).click(() => {
@@ -1901,6 +1835,7 @@ module.exports = {
                         countSearchFields.push(i);
                     }
                 });
+
                 if (countSearchFields.length === 0) {
                     $(search).find('input, textarea, button, select').attr('disabled', 'true');
                     $(search).find('.no-searchable-fields').show();
@@ -1910,6 +1845,7 @@ module.exports = {
                         $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
                     });
                 }
+
                 $(search).on('change', (e) => {
                     let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
                     $.each(fieldConf, function (i, val) {
@@ -1949,6 +1885,9 @@ module.exports = {
                     }
                 });
             }
+
+
+        }catch(e) {console.log(e)}
         }
     },
 
@@ -1962,24 +1901,10 @@ module.exports = {
     },
 
     /**
-     * Setups layer as the vector one
-     */
-    setupLayerAsVectorOne: (layerKey, ignoreErrors, layerIsEnabled) => {
-        _self.setupLayerControls(true, layerKey, ignoreErrors, layerIsEnabled);
-    },
-
-    /**
-     * Setups layer as the tile one
-     */
-    setupLayerAsTileOne: (layerKey, ignoreErrors, layerIsEnabled) => {
-        _self.setupLayerControls(false, layerKey, ignoreErrors, layerIsEnabled);
-    },
-
-    /**
      * Returns tile filter string for specific tile layer
      */
     getLayerFilterString: (layerKey) => {
-        if (!layerKey || layerKey.length === 0 || layerKey.indexOf(`v:`) === 0 || layerKey.indexOf(`.`) === -1) {
+        if (!layerKey || [LAYER.VECTOR, LAYER.VECTOR_TILE].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
@@ -1997,20 +1922,25 @@ module.exports = {
     },
 
     /**
-     * By design the layer control is rendered with controls both for tile and vector case, so
-     * this function regulates the visibility and initialization of layer type specific controls.
+     * Regulates the visibility and initialization of layer type specific controls.
      *
-     * @param {Boolean} setupAsVector  Specifies if layer should be setup as the vector one
-     * @param {String}  layerKey       Layer key
-     * @param {Boolean} ignoreErrors   Specifies if errors should be ignored
-     * @param {Boolean} layerIsEnabled Specifies if layer is enabled
+     * @param {Boolean} desiredSetupType Layer type to setup
+     * @param {String}  layerKey         Layer key
+     * @param {Boolean} ignoreErrors     Specifies if errors should be ignored
+     * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      */
-    setupLayerControls: (setupAsVector, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
-        layerKey = layerKey.replace(`v:`, ``);
+    setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
+
+        console.log(`### setupLayerControls`, desiredSetupType, layerKey, layerIsEnabled);
+
+        layerKey = layerTreeUtils.stripPrefix(layerKey);
+
         let layerMeta = meta.getMetaByKey(layerKey);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            if (setupAsVector) {
+            $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+
+            if (desiredSetupType === LAYER.VECTOR) {
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
                 $(container).find(`.js-toggle-tile-filters`).hide(0);
                 $(container).find(`.js-toggle-opacity`).hide(0);
@@ -2026,9 +1956,7 @@ module.exports = {
                 $(container).find(`.js-toggle-filters`).show(0);
                 $(container).find(`.js-toggle-load-strategy`).show(0);
                 $(container).find('.js-layer-settings-opacity').hide(0);
-            } else {
-                $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
-
+            } else if (desiredSetupType === LAYER.RASTER_TILE) {
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show(0);
                     $(container).find(`.js-toggle-filters`).show(0);
@@ -2047,12 +1975,28 @@ module.exports = {
 
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
+            } else if (desiredSetupType === LAYER.VECTOR_TILE) {
+                console.warn(`Controls are not completely setup for vector tile layers`);
+
+                $(container).find(`.js-toggle-filters`).hide(0);
+                $(container).find('.js-layer-settings-filters').hide(0);
+
+                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
+
+                $(container).find(`.js-toggle-load-strategy`).hide(0);
+                $(container).find('.js-layer-settings-load-strategy').hide(0);
+
+                $(container).find(`.js-toggle-table-view`).hide();
+                $(container).find('.js-layer-settings-table').hide(0);
+            } else if (desiredSetupType === LAYER.WEBGL) {
+                console.warn(`Controls are not completely setup for WebGL layers`);
             }
 
             $(container).find(`.js-toggle-search`).hide(0);
             $(container).find('.js-layer-settings-search').hide(0);
 
-            // For both vector and tile
+            // For all layer types
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {
@@ -2072,7 +2016,7 @@ module.exports = {
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
         _self.createStore(correspondingLayer);
-        _self.reloadLayer(`v:` + layerKey);       
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);       
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
@@ -2097,7 +2041,7 @@ module.exports = {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
-                    _self.reloadLayer(`v:` + layerKey);
+                    _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
                 }
             }
         });
@@ -2109,54 +2053,7 @@ module.exports = {
      * @returns {void}
      */
     calculateOrder: () => {
-        layerTreeOrder = [];
-
-        $(`[id^="layer-panel-"]`).each((index, element) => {
-            let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
-            let children = [];
-
-            const processLayerRecord = (layerElement) => {
-                let layerKey = $(layerElement).data(`gc2-layer-key`);
-                let splitLayerKey = layerKey.split('.');
-                if (splitLayerKey.length !== 3) {
-                    throw new Error(`Invalid layer key (${layerKey})`);
-                }
-
-                return {
-                    id: `${splitLayerKey[0]}.${splitLayerKey[1]}`,
-                    type: GROUP_CHILD_TYPE_LAYER
-                };
-            };
-
-            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
-                if ($(layerElement).data(`gc2-layer-key`)) {
-                    // Processing layer record
-                    children.push(processLayerRecord(layerElement));
-                } else if ($(layerElement).data(`gc2-subgroup-id`)) {
-                    // Processing subgroup record
-                    let subgroupDescription = {
-                        id: $(layerElement).data(`gc2-subgroup-id`),
-                        type: GROUP_CHILD_TYPE_GROUP,
-                        children: []
-                    };
-
-                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
-                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
-                    });
-
-                    children.push(subgroupDescription);
-                } else {
-                    throw new Error(`Unable to detect the group child element`);
-                }
-            });
-
-            let readableId = atob(id);
-            if (readableId) {
-                layerTreeOrder.push({id: readableId, children});
-            } else {
-                throw new Error(`Unable to decode the layer group identifier (${id})`);
-            }
-        });
+        layerTreeOrder = layerTreeUtils.calculateOrder();
     },
 
     /**
@@ -2255,29 +2152,13 @@ module.exports = {
         });
     },
 
-
-    
-
     /**
      * Returns list of currently enabled layers
+     * 
+     * @returns {Array}
      */
     getActiveLayers: () => {
-        let activeLayerIds = [];
-        $('*[data-gc2-layer-type]').each((index, item) => {
-            let isEnabled = $(item).is(':checked');
-            if (isEnabled) {
-                if ($(item).data('gc2-layer-type') === 'tile') {
-                    activeLayerIds.push($(item).data('gc2-id'));
-                } else {
-                    activeLayerIds.push('v:' + $(item).data('gc2-id'));
-                }
-            }
-        });
-
-        activeLayerIds = activeLayerIds.filter((v, i, a) => {
-            return a.indexOf(v) === i
-        });
-        return activeLayerIds;
+        return layerTreeUtils.getActiveLayers();
     },
 
     /**
