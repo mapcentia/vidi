@@ -505,12 +505,16 @@ module.exports = {
      * 
      * @param {String}  geometryType        Geometry type of created / edited feature
      * @param {Boolean} featureAlreadyExist Specifies if feature already exists 
+     * @param {String}  enabledLayerName    Specifies what layer is enabled for snapping
+     * @param {String}  enabledFeatureId    Specifies what layer feature identifier is enabled for snapping
      */
-    enableSnapping: function (geometryType, featureAlreadyExist = true) {
+    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature = false) {
         let guideLayers = [];
         layers.getMapLayers().map(layer => {
             if (`id` in layer && layer.id && layer.id.indexOf(`v:`) === 0 && guideLayers.indexOf(layer.id) === -1) {
-                guideLayers.push(layer);
+                if (`_layers` in layer) {
+                    guideLayers.push(layer);
+                }
             }
         });
 
@@ -521,6 +525,9 @@ module.exports = {
                 guideLayers.map(layer => { markers[0].snapediting.addGuideLayer(layer); });
                 markers[0].snapediting.enable();
             } else {
+                if (enabledFeature) {
+                    enabledFeature._snapping_active = true;
+                }
 
                 var snap = new L.Handler.MarkerSnap(cloud.get().map);
                 guideLayers.map(layer => { snap.addGuideLayer(layer); });
@@ -661,7 +668,7 @@ module.exports = {
                     break;
             }
 
-            _self.enableSnapping(e.feature.geometry.type);
+            _self.enableSnapping(e.feature.geometry.type, true, e);
 
             // Delete some system attributes
             let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
