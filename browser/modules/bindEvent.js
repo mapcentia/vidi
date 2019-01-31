@@ -6,19 +6,13 @@
 
 'use strict';
 
-import { LAYER } from './layerTree/constants';
+import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var draw, measurements, advancedInfo, cloud, print, switchLayer, setBaseLayer, legend, meta;
-
-/**
- *
- * @type {array}
- */
-var metaDataKeys;
+var advancedInfo, cloud, switchLayer, meta;
 
 /**
  *
@@ -32,18 +26,6 @@ let APIBridgeSingletone = require('./api-bridge');
  */
 var apiBridgeInstance = false;
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var urlparser = require('./urlparser');
-
-/**
- *
- * @type {array}
- */
-var urlVars = urlparser.urlVars;
-
 var jRespond = require('jrespond');
 
 
@@ -51,7 +33,7 @@ require('dom-shims');
 require('arrive');
 
 var backboneEvents;
-
+var switchLayer;
 var pushState;
 var layerTree;
 var layers;
@@ -68,14 +50,10 @@ var isStarted = false;
 module.exports = module.exports = {
     set: function (modules) {
         applicationModules = modules;
-        draw = modules.draw;
-        measurements = modules.measurements;
         advancedInfo = modules.advancedInfo;
-        cloud = modules.cloud;
         print = modules.print;
         switchLayer = modules.switchLayer;
-        setBaseLayer = modules.setBaseLayer;
-        legend = modules.legend;
+        cloud = modules.cloud;
         meta = modules.meta;
         pushState = modules.pushState;
         layerTree = modules.layerTree;
@@ -121,6 +99,9 @@ module.exports = module.exports = {
                 let doNotLegend = false;
                 if ($(this).data(`gc2-layer-type`)) {
                     prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    if (prefix === LAYER_TYPE_DEFAULT + `:`) {
+                        prefix = ``;
+                    }
   
                     if (data) {
                         doNotLegend = data.doNotLegend;
@@ -139,7 +120,6 @@ module.exports = module.exports = {
         });
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
-            metaDataKeys = meta.getMetaDataKeys();
             if (!isStarted) {
                 isStarted = true;
                 setTimeout(

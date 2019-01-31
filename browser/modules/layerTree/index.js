@@ -1904,7 +1904,7 @@ module.exports = {
      * Returns tile filter string for specific tile layer
      */
     getLayerFilterString: (layerKey) => {
-        if (!layerKey || [LAYER.VECTOR, LAYER.VECTOR_TILE].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
+        if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 

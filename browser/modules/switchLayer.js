@@ -7,56 +7,19 @@
 'use strict';
 
 import { LAYER } from './layerTree/constants';
-
-var backboneEvents;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-let layerTreeUtils = require('./layerTree/utils');
+const layerTreeUtils = require('./layerTree/utils');
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var legend;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var layers;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var layerTree;
+var backboneEvents, cloud, legend, layers, layerTree, meta;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
 var pushState;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var meta;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var backboneEvents;
 
 let _self = false;
 
@@ -78,17 +41,20 @@ module.exports = module.exports = {
         return this;
     },
 
-    enableRasterTile: (gc2Id, forceTileReload) => {
+    enableRasterTile: (gc2Id, forceTileReload, doNotLegend, setupControls) => {
 
 console.log(`### enableRasterTile`, gc2Id);
 
-        let rasterTileLayerId = gc2Id;
         return new Promise((resolve, reject) => {
+            try {
+
             // Only one layer at a time, so using the raster tile layer identifier
-            layers.incrementCountLoading(rasterTileLayerId);
-            layerTree.setSelectorValue(name, LAYER.RASTER_TILE);
-            layers.addLayer(name, layerTree.getLayerFilterString(name)).then(() => {
-                _self.checkLayerControl(name, doNotLegend, setupControls);
+            layers.incrementCountLoading(gc2Id);
+            layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
+            layers.addLayer(gc2Id, layerTree.getLayerFilterString(gc2Id)).then(() => {
+                try {
+                _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
+
                 let tileLayersCacheBuster = ``;
                 if (forceTileReload) {
                     tileLayersCacheBuster = Math.random();
@@ -96,15 +62,16 @@ console.log(`### enableRasterTile`, gc2Id);
 
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
-                let rasterTileLayer = cloud.get().getLayersByName(rasterTileLayerId);
+                let rasterTileLayer = cloud.get().getLayersByName(gc2Id);
                 if (`setUrl` in rasterTileLayer) {
                     rasterTileLayer.setUrl(rasterTileLayer._url + "?" + tileLayersCacheBuster);
                     rasterTileLayer.redraw();
                 }
 
                 resolve();
+            }catch(e){console.log(e)}
             }).catch((err) => {
-                meta.init(name, true, true).then(layerMeta => {
+                meta.init(gc2Id, true, true).then(layerMeta => {
                     // Trying to recreate the layer tree with updated meta and switch layer again                           
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -115,16 +82,17 @@ console.log(`### enableRasterTile`, gc2Id);
                             });
                         }
 
-                        _self.init(name, true).then(() => {
+                        _self.init(gc2Id, true).then(() => {
                             resolve();
                         });
                     });
                 }).catch(() => {
-                    console.error(`Could not add ${rasterTileLayerId} tile layer`);
-                    layers.decrementCountLoading(rasterTileLayerId);
+                    console.error(`Could not add ${gc2Id} tile layer`);
+                    layers.decrementCountLoading(gc2Id);
                     resolve();
                 });
             });
+        }catch(e){console.log(e)}
         });
     },
 
@@ -273,11 +241,11 @@ console.log(`### enableRasterTile`, gc2Id);
 
             if (enable) {
                 if (layerType === 'rasterTile') {
-                    _self.enableRasterTile(gc2Id, forceTileReload).then(resolve);
+                    _self.enableRasterTile(gc2Id, forceTileReload, doNotLegend, setupControls).then(resolve);
                 } else if (layerType === 'vector') {
-                    _self.enableVector(gc2Id, failedBefore);
+                    _self.enableVector(gc2Id, failedBefore).then(resolve);
                 } else if (layerType === `vectorTile`) {
-                    _self.enableVectorTile(gc2Id);
+                    _self.enableVectorTile(gc2Id).then(resolve);
                 }
             } else {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
@@ -294,7 +262,7 @@ console.log(`### enableRasterTile`, gc2Id);
      */
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
         const getLayerSwitchControl = () => {
-            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerName.replace('v:', '') + '"]');
+            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
             if (!controlElement || controlElement.length !== 1) {
                 if (enable) {
                     console.warn(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
@@ -310,10 +278,10 @@ console.log(`### enableRasterTile`, gc2Id);
         if (el) {
             el.prop('checked', enable);
             if (setupControls) {        
-                if (layerName.indexOf(`v:`) === 0) {
-                    layerTree.setupLayerAsVectorOne(layerName, true, enable);
+                if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
+                    layerTree.setupLayerControls(LAYER.VECTOR, layerName, true, enable);
                 } else {
-                    layerTree.setupLayerAsTileOne(layerName, true, enable);
+                    layerTree.setupLayerControls(LAYER.RASTER_TILE, layerName, true, enable);
                 }
             }
 

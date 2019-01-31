@@ -28,6 +28,8 @@ const LAYER = {
     WEBGL: `w`
 };
 
+const LAYER_TYPE_DEFAULT = LAYER.RASTER_TILE;
+
 /**
  * Layer type icons
  */
@@ -45,5 +47,6 @@ export {
     SYSTEM_FIELD_PREFIX,
     SQL_QUERY_LIMIT,
     LAYER,
-    ICONS
+    ICONS,
+    LAYER_TYPE_DEFAULT
 };
