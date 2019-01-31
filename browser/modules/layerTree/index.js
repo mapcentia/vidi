@@ -1976,21 +1976,9 @@ module.exports = {
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
             } else if (desiredSetupType === LAYER.VECTOR_TILE) {
-                console.warn(`Controls are not completely setup for vector tile layers`);
-
-                $(container).find(`.js-toggle-filters`).hide(0);
-                $(container).find('.js-layer-settings-filters').hide(0);
-
-                $(container).find(`.js-toggle-opacity`).hide(0);
-                $(container).find('.js-layer-settings-opacity').hide(0);
-
-                $(container).find(`.js-toggle-load-strategy`).hide(0);
-                $(container).find('.js-layer-settings-load-strategy').hide(0);
-
-                $(container).find(`.js-toggle-table-view`).hide();
-                $(container).find('.js-layer-settings-table').hide(0);
+                console.error(`Controls are not completely setup for vector tile layers`);
             } else if (desiredSetupType === LAYER.WEBGL) {
-                console.warn(`Controls are not completely setup for WebGL layers`);
+                console.error(`Controls are not completely setup for WebGL layers`);
             }
 
             $(container).find(`.js-toggle-search`).hide(0);
