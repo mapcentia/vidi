@@ -47,6 +47,10 @@ body {
   padding: 0;
   overflow: hidden;
 }
+#loadscreentext {
+  font-weight: 300;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
 .modal-title {
   line-height: 1;
 }
