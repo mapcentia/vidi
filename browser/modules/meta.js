@@ -165,6 +165,21 @@ module.exports = {
         })
     },
 
+    /**
+     * Shortcut for parsing layer meta
+     */
+    parseLayerMeta: (layerKey) => {
+        let data = _self.getMetaByKey(layerKey);
+        let parsedMeta = false;
+        if (`meta` in data && data.meta) {
+            try {
+                let localMeta = JSON.parse(data.meta);
+                parsedMeta = localMeta;
+            } catch(e) {}
+        }
+
+        return parsedMeta;
+    },
 
     /**
      * Add a meta data objects layers
