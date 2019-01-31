@@ -43,7 +43,17 @@ module.exports = module.exports = {
         return this;
     },
 
-    enableRasterTile: (gc2Id, forceTileReload, doNotLegend, setupControls) => {
+    /**
+     * Enables raster tile vector
+     * 
+     * @param {String}  gc2Id         Layer name (with prefix)
+     * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
+     * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
+     * @param {Boolean} setupControls Specifies if layerTree controls should be setup
+     * 
+     * @returns {Promise}
+     */
+    enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
         if (LOG) console.log(`switchLayer: enableRasterTile ${gc2Id}`);
 
         return new Promise((resolve, reject) => {
@@ -54,7 +64,7 @@ module.exports = module.exports = {
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 
                 let tileLayersCacheBuster = ``;
-                if (forceTileReload) {
+                if (forceReload) {
                     tileLayersCacheBuster = Math.random();
                 }
 
@@ -84,7 +94,7 @@ module.exports = module.exports = {
                         });
                     });
                 }).catch(() => {
-                    console.error(`Could not add ${gc2Id} tile layer`);
+                    console.error(`Could not add ${gc2Id} raster tile layer`);
                     layers.decrementCountLoading(gc2Id);
                     resolve();
                 });
@@ -92,7 +102,17 @@ module.exports = module.exports = {
         });
     },
 
-    enableVector: (gc2Id, failedBefore, doNotLegend, setupControls) => {
+    /**
+     * Enables vector layer
+     * 
+     * @param {String}  gc2Id         Layer name (with prefix)
+     * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
+     * @param {Boolean} setupControls Specifies if layerTree controls should be setup
+     * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
+     * 
+     * @returns {Promise}
+     */
+    enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
 
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
@@ -171,16 +191,18 @@ module.exports = module.exports = {
 
     /**
      * Toggles a layer on/off. If visible is true, layer is toggled off and vice versa.
-     * @param name {string}
-     * @param enable {boolean}
-     * @param doNotLegend {boolean}
-     * @param forceTileReload {boolean}
+     * 
+     * @param {String}  name          Layer name (with prefix)
+     * @param {Boolean} enable        Enable of disable layer
+     * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
+     * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
+     * @param {Boolean} setupControls Specifies if layerTree controls should be setup
+     * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
      * 
      * @returns {Promise}
      */
-    init: function (name, enable, doNotLegend, forceTileReload, setupControls = true, failedBefore = false) {
-
-        console.log(`### switch layer`, name, enable);
+    init: function (name, enable, doNotLegend, forceReload, setupControls = true, failedBefore = false) {
+        if (LOG) console.log(`switchLayer: switch layer ${name} (enable: ${enable})`);
 
         if (!name) {
             throw new Error(`Layer name is undefined`);
@@ -197,6 +219,7 @@ module.exports = module.exports = {
                     || !isRasterTileLayer && (name.startsWith(LAYER.RASTER_TILE + `:`) || name.indexOf(`:`) === -1)
                     || !isVectorTileLayer && name.startsWith(LAYER.VECTOR_TILE + `:`)) {
                     console.log(`No selected representation for ${name}, requesting the default representation instead`);
+
                     name = layerTreeUtils.stripPrefix(name);
                     if (defaultLayerType.length > 0 && defaultLayerType !== LAYER.RASTER_TILE) {
                         name = defaultLayerType + `:` + name;
@@ -232,13 +255,13 @@ module.exports = module.exports = {
 
             if (enable) {
                 if (name.startsWith(LAYER.VECTOR + ':')) {
-                    _self.enableVector(gc2Id, failedBefore, doNotLegend, setupControls).then(resolve);
+                    _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else if (name.startsWith(LAYER.VECTOR_TILE + ':')) {
                     _self.enableVectorTile(gc2Id).then(resolve);
                 } else if (name.startsWith(LAYER.WEBGL + ':')) {
                     _self.enableWebGL(gc2Id).then(resolve);
                 } else {
-                    _self.enableRasterTile(gc2Id, forceTileReload, doNotLegend, setupControls).then(resolve);
+                    _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }
             } else {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
