@@ -141,7 +141,7 @@ module.exports = module.exports = {
 
                 resolve();
             } else {
-                meta.init(rasterTileLayerId, true, true).then(layerMeta => {
+                meta.init(gc2Id, true, true).then(layerMeta => {
                     // Trying to recreate the layer tree with updated meta and switch layer again
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -159,7 +159,7 @@ module.exports = module.exports = {
                         });
                     });
                 }).catch(() => {
-                    console.error(`Could not add ${rasterTileLayerId} vector layer`);
+                    console.error(`Could not add ${gc2Id} vector layer`);
                     layers.decrementCountLoading(vectorLayerId);
                     resolve();
                 });
