@@ -82,13 +82,15 @@ L.Snap.findClosestLayerSnap = function (map, layers, latlng, tolerance, withVert
     for (var c=0; c<closest.length; c++) {
         var layerInfo = closest[c];
         if (layerInfo.distance < tolerance) {
-            withinTolerance.push(layerInfo);
-            
-            if ((! layerInfo.layer.hasOwnProperty('_gridlineGroup')) && (! layerInfo.layer.hasOwnProperty('_guidelineGroup'))) {
-                shapesWithinTolerance.push(layerInfo);
-            }
-            else if (layerInfo.layer.hasOwnProperty('_guidelineGroup')) {
-                guidesWithinTolerance.push(layerInfo);
+            if (!layerInfo.layer._snapping_active) {
+                withinTolerance.push(layerInfo);
+                
+                if ((! layerInfo.layer.hasOwnProperty('_gridlineGroup')) && (! layerInfo.layer.hasOwnProperty('_guidelineGroup'))) {
+                    shapesWithinTolerance.push(layerInfo);
+                }
+                else if (layerInfo.layer.hasOwnProperty('_guidelineGroup')) {
+                    guidesWithinTolerance.push(layerInfo);
+                }
             }
         }
     }
