@@ -210,7 +210,7 @@ const getPossibleLayerTypes = (layerDescription) => {
     }
 
     if (layerTypeSpecifier.length > 0) {
-        throw new Error(`Provided layer name "${layerName}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
+        //throw new Error(`Provided layer name "${layerName}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
     }
 
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
