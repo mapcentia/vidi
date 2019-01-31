@@ -24,7 +24,7 @@ const API_HOST = config.gc2.host;
 
 /**
  * Return identifiers of the currently authenticated user
- * 
+ *
  * @returns {Object}
  */
 const getCurrentUserIdentifiers = (request) => {
@@ -181,7 +181,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                     }
                 } else {
                     throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
-                } 
+                }
             });
         }
     } else {
@@ -209,7 +209,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                     let localParsedBody = JSON.parse(response.body);
                     parsedBody = localParsedBody;
                 } catch (e) {}
-    
+
                 if (parsedBody) {
                     let parsedSnapshotData = JSON.parse(parsedBody.data.value);
                     parsedSnapshotData.browserId = false;
@@ -253,7 +253,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                     let localParsedBody = JSON.parse(response.body);
                     parsedBody = localParsedBody;
                 } catch (e) {}
-    
+
                 if (parsedBody) {
                     let parsedSnapshotData = JSON.parse(parsedBody.data.value);
                     if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
@@ -323,4 +323,3 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
 });
 
 module.exports = router;
-
