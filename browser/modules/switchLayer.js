@@ -215,6 +215,8 @@ module.exports = module.exports = {
                 let layer = metaData.data[j];
                 let { isVectorLayer, isRasterTileLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);
+
+                if (LOG) console.log(`switchLayer: ${name}, according to meta, is vector (${isVectorLayer}), raster tile (${isRasterTileLayer}), vector tile (${isVectorTileLayer})`);
                 if (!isVectorLayer && name.startsWith(LAYER.VECTOR + `:`)
                     || !isRasterTileLayer && (name.startsWith(LAYER.RASTER_TILE + `:`) || name.indexOf(`:`) === -1)
                     || !isVectorTileLayer && name.startsWith(LAYER.VECTOR_TILE + `:`)) {
@@ -254,6 +256,7 @@ module.exports = module.exports = {
             }
 
             if (enable) {
+                if (LOG) console.log(`switchLayer: enabling ${name}`);
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else if (name.startsWith(LAYER.VECTOR_TILE + ':')) {

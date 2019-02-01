@@ -216,8 +216,6 @@ module.exports = {
 
                 // If filters are applied or single_tile is true, then request should not be cached
                 let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-                if (!singleTiled) appendedFiltersString = false;
-
                 let useLiveWMS = (appendedFiltersString || singleTiled);
 
                 // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
