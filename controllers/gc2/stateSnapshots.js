@@ -13,14 +13,16 @@ var request = require('request');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 
-const throwError = (response, error, responseBody = ``) => {
-    console.error(`Error occured: ${error}`, responseBody);
+const throwError = (response, error, data) => {
+    console.error(`Error occured: ${error}`);
+    if (data) console.error(`Error details: ${JSON.stringify(data)}`);
+
     response.status(400);
     response.json({ error });
 };
 
 if (!config.gc2.host) throw new Error(`Unable to get the GC2 host from config`);
-const API_HOST = config.gc2.host;
+const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
 
 /**
  * Return identifiers of the currently authenticated user
@@ -72,8 +74,13 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
         request({
             method: 'GET',
             encoding: 'utf8',
-            uri: API_HOST + `/` + req.params.dataBase
+            uri: API_LOCATION + `/` + req.params.dataBase
         }, (error, response) => {
+            if (error) {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
+                return;
+            }
+
             let parsedBody = false;
             try {
                 let localParsedBody = JSON.parse(response.body);
@@ -93,7 +100,10 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
 
                 res.send(results);
             } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
+                    body: response.body,
+                    url: API_LOCATION + `/` + req.params.dataBase
+                });
             }
         });
     }
@@ -112,7 +122,7 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
         request({
             method: 'GET',
             encoding: 'utf8',
-            uri: API_HOST + `/` + req.params.dataBase + '/' + req.params.id
+            uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
         }, (error, response) => {
             let parsedBody = false;
             try {
@@ -128,7 +138,7 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
                     res.send(parsedBody.data.value);
                 }
             } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
             }
         });
     }
@@ -161,7 +171,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             request({
                 method: 'POST',
                 encoding: 'utf8',
-                uri: API_HOST + `/` + req.params.dataBase + `/` + generatedKey,
+                uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
                 form: JSON.stringify(stateSnapshotCopy)
             }, (error, response) => {
                 let parsedBody = false;
@@ -180,7 +190,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                         throwError(res, parsedBody.message);
                     }
                 } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 } 
             });
         }
@@ -199,7 +209,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
         request({
             method: 'GET',
             encoding: 'utf8',
-            uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
         }, (error, response) => {
             if (response.body.data === false) {
                 throwError(res, 'INVALID_SNAPSHOT_ID');
@@ -218,13 +228,13 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                     request({
                         method: 'PUT',
                         encoding: 'utf8',
-                        uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                         form: JSON.stringify(parsedSnapshotData)
                     }, (error, response) => {
                         res.send({ status: 'success' });
                     });
                 } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
             }
         });
@@ -243,7 +253,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
         request({
             method: 'GET',
             encoding: 'utf8',
-            uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
         }, (error, response) => {
             if (response.body.data === false) {
                 throwError(res, 'INVALID_SNAPSHOT_ID');
@@ -263,7 +273,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                         request({
                             method: 'PUT',
                             encoding: 'utf8',
-                            uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                             form: JSON.stringify(parsedSnapshotData)
                         }, (error, response) => {
                             res.send({ status: 'success' });
@@ -272,7 +282,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                         throwError(res, 'ACCESS_DENIED');
                     }
                 } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
             }
         });
@@ -290,7 +300,7 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
     }, (error, response) => {
         if (response.body.data === false) {
             throwError(res, 'INVALID_SNAPSHOT_ID');
@@ -308,7 +318,7 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
                     request({
                         method: 'DELETE',
                         encoding: 'utf8',
-                        uri: API_HOST + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                     }, (error, response) => {
                         res.send({ status: 'success' });
                     });
@@ -316,7 +326,7 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
                     throwError(res, 'ACCESS_DENIED');
                 }
             } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', response.body);
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
             }
         }
     });
