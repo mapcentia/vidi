@@ -213,14 +213,15 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                // If filters are applied, then request should not be cached
-                let useLiveWMS = (appendedFiltersString || JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true); //TODO rename single_tile
 
-                // Detect if layer is protected and route it through backend if needed
+                // If filters are applied or single_tile is true, then request should not be cached
+                let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+                let useLiveWMS = (appendedFiltersString || singleTiled);
+
+                // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
                 let mapRequestProxy = false;
-                if (layerDescription.authentication === `Read/write`) {
+                if (useLiveWMS && layerDescription.authentication === `Read/write`) {
                     mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
-                    useLiveWMS = true;
                 }
 
                 if (layer === layerKey) {

@@ -28,14 +28,16 @@ const LAYER = {
     WEBGL: `w`
 };
 
+const LAYER_TYPE_DEFAULT = LAYER.RASTER_TILE;
+
 /**
  * Layer type icons
  */
 let icons = {};
 icons[LAYER.VECTOR] = `<i class="material-icons">gesture</i>`;
 icons[LAYER.RASTER_TILE] = `<i class="material-icons">border_all</i>`;
-icons[LAYER.VECTOR_TILE] = `<i style="color: red;">NOT_ADDED_YET VECTOR_TILE</i>`;
-icons[LAYER.WEBGL] = `<i style="color: red;">NOT_ADDED_YET WEBGL</i>`;
+icons[LAYER.VECTOR_TILE] = `<i class="material-icons">domain</i>`;
+icons[LAYER.WEBGL] = `<i class="material-icons">grain</i>`;
 const ICONS = icons;
 
 export {
@@ -45,5 +47,6 @@ export {
     SYSTEM_FIELD_PREFIX,
     SQL_QUERY_LIMIT,
     LAYER,
-    ICONS
+    ICONS,
+    LAYER_TYPE_DEFAULT
 };

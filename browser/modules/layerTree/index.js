@@ -1904,11 +1904,11 @@ module.exports = {
      * Returns tile filter string for specific tile layer
      */
     getLayerFilterString: (layerKey) => {
-        if (!layerKey || [LAYER.VECTOR, LAYER.VECTOR_TILE].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
+        if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
 
-        let parameterString = false;
+        let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         if (activeFilters.length > 0) {
             let data = {};
@@ -1930,12 +1930,11 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      */
     setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
-
-        console.log(`### setupLayerControls`, desiredSetupType, layerKey, layerIsEnabled);
-
         layerKey = layerTreeUtils.stripPrefix(layerKey);
 
         let layerMeta = meta.getMetaByKey(layerKey);
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
@@ -1968,7 +1967,13 @@ module.exports = {
                     $(container).find('.js-layer-settings-opacity').hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                 }
-                
+
+                if (parsedMeta && !parsedMeta.single_tile) {
+                    $(container).find(`.js-toggle-filters`).hide(0);
+                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
+                    $(container).find('.js-layer-settings-filters').hide(0);
+                }
+
                 $(container).find(`.js-toggle-load-strategy`).hide();
                 $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
@@ -1976,21 +1981,9 @@ module.exports = {
                 $(container).find('.js-layer-settings-load-strategy').hide(0);
                 $(container).find('.js-layer-settings-table').hide(0);
             } else if (desiredSetupType === LAYER.VECTOR_TILE) {
-                console.warn(`Controls are not completely setup for vector tile layers`);
-
-                $(container).find(`.js-toggle-filters`).hide(0);
-                $(container).find('.js-layer-settings-filters').hide(0);
-
-                $(container).find(`.js-toggle-opacity`).hide(0);
-                $(container).find('.js-layer-settings-opacity').hide(0);
-
-                $(container).find(`.js-toggle-load-strategy`).hide(0);
-                $(container).find('.js-layer-settings-load-strategy').hide(0);
-
-                $(container).find(`.js-toggle-table-view`).hide();
-                $(container).find('.js-layer-settings-table').hide(0);
+                console.error(`Controls are not completely setup for vector tile layers`);
             } else if (desiredSetupType === LAYER.WEBGL) {
-                console.warn(`Controls are not completely setup for WebGL layers`);
+                console.error(`Controls are not completely setup for WebGL layers`);
             }
 
             $(container).find(`.js-toggle-search`).hide(0);

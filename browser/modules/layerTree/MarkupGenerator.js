@@ -191,7 +191,7 @@ class MarkupGenerator {
             selectors.push(`<li><a class="js-layer-type-selector-vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
         }
 
-        if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
+        if (allowedTypes.indexOf(LAYER.RASTER_TILE) > -1) {
             selectors.push(`<li><a class="js-layer-type-selector-tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
         }
 

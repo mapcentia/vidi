@@ -169,48 +169,72 @@ const stripPrefix = (layerName) => {
  * @return {Object}
  */
 const getPossibleLayerTypes = (layerDescription) => {
-    let layerTypeSpecifier = ``;
+    let layerTypeSpecifiers = ``;
     if (layerDescription && layerDescription.meta) {
         let parsedMeta = JSON.parse(layerDescription.meta);
         if (parsedMeta.vidi_layer_type) {
-            layerTypeSpecifier = parsedMeta.vidi_layer_type;
+            layerTypeSpecifiers = parsedMeta.vidi_layer_type;
         }
     }
 
-    let isVectorLayer = false, isRasterTileLayer = false, isVectorTileLayer = false, isWebGLLayer = false;
-    
-    let detectedTypes = 0;
-    let specifiers = [];
-    if (layerTypeSpecifier.indexOf(LAYER.VECTOR_TILE) > -1) {
+    let isVectorLayer = false, isRasterTileLayer = false, isVectorTileLayer = false, isWebGLLayer = false, detectedTypes = 0, specifiers = [];
+    let usingLegacyNotation = true;
+    if (layerTypeSpecifiers.indexOf(`,`) > -1) {
+        // Using new layer type notation
+        layerTypeSpecifiers = layerTypeSpecifiers.split(`,`);
+        usingLegacyNotation = false;
+    }
+
+    let index = layerTypeSpecifiers.indexOf(LAYER.VECTOR_TILE);
+    if (index > -1) {
         detectedTypes++;
         isVectorTileLayer = true;
-        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.VECTOR_TILE, ``);
         specifiers.push(LAYER.VECTOR_TILE);
+        if (usingLegacyNotation) {
+            layerTypeSpecifiers = layerTypeSpecifiers.replace(LAYER.VECTOR_TILE, ``);
+        } else {
+            layerTypeSpecifiers.splice(index, 1);
+        }
     }
 
-    if (layerTypeSpecifier.indexOf(LAYER.RASTER_TILE) > -1) {
+    index = layerTypeSpecifiers.indexOf(LAYER.RASTER_TILE)
+    if (index > -1) {
         detectedTypes++
         isRasterTileLayer = true;
-        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.RASTER_TILE, ``);
         specifiers.push(LAYER.RASTER_TILE);
+        if (usingLegacyNotation) {
+            layerTypeSpecifiers = layerTypeSpecifiers.replace(LAYER.RASTER_TILE, ``);
+        } else {
+            layerTypeSpecifiers.splice(index, 1);
+        }
     }
 
-    if (layerTypeSpecifier.indexOf(LAYER.VECTOR) > -1) {
+    index = layerTypeSpecifiers.indexOf(LAYER.VECTOR);
+    if (index > -1) {
         detectedTypes++;
         isVectorLayer = true;
-        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.VECTOR, ``);
         specifiers.push(LAYER.VECTOR);
+        if (usingLegacyNotation) {
+            layerTypeSpecifiers = layerTypeSpecifiers.replace(LAYER.VECTOR, ``);
+        } else {
+            layerTypeSpecifiers.splice(index, 1);
+        }
     }
 
-    if (layerTypeSpecifier.indexOf(LAYER.WEBGL) > -1) {
+    index = layerTypeSpecifiers.indexOf(LAYER.WEBGL);
+    if (index > -1) {
         detectedTypes++;
         isWebGLLayer = true;
-        layerTypeSpecifier = layerTypeSpecifier.replace(LAYER.WEBGL, ``);
         specifiers.push(LAYER.WEBGL);
+        if (usingLegacyNotation) {
+            layerTypeSpecifiers = layerTypeSpecifiers.replace(LAYER.WEBGL, ``);
+        } else {
+            layerTypeSpecifiers.splice(index, 1);
+        }
     }
 
-    if (layerTypeSpecifier.length > 0) {
-        throw new Error(`Provided layer name "${layerName}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
+    if (layerTypeSpecifiers.length > 0) {
+        throw new Error(`Provided layer name "${layerDescription.f_schema_name + '.' + layerDescription.f_table_name}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
     }
 
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
