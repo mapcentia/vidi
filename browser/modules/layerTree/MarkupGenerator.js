@@ -81,6 +81,8 @@ class MarkupGenerator {
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
 
+        console.log(`### getLayerControlRecord`, layerType);
+        
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
@@ -189,7 +191,7 @@ class MarkupGenerator {
             selectors.push(`<li><a class="js-layer-type-selector-vector" href="javascript:void(0)">${ICONS[LAYER.VECTOR]} ${__('Vector')}</a></li>`);
         }
 
-        if (allowedTypes.indexOf(LAYER.VECTOR) > -1) {
+        if (allowedTypes.indexOf(LAYER.RASTER_TILE) > -1) {
             selectors.push(`<li><a class="js-layer-type-selector-tile" href="javascript:void(0)">${ICONS[LAYER.RASTER_TILE]} ${__('Raster tile')}</a></li>`);
         }
 

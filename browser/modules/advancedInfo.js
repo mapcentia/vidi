@@ -314,9 +314,12 @@ module.exports = {
     control: function () {
         if ($("#advanced-info-btn").is(':checked')) {
             _self.on();
+            backboneEvents.get().trigger(`off:infoClick`);
         } else {
             searchOn = false;
+            
             _self.off();
+            backboneEvents.get().trigger(`on:infoClick`);
             backboneEvents.get().trigger("advancedInfo:turnedOff");
         }
     },

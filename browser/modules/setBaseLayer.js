@@ -130,7 +130,6 @@ module.exports = module.exports = {
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
             }, (e) => {
                 numberOfErroredTiles++;
-                console.log(numberOfErroredTiles);
             }, () => {
                 console.warn(`Base layer ${str} was not found, switching to first available base layer`);
                 if (window.setBaseLayers && window.setBaseLayers.length > 0) {
