@@ -9,7 +9,8 @@ let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
 const uuid = require('uuid/v1');
-var request = require('request');
+const request = require('request');
+const config = require('../../config/config.js');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 

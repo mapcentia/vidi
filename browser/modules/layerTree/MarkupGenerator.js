@@ -81,6 +81,8 @@ class MarkupGenerator {
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
 
+        console.log(`### getLayerControlRecord`, layerType);
+        
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
