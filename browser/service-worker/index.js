@@ -155,17 +155,26 @@ class Keeper {
                 let valueCopy = JSON.parse(JSON.stringify(storedValue));
                 valueCopy[key] = JSON.parse(JSON.stringify(value));
                 localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                    // Checking if value was really saved
+                    // Checking if value was really saved first time
                     this.get(key).then(storedValue => {
-                        if (storedValue.created !== initialCreated) {
-                            console.error(`Value was not really saved in localforage`, JSON.stringify(value));
+                        if (!storedValue.created || (storedValue.created && storedValue.created === initialCreated)) {
+                            resolve();
+                        } else {
+                            let timeout = 300;
+                            console.warn(`Value was not really saved in localforage (${storedValue.created} vs ${initialCreated}), trying again in ${timeout} ms`, JSON.stringify(value));
                             setTimeout(() => {
                                 localforage.setItem(this._cacheKey, valueCopy).then(() => {
-                                    resolve();
+                                    // Checking if value was really saved second time
+                                    this.get(key).then(storedValue => {
+                                        if (storedValue.created !== initialCreated) {
+                                            resolve();
+                                        } else {
+                                            console.error(`Still unable to save the value`);
+                                            reject();
+                                        }
+                                    });
                                 });
-                            }, 100);
-                        } else {
-                            resolve();
+                            }, timeout);
                         }
                     });
                 }).catch(error => {
