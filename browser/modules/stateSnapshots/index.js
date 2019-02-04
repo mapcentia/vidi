@@ -119,6 +119,27 @@ module.exports = {
             }
 
             /**
+             * Returns the current meta settings of the snapshot
+             * 
+             * Meta remembers current configuration (config, template), so when state snapshots panel, for example,
+             * will be opened for the same browser but with different configuration, generated snapshot
+             * links will be correct
+             */
+            getSnapshotMeta() {
+                let result = {};
+                let queryParameters = urlparser.uriObj.search(true);
+                if (`config` in queryParameters && queryParameters.config) {
+                    result.config = queryParameters.config;
+                }
+
+                if (`tmpl` in queryParameters && queryParameters.tmpl) {
+                    result.tmpl = queryParameters.tmpl;
+                }
+
+                return result;
+            }
+
+            /**
              * Creates snapshot
              * 
              * @param {Boolean} anonymous Specifies if the created snapshot belongs to browser or user
@@ -133,22 +154,7 @@ module.exports = {
                     }
 
                     state.map = anchor.getCurrentMapParameters();
-
-                    /*
-                        Remembering current configuration (config, template), so when state snapshots panel, for example,
-                        will be opened for the same browser but with different configuration, generated snapshot
-                        links will be correct
-                    */
-                    let queryParameters = urlparser.uriObj.search(true);
-                    state.meta = {};
-                    if (`config` in queryParameters && queryParameters.config) {
-                        state.meta.config = queryParameters.config;
-                    }
-
-                    if (`tmpl` in queryParameters && queryParameters.tmpl) {
-                        state.meta.tmpl = queryParameters.tmpl;
-                    }
-
+                    state.meta = _self.getSnapshotMeta();
                     $.ajax({
                         url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
@@ -214,6 +220,7 @@ module.exports = {
 
                     data.title = title;
                     data.snapshot = state;
+                    data.snapshot.meta = _self.getSnapshotMeta();
                     $.ajax({
                         url: `${API_URL}/${vidiConfig.appDatabase}/${data.id}`,
                         method: 'PUT',
