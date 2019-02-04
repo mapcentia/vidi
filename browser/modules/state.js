@@ -619,7 +619,14 @@ module.exports = {
                             promises.push(listened[name].applyState(state.modules[name]));
                             modulesWithAppliedState.push(name);
                         } else {
-                            console.warn(`Module or extension ${name} is not registered in state module, so its state is not applied`);
+                            console.warn(`Module or extension ${name} is not registered in state module, so its state will be applied when the "${name}:initialized" event will be fired`);
+                            backboneEvents.get().once(`${name}:initialized`, () => {
+                                if (name in listened) {
+                                    listened[name].applyState(state.modules[name]).catch(error => {
+                                        console.error(`Unable to apply state to ${name}, though the event was fired`, error);
+                                    });
+                                }
+                            });
                         }
                     }
                 }
