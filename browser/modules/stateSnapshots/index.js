@@ -133,6 +133,22 @@ module.exports = {
                     }
 
                     state.map = anchor.getCurrentMapParameters();
+
+                    /*
+                        Remembering current configuration (config, template), so when state snapshots panel, for example,
+                        will be opened for the same browser but with different configuration, generated snapshot
+                        links will be correct
+                    */
+                    let queryParameters = urlparser.uriObj.search(true);
+                    state.meta = {};
+                    if (`config` in queryParameters && queryParameters.config) {
+                        state.meta.config = queryParameters.config;
+                    }
+
+                    if (`tmpl` in queryParameters && queryParameters.tmpl) {
+                        state.meta.tmpl = queryParameters.tmpl;
+                    }
+
                     $.ajax({
                         url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
@@ -321,13 +337,33 @@ module.exports = {
                         </button>);
                     }
 
+                    let parameters = [];
+                    parameters.push(`state=${item.id}`);
+
+                    // Detecting not prioritized parameters from current URL
+                    let highPriorityConfigString = false, lowPriorityConfigString = false;
                     let queryParameters = urlparser.uriObj.search(true);
-                    let configString = ``;
                     if (`config` in queryParameters && queryParameters.config) {
-                        configString = `&config=${queryParameters.config}`;
+                        lowPriorityConfigString = queryParameters.config;
+                    }
+                    
+                    if (item.snapshot && item.snapshot.meta) {
+                        if (item.snapshot.meta.config) {
+                            highPriorityConfigString = item.snapshot.meta.config;
+                        }
+
+                        if (item.snapshot.meta.tmpl) {
+                            parameters.push(`tmpl=${item.snapshot.meta.tmpl}`);
+                        }
                     }
 
-                    let permaLink = `${window.location.origin}${anchor.getUri()}?state=${item.id}${configString}`;
+                    if (highPriorityConfigString) {
+                        parameters.push(`config=${highPriorityConfigString}`);
+                    } else if (lowPriorityConfigString) {
+                        parameters.push(`config=${lowPriorityConfigString}`);
+                    }
+
+                    let permaLink = `${window.location.origin}${anchor.getUri()}?${parameters.join(`&`)}`;
 
                     let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
                     if (item.title) {
