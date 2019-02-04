@@ -332,4 +332,3 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
 });
 
 module.exports = router;
-

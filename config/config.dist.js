@@ -186,7 +186,7 @@ module.exports = {
     // OR URL / auto loading is returning a 404 or a invalid jSON file
     // ====================================================================================
 
-    "defaultConfig": "vidi.json",
+    //"defaultConfig": "vidi.json",
 
 
     // =============================================================
