@@ -33,6 +33,10 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(2);
     });
 
+    it("should keep or update the meta property when seizing or updating the snapshot", async () => { expect(true).to.equal(false); });
+
+    it("should keep or update the title property when seizing or updating the snapshot", async () => { expect(true).to.equal(false); });
+
     it("should capture current state and save it as browser-owned", async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_EMBEDDED);
