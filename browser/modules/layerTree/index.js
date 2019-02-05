@@ -2027,17 +2027,23 @@ module.exports = {
     },
 
     reloadLayerOnFiltersChange: (layerKey) => {
+        if (layerKey.indexOf(`:`) > -1) {
+            throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
+        }
+
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
         _self.getActiveLayers().map(activeLayerKey => {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
-                if (activeLayerKey.indexOf(layerKey) === 0) {
+                if (activeLayerKey === layerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(layerKey, false, false, false);
-                } else if (activeLayerKey.indexOf(layerKey) === 2) {
+                } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
                     _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
+                } else {
+                    console.error(`Unable to apply filters to layer ${layerKey}`);
                 }
             }
         });
