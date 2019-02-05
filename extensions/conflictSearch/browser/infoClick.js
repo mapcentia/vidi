@@ -15,6 +15,8 @@ var sqlQuery;
 var qstore = [];
 var active = false;
 var conflictSearch;
+var _layers;
+var backboneEvents;
 
 /**
  *
@@ -33,6 +35,9 @@ module.exports = {
         draw = o.draw;
         sqlQuery = o.sqlQuery;
         conflictSearch = o.extensions.conflictSearch.index;
+        _layers = o.layers;
+        backboneEvents = o.backboneEvents;
+
         return this;
     },
     init: function () {
@@ -57,6 +62,10 @@ module.exports = {
                     sqlQuery.init(qstore, wkt, "3857",
                         function (th, isEmpty, not_querable, layerTitel, fieldConf, layers, count) {
                             var layerObj = th, out = [], fieldLabel, first = true, storeId = th.id;
+
+                            _layers.decrementCountLoading("_vidi_sql_" + storeId);
+                            backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
+
                             isEmpty = layerObj.isEmpty();
                             if (!isEmpty && !not_querable) {
                                 $('#conflict-modal-info-body').show();

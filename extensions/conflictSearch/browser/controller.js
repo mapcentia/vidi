@@ -44,6 +44,8 @@ module.exports = {
         // Deactivates module
         backboneEvents.get().on("off:conflictSearch off:all reset:all", () => {
             conflictSearch.off();
+            infoClick.active(false);
+            infoClick.reset();
         });
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
@@ -67,6 +69,7 @@ module.exports = {
         backboneEvents.get().on("on:conflictInfoClick", function () {
             console.info("Starting conflictInfoClick");
             infoClick.active(true);
+
         });
 
         // Handle conflict info click events
@@ -77,7 +80,7 @@ module.exports = {
 
         backboneEvents.get().on("off:conflictInfoClick", function () {
             console.info("Stopping conflictInfoClick");
-            infoClick.active(false)
+            infoClick.active(false);
         });
 
         // When print module emit on:customData when render the custom data
