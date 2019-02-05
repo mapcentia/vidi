@@ -47,8 +47,9 @@ var isStarted = false;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     set: function (modules) {
+        console.log(modules)
         applicationModules = modules;
         advancedInfo = modules.advancedInfo;
         print = modules.print;
@@ -502,6 +503,26 @@ module.exports = module.exports = {
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
         });
+
+        // Listen for extensions
+        $(document).arrive("#side-panel ul li a", function (e, data) {
+            $(this).on("click", function (e) {
+                backboneEvents.get().trigger(`off:all`);
+                let moduleId = $(this).data(`module-id`);
+                setTimeout(() => {
+                    if (moduleId && moduleId !== ``) {
+                        if (moduleId in applicationModules.extensions) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
+                    }
+                }, 100);
+                let id = ($(this));
+                $("#side-panel ul li").removeClass("active");
+                id.addClass("active");
+            });
+        })
 
     }
 };
