@@ -167,6 +167,7 @@ module.exports = {
                     me.setState({
                         active: true
                     });
+                    utils.cursorStyle().crosshair();
                 });
 
                 // Deactivates module
