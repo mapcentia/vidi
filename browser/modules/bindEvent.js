@@ -49,7 +49,6 @@ var isStarted = false;
  */
 module.exports = {
     set: function (modules) {
-        console.log(modules)
         applicationModules = modules;
         advancedInfo = modules.advancedInfo;
         print = modules.print;
