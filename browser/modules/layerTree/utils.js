@@ -58,10 +58,14 @@ const getActiveLayers = () => {
     $('*[data-gc2-layer-type]').each((index, item) => {
         let isEnabled = $(item).is(':checked');
         if (isEnabled) {
-            if ($(item).data('gc2-layer-type') === 'tile') {
-                activeLayerIds.push($(item).data('gc2-id'));
+            let type = $(item).data('gc2-layer-type');
+            let gc2Id = $(item).data('gc2-id');
+            if (type === LAYER.RASTER_TILE) {
+                activeLayerIds.push(gc2Id);
+            } else if (type === LAYER.VECTOR) {
+                activeLayerIds.push(LAYER.VECTOR + `:` + gc2Id);
             } else {
-                activeLayerIds.push('v:' + $(item).data('gc2-id'));
+                console.error(`Unable to get active layer for ${gc2Id}`);
             }
         }
     });

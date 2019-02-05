@@ -6,6 +6,9 @@
 # Mock snapshot database, should be removed when state snapshot management is moved to GC2
 temporary-state-storage.json
 
+# Templates should be generated on-site, no need to store it in the repository
+public/js/templates.js
+
 # Code coverage files
 .nyc_output
 coverage

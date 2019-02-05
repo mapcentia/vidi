@@ -422,7 +422,7 @@ module.exports = {
                             if (initialPredefinedFilters && ignoredInitialStateKeys.indexOf(`predefinedFilters`) === -1) {
                                 predefinedFilters = initialPredefinedFilters;
                             }
-
+                            
                             if (initialDynamicLoad && ignoredInitialStateKeys.indexOf(`dynamicLoad`) === -1) {
                                 dynamicLoad = initialDynamicLoad;
                             }
@@ -494,8 +494,10 @@ module.exports = {
                                 if (`dynamicLoad` in forcedState && forcedState.dynamicLoad) {
                                     dynamicLoad = forcedState.dynamicLoad;
                                 }
-                               
+
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
+
+                                backboneEvents.get().trigger(`${MODULE_NAME}:settleForcedState`);
                             }
 
                             for (let key in dynamicLoad) {
@@ -566,6 +568,7 @@ module.exports = {
                                     state.listen(MODULE_NAME, `filtersChange`);
                                     state.listen(MODULE_NAME, `opacityChange`);
                                     state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
+                                    state.listen(MODULE_NAME, `settleForcedState`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
@@ -1450,8 +1453,6 @@ module.exports = {
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
             if (isVectorLayer) {
-                _self.createStore(layer, isVirtual);
-
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in dynamicLoad === false || [true, false].indexOf(dynamicLoad[layerKey]) === -1) {
                     if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
@@ -1464,6 +1465,8 @@ module.exports = {
                         }
                     }
                 }
+
+                _self.createStore(layer, isVirtual);
             }
 
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
@@ -2024,17 +2027,23 @@ module.exports = {
     },
 
     reloadLayerOnFiltersChange: (layerKey) => {
+        if (layerKey.indexOf(`:`) > -1) {
+            throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
+        }
+
         backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
         _self.getActiveLayers().map(activeLayerKey => {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
-                if (activeLayerKey.indexOf(layerKey) === 0) {
+                if (activeLayerKey === layerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(layerKey, false, false, false);
-                } else if (activeLayerKey.indexOf(layerKey) === 2) {
+                } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
                     _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
+                } else {
+                    console.error(`Unable to apply filters to layer ${layerKey}`);
                 }
             }
         });

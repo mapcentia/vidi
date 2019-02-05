@@ -1,15 +1,14 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2018 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-let fs = require('fs');
+let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
 const uuid = require('uuid/v1');
 const request = require('request');
-const config = require('../../config/config');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
 
@@ -333,4 +332,3 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
 });
 
 module.exports = router;
-
