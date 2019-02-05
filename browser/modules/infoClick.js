@@ -72,7 +72,6 @@ module.exports = {
      */
     reset: function () {
         sqlQuery.reset(qstore);
-        utils.cursorStyle().reset();
     },
 
     /**
@@ -82,6 +81,8 @@ module.exports = {
     active: function (a) {
         if (!a) {
             this.reset();
+            utils.cursorStyle().reset();
+
         } else {
             utils.cursorStyle().crosshair();
 
@@ -96,6 +97,7 @@ module.exports = {
 
     off: () => {
         active = false;
+        utils.cursorStyle().reset();
     }
 };
 
