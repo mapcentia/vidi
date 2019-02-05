@@ -307,7 +307,7 @@ module.exports = module.exports = {
         cloud.map.addLayer(dataItems);
 
         // Create a new tab in the main tab bar
-        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle");
+        utils.createMainTab("conflict", "Konfliktsøgning", "Lav en konfliktsøgning ned igennem alle lag. Der kan søges med en adresse/matrikelnr., en tegning eller et objekt fra et lag. Det sidste gøres ved at klikke på et objekt i et tændt lag og derefter på \'Søg med dette objekt\'", require('./../../../browser/modules/height')().max, "check_circle", false, "conflictSearch");
         $("#conflict").append(dom);
 
         // DOM created
@@ -357,134 +357,128 @@ module.exports = module.exports = {
      */
     control: function () {
         var me = this;
-        if ($("#conflict-btn").is(':checked')) {
 
-            // Start listen to the web socket
-            io.connect().on(socketId.get(), function (data) {
-                if (typeof data.num !== "undefined") {
-                    $("#conflict-progress").html(data.num + " " + (data.title || data.table));
-                    if (data.error === null) {
-                        $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
-                    } else {
-                        $("#conflict-console").append(data.table + " : " + data.error + "\n");
-                    }
+
+        // Start listen to the web socket
+        io.connect().on(socketId.get(), function (data) {
+            if (typeof data.num !== "undefined") {
+                $("#conflict-progress").html(data.num + " " + (data.title || data.table));
+                if (data.error === null) {
+                    $("#conflict-console").append(data.num + " table: " + data.table + ", hits: " + data.hits + " , time: " + data.time + "\n");
+                } else {
+                    $("#conflict-console").append(data.table + " : " + data.error + "\n");
                 }
-            });
+            }
+        });
 
-            backboneEvents.get().trigger("on:conflictInfoClick");
+        backboneEvents.get().trigger("on:conflictInfoClick");
 
-            // Emit "on" event
-            backboneEvents.get().trigger("on:conflict");
+        // Emit "on" event
+        backboneEvents.get().trigger("on:conflict");
 
-            // Trigger "off" events for info, drawing and advanced info
-            backboneEvents.get().trigger("off:drawing");
-            backboneEvents.get().trigger("off:advancedInfo");
-            backboneEvents.get().trigger("off:infoClick");
 
-            // Show DOM elements
-            $("#conflict-buffer").show();
-            $("#conflict-main-tabs-container").show();
-            $("#conflict-places").show();
-            $("#conflict .tab-content").show();
+        // Show DOM elements
+        $("#conflict-buffer").show();
+        $("#conflict-main-tabs-container").show();
+        $("#conflict-places").show();
+        $("#conflict .tab-content").show();
 
-            // Reset layer made by clickInfo
-            backboneEvents.get().trigger("reset:infoClick");
+        // Reset layer made by clickInfo
+        backboneEvents.get().trigger("reset:infoClick");
 
-            // Setup and add draw control
-            //L.drawLocal = require('./../../../browser/modules/drawLocales/advancedInfo.js');
-            drawControl = new L.Control.Draw({
-                position: 'topright',
-                draw: {
-                    polygon: {
-                        title: 'Draw a polygon!',
-                        allowIntersection: true,
-                        drawError: {
-                            color: '#b00b00',
-                            timeout: 1000
-                        },
-                        shapeOptions: {
-                            color: '#662d91',
-                            fillOpacity: 0
-                        },
-                        showArea: true
+        // Setup and add draw control
+        //L.drawLocal = require('./../../../browser/modules/drawLocales/advancedInfo.js');
+        drawControl = new L.Control.Draw({
+            position: 'topright',
+            draw: {
+                polygon: {
+                    title: 'Draw a polygon!',
+                    allowIntersection: true,
+                    drawError: {
+                        color: '#b00b00',
+                        timeout: 1000
                     },
-                    polyline: {
-                        metric: true,
-                        shapeOptions: {
-                            color: '#662d91',
-                            fillOpacity: 0
-                        }
+                    shapeOptions: {
+                        color: '#662d91',
+                        fillOpacity: 0
                     },
-                    circle: {
-                        shapeOptions: {
-                            color: '#662d91',
-                            fillOpacity: 0
-                        }
-                    },
-                    rectangle: {
-                        shapeOptions: {
-                            color: '#662d91',
-                            fillOpacity: 0
-                        }
-                    },
-                    marker: true
+                    showArea: true
                 },
-                edit: {
-                    featureGroup: drawnItems,
-                    remove: false
-                }
-            });
-            cloud.map.addControl(drawControl);
+                polyline: {
+                    metric: true,
+                    shapeOptions: {
+                        color: '#662d91',
+                        fillOpacity: 0
+                    }
+                },
+                circle: {
+                    shapeOptions: {
+                        color: '#662d91',
+                        fillOpacity: 0
+                    }
+                },
+                rectangle: {
+                    shapeOptions: {
+                        color: '#662d91',
+                        fillOpacity: 0
+                    }
+                },
+                marker: true
+            },
+            edit: {
+                featureGroup: drawnItems,
+                remove: false
+            }
+        });
+        cloud.map.addControl(drawControl);
 
-            // Unbind events
-            cloud.map.off('draw:created');
-            cloud.map.off('draw:drawstart');
-            cloud.map.off('draw:drawstop');
-            cloud.map.off('draw:editstart');
+        // Unbind events
+        cloud.map.off('draw:created');
+        cloud.map.off('draw:drawstart');
+        cloud.map.off('draw:drawstop');
+        cloud.map.off('draw:editstart');
 
-            // Bind events
-            cloud.map.on('draw:created', function (e) {
-                e.layer._vidi_type = "query_draw";
-                if (e.layerType === 'marker') {
+        // Bind events
+        cloud.map.on('draw:created', function (e) {
+            e.layer._vidi_type = "query_draw";
+            if (e.layerType === 'marker') {
 
-                    e.layer._vidi_marker = true;
-                }
-                drawnItems.addLayer(e.layer);
-            });
-            cloud.map.on('draw:drawstart', function (e) {
-                _clearDrawItems();
-                _clearDataItems();
-                // Switch info click off
-                backboneEvents.get().trigger("off:conflictInfoClick");
-            });
-            cloud.map.on('draw:drawstop', function (e) {
-                me.makeSearch(fromDrawingText);
-                // Switch info click on again
-                backboneEvents.get().trigger("on:conflictInfoClick");
-            });
-            cloud.map.on('draw:editstop', function (e) {
-                me.makeSearch(fromDrawingText);
-                // Switch info click on again
-                backboneEvents.get().trigger("on:conflictInfoClick");
-            });
-            cloud.map.on('draw:editstart', function (e) {
-                // Switch info click off
-                backboneEvents.get().trigger("off:conflictInfoClick");
-                bufferItems.clearLayers();
-            });
+                e.layer._vidi_marker = true;
+            }
+            drawnItems.addLayer(e.layer);
+        });
+        cloud.map.on('draw:drawstart', function (e) {
+            _clearDrawItems();
+            _clearDataItems();
+            // Switch info click off
+            backboneEvents.get().trigger("off:conflictInfoClick");
+        });
+        cloud.map.on('draw:drawstop', function (e) {
+            me.makeSearch(fromDrawingText);
+            // Switch info click on again
+            backboneEvents.get().trigger("on:conflictInfoClick");
+        });
+        cloud.map.on('draw:editstop', function (e) {
+            me.makeSearch(fromDrawingText);
+            // Switch info click on again
+            backboneEvents.get().trigger("on:conflictInfoClick");
+        });
+        cloud.map.on('draw:editstart', function (e) {
+            // Switch info click off
+            backboneEvents.get().trigger("off:conflictInfoClick");
+            bufferItems.clearLayers();
+        });
 
-            // Show tool tips for drawing tools
-            var po = $('.leaflet-draw-toolbar-top').popover({
-                content: __("Use these tools for querying the overlay maps."),
-                placement: "left"
-            });
-            po.popover("show");
-            setTimeout(function () {
-                po.popover("hide");
-            }, 2500);
-        } else {
-            backboneEvents.get().trigger("off:conflict");
-        }
+        // Show tool tips for drawing tools
+        var po = $('.leaflet-draw-toolbar-top').popover({
+            content: __("Use these tools for querying the overlay maps."),
+            placement: "left"
+        });
+        po.popover("show");
+        setTimeout(function () {
+            po.popover("hide");
+        }, 2500);
+
     },
 
     /**
@@ -510,11 +504,6 @@ module.exports = module.exports = {
         $('#conflict-result-content a[href="#hits-content"] span').empty();
         $('#conflict-result-content a[href="#nohits-content"] span').empty();
         $('#conflict-result-content a[href="#error-content"] span').empty();
-
-        // Turn info click on again
-        backboneEvents.get().trigger("on:infoClick");
-        backboneEvents.get().trigger("reset:conflictInfoClick");
-        backboneEvents.get().trigger("off:conflictInfoClick");
 
         // Unbind events
         cloud.map.off('draw:created');
@@ -739,17 +728,12 @@ module.exports = module.exports = {
     setPreProcessor: function (fn) {
         preProcessor = fn;
     },
-    setSearchStr: function(str) {
+    setSearchStr: function (str) {
         searchStr = str;
     }
 };
 
 var dom = '<div role="tabpanel">' +
-    '<div class="togglebutton">' +
-    '<label>' +
-    '<input id="conflict-btn" type="checkbox">Aktiver konfliktsøgning' +
-    '</label>' +
-    '</div>' +
     '<div id="conflict-buffer" style="display: none">' +
     '<div>' +
     '<label for="conflict-buffer-value" class="control-label">Buffer</label>' +

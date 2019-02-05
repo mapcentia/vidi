@@ -32,13 +32,17 @@ module.exports = {
     init: function () {
         var endPrintEventName = "end:conflictPrint";
 
-        // Listen and reacting to the global Reset ALL event
-        backboneEvents.get().on("reset:all", function () {
-            backboneEvents.get().trigger("off:conflict");
+        // Stop listening to any events, deactivate controls, but
+        // keep effects of the module until they are deleted manually or reset:all is emitted
+        backboneEvents.get().on("deactivate:all", () => {});
+
+        // Activates module
+        backboneEvents.get().on("on:conflictSearch", () => {
+            conflictSearch.control();
         });
 
-        // Turn off if advanced info or drawing is activated
-        backboneEvents.get().on("off:conflict on:advancedInfo on:drawing", function () {
+        // Deactivates module
+        backboneEvents.get().on("off:conflictSearch off:all reset:all", () => {
             conflictSearch.off();
         });
 
@@ -93,10 +97,7 @@ module.exports = {
             });
         });
 
-        // Click event for conflict search on/off toggle button
-        $("#conflict-btn").on("click", function () {
-            conflictSearch.control();
-        });
+
 
 
     }
