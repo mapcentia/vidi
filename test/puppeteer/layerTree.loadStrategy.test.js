@@ -95,6 +95,7 @@ describe('Layer tree load strategy', () => {
         await helpers.sleep(2000);
 
         expect(lastLoadStrategyUsedWasDynamic).to.be.false;
+        expect(await page.evaluate(`$('#collapseRHluYW1pYyBsb2FkIHRlc3Q .js-layer-settings-load-strategy .togglebutton label').is(':visible')`)).to.be.true;
 
         await page.close();
         await newPage.close();
