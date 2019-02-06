@@ -13,7 +13,7 @@ describe("Application", () => {
     });
 
     it("should take into account configuration options", async () => {
-        // Empty "activateMainTab" option
+        // Non-empty "activateMainTab" option (module)
         let page = await browser.newPage();
         await page.setRequestInterception(true);
         page.on('request', request => {
@@ -22,7 +22,33 @@ describe("Application", () => {
                     content: 'application/json',
                     headers: {"Access-Control-Allow-Origin": "*"},
                     body: JSON.stringify({
-                        "brandName": "Test",
+                        "brandName": "Test 1",
+                        "activateMainTab": "streetview"
+                    })
+                });
+            } else {
+                request.continue();
+            }
+        });
+
+        await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(1000);
+        let text = await page.evaluate(`$('.navbar-brand').text()`);
+        expect(text.indexOf(`Test 1`) > -1).to.be.true;
+        expect(await page.evaluate(`$('#streetview-content').is(':visible')`)).to.be.true;
+        await page.close();
+
+        // Non-empty "activateMainTab" option (extension)
+        page = await browser.newPage();
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (request.url().indexOf(`aleksandrshumilov/aleksandrshumilov.json`) !== -1) {
+                request.respond({
+                    content: 'application/json',
+                    headers: {"Access-Control-Allow-Origin": "*"},
+                    body: JSON.stringify({
+                        "brandName": "Test 2",
                         "activateMainTab": "draw"
                     })
                 });
@@ -34,16 +60,18 @@ describe("Application", () => {
         await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
         page = await helpers.waitForPageToLoad(page);
         await helpers.sleep(1000);
+        text = await page.evaluate(`$('.navbar-brand').text()`);
+        expect(text.indexOf(`Test 2`) > -1).to.be.true;
         expect(await page.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.true;
         await page.close();
 
-        // Non-empty "activateMainTab" option
+        // Empty "activateMainTab" option
         let newPage = await browser.newPage();
         await newPage.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
         newPage = await helpers.waitForPageToLoad(newPage);
         await helpers.sleep(1000);
         expect(await newPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
-        await newPage.close();
+        await newPage.close();        
     });
 
     it("should have only one active module at a time", async () => {
