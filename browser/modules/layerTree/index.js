@@ -16,7 +16,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 
 var layerTreeOrder = false;
 
-var onEachFeature = [], pointToLayer = [], onLoad = [], onSelect = [],
+var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [], tables = {};
 
 /**
@@ -37,6 +37,13 @@ import {
     EXPRESSIONS_FOR_DATES,
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
+
+const defaultSelectedStyle = {
+    weight: 5,
+    color: '#666',
+    dashArray: '',
+    fillOpacity: 0.2
+};
 
 /**
  *
@@ -874,6 +881,7 @@ module.exports = {
                     ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
                 let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
+                let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : defaultSelectedStyle);
                 let localTable = gc2table.init({
                     el: tableContainerId + ` table`,
                     ns: tableContainerId,
@@ -889,7 +897,8 @@ module.exports = {
                     assignFeatureEventListenersOnDataLoad: true,
                     height: 250,
                     locale: window._vidiLocale.replace("_", "-"),
-                    template: template
+                    template: template,
+                    styleSelected
                 });
 
                 if ($(tableContainerId + ` table`).is(`:visible`)) {
@@ -2203,6 +2212,10 @@ module.exports = {
 
     setPointToLayer: function (layer, fn) {
         pointToLayer[layer] = fn;
+    },
+
+    setOnSelectedStyle: function (layer, style) {
+        onSelectedStyle[layer] = style;
     },
 
     getStores: function () {
