@@ -239,15 +239,18 @@ module.exports = module.exports = {
         touchScroll(".tab-pane");
         touchScroll("#info-modal-body-wrapper");
         $("#loadscreentext").html(__("Loading data"));
-        if (window.vidiConfig.activateMainTab) {
-            setTimeout(function () {
-                if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
-                    $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
-                } else {
-                    console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
-                }
-            }, 200);
-        }
+
+        backboneEvents.get().on(`extensions:initialized`, () => {
+            if (window.vidiConfig.activateMainTab) {
+                setTimeout(function () {
+                    if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
+                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
+                    } else {
+                        console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                    }
+                }, 200);
+            }
+        });
 
         $(document).arrive('[data-toggle="tooltip"]', function () {
             $(this).tooltip()
