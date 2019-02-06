@@ -1730,26 +1730,6 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
-
-                let value = false;
-                if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
-                    value = dynamicLoad[layerKey];
-                }
-
-                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                if (document.getElementById(componentContainerId)) {
-                    ReactDOM.render(<LoadStrategyToggle
-                        layerKey={layerKey}
-                        initialValue={value}
-                        onChange={_self.onChangeLoadStrategyHandler}/>,
-                        document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                        _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                    });
-                }
             }
 
             if (isVectorLayer) {
