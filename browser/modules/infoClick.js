@@ -58,7 +58,9 @@ module.exports = {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
-                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng]);
+                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, () => {
+                        backboneEvents.get().trigger("sqlQuery:clear");
+                    });
                 }, 250);
             }
         });
