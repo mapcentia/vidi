@@ -3,6 +3,7 @@
  */
 
 const { expect } = require("chai");
+const uuidv1 = require('uuid/v1');
 const helpers = require("./../helpers");
 
 describe("State snapshots", () => {
@@ -33,9 +34,135 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('#state-snapshots').find('h4').length`)).to.equal(2);
     });
 
-    it("should keep or update the meta property when seizing or updating the snapshot", async () => { expect(true).to.equal(false); });
+    it("should generate state snapshot link with template parameter, taken from meta, not the current URL", async () => {
+        let page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL_EMBEDDED.replace(`public/#`, `public/?tmpl=default.tmpl#`));
+        page = await helpers.waitForPageToLoad(page);
 
-    it("should keep or update the title property when seizing or updating the snapshot", async () => { expect(true).to.equal(false); });
+        // Accepting dialogs
+        page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Open state snapshot manager
+        await page.click(`#search-border`);
+        await helpers.sleep(1000);
+        await page.click(`[data-module-id="stateSnapshots"]`);
+        await helpers.sleep(1000);
+
+        let snapshotTitle = `test snapshot with template in meta ` + uuidv1();
+
+        // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input[placeholder="New title"]`, snapshotTitle);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        let link = await page.evaluate(`$('[title="${snapshotTitle}"]').closest('.panel-body').find('input[type="text"]').val()`);
+        expect(link.indexOf(`tmpl=default.tmpl`) > -1).to.equal(true);
+
+        await helpers.sleep(1000);
+
+        await page.goto(helpers.PAGE_URL_EMBEDDED);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(3000);
+
+        // Open state snapshot manager
+        await page.click(`#state-snapshots-dialog-btn`);
+        await helpers.sleep(2000);
+
+        await helpers.img(page);
+
+        link = await page.evaluate(`$('[title="${snapshotTitle}"]').closest('.panel-body').find('input[type="text"]').val()`);
+        expect(link.indexOf(`tmpl=default.tmpl`) > -1).to.equal(true);
+    });
+
+    it("should keep and update meta and title properties when seizing or updating the snapshot", async () => {
+        let page = await browser.newPage();
+        await page.goto(helpers.PAGE_URL_EMBEDDED.replace(`public/#`, `public/?tmpl=default.tmpl#`));
+        page = await helpers.waitForPageToLoad(page);
+
+        // Accepting dialogs
+        page.on('dialog', (dialog) => { dialog.accept(); });
+
+        // Open state snapshot manager
+        await page.click(`#search-border`);
+        await helpers.sleep(1000);
+        await page.click(`[data-module-id="stateSnapshots"]`);
+        await helpers.sleep(1000);
+
+        await page.setRequestInterception(true);
+
+        page.on('request', request => {
+            request.continue();
+        });
+
+        let snapshotTitle = `test snapshot with template in meta ` + uuidv1();
+        let updatedSnapshotTitle = ` updated`;
+
+        let metaWasProperlySaved = false;
+        let titleWasUpdated = false;
+        page.on('response', response => {
+            if (response.url().indexOf(`state-snapshots/aleksandrshumilov`) > -1) {
+                response.json().then(result => {
+                    if (Array.isArray(result) && result.length > 0) {
+                        result.map(stateSnapshot => {
+                            if (stateSnapshot.title === snapshotTitle || stateSnapshot.title === (snapshotTitle + updatedSnapshotTitle)) {
+                                if (stateSnapshot.title === (snapshotTitle + updatedSnapshotTitle)) {
+                                    titleWasUpdated = true;
+                                }
+
+                                if (stateSnapshot.snapshot.meta.tmpl === `default.tmpl`) {
+                                    metaWasProperlySaved = true;
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        // Clicking the Add state snapshot button
+        await page.type(`.js-browser-owned input[placeholder="New title"]`, snapshotTitle);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Checking if meta was saved
+        expect(metaWasProperlySaved).to.equal(true);
+        metaWasProperlySaved = false;
+
+        // Sign in
+        await page.evaluate(`$('.gc2-session-unlock').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.focus('#sessionEmail');
+        await page.keyboard.type('aleksandrshumilov');
+        await page.focus('#sessionPassword');
+        await page.keyboard.type('qewadszcx');
+        await helpers.sleep(1000);
+        await page.evaluate(`$('.login').find('[type="submit"]').trigger('click')`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#login-modal').find('[data-dismiss="modal"]').first().trigger('click');`);
+        await helpers.sleep(2000);
+
+        // Seizing the snapshot
+        await page.evaluate(`$($('.js-browser-owned').find('.panel-body').find('button')[3]).trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Checking if meta was kept after seizing
+        expect(metaWasProperlySaved).to.equal(true);
+        metaWasProperlySaved = false;
+
+        // Updating snapshot
+        await page.evaluate(`$($('[title="${snapshotTitle}"]').closest('.panel-body').find('button')[1]).trigger('click')`);
+        await helpers.sleep(1000);
+        await page.type(`[value="${snapshotTitle}"]`, updatedSnapshotTitle);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[title="${snapshotTitle}"]').closest('.panel-body').find('.input-group-btn').find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        // Checking if meta was kept after updating and title was changed
+        expect(metaWasProperlySaved).to.equal(true);
+        expect(titleWasUpdated).to.equal(true);
+    });
 
     it("should capture current state and save it as browser-owned", async () => {
         let page = await browser.newPage();

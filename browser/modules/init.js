@@ -272,6 +272,7 @@ module.exports = {
                                         } catch (e) {
                                             console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
                                         }
+
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
                                         if (enabledExtensionIndex > -1) {
                                             enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
@@ -279,6 +280,7 @@ module.exports = {
                                     }
                                 })
                             });
+
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
                             }
@@ -291,6 +293,7 @@ module.exports = {
                         }, 100);
                     });
 
+                    backboneEvents.get().trigger(`extensions:initialized`);
                 } catch (e) {
                     console.error("Could not perform application initialization", e.message, e);
                 }
