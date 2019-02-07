@@ -16,7 +16,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 
 var layerTreeOrder = false;
 
-var onEachFeature = [], pointToLayer = [], onLoad = [], onSelect = [],
+var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [], tables = {};
 
 /**
@@ -37,6 +37,13 @@ import {
     EXPRESSIONS_FOR_DATES,
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
+
+const defaultSelectedStyle = {
+    weight: 5,
+    color: '#666',
+    dashArray: '',
+    fillOpacity: 0.2
+};
 
 /**
  *
@@ -874,6 +881,7 @@ module.exports = {
                     ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
                 let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
+                let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : defaultSelectedStyle);
                 let localTable = gc2table.init({
                     el: tableContainerId + ` table`,
                     ns: tableContainerId,
@@ -889,7 +897,8 @@ module.exports = {
                     assignFeatureEventListenersOnDataLoad: true,
                     height: 250,
                     locale: window._vidiLocale.replace("_", "-"),
-                    template: template
+                    template: template,
+                    styleSelected
                 });
 
                 if ($(tableContainerId + ` table`).is(`:visible`)) {
@@ -1721,26 +1730,6 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings-filters').toggle();
                     });
                 }
-
-                let value = false;
-                if (layerKey in dynamicLoad && [true, false].indexOf(dynamicLoad[layerKey]) !== -1) {
-                    value = dynamicLoad[layerKey];
-                }
-
-                componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                if (document.getElementById(componentContainerId)) {
-                    ReactDOM.render(<LoadStrategyToggle
-                        layerKey={layerKey}
-                        initialValue={value}
-                        onChange={_self.onChangeLoadStrategyHandler}/>,
-                        document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                    $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                        _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                    });
-                }
             }
 
             if (isVectorLayer) {
@@ -2203,6 +2192,10 @@ module.exports = {
 
     setPointToLayer: function (layer, fn) {
         pointToLayer[layer] = fn;
+    },
+
+    setOnSelectedStyle: function (layer, style) {
+        onSelectedStyle[layer] = style;
     },
 
     getStores: function () {
