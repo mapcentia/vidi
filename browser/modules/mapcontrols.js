@@ -19,10 +19,6 @@ let _self = false;
 
 let embedModeIsEnabled = false;
 
-const buttonsStyle = {
-    
-};
-
 /**
  * Clear map control
  */
@@ -35,8 +31,12 @@ const ClearMapControlOptions = {
     onclick: (e) => {
         e.stopPropagation();
         backboneEvents.get().trigger(`reset:infoClick`);
+        backboneEvents.get().trigger(`reset:advancedInfo`);
         state.resetState([`draw`, `measurements`]);
-
+        setTimeout(() => {
+            // Detect which module is now active and reactivate it
+            $('#main-tabs > li[class="active"] > a').trigger('click');
+        }, 100);
     }
 };
 let ClearMapControl = L.Control.extend({
@@ -95,7 +95,6 @@ module.exports = {
 
         if (embedModeIsEnabled) {
             let buttonClass = `btn btn-default btn-fab btn-fab-mini map-tool-btn`;
-            let buttonStyle = `padding-top: 4px;`;
 
             let container = `#floating-container-secondary`;
 
