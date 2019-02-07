@@ -69,7 +69,8 @@ module.exports = {
     },
 
     /**
-     *
+     * Performs spatial SQL query and display results on map and in gc2table
+     * 
      * @param qstore
      * @param wkt
      * @param proj
@@ -78,8 +79,9 @@ module.exports = {
      * @param infoClickPoint
      * @param whereClause
      * @param includes
+     * @param {Function} onPopupClose Fires when feature popup is closed
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupClose) {
         let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -219,6 +221,7 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
+                            onPopupClose: onPopupClose,
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
