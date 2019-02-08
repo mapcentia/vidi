@@ -714,24 +714,55 @@ geocloud = (function () {
      * @return {Object}
      */
     createMVTLayer = function (layer, defaults) {
-        var l, url, config, usingSubDomains = false;
-        url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
-
-        config = {
-            attribution: defaults.attribution,
-            maxZoom: defaults.maxZoom,
-            maxNativeZoom: defaults.maxNativeZoom,
-            tileSize: 256,
-            ran: function () {
-                return Math.random();
+        var l, url, uri, usingSubDomains = false;
+        
+        let parts = layer.split(".");
+        if (!defaults.tileCached) {
+            if (!defaults.uri) {
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
+            } else {
+                uri = defaults.uri;
             }
-        };
 
-        if (usingSubDomains) {
-            config.subdomains = defaults.subdomains;
+            url = defaults.host + uri;
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+            }
+
+            var options = {
+                layers: layer,
+                format: 'mvt',
+                transparent: false,
+                maxZoom: defaults.maxZoom,
+                tileSize: defaults.tileSize
+            };
+
+            if (defaults.singleTile) {
+                // Insert in tile pane, so non-tiled and tiled layers can be sorted
+                options.pane = "tilePane";
+                l = new L.nonTiledLayer.wms(url, options);
+            } else {
+                l = new L.TileLayer.WMS(url, options);
+            }
+        } else {
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+
+            var options = {
+                attribution: defaults.attribution,
+                maxZoom: defaults.maxZoom,
+                maxNativeZoom: defaults.maxNativeZoom,
+                tileSize: 256,
+                ran: function () {
+                    return Math.random();
+                }
+            };
+
+            if (usingSubDomains) {
+                options.subdomains = defaults.subdomains;
+            }
+
+            l = new L.vectorGrid.protobuf(url, options);
         }
-
-        l = new L.vectorGrid.protobuf(url, config);
 
         if (defaults.layerId) {
             l.id = defaults.layerId;

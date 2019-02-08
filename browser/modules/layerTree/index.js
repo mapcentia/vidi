@@ -1930,8 +1930,6 @@ module.exports = {
     setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
 
-        console.log(`### setupLayerControls`, desiredSetupType, layerKey);
-
         let layerMeta = meta.getMetaByKey(layerKey);
         let parsedMeta = meta.parseLayerMeta(layerKey);
 

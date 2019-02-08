@@ -140,8 +140,6 @@ module.exports = module.exports = {
                     rasterTileLayer.redraw();
                 }
 
-                console.log(`### ${gc2Id}`, forceReload);
-
                 resolve();
             }).catch((err) => {
                 meta.init(gc2Id, true, true).then(layerMeta => {
@@ -328,9 +326,6 @@ module.exports = module.exports = {
      * Toggles the layer control
      */
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
-
-console.log(`### _toggleLayerControl`, layerName, enable);
-
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
             if (!controlElement || controlElement.length !== 1) {

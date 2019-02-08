@@ -199,9 +199,8 @@ module.exports = {
         }
     },
 
-
     /**
-     * Adds raster layer
+     * Add raster layer
      * 
      * @param {String} layerKey              Layer key
      * @param {String} appendedFiltersString Optional filter string
@@ -217,16 +216,7 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-
-                // If filters are applied or single_tile is true, then request should not be cached
-                let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-                let useLiveWMS = (appendedFiltersString || singleTiled);
-
-                // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
-                let mapRequestProxy = false;
-                if (useLiveWMS && layerDescription.authentication === `Read/write`) {
-                    mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
-                }
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, appendedFiltersString);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -279,13 +269,14 @@ module.exports = {
     },
 
     /**
-     * Adds vector tile layer
+     * Add vector tile layer
      * 
-     * @param {String} layerKey Layer key
+     * @param {String} layerKey              Layer key
+     * @param {String} appendedFiltersString Optional filter string
      * 
      * @returns {Promise}
      */
-    addVectorTileLayer: function (layerKey) {
+    addVectorTileLayer: function (layerKey, appendedFiltersString = false) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -294,6 +285,7 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, appendedFiltersString);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -304,7 +296,8 @@ module.exports = {
                         layers: [layer],
                         db: db,
                         isBaseLayer: isBaseLayer,
-                        tileCached: true, // Use MapCache or "real" WMS. Defaults to MapCache
+                        mapRequestProxy: mapRequestProxy,
+                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
@@ -342,4 +335,26 @@ module.exports = {
 
         return result;
     },
+
+    /**
+     * Extracts cache settings from layer description
+     * 
+     * @param {Object} layerDescription      Layer description
+     * @param {String} appendedFiltersString Optional filter string
+     * 
+     * @returns {Object}
+     */
+    getCachingDataForLayer: (layerDescription, appendedFiltersString = false) => {
+        // If filters are applied or single_tile is true, then request should not be cached
+        let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        let useLiveWMS = (appendedFiltersString || singleTiled);
+
+        // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
+        let mapRequestProxy = false;
+        if (useLiveWMS && layerDescription.authentication === `Read/write`) {
+            mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
+        }
+
+        return { useLiveWMS, mapRequestProxy };
+    }
 };
