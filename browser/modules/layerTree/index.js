@@ -17,7 +17,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 var layerTreeOrder = false;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], stores = [], virtualLayers = [], tables = {};
+    onMouseOver = [], cm = [], styles = [], vectorStores = [], virtualLayers = [], tables = {};
 
 /**
  * Layer filters
@@ -344,7 +344,7 @@ module.exports = {
          */
         cloud.get().on(`moveend`, () => {
             let activeLayers = _self.getActiveLayers();
-            for (let layerKey in stores) {
+            for (let layerKey in vectorStores) {
                 let layerIsEnabled = false;
                 for (let i = 0; i < activeLayers.length; i++) {
                     if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
@@ -365,8 +365,8 @@ module.exports = {
                         || (layerKeyNoPrefix in dynamicLoad && dynamicLoad[layerKeyNoPrefix] === true)) {
                         needToReload = true;
                         let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in stores[layerKey]) {
-                            if (stores[layerKey].buffered_bbox === false || stores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                        if (`buffered_bbox` in vectorStores[layerKey]) {
+                            if (vectorStores[layerKey].buffered_bbox === false || vectorStores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                 needToReload = false;
                             }
                         }
@@ -375,8 +375,8 @@ module.exports = {
                     }
 
                     if (needToReload) {
-                        stores[layerKey].abort();
-                        stores[layerKey].load();
+                        vectorStores[layerKey].abort();
+                        vectorStores[layerKey].load();
                     }
                 }
             }
@@ -801,11 +801,15 @@ module.exports = {
     /**
      * Creates SQL store for vector layers
      *
-     * @param {Object} layer Layer description
+     * @param {Object}  layer        Layer description
+     * @param {Boolean} isVirtual    Specifies if layer is virtual
+     * @param {Boolean} isVectorTile Specifies if layer is the vector tile one
      *
      * @return {void}
      */
-    createStore: (layer, isVirtual) => {
+    createStore: (layer, isVirtual = false, isVectorTile = false) => {
+        if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
+
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (isVirtual) {
@@ -829,7 +833,6 @@ module.exports = {
 
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
 
-
             // Checking if versioning is enabled for layer
             if (`versioning` in layer && layer.versioning) {
                 whereClauses.push(`gc2_version_end_date is null`);
@@ -852,7 +855,8 @@ module.exports = {
             custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
         }
 
-        stores[LAYER.VECTOR + ':' + layerKey] = new geocloud.sqlStore({
+        let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
+        vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
             jsonp: false,
             method: "POST",
@@ -860,16 +864,14 @@ module.exports = {
             db: db,
             uri: "/api/sql",
             clickable: true,
-            id: LAYER.VECTOR + ':' + layerKey,
-            name: LAYER.VECTOR + ':' + layerKey,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
             lifetime: 0,
             custom_data,
-            styleMap: styles[LAYER.VECTOR + ':' + layerKey],
+            styleMap: styles[trackingLayerKey],
             sql,
             onLoad: (l) => {
                 if (l === undefined) return;
-
-                // @todo Here goes the initialization of vector OR vector tile layer
 
                 let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                 if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
@@ -886,7 +888,7 @@ module.exports = {
                     el: tableContainerId + ` table`,
                     ns: tableContainerId,
                     geocloud2: cloud.get(),
-                    store: stores[LAYER.VECTOR + ':' + layerKey],
+                    store: vectorStores[LAYER.VECTOR + ':' + layerKey],
                     cm: tableHeaders,
                     autoUpdate: false,
                     autoPan: false,
@@ -1478,6 +1480,10 @@ module.exports = {
                 _self.createStore(layer, isVirtual);
             }
 
+            if (isVectorTileLayer) {
+                _self.createStore(layer, false, true);
+            }
+
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
             let layerTypeSelector = ``;
@@ -1645,7 +1651,7 @@ module.exports = {
             _self.setupLayerControls(defaultLayerType, layerKey);
 
             let initialSliderValue = 1;
-            if (isRasterTileLayer) {
+            if (isRasterTileLayer || isVectorTileLayer) {
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
                     <div class="js-opacity-slider slider shor slider-material-orange"></div>
@@ -1929,12 +1935,49 @@ module.exports = {
 
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+            const hideFilters = () => {
+                $(container).find(`.js-toggle-filters`).hide(0);
+                $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
+                $(container).find('.js-layer-settings-filters').hide(0);
+            };
+
+            const hideOpacity = () => {
+                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
+            };
+
+            const hideLoadStrategy = () => {
+                $(container).find(`.js-toggle-load-strategy`).hide(0);
+                $(container).find('.js-layer-settings-load-strategy').hide(0);
+            };
+
+            const hideTableView = () => {
+                $(container).find(`.js-toggle-table-view`).hide(0);
+                $(container).find('.js-layer-settings-table').hide(0);
+            };
+
+            const hideOfflineMode = () => {
+                $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+            };
+
+            const hideSearch = () => {
+                $(container).find(`.js-toggle-search`).hide(0);
+                $(container).find('.js-layer-settings-search').hide(0);
+            };
+
+            const hideAddFeature = () => {
+                $(container).find('.gc2-add-feature').hide(0);
+            };
 
             if (desiredSetupType === LAYER.VECTOR) {
+                hideOpacity();
+
+                // Toggles
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
-                $(container).find(`.js-toggle-tile-filters`).hide(0);
-                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find(`.js-toggle-filters`).show(0);
+                $(container).find(`.js-toggle-load-strategy`).show(0);
+                $(container).find('.gc2-add-feature').show(0);
+
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-table-view`).show(0);
                 } else {
@@ -1942,46 +1985,36 @@ module.exports = {
                     $(container).find('.js-layer-settings-filters').hide(0);
                     $(container).find('.js-layer-settings-load-strategy').hide(0);
                     $(container).find('.js-layer-settings-table').hide(0);
-                }
+                } 
+            } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                hideOfflineMode();
+                hideTableView();
+                hideLoadStrategy();
+                hideAddFeature();
 
-                $(container).find(`.js-toggle-filters`).show(0);
-                $(container).find(`.js-toggle-load-strategy`).show(0);
-                $(container).find('.js-layer-settings-opacity').hide(0);
-            } else if (desiredSetupType === LAYER.RASTER_TILE) {
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show(0);
                     $(container).find(`.js-toggle-filters`).show(0);
                     $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                 } else {
-                    $(container).find(`.js-toggle-opacity`).hide(0);
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-opacity').hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
+                    hideFilters();
+                    hideOpacity();
                 }
 
                 if (parsedMeta && !parsedMeta.single_tile) {
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
+                    hideFilters();
                 }
 
-                $(container).find(`.js-toggle-load-strategy`).hide();
-                $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
-
-                $(container).find('.js-layer-settings-load-strategy').hide(0);
-                $(container).find('.js-layer-settings-table').hide(0);
-            } else if (desiredSetupType === LAYER.VECTOR_TILE) {
-                console.error(`Controls are not completely setup for vector tile layers`);
-            } else if (desiredSetupType === LAYER.WEBGL) {
-                console.error(`Controls are not completely setup for WebGL layers`);
+                if (desiredSetupType === LAYER.VECTOR_TILE) {
+                    hideOpacity();
+                }
+            } else {
+                throw new Error(`${desiredSetupType} control setup is not supported yet`);
             }
 
-            $(container).find(`.js-toggle-search`).hide(0);
-            $(container).find('.js-layer-settings-search').hide(0);
-
             // For all layer types
+            hideSearch();
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {
@@ -2199,11 +2232,11 @@ module.exports = {
     },
 
     getStores: function () {
-        return stores;
+        return vectorStores;
     },
 
     load: function (id) {
-        stores[id].load();
+        vectorStores[id].load();
     },
 
     resetSearch: function () {

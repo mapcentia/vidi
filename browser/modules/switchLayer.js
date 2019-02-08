@@ -44,7 +44,71 @@ module.exports = module.exports = {
     },
 
     /**
-     * Enables raster tile vector
+     * Enables vector layer
+     * 
+     * @param {String}  gc2Id         Layer name (with prefix)
+     * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
+     * @param {Boolean} setupControls Specifies if layerTree controls should be setup
+     * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
+     * 
+     * @returns {Promise}
+     */
+    enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
+        if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
+
+        let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
+        return new Promise((resolve, reject) => {
+            layers.incrementCountLoading(vectorLayerId);
+            layerTree.setSelectorValue(name, LAYER.VECTOR);
+
+            let vectorDataStores = layerTree.getStores();
+            if (vectorLayerId in vectorDataStores) {
+                cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
+                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
+                cloud.get().map.addLayer(existingLayer);
+                vectorDataStores[vectorLayerId].load();
+
+                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
+
+                _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
+                resolve();
+            } else if (failedBefore !== false) {
+                if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
+                    console.error(`Failed to switch layer while attempting to get the vector data store for ${vectorLayerId} (probably it is not the vector layer)`);
+                } else {
+                    console.error(`Unknown switch layer failure for ${vectorLayerId}`);
+                }
+
+                resolve();
+            } else {
+                meta.init(gc2Id, true, true).then(layerMeta => {
+                    // Trying to recreate the layer tree with updated meta and switch layer again
+                    layerTree.create().then(() => {
+                        // All layers are guaranteed to exist in meta
+                        let currentLayers = layers.getLayers();
+                        if (currentLayers && Array.isArray(currentLayers)) {
+                            layers.getLayers().split(',').map(layerToActivate => {
+                                _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
+                            });
+                        }
+
+                        _self.init(vectorLayerId, true, false, false, true, {
+                            reason: `NO_VECTOR_DATA_STORE`
+                        }).then(() => {
+                            resolve();
+                        });
+                    });
+                }).catch(() => {
+                    console.error(`Could not add ${gc2Id} vector layer`);
+                    layers.decrementCountLoading(vectorLayerId);
+                    resolve();
+                });
+            }
+        });
+    },
+
+    /**
+     * Enable raster tile vector
      * 
      * @param {String}  gc2Id         Layer name (with prefix)
      * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
@@ -103,79 +167,61 @@ module.exports = module.exports = {
     },
 
     /**
-     * Enables vector layer
+     * Enable raster tile vector
      * 
      * @param {String}  gc2Id         Layer name (with prefix)
+     * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
-     * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
      * 
      * @returns {Promise}
      */
-    enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
-        if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
-
-        let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
-        return new Promise((resolve, reject) => {
-            try {
-            layers.incrementCountLoading(vectorLayerId);
-            layerTree.setSelectorValue(name, LAYER.VECTOR);
-
-            let vectorDataStores = layerTree.getStores();
-            if (vectorLayerId in vectorDataStores) {
-                cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
-                let existingLayer = cloud.get().getLayersByName(vectorLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                vectorDataStores[vectorLayerId].load();
-
-                backboneEvents.get().trigger("startLoading:layers", vectorLayerId);
-
-                _self.checkLayerControl(vectorLayerId, doNotLegend, setupControls);
-                resolve();
-            } else if (failedBefore !== false) {
-                if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
-                    console.error(`Failed to switch layer while attempting to get the vector data store for ${vectorLayerId} (probably it is not the vector layer)`);
-                } else {
-                    console.error(`Unknown switch layer failure for ${vectorLayerId}`);
-                }
-
-                resolve();
-            } else {
-                meta.init(gc2Id, true, true).then(layerMeta => {
-                    // Trying to recreate the layer tree with updated meta and switch layer again
-                    layerTree.create().then(() => {
-                        // All layers are guaranteed to exist in meta
-                        let currentLayers = layers.getLayers();
-                        if (currentLayers && Array.isArray(currentLayers)) {
-                            layers.getLayers().split(',').map(layerToActivate => {
-                                _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
-                            });
-                        }
-
-                        _self.init(vectorLayerId, true, false, false, true, {
-                            reason: `NO_VECTOR_DATA_STORE`
-                        }).then(() => {
-                            resolve();
-                        });
-                    });
-                }).catch(() => {
-                    console.error(`Could not add ${gc2Id} vector layer`);
-                    layers.decrementCountLoading(vectorLayerId);
-                    resolve();
-                });
-            }
-
-        }catch(e){console.log(e)}
-        });
-    },
-
-    enableVectorTile: (gc2Id) => {
+    enableVectorTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
         if (LOG) console.log(`switchLayer: enableVectorTile ${gc2Id}`);
 
-        let vectorTileLayerId = LAYER.VECTOR_TILE + `:` + gc2Id;
+        if (forceReload && forceReload === true) {
+            console.warn(`Force reloading is not supported for vector tile layers`);
+        }
+
         return new Promise((resolve, reject) => {
-            console.error(`Enabling of vector tile layers in not implemented yet (${vectorTileLayerId})`);
-            resolve();
+            try {
+
+            let typedGc2Id = LAYER.VECTOR_TILE + `:` + gc2Id;
+            layers.incrementCountLoading(typedGc2Id);
+            layerTree.setSelectorValue(gc2Id, LAYER.VECTOR_TILE);
+            layers.addVectorTileLayer(gc2Id).then(() => {
+                _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);
+                resolve();
+            }).catch((err) => {
+                if (err) {
+                    console.error(err);
+                    reject();
+                } else {
+                    meta.init(gc2Id, true, true).then(layerMeta => {
+                        // Trying to recreate the layer tree with updated meta and switch layer again                           
+                        layerTree.create().then(() => {
+                            // All layers are guaranteed to exist in meta
+                            let currentLayers = layers.getLayers();
+                            if (currentLayers && Array.isArray(currentLayers)) {
+                                layers.getLayers().split(',').map(layerToActivate => {
+                                    _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
+                                });
+                            }
+
+                            _self.init(LAYER.VECTOR_TILE + `:` + gc2Id, true).then(() => {
+                                resolve();
+                            });
+                        });
+                    }).catch(() => {
+                        console.error(`Could not add ${typedGc2Id} vector tile layer`);
+                        layers.decrementCountLoading(typedGc2Id);
+                        resolve();
+                    });
+                }
+            });
+
+
+            } catch(e) { console.log(e); }
         });
     },
 
@@ -260,7 +306,7 @@ module.exports = module.exports = {
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else if (name.startsWith(LAYER.VECTOR_TILE + ':')) {
-                    _self.enableVectorTile(gc2Id).then(resolve);
+                    _self.enableVectorTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 } else if (name.startsWith(LAYER.WEBGL + ':')) {
                     _self.enableWebGL(gc2Id).then(resolve);
                 } else {
@@ -299,6 +345,10 @@ module.exports = module.exports = {
             if (setupControls) {        
                 if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
                     layerTree.setupLayerControls(LAYER.VECTOR, layerName, true, enable);
+                } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+                    layerTree.setupLayerControls(LAYER.VECTOR_TILE, layerName, true, enable);
+                } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
+                    layerTree.setupLayerControls(LAYER.WEBGL, layerName, true, enable);
                 } else {
                     layerTree.setupLayerControls(LAYER.RASTER_TILE, layerName, true, enable);
                 }

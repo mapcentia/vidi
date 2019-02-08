@@ -6,6 +6,8 @@
 
 'use strict';
 
+const layerTreeUtils = require('./layerTree/utils')
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -139,11 +141,12 @@ module.exports = {
              </div>`;
 
         $.each(layers, function (index, value) {
-
-            // No need to search in the already displayed vector layer
+            // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
                 return true;
             }
+
+            value = layerTreeUtils.stripPrefix(value);
 
             if (layers[0] === "") {
                 return false;
