@@ -1492,7 +1492,7 @@ module.exports = {
             }
 
             let addButton = ``;
-            if (isVectorLayer && editingIsEnabled && layerIsEditable) {
+            if (editingIsEnabled && layerIsEditable) {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
@@ -1651,7 +1651,7 @@ module.exports = {
             _self.setupLayerControls(defaultLayerType, layerKey);
 
             let initialSliderValue = 1;
-            if (isRasterTileLayer) {
+            if (isRasterTileLayer || isVectorTileLayer) {
                 // Opacity slider
                 $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
                     <div class="js-opacity-slider slider shor slider-material-orange"></div>
@@ -1930,22 +1930,56 @@ module.exports = {
     setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
 
+        console.log(`### setupLayerControls`, desiredSetupType, layerKey);
+
         let layerMeta = meta.getMetaByKey(layerKey);
         let parsedMeta = meta.parseLayerMeta(layerKey);
 
-        if (desiredSetupType === LAYER.VECTOR_TILE) {
-            console.warn(`Controls are not completely setup for vector tile layers, setting it up as a raster tile one`);
-            desiredSetupType = LAYER.RASTER_TILE;
-        }
-
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+            const hideFilters = () => {
+                $(container).find(`.js-toggle-filters`).hide(0);
+                $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
+                $(container).find('.js-layer-settings-filters').hide(0);
+            };
+
+            const hideOpacity = () => {
+                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find('.js-layer-settings-opacity').hide(0);
+            };
+
+            const hideLoadStrategy = () => {
+                $(container).find(`.js-toggle-load-strategy`).hide(0);
+                $(container).find('.js-layer-settings-load-strategy').hide(0);
+            };
+
+            const hideTableView = () => {
+                $(container).find(`.js-toggle-table-view`).hide(0);
+                $(container).find('.js-layer-settings-table').hide(0);
+            };
+
+            const hideOfflineMode = () => {
+                $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+            };
+
+            const hideSearch = () => {
+                $(container).find(`.js-toggle-search`).hide(0);
+                $(container).find('.js-layer-settings-search').hide(0);
+            };
+
+            const hideAddFeature = () => {
+                $(container).find('.gc2-add-feature').hide(0);
+            };
 
             if (desiredSetupType === LAYER.VECTOR) {
+                hideOpacity();
+
+                // Toggles
                 $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
-                $(container).find(`.js-toggle-tile-filters`).hide(0);
-                $(container).find(`.js-toggle-opacity`).hide(0);
+                $(container).find(`.js-toggle-filters`).show(0);
+                $(container).find(`.js-toggle-load-strategy`).show(0);
+                $(container).find('.gc2-add-feature').show(0);
+
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-table-view`).show(0);
                 } else {
@@ -1953,46 +1987,36 @@ module.exports = {
                     $(container).find('.js-layer-settings-filters').hide(0);
                     $(container).find('.js-layer-settings-load-strategy').hide(0);
                     $(container).find('.js-layer-settings-table').hide(0);
-                }
+                } 
+            } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                hideOfflineMode();
+                hideTableView();
+                hideLoadStrategy();
+                hideAddFeature();
 
-                $(container).find(`.js-toggle-filters`).show(0);
-                $(container).find(`.js-toggle-load-strategy`).show(0);
-                $(container).find('.js-layer-settings-opacity').hide(0);
-            } else if (desiredSetupType === LAYER.RASTER_TILE) {
                 if (layerIsEnabled) {
                     $(container).find(`.js-toggle-opacity`).show(0);
                     $(container).find(`.js-toggle-filters`).show(0);
                     $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                 } else {
-                    $(container).find(`.js-toggle-opacity`).hide(0);
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-opacity').hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
+                    hideFilters();
+                    hideOpacity();
                 }
 
                 if (parsedMeta && !parsedMeta.single_tile) {
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
+                    hideFilters();
                 }
 
-                $(container).find(`.js-toggle-load-strategy`).hide();
-                $(container).find(`.js-toggle-table-view`).hide();
                 $(container).find('.js-layer-settings-filters').hide(0);
-
-                $(container).find('.js-layer-settings-load-strategy').hide(0);
-                $(container).find('.js-layer-settings-table').hide(0);
-            } else if (desiredSetupType === LAYER.VECTOR_TILE) {
-                console.error(`Controls are not completely setup for vector tile layers`);
-            } else if (desiredSetupType === LAYER.WEBGL) {
-                console.error(`Controls are not completely setup for WebGL layers`);
+                if (desiredSetupType === LAYER.VECTOR_TILE) {
+                    hideOpacity();
+                }
+            } else {
+                throw new Error(`${desiredSetupType} control setup is not supported yet`);
             }
 
-            $(container).find(`.js-toggle-search`).hide(0);
-            $(container).find('.js-layer-settings-search').hide(0);
-
             // For all layer types
+            hideSearch();
             if (layerIsEnabled) {
                 $(container).find(`.js-toggle-search`).show();
             } else {

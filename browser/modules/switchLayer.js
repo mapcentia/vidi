@@ -9,7 +9,7 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = true;
+const LOG = false;
 
 /**
  *
@@ -192,7 +192,7 @@ module.exports = module.exports = {
             layers.incrementCountLoading(typedGc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.VECTOR_TILE);
             layers.addVectorTileLayer(gc2Id).then(() => {
-                _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
+                _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);
                 resolve();
             }).catch((err) => {
                 if (err) {
@@ -328,6 +328,9 @@ module.exports = module.exports = {
      * Toggles the layer control
      */
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
+
+console.log(`### _toggleLayerControl`, layerName, enable);
+
         const getLayerSwitchControl = () => {
             let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
             if (!controlElement || controlElement.length !== 1) {
@@ -347,6 +350,10 @@ module.exports = module.exports = {
             if (setupControls) {        
                 if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
                     layerTree.setupLayerControls(LAYER.VECTOR, layerName, true, enable);
+                } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+                    layerTree.setupLayerControls(LAYER.VECTOR_TILE, layerName, true, enable);
+                } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
+                    layerTree.setupLayerControls(LAYER.WEBGL, layerName, true, enable);
                 } else {
                     layerTree.setupLayerControls(LAYER.RASTER_TILE, layerName, true, enable);
                 }
