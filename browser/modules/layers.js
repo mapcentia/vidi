@@ -52,7 +52,7 @@ var host = require("./connection").getHost();
 
 var layerTree;
 
-var array = [];
+var currentlyLoadedLayers = [];
 
 var uri = null
 
@@ -143,23 +143,24 @@ module.exports = {
     },
 
     incrementCountLoading: function (i) {
-        if (array.indexOf(i) === -1) {
-            array.push(i)
+        if (currentlyLoadedLayers.indexOf(i) === -1) {
+            currentlyLoadedLayers.push(i)
         }
-        return array.length;
+
+        return currentlyLoadedLayers.length;
     },
 
     decrementCountLoading: function (i) {
-        array.splice(array.indexOf(i), 1);
-        return array.length;
+        currentlyLoadedLayers.splice(currentlyLoadedLayers.indexOf(i), 1);
+        return currentlyLoadedLayers.length;
     },
 
     getCountLoading: function () {
-        return array.length;
+        return currentlyLoadedLayers.length;
     },
 
     getArray: function () {
-        return array;
+        return currentlyLoadedLayers;
     },
 
     setUri: function (str) {
@@ -272,5 +273,19 @@ module.exports = {
         });
 
         return result;
+    },
+
+
+
+    addVectorTileLayer: () => {
+
+
     }
+
+
+
+
+
+
+
 };

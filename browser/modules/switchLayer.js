@@ -9,7 +9,7 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = false;
+const LOG = true;
 
 /**
  *
@@ -117,7 +117,6 @@ module.exports = module.exports = {
 
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
         return new Promise((resolve, reject) => {
-            try {
             layers.incrementCountLoading(vectorLayerId);
             layerTree.setSelectorValue(name, LAYER.VECTOR);
 
@@ -164,18 +163,81 @@ module.exports = module.exports = {
                     resolve();
                 });
             }
-
-        }catch(e){console.log(e)}
         });
     },
 
-    enableVectorTile: (gc2Id) => {
+    enableVectorTile: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVectorTile ${gc2Id}`);
 
         let vectorTileLayerId = LAYER.VECTOR_TILE + `:` + gc2Id;
         return new Promise((resolve, reject) => {
-            console.error(`Enabling of vector tile layers in not implemented yet (${vectorTileLayerId})`);
-            resolve();
+            try {
+
+            /*
+                The data source for the vector tile layer can be either GeoJSON or MVT
+            */
+            const dataSource = `GeoJSON`;
+
+            if (dataSource === `MVT`) {
+
+
+
+
+
+
+                
+
+            } else if (dataSource === `GeoJSON`) {
+                layers.incrementCountLoading(vectorTileLayerId);
+                layerTree.setSelectorValue(name, LAYER.VECTOR_TILE);
+
+                let vectorTileDataStores = layerTree.getVectorTileStores();
+
+                if (vectorTileLayerId in vectorTileDataStores) {
+                    cloud.get().layerControl.addOverlay(vectorTileDataStores[vectorTileLayerId].layer, vectorTileLayerId);
+                    let existingLayer = cloud.get().getLayersByName(vectorTileLayerId);
+                    cloud.get().map.addLayer(existingLayer);
+                    vectorTileDataStores[vectorTileLayerId].load();
+
+                    backboneEvents.get().trigger("startLoading:layers", vectorTileLayerId);
+
+                    _self.checkLayerControl(vectorTileLayerId, doNotLegend, setupControls);
+                    resolve();
+                } else if (failedBefore !== false) {
+                    if (failedBefore.reason === `NO_VECTOR_TILE_DATA_STORE`) {
+                        console.error(`Failed to switch layer while attempting to get the vector tile data store for ${vectorTileLayerId} (probably it is not the vector tile layer)`);
+                    } else {
+                        console.error(`Unknown switch layer failure for ${vectorTileLayerId}`);
+                    }
+
+                    resolve();
+                } else {
+                    meta.init(gc2Id, true, true).then(layerMeta => {
+                        // Trying to recreate the layer tree with updated meta and switch layer again
+                        layerTree.create().then(() => {
+                            // All layers are guaranteed to exist in meta
+                            let currentLayers = layers.getLayers();
+                            if (currentLayers && Array.isArray(currentLayers)) {
+                                layers.getLayers().split(',').map(layerToActivate => {
+                                    _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
+                                });
+                            }
+
+                            _self.init(vectorTileLayerId, true, false, false, true, {
+                                reason: `NO_VECTOR_DATA_STORE`
+                            }).then(() => {
+                                resolve();
+                            });
+                        });
+                    }).catch(() => {
+                        console.error(`Could not add ${gc2Id} vector layer`);
+                        layers.decrementCountLoading(vectorTileLayerId);
+                        resolve();
+                    });
+                }
+            }
+
+        }catch(e){console.log(e)}
         });
     },
 
@@ -260,7 +322,7 @@ module.exports = module.exports = {
                 if (name.startsWith(LAYER.VECTOR + ':')) {
                     _self.enableVector(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else if (name.startsWith(LAYER.VECTOR_TILE + ':')) {
-                    _self.enableVectorTile(gc2Id).then(resolve);
+                    _self.enableVectorTile(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else if (name.startsWith(LAYER.WEBGL + ':')) {
                     _self.enableWebGL(gc2Id).then(resolve);
                 } else {
