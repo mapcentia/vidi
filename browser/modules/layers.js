@@ -7,6 +7,7 @@
 'use strict';
 
 import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './layerTree/LayerSorting';
+import { LAYER } from './layerTree/constants';
 
 /**
  *
@@ -111,6 +112,7 @@ module.exports = {
                 }
             }
         }
+
         return mapLayers;
     },
 
@@ -197,6 +199,7 @@ module.exports = {
         }
     },
 
+
     /**
      * Adds raster layer
      * 
@@ -275,17 +278,68 @@ module.exports = {
         return result;
     },
 
+    /**
+     * Adds vector tile layer
+     * 
+     * @param {String} layerKey Layer key
+     * 
+     * @returns {Promise}
+     */
+    addVectorTileLayer: function (layerKey) {
+        var me = this;
+        let result = new Promise((resolve, reject) => {
+            var isBaseLayer, layers = [], metaData = meta.getMetaData();
 
+            let layerWasAdded = false;
 
-    addVectorTileLayer: () => {
+            $.each(metaData.data, function (i, layerDescription) {
+                var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
 
+                if (layer === layerKey) {
+                    // Check if the opacity value differs from the default one
+                    isBaseLayer = !!layerDescription.baselayer;
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        host: host,
+                        layerId: (LAYER.VECTOR_TILE + `:` + layer),
+                        layers: [layer],
+                        db: db,
+                        isBaseLayer: isBaseLayer,
+                        tileCached: true, // Use MapCache or "real" WMS. Defaults to MapCache
+                        singleTile: true, // Always use single tiled. With or without MapCache
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        name: layerDescription.f_table_name,
+                        type: "mvt",
+                        format: "image/png",
+                        uri: uri,
+                        loadEvent: function () {
+                            me.decrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
 
-    }
+                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
+                    me.reorderLayers();
 
+                    layerWasAdded = true;
+                    return false;
+                }
+            });
 
+            if (layerWasAdded) {
+                console.info(`${layerKey} was added to the map`);
+                resolve();
+            } else {
+                console.warn(`${layerKey} was not added to the map`);
+                reject();
+            }
+        });
 
-
-
-
-
+        return result;
+    },
 };

@@ -17,7 +17,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 var layerTreeOrder = false;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], vectorStores = [], vectorTileStores = [], virtualLayers = [], tables = {};
+    onMouseOver = [], cm = [], styles = [], vectorStores = [], virtualLayers = [], tables = {};
 
 /**
  * Layer filters
@@ -855,163 +855,139 @@ module.exports = {
             custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
         }
 
-        let trackingLayerKey = false;
-        if (isVectorTile) {
-            trackingLayerKey = (LAYER.VECTOR_TILE + ':' + layerKey);
-            vectorTileStores[trackingLayerKey] = new geocloud.sqlStoreVectorTile({
-                map: cloud.get().map,
-                jsonp: false,
-                method: "POST",
-                host: "",
-                db: db,
-                uri: "/api/sql",
-                clickable: true,
-                id: trackingLayerKey,
-                name: trackingLayerKey,
-                lifetime: 0,
-                custom_data,
-                styleMap: styles[trackingLayerKey],
-                sql,
-                onLoad: (l) => {
-                    if (l === undefined) return;
-                    console.log(`### onLoad triggered`);
-                },
-            });
-        } else {
-            trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
-            vectorStores[trackingLayerKey] = new geocloud.sqlStore({
-                map: cloud.get().map,
-                jsonp: false,
-                method: "POST",
-                host: "",
-                db: db,
-                uri: "/api/sql",
-                clickable: true,
-                id: trackingLayerKey,
-                name: trackingLayerKey,
-                lifetime: 0,
-                custom_data,
-                styleMap: styles[trackingLayerKey],
-                sql,
-                onLoad: (l) => {
-                    if (l === undefined) return;
+        let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
+        vectorStores[trackingLayerKey] = new geocloud.sqlStore({
+            map: cloud.get().map,
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: db,
+            uri: "/api/sql",
+            clickable: true,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
+            lifetime: 0,
+            custom_data,
+            styleMap: styles[trackingLayerKey],
+            sql,
+            onLoad: (l) => {
+                if (l === undefined) return;
 
-                    let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                    if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-                    $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+                let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+                $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
 
-                    let metaDataKeys = meta.getMetaDataKeys();
-                    let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                        && metaDataKeys[layerKey].infowindow.template !== "")
-                        ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-                    let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
+                let metaDataKeys = meta.getMetaDataKeys();
+                let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                    && metaDataKeys[layerKey].infowindow.template !== "")
+                    ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+                let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
-                    let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : defaultSelectedStyle);
-                    let localTable = gc2table.init({
-                        el: tableContainerId + ` table`,
-                        ns: tableContainerId,
-                        geocloud2: cloud.get(),
-                        store: vectorStores[LAYER.VECTOR + ':' + layerKey],
-                        cm: tableHeaders,
-                        autoUpdate: false,
-                        autoPan: false,
-                        openPopUp: false,
-                        setViewOnSelect: true,
-                        responsive: false,
-                        callCustomOnload: true,
-                        assignFeatureEventListenersOnDataLoad: true,
-                        height: 250,
-                        locale: window._vidiLocale.replace("_", "-"),
-                        template: template,
-                        styleSelected
-                    });
+                let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : defaultSelectedStyle);
+                let localTable = gc2table.init({
+                    el: tableContainerId + ` table`,
+                    ns: tableContainerId,
+                    geocloud2: cloud.get(),
+                    store: vectorStores[LAYER.VECTOR + ':' + layerKey],
+                    cm: tableHeaders,
+                    autoUpdate: false,
+                    autoPan: false,
+                    openPopUp: false,
+                    setViewOnSelect: true,
+                    responsive: false,
+                    callCustomOnload: true,
+                    assignFeatureEventListenersOnDataLoad: true,
+                    height: 250,
+                    locale: window._vidiLocale.replace("_", "-"),
+                    template: template,
+                    styleSelected
+                });
 
-                    if ($(tableContainerId + ` table`).is(`:visible`)) {
-                        localTable.loadDataInTable(true);
+                if ($(tableContainerId + ` table`).is(`:visible`)) {
+                    localTable.loadDataInTable(true);
+                }
+
+                tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+
+                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+                if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
+                    onLoad[LAYER.VECTOR + ':' + layerKey](l);
+                }
+            },
+            transformResponse: (response, id) => {
+                return apiBridgeInstance.transformResponseHandler(response, id);
+            },
+            onEachFeature: (feature, layer) => {
+                if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
                     }
 
-                    tables[LAYER.VECTOR + ':' + layerKey] = localTable;
-
-                    $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
-                    layers.decrementCountLoading(l.id);
-                    backboneEvents.get().trigger("doneLoading:layers", l.id);
-                    if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
-                        onLoad[LAYER.VECTOR + ':' + layerKey](l);
-                    }
-                },
-                transformResponse: (response, id) => {
-                    return apiBridgeInstance.transformResponseHandler(response, id);
-                },
-                onEachFeature: (feature, layer) => {
-                    if ((LAYER.VECTOR + ':' + layerKey) in onEachFeature) {
+                    if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
                         /*
-                            Checking for correct onEachFeature structure
+                            If the handler was set by the editor extension, then display the attributes popup and editing buttons
                         */
-                        if (`fn` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].fn ||
-                            `caller` in onEachFeature[LAYER.VECTOR + ':' + layerKey] === false || !onEachFeature[LAYER.VECTOR + ':' + layerKey].caller) {
-                            throw new Error(`Invalid onEachFeature structure`);
+                        if (`editor` in extensions) {
+                            editor = extensions.editor.index;
                         }
-    
-                        if (onEachFeature[LAYER.VECTOR + ':' + layerKey].caller === `editor`) {
-                            /*
-                                If the handler was set by the editor extension, then display the attributes popup and editing buttons
-                            */
-                            if (`editor` in extensions) {
-                                editor = extensions.editor.index;
-                            }
-    
-                            layer.on("click", function (e) {
-                                let layerIsEditable = false;
-                                let metaDataKeys = meta.getMetaDataKeys();
-                                if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
-                                    let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
-                                    if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                        layerIsEditable = true;
-                                    }
-                                } else {
-                                    throw new Error(`metaDataKeys[${layerKey}] is undefined`);
-                                }
-    
-                                let editingButtonsMarkup = ``;
-                                if (editingIsEnabled && layerIsEditable) {
-                                    editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
-                                }
-    
-                                _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup);
-    
-                                if (editingIsEnabled && layerIsEditable) {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
-                                        let layerMeta = meta.getMetaByKey(layerKey);
-                                        editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                    });
-    
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
-                                        if (window.confirm("Are you sure? Changes will not be saved!")) {
-                                            let layerMeta = meta.getMetaByKey(layerKey);
-                                            editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
-                                        }
-                                    });
-                                } else {
-                                    $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
-                                    $(`.js-vector-layer-popup`).find(".ge-delete").hide();
-                                }
-                            });
-                        }
-    
-                        onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
-                    } else {
-                        // If there is no handler for specific layer, then display attributes only
+
                         layer.on("click", function (e) {
-                            _self.displayAttributesPopup(feature, layer, e);
+                            let layerIsEditable = false;
+                            let metaDataKeys = meta.getMetaDataKeys();
+                            if (metaDataKeys[layerKey] && `meta` in metaDataKeys[layerKey]) {
+                                let parsedMeta = _self.parseLayerMeta(metaDataKeys[layerKey]);
+                                if (parsedMeta && `vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                    layerIsEditable = true;
+                                }
+                            } else {
+                                throw new Error(`metaDataKeys[${layerKey}] is undefined`);
+                            }
+
+                            let editingButtonsMarkup = ``;
+                            if (editingIsEnabled && layerIsEditable) {
+                                editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
+                            }
+
+                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup);
+
+                            if (editingIsEnabled && layerIsEditable) {
+                                $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
+                                    let layerMeta = meta.getMetaByKey(layerKey);
+                                    editor.edit(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                                });
+
+                                $(`.js-vector-layer-popup`).find(".ge-delete").unbind("click.ge-delete").bind("click.ge-delete", (e) => {
+                                    if (window.confirm("Are you sure? Changes will not be saved!")) {
+                                        let layerMeta = meta.getMetaByKey(layerKey);
+                                        editor.delete(layer, layerKey + "." + layerMeta.f_geometry_column, null, true);
+                                    }
+                                });
+                            } else {
+                                $(`.js-vector-layer-popup`).find(".ge-start-edit").hide();
+                                $(`.js-vector-layer-popup`).find(".ge-delete").hide();
+                            }
                         });
                     }
-                },
-                pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
-                    return L.circleMarker(latlng);
-                })
-            });
-        }
+
+                    onEachFeature[LAYER.VECTOR + ':' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
+                }
+            },
+            pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
+                return L.circleMarker(latlng);
+            })
+        });
     },
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {
@@ -1516,7 +1492,7 @@ module.exports = {
             }
 
             let addButton = ``;
-            if (editingIsEnabled && layerIsEditable) {
+            if (isVectorLayer && editingIsEnabled && layerIsEditable) {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
             }
 
@@ -1958,8 +1934,8 @@ module.exports = {
         let parsedMeta = meta.parseLayerMeta(layerKey);
 
         if (desiredSetupType === LAYER.VECTOR_TILE) {
-            console.warn(`Controls are not completely setup for vector tile layers, setting it up as a vector one`);
-            desiredSetupType = LAYER.VECTOR;
+            console.warn(`Controls are not completely setup for vector tile layers, setting it up as a raster tile one`);
+            desiredSetupType = LAYER.RASTER_TILE;
         }
 
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
@@ -2235,10 +2211,6 @@ module.exports = {
 
     getStores: function () {
         return vectorStores;
-    },
-
-    getVectorTileStores: function () {
-        return vectorTileStores;
     },
 
     load: function (id) {

@@ -30,17 +30,16 @@ geocloud = (function () {
         }()),
         map,
         storeClass,
-        vectorTileStoreClass,
         extend,
         geoJsonStore,
         cartoDbStore,
         sqlStore,
-        sqlStoreVectorTile,
         tweetStore,
         elasticStore,
         tileLayer,
         createTileLayer,
         createTMSLayer,
+        createMVTLayer,
         clickEvent,
         transformPoint,
         base64,
@@ -141,7 +140,6 @@ geocloud = (function () {
         base64: true,
         custom_data: null
     };
-
     // Base class for stores
     storeClass = function () {
         //this.defaults = STOREDEFAULTS;
@@ -212,44 +210,6 @@ geocloud = (function () {
             return new OpenLayers.Format.WKT().write(this.layer.features);
         };
     };
-
-    // Base class for stores that use vector tile layers
-    vectorTileStoreClass = function () {
-        this.hide = function () { this.layer.setVisibility(false); };
-        this.show = function () { this.layer.setVisibility(true); };
-        this.map = null;
-
-        /**
-         * Initiate base class settings
-         */
-        this.init = function () {
-            this.onLoad = this.defaults.onLoad;
-            this.loading = this.defaults.loading;
-
-            this.layer = L.vectorGrid.slicer(null);
-            console.log(this.layer);
-
-            /*
-            this.layer = L.geoJson(null, {
-                style: this.defaults.styleMap,
-                pointToLayer: this.defaults.pointToLayer,
-                onEachFeature: this.defaults.onEachFeature,
-                interactive: this.defaults.clickable,
-                bubblingMouseEvents: false
-            });
-            */
-
-
-            this.layer.id = this.defaults.name;
-        };
-
-        this.geoJSON = null;
-        this.featureStore = null;
-        this.reset = function () { this.layer.clearLayers(); };
-        this.isEmpty = function () { return (Object.keys(this.layer._layers).length === 0) ? true : false; };
-        this.getWKT = function () { return new OpenLayers.Format.WKT().write(this.layer.features); };
-    };
-
     geoJsonStore = sqlStore = function (config) {
         var prop, me = this, map, sql, xhr = {
             abort: function () {/* stub */
@@ -373,117 +333,6 @@ geocloud = (function () {
             xhr.abort();
         }
     };
-
-    sqlStoreVectorTile = function (config) {
-        var prop, me = this, map, sql, xhr = {
-            abort: function () {/* stub */
-            }
-        };
-
-        this.defaults = $.extend({}, STOREDEFAULTS);
-        if (config) {
-            for (prop in config) {
-                this.defaults[prop] = config[prop];
-            }
-        }
-
-        this.init();
-        this.name = this.defaults.name;
-        this.id = this.defaults.id;
-        this.sql = this.defaults.sql;
-        this.db = this.defaults.db;
-        this.host = this.defaults.host.replace("cdn.", "");
-        this.onLoad = this.defaults.onLoad;
-        this.loading = this.defaults.loading;
-        this.dataType = this.defaults.dataType;
-        this.async = this.defaults.async;
-        this.jsonp = this.defaults.jsonp;
-        this.method = this.defaults.method;
-        this.uri = this.defaults.uri;
-        this.base64 = this.defaults.base64;
-        this.custom_data = this.defaults.custom_data;
-
-        this.buffered_bbox = false;
-
-        this.load = function (doNotShowAlertOnError) {
-            try {
-                me.abort();
-            } catch (e) {
-                console.error(e.message);
-            }
-
-            sql = this.sql;
-
-            var dynamicQueryIsUsed = false;
-            map = me.layer._map;
-            if (map) {
-                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
-                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
-                    dynamicQueryIsUsed = true;
-                }
-
-                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
-                var extendedBounds = map.getBounds().pad(1);
-                this.buffered_bbox = extendedBounds;
-
-                sql = sql.replace("{centerX}", map.getCenter().lat.toString());
-                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
-                sql = sql.replace("{maxY}", extendedBounds.getNorth());
-                sql = sql.replace("{maxX}", extendedBounds.getEast());
-                sql = sql.replace("{minY}", extendedBounds.getSouth());
-                sql = sql.replace("{minX}", extendedBounds.getWest());
-
-                if (sql.indexOf("{bbox}") !== -1) {
-                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
-                }
-            } else {
-                console.error("Unable to get map object");
-            }
-
-            me.loading();
-            xhr = $.ajax({
-                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
-                async: this.defaults.async,
-                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
-                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
-                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
-                jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
-                url: this.host + this.uri + '/' + this.db,
-                type: this.defaults.method,
-                success: function (response) {
-                    if (response.success === false && doNotShowAlertOnError === undefined) {
-                        alert(response.message);
-                    }
-
-                    console.log(me.layer);
-
-                    if (response.success === true) {
-                        if (response.features !== null) {
-                            me.geoJSON = response;
-                            if (dynamicQueryIsUsed) {
-                                me.layer.clearLayers();
-                            }
-
-                            me.layer.addData(response);
-                        } else {
-                            me.geoJSON = null;
-                        }
-                    }
-                },
-                error: this.defaults.error,
-                complete: function () {
-                    me.onLoad(me);
-                }
-            });
-
-            return xhr;
-        };
-
-        this.abort = function () {
-            xhr.abort();
-        }
-    };
-
     cartoDbStore = function (config) {
         var prop, me = this, map, sql, xhr;
         this.defaults = $.extend({}, STOREDEFAULTS);
@@ -685,7 +534,6 @@ geocloud = (function () {
     };
     // Extend store classes
     extend(sqlStore, storeClass);
-    extend(sqlStoreVectorTile, vectorTileStoreClass);
     extend(tweetStore, storeClass);
     extend(elasticStore, storeClass);
     extend(cartoDbStore, storeClass);
@@ -856,6 +704,52 @@ geocloud = (function () {
         }
         return l;
     };
+
+    /**
+     * Creates MVT layer
+     * 
+     * @param {String} layer    Layer identifier
+     * @param {Object} defaults Default settings
+     * 
+     * @return {Object}
+     */
+    createMVTLayer = function (layer, defaults) {
+        var l, url, config, usingSubDomains = false;
+        url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+
+        config = {
+            attribution: defaults.attribution,
+            maxZoom: defaults.maxZoom,
+            maxNativeZoom: defaults.maxNativeZoom,
+            tileSize: 256,
+            ran: function () {
+                return Math.random();
+            }
+        };
+
+        if (usingSubDomains) {
+            config.subdomains = defaults.subdomains;
+        }
+
+        l = new L.vectorGrid.protobuf(url, config);
+
+        if (defaults.layerId) {
+            l.id = defaults.layerId;
+        }  else {
+            l.id = layer;
+        }
+
+        if (defaults.loadEvent) {
+            l.on("load", defaults.loadEvent);
+        }
+
+        if (defaults.loadingEvent) {
+            l.on("loading", defaults.loadingEvent);
+        }
+
+        return l;
+    };
+
 
     // Set map constructor
     map = function (config) {
@@ -2011,6 +1905,7 @@ geocloud = (function () {
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
+                layerId: false,
                 layers: [],
                 db: null,
                 mapRequestProxy: false,
@@ -2030,11 +1925,13 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
+
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
+
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -2046,32 +1943,28 @@ geocloud = (function () {
                     case "tms":
                         l = createTMSLayer(layers[i], defaults);
                         break;
+                    case "mvt":
+                        l = createMVTLayer(layers[i], defaults);
+                        break;
                     default:
                         l = createTileLayer(layers[i], defaults);
                         break;
                 }
+
                 l.baseLayer = defaults.isBaseLayer;
-                switch (MAPLIB) {
-                    case "ol2":
-                        this.map.addLayer(l);
-                        break;
-                    case "ol3":
-                        this.map.addLayer(l);
-                        break;
-                    case "leaflet":
-                        if (defaults.isBaseLayer === true) {
-                            lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
-                        }
-                        else {
-                            lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
-                        }
-                        if (defaults.visibility === true) {
-                            this.showLayer(layers[i]);
-                        }
-                        break;
+                if (defaults.isBaseLayer === true) {
+                    lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
+                } else {
+                    lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
                 }
+
+                if (defaults.visibility === true) {
+                    this.showLayer(layers[i]);
+                }
+
                 layersArr.push(l);
             }
+
             return layersArr;
         };
 
@@ -2159,51 +2052,33 @@ geocloud = (function () {
                     break;
             }
         };
-        //ol2, ol3 and leaflet
+        
         this.showLayer = function (name) {
-            switch (MAPLIB) {
-                case "ol2":
-                    this.getLayersByName(name).setVisibility(true);
-                    break;
-                case "ol3":
-                    this.getLayersByName(name).set("visible", true);
-                    break;
-                case "leaflet":
-                    this.getLayersByName(name).addTo(this.map);
-                    break;
-            }
+            this.getLayersByName(name).addTo(this.map);
         };
+
         //ol2
         this.getLayerById = function (id) {
             return this.map.getLayer(id);
         };
-        //ol2, ol3 and leaflet (rename to getLayerByName)
+
+        //leaflet (rename to getLayerByName)
         this.getLayersByName = function (name) {
             var l;
-            switch (MAPLIB) {
-                case "ol2":
-                    l = this.map.getLayersByName(name)[0];
-                    break;
-                case "ol3":
-                    for (var i = 0; i < this.map.getLayers().getLength(); i++) {
-                        if (this.map.getLayers().a[i].id === name) {
-                            l = this.map.getLayers().a[i];
-                        }
+            var layers = lControl._layers;
+            for (var key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    if (layers[key].layer.id === name || layers[key].layer.id === ('mvt:' + name)) {
+                        l = layers[key].layer;
                     }
-                    break;
-                case "leaflet":
-                    var layers = lControl._layers;
-                    for (var key in layers) {
-                        if (layers.hasOwnProperty(key)) {
-                            if (layers[key].layer.id === name) {
-                                l = layers[key].layer;
-                            }
-                        }
-                    }
-                    break;
+                }
             }
+
+            //if (!l) throw new Error('Unable to find layer with identifier ' + name);
+
             return l;
         };
+
         //ol2
         this.hideAllTileLayers = function () {
             for (var i = 0; i < this.map.layers.length; i++) {
@@ -2577,7 +2452,6 @@ geocloud = (function () {
     return {
         geoJsonStore: geoJsonStore,
         sqlStore: sqlStore,
-        sqlStoreVectorTile: sqlStoreVectorTile,
         tileLayer: tileLayer,
         elasticStore: elasticStore,
         tweetStore: tweetStore,
@@ -2714,4 +2588,3 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
-
