@@ -11,6 +11,8 @@ const layerTreeUtils = require('./layerTree/utils');
 
 const LOG = false;
 
+let layersAlternationHistory = {};
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -124,19 +126,26 @@ module.exports = module.exports = {
             // Only one layer at a time, so using the raster tile layer identifier
             layers.incrementCountLoading(gc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
-            layers.addLayer(gc2Id, layerTree.getLayerFilterString(gc2Id)).then(() => {
+            layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id)]).then(() => {
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 
-                let tileLayersCacheBuster = ``;
+                let cacheBuster = ``;
                 if (forceReload) {
-                    tileLayersCacheBuster = Math.random();
+                    cacheBuster = Math.random();
+                } else {
+                    if (gc2Id in layersAlternationHistory) {
+                        if (layersAlternationHistory[gc2Id].updatedLayerTypes.indexOf(LAYER.RASTER_TILE) === -1) {
+                            layersAlternationHistory[gc2Id].updatedLayerTypes.push(LAYER.RASTER_TILE);
+                            cacheBuster = Math.random();
+                        }
+                    }
                 }
 
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
                 let rasterTileLayer = cloud.get().getLayersByName(gc2Id);
                 if (`setUrl` in rasterTileLayer) {
-                    rasterTileLayer.setUrl(rasterTileLayer._url + "?" + tileLayersCacheBuster);
+                    rasterTileLayer.setUrl(rasterTileLayer._url + "?" + cacheBuster);
                     rasterTileLayer.redraw();
                 }
 
@@ -189,7 +198,28 @@ module.exports = module.exports = {
             let typedGc2Id = LAYER.VECTOR_TILE + `:` + gc2Id;
             layers.incrementCountLoading(typedGc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.VECTOR_TILE);
-            layers.addVectorTileLayer(gc2Id).then(() => {
+
+            let URLParameters = [layerTree.getLayerFilterString(gc2Id)];
+            if (forceReload) {
+                let cacheBuster = `cacheBuster=${Math.random()}`;
+                layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
+                URLParameters.push(cacheBuster);
+            } else {
+                if (gc2Id in layersAlternationHistory) {
+                    if (layersAlternationHistory[gc2Id].updatedLayerTypes.indexOf(LAYER.VECTOR_TILE) === -1) {
+                        layersAlternationHistory[gc2Id].updatedLayerTypes.push(LAYER.VECTOR_TILE);
+                        let cacheBuster = `cacheBuster=${Math.random()}`;
+                        layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
+                        URLParameters.push(cacheBuster);
+                    } else {
+                        URLParameters.push(layersAlternationHistory[gc2Id].cacheBuster);
+                    }
+                }
+            }
+
+            console.log(`### URLParameters`, URLParameters);
+
+            layers.addVectorTileLayer(gc2Id, URLParameters).then(() => {
                 _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);
                 resolve();
             }).catch((err) => {
@@ -233,6 +263,24 @@ module.exports = module.exports = {
             console.error(`Enabling of WebGL layers in not implemented yet (${webGLLayerId})`);
             resolve();
         });
+    },
+
+    /**
+     * Registers layer data alternation, this way when is will be loaded next time in format, different
+     * from the current one, the cache will be also updated (for example, cache busting will be
+     * applied for raster and vector tiles)
+     * 
+     * @param {String} gc2Id Layer identifier
+     * 
+     * @returns {void}
+     */
+    registerLayerDataAlternation: (gc2Id) => {
+        if (!gc2Id || gc2Id.indexOf(`:`) > -1) throw new Error(`Invalid layer identifier was provided`);
+        layersAlternationHistory[gc2Id] = {
+            updatedLayerTypes: [],
+            cacheBuster: ``,
+            registeredAt: new Date()
+        };
     },
 
     /**

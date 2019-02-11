@@ -1911,7 +1911,7 @@ module.exports = {
         if (activeFilters.length > 0) {
             let data = {};
             data[layerKey] = activeFilters;
-            parameterString = `&filters=` + JSON.stringify(data);
+            parameterString = `filters=` + JSON.stringify(data);
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
@@ -2058,12 +2058,15 @@ module.exports = {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
                 if (activeLayerKey === layerKey) {
                     // Reloading as a tile layer
-                    _self.reloadLayer(layerKey, false, false, false);
+                    _self.reloadLayer(activeLayerKey, false, false, false);
+                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + layerKey)) {
+                    // Reloading as a vector tile layer
+                    _self.reloadLayer(activeLayerKey, false, false, false);
                 } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
-                    _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
+                    _self.reloadLayer(activeLayerKey);
                 } else {
                     console.error(`Unable to apply filters to layer ${layerKey}`);
                 }

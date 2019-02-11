@@ -570,7 +570,7 @@ geocloud = (function () {
 
         if (!defaults.tileCached) {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
                 uri = defaults.uri;
             }
@@ -714,55 +714,39 @@ geocloud = (function () {
      * @return {Object}
      */
     createMVTLayer = function (layer, defaults) {
-        var l, url, uri, usingSubDomains = false;
+        var l, url, uri;
         
         let parts = layer.split(".");
-        if (!defaults.tileCached) {
+        var options = {
+            attribution: defaults.attribution,
+            maxZoom: defaults.maxZoom,
+            maxNativeZoom: defaults.maxNativeZoom,
+            tileSize: 256,
+            ran: function () {
+                return Math.random();
+            }
+        };
+
+        if (defaults.tileCached) {
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+        } else {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+                    + "&format=mvt&map.imagetype=mvt&" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
                 uri = defaults.uri;
             }
 
             url = defaults.host + uri;
             if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
                 url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+                url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
             }
-
-            var options = {
-                layers: layer,
-                format: 'mvt',
-                transparent: false,
-                maxZoom: defaults.maxZoom,
-                tileSize: defaults.tileSize
-            };
-
-            if (defaults.singleTile) {
-                // Insert in tile pane, so non-tiled and tiled layers can be sorted
-                options.pane = "tilePane";
-                l = new L.nonTiledLayer.wms(url, options);
-            } else {
-                l = new L.TileLayer.WMS(url, options);
-            }
-        } else {
-            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
-
-            var options = {
-                attribution: defaults.attribution,
-                maxZoom: defaults.maxZoom,
-                maxNativeZoom: defaults.maxNativeZoom,
-                tileSize: 256,
-                ran: function () {
-                    return Math.random();
-                }
-            };
-
-            if (usingSubDomains) {
-                options.subdomains = defaults.subdomains;
-            }
-
-            l = new L.vectorGrid.protobuf(url, options);
         }
+
+        l = new L.vectorGrid.protobuf(url, options);
 
         if (defaults.layerId) {
             l.id = defaults.layerId;
