@@ -39,6 +39,7 @@ geocloud = (function () {
         tileLayer,
         createTileLayer,
         createTMSLayer,
+        createMVTLayer,
         clickEvent,
         transformPoint,
         base64,
@@ -569,7 +570,7 @@ geocloud = (function () {
 
         if (!defaults.tileCached) {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters ? defaults.additionalURLParameters : '');
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
                 uri = defaults.uri;
             }
@@ -703,6 +704,67 @@ geocloud = (function () {
         }
         return l;
     };
+
+    /**
+     * Creates MVT layer
+     * 
+     * @param {String} layer    Layer identifier
+     * @param {Object} defaults Default settings
+     * 
+     * @return {Object}
+     */
+    createMVTLayer = function (layer, defaults) {
+        var l, url, uri;
+        
+        let parts = layer.split(".");
+        var options = {
+            attribution: defaults.attribution,
+            maxZoom: defaults.maxZoom,
+            maxNativeZoom: defaults.maxNativeZoom,
+            tileSize: 256,
+            ran: function () {
+                return Math.random();
+            }
+        };
+
+        if (defaults.tileCached) {
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+        } else {
+            if (!defaults.uri) {
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+                    + "&format=mvt&map.imagetype=mvt&" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
+            } else {
+                uri = defaults.uri;
+            }
+
+            url = defaults.host + uri;
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
+                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+                url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
+            }
+        }
+
+        l = new L.vectorGrid.protobuf(url, options);
+
+        if (defaults.layerId) {
+            l.id = defaults.layerId;
+        }  else {
+            l.id = layer;
+        }
+
+        if (defaults.loadEvent) {
+            l.on("load", defaults.loadEvent);
+        }
+
+        if (defaults.loadingEvent) {
+            l.on("loading", defaults.loadingEvent);
+        }
+
+        return l;
+    };
+
 
     // Set map constructor
     map = function (config) {
@@ -1858,6 +1920,7 @@ geocloud = (function () {
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
+                layerId: false,
                 layers: [],
                 db: null,
                 mapRequestProxy: false,
@@ -1877,11 +1940,13 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
+
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
+
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -1893,32 +1958,28 @@ geocloud = (function () {
                     case "tms":
                         l = createTMSLayer(layers[i], defaults);
                         break;
+                    case "mvt":
+                        l = createMVTLayer(layers[i], defaults);
+                        break;
                     default:
                         l = createTileLayer(layers[i], defaults);
                         break;
                 }
+
                 l.baseLayer = defaults.isBaseLayer;
-                switch (MAPLIB) {
-                    case "ol2":
-                        this.map.addLayer(l);
-                        break;
-                    case "ol3":
-                        this.map.addLayer(l);
-                        break;
-                    case "leaflet":
-                        if (defaults.isBaseLayer === true) {
-                            lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
-                        }
-                        else {
-                            lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
-                        }
-                        if (defaults.visibility === true) {
-                            this.showLayer(layers[i]);
-                        }
-                        break;
+                if (defaults.isBaseLayer === true) {
+                    lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
+                } else {
+                    lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
                 }
+
+                if (defaults.visibility === true) {
+                    this.showLayer(layers[i]);
+                }
+
                 layersArr.push(l);
             }
+
             return layersArr;
         };
 
@@ -2006,51 +2067,33 @@ geocloud = (function () {
                     break;
             }
         };
-        //ol2, ol3 and leaflet
+        
         this.showLayer = function (name) {
-            switch (MAPLIB) {
-                case "ol2":
-                    this.getLayersByName(name).setVisibility(true);
-                    break;
-                case "ol3":
-                    this.getLayersByName(name).set("visible", true);
-                    break;
-                case "leaflet":
-                    this.getLayersByName(name).addTo(this.map);
-                    break;
-            }
+            this.getLayersByName(name).addTo(this.map);
         };
+
         //ol2
         this.getLayerById = function (id) {
             return this.map.getLayer(id);
         };
-        //ol2, ol3 and leaflet (rename to getLayerByName)
+
+        //leaflet (rename to getLayerByName)
         this.getLayersByName = function (name) {
             var l;
-            switch (MAPLIB) {
-                case "ol2":
-                    l = this.map.getLayersByName(name)[0];
-                    break;
-                case "ol3":
-                    for (var i = 0; i < this.map.getLayers().getLength(); i++) {
-                        if (this.map.getLayers().a[i].id === name) {
-                            l = this.map.getLayers().a[i];
-                        }
+            var layers = lControl._layers;
+            for (var key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    if (layers[key].layer.id === name || layers[key].layer.id === ('mvt:' + name)) {
+                        l = layers[key].layer;
                     }
-                    break;
-                case "leaflet":
-                    var layers = lControl._layers;
-                    for (var key in layers) {
-                        if (layers.hasOwnProperty(key)) {
-                            if (layers[key].layer.id === name) {
-                                l = layers[key].layer;
-                            }
-                        }
-                    }
-                    break;
+                }
             }
+
+            //if (!l) throw new Error('Unable to find layer with identifier ' + name);
+
             return l;
         };
+
         //ol2
         this.hideAllTileLayers = function () {
             for (var i = 0; i < this.map.layers.length; i++) {
@@ -2560,4 +2603,3 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
-

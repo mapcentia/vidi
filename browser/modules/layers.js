@@ -7,6 +7,7 @@
 'use strict';
 
 import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './layerTree/LayerSorting';
+import { LAYER } from './layerTree/constants';
 
 /**
  *
@@ -52,7 +53,7 @@ var host = require("./connection").getHost();
 
 var layerTree;
 
-var array = [];
+var currentlyLoadedLayers = [];
 
 var uri = null
 
@@ -111,6 +112,7 @@ module.exports = {
                 }
             }
         }
+
         return mapLayers;
     },
 
@@ -143,23 +145,24 @@ module.exports = {
     },
 
     incrementCountLoading: function (i) {
-        if (array.indexOf(i) === -1) {
-            array.push(i)
+        if (currentlyLoadedLayers.indexOf(i) === -1) {
+            currentlyLoadedLayers.push(i)
         }
-        return array.length;
+
+        return currentlyLoadedLayers.length;
     },
 
     decrementCountLoading: function (i) {
-        array.splice(array.indexOf(i), 1);
-        return array.length;
+        currentlyLoadedLayers.splice(currentlyLoadedLayers.indexOf(i), 1);
+        return currentlyLoadedLayers.length;
     },
 
     getCountLoading: function () {
-        return array.length;
+        return currentlyLoadedLayers.length;
     },
 
     getArray: function () {
-        return array;
+        return currentlyLoadedLayers;
     },
 
     setUri: function (str) {
@@ -197,14 +200,14 @@ module.exports = {
     },
 
     /**
-     * Adds raster layer
+     * Add raster layer
      * 
-     * @param {String} layerKey              Layer key
-     * @param {String} appendedFiltersString Optional filter string
+     * @param {String} layerKey                Layer key
+     * @param {Array}  additionalURLParameters Additional URL parameters
      * 
      * @returns {Promise}
      */
-    addLayer: function (layerKey, appendedFiltersString = false) {
+    addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -213,22 +216,13 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-
-                // If filters are applied or single_tile is true, then request should not be cached
-                let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-                let useLiveWMS = (appendedFiltersString || singleTiled);
-
-                // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
-                let mapRequestProxy = false;
-                if (useLiveWMS && layerDescription.authentication === `Read/write`) {
-                    mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
-                }
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
                     isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
-                        additionalURLParameters: (appendedFiltersString ? appendedFiltersString : ''),
+                        additionalURLParameters,
                         host: host,
                         layers: [layer],
                         db: db,
@@ -256,7 +250,6 @@ module.exports = {
                     layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
                     me.reorderLayers();
 
-                    
                     layerWasAdded = true;
                     return false;
                 }
@@ -272,5 +265,96 @@ module.exports = {
         });
 
         return result;
+    },
+
+    /**
+     * Add vector tile layer
+     * 
+     * @param {String} layerKey                Layer key
+     * @param {Array}  additionalURLParameters Additional URL parameters
+     * 
+     * @returns {Promise}
+     */
+    addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
+        var me = this;
+        let result = new Promise((resolve, reject) => {
+            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+
+            let layerWasAdded = false;
+
+            $.each(metaData.data, function (i, layerDescription) {
+                var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+
+                if (layer === layerKey) {
+                    // Check if the opacity value differs from the default one
+                    isBaseLayer = !!layerDescription.baselayer;
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        additionalURLParameters,
+                        host: host,
+                        layerId: (LAYER.VECTOR_TILE + `:` + layer),
+                        layers: [layer],
+                        db: db,
+                        isBaseLayer: isBaseLayer,
+                        mapRequestProxy: mapRequestProxy,
+                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        singleTile: true, // Always use single tiled. With or without MapCache
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        name: layerDescription.f_table_name,
+                        type: "mvt",
+                        format: "image/png",
+                        uri: uri,
+                        loadEvent: function () {
+                            me.decrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
+
+                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
+                    me.reorderLayers();
+
+                    layerWasAdded = true;
+                    return false;
+                }
+            });
+
+            if (layerWasAdded) {
+                console.info(`${layerKey} was added to the map`);
+                resolve();
+            } else {
+                console.warn(`${layerKey} was not added to the map`);
+                reject();
+            }
+        });
+
+        return result;
+    },
+
+    /**
+     * Extracts cache settings from layer description
+     * 
+     * @param {Object} layerDescription        Layer description
+     * @param {String} additionalURLParameters Additional URL parameters
+     * 
+     * @returns {Object}
+     */
+    getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
+        // If filters are applied or single_tile is true, then request should not be cached
+        let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        let useLiveWMS = (appendedFiltersString.length > 0 || singleTiled);
+
+        // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
+        let mapRequestProxy = false;
+        if (useLiveWMS && layerDescription.authentication === `Read/write`) {
+            mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
+        }
+
+        return { useLiveWMS, mapRequestProxy };
     }
 };

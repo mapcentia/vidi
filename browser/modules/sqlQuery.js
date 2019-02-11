@@ -6,6 +6,8 @@
 
 'use strict';
 
+const layerTreeUtils = require('./layerTree/utils')
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -69,7 +71,8 @@ module.exports = {
     },
 
     /**
-     *
+     * Performs spatial SQL query and display results on map and in gc2table
+     * 
      * @param qstore
      * @param wkt
      * @param proj
@@ -78,8 +81,9 @@ module.exports = {
      * @param infoClickPoint
      * @param whereClause
      * @param includes
+     * @param {Function} onPopupClose Fires when feature popup is closed
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupClose) {
         let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -137,11 +141,12 @@ module.exports = {
              </div>`;
 
         $.each(layers, function (index, value) {
-
-            // No need to search in the already displayed vector layer
+            // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
                 return true;
             }
+
+            value = layerTreeUtils.stripPrefix(value);
 
             if (layers[0] === "") {
                 return false;
@@ -219,6 +224,7 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
+                            onPopupClose: onPopupClose,
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,

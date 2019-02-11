@@ -437,6 +437,8 @@ module.exports = {
                 const featureIsSaved = (result) => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
 
+                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
+
                     sqlQuery.reset(qstore);
 
                     me.stopEdit();
@@ -694,7 +696,6 @@ module.exports = {
                 }
             });
 
-
             /**
              * Commit to GC2
              * @param formData
@@ -742,6 +743,8 @@ module.exports = {
 
                 const featureIsUpdated = () => {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
+
+                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
  
                     sqlQuery.reset(qstore);
                     me.stopEdit();
