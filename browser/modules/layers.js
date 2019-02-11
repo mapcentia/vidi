@@ -202,12 +202,12 @@ module.exports = {
     /**
      * Add raster layer
      * 
-     * @param {String} layerKey              Layer key
-     * @param {String} appendedFiltersString Optional filter string
+     * @param {String} layerKey                Layer key
+     * @param {Array}  additionalURLParameters Additional URL parameters
      * 
      * @returns {Promise}
      */
-    addLayer: function (layerKey, appendedFiltersString = false) {
+    addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -216,13 +216,13 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, appendedFiltersString);
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
                     isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
-                        additionalURLParameters: (appendedFiltersString ? appendedFiltersString : ''),
+                        additionalURLParameters,
                         host: host,
                         layers: [layer],
                         db: db,
@@ -250,7 +250,6 @@ module.exports = {
                     layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
                     me.reorderLayers();
 
-                    
                     layerWasAdded = true;
                     return false;
                 }
@@ -271,12 +270,12 @@ module.exports = {
     /**
      * Add vector tile layer
      * 
-     * @param {String} layerKey              Layer key
-     * @param {String} appendedFiltersString Optional filter string
+     * @param {String} layerKey                Layer key
+     * @param {Array}  additionalURLParameters Additional URL parameters
      * 
      * @returns {Promise}
      */
-    addVectorTileLayer: function (layerKey, appendedFiltersString = false) {
+    addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var isBaseLayer, layers = [], metaData = meta.getMetaData();
@@ -285,12 +284,13 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, appendedFiltersString);
+                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
                     isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
+                        additionalURLParameters,
                         host: host,
                         layerId: (LAYER.VECTOR_TILE + `:` + layer),
                         layers: [layer],
@@ -339,15 +339,15 @@ module.exports = {
     /**
      * Extracts cache settings from layer description
      * 
-     * @param {Object} layerDescription      Layer description
-     * @param {String} appendedFiltersString Optional filter string
+     * @param {Object} layerDescription        Layer description
+     * @param {String} additionalURLParameters Additional URL parameters
      * 
      * @returns {Object}
      */
-    getCachingDataForLayer: (layerDescription, appendedFiltersString = false) => {
+    getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
         let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-        let useLiveWMS = (appendedFiltersString || singleTiled);
+        let useLiveWMS = (appendedFiltersString.length > 0 || singleTiled);
 
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
         let mapRequestProxy = false;
