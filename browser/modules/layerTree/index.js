@@ -366,7 +366,7 @@ module.exports = {
                         needToReload = true;
                         let currentMapBBox = cloud.get().map.getBounds();
                         if (`buffered_bbox` in vectorStores[layerKey]) {
-                            if (vectorStores[layerKey].buffered_bbox === false || vectorStores[layerKey].buffered_bbox && stores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                            if (vectorStores[layerKey].buffered_bbox === false || vectorStores[layerKey].buffered_bbox && vectorStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                 needToReload = false;
                             }
                         }
