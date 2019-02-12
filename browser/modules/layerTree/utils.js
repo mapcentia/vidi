@@ -64,6 +64,10 @@ const getActiveLayers = () => {
                 activeLayerIds.push(gc2Id);
             } else if (type === LAYER.VECTOR) {
                 activeLayerIds.push(LAYER.VECTOR + `:` + gc2Id);
+            } else if (type === LAYER.VECTOR_TILE) {
+                activeLayerIds.push(LAYER.VECTOR_TILE + `:` + gc2Id);
+            } else if (type === LAYER.WEBGL) {
+                activeLayerIds.push(LAYER.WEBGL + `:` + gc2Id);
             } else {
                 console.error(`Unable to get active layer for ${gc2Id}`);
             }

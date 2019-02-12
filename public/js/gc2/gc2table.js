@@ -104,6 +104,7 @@ var gc2table = (function () {
                 height: 300,
                 setSelectedStyle: true,
                 openPopUp: false,
+                onPopupClose: false,
                 setViewOnSelect: true,
                 responsive: true,
                 autoPan: false,
@@ -150,6 +151,7 @@ var gc2table = (function () {
             onSelect = defaults.onSelect,
             onMouseOver = defaults.onMouseOver,
             openPopUp = defaults.openPopUp,
+            onPopupClose = defaults.onPopupClose,
             autoPan = defaults.autoPan,
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
@@ -175,7 +177,8 @@ var gc2table = (function () {
                 var clearSelection = function () {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
-                        if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
+                        let databaseIdentifier = getDatabaseIdForLayerId(v._leaflet_id);
+                        if (uncheckedIds.indexOf(databaseIdentifier) === -1) {
                             try {
                                 v.closePopup();
                                 if (store.layer && store.layer.resetStyle) {
@@ -228,6 +231,19 @@ var gc2table = (function () {
                             closeButton: true,
                             minWidth: 160
                         }).openPopup();
+
+                        m.map._layers[id].on('popupclose', function(e) {
+                            // Removing the selectedStyle from feature
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
+                                store.layer._layers[id].setStyle(uncheckedStyle);
+                            } else {
+                                store.layer.resetStyle(store.layer._layers[id]);
+                            }
+
+                            // Callling special handler for this occasion if it exists
+                            if (onPopupClose) onPopupClose();
+                        });
 
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
                     }
@@ -351,6 +367,11 @@ var gc2table = (function () {
                     }, 100);
                 };
 
+                var uncheckedStyle = {
+                    fillOpacity: 0.0,
+                    opacity: 0.0
+                };
+
                 $(el).bootstrapTable({
                     uniqueId: "_id",
                     height: height,
@@ -376,10 +397,7 @@ var gc2table = (function () {
                         var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
                         uncheckedIds.push(parseInt(databaseIdentifier));
 
-                        store.layer._layers[uncheckedRowItem._id].setStyle({
-                            fillOpacity: 0.0,
-                            opacity: 0.2
-                        });
+                        store.layer._layers[uncheckedRowItem._id].setStyle(uncheckedStyle);
 
                         store.layer._layers[uncheckedRowItem._id].closePopup()
                     });
@@ -390,10 +408,7 @@ var gc2table = (function () {
                     if (m[pkey] === false) {
                         uncheckedIds.push(parseInt(databaseIdentifier));
 
-                        store.layer._layers[m._id].setStyle({
-                            fillOpacity: 0.0,
-                            opacity: 0.2
-                        });
+                        store.layer._layers[m._id].setStyle(uncheckedStyle);
 
                         store.layer._layers[m._id].closePopup()
                     } else {
