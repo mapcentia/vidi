@@ -58,8 +58,13 @@ module.exports = {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
-                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, () => {
-                        backboneEvents.get().trigger("sqlQuery:clear");
+                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
+                        setTimeout(() => {
+                            let parentLayer = cloud.get().map._layers[layerId];
+                            let clearQueryResults = true;
+                            if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
+                            if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
+                        }, 100);
                     });
                 }, 250);
             }
