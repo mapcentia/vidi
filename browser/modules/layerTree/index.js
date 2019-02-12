@@ -2008,6 +2008,7 @@ module.exports = {
                 $(container).find('.js-layer-settings-filters').hide(0);
                 if (desiredSetupType === LAYER.VECTOR_TILE) {
                     hideOpacity();
+                    hideFilters();
                 }
             } else {
                 throw new Error(`${desiredSetupType} control setup is not supported yet`);
