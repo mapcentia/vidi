@@ -346,14 +346,19 @@ module.exports = {
             let activeLayers = _self.getActiveLayers();
             for (let layerKey in vectorStores) {
                 let layerIsEnabled = false;
+                let layerPrefix = ``;
                 for (let i = 0; i < activeLayers.length; i++) {
                     if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
+                        if (activeLayers[i].indexOf(`:`) > -1) {
+                            layerPrefix = activeLayers[i].split(`:`)[0];
+                        }
+
                         layerIsEnabled = true;
                         break;
                     }
                 }
 
-                if (layerIsEnabled) {
+                if (layerIsEnabled && layerPrefix === LAYER.VECTOR) {
                     let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
                     let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
                     let parsedMeta = _self.parseLayerMeta(layerDescription);
