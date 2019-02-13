@@ -6,7 +6,8 @@
 
 'use strict';
 
-const layerTreeUtils = require('./layerTree/utils')
+const layerTreeUtils = require('./layerTree/utils');
+import { SYSTEM_FIELD_PREFIX } from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -479,7 +480,7 @@ module.exports = {
             var fields = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
-                    if (name.indexOf(layerTree.getSystemFieldPrefix()) !== 0 && name !== `_id` && name !== `_vidi_content`) {
+                    if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
                         fields.push({
                             title: name,
                             value: feature.properties[name]
