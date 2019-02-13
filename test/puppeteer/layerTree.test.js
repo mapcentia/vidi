@@ -296,7 +296,7 @@ describe('Layer tree common', () => {
 
         let tilesWereRequested = false;
         await page._client.on('Network.requestWillBeSent', event => {
-            if (event.request.url.indexOf(`wms?service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
+            if (event.request.url.indexOf(`service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
                 tilesWereRequested = true;
             }
         });
@@ -335,7 +335,7 @@ describe('Layer tree common', () => {
 
         let tilesWereRequested = false;
         await page._client.on('Network.requestWillBeSent', event => {
-            if (event.request.url.indexOf(`wms?service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
+            if (event.request.url.indexOf(`service=WMS&request=GetMap&version=1.1.1&layers=public.test_poly`) !== -1) {
                 tilesWereRequested = true;
             }
         });
