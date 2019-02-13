@@ -9,7 +9,7 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = false;
+const LOG = true;
 
 let layersAlternationHistory = {};
 
@@ -216,8 +216,6 @@ module.exports = module.exports = {
                     }
                 }
             }
-
-            console.log(`### URLParameters`, URLParameters);
 
             layers.addVectorTileLayer(gc2Id, URLParameters).then(() => {
                 _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);

@@ -28,7 +28,7 @@ class MarkupGenerator {
     getGroupPanel(base64GroupName, name) {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
             <div class="panel-heading" role="tab" style="padding: 8px 15px;">
-                <h4 class="panel-title">
+                <h4 class="panel-title js-toggle-layer-panel">
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
