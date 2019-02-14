@@ -189,11 +189,15 @@ module.exports = {
         if (splitLocation.length === 4 || splitLocation.length === 5) {
             let database = splitLocation[2];
             let schema = splitLocation[3];
-            if (!database || database.length === 0 || !schema || schema.length === 0) {
-                console.warn(`Unable to detect current database and schema`);
+            if (!schema || schema.length === 0) {
+                console.log(`Schema not provided in URL`);
+            } else {
+                window.vidiConfig.appSchema = schema;
+            }
+            if (!database || database.length === 0) {
+                alert(`Could not detect databse. Check URL`);
             } else {
                 window.vidiConfig.appDatabase = database;
-                window.vidiConfig.appSchema = schema;
             }
         } else {
             console.warn(`Unable to detect current database and schema`);

@@ -163,7 +163,8 @@ module.exports = {
                         data: JSON.stringify({
                             title,
                             anonymous,
-                            snapshot: state
+                            snapshot: state,
+                            database: vidiConfig.appDatabase
                         })
                     }).then(() => {
                         _self.setState({ loading: false });

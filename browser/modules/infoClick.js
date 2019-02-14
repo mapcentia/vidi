@@ -10,6 +10,7 @@ const MODULE_ID = `infoClick`;
 
 var cloud;
 var backboneEvents;
+var utils;
 var clicktimer;
 var sqlQuery;
 var qstore = [];
@@ -25,11 +26,13 @@ module.exports = {
         cloud = o.cloud;
         sqlQuery = o.sqlQuery;
         backboneEvents = o.backboneEvents;
+        utils = o.utils;
         _self = this;
         return this;
     },
 
     init: function () {
+
         backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => { _self.reset(); });
         backboneEvents.get().on(`off:all`, () => {
             _self.off(); 
@@ -85,17 +88,23 @@ module.exports = {
     active: function (a) {
         if (!a) {
             this.reset();
-        }
+            utils.cursorStyle().reset();
 
+        } else {
+            utils.cursorStyle().crosshair();
+
+        }
         active = a;
     },
 
     on: () => {
         active = true;
+
     },
 
     off: () => {
         active = false;
+        utils.cursorStyle().reset();
     }
 };
 
