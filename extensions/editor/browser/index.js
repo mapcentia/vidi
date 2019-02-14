@@ -140,6 +140,7 @@ module.exports = {
         // Listen to close of attr box
         $(".editor-attr-dialog__close-hide").on("click", function (e) {
             _self.stopEdit(editedFeature);
+            backboneEvents.get().trigger("sqlQuery:clear");
         });
 
         $(".editor-attr-dialog__expand-less").on("click", function () {
