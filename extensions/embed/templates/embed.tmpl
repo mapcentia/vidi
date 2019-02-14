@@ -446,8 +446,6 @@
         #floating-container-secondary {
             top: 225px;
         }
-    }
-    @media (max-width: 767px) {
         .dialog-bottom, #legend-dialog.dialog-bottom {
             min-width: 100%;
             border-radius: 0;
@@ -455,6 +453,8 @@
             right: 0;
             left: 0;
         }
+    }
+    @media (max-width: 767px) {
         .dialog-bottom .modal-body {
             max-height: 60vh;
         }
@@ -489,6 +489,9 @@
             <a href="#base-layers-dialog" id="base-layers-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>
+            <a href="#full-screen" id="full-screen-btn"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">fullscreen</i></a>
         </div>
         <div id="burger-btn-container">
             <button type="button" class="navbar-toggle" id="burger-btn">

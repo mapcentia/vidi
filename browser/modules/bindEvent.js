@@ -12,7 +12,7 @@ import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
  *
  * @type {*|exports|module.exports}
  */
-var advancedInfo, cloud, switchLayer, meta;
+var advancedInfo, cloud, switchLayer, meta, utils;
 
 /**
  *
@@ -33,7 +33,6 @@ require('dom-shims');
 require('arrive');
 
 var backboneEvents;
-var switchLayer;
 var pushState;
 var layerTree;
 var layers;
@@ -62,6 +61,7 @@ module.exports = {
         backboneEvents = modules.backboneEvents;
         setting = modules.setting;
         state = modules.state;
+        utils = modules.utils;
         return this;
     },
     init: function (str) {
@@ -455,6 +455,11 @@ module.exports = {
             e.preventDefault();
 
             var id = ($(this)).attr('href');
+
+            if (id === "#full-screen"){
+                utils.fullScreen();
+                return;
+            }
 
             // If print when activate
             if ($(this).data('module') === "print") {
