@@ -82,9 +82,7 @@ module.exports = {
     /**
      *
      */
-    init: function () {
-        
-    },
+    init: function () {},
 
     ready: function () {
         return ready;
