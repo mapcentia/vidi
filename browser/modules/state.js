@@ -82,7 +82,7 @@ const _getInternalState = () => {
             if (LOG) console.log('State: after getting state');
 
             if (error) {
-                throw new Error('State: error occured while accessing the store');
+                throw new Error('State: error occured while accessing the store', error);
             }
 
             let localState = { modules: {} };

@@ -242,7 +242,7 @@ var gc2table = (function () {
                             }
 
                             // Callling special handler for this occasion if it exists
-                            if (onPopupClose) onPopupClose();
+                            if (onPopupClose) onPopupClose(id);
                         });
 
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
