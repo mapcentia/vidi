@@ -27,8 +27,9 @@ class MarkupGenerator {
 
     getGroupPanel(base64GroupName, name) {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
-            <div class="panel-heading" role="tab" style="padding: 8px 15px;">
+            <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
                 <h4 class="panel-title">
+                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
@@ -159,9 +160,13 @@ class MarkupGenerator {
                     </a><span class="js-toggle-filters-number-of-filters">0</span>
                 </div>
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-                <div style="float: right; padding-top: 8px; padding-right: 10px;">${addButton}
+                
+                <i style="float: right; padding-top: 9px;" class="material-icons layer-move-vert">more_vert</i>
+
+                <div style="float: right; padding-top: 7px; padding-right: 10px;">${addButton}
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
+
             </div>
             <div class="js-layer-settings-filters"></div>
             <div class="js-layer-settings-load-strategy"></div>

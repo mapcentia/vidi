@@ -53,7 +53,7 @@ module.exports = {
 
         let id = "#legend-dialog";
         $(id).animate({
-            bottom: ("-235px")
+            bottom: ("-229px")
         }, 500, function () {
             $(id + " .expand-less").hide();
             $(id + " .expand-more").show();

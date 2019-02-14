@@ -431,7 +431,7 @@ module.exports = {
             var id = ($(this)).parent().parent().attr('id');
 
             $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 14) + "px"
+                bottom: (($("#" + id).height() * -1) + 20) + "px"
             }, 500, function () {
                 $("#" + id + " .expand-less").hide();
                 $("#" + id + " .expand-more").show();
