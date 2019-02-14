@@ -183,8 +183,8 @@ input[type="checkbox"] {
   margin-top: 0 !important;
   padding: 9px 10px 10px;
 }
-.modal-header {
-  padding: 10px 15px;
+.dialog-bottom .modal-header {
+  padding: 0 15px 10px 15px;
 }
 #result_GroupDiv {
   background: white;

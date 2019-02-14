@@ -1,9 +1,7 @@
 <style>
-
     #pane {
         right: 0;
     }
-
     #list {
         position: absolute;
         height: 100%;
@@ -13,7 +11,6 @@
         background-color: #ffffff;
         display: none;
     }
-
     #switcher, #switcher-list {
         height: 50px;
         top: 5px;
@@ -24,18 +21,13 @@
         left: 0;
         right: 0;
     }
-
     #switcher {
         width: 200px;
-
     }
-
     #switcher-list {
         top: 50px;
         width: 150px;
-
     }
-
     #inner-list {
         display: block;
         top: 90px;
@@ -47,13 +39,11 @@
         height: calc(100% - 150px);
         overflow: auto;
     }
-
     #inner-list img {
         width: 40px;
         float: left;
         margin-right: 15px;
     }
-
     #btn-kort, #btn-list-dis {
         float: left;
         -webkit-border-bottom-left-radius: 5px;
@@ -63,7 +53,6 @@
         border-bottom-left-radius: 5px;
         border-top-left-radius: 5px;
     }
-
     #btn-list, #btn-list-alpha {
         float: right;
         -webkit-border-bottom-right-radius: 5px;
@@ -73,40 +62,31 @@
         border-bottom-right-radius: 5px;
         border-top-right-radius: 5px;
     }
-
     #btn-kort, #btn-list {
         width: 50%;
         text-align: center;
         background-color: rgba(224, 241, 251, 0.9);
-
     }
-
     #btn-list-dis, #btn-list-alpha {
         width: 50%;
         text-align: center;
         background-color: rgba(241, 241, 241, 0.9);
-
     }
-
     .nav > li {
         float: left !important;
     }
-
     #switcher .active {
         background-color: #008ECF;
         color: white;
     }
-
     #switcher-list .active {
         background-color: #9e9e9e;
         color: white;
     }
-
     #switcher-list .disabled {
         color: white;
         cursor: not-allowed;
     }
-
     #btn-list h3, #btn-kort h3 {
         top: 0;
         left: 0;
@@ -119,7 +99,6 @@
         font-weight: 700;
         cursor: pointer;
     }
-
     #btn-list-dis h3, #btn-list-alpha h3 {
         top: 0;
         left: 0;
@@ -132,7 +111,6 @@
         font-weight: 300;
         cursor: pointer;
     }
-
     .naturpark-list-item {
         font-weight: 300;
         cursor: pointer;
@@ -141,30 +119,24 @@
         margin: 2px 0 0 0;
         background-color: rgba(248, 248, 248, 1);
     }
-
     .naturpark-list-item div {
         white-space: nowrap;
     }
-
     .navbar {
         left: 0 !important;
     }
-
     .leaflet-control-locate {
         margin-top: 0;
         margin-bottom: 0;
         box-shadow: none;
         z-index: 0;
     }
-
     .btn-share {
         margin: 5px !important;
     }
-
     .leaflet-top.leaflet-right {
         display: none !important;
     }
-
     .distance {
         font-size: 80%;
         vertical-align: middle;
@@ -172,95 +144,75 @@
         margin-right: 10px;
         color: #9e9e9e;
     }
-
     .btn-text {
         margin-bottom: 7px;
     }
-
     .btn-text-dis {
         margin-top: 7px;
     }
-
     .btn-text-alpha {
         margin-top: 12px;
     }
-
     .carousel-caption {
         padding: 0;
         top: 10px;
     }
-
     .embed-responsive {
         margin-top: 18px;
     }
-
     #main {
         margin: 0 auto;
         text-align: left;
     }
-
     ul {
         list-style: none;
     }
-
     #start-modal ul {
         padding-left: 5px;
     }
-
     #start-modal li {
         margin-bottom: 7px;
     }
-
     .form-inline .form-control {
         width: 50%;
         margin-left: 80px;
     }
-
     .done {
         color: #00ff33;
         text-decoration: line-through;
     }
-
     .undone {
         color: #ff0033;
     }
-
     .icon {
         margin: 6px 10px 6px 0;
     }
-
     .list-group-item {
         padding: 9px 3px;
 
         border: none;
     }
-
     .inherit-size {
         font-size: inherit;
     }
-
     #floating-container-primary {
         position: absolute;
-        top: 68px;
-        right: 8px;
+        top: 6px;
+        right: 6px;
         width: 40px;
     }
-
     #floating-container-secondary {
         position: absolute;
-        top: 235px;
-        right: 8px;
+        top: 165px;
+        right: 6px;
         width: 40px;
     }
-
     #floating-container-secondary a {
         margin-bottom: 8px;
     }
-
     #floating-container-primary a {
         margin-bottom: 8px;
     }
-
     .leaflet-control-locate a, .leaflet-control-locate a:hover {
         border-radius: 50% !important;
         font-size: 24px;
@@ -275,80 +227,49 @@
         position: relative;
         line-height: 40px
     }
-
     .leaflet-bar {
-
         box-shadow: none !important;
-        /* border-radius: 4px !important; */
     }
-
     .btn.btn-fab btn-fab-mini, .btn.btn-fab btn-fab-mini.btn-primary, .btn:not(.btn-raised):not(.btn-link):hover {
-
     }
-
     .dialog-bottom {
         padding: 14px 15px;
         margin-bottom: 20px;
         height: auto;
-
         clear: both;
         min-width: 288px;
         max-width: 568px;
-
         position: fixed;
         left: auto;
         right: 56px;
         bottom: -100%;
-
         box-shadow: 0 27px 24px 0 rgba(0, 0, 0, .2), 0 15px 77px 0 rgba(0, 0, 0, .22);
         background-color: #fff;
-
         border-radius: 2px;
         max-height: 80%;
-
     }
-
     .dialog-bottom .modal-body {
         max-height: 60vh;
-
     }
-
     .expand-more {
         display: none;
     }
-
-    /*.fixed-table-container {*/
-        /*height: 100% !important;*/
-    /*}*/
-
     .list-group .list-group-item {
         padding: 3px 16px;
     }
-
     .modal-dialog br {
         line-height: 28px;
     }
-
     .carousel {
         margin-top: 5px;
     }
-
     .vmus-text {
         margin-top: 28px;
     }
-
     #share-buttons {
         margin-top: 10px;
         margin-buttom: 10px;
     }
-
-    /*img.center, div.center {*/
-        /*display: block;*/
-        /*margin: 0 auto;*/
-        /*width: 230px;*/
-        /*margin-bottom: 20px;*/
-    /*}*/
-
     .start-list-icon {
         margin-left: -17px;
         width: 35px;
@@ -359,57 +280,46 @@
         display: inline-block;
         vertical-align: middle;
     }
-
     .start-list-text {
         position: relative;
         margin-left: 14px;
         max-width: 85%;
         display: inline-block;
         vertical-align: middle;
-
     }
-
     .start-list-text p {
         margin: 0;
     }
-
     .nav .checkbox {
         width: 140px;
         display: inline-block;
         height: 50px;
         padding-top: 12px;
     }
-
     .nav .overlay-label {
         width: 130px;
         font-size: 18px;
         font-weight: 300;
     }
-
     #burger-btn {
         display: inline;
     }
-
     #layer-slide {
         display: inline;
     }
-
     #vectorlayers .panel:first-child {
         display: none;
     }
-
     #count-badge {
-
         position: absolute;
         right: 16px;
         top: -2px;
         font-size: 10pt;
     }
-
     #layer-slide, #info-modal-top {
         position: fixed;
         max-width: 650px;
-        z-index: 3000;
+        z-index: 300000;
         min-width: 350px;
         width: 30%;
         height: 100%;
@@ -418,7 +328,105 @@
         box-sizing: border-box;
         display: block;
     }
-
+    .dialog-bottom-wide {
+        min-width: 568px;
+        max-width: 768px;
+    }
+    .btn:not(.btn-raised):not(.btn-link):focus, .btn:not(.btn-raised):not(.btn-link):hover, .input-group-btn .btn:not(.btn-raised):not(.btn-link):focus, .input-group-btn .btn:not(.btn-raised):not(.btn-link):hover {
+        background-color: #EEEEEE;
+    }
+    .container {
+        width: 100%;
+        margin: 0;
+    }
+    .nav .checkbox input[type=checkbox]:checked + .checkbox-material .check, label.checkbox-inline input[type=checkbox]:checked + .checkbox-material .check {
+        color: #fff;
+        border-color: #fff;
+        background-color: #fff;
+    }
+    .nav .checkbox .checkbox-material .check, label.checkbox-inline .checkbox-material .check {
+        border: 2px solid #bdbdbd;
+    }
+    .form-group.is-focused .checkbox label, .form-group.is-focused label.checkbox-inline {
+        color: #bdbdbd !important;
+    }
+    .panel-heading a, .panel-heading a:focus, .panel-heading a:hover {
+        text-decoration: none;
+    }
+    #btn-start {
+        font-size: 18px;
+        margin-right: 30px;
+    }
+    .refresh-vector-layer {
+        display: none !important;
+    }
+    .tab-content > .tab-pane {
+        height: auto !important;
+    }
+    #place-search {
+        position: absolute;
+        z-index: 2000;
+        width: 350px;
+        left: 63px;
+        max-width: calc(100vw - 70px);
+    }
+    #burger-btn-container {
+        position: absolute;
+        z-index: 2000;
+        background-color: white;
+        margin-top: 6px;
+        border: 1px solid #ccc;
+        left: 6px;
+    }
+    #burger-btn {
+        margin: 8px;
+        padding: 2px 8px 2px 8px;
+    }
+    .icon-bar {
+        background-color: #222222;
+    }
+    .btn-group, .btn-group-vertical {
+        margin: 0;
+    }
+    .tt-hint, .tt-query, .typeahead {
+        -webkit-border-radius: 0;
+        -moz-border-radius: 0;
+        border-radius: 0;
+        margin-top: 6px;
+        font-size: 18px;
+        line-height: 20px;
+    }
+    .tt-dropdown-menu {
+        margin-top: 0;
+        max-height: calc(-150px + 100vh);
+    }
+    .tt-suggestion {
+        padding: 3px 20px;
+        font-size: 14px;
+        line-height: 18px;
+    }
+    .places .typeahead-heading {
+        margin: 0 20px 5px 20px;
+        padding: 3px 0;
+        border-bottom: 1px solid #ccc;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    #searchclear {
+        height: 16px;
+        font-size: 18px;
+        top: 5px;
+    }
+    #legend-dialog .modal-body {
+        height: 210px;
+    }
+    #legend-dialog.dialog-bottom {
+        left: 25px;
+        right: auto;
+    }
+    #measurements-module-btn, #measurements-module-cancel-btn, #mapcontrols-clear-map {
+        display: none;
+    }
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
@@ -432,120 +440,43 @@
         .export {
             display: none !important;
         }
+        #floating-container-primary {
+            top: 58px;
+        }
+        #floating-container-secondary {
+            top: 225px;
+        }
     }
-
-    .dialog-bottom-wide {
-        min-width: 568px;
-        max-width: 768px;
-    }
-
     @media (max-width: 767px) {
-        .dialog-bottom {
+        .dialog-bottom, #legend-dialog.dialog-bottom {
             min-width: 100%;
             border-radius: 0;
             margin-bottom: 0;
             right: 0;
             left: 0;
         }
-
         .dialog-bottom .modal-body {
             max-height: 60vh;
-
         }
-
-        .navbar-brand.navbar-brand-text {
-            display: none;
+        #legend-dialog .modal-body {
+            height: 210px;
         }
-
-        .nav .checkbox {
-            display: none;
-        }
-
         .dialog-bottom-wide {
             min-width: 288px;
             max-width: 568px;
         }
-
     }
-
-    @media (min-width: 1200px) {
-        .navbar-toggle {
-            margin-top: 14px;
-        }
-
-        .nav .checkbox {
-            padding-top: 17px;
-        }
-
-    }
-
     @media (max-width: 1200px) {
-
-        #floating-container-primary {
-            top: 58px;
-
-        }
-
-        #floating-container-secondary {
-            top: 225px;
-
-        }
-
         .navbar-brand {
             height: 50px;
             padding: 10px 0px;
         }
     }
-
-    .btn:not(.btn-raised):not(.btn-link):focus, .btn:not(.btn-raised):not(.btn-link):hover, .input-group-btn .btn:not(.btn-raised):not(.btn-link):focus, .input-group-btn .btn:not(.btn-raised):not(.btn-link):hover {
-        background-color: #EEEEEE;
-    }
-
-    .container {
-        width: 100%;
-        margin: 0;
-    }
-
-    .nav .checkbox input[type=checkbox]:checked + .checkbox-material .check, label.checkbox-inline input[type=checkbox]:checked + .checkbox-material .check {
-        color: #fff;
-        border-color: #fff;
-        background-color: #fff;
-
-    }
-
-    .nav .checkbox .checkbox-material .check, label.checkbox-inline .checkbox-material .check {
-        border: 2px solid #bdbdbd;
-    }
-
-    .form-group.is-focused .checkbox label, .form-group.is-focused label.checkbox-inline {
-        color: #bdbdbd !important;
-    }
-
-    .panel-heading a, .panel-heading a:focus, .panel-heading a:hover {
-
-        text-decoration: none;
-    }
-
-    #btn-start {
-        font-size: 18px;
-        margin-right: 30px;
-    }
-
-    .refresh-vector-layer {
-        display: none !important;
-    }
-
-    .tab-content > .tab-pane {
-        height: auto !important;
-    }
-
 </style>
 <!-- map -->
 <div id="pane">
-
     <div id="container">
         <div id="map"></div>
-
         <div id="floating-container-primary">
             <a href="javascript:void(0)" id="zoom-in-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">add</i></a>
@@ -554,59 +485,40 @@
             <a href="javascript:void(0)" id="zoom-out-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">remove</i></a>
         </div>
-
         <div id="floating-container-secondary">
-            <div id="locale-btn"></div>
             <a href="#base-layers-dialog" id="base-layers-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>
-            <a href="#info-dialog" id="info-dialog-btn" data-module="info"
-               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
-                    class="material-icons">info</i></a>
-            <a href="#print-dialog" id="print-dialog-btn" data-module="print"
-               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
-                    class="material-icons">print</i></a>
-            <a href="#offline-map-dialog" id="offline-map-btn" data-module="offline-map"
-               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
-                    class="material-icons">save_alt</i></a>
-            <a href="#state-snapshots-dialog" id="state-snapshots-dialog-btn" data-module="state-snapshots"
-               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
-                    class="material-icons">camera</i></a>
         </div>
-
+        <div id="burger-btn-container">
+            <button type="button" class="navbar-toggle" id="burger-btn">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div id="place-search">
+            <div class="places">
+                <div class="btn-group">
+                    <input id="custom-search" class="custom-search typeahead" type="text"
+                           placeholder="{{Address}}">
+                    <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <!-- Nav bar -->
-    <nav class="navbar navbar-default navbar-fixed-top fade-then-dragging">
-        <div class="container">
-            <div class="navbar-header">
-
-                <button type="button" class="navbar-toggle" id="burger-btn">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-
-                <a class="navbar-brand navbar-brand-text" href="#">{{brandName}}</a>
-            </div>
-
-            <div class="collapse navbar-collapse">
-                <ul id="main-navbar" class="nav navbar-nav navbar-right">
-                    <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i></a></li>
-                    <li>
-                        <a id="session" href="#" data-toggle="modal" data-target="#login-modal">
-                            <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>
-                            <i class="material-icons gc2-session-unlock" aria-hidden="true">lock_open</i>
-
-                        </a>
-                    </li>
-                    <li><a href="#" id="btn-reset"><i class="material-icons">replay</i></a></li>
-                </ul>
-
-            </div>
+    <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
+        <div class="modal-header">
+            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+            </button>
+            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+            </button>
+            <h3 class="modal-title">Signatur</h3>
         </div>
-    </nav>
-
+        <div class="modal-body">
+            <div id="legend" class="legend"></div>
+        </div>
+    </div>
     <div id="base-layers-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close close-hide" aria-hidden="true"><i class="material-icons">close</i>
@@ -621,22 +533,6 @@
             <div class="form-group" id="base-layer-list"></div>
         </div>
     </div>
-
-    <div id="state-snapshots-dialog" class="dialog-bottom fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" aria-hidden="true"><i class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">State snapshots</h3>
-        </div>
-        <div class="modal-body">
-            <div class="form-group" id="state-snapshots"></div>
-        </div>
-    </div>
-
     <div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close editor-attr-dialog__close-hide" data-module="editor" aria-hidden="true"><i class="material-icons">close</i>
@@ -650,173 +546,7 @@
         <div class="modal-body">
             <div class="form-group" id="editor-attr-form"></div>
         </div>
-    </div>   
-
-    <div id="offline-map-dialog" class="dialog-bottom fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
-                    class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Offline base layer</h3>
-        </div>
-        <div class="modal-body">
-            <div class="form-group" id="offline-map-form"></div>
-        </div>
     </div>
-
-    <div id="print-dialog" class="dialog-bottom fade-then-dragging">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="print" aria-hidden="true"><i
-                    class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Print</h3>
-        </div>
-        <div class="modal-body">
-            <div class="btn-toolbar bs-component" style="margin: 0;">
-                <div class="btn-group">
-                    <button id="start-print-btn" class="btn btn-raised" style="width: 130px"
-                            data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}
-                                                " disabled><i class='fa fa-cog fa-lg'></i> {{Make PDF}}
-                    </button>
-                </div>
-                <fieldset disabled id="get-print-fieldset">
-                    <div class="btn-group" style="display: none">
-                        <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised"
-                           id="open-pdf">{{Open PDF}}</a>
-                        <a href="bootstrap-elements.html"
-                           class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span
-                                class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="javascript:void(0)" id="download-pdf">{{Download}}</a></li>
-                            <li><a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a>
-                            </li>
-                        </ul>
-                    </div>
-                </fieldset>
-            </div>
-            <div>
-                <form class="form-horizontal" id="print-form" role="form" data-toggle="validator">
-                    <fieldset>
-                        <div class="form-group">
-                            <label for="select-scale" class="col-md-2 control-label">{{Scale}}</label>
-                            <div class="col-md-10">
-                                <div class="input-group">
-                                    <div class="input-group-btn">
-                                        <button type="button" class="btn btn-default dropdown-toggle"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
-                                                disabled>1: <span class="caret"></span></button>
-                                        <ul id="ul-scale" class="dropdown-menu dropdown-menu-right"></ul>
-                                    </div>
-                                    <input type="number" min="200" id="select-scale" class="form-control" disabled>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="display: none">
-                            <label class="col-md-2 control-label">{{Template}}</label>
-                            <div class="col-md-10" id="print-tmpl"></div>
-                        </div>
-
-                        <div class="form-group" style="display: none">
-                            <label class="col-md-2 control-label">{{Page size}}</label>
-                            <div class="col-md-10" id="print-size"></div>
-                        </div>
-
-                        <div class="form-group" style="display: none">
-                            <label class="col-md-2 control-label">{{Orientation}}</label>
-                            <div class="col-md-10" id="print-orientation"></div>
-                        </div>
-
-                        <div class="form-group" style="display: none">
-                            <label for="print-title" class="col-md-2 control-label">{{Title}}</label>
-
-                            <div class="col-md-10" style="display: none">
-                                <input type="text" class="form-control" id="print-title" disabled>
-                            </div>
-                        </div>
-
-                        <div class="form-group" style="display: none">
-                            <label for="print-comment" class="col-md-2 control-label">{{Comment}}</label>
-                            <div class="col-md-10">
-                                <textarea class="form-control" rows="3" id="print-comment" disabled></textarea>
-                                <span class="help-block">{{The comment will be placed on the PDF}}</span>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <div class="togglebutton">
-                                <label>
-                                    <input id="add-legend-btn" type="checkbox" checked disabled> {{Show legend on print}}
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="info-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
-                    class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Info</h3>
-        </div>
-        <div class="modal-body">
-            <div id="info-box">
-                <div id="modal-info-body">
-                    <ul class="nav nav-tabs" id="info-tab"></ul>
-                    <div class="tab-content" id="info-pane"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
-                    class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Table view</h3>
-        </div>
-        <div class="modal-body">
-            <div class="form-group" id="vector-layer-table-view-form"></div>
-        </div>
-    </div>
-
-    <div id="watsonc-features-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
-        <div class="modal-header">
-            <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
-                    class="material-icons">close</i>
-            </button>
-            <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
-            </button>
-            <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
-            </button>
-            <h3 class="modal-title">Watsonc extension</h3>
-        </div>
-        <div class="modal-body">
-            <div class="form-group" id="watsonc-features-dialog-form"></div>
-        </div>
-    </div>
-
     <div id="layer-slide" class="slide-left fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close" aria-hidden="true">×</button>
@@ -828,8 +558,6 @@
             </div>
         </div>
     </div>
-
-
     <div id="info-modal-top" class="slide-left fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close" aria-hidden="true">×</button>
@@ -837,64 +565,6 @@
         </div>
         <div id="info-modal-top-body-wrapper">
             <div class="modal-body">
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-<!-- About Modal -->
-<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
-            </div>
-            <div class="modal-body">
-                {{{aboutBox}}}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Info Modal -->
-<div class="modal fade" id="click-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="click-modalLabel"></h3>
-            </div>
-            <div class="modal-body">
-                ...
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Login Modal -->
-<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                        aria-hidden="true">&times;</span></button>
-                <h3 class="modal-title" id="login-modalLabel"></h3>
-            </div>
-            <div class="modal-body" id="login-modal-body">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
             </div>
         </div>
     </div>

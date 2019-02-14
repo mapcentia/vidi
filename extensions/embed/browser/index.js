@@ -49,9 +49,18 @@ module.exports = {
         return this;
     },
     init: function () {
+        backboneEvents.get().trigger(`on:infoClick`);
 
-        var map = cloud.get().map, showInfo = function (e) {
-            var t = ($(this).data('gc2-id')), html,
+        let id = "#legend-dialog";
+        $(id).animate({
+            bottom: ("-235px")
+        }, 500, function () {
+            $(id + " .expand-less").hide();
+            $(id + " .expand-more").show();
+        });
+
+        let map = cloud.get().map, showInfo = function (e) {
+            let t = ($(this).data('gc2-id')), html,
                 meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
                 name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
                 title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
@@ -64,7 +73,7 @@ module.exports = {
 
             moment.locale('da');
 
-            for (var key in  metaDataKeys[t]) {
+            for (let key in  metaDataKeys[t]) {
                 if (metaDataKeys[t].hasOwnProperty(key)) {
                     console.log(key + " -> " + metaDataKeys[t][key]);
                     if (key === "lastmodified") {
@@ -80,7 +89,7 @@ module.exports = {
             $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
             legend.init([t], "#info-modal-legend");
             e.stopPropagation();
-        }
+        };
 
         metaDataKeys = meta.getMetaDataKeys();
 
@@ -133,10 +142,6 @@ module.exports = {
 
         $("#measurements-module-btn").on("click", function () {
             measurements.toggleMeasurements(true);
-
-
         });
-        $("#locale-btn").append($(".leaflet-control-locate"));
-
     }
 };
