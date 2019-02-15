@@ -1510,33 +1510,62 @@ module.exports = {
         // Reverse groups
         let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
 
-        // Create stores before the layer panel is shown
-/*
-            for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
-                let localItem = layersAndSubgroupsForCurrentGroup[u];
-                if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
-                    if (layerIsActive) {
-                        numberOfActiveLayers++;
-                    }
+        // Create stores and calculate active / added layers before the layer panel is shown
+        let localNumberOfActiveLayers = 0;
+        let localNumberOfAddedLayers = 0;
+        let layersToProcess = [];
+        for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
+            let localItem = layersAndSubgroupsForCurrentGroup[u];
+            if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
+                layersToProcess.push(localItem.layer);
+            } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                localItem.children.map(childLocalItem => {
+                    layersToProcess.push(childLocalItem);
+                });
+            } else {
+                throw new Error(`Invalid sorting element type`);
+            }
+        }
 
-                    _self.createLayerRecord(localItem.layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
-                    numberOfAddedLayers++;
-                } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                    
-
-
-
-
-                    let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
-                    numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                    numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
-                } else {
-                    throw new Error(`Invalid sorting element type`);
-                }
+        layersToProcess.map(layer => {
+            let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+            if (layerIsActive) {
+                localNumberOfActiveLayers++;
             }
 
-*/
+            localNumberOfAddedLayers++;
+
+            let { isVectorLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let parsedMeta = false;
+            if (layer.meta) {
+                parsedMeta = _self.parseLayerMeta(layer);
+            }
+    
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+            if (isVectorLayer) {
+                // Filling up default dynamic load values if they are absent
+                if (layerKey in moduleState.dynamicLoad === false || [true, false].indexOf(moduleState.dynamicLoad[layerKey]) === -1) {
+                    if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
+                        if (parsedMeta.load_strategy === `d`) {
+                            moduleState.dynamicLoad[layerKey] = true;
+                        } else if (parsedMeta.load_strategy === `s`) {
+                            moduleState.dynamicLoad[layerKey] = false;
+                        } else {
+                            console.warn(`Invalid default dynamic load value "${parsedMeta.load_strategy}" for layer ${layerKey}`);
+                        }
+                    }
+                }
+    
+                _self.createStore(layer, isVirtualGroup);
+            }
+    
+            if (isVectorTileLayer) {
+                _self.createStore(layer, false, true);
+            }
+        });
+
+        // Setup active / added layers indicators
+        layerTreeUtils.setupLayerNumberIndicator(base64GroupName, localNumberOfActiveLayers, localNumberOfAddedLayers);
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
@@ -1572,21 +1601,9 @@ module.exports = {
                     }
                 });
 
-                let count = 0;
-                if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                    count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
-                } else {
-                    count = numberOfAddedLayers;
-                }
-
-                $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
                 // Remove the group if empty
                 if (numberOfAddedLayers === 0) {
                     $("#layer-panel-" + base64GroupName).remove();
-                }
-
-                if (numberOfActiveLayers > 0) {
-                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
                 }
 
                 const setAllControlsProcessors = (type) => {
@@ -1608,7 +1625,6 @@ module.exports = {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
                     if (moduleState.setupLayerControlsRequests[layerKey]) {
                         let settings = moduleState.setupLayerControlsRequests[layerKey];
-                        console.log(`### forced`, settings);
                         _self.setupLayerControls(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
                 };            
@@ -1778,27 +1794,6 @@ module.exports = {
 
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-            if (isVectorLayer) {
-                // Filling up default dynamic load values if they are absent
-                if (layerKey in moduleState.dynamicLoad === false || [true, false].indexOf(moduleState.dynamicLoad[layerKey]) === -1) {
-                    if (`load_strategy` in parsedMeta && parsedMeta.load_strategy) {
-                        if (parsedMeta.load_strategy === `d`) {
-                            moduleState.dynamicLoad[layerKey] = true;
-                        } else if (parsedMeta.load_strategy === `s`) {
-                            moduleState.dynamicLoad[layerKey] = false;
-                        } else {
-                            console.warn(`Invalid default dynamic load value "${parsedMeta.load_strategy}" for layer ${layerKey}`);
-                        }
-                    }
-                }
-
-                _self.createStore(layer, isVirtual);
-            }
-
-            if (isVectorTileLayer) {
-                _self.createStore(layer, false, true);
-            }
 
             let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
 
@@ -2215,8 +2210,7 @@ module.exports = {
         }
     },
 
-
-    onChangeLoadStrategyHandler: ({layerKey, dynamicLoadIsEnabled}) => {
+    onChangeLoadStrategyHandler: ({layerKey}) => {
         moduleState.dynamicLoad[layerKey] = moduleState.dynamicLoadIsEnabled;
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);

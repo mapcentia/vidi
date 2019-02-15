@@ -140,6 +140,29 @@ const calculateOrder = () => {
 };
 
 /**
+ * Setups the active / added layers indicator for group
+ * 
+ * @param {String} base64GroupName      Group name encoded in base64
+ * @param {Number} numberOfActiveLayers Number of added layers
+ * @param {Number} numberOfAddedLayers  Number of active layers
+ * 
+ * @returns {void}
+ */
+const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, numberOfAddedLayers) => {
+    let count = 0;
+    if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+        count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
+    } else {
+        count = numberOfAddedLayers;
+    }
+
+    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+    if (numberOfActiveLayers > 0) {
+        $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
+    }
+};
+
+/**
  * Default template for feature popup
  */
 const getDefaultTemplate = () => {
@@ -279,5 +302,6 @@ module.exports = {
     getDefaultTemplate,
     stripPrefix,
     getPossibleLayerTypes,
-    getDefaultLayerType
+    getDefaultLayerType,
+    setupLayerNumberIndicator
 };
