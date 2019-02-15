@@ -183,8 +183,8 @@ input[type="checkbox"] {
   margin-top: 0 !important;
   padding: 9px 10px 10px;
 }
-.modal-header {
-  padding: 10px 15px;
+.dialog-bottom .modal-header {
+  padding: 0 15px 10px 15px;
 }
 #result_GroupDiv {
   background: white;
@@ -1259,4 +1259,9 @@ h4 small {
 #layers_list .layer-item.list-group-item .active {
   background-color: #03a9f4;
   color: white;
+}
+.layer-move-vert {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: move;
 }

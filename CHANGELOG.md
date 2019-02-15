@@ -10,6 +10,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Touch drag enabled in layer tree.
 - Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
 - Visual grouping of map tools in GUI.
+- Support of Mapbox Vector Tiles (MVT). 
+- Cross hair cursor when info click is on.
 
 ### Changed
 - One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:

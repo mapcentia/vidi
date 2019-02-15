@@ -106,13 +106,13 @@ module.exports = {
             $(container).append(`<a title="${__(`Previous extent`)}"
                 id="mapcontrols-history-backward"
                 class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
-                <span class="fa fa-chevron-left"></span>
+                <i class="material-icons">arrow_back_ios</i>
             </a>`);
 
             $(container).append(`<a title="${__(`Next extent`)}"
                 id="mapcontrols-history-forward"
                 class="${buttonClass}" style="padding-top: 6px; color: lightgray;">
-                <span class="fa fa-chevron-right"></span>
+                <i class="material-icons">arrow_forward_ios</i>
             </a>`);
 
             $(container).find(`#mapcontrols-clear-map`).click(ClearMapControlOptions.onclick);

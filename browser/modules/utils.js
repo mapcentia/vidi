@@ -127,5 +127,18 @@ module.exports = {
             return txt;
         }
 
+    },
+
+    fullScreen: function () {
+        let elem = document.getElementsByTagName("body")[0];
+        if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+        } else if (elem.mozRequestFullScreen) {
+            elem.mozRequestFullScreen();
+        } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen();
+        } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen();
+        }
     }
 };

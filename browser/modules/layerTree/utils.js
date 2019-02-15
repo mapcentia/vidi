@@ -230,7 +230,7 @@ const getPossibleLayerTypes = (layerDescription) => {
 
     index = layerTypeSpecifiers.indexOf(LAYER.RASTER_TILE)
     if (index > -1) {
-        detectedTypes++
+        detectedTypes++;
         isRasterTileLayer = true;
         specifiers.push(LAYER.RASTER_TILE);
         if (usingLegacyNotation) {
@@ -266,6 +266,13 @@ const getPossibleLayerTypes = (layerDescription) => {
 
     if (layerTypeSpecifiers.length > 0) {
         throw new Error(`Provided layer name "${layerDescription.f_schema_name + '.' + layerDescription.f_table_name}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
+    }
+
+    // Default to Raster Tiles
+    if (!isVectorLayer && !isRasterTileLayer && !isVectorTileLayer && !isWebGLLayer) {
+        detectedTypes++;
+        isRasterTileLayer = true;
+        specifiers.push(LAYER.RASTER_TILE);
     }
 
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
