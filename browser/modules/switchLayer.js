@@ -9,9 +9,11 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = true;
+const LOG = false;
 
 let layersAlternationHistory = {};
+
+let layersEnabledStatus = {};
 
 /**
  *
@@ -43,6 +45,13 @@ module.exports = module.exports = {
 
         _self = this;
         return this;
+    },
+
+    /**
+     * Returns enabled status of previously switched layers
+     */
+    getLayersEnabledStatus: () => {
+        return layersEnabledStatus;
     },
 
     /**
@@ -299,6 +308,8 @@ module.exports = module.exports = {
         if (!name) {
             throw new Error(`Layer name is undefined`);
         }
+
+        layersEnabledStatus[layerTreeUtils.stripPrefix(name)] = enable;
 
         let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {

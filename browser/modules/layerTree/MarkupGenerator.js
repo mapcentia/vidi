@@ -33,7 +33,7 @@ class MarkupGenerator {
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
-                    <a style="display: block" class="accordion-toggle" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
+                    <a style="display: block" class="accordion-toggle js-toggle-layer-panel" data-toggle="collapse" data-parent="#layers" href="#collapse${base64GroupName}">${name}</a>
                 </h4>
             </div>
             <ul class="list-group" id="group-${base64GroupName}" role="tabpanel"></ul>

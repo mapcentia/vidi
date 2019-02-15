@@ -8,7 +8,7 @@
  * File contains constants that are used across the layerTree module
  */
 
-const LOG = true;
+const LOG = false;
 
 const MODULE_NAME = `layerTree`;
 

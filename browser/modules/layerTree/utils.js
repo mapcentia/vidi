@@ -149,14 +149,7 @@ const calculateOrder = () => {
  * @returns {void}
  */
 const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, numberOfAddedLayers) => {
-    let count = 0;
-    if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-        count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
-    } else {
-        count = numberOfAddedLayers;
-    }
-
-    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(numberOfAddedLayers);
     if (numberOfActiveLayers > 0) {
         $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
     }

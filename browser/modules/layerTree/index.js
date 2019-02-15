@@ -340,9 +340,6 @@ module.exports = {
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                 }
             } else {
-
-                //console.log(`### postponing setupLayerControls`);
-
                 if (layerKey in moduleState.setupLayerControlsRequests === false) {
                     moduleState.setupLayerControlsRequests[layerKey] = false;
                 }
@@ -509,6 +506,33 @@ module.exports = {
 
                     break;
                 }
+            }
+        });
+
+        /**
+         * Layers are initially loaded after the layerTree is created, so once all layers are loaded,
+         * counters of active / added layers needs to be updated
+         */
+        backboneEvents.get().once(`allDoneLoading:layers`, () => {
+            let metaData = meta.getMetaData();
+            let groupsToActiveLayers = {};
+            let groupsToAddedLayers = {};
+            let activeLayers = switchLayer.getLayersEnabledStatus();
+            for (let u = 0; u < metaData.data.length; ++u) {
+                let base64GroupName = Base64.encode(metaData.data[u].layergroup).replace(/=/g, "");
+                if (!groupsToActiveLayers[base64GroupName]) groupsToActiveLayers[base64GroupName] = 0;
+                if (!groupsToAddedLayers[base64GroupName]) groupsToAddedLayers[base64GroupName] = 0;
+
+                let layerKey = metaData.data[u].f_table_schema + `.` + metaData.data[u].f_table_name;
+                if (activeLayers[layerKey]) {
+                    groupsToActiveLayers[base64GroupName]++;
+                }
+
+                groupsToAddedLayers[base64GroupName]++;
+            }
+
+            for (let key in groupsToActiveLayers) {
+                layerTreeUtils.setupLayerNumberIndicator(key, groupsToActiveLayers[key], groupsToAddedLayers[key]);
             }
         });
 
@@ -1529,6 +1553,7 @@ module.exports = {
 
         layersToProcess.map(layer => {
             let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+
             if (layerIsActive) {
                 localNumberOfActiveLayers++;
             }
@@ -1733,8 +1758,6 @@ module.exports = {
     createLayerRecord: (layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName,
         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
-        //console.log(`### createLayerRecord ${layer.f_table_schema}.${layer.f_table_name}`, opacitySettings, base64GroupName, layerIsActive, activeLayerName, subgroupId, base64SubgroupName, isVirtual)
-        
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
