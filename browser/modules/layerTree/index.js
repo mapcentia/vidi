@@ -341,7 +341,7 @@ module.exports = {
                 }
             } else {
 
-                console.log(`### postponing setupLayerControls`);
+                //console.log(`### postponing setupLayerControls`);
 
                 if (layerKey in moduleState.setupLayerControlsRequests === false) {
                     moduleState.setupLayerControlsRequests[layerKey] = false;
@@ -1569,8 +1569,6 @@ module.exports = {
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
-                // Get layers and subgroups that belong to the current layer group
-
                 // Add layers and subgroups
                 let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
@@ -1648,17 +1646,22 @@ module.exports = {
         let layerIsActive = false;
         let activeLayerName = false;
 
+        let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
+
         // If activeLayers are set, then no need to sync with the map
         if (!forcedState) {
-            if (precheckedLayers && Array.isArray(precheckedLayers)) {
+            if (precheckedLayers && Array.isArray(precheckedLayers) && precheckedLayers.length > 0) {
                 precheckedLayers.map(item => {
-                    let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
-                    if (item.id && (item.id === name
-                        || item.id === `${LAYER.VECTOR}:${name}`
-                        || item.id === `${LAYER.RASTER_TILE}:${name}`
-                        || item.id === `${LAYER.VECTOR_TILE}:${name}`)) {
+                    if (layerUtils.stripPrefix(item.id) === name) {
                         layerIsActive = true;
                         activeLayerName = item.id;
+                    }
+                });
+            } else {
+                cloud.get().map.eachLayer(function(layer){
+                    if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name) {
+                        layerIsActive = true;
+                        activeLayerName = layer.id;
                     }
                 });
             }
@@ -1730,11 +1733,7 @@ module.exports = {
     createLayerRecord: (layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName,
         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
-
-
-        console.log(`### createLayerRecord ${layer.f_table_schema}.${layer.f_table_name}`, opacitySettings, base64GroupName, layerIsActive, activeLayerName, subgroupId, base64SubgroupName, isVirtual)
-
-
+        //console.log(`### createLayerRecord ${layer.f_table_schema}.${layer.f_table_name}`, opacitySettings, base64GroupName, layerIsActive, activeLayerName, subgroupId, base64SubgroupName, isVirtual)
         
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -1959,7 +1958,7 @@ module.exports = {
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
             $(layerContainer).find('.js-layer-settings-table').hide(0);
 
-            _self.setupLayerControls(defaultLayerType, layerKey);
+            _self.setupLayerControls(defaultLayerType, layerKey, true, layerIsActive);
 
             let initialSliderValue = 1;
             if (isRasterTileLayer || isVectorTileLayer) {
