@@ -1449,73 +1449,69 @@ module.exports = {
             $("#group-" + base64GroupName).append(`<div id="collapse${base64GroupName}" class="accordion-body collapse"></div>`);
         }
 
-        $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
-
-            // @todo Clicking the group name two times in a row causes errors (toggle view)
-
-            // Get layers and subgroups that belong to the current layer group
-            let notSortedLayersAndSubgroupsForCurrentGroup = [];
-            if (isVirtualGroup) {
-                moduleState.virtualLayers.map(item => {
-                    let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
-                    meta.addMetaData({ data: [simulatedMetaData]});
-                    notSortedLayersAndSubgroupsForCurrentGroup.push({
-                        type: GROUP_CHILD_TYPE_LAYER,
-                        layer: simulatedMetaData
-                    });
+        // Get layers that belong to current group
+        let notSortedLayersAndSubgroupsForCurrentGroup = [];
+        if (isVirtualGroup) {
+            moduleState.virtualLayers.map(item => {
+                let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
+                meta.addMetaData({ data: [simulatedMetaData]});
+                notSortedLayersAndSubgroupsForCurrentGroup.push({
+                    type: GROUP_CHILD_TYPE_LAYER,
+                    layer: simulatedMetaData
                 });
-            } else {
-                for (let u = 0; u < metaData.data.length; ++u) {
-                    if (metaData.data[u].layergroup == groupName) {
-                        let layer = metaData.data[u];
-                        let parsedMeta = _self.parseLayerMeta(layer);
-                        if (parsedMeta && `vidi_sub_group` in parsedMeta) {
-                            layer.subGroup = parsedMeta.vidi_sub_group;
-                        } else {
-                            layer.subGroup = false;
-                        }
+            });
+        } else {
+            for (let u = 0; u < metaData.data.length; ++u) {
+                if (metaData.data[u].layergroup == groupName) {
+                    let layer = metaData.data[u];
+                    let parsedMeta = _self.parseLayerMeta(layer);
+                    if (parsedMeta && `vidi_sub_group` in parsedMeta) {
+                        layer.subGroup = parsedMeta.vidi_sub_group;
+                    } else {
+                        layer.subGroup = false;
+                    }
 
-                        if (layer.subGroup) {
-                            let subGroupIndex = false;
-                            notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
-                                if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
-                                    subGroupIndex = index;
-                                    return false;
-                                }
-                            });
-
-                            // Group does not exist
-                            if (subGroupIndex === false) {
-                                notSortedLayersAndSubgroupsForCurrentGroup.push({
-                                    id: layer.subGroup,
-                                    type: GROUP_CHILD_TYPE_GROUP,
-                                    children: [layer]
-                                });
-                            } else {
-                                notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push(layer);
+                    if (layer.subGroup) {
+                        let subGroupIndex = false;
+                        notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
+                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
+                                subGroupIndex = index;
+                                return false;
                             }
-                        } else {
+                        });
+
+                        // Group does not exist
+                        if (subGroupIndex === false) {
                             notSortedLayersAndSubgroupsForCurrentGroup.push({
-                                type: GROUP_CHILD_TYPE_LAYER,
-                                layer
+                                id: layer.subGroup,
+                                type: GROUP_CHILD_TYPE_GROUP,
+                                children: [layer]
                             });
+                        } else {
+                            notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push(layer);
                         }
+                    } else {
+                        notSortedLayersAndSubgroupsForCurrentGroup.push({
+                            type: GROUP_CHILD_TYPE_LAYER,
+                            layer
+                        });
                     }
                 }
             }
+        }
 
-            // Reverse subgroups
-            notSortedLayersAndSubgroupsForCurrentGroup.map((item) => {
-                if (item.type === "group") {
-                    item.children.reverse();
-                }
-            });
+        // Reverse subgroups
+        notSortedLayersAndSubgroupsForCurrentGroup.map((item) => {
+            if (item.type === "group") {
+                item.children.reverse();
+            }
+        });
 
-            // Reverse groups
-            let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
+        // Reverse groups
+        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
 
-            // Add layers and subgroups
-            let numberOfAddedLayers = 0;
+        // Create stores before the layer panel is shown
+/*
             for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                 let localItem = layersAndSubgroupsForCurrentGroup[u];
                 if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
@@ -1527,6 +1523,11 @@ module.exports = {
                     _self.createLayerRecord(localItem.layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
                     numberOfAddedLayers++;
                 } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                    
+
+
+
+
                     let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
                     numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                     numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
@@ -1535,63 +1536,91 @@ module.exports = {
                 }
             }
 
-            $("#collapse" + base64GroupName).sortable({
-                axis: 'y',
-                stop: (event, ui) => {
-                    _self.calculateOrder();
-                    backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
-                    layers.reorderLayers();
-                }
-            });
+*/
 
-            let count = 0;
-            if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
-                count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
-            } else {
-                count = numberOfAddedLayers;
-            }
+        $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
+            if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
+                // Get layers and subgroups that belong to the current layer group
 
-            $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
-            // Remove the group if empty
-            if (numberOfAddedLayers === 0) {
-                $("#layer-panel-" + base64GroupName).remove();
-            }
-
-            if (numberOfActiveLayers > 0) {
-                $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
-            }
-
-            const setAllControlsProcessors = (type) => {
-                $(`.js-set-all-layer-to-be-${type}`).off();
-                $(`.js-set-all-layer-to-be-${type}`).click(e => {
-                    e.preventDefault();
-                    $(`button[class*="js-set-${type}"]`).each((index, element) => {
-                        if ($(element).prop(`disabled`) !== true) {
-                            $(element).trigger(`click`);
+                // Add layers and subgroups
+                let numberOfAddedLayers = 0;
+                for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
+                    let localItem = layersAndSubgroupsForCurrentGroup[u];
+                    if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
+                        let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
+                        if (layerIsActive) {
+                            numberOfActiveLayers++;
                         }
-                    });
+
+                        _self.createLayerRecord(localItem.layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
+                        numberOfAddedLayers++;
+                    } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
+                        numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
+                        numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+                    } else {
+                        throw new Error(`Invalid sorting element type`);
+                    }
+                }
+
+                $("#collapse" + base64GroupName).sortable({
+                    axis: 'y',
+                    stop: (event, ui) => {
+                        _self.calculateOrder();
+                        backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
+                        layers.reorderLayers();
+                    }
                 });
-            };
 
-            setAllControlsProcessors(`online`);
-            setAllControlsProcessors(`offline`);
-
-            const applyQueriedSetupControlRequests = (layer) => {
-                let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-                if (moduleState.setupLayerControlsRequests[layerKey]) {
-                    let settings = moduleState.setupLayerControlsRequests[layerKey];
-                    console.log(`### forced`, settings);
-                    _self.setupLayerControls(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
-                }
-            };            
-
-            layersAndSubgroupsForCurrentGroup.map(item => {
-                if (item.type === GROUP_CHILD_TYPE_LAYER) {
-                    applyQueriedSetupControlRequests(item.layer);
+                let count = 0;
+                if (!isNaN(parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()))) {
+                    count = parseInt($($("#layer-panel-" + base64GroupName + " .layer-count span")[1]).html()) + numberOfAddedLayers;
                 } else {
-                    item.children.map(applyQueriedSetupControlRequests);
+                    count = numberOfAddedLayers;
                 }
-            });
+
+                $("#layer-panel-" + base64GroupName + " span:eq(1)").html(count);
+                // Remove the group if empty
+                if (numberOfAddedLayers === 0) {
+                    $("#layer-panel-" + base64GroupName).remove();
+                }
+
+                if (numberOfActiveLayers > 0) {
+                    $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
+                }
+
+                const setAllControlsProcessors = (type) => {
+                    $(`.js-set-all-layer-to-be-${type}`).off();
+                    $(`.js-set-all-layer-to-be-${type}`).click(e => {
+                        e.preventDefault();
+                        $(`button[class*="js-set-${type}"]`).each((index, element) => {
+                            if ($(element).prop(`disabled`) !== true) {
+                                $(element).trigger(`click`);
+                            }
+                        });
+                    });
+                };
+
+                setAllControlsProcessors(`online`);
+                setAllControlsProcessors(`offline`);
+
+                const applyQueriedSetupControlRequests = (layer) => {
+                    let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
+                    if (moduleState.setupLayerControlsRequests[layerKey]) {
+                        let settings = moduleState.setupLayerControlsRequests[layerKey];
+                        console.log(`### forced`, settings);
+                        _self.setupLayerControls(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
+                    }
+                };            
+
+                layersAndSubgroupsForCurrentGroup.map(item => {
+                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                        applyQueriedSetupControlRequests(item.layer);
+                    } else {
+                        item.children.map(applyQueriedSetupControlRequests);
+                    }
+                });
+            }
         });
     },
 
