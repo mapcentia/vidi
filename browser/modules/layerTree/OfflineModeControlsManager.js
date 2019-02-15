@@ -143,7 +143,7 @@ class OfflineModeControlsManager {
         let existingMeta = meta.getMetaData();
         existingMeta.data.map(layer => {
             if (((layer.f_table_schema + '.' + layer.f_table_name) === layerKey) && layer.meta) {
-                let { isVectorLayer, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+                let { isVectorLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
                 if (isVectorLayer) {
                     isVectorLayerLocal = true;
                     let layerRecord = $(`[data-gc2-layer-key="${layerKey}.${layer.f_geometry_column}"]`);

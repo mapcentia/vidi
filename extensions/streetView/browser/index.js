@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -34,7 +34,7 @@ var transformPoint;
  *
  * @type {string}
  */
-var exId = "streetview";
+var exId = "streetView";
 
 /**
  *
@@ -143,45 +143,7 @@ module.exports = {
                     selectedOption: "google"
                 };
 
-                this.onActive = this.onActive.bind(this);
                 this.onChange = this.onChange.bind(this);
-            }
-
-            /**
-             *
-             * @param e
-             */
-            onActive(e) {
-                this.setState({
-                    active: e.target.checked
-                });
-
-                if (e.target.checked) {
-
-                    // Turn info click off
-                    //====================
-                    backboneEvents.get().trigger("off:infoClick");
-
-                    // Emit "on" event
-                    //================
-                    backboneEvents.get().trigger("on:" + exId);
-
-                    utils.cursorStyle().crosshair();
-
-                } else {
-
-                    // Turn info click on again
-                    //=========================
-                    backboneEvents.get().trigger("on:infoClick");
-
-                    // Emit "off" event
-                    //=================
-                    backboneEvents.get().trigger("off:" + exId);
-
-                    utils.cursorStyle().reset();
-
-                }
-
             }
 
             onChange(changeEvent) {
@@ -194,10 +156,22 @@ module.exports = {
              *
              */
             componentDidMount() {
-                var me = this;
+                let me = this;
 
-                // Listen and reacting to the global Reset ALL event
-                backboneEvents.get().on("reset:all", function () {
+                // Stop listening to any events, deactivate controls, but
+                // keep effects of the module until they are deleted manually or reset:all is emitted
+                backboneEvents.get().on("deactivate:all", () => {});
+
+                // Activates module
+                backboneEvents.get().on(`on:${exId}`, () => {
+                    me.setState({
+                        active: true
+                    });
+                    utils.cursorStyle().crosshair();
+                });
+
+                // Deactivates module
+                backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
                     me.setState({
                         active: false
                     });
@@ -211,7 +185,7 @@ module.exports = {
                     clicktimer = undefined;
                 });
                 mapObj.on("click", function (e) {
-                    var event = new geocloud.clickEvent(e, cloud);
+                    let event = new geocloud.clickEvent(e, cloud);
                     if (clicktimer) {
                         clearTimeout(clicktimer);
                     }
@@ -256,13 +230,6 @@ module.exports = {
 
                     <div role="tabpanel">
                         <div className="form-group">
-                            <div className="togglebutton">
-                                <label><input id="streetview-btn" type="checkbox"
-                                              checked={this.state.active}
-                                              onChange={this.onActive}/>{__("Activate")}
-                                </label>
-
-                            </div>
                             <h3>{__("Choose service")}</h3>
                             <div className="radio">
                                 <label>
@@ -299,7 +266,7 @@ module.exports = {
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera");
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
 
         // Append to DOM
         //==============

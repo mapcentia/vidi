@@ -140,6 +140,22 @@ const calculateOrder = () => {
 };
 
 /**
+ * Setups the active / added layers indicator for group
+ * 
+ * @param {String} base64GroupName      Group name encoded in base64
+ * @param {Number} numberOfActiveLayers Number of added layers
+ * @param {Number} numberOfAddedLayers  Number of active layers
+ * 
+ * @returns {void}
+ */
+const setupLayerNumberIndicator = (base64GroupName, numberOfActiveLayers, numberOfAddedLayers) => {
+    $("#layer-panel-" + base64GroupName + " span:eq(1)").html(numberOfAddedLayers);
+    if (numberOfActiveLayers > 0) {
+        $("#layer-panel-" + base64GroupName + " span:eq(0)").html(numberOfActiveLayers);
+    }
+};
+
+/**
  * Default template for feature popup
  */
 const getDefaultTemplate = () => {
@@ -207,7 +223,7 @@ const getPossibleLayerTypes = (layerDescription) => {
 
     index = layerTypeSpecifiers.indexOf(LAYER.RASTER_TILE)
     if (index > -1) {
-        detectedTypes++
+        detectedTypes++;
         isRasterTileLayer = true;
         specifiers.push(LAYER.RASTER_TILE);
         if (usingLegacyNotation) {
@@ -245,6 +261,13 @@ const getPossibleLayerTypes = (layerDescription) => {
         throw new Error(`Provided layer name "${layerDescription.f_schema_name + '.' + layerDescription.f_table_name}" does not correspond to layer type specifier convention, should be [mvt][v][t][w]`);
     }
 
+    // Default to Raster Tiles
+    if (!isVectorLayer && !isRasterTileLayer && !isVectorTileLayer && !isWebGLLayer) {
+        detectedTypes++;
+        isRasterTileLayer = true;
+        specifiers.push(LAYER.RASTER_TILE);
+    }
+
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
 };
 
@@ -279,5 +302,6 @@ module.exports = {
     getDefaultTemplate,
     stripPrefix,
     getPossibleLayerTypes,
-    getDefaultLayerType
+    getDefaultLayerType,
+    setupLayerNumberIndicator
 };

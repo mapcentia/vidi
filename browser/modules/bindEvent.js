@@ -12,7 +12,7 @@ import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
  *
  * @type {*|exports|module.exports}
  */
-var advancedInfo, cloud, switchLayer, meta;
+var advancedInfo, cloud, switchLayer, meta, utils;
 
 /**
  *
@@ -33,7 +33,6 @@ require('dom-shims');
 require('arrive');
 
 var backboneEvents;
-var switchLayer;
 var pushState;
 var layerTree;
 var layers;
@@ -47,7 +46,7 @@ var isStarted = false;
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
+module.exports = {
     set: function (modules) {
         applicationModules = modules;
         advancedInfo = modules.advancedInfo;
@@ -62,6 +61,7 @@ module.exports = module.exports = {
         backboneEvents = modules.backboneEvents;
         setting = modules.setting;
         state = modules.state;
+        utils = modules.utils;
         return this;
     },
     init: function (str) {
@@ -431,7 +431,7 @@ module.exports = module.exports = {
             var id = ($(this)).parent().parent().attr('id');
 
             $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 30) + "px"
+                bottom: (($("#" + id).height() * -1) + 20) + "px"
             }, 500, function () {
                 $("#" + id + " .expand-less").hide();
                 $("#" + id + " .expand-more").show();
@@ -455,6 +455,11 @@ module.exports = module.exports = {
             e.preventDefault();
 
             var id = ($(this)).attr('href');
+
+            if (id === "#full-screen"){
+                utils.fullScreen();
+                return;
+            }
 
             // If print when activate
             if ($(this).data('module') === "print") {
@@ -482,7 +487,7 @@ module.exports = module.exports = {
             }
         });
 
-        $(`.modal-header > button[class="close"]`).click(() => {
+        $(`.slide-right > .modal-header > button[class="close"]`).click(() => {
             backboneEvents.get().trigger(`off:all`);
         });
 
@@ -505,6 +510,26 @@ module.exports = module.exports = {
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
         });
+
+        // Listen for extensions
+        $(document).arrive("#side-panel ul li a", function (e, data) {
+            $(this).on("click", function (e) {
+                backboneEvents.get().trigger(`off:all`);
+                let moduleId = $(this).data(`module-id`);
+                setTimeout(() => {
+                    if (moduleId && moduleId !== ``) {
+                        if (moduleId in applicationModules.extensions) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
+                    }
+                }, 100);
+                let id = ($(this));
+                $("#side-panel ul li").removeClass("active");
+                id.addClass("active");
+            });
+        })
 
     }
 };
