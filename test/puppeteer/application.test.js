@@ -23,7 +23,7 @@ describe("Application", () => {
                     headers: {"Access-Control-Allow-Origin": "*"},
                     body: JSON.stringify({
                         "brandName": "Test 1",
-                        "activateMainTab": "streetview"
+                        "activateMainTab": "streetView"
                     })
                 });
             } else {
@@ -36,7 +36,7 @@ describe("Application", () => {
         await helpers.sleep(1000);
         let text = await page.evaluate(`$('.navbar-brand').text()`);
         expect(text.indexOf(`Test 1`) > -1).to.be.true;
-        expect(await page.evaluate(`$('#streetview-content').is(':visible')`)).to.be.true;
+        expect(await page.evaluate(`$('#streetView-content').is(':visible')`)).to.be.true;
         await page.close();
 
         // Non-empty "activateMainTab" option (extension)
