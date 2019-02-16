@@ -229,7 +229,15 @@ module.exports = {
      * @returns {Array}
      */
     getActiveLayers: () => {
-        return layerTreeUtils.getActiveLayers();
+        let result = [];
+        let activeLayers = switchLayer.getLayersEnabledStatus();
+        for (let key in activeLayers) {
+            if (activeLayers[key].enabled) {
+                result.push(activeLayers[key].fullLayerKey);
+            }
+        }
+
+        return result;
     },
 
     /**
@@ -470,6 +478,7 @@ module.exports = {
         if (newState === false) {
             newState = {
                 order: false,
+                activeLayers: [],
                 opacitySettings: {},
                 layersOfflineMode: {},
                 virtualLayers: [],
@@ -539,7 +548,7 @@ module.exports = {
                 if (!groupsToAddedLayers[base64GroupName]) groupsToAddedLayers[base64GroupName] = 0;
 
                 let layerKey = metaData.data[u].f_table_schema + `.` + metaData.data[u].f_table_name;
-                if (activeLayers[layerKey]) {
+                if (activeLayers[layerKey] && activeLayers[layerKey].enabled) {
                     groupsToActiveLayers[base64GroupName]++;
                 }
 
@@ -627,10 +636,13 @@ module.exports = {
 
                     moduleState.isReady = false;
                     if (forcedState) {
-                        if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, _self.getActiveLayers());
-                        _self.getActiveLayers().map(item => {
-                            switchLayer.init(item, false, true, false);
-                        });
+                        let enabledLayers = switchLayer.getLayersEnabledStatus();
+                        if (LOG) console.log(`${MODULE_NAME}: disabling active layers`, enabledLayers);
+                        for (let key in enabledLayers) {
+                            if (enabledLayers[key].enabled) {
+                                switchLayer.init(key, false, true, false);
+                            }
+                        }
                     }
 
                     // Emptying the tree
@@ -796,27 +808,15 @@ module.exports = {
                                         const turnOnActiveLayersAndFinishBuilding = () => {
                                             return new Promise((localResolve, reject) => {
                                                 if (activeLayers) {
+                                                    let layersAreActivatedPromises = [];
                                                     activeLayers.map(layerName => {
                                                         let noPrefixName = layerTreeUtils.stripPrefix(layerName);
-                                                        let layerMeta = meta.getMetaByKey(noPrefixName);
-        
-                                                        if ($(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).length === 1 ||
-                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).length === 1 ||
-                                                            $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).length === 1) {
-
-                                                            if (layerName.indexOf(`${LAYER.VECTOR}:`) === 0) {
-                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector`).trigger(`click`, [{doNotLegend: true}]);
-                                                            } else if (layerName.indexOf(`${LAYER.VECTOR_TILE}:`) === 0) {
-                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-vector-tile`).trigger(`click`, [{doNotLegend: true}]);
-                                                            } else {
-                                                                $(`[data-gc2-layer-key="${noPrefixName}.${layerMeta.f_geometry_column}"]`).find(`.js-layer-type-selector-tile`).trigger(`click`, [{doNotLegend: true}]);
-                                                            }
-                                                        } else {
-                                                            $(`#layers`).find(`input[data-gc2-id="${noPrefixName}"]`).trigger('click', [{doNotLegend: true}]);
-                                                        }
+                                                        layersAreActivatedPromises.push(switchLayer.init(layerName, true, true));
                                                     });
-        
-                                                    legend.init();
+
+                                                    Promise.all(layersAreActivatedPromises).then(() => {
+                                                        legend.init();
+                                                    });
                                                 }
         
                                                 moduleState.isReady = true;
@@ -1136,6 +1136,9 @@ module.exports = {
             }
 
             // Checking if dynamic load is enabled for layer
+
+console.log(`### moduleState.dynamicLoad`, moduleState.dynamicLoad);
+
             if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
                 whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
             }
@@ -1609,6 +1612,20 @@ module.exports = {
             }
         });
 
+        // Apply opacity to layers
+        _self.getActiveLayers().map(item => {
+            let layerKey = layerTreeUtils.stripPrefix(name);
+            if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {
+                if (opacitySettings[layerKey] >= 0 && opacitySettings[layerKey] <= 1) {
+                    let opacity = opacitySettings[layerKey];
+                    layerTreeUtils.applyOpacityToLayer(opacity, layerKey, cloud, backboneEvents);
+
+                    // Assuming that it is not possible to set layer opacity right now
+                    moduleState.setLayerOpacityRequests.push({layerKey, opacity});
+                }
+            }
+        });
+
         // Setup active / added layers indicators
         layerTreeUtils.setupLayerNumberIndicator(base64GroupName, localNumberOfActiveLayers, localNumberOfAddedLayers);
 
@@ -1694,7 +1711,14 @@ module.exports = {
         let name = `${localItem.f_table_schema}.${localItem.f_table_name}`;
 
         // If activeLayers are set, then no need to sync with the map
-        if (!forcedState) {
+        if (forcedState && forcedState.activeLayers) {
+            forcedState.activeLayers.map(key => {
+                if (layerTreeUtils.stripPrefix(key) === name) {
+                    layerIsActive = true;
+                    activeLayerName = key;
+                }
+            });
+        } else {
             if (precheckedLayers && Array.isArray(precheckedLayers) && precheckedLayers.length > 0) {
                 precheckedLayers.map(item => {
                     if (layerTreeUtils.stripPrefix(item.id) === name) {
@@ -2035,9 +2059,6 @@ module.exports = {
                     });
                 }
 
-                // Assuming that it not possible to set layer opacity right now
-                moduleState.setLayerOpacityRequests.push({layerKey, opacity: initialSliderValue});
-
                 $(layerContainer).find(`.js-toggle-opacity`).click(() => {
                     _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
                     $(layerContainer).find('.js-layer-settings-opacity').toggle();
@@ -2252,8 +2273,8 @@ module.exports = {
         }
     },
 
-    onChangeLoadStrategyHandler: ({layerKey}) => {
-        moduleState.dynamicLoad[layerKey] = moduleState.dynamicLoadIsEnabled;
+    onChangeLoadStrategyHandler: ({layerKey, dynamicLoadIsEnabled}) => {
+        moduleState.dynamicLoad[layerKey] = dynamicLoadIsEnabled;
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
         _self.createStore(correspondingLayer);
@@ -2305,10 +2326,6 @@ module.exports = {
     calculateOrder: () => {
         moduleState.layerTreeOrder = layerTreeUtils.calculateOrder();
     },
-
-
-
-
 
     /**
      * Reloading provided layer.

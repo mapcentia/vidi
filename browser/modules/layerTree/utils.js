@@ -49,39 +49,6 @@ const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
 };
 
 /**
- * Returns list of currently enabled layers
- * 
- * @returns {Array}
- */
-const getActiveLayers = () => {
-    let activeLayerIds = [];
-    $('*[data-gc2-layer-type]').each((index, item) => {
-        let isEnabled = $(item).is(':checked');
-        if (isEnabled) {
-            let type = $(item).data('gc2-layer-type');
-            let gc2Id = $(item).data('gc2-id');
-            if (type === LAYER.RASTER_TILE) {
-                activeLayerIds.push(gc2Id);
-            } else if (type === LAYER.VECTOR) {
-                activeLayerIds.push(LAYER.VECTOR + `:` + gc2Id);
-            } else if (type === LAYER.VECTOR_TILE) {
-                activeLayerIds.push(LAYER.VECTOR_TILE + `:` + gc2Id);
-            } else if (type === LAYER.WEBGL) {
-                activeLayerIds.push(LAYER.WEBGL + `:` + gc2Id);
-            } else {
-                console.error(`Unable to get active layer for ${gc2Id}`);
-            }
-        }
-    });
-
-    activeLayerIds = activeLayerIds.filter((v, i, a) => {
-        return a.indexOf(v) === i
-    });
-
-    return activeLayerIds;
-};
-
-/**
  * Calculates layer order using the current markup
  *
  * @returns {Array}
@@ -297,7 +264,6 @@ const getDefaultLayerType = (layerMeta) => {
 module.exports = {
     queryServiceWorker,
     applyOpacityToLayer,
-    getActiveLayers,
     calculateOrder,
     getDefaultTemplate,
     stripPrefix,
