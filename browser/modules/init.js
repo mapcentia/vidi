@@ -6,7 +6,6 @@
 
 'use strict';
 
-var extensions;
 var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');

@@ -216,13 +216,11 @@ module.exports = {
                  * 
                  * @param {String} data Input data for underlying function
                  * 
-                 * @return {Function} 
+                 * @return {Function}
                  */
                 const createPromise = (data) => {
                     return new Promise(resolve => {
-                        switchLayer.init(data, true, true).then(() => {
-                            resolve();
-                        });
+                        switchLayer.init(data, true, true).then(resolve);
                     })
                 };
 
