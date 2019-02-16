@@ -171,9 +171,7 @@ module.exports = module.exports = {
                             });
                         }
 
-                        _self.init(gc2Id, true).then(() => {
-                            resolve();
-                        });
+                        _self.init(gc2Id, true).then(resolve);
                     });
                 }).catch(() => {
                     console.error(`Could not add ${gc2Id} raster tile layer`);
@@ -339,7 +337,6 @@ module.exports = module.exports = {
         let applicationWideControls = $(`*[data-gc2-id="${gc2Id}"]`);
         applicationWideControls.prop('checked', enable);
         let result = new Promise((resolve, reject) => {
-            try {
             let vectorDataStores = layerTree.getStores();
 
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
@@ -373,7 +370,6 @@ module.exports = module.exports = {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 resolve();
             }
-        }catch(e) {console.log(e)}
         });
 
         return result;
@@ -383,35 +379,34 @@ module.exports = module.exports = {
      * Toggles the layer control
      */
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
-        const getLayerSwitchControl = () => {
-            let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
-            if (!controlElement || controlElement.length !== 1) {
-                if (enable) {
-                    console.warn(`Unable to find layer switch control for layer ${layerName}, number of layer switch controls: ${controlElement.length}`);
-                }
-
-                return false;
+        if (setupControls) {        
+            if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
+                layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable);
+            } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+                layerTree.setLayerState(LAYER.VECTOR_TILE, layerName, true, enable);
+            } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
+                layerTree.setLayerState(LAYER.WEBGL, layerName, true, enable);
             } else {
-                return controlElement;
+                layerTree.setLayerState(LAYER.RASTER_TILE, layerName, true, enable);
             }
-        };
+        }
 
-        let el = getLayerSwitchControl();
-        if (el) {
-            el.prop('checked', enable);
-            if (setupControls) {        
-                if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
-                    layerTree.setupLayerControls(LAYER.VECTOR, layerName, true, enable);
-                } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
-                    layerTree.setupLayerControls(LAYER.VECTOR_TILE, layerName, true, enable);
-                } else if (layerName.indexOf(LAYER.WEBGL + `:`) === 0) {
-                    layerTree.setupLayerControls(LAYER.WEBGL, layerName, true, enable);
-                } else {
-                    layerTree.setupLayerControls(LAYER.RASTER_TILE, layerName, true, enable);
+        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerTreeUtils.stripPrefix(layerName) + '"]');
+        if (controlElement.length === 1) {
+            var siblings = $(controlElement).parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
+
+            $.each(siblings, function (i, v) {
+                if (v.checked) {
+                    c = c + 1;
                 }
-            }
+            });
+    
+            $(controlElement).parents(".panel-layertree").find("span:eq(0)").html(c);
+        }
 
-            _self.update(doNotLegend, el);
+        pushState.init();
+        if (!doNotLegend) {
+            legend.init();
         }
     },
 
@@ -431,27 +426,6 @@ module.exports = module.exports = {
      */
     uncheckLayerControl: (layerName, doNotLegend, setupControls = true) => {
         _self._toggleLayerControl(false, layerName, doNotLegend, setupControls);
-    },
-
-    /**
-     * Updates the number of active layers indicator for the tab
-     */
-    update: (doNotLegend, el) => {
-        var siblings = el.parents(".accordion-body").find("input.js-show-layer-control"), c = 0;
-
-        $.each(siblings, function (i, v) {
-            if (v.checked) {
-                c = c + 1;
-            }
-        });
-
-        el.parents(".panel-layertree").find("span:eq(0)").html(c);
-
-        pushState.init();
-
-        if (!doNotLegend) {
-            legend.init();
-        }
     }
 };
 

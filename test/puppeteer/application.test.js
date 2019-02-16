@@ -129,6 +129,12 @@ describe("Application", () => {
             dialog.accept();
         });
 
+        expect(page.url().indexOf(`test.polygon`) > 0).to.be.true;
+        expect(page.url().indexOf(`public.urbanspatial_dar_es_salaam_luse_2002`) > 0).to.be.true;
+        expect(page.url().indexOf(`public.test_poly`) > 0).to.be.true;
+        expect(page.url().indexOf(`v:public.test`) > 0).to.be.true;
+        expect(page.url().indexOf(`v:public.test_line`) > 0).to.be.true;
+
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);

@@ -105,7 +105,7 @@ let moduleState = {
     predefinedFilters: {},
     dynamicLoad: {},
     setLayerOpacityRequests: [],
-    setupLayerControlsRequests: {},
+    setLayerStateRequests: {},
     vectorStores: [],
     virtualLayers: []
 };
@@ -233,7 +233,8 @@ module.exports = {
     },
 
     /**
-     * Regulates the visibility and initialization of layer type specific controls.
+     * Sets the layer state and, if layer panel if already drawn, applies state to the interface,
+     * otherwise stores the state and recreates it upon first layer panel rendering.
      *
      * @param {Boolean} desiredSetupType Layer type to setup
      * @param {String}  layerKey         Layer key
@@ -241,7 +242,7 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      */
-    setupLayerControls: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
@@ -282,6 +283,20 @@ module.exports = {
                 const hideAddFeature = () => {
                     $(container).find('.gc2-add-feature').hide(0);
                 };
+
+                const getLayerSwitchControl = () => {
+                    let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
+                    if (!controlElement || controlElement.length !== 1) {
+                        return false;
+                    } else {
+                        return controlElement;
+                    }
+                };
+        
+                let el = getLayerSwitchControl();
+                if (el) {
+                    el.prop('checked', layerIsEnabled);
+                }
 
                 if (desiredSetupType === LAYER.VECTOR) {
                     hideOpacity();
@@ -340,11 +355,11 @@ module.exports = {
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                 }
             } else {
-                if (layerKey in moduleState.setupLayerControlsRequests === false) {
-                    moduleState.setupLayerControlsRequests[layerKey] = false;
+                if (layerKey in moduleState.setLayerStateRequests === false) {
+                    moduleState.setLayerStateRequests[layerKey] = false;
                 }
 
-                moduleState.setupLayerControlsRequests[layerKey] = {
+                moduleState.setLayerStateRequests[layerKey] = {
                     desiredSetupType,
                     ignoreErrors,
                     layerIsEnabled,
@@ -1651,11 +1666,11 @@ module.exports = {
 
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-                    if (moduleState.setupLayerControlsRequests[layerKey]) {
-                        let settings = moduleState.setupLayerControlsRequests[layerKey];
-                        _self.setupLayerControls(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
+                    if (moduleState.setLayerStateRequests[layerKey]) {
+                        let settings = moduleState.setLayerStateRequests[layerKey];
+                        _self.setLayerState(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
-                };            
+                };
 
                 layersAndSubgroupsForCurrentGroup.map(item => {
                     if (item.type === GROUP_CHILD_TYPE_LAYER) {
@@ -1682,19 +1697,19 @@ module.exports = {
         if (!forcedState) {
             if (precheckedLayers && Array.isArray(precheckedLayers) && precheckedLayers.length > 0) {
                 precheckedLayers.map(item => {
-                    if (layerUtils.stripPrefix(item.id) === name) {
+                    if (layerTreeUtils.stripPrefix(item.id) === name) {
                         layerIsActive = true;
                         activeLayerName = item.id;
                     }
                 });
-            } else {
-                cloud.get().map.eachLayer(function(layer){
-                    if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name) {
-                        layerIsActive = true;
-                        activeLayerName = layer.id;
-                    }
-                });
             }
+
+            cloud.get().map.eachLayer(function(layer){
+                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name) {
+                    layerIsActive = true;
+                    activeLayerName = layer.id;
+                }
+            });
         }
 
         return {layerIsActive, activeLayerName}
@@ -1842,7 +1857,7 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', LAYER.RASTER_TILE);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerControls(LAYER.RASTER_TILE, layerKey);
+                _self.setLayerState(LAYER.RASTER_TILE, layerKey);
                 _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.RASTER_TILE]);
@@ -1855,7 +1870,7 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', LAYER.VECTOR);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerControls(LAYER.VECTOR, layerKey);
+                _self.setLayerState(LAYER.VECTOR, layerKey);
                 _self.reloadLayer(`${LAYER.VECTOR}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
@@ -1868,7 +1883,7 @@ module.exports = {
                 $(switcher).data('gc2-layer-type', LAYER.VECTOR_TILE);
                 $(switcher).prop('checked', true);
 
-                _self.setupLayerControls(LAYER.VECTOR_TILE, layerKey);
+                _self.setLayerState(LAYER.VECTOR_TILE, layerKey);
                 _self.reloadLayer(`${LAYER.VECTOR_TILE}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
 
                 $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR_TILE]);
@@ -1986,7 +2001,7 @@ module.exports = {
             $(layerContainer).find('.js-layer-settings-opacity').hide(0);
             $(layerContainer).find('.js-layer-settings-table').hide(0);
 
-            _self.setupLayerControls(defaultLayerType, layerKey, true, layerIsActive);
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
 
             let initialSliderValue = 1;
             if (isRasterTileLayer || isVectorTileLayer) {
@@ -2113,7 +2128,7 @@ module.exports = {
                     tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                 });
 
-                _self.setupLayerControls(defaultLayerType, layerKey, true, layerIsActive);
+                _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
             }
 
             $(layerContainer).find(`.js-toggle-search`).click(() => {
