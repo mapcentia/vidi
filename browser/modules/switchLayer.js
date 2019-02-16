@@ -307,7 +307,10 @@ module.exports = module.exports = {
             throw new Error(`Layer name is undefined`);
         }
 
-        layersEnabledStatus[layerTreeUtils.stripPrefix(name)] = enable;
+        layersEnabledStatus[layerTreeUtils.stripPrefix(name)] = {
+            enabled: enable,
+            fullLayerKey: name
+        };
 
         let metaData = meta.getMetaData();
         for (let j = 0; j < metaData.data.length; j++) {

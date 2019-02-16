@@ -15,14 +15,12 @@ const createPage = async () => {
 
     await page._client.send('Network.enable');
 
-    await page.evaluate(`$('#search-border').trigger('click')`);
-    await helpers.sleep(500);
     await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
     await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
     await page.evaluate(`$('[data-gc2-layer-key="test.testpointfilters.the_geom"]').find('.js-toggle-filters').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
 
     return page;
 };
@@ -73,10 +71,11 @@ reactTriggerChange(target);`);
 
 const disablePredefinedFilters = async (page) => {
     // Turn off the predefined filter
-    await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').trigger('click')`);
+    await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"]').find('.js-predefined-filters').find('input').trigger('click')`);
     await helpers.sleep(2000);
+
     // Switch to arbitrary filters tab
-    await page.evaluate(`$($('[id="layer-settings-filters-test.testpointfilters"').find('.btn-group')[2]).find('button').trigger('click')`);
+    await page.evaluate(`$($('[id="layer-settings-filters-test.testpointfilters"]').find('.btn-group')[2]).find('button').trigger('click')`);
     await helpers.sleep(2000);
 }
 
@@ -98,14 +97,17 @@ describe('Layer tree filters', () => {
         });
 
         await disablePredefinedFilters(page);
+        await helpers.img(page);
+
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
 
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm"]').first().trigger('click')`));
         await setTextFilterValue(page, `decimalfield`, `=`, `1.4`, 1);
-
         expect(numberOfFilteredItems).to.equal(4);
 
-        await page.click(`[href="#state-snapshots-content"]`);   
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(1000);
 
         // Create state snapshot
@@ -125,27 +127,25 @@ describe('Layer tree filters', () => {
         // Checking if reset drops filters
         await page.click(`#btn-reset`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#search-border').trigger('click')`);
-        await helpers.sleep(500);
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
-        await helpers.sleep(500);
+        await helpers.sleep(2000);
         await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
-        await helpers.sleep(500);
+        await helpers.sleep(2000);
         await page.evaluate(`$('[data-gc2-id="test.testpointfilters"]').first().trigger('click')`);
         await helpers.sleep(2000);
+
 
         await disablePredefinedFilters(page);
 
         expect(numberOfFilteredItems).to.equal(7);
 
         // Restore snapshot
-        await page.evaluate(`$('#search-border').trigger('click')`);
-        await helpers.sleep(500);
         await page.click(`[href="#state-snapshots-content"]`);   
         await helpers.sleep(1000);
-
+        
         await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
+
         expect(numberOfFilteredItems).to.equal(4);
 
         await page.close();

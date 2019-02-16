@@ -7,7 +7,6 @@ const helpers = require("./../helpers");
 
 describe('Layer tree load strategy', () => {
     it(`should display controls only for vector layers`, async () => {
-
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT + 'v:public.dynamicloadtest,public.polygon');
         await page.emulate(helpers.EMULATED_SCREEN);
@@ -25,7 +24,7 @@ describe('Layer tree load strategy', () => {
         await page.close();
     });
 
-    it(`should change the opacity for vector layers using control and keep it after page reload`, async () => {
+    it(`should change the load strategy for vector layers using control and keep it after page reload`, async () => {
         let page = await browser.newPage();
         await page.goto(helpers.PAGE_URL_DEFAULT);
         await page.emulate(helpers.EMULATED_SCREEN);
