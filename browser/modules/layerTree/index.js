@@ -1136,9 +1136,6 @@ module.exports = {
             }
 
             // Checking if dynamic load is enabled for layer
-
-console.log(`### moduleState.dynamicLoad`, moduleState.dynamicLoad);
-
             if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
                 whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
             }

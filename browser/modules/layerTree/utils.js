@@ -59,51 +59,58 @@ const calculateOrder = () => {
     $(`[id^="layer-panel-"]`).each((index, element) => {
         let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
         let children = [];
+        let panelWasInitialized = true;
 
-        const processLayerRecord = (layerElement) => {
-            let layerKey = $(layerElement).data(`gc2-layer-key`);
-            let splitLayerKey = layerKey.split('.');
-            if (splitLayerKey.length !== 3) {
-                throw new Error(`Invalid layer key (${layerKey})`);
-            }
+        if ($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().length > 0) {
+            const processLayerRecord = (layerElement) => {
+                let layerKey = $(layerElement).data(`gc2-layer-key`);
+                let splitLayerKey = layerKey.split('.');
+                if (splitLayerKey.length !== 3) {
+                    throw new Error(`Invalid layer key (${layerKey})`);
+                }
 
-            return {
-                id: `${splitLayerKey[0]}.${splitLayerKey[1]}`,
-                type: GROUP_CHILD_TYPE_LAYER
-            };
-        };
-
-        $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
-            if ($(layerElement).data(`gc2-layer-key`)) {
-                // Processing layer record
-                children.push(processLayerRecord(layerElement));
-            } else if ($(layerElement).data(`gc2-subgroup-id`)) {
-                // Processing subgroup record
-                let subgroupDescription = {
-                    id: $(layerElement).data(`gc2-subgroup-id`),
-                    type: GROUP_CHILD_TYPE_GROUP,
-                    children: []
+                return {
+                    id: `${splitLayerKey[0]}.${splitLayerKey[1]}`,
+                    type: GROUP_CHILD_TYPE_LAYER
                 };
+            };
 
-                $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
-                    subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
-                });
+            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+                if ($(layerElement).data(`gc2-layer-key`)) {
+                    // Processing layer record
+                    children.push(processLayerRecord(layerElement));
+                } else if ($(layerElement).data(`gc2-subgroup-id`)) {
+                    // Processing subgroup record
+                    let subgroupDescription = {
+                        id: $(layerElement).data(`gc2-subgroup-id`),
+                        type: GROUP_CHILD_TYPE_GROUP,
+                        children: []
+                    };
 
-                children.push(subgroupDescription);
-            } else {
-                throw new Error(`Unable to detect the group child element`);
-            }
-        });
+                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
+                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
+                    });
+
+                    children.push(subgroupDescription);
+                } else {
+                    throw new Error(`Unable to detect the group child element`);
+                }
+            });
+        } else {
+            panelWasInitialized = false;
+        }
 
         let readableId = atob(id);
         if (readableId) {
-            layerTreeOrder.push({id: readableId, children});
+            layerTreeOrder.push({
+                id: readableId,
+                children,
+                panelWasInitialized
+            });
         } else {
             throw new Error(`Unable to decode the layer group identifier (${id})`);
         }
     });
-
-    console.log(`### layerTreeOrder`, layerTreeOrder);
 
     return layerTreeOrder;
 };
