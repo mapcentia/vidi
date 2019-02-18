@@ -103,6 +103,8 @@ const calculateOrder = () => {
         }
     });
 
+    console.log(`### layerTreeOrder`, layerTreeOrder);
+
     return layerTreeOrder;
 };
 

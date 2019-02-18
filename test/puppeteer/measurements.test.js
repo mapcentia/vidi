@@ -22,6 +22,8 @@ describe('Measurements', () => {
         expect(await page.evaluate(`$('.leaflet-draw-draw-polygon').is(':visible')`)).to.be.true;
     });
 
+    /*
+    // Embedded template now does not contain measurements module, so this test should be removed
     it('should allow measuring distance and area in embed template', async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_EMBEDDED}`);
@@ -48,4 +50,5 @@ describe('Measurements', () => {
 
         expect(await page.evaluate(`$('#measurements-module-cancel-btn').is(':visible')`)).to.be.false;
     });
+    */
 });

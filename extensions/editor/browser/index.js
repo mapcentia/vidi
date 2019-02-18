@@ -6,6 +6,8 @@
 
 'use strict';
 
+import { LAYER, SYSTEM_FIELD_PREFIX } from '../../../browser/modules/layerTree/constants';
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -127,7 +129,7 @@ module.exports = {
         }, function () {
             $(this).on("click", function (e) {
                 let isVectorLayer = false;
-                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
+                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === LAYER.VECTOR) {
                     isVectorLayer = true;
                 }
 
@@ -278,7 +280,7 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column && key.indexOf(layerTree.getSystemFieldPrefix()) !== 0) {
+            if (key !== pkey && key !== f_geometry_column && key.indexOf(SYSTEM_FIELD_PREFIX) !== 0) {
                 let title = key;
                 if (fieldConf[key] !== undefined && fieldConf[key].alias) {
                     title = fieldConf[key].alias;

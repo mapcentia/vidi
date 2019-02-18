@@ -228,12 +228,12 @@ describe('Layer tree common', () => {
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(1000);
 
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').length`)).to.equal(1);
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test"]').is(':checked')`)).to.be.true;
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').length`)).to.equal(1);
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.false;
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').length`)).to.equal(1);
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"][class="js-show-layer-control"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test"][class="js-show-layer-control"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"][class="js-show-layer-control"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"][class="js-show-layer-control"]').is(':checked')`)).to.be.false;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"][class="js-show-layer-control"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"][class="js-show-layer-control"]').is(':checked')`)).to.be.true;
 
         await page.close();
     });
@@ -247,6 +247,8 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
         await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#collapseRGFyIGVzIFNhbGFhbSBMYW5kIFVzZSBhbmQgSW5mb3JtYWwgU2V0dGxlbWVudCBEYXRhIFNldA"]').trigger('click')`);
+        await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').length`)).to.equal(1);
         expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').is(':checked')`)).to.be.true;
@@ -256,10 +258,10 @@ describe('Layer tree common', () => {
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.true;
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').length`)).to.equal(1);
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_point_no_type"]').is(':checked')`)).to.be.false;
-        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"]').length`)).to.equal(1);
-        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"]').is(':checked')`)).to.be.true;
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').length`)).to.equal(1);
-        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"][class="js-show-layer-control"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.urbanspatial_dar_es_salaam_luse_2002"][class="js-show-layer-control"]').is(':checked')`)).to.be.true;
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"][class="js-show-layer-control"]').length`)).to.equal(1);
+        expect(await page.evaluate(`$('input[data-gc2-id="public.test_poly"][class="js-show-layer-control"]').is(':checked')`)).to.be.true;
 
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
@@ -314,6 +316,8 @@ describe('Layer tree common', () => {
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
         await page._client.send('Network.enable');
 
         let apiWasRequested = false;
@@ -344,6 +348,8 @@ describe('Layer tree common', () => {
         page = await helpers.waitForPageToLoad(page);
 
         await page.click(`#burger-btn`);
+        await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
+        await helpers.sleep(1000);
         await page.evaluate(`$('[data-gc2-layer-key="public.test_poly.the_geom"]').find('.check').trigger('click')`);
         expect(tilesWereRequested).to.be.true;
 
