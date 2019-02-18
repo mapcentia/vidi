@@ -346,7 +346,7 @@ module.exports = {
                         hideOpacity();
                     }
 
-                    if (parsedMeta && !parsedMeta.single_tile) {
+                    if ((parsedMeta && !parsedMeta.single_tile) || (!parsedMeta && typeof parsedMeta.single_tile === "undefined")) {
                         hideFilters();
                     }
 
