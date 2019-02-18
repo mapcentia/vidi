@@ -101,7 +101,13 @@ class MarkupGenerator {
                 <div style="display: inline-block;">${layerTypeSelector}</div>
 
                 <div style="display: inline-block;">
-                    <span>${text}${lockedLayer} <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span></span>
+                    <span>
+                        ${text}${lockedLayer} 
+                        <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
+                    </span>
+                </div>
+
+                <div style="display: inline-block;">
                     <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
                         <i class="fa fa-plus"></i> <span class="js-value"></span>
                     </button>
@@ -125,7 +131,7 @@ class MarkupGenerator {
                     </button>
                 </div>
 
-                <div class="js-toggle-layer-offline-mode-container" style="display: inline-block;">
+                <div class="js-toggle-layer-offline-mode-container" style="display: none;">
                     <div class="btn-group" role="group">
                         <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
                             <i class="fa fa-signal"></i>
@@ -142,8 +148,8 @@ class MarkupGenerator {
                     </div>
                 </div>
 
-                <div style="display: inline-block;">
-                    <a href="javascript:void(0);" class="js-toggle-search">
+                <div class="js-toggles-container" style="display: none;">
+                    <a href="javascript:void(0);" class="js-toggle-search" >
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
                     </a>
                     <a href="javascript:void(0);" class="js-toggle-opacity">
@@ -159,6 +165,7 @@ class MarkupGenerator {
                         <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
                     </a><span class="js-toggle-filters-number-of-filters">0</span>
                 </div>
+
                 <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
                 
                 <i style="float: right; padding-top: 9px;" class="material-icons layer-move-vert">more_vert</i>
@@ -166,13 +173,12 @@ class MarkupGenerator {
                 <div style="float: right; padding-top: 7px; padding-right: 10px;">${addButton}
                     <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
-
             </div>
-            <div class="js-layer-settings-filters"></div>
-            <div class="js-layer-settings-load-strategy"></div>
-            <div class="js-layer-settings-opacity"></div>
-            <div class="js-layer-settings-search"></div>
-            <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}"></div>
+            <div class="js-layer-settings-filters" style="display: none;"></div>
+            <div class="js-layer-settings-load-strategy" style="display: none;"></div>
+            <div class="js-layer-settings-opacity" style="display: none;"></div>
+            <div class="js-layer-settings-search" style="display: none;"></div>
+            <div class="js-layer-settings-table" id="table_view-${layerKey.replace(".", "_")}" style="display: none;"></div>
             </div>
         </li>`);
     }

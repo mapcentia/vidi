@@ -249,10 +249,17 @@ module.exports = {
      * @param {Boolean} ignoreErrors     Specifies if errors should be ignored
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
+     * @param {Boolean} isVirtual        Specifies if layer is virtual
      */
-    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
+
+        try {
+        if (layerIsEnabled) {
+            _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
+        }
+    }catch(e){console.log(e)}
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if ($(container).is(`:visible`) || forced) {
@@ -280,7 +287,7 @@ module.exports = {
                 };
 
                 const hideOfflineMode = () => {
-                    $(container).find(`.js-toggle-layer-offline-mode-container`).hide(0);
+                    $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
                 };
 
                 const hideSearch = () => {
@@ -307,15 +314,16 @@ module.exports = {
                 }
 
                 if (desiredSetupType === LAYER.VECTOR) {
+                    hideOfflineMode();
                     hideOpacity();
 
                     // Toggles
-                    $(container).find(`.js-toggle-layer-offline-mode-container`).show(0);
                     $(container).find(`.js-toggle-filters`).show(0);
                     $(container).find(`.js-toggle-load-strategy`).show(0);
                     $(container).find('.gc2-add-feature').show(0);
 
                     if (layerIsEnabled) {
+                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                         $(container).find(`.js-toggle-table-view`).show(0);
                     } else {
                         $(container).find(`.js-toggle-table-view`).hide(0);
@@ -647,26 +655,9 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.getLayerTreeSettings().then(({order, offlineModeSettings, initialArbitraryFilters, initialDynamicLoad,
-                        initialVirtualLayers, initialPredefinedFilters, opacitySettings}) => {
+                    _self.applyStoredSettings(ignoredInitialStateKeys).then(({order, offlineModeSettings }) => {
 
                         try {
-
-                            if (moduleState.arbitraryFilters && ignoredInitialStateKeys.indexOf(`arbitraryFilters`) === -1) {
-                                moduleState.arbitraryFilters = initialArbitraryFilters;
-                            }
-
-                            if (initialPredefinedFilters && ignoredInitialStateKeys.indexOf(`predefinedFilters`) === -1) {
-                                moduleState.predefinedFilters = initialPredefinedFilters;
-                            }
-                            
-                            if (initialDynamicLoad && ignoredInitialStateKeys.indexOf(`dynamicLoad`) === -1) {
-                                moduleState.dynamicLoad = initialDynamicLoad;
-                            }
-
-                            if (initialVirtualLayers && ignoredInitialStateKeys.indexOf(`virtualLayers`) === -1) {
-                                moduleState.virtualLayers = initialVirtualLayers;
-                            }
 
                             if (order && layerSortingInstance.validateOrderObject(order) === false) {
                                 console.error(`Invalid order object`, order);
@@ -716,7 +707,7 @@ module.exports = {
                                     }
                                 }
 
-                                if (forcedState.opacitySettings) opacitySettings = forcedState.opacitySettings;
+                                if (forcedState.opacitySettings) moduleState.opacitySettings = forcedState.opacitySettings;
                                 if (forcedState.predefinedFilters) moduleState.predefinedFilters = forcedState.predefinedFilters;
                                 if (forcedState.arbitraryFilters) moduleState.arbitraryFilters = forcedState.arbitraryFilters;
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
@@ -769,7 +760,7 @@ module.exports = {
                                 // Filling up groups and underlying layers (except ungrouped ones)
                                 for (let i = 0; i < arr.length; ++i) {
                                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                        _self.createGroupRecord(arr[i], order, forcedState, opacitySettings, precheckedLayers);
+                                        _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
                                     }
                                 }
 
@@ -934,19 +925,30 @@ module.exports = {
     /**
      * Returns layers order in corresponding groups
      *
+     * @param {Array<String>} ignoredInitialStateKeys Settings that need to be ignored
+     * 
      * @returns {Promise}
      */
-    getLayerTreeSettings: () => {
+    applyStoredSettings: (ignoredInitialStateKeys) => {
         let result = new Promise((resolve, reject) => {
             state.getModuleState(MODULE_NAME).then(initialState => {
                 let order = ((initialState && `order` in initialState) ? initialState.order : false);
                 let offlineModeSettings = ((initialState && `layersOfflineMode` in initialState) ? initialState.layersOfflineMode : false);
-                let initialArbitraryFilters = ((initialState && `arbitraryFilters` in initialState && typeof initialState.arbitraryFilters === `object`) ? initialState.arbitraryFilters : {});
-                let initialPredefinedFilters = ((initialState && `predefinedFilters` in initialState && typeof initialState.predefinedFilters === `object`) ? initialState.predefinedFilters : {});
-                let initialVirtualLayers = ((initialState && `virtualLayers` in initialState && typeof initialState.virtualLayers === `object`) ? initialState.virtualLayers : []);
-                let opacitySettings = ((initialState && `opacitySettings` in initialState) ? initialState.opacitySettings : {});
-                let initialDynamicLoad = ((initialState && `dynamicLoad` in initialState) ? initialState.dynamicLoad : {});
-                resolve({order, offlineModeSettings, initialArbitraryFilters, initialPredefinedFilters, initialVirtualLayers, opacitySettings, initialDynamicLoad});
+
+                const applySetting = (key, defaultValue) => {
+                    let initialValue = ((initialState && key in initialState) ? initialState[key] : defaultValue);
+                    if (initialValue && ignoredInitialStateKeys.indexOf(key) === -1) {
+                        moduleState[key] = initialValue;
+                    }
+                };
+
+                applySetting(`arbitraryFilters`, {});
+                applySetting(`predefinedFilters`, {});
+                applySetting(`virtualLayers`, []);
+                applySetting(`opacitySettings`, {});
+                applySetting(`dynamicLoad`, {});
+
+                resolve({order, offlineModeSettings });
             });
         });
 
@@ -1468,7 +1470,7 @@ module.exports = {
      *
      * @returns {void}
      */
-    createGroupRecord: (groupName, order, forcedState, opacitySettings, precheckedLayers) => {
+    createGroupRecord: (groupName, order, forcedState, precheckedLayers) => {
         let isVirtualGroup = false;
         if (groupName === __(`Virtual layers`)) {
             if (moduleState.virtualLayers.length > 0) {
@@ -1612,9 +1614,9 @@ module.exports = {
         // Apply opacity to layers
         _self.getActiveLayers().map(item => {
             let layerKey = layerTreeUtils.stripPrefix(name);
-            if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {
-                if (opacitySettings[layerKey] >= 0 && opacitySettings[layerKey] <= 1) {
-                    let opacity = opacitySettings[layerKey];
+            if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
+                if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
+                    let opacity = moduleState.opacitySettings[layerKey];
                     layerTreeUtils.applyOpacityToLayer(opacity, layerKey, cloud, backboneEvents);
 
                     // Assuming that it is not possible to set layer opacity right now
@@ -1638,10 +1640,10 @@ module.exports = {
                             numberOfActiveLayers++;
                         }
 
-                        _self.createLayerRecord(localItem.layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
+                        _self.createLayerRecord(localItem.layer, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
                         numberOfAddedLayers++;
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, opacitySettings, precheckedLayers, base64GroupName)
+                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
                         numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                         numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
                     } else {
@@ -1741,7 +1743,7 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, opacitySettings, precheckedLayers, base64GroupName) => {
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
         let addedLayers = 0, activeLayers = 0;
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
@@ -1775,7 +1777,7 @@ module.exports = {
                 activeLayers++;
             }
 
-            _self.createLayerRecord(child, opacitySettings, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
+            _self.createLayerRecord(child, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
             addedLayers++;
         });
 
@@ -1796,12 +1798,13 @@ module.exports = {
      *
      * @returns {void}
      */
-    createLayerRecord: (layer, opacitySettings, base64GroupName, layerIsActive, activeLayerName,
+    createLayerRecord: (layer, base64GroupName, layerIsActive, activeLayerName,
         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
         if (layer.baselayer) {
+            console.error(`Non-supported way of adding the base layer`);
             $("#base-layer-list").append(`<div class='list-group-item'>
                 <div class='row-action-primary radio radio-primary base-layer-item' data-gc2-base-id='${layer.f_table_schema}.${layer.f_table_name}'>
                     <label class='baselayer-label'>
@@ -1810,7 +1813,7 @@ module.exports = {
                 </div>
             </div>`);
         } else {
-            let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, detectedTypes, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let { detectedTypes, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
             let singleTypeLayer = (detectedTypes === 1);
 
             let condition = layerTreeUtils.getDefaultLayerType(layer);
@@ -1865,6 +1868,7 @@ module.exports = {
                 layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, specifiers);
             }
 
+            // Add feature button
             let addButton = ``;
             if (moduleState.editingIsEnabled && layerIsEditable) {
                 addButton = markupGeneratorInstance.getAddButton(layerKeyWithGeom);
@@ -1873,46 +1877,30 @@ module.exports = {
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
                 layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
 
-            $(layerControlRecord).find('.js-layer-type-selector-tile').first().on('click', (e, data) => {
+            // Callback for selecting specific layer type to enable (layer type dropdown)
+            $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
+                let type = false;
+                let className = $(e.target).attr(`class`);
+                switch (className.replace(`js-layer-type-selector-`, ``)) {
+                    case `tile`: type = LAYER.RASTER_TILE; break;
+                    case `vector`: type = LAYER.VECTOR; break;
+                    case `vector-tile`: type = LAYER.VECTOR_TILE; break;
+                    default: throw new Error(`Invalid selector type`);
+                }
+
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', LAYER.RASTER_TILE);
+                $(switcher).data('gc2-layer-type', type);
                 $(switcher).prop('checked', true);
 
-                _self.setLayerState(LAYER.RASTER_TILE, layerKey);
-                _self.reloadLayer($(switcher).data('gc2-id'), false, (data ? data.doNotLegend : false));
+                let layerToReload = ((type === LAYER.RASTER_TILE ? `` : type + `:`) + $(switcher).data('gc2-id'));
+                _self.setLayerState(type, layerKey);
+                _self.reloadLayer(layerToReload, false, (data ? data.doNotLegend : false));
 
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.RASTER_TILE]);
+                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[type]);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 offlineModeControlsManager.updateControls();
             });
 
-            $(layerControlRecord).find('.js-layer-type-selector-vector').first().on('click', (e, data) => {
-                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', LAYER.VECTOR);
-                $(switcher).prop('checked', true);
-
-                _self.setLayerState(LAYER.VECTOR, layerKey);
-                _self.reloadLayer(`${LAYER.VECTOR}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
-
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR]);
-                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                offlineModeControlsManager.updateControls();
-            });
-
-            $(layerControlRecord).find('.js-layer-type-selector-vector-tile').first().on('click', (e, data) => {
-                let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
-                $(switcher).data('gc2-layer-type', LAYER.VECTOR_TILE);
-                $(switcher).prop('checked', true);
-
-                _self.setLayerState(LAYER.VECTOR_TILE, layerKey);
-                _self.reloadLayer(`${LAYER.VECTOR_TILE}:${$(switcher).data('gc2-id')}`, false, (data ? data.doNotLegend : false));
-
-                $(e.target).closest('.layer-item').find('.js-dropdown-label').html(ICONS[LAYER.VECTOR_TILE]);
-                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-                offlineModeControlsManager.updateControls();
-            });
-
-            try {
             if (isVirtual) {
                 $(layerControlRecord).find(`.js-toggle-filters`).remove();
                 $(layerControlRecord).find(`.js-toggle-load-strategy`).remove();
@@ -1966,298 +1954,336 @@ module.exports = {
                 $("#collapse" + base64GroupName).append(layerControlRecord);
             }
 
-            let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
-            $(layerContainer).find(`.js-set-online, .js-set-offline`).click(e => {
-                e.preventDefault();
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
+        }
+    },
 
-                var $this = $(e.currentTarget);
-                let layerKey = $this.data(`layer-key`);
-                let offlineModeValue = false;
-                let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
-                if ($this.hasClass(`js-set-offline`)) {
-                    offlineModeValue = true;
-                    serviceWorkerAPIKey = `enableOfflineModeForLayer`;
-                }
+    /**
+     * Renders widgets for the particular layer record in tree, shoud be called
+     * only when widgets are really needed (for example, when layer is activated)
+     * 
+     * @param {String}  defaultLayerType Default layer type
+     * @param {Object}  layer            Layer description
+     * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * 
+     * @returns {void}
+     */
+    _setupLayerWidgets: (defaultLayerType, layer, isVirtual) => {
+        if (!defaultLayerType || !layer) {
+            throw new Error(`Invalid parameters were provided`);
+        }
 
-                offlineModeControlsManager.setControlState(layerKey, offlineModeValue);
-                if (offlineModeControlsManager.isVectorLayer(layerKey)) {
-                    layerTreeUtils.queryServiceWorker({
-                        action: serviceWorkerAPIKey,
-                        payload: {layerKey}
-                    }).then(() => {
-                        _self._setupToggleOfflineModeControlsForLayers().then(() => {
+        let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+        let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+
+
+        console.log(`### _setupLayerWidgets`, defaultLayerType, layer);
+
+        
+        let parsedMeta = false;
+        if (layer.meta) {
+            parsedMeta = _self.parseLayerMeta(layer);
+        }
+
+        let { isVectorLayer, isRasterTileLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+        let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+        if ($(layerContainer).length === 1) {
+            if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
+
+
+                console.log(`### _setupLayerWidgets in progress`);
+
+
+                $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
+                $(layerContainer).find(`.js-toggles-container`).css(`display`, `inline-block`);
+
+                $(layerContainer).find(`.js-set-online, .js-set-offline`).click(e => {
+                    e.preventDefault();
+
+                    var $this = $(e.currentTarget);
+                    let layerKey = $this.data(`layer-key`);
+                    let offlineModeValue = false;
+                    let serviceWorkerAPIKey = `disableOfflineModeForLayer`;
+                    if ($this.hasClass(`js-set-offline`)) {
+                        offlineModeValue = true;
+                        serviceWorkerAPIKey = `enableOfflineModeForLayer`;
+                    }
+
+                    offlineModeControlsManager.setControlState(layerKey, offlineModeValue);
+                    if (offlineModeControlsManager.isVectorLayer(layerKey)) {
+                        layerTreeUtils.queryServiceWorker({
+                            action: serviceWorkerAPIKey,
+                            payload: {layerKey}
+                        }).then(() => {
+                            _self._setupToggleOfflineModeControlsForLayers().then(() => {
+                                backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
+                            });
+                        });
+                    } else {
+                        offlineModeControlsManager.updateControls().then(() => {
                             backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
                         });
-                    });
-                } else {
-                    offlineModeControlsManager.updateControls().then(() => {
-                        backboneEvents.get().trigger(`${MODULE_NAME}:layersOfflineModeChange`);
-                    });
-                }
-            });
+                    }
+                });
 
-            $(layerContainer).find(`.js-refresh`).click(e => {
-                e.preventDefault();
+                $(layerContainer).find(`.js-refresh`).click(e => {
+                    e.preventDefault();
 
-                let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
-                if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
-                    layerTreeUtils.queryServiceWorker({
-                        action: `disableOfflineModeForLayer`,
-                        payload: {layerKey}
-                    }).then(() => {
-                        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey).then(() => {
-                            layerTreeUtils.queryServiceWorker({
-                                action: `enableOfflineModeForLayer`,
-                                payload: {layerKey}
-                            }).then(() => {
-                                _self._setupToggleOfflineModeControlsForLayers()
+                    let layerKey = $(layerContainer).find(`.js-refresh`).data(`layer-key`);
+                    if (confirm(__(`Refresh cache for layer`) + ` ${layerKey}?`)) {
+                        layerTreeUtils.queryServiceWorker({
+                            action: `disableOfflineModeForLayer`,
+                            payload: {layerKey}
+                        }).then(() => {
+                            _self.reloadLayer(LAYER.VECTOR + ':' + layerKey).then(() => {
+                                layerTreeUtils.queryServiceWorker({
+                                    action: `enableOfflineModeForLayer`,
+                                    payload: {layerKey}
+                                }).then(() => {
+                                    _self._setupToggleOfflineModeControlsForLayers()
+                                });
                             });
                         });
-                    });
-                }
-            });
-
-            $(layerContainer).find('.js-layer-settings-filters').hide(0);
-            $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-            $(layerContainer).find('.js-layer-settings-opacity').hide(0);
-            $(layerContainer).find('.js-layer-settings-table').hide(0);
-
-            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
-
-            let initialSliderValue = 1;
-            if (isRasterTileLayer || isVectorTileLayer) {
-                // Opacity slider
-                $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
-                    <div class="js-opacity-slider slider shor slider-material-orange"></div>
-                </div>`);
-
-                if (layerKey in opacitySettings && isNaN(opacitySettings[layerKey]) === false) {
-                    if (opacitySettings[layerKey] >= 0 && opacitySettings[layerKey] <= 1) {
-                        initialSliderValue = opacitySettings[layerKey];
                     }
-                }
-
-                let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
-                if (slider) {
-                    noUiSlider.create(slider, {
-                        start: (initialSliderValue * 100),
-                        connect: `lower`,
-                        step: 10,
-                        range: {
-                            'min': 0,
-                            'max': 100
-                        }
-                    });
-
-                    slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
-                        let sliderValue = (parseFloat(values[handle]) / 100);
-                        layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
-                        moduleState.setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
-                    });
-                }
-
-                $(layerContainer).find(`.js-toggle-opacity`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
-                    $(layerContainer).find('.js-layer-settings-opacity').toggle();
                 });
-            }
 
-            if (isVirtual === false) {
-                let componentContainerId = `layer-settings-filters-${layerKey}`;
-                $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                let localArbitraryfilters = {};
-                if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
-                    localArbitraryfilters = moduleState.arbitraryFilters[layerKey];
-                }
+                let initialSliderValue = 1;
+                if (isRasterTileLayer || isVectorTileLayer) {
+                    // Opacity slider
+                    $(layerContainer).find('.js-layer-settings-opacity').append(`<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px; padding-top: 10px;">
+                        <div class="js-opacity-slider slider shor slider-material-orange"></div>
+                    </div>`);
 
-                let localPredefinedFilters = {};
-                if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
-                    || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
-                    if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
-                        moduleState.predefinedFiltersWarningFired = true;
-                        console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                    if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
+                        if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
+                            initialSliderValue = moduleState.opacitySettings[layerKey];
+                        }
                     }
 
-                    let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
-                    try {
-                        let filters = JSON.parse(predefinedFiltersRaw);
-                        localPredefinedFilters = filters;
-                    } catch (e) {
-                        console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
-                        $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                    let slider = $(layerContainer).find('.js-layer-settings-opacity').find(`.js-opacity-slider`).get(0);
+                    if (slider) {
+                        noUiSlider.create(slider, {
+                            start: (initialSliderValue * 100),
+                            connect: `lower`,
+                            step: 10,
+                            range: {
+                                'min': 0,
+                                'max': 100
+                            }
+                        });
+
+                        slider.noUiSlider.on(`update`, (values, handle, unencoded, tap, positions) => {
+                            let sliderValue = (parseFloat(values[handle]) / 100);
+                            layerTreeUtils.applyOpacityToLayer(sliderValue, layerKey, cloud, backboneEvents);
+                            moduleState.setLayerOpacityRequests.push({layerKey, opacity: sliderValue});
+                        });
                     }
-                }
 
-                let activeFilters = _self.getActiveLayerFilters(layerKey);
-                $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-                if (document.getElementById(componentContainerId)) {
-                    ReactDOM.render(
-                        <LayerFilter
-                            layer={layer}
-                            predefinedFilters={localPredefinedFilters}
-                            disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
-                            arbitraryFilters={localArbitraryfilters}
-                            onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
-                            onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
-                            />, document.getElementById(componentContainerId));
-                    $(layerContainer).find('.js-layer-settings-filters').hide(0);
-
-                    $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                        _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
-                        $(layerContainer).find('.js-layer-settings-filters').toggle();
+                    $(layerContainer).find(`.js-toggle-opacity`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-opacity'));
+                        $(layerContainer).find('.js-layer-settings-opacity').toggle();
                     });
                 }
-            }
 
-            if (isVectorLayer) {
                 if (isVirtual === false) {
-                    let value = false;
-                    if (layerKey in moduleState.dynamicLoad && [true, false].indexOf(moduleState.dynamicLoad[layerKey]) !== -1) {
-                        value = moduleState.dynamicLoad[layerKey];
+                    let componentContainerId = `layer-settings-filters-${layerKey}`;
+                    $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    let localArbitraryfilters = {};
+                    if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
+                        localArbitraryfilters = moduleState.arbitraryFilters[layerKey];
                     }
 
-                    let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
-                    $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                    let localPredefinedFilters = {};
+                    if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
+                        || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                        if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
+                            moduleState.predefinedFiltersWarningFired = true;
+                            console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                        }
+
+                        let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
+                        try {
+                            let filters = JSON.parse(predefinedFiltersRaw);
+                            localPredefinedFilters = filters;
+                        } catch (e) {
+                            console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                            $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                        }
+                    }
+
+                    let activeFilters = _self.getActiveLayerFilters(layerKey);
+                    $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(<LoadStrategyToggle
-                            layerKey={layerKey}
-                            initialValue={value}
-                            onChange={_self.onChangeLoadStrategyHandler}/>,
-                            document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                        $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                            $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                        ReactDOM.render(
+                            <LayerFilter
+                                layer={layer}
+                                predefinedFilters={localPredefinedFilters}
+                                disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
+                                arbitraryFilters={localArbitraryfilters}
+                                onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
+                                onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                />, document.getElementById(componentContainerId));
+                        $(layerContainer).find('.js-layer-settings-filters').hide(0);
+
+                        $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                            _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
+                            $(layerContainer).find('.js-layer-settings-filters').toggle();
                         });
                     }
                 }
 
-                // Table view
-                $(layerContainer).find(`.js-toggle-table-view`).click(() => {
-                    _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
-                    $(layerContainer).find('.js-layer-settings-table').toggle();
+                if (isVectorLayer) {
+                    if (isVirtual === false) {
+                        let value = false;
+                        if (layerKey in moduleState.dynamicLoad && [true, false].indexOf(moduleState.dynamicLoad[layerKey]) !== -1) {
+                            value = moduleState.dynamicLoad[layerKey];
+                        }
 
-                    let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                    if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
-
-                    // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
-                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-
-                    tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
-                });
-
-                _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
-            }
-
-            $(layerContainer).find(`.js-toggle-search`).click(() => {
-                _self._selectIcon($(layerContainer).find('.js-toggle-search'));
-                $(layerContainer).find('.js-layer-settings-search').toggle();
-            });
-
-            // PostgreSQL search is for all types of layers
-            $(layerContainer).find('.js-layer-settings-search').append(
-                `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
-                    <div>
-                        <form class="form" onsubmit="return false">
-                            <div class="form-group">
-                                <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
-                            </div>
-		                    <div class="form-inline">
-                                <div class="form-group">
-                                    <label>${__("Method")}</label>
-                                    <select class="form-control js-search-method">
-                                      <option value="like">${__("Like")}</option>
-                                      <option value="tsvector">${__("Tsvector")}</option>                                      
-                                      <option value="similarity">${__("Similarity")}</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>${__("Similarity")}</label>
-                                    <select class="form-control js-search-similarity">
-                                      <option value="1">100 %</option>
-                                      <option value="0.9">90 %</option>
-                                      <option value="0.8" selected>80 %</option>
-                                      <option value="0.7">70 %</option>
-                                      <option value="0.6">60 %</option>
-                                      <option value="0.5">50 %</option>
-                                      <option value="0.4">40 %</option>
-                                      <option value="0.3">30 %</option>
-                                      <option value="0.2">20 %</option>
-                                      <option value="0.1">10 %</option>
-                                    </select>
-                                </div>
-		                    </div>
-		                    <div class="alert alert-warning no-searchable-fields" style="display: none;">
-                                ${__("No searchable fields on layer")}
-                            </div>
-                            <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
-                        </form>
-                    </div>
-                 </div>`
-            );
-
-            let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
-            if (search) {
-                let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
-                $.each(fieldConf, function (i, val) {
-                    if (typeof val.searchable === "boolean" && val.searchable === true) {
-                        countSearchFields.push(i);
+                        let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
+                        $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(<LoadStrategyToggle
+                                layerKey={layerKey}
+                                initialValue={value}
+                                onChange={_self.onChangeLoadStrategyHandler}/>,
+                                document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                            $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                                _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                                $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                            });
+                        }
                     }
-                });
 
-                if (countSearchFields.length === 0) {
-                    $(search).find('input, textarea, button, select').attr('disabled', 'true');
-                    $(search).find('.no-searchable-fields').show();
-                } else {
-                    $(search).find('.searchable-fields').show();
-                    $.each(countSearchFields, function (i, val) {
-                        $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
+                    // Table view
+                    $(layerContainer).find(`.js-toggle-table-view`).click(() => {
+                        _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                        $(layerContainer).find('.js-layer-settings-table').toggle();
+
+                        let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                        if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
+
+                        // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
+                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+
+                        tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                     });
+
+                    // @todo Test
+                    //_self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
                 }
 
-                $(search).on('change', (e) => {
-                    let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
+                $(layerContainer).find(`.js-toggle-search`).click(() => {
+                    _self._selectIcon($(layerContainer).find('.js-toggle-search'));
+                    $(layerContainer).find('.js-layer-settings-search').toggle();
+                });
+
+                // PostgreSQL search is for all types of layers
+                $(layerContainer).find('.js-layer-settings-search').append(
+                    `<div style="padding-left: 15px; padding-right: 10px; padding-bottom: 20px; padding-top: 20px;">
+                        <div>
+                            <form class="form" onsubmit="return false">
+                                <div class="form-group">
+                                    <input type="test" class="js-search-input form-control" placeholder="${__("Search")}">
+                                </div>
+                                <div class="form-inline">
+                                    <div class="form-group">
+                                        <label>${__("Method")}</label>
+                                        <select class="form-control js-search-method">
+                                        <option value="like">${__("Like")}</option>
+                                        <option value="tsvector">${__("Tsvector")}</option>                                      
+                                        <option value="similarity">${__("Similarity")}</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>${__("Similarity")}</label>
+                                        <select class="form-control js-search-similarity">
+                                        <option value="1">100 %</option>
+                                        <option value="0.9">90 %</option>
+                                        <option value="0.8" selected>80 %</option>
+                                        <option value="0.7">70 %</option>
+                                        <option value="0.6">60 %</option>
+                                        <option value="0.5">50 %</option>
+                                        <option value="0.4">40 %</option>
+                                        <option value="0.3">30 %</option>
+                                        <option value="0.2">20 %</option>
+                                        <option value="0.1">10 %</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning no-searchable-fields" style="display: none;">
+                                    ${__("No searchable fields on layer")}
+                                </div>
+                                <div class="searchable-fields" style="display: none;">${__("Searchable fields")} </div>
+                            </form>
+                        </div>
+                    </div>`
+                );
+
+                let search = $(layerContainer).find('.js-layer-settings-search').find(`form`).get(0);
+                if (search) {
+                    let fieldConf = JSON.parse(layer.fieldconf) || {}, countSearchFields = [];
                     $.each(fieldConf, function (i, val) {
                         if (typeof val.searchable === "boolean" && val.searchable === true) {
-                            searchFields.push(i);
+                            countSearchFields.push(i);
                         }
                     });
-                    let searchStr = $(e.target).closest('form').find('.js-search-input').get(0).value,
-                        method = $(e.target).closest('form').find('.js-search-method').get(0).value,
-                        similarity = $(e.target).closest('form').find('.js-search-similarity').get(0).value;
-                    if (method !== "similarity") {
-                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", true)
+
+                    if (countSearchFields.length === 0) {
+                        $(search).find('input, textarea, button, select').attr('disabled', 'true');
+                        $(search).find('.no-searchable-fields').show();
                     } else {
-                        $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", false)
-                    }
-                    switch (method) {
-                        case "similarity":
-                            $.each(searchFields, function (i, val) {
-                                whereClauses.push(`similarity(${val}::TEXT, '${searchStr}'::TEXT) >= ${similarity}`);
-                            });
-                            break;
-                        case "like":
-                            $.each(searchFields, function (i, val) {
-                                whereClauses.push(`${val}::TEXT ILIKE '%${searchStr}%'::TEXT`);
-                            });
-                            break;
-                        case "tsvector":
-                            $.each(searchFields, function (i, val) {
-                                whereClauses.push(`to_tsvector('danish', ${val}::TEXT) @@ to_tsquery('danish', '${searchStr}'::TEXT)`);
-                            });
-                            break;
+                        $(search).find('.searchable-fields').show();
+                        $.each(countSearchFields, function (i, val) {
+                            $(search).find('.searchable-fields').append(`<span class="label label-default" style="margin-right: 3px">${fieldConf[val].alias || val}</span>`)
+                        });
                     }
 
-                    if (searchStr !== "") {
-                        let whereClause = whereClauses.join(" OR ");
-                        backboneEvents.get().trigger("sqlQuery:clear");
-                        sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`], true);
-                    }
-                });
+                    $(search).on('change', (e) => {
+                        let fieldConf = JSON.parse(layer.fieldconf) || {}, searchFields = [], whereClauses = [];
+                        $.each(fieldConf, function (i, val) {
+                            if (typeof val.searchable === "boolean" && val.searchable === true) {
+                                searchFields.push(i);
+                            }
+                        });
+                        let searchStr = $(e.target).closest('form').find('.js-search-input').get(0).value,
+                            method = $(e.target).closest('form').find('.js-search-method').get(0).value,
+                            similarity = $(e.target).closest('form').find('.js-search-similarity').get(0).value;
+                        if (method !== "similarity") {
+                            $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", true)
+                        } else {
+                            $($(e.target).closest('form').find('.js-search-similarity').get(0)).prop("disabled", false)
+                        }
+                        switch (method) {
+                            case "similarity":
+                                $.each(searchFields, function (i, val) {
+                                    whereClauses.push(`similarity(${val}::TEXT, '${searchStr}'::TEXT) >= ${similarity}`);
+                                });
+                                break;
+                            case "like":
+                                $.each(searchFields, function (i, val) {
+                                    whereClauses.push(`${val}::TEXT ILIKE '%${searchStr}%'::TEXT`);
+                                });
+                                break;
+                            case "tsvector":
+                                $.each(searchFields, function (i, val) {
+                                    whereClauses.push(`to_tsvector('danish', ${val}::TEXT) @@ to_tsquery('danish', '${searchStr}'::TEXT)`);
+                                });
+                                break;
+                        }
+
+                        if (searchStr !== "") {
+                            let whereClause = whereClauses.join(" OR ");
+                            backboneEvents.get().trigger("sqlQuery:clear");
+                            sqlQuery.init(qstore, null, "3857", null, null, null, whereClause, [`${layer.f_table_schema}.${layer.f_table_name}`], true);
+                        }
+                    });
+                }
+
+                $(layerContainer).attr(`data-widgets-were-initialized`, `true`);
             }
-
-
-        }catch(e) {console.log(e)}
+        } else {
+            throw new Error(`Unable to find the layer container`);
         }
     },
 
