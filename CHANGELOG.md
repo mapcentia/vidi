@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+
+## [2019.1.0.rc1] - 2019-14-02
 ### Added
 - Fall back mechanism for base layers. If the current base layer responses with error codes the next one is switched no.
 - Touch drag enabled in layer tree.
@@ -12,8 +14,13 @@ and this project adheres to [CalVer](https://calver.org/).
 - Visual grouping of map tools in GUI.
 - Support of Mapbox Vector Tiles (MVT). 
 - Cross hair cursor when info click is on.
+- When drawing or editing with the Editor module, snapping to other vector layers is added.
+- Unify filter methods for vector and tile layers.
+- After a query with the sqlQuery module is made, its now possible to store the query as a new "virtual" layer. The new layer is a vector layer, which acts like any other vector layer.
 
 ### Changed
+- State shots are now stored in GC2 database using the new keyvalue API.
+- Protected WMS layers requests result in `401` being routed through the WMS backend. A authentication is implemented in order to request protected WMS layers correctly.
 - One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
 - Google API files are no longer requested locally, because things break when Google makes updates. The files are requested remotely and are not cached in Service Workers due to CORS issues. The Google API doesn't work offline anyway. Google API must be set in GC2 config (App.php) with the kay ``
 ```javascript
