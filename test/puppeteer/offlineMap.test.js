@@ -13,7 +13,7 @@ describe("OfflineMap", () => {
         }
 
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL_EMBEDDED.replace('public/#osm/13/', 'public/#osm/17/'));
+        await page.goto(helpers.PAGE_URL_DEFAULT.replace('public/#osm/13/', 'public/#osm/17/'));
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -51,11 +51,11 @@ describe("OfflineMap", () => {
         await helpers.sleep(5000);
 
         // Open and fill the form
-        await page.click(`#offline-map-btn`);
+        await page.click(`[href="#offline-map-form-content"]`);
         await helpers.sleep(2000);
         await page.evaluate(`$('[href="#collapseOfflineMap1"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$($('#offline-map-dialog').find('.btn-primary')[0]).trigger('click')`);
+        await page.evaluate(`$($('[id="offline-map-form-content"]').find('.btn-primary')[0]).trigger('click')`);
         await helpers.sleep(1000);
         await page.focus('#offline-map-comment');
         await page.keyboard.type('Test offline map');
@@ -88,26 +88,26 @@ describe("OfflineMap", () => {
         await helpers.sleep(1000);
 
         // Should change minimum zoom level according to latest map zoom change
-        await page.click('#zoom-out-btn');
+        await page.click('[title="Zoom out"]');
         await helpers.sleep(1000);
-        await page.click('#zoom-out-btn');
+        await page.click('[title="Zoom out"]');
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#offline-map-zoom_min').val()`)).to.equal('15');
 
-        await page.click('#zoom-in-btn');
+        await page.click('[title="Zoom in"]');
         await helpers.sleep(1000);
-        await page.click('#zoom-in-btn');
+        await page.click('[title="Zoom in"]');
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#offline-map-zoom_min').val()`)).to.equal('17');
 
         // Save map
-        await page.evaluate(`$($('#offline-map-dialog').find('.btn-primary')[2]).trigger('click')`);
+        await page.evaluate(`$($('[id="offline-map-form-content"]').find('.btn-primary')[2]).trigger('click')`);
         await helpers.sleep(10000);
 
         // Check if all tiles were saved
-        let result = await page.evaluate(`$('#offline-map-dialog').find('h4').text()`);
+        let result = await page.evaluate(`$('[id="offline-map-form-content"]').find('h4').text()`);
         expect(result.indexOf(`Done`) !== -1).to.be.true;
 
         // Check if newly saved map is displayed
@@ -126,12 +126,12 @@ describe("OfflineMap", () => {
 
         // Checking if map is truly stored across all tabs
         let newPage = await browser.newPage();
-        await newPage.goto(helpers.PAGE_URL_EMBEDDED.replace('public/#osm/13/', 'public/#osm/17/'));
+        await newPage.goto(helpers.PAGE_URL_DEFAULT.replace('public/#osm/13/', 'public/#osm/17/'));
         await newPage.emulate(helpers.EMULATED_SCREEN);
         newPage = await helpers.waitForPageToLoad(newPage);
 
         // Check if previously saved map is restored
-        await newPage.click(`#offline-map-btn`);
+        //await newPage.click(`#offline-map-btn`);
         await helpers.sleep(2000);
         expect(await newPage.evaluate(`$('#collapseOfflineMap2').find('td').length`)).to.equal(3);
         expect(await newPage.evaluate(`$($('#collapseOfflineMap2').find('td')[1]).text()`)).to.equal(`Test offline map`);
