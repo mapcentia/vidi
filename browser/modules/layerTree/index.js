@@ -295,7 +295,7 @@ module.exports = {
                 };
 
                 const hideAddFeature = () => {
-                    $(container).find('.gc2-add-feature').hide(0);
+                    $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
                 };
 
                 const getLayerSwitchControl = () => {
@@ -315,13 +315,14 @@ module.exports = {
                 if (desiredSetupType === LAYER.VECTOR) {
                     hideOfflineMode();
                     hideOpacity();
-
-                    // Toggles
-                    $(container).find(`.js-toggle-filters`).show(0);
-                    $(container).find(`.js-toggle-load-strategy`).show(0);
-                    $(container).find('.gc2-add-feature').show(0);
+                    hideLoadStrategy();
+                    hideFilters();
+                    hideAddFeature();
 
                     if (layerIsEnabled) {
+                        $(container).find(`.js-toggle-filters`).show(0);
+                        $(container).find(`.js-toggle-load-strategy`).show(0);
+                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                         $(container).find(`.js-toggle-table-view`).show(0);
                     } else {
@@ -329,7 +330,7 @@ module.exports = {
                         $(container).find('.js-layer-settings-filters').hide(0);
                         $(container).find('.js-layer-settings-load-strategy').hide(0);
                         $(container).find('.js-layer-settings-table').hide(0);
-                    } 
+                    }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                     hideOfflineMode();
                     hideTableView();
@@ -1573,14 +1574,14 @@ module.exports = {
             }
         }
 
-        let layersTocheckOpacity = _self.getActiveLayers();
+        let layersToCheckOpacity = _self.getActiveLayers();
         layersToProcess.map(layer => {
             let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
 
             if (layerIsActive) {
                 localNumberOfActiveLayers++;
-                layersTocheckOpacity.push(layerKey);
+                layersToCheckOpacity.push(layerKey);
             }
 
             localNumberOfAddedLayers++;
@@ -1614,7 +1615,7 @@ module.exports = {
         });
 
         // Apply opacity to layers
-        layersTocheckOpacity.map(item => {
+        layersToCheckOpacity.map(item => {
             let layerKey = layerTreeUtils.stripPrefix(item);
             if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                 if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
@@ -1682,9 +1683,18 @@ module.exports = {
                 setAllControlsProcessors(`online`);
                 setAllControlsProcessors(`offline`);
 
+
+
+
+
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-                    if (moduleState.setLayerStateRequests[layerKey]) {
+
+
+
+                    let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+
+                    if (layerIsActive && moduleState.setLayerStateRequests[layerKey]) {
                         let settings = moduleState.setLayerStateRequests[layerKey];
                         _self.setLayerState(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
@@ -1977,7 +1987,7 @@ module.exports = {
 
         let layerKey = layer.f_table_schema + "." + layer.f_table_name;
         let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-        
+
         let parsedMeta = false;
         if (layer.meta) {
             parsedMeta = _self.parseLayerMeta(layer);

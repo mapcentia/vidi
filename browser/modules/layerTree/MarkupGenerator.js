@@ -19,7 +19,7 @@ class MarkupGenerator {
     }
 
     getAddButton(layerKeyWithGeom) {
-        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle}" 
+        return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;" 
             data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
             <i class="fa fa-plus"></i>
         </button>`);
