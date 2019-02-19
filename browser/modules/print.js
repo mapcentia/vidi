@@ -427,7 +427,10 @@ module.exports = {
 
             recEdit.editing.enable();
             state.getState().then(applicationState => {
+                let anchorRaw = anchor.getAnchor();
+                anchorRaw = anchorRaw.substr(0, anchorRaw.lastIndexOf(`/`));
                 let data = {
+                    anchor: anchorRaw,
                     applicationHost: window.location.origin,
                     db: db,
                     schema: schema,
@@ -436,7 +439,6 @@ module.exports = {
                     queryBuffer: (typeof  layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
                     queryResult: (typeof  layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
                     print: (typeof  layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-                    anchor: anchor.getAnchor(),
                     bounds: recScale.getBounds(),
                     scale: scale,
                     tmpl: tmpl,

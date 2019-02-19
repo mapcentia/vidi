@@ -765,11 +765,6 @@ module.exports = {
                                 }
 
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
-
-
-                                    // @todo Needs refactoring, turning on layers by triggering a click is bad
-
-
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
                                         stop: (event, ui) => {
@@ -870,11 +865,6 @@ module.exports = {
                                     }, 1000);
                                 });
                             }
-
-
-
-
-
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
