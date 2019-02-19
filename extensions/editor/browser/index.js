@@ -163,11 +163,6 @@ module.exports = {
             });
         });
 
-        // Listen to arrival of edit-tools
-        $(document).arrive('.gc2-edit-tools', function () {
-            $(this).css("visibility", "visible");
-        });
-
         backboneEvents.get().on("ready:meta", function () {
             _self.setHandlersForVectorLayers();
         });
