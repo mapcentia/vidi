@@ -255,11 +255,9 @@ module.exports = {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
-        try {
         if (layerIsEnabled) {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
-    }catch(e){console.log(e)}
 
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
@@ -433,11 +431,6 @@ module.exports = {
      */
     getState: () => {
         let activeLayers = _self.getActiveLayers();
-
-
-        console.log(`### activeLayers`, activeLayers);
-
-
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
 
         let opacitySettings = {};
@@ -470,11 +463,6 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
-
-
-console.log(`### applyState`, JSON.stringify(newState));
-
-
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -1999,11 +1987,6 @@ console.log(`### applyState`, JSON.stringify(newState));
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
-
-
-                console.log(`### _setupLayerWidgets in progress`);
-
-
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                 $(layerContainer).find(`.js-toggles-container`).css(`display`, `inline-block`);
 
