@@ -228,7 +228,7 @@ module.exports = {
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
-                modules.state.listenAny(`extensions:initialized`);
+                modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
 
                 try {
 
