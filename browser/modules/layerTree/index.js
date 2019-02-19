@@ -265,8 +265,7 @@ module.exports = {
                 let parsedMeta = meta.parseLayerMeta(layerKey);
 
                 const hideFilters = () => {
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
+                    $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                 };
 
@@ -313,35 +312,41 @@ module.exports = {
                 }
 
                 if (desiredSetupType === LAYER.VECTOR) {
-                    hideOfflineMode();
-                    hideOpacity();
-                    hideLoadStrategy();
-                    hideFilters();
-                    hideAddFeature();
+                    // Load strategy and filters should be kept opened after setLayerState()
+                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                        hideOpacity();
+                    }
 
                     if (layerIsEnabled) {
-                        $(container).find(`.js-toggle-filters`).show(0);
-                        $(container).find(`.js-toggle-load-strategy`).show(0);
                         $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
+                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
+                        $(container).find(`.js-toggle-load-strategy`).show(0);
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                         $(container).find(`.js-toggle-table-view`).show(0);
                     } else {
-                        $(container).find(`.js-toggle-table-view`).hide(0);
-                        $(container).find('.js-layer-settings-filters').hide(0);
-                        $(container).find('.js-layer-settings-load-strategy').hide(0);
-                        $(container).find('.js-layer-settings-table').hide(0);
+                        hideAddFeature();
+                        hideFilters();                   
+                        hideOfflineMode();                   
+                        hideLoadStrategy();
+                        hideTableView();
                     }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                    hideOfflineMode();
-                    hideTableView();
-                    hideLoadStrategy();
-                    hideAddFeature();
+                    // Opacity and filters should be kept opened after setLayerState()
+                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                        hideLoadStrategy();
+                        hideOfflineMode();
+                        hideTableView();
+                    }
 
                     if (layerIsEnabled) {
+                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
                         $(container).find(`.js-toggle-opacity`).show(0);
                         $(container).find(`.js-toggle-filters`).show(0);
                         $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                     } else {
+                        hideAddFeature();
                         hideFilters();
                         hideOpacity();
                     }
@@ -370,6 +375,8 @@ module.exports = {
                     // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                 }
+
+                $(container).attr(`data-last-layer-type`, desiredSetupType);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -1673,14 +1680,8 @@ module.exports = {
                 setAllControlsProcessors(`online`);
                 setAllControlsProcessors(`offline`);
 
-
-
-
-
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-
-
 
                     let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
 
