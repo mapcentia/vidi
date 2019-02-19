@@ -41,10 +41,10 @@ var callBack= () => {};
  */
 var _cleanUp = function (hard) {
     try {
-        cloud.get().map.removeLayer(recScale);
-        cloud.get().map.removeLayer(recEdit);
-    } catch (e) {
-    }
+        if (recScale) cloud.get().map.removeLayer(recScale);
+        if (recEdit) cloud.get().map.removeLayer(recEdit);
+    } catch (e) {}
+
     printOn = false;
     if (hard) {
         center = null;

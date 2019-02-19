@@ -56,7 +56,6 @@ describe("State snapshots", () => {
         await page.type(`.js-browser-owned input[placeholder="New title"]`, snapshotTitle);
         await helpers.sleep(2000);
 
-        await helpers.img(page);
         await page.evaluate(`$('#state-snapshots-content').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
@@ -70,10 +69,8 @@ describe("State snapshots", () => {
         await helpers.sleep(3000);
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
-
-        await helpers.img(page);
 
         link = await page.evaluate(`$('[title="${snapshotTitle}"]').closest('.panel-body').find('input[type="text"]').val()`);
         expect(link.indexOf(`tmpl=default.tmpl`) > -1).to.equal(true);
@@ -178,7 +175,7 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
         expect(await page.evaluate(`$('#state-snapshots-content').find('h4').length`)).to.equal(1);
         let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-content').find('.js-browser-owned').find('.panel-default').length`);
@@ -198,7 +195,7 @@ describe("State snapshots", () => {
         page = await helpers.waitForPageToLoad(page);
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Check if browser-owned state snapshots were loaded
@@ -217,7 +214,7 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
         expect(await page.evaluate(`$('#state-snapshots-content').find('h4').length`)).to.equal(1);
 
@@ -256,7 +253,7 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
         expect(await page.evaluate(`$('#state-snapshots-content').find('h4').length`)).to.equal(1);
         let initialNumberOfStateSnapshots = await page.evaluate(`$('#state-snapshots-content').find('.js-browser-owned').find('.panel-default').length`);
@@ -311,11 +308,16 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Turning on the layer
+        await helpers.sleep(1000);
+        await page.click(`[href="#layer-content"]`);
+        await helpers.sleep(1000);
+        await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await helpers.sleep(1000);
         await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
         await helpers.sleep(1000);
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
         expect(await page.evaluate(`$('#state-snapshots-content').find('h4').length`)).to.equal(1);
 
@@ -331,7 +333,12 @@ describe("State snapshots", () => {
         await statePage.goto(linkURL);
         await statePage.emulate(helpers.EMULATED_SCREEN);
         statePage = await helpers.waitForPageToLoad(statePage);
-        await helpers.sleep(2000);
+
+        await helpers.sleep(1000);
+        await statePage.click(`[href="#layer-content"]`);
+        await helpers.sleep(1000);
+        await statePage.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await helpers.sleep(1000);
         expect(await statePage.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
     });
 
@@ -345,16 +352,16 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Turn on two layers, including dynamic one
-        await page.click(`#burger-btn`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('.accordion-toggle.collapsed').eq(2).trigger('click')`);
+        await page.click(`[href="#layer-content"]`);
         await helpers.sleep(1000);
-
+        await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
         await helpers.sleep(1000);
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Clicking the Add state snapshot button
@@ -370,7 +377,7 @@ describe("State snapshots", () => {
         newPage = await helpers.waitForPageToLoad(newPage);
 
         // Open state snapshot manager
-        await newPage.click(`#state-snapshots-dialog-btn`);
+        await newPage.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Applying first state snapshot
@@ -393,18 +400,19 @@ describe("State snapshots", () => {
         page.on('dialog', (dialog) => { dialog.accept(); });
 
         // Turn on two layers
-        await page.click(`#burger-btn`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('.accordion-toggle.collapsed').eq(2).trigger('click')`);
+        await page.click(`[href="#layer-content"]`);
         await helpers.sleep(1000);
-
+        await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await page.click(`[href="#collapseVGVzdCBncm91cA"]`);
+        await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test_line"]').trigger('click')`);
         await helpers.sleep(1000);
 
         // Open state snapshot manager
-        await page.click(`#state-snapshots-dialog-btn`);
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
 
         // Clicking the Add state snapshot button
@@ -423,7 +431,7 @@ describe("State snapshots", () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('input[data-gc2-id="public.test_poly"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('input[data-gc2-id="test.polygon"]').trigger('click')`);
+        await page.evaluate(`$('input[data-gc2-id="test.polygon"]').first().trigger('click')`);
         await helpers.sleep(1000);
 
         // Clicking the Add state snapshot button
@@ -447,6 +455,12 @@ describe("State snapshots", () => {
         expect(await page.evaluate(`$('#state-snapshots-content').find('.panel-default').eq(0).find('button').first().prop('disabled')`)).to.be.false;
         expect(await page.evaluate(`$('#state-snapshots-content').find('.panel-default').eq(1).find('button').first().prop('disabled')`)).to.be.false;
 
+        await helpers.sleep(1000);
+        await page.click(`[href="#layer-content"]`);
+        await helpers.sleep(1000);
+        await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await page.click(`[href="#collapseVGVzdCBncm91cA"]`);
+        await helpers.sleep(1000);
         expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.false;
@@ -457,6 +471,15 @@ describe("State snapshots", () => {
         await helpers.sleep(2000);
         await page.evaluate(`$('#state-snapshots-content').find('.panel-default').eq(1).find('button').first().trigger('click')`);
         await helpers.sleep(4000);
+
+        await helpers.sleep(1000);
+        await page.click(`[href="#layer-content"]`);
+        await helpers.sleep(1000);
+        await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
+        await helpers.sleep(1000);
+        await page.click(`[href="#collapseVGVzdCBncm91cA"]`);
+        await helpers.sleep(1000);
+
         expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.false;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.true;
@@ -466,7 +489,7 @@ describe("State snapshots", () => {
 
     it("should store layer-specific settings", async () => {
         let page = await browser.newPage();
-        await page.goto(helpers.PAGE_URL_DEFAULT + `public.test_poly`);
+        await page.goto(helpers.PAGE_URL_DEFAULT + `public.test_poly,v:public.test`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -476,9 +499,6 @@ describe("State snapshots", () => {
         // Open state snapshot manager
         await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(2000);
-
-        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"] input').first().trigger('click')`);
-        await helpers.sleep(6000);
 
         // Add snapshot
         await page.type(`.js-browser-owned input`, `Plain snapshot`);

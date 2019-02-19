@@ -493,6 +493,8 @@ module.exports = {
 
         // Module icons
         $("#side-panel ul li a").on("click", function (e) {
+            
+            
             backboneEvents.get().trigger(`off:all`);
 
             let moduleId = $(this).data(`module-id`);
@@ -509,6 +511,7 @@ module.exports = {
             let id = ($(this));
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
+            
         });
 
         // Listen for extensions
