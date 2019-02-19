@@ -260,6 +260,7 @@ module.exports = {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
     }catch(e){console.log(e)}
+
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if ($(container).is(`:visible`) || forced) {
@@ -432,6 +433,11 @@ module.exports = {
      */
     getState: () => {
         let activeLayers = _self.getActiveLayers();
+
+
+        console.log(`### activeLayers`, activeLayers);
+
+
         let layersOfflineMode = offlineModeControlsManager.getOfflineModeSettings();
 
         let opacitySettings = {};
@@ -464,6 +470,11 @@ module.exports = {
      * Applies externally provided state
      */
     applyState: (newState) => {
+
+
+console.log(`### applyState`, JSON.stringify(newState));
+
+
         // Setting vector filters
         if (newState !== false && `arbitraryFilters` in newState && typeof newState.arbitraryFilters === `object`) {
             for (let key in newState.arbitraryFilters) {
@@ -518,7 +529,7 @@ module.exports = {
 
         /**
          * Opacity settings needs to be applied when layer is loaded. As layer loading takes some
-         * time, the application of opacity setting has to be posponed as well. The setLayerOpacityRequests
+         * time, the application of opacity setting has to be postponed as well. The setLayerOpacityRequests
          * contains opacity settings for layers and is cleaned up on every run.
          */
         backboneEvents.get().on(`doneLoading:layers`, layerKey => {
@@ -787,13 +798,14 @@ module.exports = {
                                     state.listen(MODULE_NAME, `sorted`);
                                     state.listen(MODULE_NAME, `layersOfflineModeChange`);
                                     state.listen(MODULE_NAME, `activeLayersChange`);
-                                    state.listen(MODULE_NAME, `filtersChange`);
+                                    state.listen(MODULE_NAME, `changed`);
                                     state.listen(MODULE_NAME, `opacityChange`);
                                     state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
                                     state.listen(MODULE_NAME, `settleForcedState`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
+
                                         if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
 
                                         const turnOnActiveLayersAndFinishBuilding = () => {
@@ -1573,11 +1585,14 @@ module.exports = {
             }
         }
 
+        let layersTocheckOpacity = _self.getActiveLayers();
         layersToProcess.map(layer => {
             let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
 
             if (layerIsActive) {
                 localNumberOfActiveLayers++;
+                layersTocheckOpacity.push(layerKey);
             }
 
             localNumberOfAddedLayers++;
@@ -1588,7 +1603,6 @@ module.exports = {
                 parsedMeta = _self.parseLayerMeta(layer);
             }
     
-            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             if (isVectorLayer) {
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in moduleState.dynamicLoad === false || [true, false].indexOf(moduleState.dynamicLoad[layerKey]) === -1) {
@@ -1612,8 +1626,8 @@ module.exports = {
         });
 
         // Apply opacity to layers
-        _self.getActiveLayers().map(item => {
-            let layerKey = layerTreeUtils.stripPrefix(name);
+        layersTocheckOpacity.map(item => {
+            let layerKey = layerTreeUtils.stripPrefix(item);
             if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                 if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
                     let opacity = moduleState.opacitySettings[layerKey];
@@ -1975,10 +1989,6 @@ module.exports = {
 
         let layerKey = layer.f_table_schema + "." + layer.f_table_name;
         let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-
-        console.log(`### _setupLayerWidgets`, defaultLayerType, layer);
-
         
         let parsedMeta = false;
         if (layer.meta) {
@@ -2282,8 +2292,6 @@ module.exports = {
 
                 $(layerContainer).attr(`data-widgets-were-initialized`, `true`);
             }
-        } else {
-            throw new Error(`Unable to find the layer container`);
         }
     },
 
@@ -2320,7 +2328,7 @@ module.exports = {
             throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
         }
 
-        backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
         _self.getActiveLayers().map(activeLayerKey => {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
                 if (activeLayerKey === layerKey) {
