@@ -698,6 +698,35 @@ module.exports = {
     },
 
     /**
+     * Updates overall state of the application on provided event (less optimized than listen())
+     */
+    listenAny: (eventName, updatedModules = []) => {
+        backboneEvents.get().on(eventName, () => {
+            _getInternalState().then(localState => {
+                if (`modules` in localState === false || !localState.modules) {
+                    localState.modules = {};
+                }
+
+                if (updatedModules.length === 0) {
+                    for (let name in listened) {
+                        localState.modules[name] = listened[name].getState();
+                    }
+                } else {
+                    for (let name in listened) {
+                        if (updatedModules.indexOf(name) > -1) {
+                            localState.modules[name] = listened[name].getState();
+                        }
+                    }
+                }
+
+                _setInternalState(localState);
+            }).catch(error => {
+                console.error(error);
+            });
+        });
+    },
+
+    /**
      * Listens to specific events of modules and extensions, then gets their state and updates
      * and saves the overall state locally, so next reload will keep all changes
      */

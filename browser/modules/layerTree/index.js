@@ -255,19 +255,17 @@ module.exports = {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
-        try {
         if (layerIsEnabled) {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
-    }catch(e){console.log(e)}
+
         let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
             if ($(container).is(`:visible`) || forced) {
                 let parsedMeta = meta.parseLayerMeta(layerKey);
 
                 const hideFilters = () => {
-                    $(container).find(`.js-toggle-filters`).hide(0);
-                    $(container).find(`.js-toggle-filters-number-of-filters`).hide(0);
+                    $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
                     $(container).find('.js-layer-settings-filters').hide(0);
                 };
 
@@ -296,7 +294,7 @@ module.exports = {
                 };
 
                 const hideAddFeature = () => {
-                    $(container).find('.gc2-add-feature').hide(0);
+                    $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
                 };
 
                 const getLayerSwitchControl = () => {
@@ -314,34 +312,41 @@ module.exports = {
                 }
 
                 if (desiredSetupType === LAYER.VECTOR) {
-                    hideOfflineMode();
-                    hideOpacity();
-
-                    // Toggles
-                    $(container).find(`.js-toggle-filters`).show(0);
-                    $(container).find(`.js-toggle-load-strategy`).show(0);
-                    $(container).find('.gc2-add-feature').show(0);
+                    // Load strategy and filters should be kept opened after setLayerState()
+                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                        hideOpacity();
+                    }
 
                     if (layerIsEnabled) {
+                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
+                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
+                        $(container).find(`.js-toggle-load-strategy`).show(0);
                         $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                         $(container).find(`.js-toggle-table-view`).show(0);
                     } else {
-                        $(container).find(`.js-toggle-table-view`).hide(0);
-                        $(container).find('.js-layer-settings-filters').hide(0);
-                        $(container).find('.js-layer-settings-load-strategy').hide(0);
-                        $(container).find('.js-layer-settings-table').hide(0);
-                    } 
+                        hideAddFeature();
+                        hideFilters();                   
+                        hideOfflineMode();                   
+                        hideLoadStrategy();
+                        hideTableView();
+                    }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                    hideOfflineMode();
-                    hideTableView();
-                    hideLoadStrategy();
-                    hideAddFeature();
+                    // Opacity and filters should be kept opened after setLayerState()
+                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                        hideLoadStrategy();
+                        hideOfflineMode();
+                        hideTableView();
+                    }
 
                     if (layerIsEnabled) {
+                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
                         $(container).find(`.js-toggle-opacity`).show(0);
                         $(container).find(`.js-toggle-filters`).show(0);
                         $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
                     } else {
+                        hideAddFeature();
                         hideFilters();
                         hideOpacity();
                     }
@@ -370,6 +375,8 @@ module.exports = {
                     // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                     $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                 }
+
+                $(container).attr(`data-last-layer-type`, desiredSetupType);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -518,7 +525,7 @@ module.exports = {
 
         /**
          * Opacity settings needs to be applied when layer is loaded. As layer loading takes some
-         * time, the application of opacity setting has to be posponed as well. The setLayerOpacityRequests
+         * time, the application of opacity setting has to be postponed as well. The setLayerOpacityRequests
          * contains opacity settings for layers and is cleaned up on every run.
          */
         backboneEvents.get().on(`doneLoading:layers`, layerKey => {
@@ -765,11 +772,6 @@ module.exports = {
                                 }
 
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
-
-
-                                    // @todo Needs refactoring, turning on layers by triggering a click is bad
-
-
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
                                         stop: (event, ui) => {
@@ -787,13 +789,14 @@ module.exports = {
                                     state.listen(MODULE_NAME, `sorted`);
                                     state.listen(MODULE_NAME, `layersOfflineModeChange`);
                                     state.listen(MODULE_NAME, `activeLayersChange`);
-                                    state.listen(MODULE_NAME, `filtersChange`);
+                                    state.listen(MODULE_NAME, `changed`);
                                     state.listen(MODULE_NAME, `opacityChange`);
                                     state.listen(MODULE_NAME, `dynamicLoadLayersChange`);
                                     state.listen(MODULE_NAME, `settleForcedState`);
 
                                     backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                     setTimeout(() => {
+
                                         if (LOG) console.log(`${MODULE_NAME}: active layers`, activeLayers);
 
                                         const turnOnActiveLayersAndFinishBuilding = () => {
@@ -869,11 +872,6 @@ module.exports = {
                                     }, 1000);
                                 });
                             }
-
-
-
-
-
 
                             if (layersThatAreNotInMeta.length > 0) {
                                 let fetchMetaRequests = [];
@@ -1573,11 +1571,14 @@ module.exports = {
             }
         }
 
+        let layersToCheckOpacity = _self.getActiveLayers();
         layersToProcess.map(layer => {
             let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
 
             if (layerIsActive) {
                 localNumberOfActiveLayers++;
+                layersToCheckOpacity.push(layerKey);
             }
 
             localNumberOfAddedLayers++;
@@ -1588,7 +1589,6 @@ module.exports = {
                 parsedMeta = _self.parseLayerMeta(layer);
             }
     
-            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             if (isVectorLayer) {
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in moduleState.dynamicLoad === false || [true, false].indexOf(moduleState.dynamicLoad[layerKey]) === -1) {
@@ -1612,8 +1612,8 @@ module.exports = {
         });
 
         // Apply opacity to layers
-        _self.getActiveLayers().map(item => {
-            let layerKey = layerTreeUtils.stripPrefix(name);
+        layersToCheckOpacity.map(item => {
+            let layerKey = layerTreeUtils.stripPrefix(item);
             if (layerKey in moduleState.opacitySettings && isNaN(moduleState.opacitySettings[layerKey]) === false) {
                 if (moduleState.opacitySettings[layerKey] >= 0 && moduleState.opacitySettings[layerKey] <= 1) {
                     let opacity = moduleState.opacitySettings[layerKey];
@@ -1682,7 +1682,10 @@ module.exports = {
 
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-                    if (moduleState.setLayerStateRequests[layerKey]) {
+
+                    let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+
+                    if (layerIsActive && moduleState.setLayerStateRequests[layerKey]) {
                         let settings = moduleState.setLayerStateRequests[layerKey];
                         _self.setLayerState(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
@@ -1976,10 +1979,6 @@ module.exports = {
         let layerKey = layer.f_table_schema + "." + layer.f_table_name;
         let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
-
-        console.log(`### _setupLayerWidgets`, defaultLayerType, layer);
-
-        
         let parsedMeta = false;
         if (layer.meta) {
             parsedMeta = _self.parseLayerMeta(layer);
@@ -1989,11 +1988,6 @@ module.exports = {
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
-
-
-                console.log(`### _setupLayerWidgets in progress`);
-
-
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                 $(layerContainer).find(`.js-toggles-container`).css(`display`, `inline-block`);
 
@@ -2282,8 +2276,6 @@ module.exports = {
 
                 $(layerContainer).attr(`data-widgets-were-initialized`, `true`);
             }
-        } else {
-            throw new Error(`Unable to find the layer container`);
         }
     },
 
@@ -2320,7 +2312,7 @@ module.exports = {
             throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
         }
 
-        backboneEvents.get().trigger(`${MODULE_NAME}:filtersChange`);
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
         _self.getActiveLayers().map(activeLayerKey => {
             if (activeLayerKey.indexOf(layerKey) !== -1) {
                 if (activeLayerKey === layerKey) {
