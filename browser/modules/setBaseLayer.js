@@ -6,6 +6,8 @@
 
 'use strict';
 
+import layerTreeUtils from './layerTree/utils';
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -52,7 +54,7 @@ module.exports = module.exports = {
             if (!cloud.get().getLayersByName(str)) {
                 baseLayer.addBaseLayer(str);
                 // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
-                if (str.split(".")[1]) {
+                if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
                     layers.addLayer(str);
                 }
 
@@ -90,8 +92,17 @@ module.exports = module.exports = {
             }
 
             let numberOfErroredTiles = 0, timerHasStarted = false;
+            let alreadyLoaded = false;
             cloud.get().setBaseLayer(str, (e) => {
-                if (numberOfErroredTiles > 10) { // If 10 tiles fails within 10 secs the next base layer is chosen
+                // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
+                // MVT layers, so the single time event firing guard was added
+                if (layerTreeUtils.isVectorTileLayerId(str)) {
+                    if (alreadyLoaded) return;
+                    alreadyLoaded = true;
+                }
+                
+                // If 10 tiles fails within 10 secs the next base layer is chosen
+                if (numberOfErroredTiles > 10) {
                     jquery.snackbar({
                         content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
                         htmlAllowed: true,
@@ -127,6 +138,10 @@ module.exports = module.exports = {
                     }
                 }
             }, (e) => {
+                if (layerTreeUtils.isVectorTileLayerId(str)) {
+                    alreadyLoaded = false;
+                }
+
                 backboneEvents.get().trigger("startLoading:setBaselayer", str);
             }, (e) => {
                 numberOfErroredTiles++;
@@ -138,6 +153,7 @@ module.exports = module.exports = {
                     throw new Error(`No default layers were set`);
                 }
             });
+            
 
             baseLayer.redraw(str);
 

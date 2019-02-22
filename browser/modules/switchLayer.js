@@ -152,7 +152,7 @@ module.exports = module.exports = {
 
                 // The WMS tile layer and single-tiled at the same time creates the L.nonTiledLayer.wms
                 // which does not have the setUrl() method
-                let rasterTileLayer = cloud.get().getLayersByName(gc2Id);
+                let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
                 if (`setUrl` in rasterTileLayer) {
                     rasterTileLayer.setUrl(rasterTileLayer._url + "?" + cacheBuster);
                     rasterTileLayer.redraw();
@@ -345,9 +345,9 @@ module.exports = module.exports = {
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
             let vectorTileLayerId = LAYER.VECTOR_TILE + `:` + gc2Id;
 
-            let rasterTileLayer = cloud.get().getLayersByName(gc2Id);
-            let vectorLayer = cloud.get().getLayersByName(vectorLayerId);
-            let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId);
+            let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
+            let vectorLayer = cloud.get().getLayersByName(vectorLayerId, false);
+            let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
 
             if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
             if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);

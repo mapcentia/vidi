@@ -1733,7 +1733,7 @@ module.exports = {
             }
 
             cloud.get().map.eachLayer(function(layer){
-                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name) {
+                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
                     layerIsActive = true;
                     activeLayerName = layer.id;
                 }

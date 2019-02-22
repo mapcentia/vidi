@@ -162,6 +162,22 @@ const stripPrefix = (layerName) => {
 };
 
 /**
+ * Checks if the current layer type is the vector tile one
+ * 
+ * @param {String} layerId Layer identifier
+ * 
+ * @returns {Promise}
+ */
+const isVectorTileLayerId = (layerId) => {
+    if (!layerId) throw new Error(`Invalid layer identifier was provided ${layerId}`);
+    if (layerId.indexOf(`.`) > -1 && layerId.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+/**
  * Detects possible layer types for layer meta
  * 
  * @param {Object} layerDescription Layer description
@@ -278,5 +294,6 @@ module.exports = {
     stripPrefix,
     getPossibleLayerTypes,
     getDefaultLayerType,
-    setupLayerNumberIndicator
+    setupLayerNumberIndicator,
+    isVectorTileLayerId
 };

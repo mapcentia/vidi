@@ -581,15 +581,12 @@ module.exports = module.exports = {
                         db: bl.db,
                         host: bl.host,
                         type: "mvt",
-                        baseLayer: true,
+                        isBaseLayer: true,
                     }, bl.config));
 
                     result = addedLayers[0];
                     result.baseLayer = true;
                     result.id = bl.id;
-
-                    
-                    result.on(`load`, () => { console.log(`### loaded`) });
                 } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                     customBaseLayer = new L.TileLayer(bl.url, {
                         attribution: bl.attribution,
