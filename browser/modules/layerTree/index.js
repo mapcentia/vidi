@@ -558,16 +558,18 @@ module.exports = {
             let groupsToAddedLayers = {};
             let activeLayers = switchLayer.getLayersEnabledStatus();
             for (let u = 0; u < metaData.data.length; ++u) {
-                let base64GroupName = Base64.encode(metaData.data[u].layergroup).replace(/=/g, "");
-                if (!groupsToActiveLayers[base64GroupName]) groupsToActiveLayers[base64GroupName] = 0;
-                if (!groupsToAddedLayers[base64GroupName]) groupsToAddedLayers[base64GroupName] = 0;
+                if (metaData.data[u].layergroup) {
+                    let base64GroupName = Base64.encode(metaData.data[u].layergroup).replace(/=/g, "");
+                    if (!groupsToActiveLayers[base64GroupName]) groupsToActiveLayers[base64GroupName] = 0;
+                    if (!groupsToAddedLayers[base64GroupName]) groupsToAddedLayers[base64GroupName] = 0;
 
-                let layerKey = metaData.data[u].f_table_schema + `.` + metaData.data[u].f_table_name;
-                if (activeLayers[layerKey] && activeLayers[layerKey].enabled) {
-                    groupsToActiveLayers[base64GroupName]++;
+                    let layerKey = metaData.data[u].f_table_schema + `.` + metaData.data[u].f_table_name;
+                    if (activeLayers[layerKey] && activeLayers[layerKey].enabled) {
+                        groupsToActiveLayers[base64GroupName]++;
+                    }
+
+                    groupsToAddedLayers[base64GroupName]++;
                 }
-
-                groupsToAddedLayers[base64GroupName]++;
             }
 
             for (let key in groupsToActiveLayers) {
@@ -1731,7 +1733,7 @@ module.exports = {
             }
 
             cloud.get().map.eachLayer(function(layer){
-                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name) {
+                if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
                     layerIsActive = true;
                     activeLayerName = layer.id;
                 }

@@ -2078,13 +2078,17 @@ geocloud = (function () {
         };
 
         //leaflet (rename to getLayerByName)
-        this.getLayersByName = function (name) {
+        this.getLayersByName = function (name, searchBaseLayers = true) {
             var l;
             var layers = lControl._layers;
             for (var key in layers) {
                 if (layers.hasOwnProperty(key)) {
                     if (layers[key].layer.id === name || layers[key].layer.id === ('mvt:' + name)) {
-                        l = layers[key].layer;
+                        if (searchBaseLayers) {
+                            l = layers[key].layer;
+                        } else if (!layers[key].layer.baseLayer) {
+                            l = layers[key].layer;
+                        }
                     }
                 }
             }
