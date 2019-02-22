@@ -297,7 +297,11 @@ module.exports = {
                 let _self = this;
 
                 this.setState({ loading: true });
-                $.getJSON(API_URL + '/' + vidiConfig.appDatabase).then(data => {
+                $.ajax({
+                    url: API_URL + '/' + vidiConfig.appDatabase,
+                    method: 'GET',
+                    dataType: 'json'
+                }).then(data => {
                     let browserOwnerSnapshots = [];
                     let userOwnerSnapshots = [];
                     data.map(item => {
@@ -311,6 +315,10 @@ module.exports = {
                     });
 
                     _self.setState({ browserOwnerSnapshots, userOwnerSnapshots, loading: false });
+                }, (jqXHR) => {
+                    if (jqXHR.responseJSON && jqXHR.responseJSON.error && jqXHR.responseJSON.error === `INVALID_OR_EMPTY_EXTERNAL_API_REPLY`) {
+                        console.error(`Seems like Vidi is unable to access key-value storage capabilities, please check if the GC2 supports it (state snapshots module will be disabled)`);
+                    }
                 });
             }
 
