@@ -32,7 +32,6 @@ module.exports = {
     },
 
     init: function () {
-
         backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => { _self.reset(); });
         backboneEvents.get().on(`off:all`, () => {
             _self.off(); 

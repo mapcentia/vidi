@@ -249,9 +249,11 @@ module.exports = {
                             }
 
                             if (editingIsEnabled && layerIsEditable) {
+                                $(".gc2-edit-tools").css(`visibility`, `visible`);
                                 $(".popup-edit-btn").show();
                                 $(".popup-delete-btn").show();
                             } else {
+                                $(".gc2-edit-tools").css(`visibility`, `hidden`);
                                 $(".popup-edit-btn").hide();
                                 $(".popup-delete-btn").hide();
                             }
