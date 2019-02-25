@@ -192,7 +192,7 @@ const getPossibleLayerTypes = (layerDescription) => {
     let layerTypeSpecifiers = ``;
     if (layerDescription && layerDescription.meta) {
         let parsedMeta = JSON.parse(layerDescription.meta);
-        if (parsedMeta.vidi_layer_type) {
+        if (parsedMeta && parsedMeta.vidi_layer_type) {
             layerTypeSpecifiers = parsedMeta.vidi_layer_type;
         }
     }
