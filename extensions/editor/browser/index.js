@@ -578,6 +578,34 @@ module.exports = {
     // @todo the initial value is not parsed as number
 
     /**
+     * Removes duplicates from polygon data (duplicate is two or more consecutive vertices with same coordinates)
+     * 
+     * @param {Object} geoJSON GeoJSON data
+     * 
+     * @returns {Object}
+     */
+    removeDuplicates: function (geoJSON) {
+        geoJSON.geometry.coordinates.map((polygon, index) => {
+            let result = [];
+            let polygonCoordinates = polygon;
+
+            let hashTable = {};
+            polygonCoordinates.map(coordinates => {
+                let key = (coordinates[0] + `:` + coordinates[1]);
+                if (key in hashTable === false) {
+                    result.push(coordinates);
+                    hashTable = {};
+                    hashTable[key] = true;
+                }
+            });
+
+            geoJSON.geometry.coordinates[index] = result;
+        });
+
+        return geoJSON;
+    },
+
+    /**
      * Change existing feature
      * @param e
      * @param k
@@ -730,6 +758,10 @@ module.exports = {
                     }
                 });
 
+                if (eventFeatureCopy.geometry.type === `Polygon`) {
+                    GeoJSON = _self.removeDuplicates(GeoJSON);
+                }
+
                 // Set the GeoJSON FeatureCollection
                 // This is committed to GC2
                 featureCollection = {
@@ -752,6 +784,8 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
                 };
+
+                console.log(`### featureCollection`, featureCollection);
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
@@ -857,8 +891,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON(),
-            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
+            GeoJSON = e.toGeoJSON();
 
         const deleteFeature = () => {
             serviceWorkerCheck();

@@ -158,7 +158,27 @@ const getDefaultTemplate = () => {
  * @return {String}
  */
 const stripPrefix = (layerName) => {
-    return layerName.replace(LAYER.VECTOR + `:`, ``).replace(LAYER.VECTOR_TILE + `:`, ``).replace(LAYER.RASTER_TILE + `:`, ``);
+    return layerName
+        .replace(LAYER.VECTOR + `:`, ``)
+        .replace(LAYER.VECTOR_TILE + `:`, ``)
+        .replace(LAYER.RASTER_TILE + `:`, ``)
+        .replace(LAYER.WEBGL + `:`, ``);
+};
+
+/**
+ * Checks if the current layer type is the vector tile one
+ * 
+ * @param {String} layerId Layer identifier
+ * 
+ * @returns {Promise}
+ */
+const isVectorTileLayerId = (layerId) => {
+    if (!layerId) throw new Error(`Invalid layer identifier was provided ${layerId}`);
+    if (layerId.indexOf(`.`) > -1 && layerId.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+        return true;
+    } else {
+        return false;
+    }
 };
 
 /**
@@ -278,5 +298,6 @@ module.exports = {
     stripPrefix,
     getPossibleLayerTypes,
     getDefaultLayerType,
-    setupLayerNumberIndicator
+    setupLayerNumberIndicator,
+    isVectorTileLayerId
 };

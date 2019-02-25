@@ -10,10 +10,13 @@ import noUiSlider from 'nouislider';
 
 const MODULE_NAME = `baseLayer`;
 
+import { LAYER } from './layerTree/constants';
+import layerTreeUtils from './layerTree/utils';
+
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, utils, layers, setBaseLayer, urlparser, backboneEvents, state, setting;
+var cloud, setBaseLayer, urlparser, backboneEvents, state, setting, layers, utils;
 
 /**
  * List with base layers added to the map. Can be got through API.
@@ -570,7 +573,21 @@ module.exports = module.exports = {
         for (var i = 0; i < window.setBaseLayers.length; i = i + 1) {
             bl = window.setBaseLayers[i];
             if (bl.id === id) {
-                if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
+                // Base layer can be a MVT layer
+                if (bl.id.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
+                    let addedLayers = cloud.get().addTileLayers($.extend({
+                        layerId: bl.id,
+                        layers: [layerTreeUtils.stripPrefix(bl.id)],
+                        db: bl.db,
+                        host: bl.host,
+                        type: "mvt",
+                        isBaseLayer: true,
+                    }, bl.config));
+
+                    result = addedLayers[0];
+                    result.baseLayer = true;
+                    result.id = bl.id;
+                } else if (typeof bl.type !== "undefined" && bl.type === "XYZ") {
                     customBaseLayer = new L.TileLayer(bl.url, {
                         attribution: bl.attribution,
 

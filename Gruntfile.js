@@ -233,6 +233,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
+                        'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/q-cluster/src/utils.js',
                         'public/js/lib/q-cluster/src/clustering.js',
                         'public/js/point-clusterer.js',

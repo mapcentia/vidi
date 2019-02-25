@@ -82,9 +82,9 @@ module.exports = {
      * @param infoClickPoint
      * @param whereClause
      * @param includes
-     * @param {Function} onPopupClose Fires when feature popup is closed
+     * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupClose) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick) {
         let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
@@ -114,12 +114,19 @@ module.exports = {
          */
         var defaultTemplate =
                 `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                    <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                    </button>
-                    <button class="btn btn-danger btn-xs popup-delete-btn">
-                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                <div class="form-group gc2-edit-tools" style="visibility: hidden; width: 90%;">
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-xs popup-edit-btn">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-xs popup-delete-btn">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 {{#_vidi_content.fields}}
                     {{#title}}<h4>{{title}}</h4>{{/title}}
@@ -225,7 +232,6 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
-                            onPopupClose: onPopupClose,
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
@@ -238,6 +244,13 @@ module.exports = {
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            let popup = e.getPopup();
+                            if (popup._closeButton) {
+                                popup._closeButton.onclick = function(clickEvent) {
+                                    if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
+                                }
+                            }
+
                             let layerIsEditable = false;
                             if (metaDataKeys[value].meta) {
                                 let parsedMeta = JSON.parse(metaDataKeys[value].meta);
@@ -248,13 +261,17 @@ module.exports = {
                                 }
                             }
 
-                            if (editingIsEnabled && layerIsEditable) {
-                                $(".popup-edit-btn").show();
-                                $(".popup-delete-btn").show();
-                            } else {
-                                $(".popup-edit-btn").hide();
-                                $(".popup-delete-btn").hide();
-                            }
+                            setTimeout(() => {
+                                if (editingIsEnabled && layerIsEditable) {
+                                    $(".gc2-edit-tools").css(`visibility`, `visible`);
+                                    $(".popup-edit-btn").show();
+                                    $(".popup-delete-btn").show();
+                                } else {
+                                    $(".gc2-edit-tools").css(`visibility`, `hidden`);
+                                    $(".popup-edit-btn").hide();
+                                    $(".popup-delete-btn").hide();
+                                }
+                            }, 100);
 
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(e, _key_, qstore);

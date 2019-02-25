@@ -105,6 +105,7 @@ var gc2table = (function () {
                 setSelectedStyle: true,
                 openPopUp: false,
                 onPopupClose: false,
+                onPopupCloseButtonClick: false,
                 setViewOnSelect: true,
                 responsive: true,
                 autoPan: false,
@@ -152,6 +153,7 @@ var gc2table = (function () {
             onMouseOver = defaults.onMouseOver,
             openPopUp = defaults.openPopUp,
             onPopupClose = defaults.onPopupClose,
+            onPopupCloseButtonClick = defaults.onPopupCloseButtonClick,
             autoPan = defaults.autoPan,
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
@@ -241,7 +243,6 @@ var gc2table = (function () {
                                 store.layer.resetStyle(store.layer._layers[id]);
                             }
 
-                            // Callling special handler for this occasion if it exists
                             if (onPopupClose) onPopupClose(id);
                         });
 
