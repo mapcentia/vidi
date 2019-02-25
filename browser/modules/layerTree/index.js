@@ -107,6 +107,7 @@ let moduleState = {
     setLayerOpacityRequests: [],
     setLayerStateRequests: {},
     vectorStores: [],
+    webGLStores: [],
     virtualLayers: []
 };
 
@@ -172,6 +173,13 @@ module.exports = {
      * @returns {Array}
      */
     getStores: () => { return moduleState.vectorStores; },
+
+    /**
+     * Returns WebGL stores
+     * 
+     * @returns {Object}
+     */
+    getWebGLStores: () => { return moduleState.webGLStores; },
 
     /**
      * Resets search
@@ -360,6 +368,13 @@ module.exports = {
                         hideOpacity();
                         hideFilters();
                     }
+                } else if (desiredSetupType === LAYER.WEBGL) {
+                    hideAddFeature();
+                    hideFilters();                   
+                    hideOfflineMode();                   
+                    hideLoadStrategy();
+                    hideTableView();
+                    hideOpacity();
                 } else {
                     throw new Error(`${desiredSetupType} control setup is not supported yet`);
                 }
@@ -583,7 +598,17 @@ module.exports = {
          */
         cloud.get().on(`moveend`, () => {
             let activeLayers = _self.getActiveLayers();
+
+            let stores = [];
             for (let layerKey in moduleState.vectorStores) {
+                stores[layerKey] = moduleState.vectorStores[layerKey];
+            }
+
+            for (let layerKey in moduleState.webGLStores) {
+                stores[layerKey] = moduleState.webGLStores[layerKey];
+            }
+
+            for (let layerKey in stores) {
                 let layerIsEnabled = false;
                 let layerPrefix = ``;
                 for (let i = 0; i < activeLayers.length; i++) {
@@ -597,7 +622,14 @@ module.exports = {
                     }
                 }
 
-                if (layerIsEnabled && layerPrefix === LAYER.VECTOR) {
+                if (layerIsEnabled) {
+                    let localTypeStores = false;
+                    if (layerPrefix === LAYER.VECTOR) {
+                        localTypeStores = moduleState.vectorStores;
+                    } else if (layerPrefix === LAYER.WEBGL) {
+                        localTypeStores = moduleState.webGLStores;
+                    }
+
                     let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
                     let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
                     let parsedMeta = _self.parseLayerMeta(layerDescription);
@@ -609,8 +641,8 @@ module.exports = {
                         || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
                         needToReload = true;
                         let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in moduleState.vectorStores[layerKey]) {
-                            if (moduleState.vectorStores[layerKey].buffered_bbox === false || moduleState.vectorStores[layerKey].buffered_bbox && moduleState.vectorStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                        if (`buffered_bbox` in localTypeStores[layerKey]) {
+                            if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                 needToReload = false;
                             }
                         }
@@ -619,8 +651,8 @@ module.exports = {
                     }
 
                     if (needToReload) {
-                        moduleState.vectorStores[layerKey].abort();
-                        moduleState.vectorStores[layerKey].load();
+                        localTypeStores[layerKey].abort();
+                        localTypeStores[layerKey].load();
                     }
                 }
             }
@@ -1095,6 +1127,87 @@ module.exports = {
         }
 
         return parsedMeta;
+    },
+
+    /**
+     * Creates SQL store for WebGL layers
+     *
+     * @param {Object} layer Layer description
+     *
+     * @returns {void}
+     */
+    createWebGLStore: (layer) => {
+        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+    
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
+
+        let whereClauses = [];
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        activeFilters.map(item => {
+            whereClauses.push(item);
+        });
+
+        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+
+        // Checking if versioning is enabled for layer
+        if (`versioning` in layer && layer.versioning) {
+            whereClauses.push(`gc2_version_end_date is null`);
+        }
+
+        // Checking if dynamic load is enabled for layer
+        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+        }
+
+        // Gathering all WHERE clauses
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+        }
+
+        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
+        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
+            map: cloud.get().map,
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: urlparser.db,
+            uri: "/api/sql",
+            clickable: true,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
+            lifetime: 0,
+            styleMap: styles[trackingLayerKey],
+            sql,
+            onLoad: (l) => {
+                if (l === undefined) return;
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+
+                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
+                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
+                }
+            },
+            onEachFeature: (feature, layer) => {
+                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
+                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
+                }
+            }
+        });
     },
 
     /**
@@ -1585,7 +1698,7 @@ module.exports = {
 
             localNumberOfAddedLayers++;
 
-            let { isVectorLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let { isVectorLayer, isVectorTileLayer, isWebGLLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
             let parsedMeta = false;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
@@ -1610,6 +1723,10 @@ module.exports = {
     
             if (isVectorTileLayer) {
                 _self.createStore(layer, false, true);
+            }
+
+            if (isWebGLLayer) {
+                _self.createWebGLStore(layer);
             }
         });
 
@@ -1890,6 +2007,7 @@ module.exports = {
                     case `tile`: type = LAYER.RASTER_TILE; break;
                     case `vector`: type = LAYER.VECTOR; break;
                     case `vector-tile`: type = LAYER.VECTOR_TILE; break;
+                    case `webgl`: type = LAYER.WEBGL; break;
                     default: throw new Error(`Invalid selector type`);
                 }
 
@@ -2405,12 +2523,8 @@ module.exports = {
         onSelectedStyle[layer] = style;
     },
 
-
-
     load: function (id) {
         moduleState.vectorStores[id].load();
     },
-
-
 
 };
