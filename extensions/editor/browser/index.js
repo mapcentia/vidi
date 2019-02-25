@@ -891,8 +891,7 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON(),
-            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
+            GeoJSON = e.toGeoJSON();
 
         const deleteFeature = () => {
             serviceWorkerCheck();
