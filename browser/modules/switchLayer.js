@@ -9,7 +9,7 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = false;
+const LOG = true;
 
 let layersAlternationHistory = {};
 
@@ -260,13 +260,72 @@ module.exports = module.exports = {
         });
     },
 
-    enableWebGL: (gc2Id) => {
+    /**
+     * Enables WebGL layer
+     * 
+     * @param {String}  gc2Id         Layer name (with prefix)
+     * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
+     * @param {Boolean} setupControls Specifies if layerTree controls should be setup
+     * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
+     * 
+     * @returns {Promise}
+     */
+    enableWebGL: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableWebGL ${gc2Id}`);
 
         let webGLLayerId = LAYER.WEBGL + `:` + gc2Id;
         return new Promise((resolve, reject) => {
-            console.error(`Enabling of WebGL layers in not implemented yet (${webGLLayerId})`);
-            resolve();
+
+            try {
+            layers.incrementCountLoading(webGLLayerId);
+            layerTree.setSelectorValue(name, LAYER.WEBGL);
+
+            let webGLDataStores = layerTree.getWebGLStores();
+            if (webGLLayerId in webGLDataStores) {
+                cloud.get().layerControl.addOverlay(webGLDataStores[webGLLayerId].layer, webGLLayerId);
+                let existingLayer = cloud.get().getLayersByName(webGLLayerId);
+                cloud.get().map.addLayer(existingLayer);
+                webGLDataStores[webGLLayerId].load();
+
+                backboneEvents.get().trigger("startLoading:layers", webGLLayerId);
+
+                _self.checkLayerControl(webGLLayerId, doNotLegend, setupControls);
+                resolve();
+            } else if (failedBefore !== false) {
+                if (failedBefore.reason === `NO_WEBGL_DATA_STORE`) {
+                    console.error(`Failed to switch layer while attempting to get the WebGL data store for ${webGLLayerId} (probably it is not the WebGL layer)`);
+                } else {
+                    console.error(`Unknown switch layer failure for ${webGLLayerId}`);
+                }
+
+                resolve();
+            } else {
+                meta.init(gc2Id, true, true).then(layerMeta => {
+                    // Trying to recreate the layer tree with updated meta and switch layer again
+                    layerTree.create().then(() => {
+                        // All layers are guaranteed to exist in meta
+                        let currentLayers = layers.getLayers();
+                        if (currentLayers && Array.isArray(currentLayers)) {
+                            layers.getLayers().split(',').map(layerToActivate => {
+                                _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
+                            });
+                        }
+
+                        _self.init(webGLLayerId, true, false, false, true, {
+                            reason: `NO_WEBGL_DATA_STORE`
+                        }).then(() => {
+                            resolve();
+                        });
+                    });
+                }).catch(() => {
+                    console.error(`Could not add ${gc2Id} WebGL layer`);
+                    layers.decrementCountLoading(webGLLayerId);
+                    resolve();
+                });
+            }
+
+
+        } catch(e) { console.log(e);}
         });
     },
 
@@ -365,7 +424,7 @@ module.exports = module.exports = {
                 } else if (name.startsWith(LAYER.VECTOR_TILE + ':')) {
                     _self.enableVectorTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 } else if (name.startsWith(LAYER.WEBGL + ':')) {
-                    _self.enableWebGL(gc2Id).then(resolve);
+                    _self.enableWebGL(gc2Id, doNotLegend, setupControls, failedBefore).then(resolve);
                 } else {
                     _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }

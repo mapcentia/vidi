@@ -32,6 +32,7 @@ geocloud = (function () {
         storeClass,
         extend,
         geoJsonStore,
+        webGLStore,
         cartoDbStore,
         sqlStore,
         tweetStore,
@@ -140,6 +141,7 @@ geocloud = (function () {
         base64: true,
         custom_data: null
     };
+
     // Base class for stores
     storeClass = function () {
         //this.defaults = STOREDEFAULTS;
@@ -155,34 +157,15 @@ geocloud = (function () {
         this.init = function () {
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
-            switch (MAPLIB) {
-                case 'ol2':
-                    this.layer = new OpenLayers.Layer.Vector(this.defaults.name, {
-                        styleMap: this.defaults.styleMap,
-                        visibility: this.defaults.visibility,
-                        renderers: ['Canvas', 'SVG', 'VML'],
-                        rendererOptions: this.defaults.rendererOptions
-                    });
-                    break;
-                case 'ol3':
-                    this.layer = new ol.layer.Vector({
-                        source: new ol.source.GeoJSON(),
-                        style: this.defaults.styleMap
-                    });
-                    this.layer.id = this.defaults.name;
-                    break;
+            this.layer = L.geoJson(null, {
+                style: this.defaults.styleMap,
+                pointToLayer: this.defaults.pointToLayer,
+                onEachFeature: this.defaults.onEachFeature,
+                interactive: this.defaults.clickable,
+                bubblingMouseEvents: false
+            });
 
-                case 'leaflet':
-                    this.layer = L.geoJson(null, {
-                        style: this.defaults.styleMap,
-                        pointToLayer: this.defaults.pointToLayer,
-                        onEachFeature: this.defaults.onEachFeature,
-                        interactive: this.defaults.clickable,
-                        bubblingMouseEvents: false
-                    });
-                    this.layer.id = this.defaults.name;
-                    break;
-            }
+            this.layer.id = this.defaults.name;
         };
         this.geoJSON = null;
         this.featureStore = null;
@@ -210,6 +193,7 @@ geocloud = (function () {
             return new OpenLayers.Format.WKT().write(this.layer.features);
         };
     };
+
     geoJsonStore = sqlStore = function (config) {
         var prop, me = this, map, sql, xhr = {
             abort: function () {/* stub */
@@ -333,6 +317,153 @@ geocloud = (function () {
             xhr.abort();
         }
     };
+
+    /**
+     * WebGL representation for SQL stored layer
+     */
+    webGLStore = function (config) {
+        var prop, me = this, map, sql, xhr = {
+            abort: function () {/* stub */
+            }
+        };
+
+        this.init = function () {
+            this.onLoad = this.defaults.onLoad;
+            this.loading = this.defaults.loading;
+
+
+
+            console.log(`### here goes`);
+            this.layer = L.geoJson(null, {
+                style: this.defaults.styleMap,
+                pointToLayer: this.defaults.pointToLayer,
+                onEachFeature: this.defaults.onEachFeature,
+                interactive: this.defaults.clickable,
+                bubblingMouseEvents: false
+            });
+
+            this.layer.id = this.defaults.name;
+        };
+
+        this.defaults = $.extend({}, STOREDEFAULTS);
+        if (config) {
+            for (prop in config) {
+                this.defaults[prop] = config[prop];
+            }
+        }
+
+        this.init();
+        this.name = this.defaults.name;
+        this.id = this.defaults.id;
+        this.sql = this.defaults.sql;
+        this.db = this.defaults.db;
+        this.onLoad = this.defaults.onLoad;
+        this.transformResponse = this.defaults.transformResponse;
+        this.loading = this.defaults.loading;
+        this.dataType = this.defaults.dataType;
+        this.async = this.defaults.async;
+        this.jsonp = this.defaults.jsonp;
+        this.method = this.defaults.method;
+        this.uri = this.defaults.uri;
+        this.base64 = this.defaults.base64;
+        this.custom_data = this.defaults.custom_data;
+
+        this.buffered_bbox = false;
+
+        this.load = function (doNotShowAlertOnError) {
+            try {
+                me.abort();
+            } catch (e) {
+                console.error(e.message);
+            }
+
+            sql = this.sql;
+
+            var dynamicQueryIsUsed = false;
+            map = me.layer._map;
+            if (map) {
+                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
+                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
+                    dynamicQueryIsUsed = true;
+                }
+
+                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
+                var extendedBounds = map.getBounds().pad(1);
+                this.buffered_bbox = extendedBounds;
+
+                sql = sql.replace("{centerX}", map.getCenter().lat.toString());
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{maxY}", extendedBounds.getNorth());
+                sql = sql.replace("{maxX}", extendedBounds.getEast());
+                sql = sql.replace("{minY}", extendedBounds.getSouth());
+                sql = sql.replace("{minX}", extendedBounds.getWest());
+
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
+            }
+
+            me.loading();
+            xhr = $.ajax({
+                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
+                async: this.defaults.async,
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
+                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
+                jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
+                url: this.host + this.uri + '/' + this.db,
+                type: this.defaults.method,
+                success: function (response) {
+                    if (response.success === false && doNotShowAlertOnError === undefined) {
+                        alert(response.message);
+                    }
+
+                    if (response.success === true) {
+                        if (response.features !== null) {
+                            response = me.transformResponse(response, me.id);
+
+                            me.geoJSON = response;
+                            switch (MAPLIB) {
+                                case "ol2":
+                                    me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
+                                    break;
+                                case "ol3":
+                                    me.layer.getSource().addFeatures(new ol.source.GeoJSON(
+                                        {
+                                            object: response.features[0]
+                                        }
+                                    ));
+
+                                    break;
+                                case "leaflet":
+                                    if (dynamicQueryIsUsed) {
+                                        me.layer.clearLayers();
+                                    }
+
+                                    me.layer.addData(response);
+                                    break;
+                            }
+                        } else {
+                            me.geoJSON = null;
+                        }
+                    }
+                },
+                error: this.defaults.error,
+                complete: function () {
+                    me.onLoad(me);
+                }
+            });
+
+            return xhr;
+        };
+
+        this.abort = function () {
+            xhr.abort();
+        }
+    };
+
     cartoDbStore = function (config) {
         var prop, me = this, map, sql, xhr;
         this.defaults = $.extend({}, STOREDEFAULTS);
@@ -534,6 +665,7 @@ geocloud = (function () {
     };
     // Extend store classes
     extend(sqlStore, storeClass);
+    extend(webGLStore, storeClass);
     extend(tweetStore, storeClass);
     extend(elasticStore, storeClass);
     extend(cartoDbStore, storeClass);
@@ -2471,6 +2603,7 @@ geocloud = (function () {
     return {
         geoJsonStore: geoJsonStore,
         sqlStore: sqlStore,
+        webGLStore: webGLStore,
         tileLayer: tileLayer,
         elasticStore: elasticStore,
         tweetStore: tweetStore,

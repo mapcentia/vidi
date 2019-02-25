@@ -158,7 +158,11 @@ const getDefaultTemplate = () => {
  * @return {String}
  */
 const stripPrefix = (layerName) => {
-    return layerName.replace(LAYER.VECTOR + `:`, ``).replace(LAYER.VECTOR_TILE + `:`, ``).replace(LAYER.RASTER_TILE + `:`, ``);
+    return layerName
+        .replace(LAYER.VECTOR + `:`, ``)
+        .replace(LAYER.VECTOR_TILE + `:`, ``)
+        .replace(LAYER.RASTER_TILE + `:`, ``)
+        .replace(LAYER.WEBGL + `:`, ``);
 };
 
 /**
