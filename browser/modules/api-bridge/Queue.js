@@ -6,7 +6,7 @@
 
 'use strict';
 
-import { QUEUE_PROCESSING_INTERVAL, QUEUE_STORE_NAME, ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST, LOG, QUEUE_DEFAULT_PKEY } from './constants';
+const { QUEUE_PROCESSING_INTERVAL, QUEUE_STORE_NAME, ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST, LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 /*
 Specifies if the first and only element of the queue should

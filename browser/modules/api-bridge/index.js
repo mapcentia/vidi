@@ -8,7 +8,7 @@
 
 const Queue = require('./Queue');
 
-import { LOG, QUEUE_DEFAULT_PKEY } from './constants';
+const { LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 let singletoneInstance = false;
 
