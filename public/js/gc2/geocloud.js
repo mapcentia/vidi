@@ -330,10 +330,6 @@ geocloud = (function () {
         this.init = function () {
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
-
-
-
-            console.log(`### here goes`);
             this.layer = L.geoJson(null, {
                 style: this.defaults.styleMap,
                 pointToLayer: this.defaults.pointToLayer,
