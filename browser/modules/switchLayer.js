@@ -282,15 +282,15 @@ module.exports = module.exports = {
 
             let webGLDataStores = layerTree.getWebGLStores();
             if (webGLLayerId in webGLDataStores) {
-                cloud.get().layerControl.addOverlay(webGLDataStores[webGLLayerId].layer, webGLLayerId);
-                let existingLayer = cloud.get().getLayersByName(webGLLayerId);
-                cloud.get().map.addLayer(existingLayer);
-                webGLDataStores[webGLLayerId].load();
-
                 backboneEvents.get().trigger("startLoading:layers", webGLLayerId);
+                webGLDataStores[webGLLayerId].load(true, () => {
+                    cloud.get().layerControl.addOverlay(webGLDataStores[webGLLayerId].layer, webGLLayerId);
+                    let existingLayer = cloud.get().getLayersByName(webGLLayerId);
+                    cloud.get().map.addLayer(existingLayer);
+                    _self.checkLayerControl(webGLLayerId, doNotLegend, setupControls);
 
-                _self.checkLayerControl(webGLLayerId, doNotLegend, setupControls);
-                resolve();
+                    resolve();
+                });
             } else if (failedBefore !== false) {
                 if (failedBefore.reason === `NO_WEBGL_DATA_STORE`) {
                     console.error(`Failed to switch layer while attempting to get the WebGL data store for ${webGLLayerId} (probably it is not the WebGL layer)`);
@@ -403,14 +403,17 @@ module.exports = module.exports = {
 
             let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
             let vectorTileLayerId = LAYER.VECTOR_TILE + `:` + gc2Id;
+            let webGLLayerId = LAYER.WEBGL + `:` + gc2Id;
 
             let rasterTileLayer = cloud.get().getLayersByName(gc2Id, false);
             let vectorLayer = cloud.get().getLayersByName(vectorLayerId, false);
             let vectorTileLayer = cloud.get().getLayersByName(vectorTileLayerId, false);
+            let webGLLayer = cloud.get().getLayersByName(webGLLayerId, false);
 
             if (rasterTileLayer) cloud.get().map.removeLayer(rasterTileLayer);
             if (vectorLayer) cloud.get().map.removeLayer(vectorLayer);
             if (vectorTileLayer) cloud.get().map.removeLayer(vectorTileLayer);
+            if (webGLLayer) cloud.get().map.removeLayer(webGLLayer);
 
             if (vectorDataStores[vectorLayerId]) {
                 vectorDataStores[vectorLayerId].abort();
