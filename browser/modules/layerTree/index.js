@@ -1167,6 +1167,7 @@ module.exports = {
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
         moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
+            type: layer.type,
             map: cloud.get().map,
             jsonp: false,
             method: "POST",

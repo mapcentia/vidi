@@ -330,15 +330,6 @@ geocloud = (function () {
         this.init = function () {
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
-            this.layer = L.geoJson(null, {
-                style: this.defaults.styleMap,
-                pointToLayer: this.defaults.pointToLayer,
-                onEachFeature: this.defaults.onEachFeature,
-                interactive: this.defaults.clickable,
-                bubblingMouseEvents: false
-            });
-
-            this.layer.id = this.defaults.name;
         };
 
         this.defaults = $.extend({}, STOREDEFAULTS);
@@ -361,12 +352,13 @@ geocloud = (function () {
         this.jsonp = this.defaults.jsonp;
         this.method = this.defaults.method;
         this.uri = this.defaults.uri;
+        this.host = this.defaults.host;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
 
         this.buffered_bbox = false;
 
-        this.load = function (doNotShowAlertOnError) {
+        this.load = function (showAlertOnError = true, onLoadCallback) {
             try {
                 me.abort();
             } catch (e) {
@@ -376,7 +368,8 @@ geocloud = (function () {
             sql = this.sql;
 
             var dynamicQueryIsUsed = false;
-            map = me.layer._map;
+
+            map = me.defaults.map;
             if (map) {
                 if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
                     && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
@@ -412,39 +405,53 @@ geocloud = (function () {
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
                 success: function (response) {
-                    if (response.success === false && doNotShowAlertOnError === undefined) {
+                    if (response.success === false && showAlertOnError) {
                         alert(response.message);
                     }
 
                     if (response.success === true) {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
-
                             me.geoJSON = response;
-                            switch (MAPLIB) {
-                                case "ol2":
-                                    me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
-                                    break;
-                                case "ol3":
-                                    me.layer.getSource().addFeatures(new ol.source.GeoJSON(
-                                        {
-                                            object: response.features[0]
-                                        }
-                                    ));
 
-                                    break;
-                                case "leaflet":
-                                    if (dynamicQueryIsUsed) {
-                                        me.layer.clearLayers();
-                                    }
+                            let layer = false;
+                            if (me.defaults.type === 'POINT') {
+                                let data = [];
+                                me.geoJSON.features.map(feature => data.push(feature.geometry.coordinates));
 
-                                    me.layer.addData(response);
-                                    break;
+                                layer = L.glify.points({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    size: 8,
+                                    data
+                                });
+                            } else if (me.defaults.type === 'LINESTRING') {
+                                layer = L.glify.lines({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else if (me.defaults.type === 'POLYGON') {
+                                layer = L.glify.shapes({
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else {
+                                throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
                             }
+
+                            me.layer = layer.glLayer;
+                            me.layer.id = me.defaults.name;
+
+                            if (me.onLoad) me.onLoad();
                         } else {
                             me.geoJSON = null;
                         }
                     }
+
+                    if (onLoadCallback) onLoadCallback();
                 },
                 error: this.defaults.error,
                 complete: function () {
