@@ -50,6 +50,12 @@ How state snapshot is stored in the key-value storage:
     id: "state_snapshot_123",
     // Optional title
     title: "abc",
+    // Database
+    database: "test",
+    // Schema
+    schema: "schema",
+    // Host
+    host: "https://example.com/",
     // Property that specifies owner of the snapshot
     browserId: "123" || userId: "123",
     // Snapshot body
@@ -108,7 +114,6 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
     }
 });
 
-
 /**
  * Get specific state snapshots
  */
@@ -144,6 +149,27 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
 });
 
 /**
+ * Generates token for state snapshot
+ * 
+ * @param {Object} stateSnapshot Tokenized state snapshot
+ * 
+ * @returns {String}
+ */
+const generateToken = (stateSnapshot) => {
+    let stateSnapshotCleanedUpCopy = Object.assign({}, stateSnapshot);
+
+    // No need to carry the "snapshot" property
+    stateSnapshotCleanedUpCopy.snapshot = false;
+
+    // Specifying "config" and "tmpl" options at higher level
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.config) stateSnapshotCleanedUpCopy.config = stateSnapshot.snapshot.meta.config;
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.tmpl) stateSnapshotCleanedUpCopy.tmpl = stateSnapshot.snapshot.meta.tmpl;
+
+    let token = Buffer.from(JSON.stringify(stateSnapshotCleanedUpCopy)).toString('base64');
+    return token;
+};
+
+/**
  * Create state snapshot
  */
 router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
@@ -167,31 +193,40 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             let currentDate = new Date();
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
-            request({
-                method: 'POST',
-                encoding: 'utf8',
-                uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
-                form: JSON.stringify(stateSnapshotCopy)
-            }, (error, response) => {
-                let parsedBody = false;
-                try {
-                    let localParsedBody = JSON.parse(response.body);
-                    parsedBody = localParsedBody;
-                } catch (e) {}
 
-                if (parsedBody) {
-                    if (parsedBody.success) {
-                        res.json({
-                            id: generatedKey,
-                            status: 'success'
-                        });
+            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database || !stateSnapshotCopy.schema) {
+                throwError(res, 'MISSING_DATA');
+            } else {
+                let token = generateToken(stateSnapshotCopy);
+                stateSnapshotCopy.token = token;
+
+                request({
+                    method: 'POST',
+                    encoding: 'utf8',
+                    uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
+                    form: JSON.stringify(stateSnapshotCopy)
+                }, (error, response) => {
+                    let parsedBody = false;
+                    try {
+                        let localParsedBody = JSON.parse(response.body);
+                        parsedBody = localParsedBody;
+                    } catch (e) {}
+
+                    if (parsedBody) {
+                        if (parsedBody.success) {
+                            res.json({
+                                id: generatedKey,
+                                token: token,
+                                status: 'success'
+                            });
+                        } else {
+                            throwError(res, parsedBody.message);
+                        }
                     } else {
-                        throwError(res, parsedBody.message);
-                    }
-                } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
-                } 
-            });
+                        throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    } 
+                });
+            }
         }
     } else {
         throwError(res, 'MISSING_DATA');
@@ -269,6 +304,9 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                         `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
                         parsedSnapshotData.snapshot = req.body.snapshot;
                         if (req.body.title) parsedSnapshotData.title = req.body.title;
+
+                        let token = generateToken(parsedSnapshotData);
+                        parsedSnapshotData.token = token;
                         request({
                             method: 'PUT',
                             encoding: 'utf8',
