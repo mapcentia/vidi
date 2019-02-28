@@ -9,7 +9,7 @@
 import { LAYER } from './layerTree/constants';
 const layerTreeUtils = require('./layerTree/utils');
 
-const LOG = true;
+const LOG = false;
 
 let layersAlternationHistory = {};
 

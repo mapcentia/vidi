@@ -274,6 +274,7 @@ module.exports = {
         "Add local state snapshots to user's ones": "Overfør lokale projekter til bruger",
         "Add local state snapshot to user's ones": "Overfør lokal projekter til bruger",
         "copy link": "Kopier link",
+        "copy token": "Kopier token",
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
 
