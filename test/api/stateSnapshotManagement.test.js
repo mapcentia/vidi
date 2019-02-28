@@ -73,6 +73,9 @@ describe('State snapshot management API', () => {
             headers: { Cookie: cookie },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 anonymous: true,
                 snapshot: {
                     modules: [],
@@ -87,6 +90,8 @@ describe('State snapshot management API', () => {
 
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(200);
+            expect(response.body.id.length > 0).to.equal(true);
+            expect(response.body.token.length > 0).to.equal(true);
 
             anonymousStateSnapshotId = response.body.id;
 
@@ -164,6 +169,9 @@ describe('State snapshot management API', () => {
             headers: { Cookie: cookie },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 anonymous: false,
                 snapshot: {
                     modules: [],
@@ -244,6 +252,9 @@ describe('State snapshot management API', () => {
             headers: { Cookie: cookie },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 snapshot: {
                     modules: [],
                     map: {
@@ -271,6 +282,9 @@ describe('State snapshot management API', () => {
             },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 snapshot: {
                     modules: [],
                     map: {
@@ -323,6 +337,9 @@ describe('State snapshot management API', () => {
             headers: { Cookie: cookie },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 anonymous: true,
                 title: `test`,
                 snapshot: {
@@ -383,6 +400,9 @@ describe('State snapshot management API', () => {
         let body = {
             anonymous: true,
             title: `test`,
+            host: `https://example.com`,
+            database: `database`,
+            schema: `schema`,
             snapshot: {
                 modules: [],
                 map: {
@@ -444,6 +464,9 @@ describe('State snapshot management API', () => {
             headers: { Cookie: cookie },
             json: true,
             body: {
+                host: `https://example.com`,
+                database: `database`,
+                schema: `schema`,
                 anonymous: true,
                 snapshot: {
                     modules: [],
@@ -572,6 +595,71 @@ describe('State snapshot management API', () => {
         request(options, (error, response, body) => {
             expect(response.statusCode).to.equal(400);
             done();
+        });
+    });
+
+    it('should generate token after creation and regenerate after update', (done) => {
+        let cookie = request.cookie(`${TRACKER_COOKIE}`);
+
+        let data = {
+            host: `https://example.com`,
+            database: `database`,
+            schema: `schema`,
+            anonymous: true,
+            snapshot: {
+                meta: {
+                    config: `test.json`,
+                    tmpl: `test.tmpl`
+                },
+                modules: [],
+                map: {
+                    x: 1,
+                    y: 2,
+                    zoom: 3
+                }
+            }
+        };
+
+        let options = {
+            url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}`,
+            method: `POST`,
+            headers: { Cookie: cookie },
+            json: true,
+            body: data
+        };
+
+        request(options, (error, response, body) => {
+            expect(response.statusCode).to.equal(200);
+            expect(response.body.id.length > 0).to.equal(true);
+            expect(response.body.token.length > 0).to.equal(true);
+
+            let stateSnapshotId = response.body.id;
+
+            let decodedToken = JSON.parse(Buffer.from(response.body.token, 'base64'));
+            expect(decodedToken.config.length > 0).to.equal(true);
+            expect(decodedToken.tmpl.length > 0).to.equal(true);
+
+            data.snapshot.meta = { config: `test.json` };
+            request({
+                url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${stateSnapshotId}`,
+                method: `PUT`,
+                json: true,
+                headers: { Cookie: cookie },
+                body: data
+            }, (error, response) => {
+                expect(response.statusCode).to.equal(200);
+                request({
+                    url: `${helpers.API_URL}/state-snapshots/${DATABASE_NAME}/${stateSnapshotId}`,
+                    method: `GET`,
+                    json: true,
+                    headers: { Cookie: cookie },
+                }, (error, response) => {
+                    let decodedToken = JSON.parse(Buffer.from(response.body.token, 'base64'));
+                    expect(decodedToken.config.length > 0).to.equal(true);
+                    expect(!decodedToken.tmpl).to.equal(true);
+                    done();
+                });
+            });
         });
     });
 });

@@ -161,6 +161,10 @@ const generateToken = (stateSnapshot) => {
     // No need to carry the "snapshot" property
     stateSnapshotCleanedUpCopy.snapshot = false;
 
+    // Specifying "config" and "tmpl" options at higher level
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.config) stateSnapshotCleanedUpCopy.config = stateSnapshot.snapshot.meta.config;
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.tmpl) stateSnapshotCleanedUpCopy.tmpl = stateSnapshot.snapshot.meta.tmpl;
+
     let token = Buffer.from(JSON.stringify(stateSnapshotCleanedUpCopy)).toString('base64');
     return token;
 };
@@ -255,10 +259,6 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                     parsedSnapshotData.browserId = false;
                     parsedSnapshotData.anonymous = false;
                     parsedSnapshotData.userId = userId;
-
-                    let token = generateToken(parsedSnapshotData);
-                    parsedSnapshotData.token = token;
-
                     request({
                         method: 'PUT',
                         encoding: 'utf8',
@@ -304,6 +304,9 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                         `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
                         parsedSnapshotData.snapshot = req.body.snapshot;
                         if (req.body.title) parsedSnapshotData.title = req.body.title;
+
+                        let token = generateToken(parsedSnapshotData);
+                        parsedSnapshotData.token = token;
                         request({
                             method: 'PUT',
                             encoding: 'utf8',
