@@ -305,7 +305,7 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'css/build/all.min.css'],
+                assets: ['js/build/all.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,
