@@ -329,7 +329,24 @@ module.exports = {
         if ($("#draw-measure").is(":checked") && type !== 'marker') {
             l.hideMeasurements();
             l.showMeasurements({
-                showTotal: $("#draw-line-total-dist").is(":checked")
+                showTotal: $("#draw-line-total-dist").is(":checked"),
+                formatArea: (areaInSquareMeters) => {
+                    let result = Math.round(areaInSquareMeters);
+                    let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+                    let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
+                    if (areaInSquareMeters < 10000) {
+                        // Display square meters
+                        result = (Math.round(areaInSquareMeters) + ' m2');
+                    } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
+                        // Display hectars
+                        result = (ha + ' ha');
+                    } else if (areaInSquareMeters >= 1000000) {
+                        // Display square kilometers and hectars
+                        result = (km2 + ' km2 (' + ha + ' ha)');
+                    }
+
+                    return result;
+                }
             });
         } else {
             if (type !== 'marker' && type !== 'circlemarker' ) {

@@ -160,6 +160,8 @@ module.exports = {
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
         "Measure the area": "Mål areal",
-        "Delete all measurements": "Slet alle målinger"
+        "Delete all measurements": "Slet alle målinger",
+        "Clear all": "Slet alle",
+        "Clear all drawings.": "Slet alle tegninger."
     }
 };
