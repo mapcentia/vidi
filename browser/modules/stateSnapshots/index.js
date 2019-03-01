@@ -155,18 +155,27 @@ module.exports = {
 
                     state.map = anchor.getCurrentMapParameters();
                     state.meta = _self.getSnapshotMeta();
+                    let data = {
+                        title,
+                        anonymous,
+                        snapshot: state,
+                        database: vidiConfig.appDatabase,
+                        schema: vidiConfig.appDatabase,
+                        host: vidiConfig.gc2.host
+                    };
+
+                    console.log(`### data`, data);
                     $.ajax({
                         url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
                         contentType: 'application/json; charset=utf-8',
                         dataType: 'json',
-                        data: JSON.stringify({
-                            title,
-                            anonymous,
-                            snapshot: state,
-                            database: vidiConfig.appDatabase
-                        })
+                        data: JSON.stringify(data)
                     }).then(() => {
+                        _self.setState({ loading: false });
+                        _self.refreshSnapshotsList();
+                    }).catch(error => {
+                        console.error(error);
                         _self.setState({ loading: false });
                         _self.refreshSnapshotsList();
                     });
@@ -381,6 +390,8 @@ module.exports = {
 
                     let permaLink = `${window.location.origin}${anchor.getUri()}?${parameters.join(`&`)}`;
 
+                    let token = (item.token ? item.token : false);
+
                     let titleLabel = (<span style={snapshotIdStyle} title={item.id}>{item.id.substring(0, 6)}</span>);
                     if (item.title) {
                         titleLabel = (<span style={{marginRight: `10px`}} title={item.title}>{item.title.substring(0, 24)}</span>);
@@ -401,6 +412,14 @@ module.exports = {
                             onAdd={(newTitle) => { this.updateSnapshot(item, newTitle) }}
                             onCancel={() => { this.setState({ updatedItemId: false }) }}
                             type={type}/>);
+                    }
+
+                    let tokenField = false;
+                    if (token) {
+                        tokenField = (<div className="input-group form-group">
+                            <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(token) }}>{__(`copy token`)}</a>
+                            <input className="form-control" type="text" defaultValue={token}/>
+                        </div>);
                     }
 
                     return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
@@ -430,9 +449,10 @@ module.exports = {
                             </div>
                             <div>
                                 <div className="input-group form-group">
-                                    <a className="input-group-addon" onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
+                                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
                                     <input className="form-control" type="text" defaultValue={permaLink}/>
                                 </div>
+                                {tokenField}
                             </div>
                         </div>
                     </div>);
