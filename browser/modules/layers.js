@@ -98,7 +98,11 @@ module.exports = {
         for (var key in layers) {
             if (layers[key].baseLayer !== true) {
                 if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                    if ((typeof layers[key]._tiles === "object" || typeof layers[key]._wmsUrl !== "undefined") || (layers[key].id && layers[key].id.startsWith('v:'))) {
+                    if ((typeof layers[key]._tiles === "object" || typeof layers[key]._wmsUrl !== "undefined")
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR + ':'))
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR_TILE + ':'))
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.WEBGL + ':'))) {
+                        
                         if (searchedLayerKey) {
                             if (searchedLayerKey === layers[key].id) {
                                 mapLayers.push(layers[key]);
