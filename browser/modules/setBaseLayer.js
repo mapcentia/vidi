@@ -101,8 +101,8 @@ module.exports = module.exports = {
                     alreadyLoaded = true;
                 }
                 
-                // If 10 tiles fails within 10 secs the next base layer is chosen
-                if (numberOfErroredTiles > 10) {
+                // If 100 tiles fails within 10 secs the next base layer is chosen
+                if (numberOfErroredTiles > 100) {
                     jquery.snackbar({
                         content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
                         htmlAllowed: true,
