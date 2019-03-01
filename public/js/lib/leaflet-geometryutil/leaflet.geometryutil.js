@@ -204,10 +204,28 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
         if (! ( layer instanceof L.Polyline ) )
             return result;
 
-        // deep copy of latlngs
-        // @fix No need to JSON.parse(JSON.stringify()), as values are not changed lately
-        //latlngs = JSON.parse(JSON.stringify(layer.getLatLngs().slice(0)));
-        latlngs = layer.getLatLngs().slice(0);
+        // Deep copy of latlngs - not using traditional ways, as sometimes latlngs contain circular dependencies,
+        // so creating new array and populating it. If the error is emitted, then the copying should be done at deeper level.
+        var resultsTmp = [];
+        var latlngsTmp = layer.getLatLngs();
+        for (var i = 0; i < latlngsTmp.length; i++) {
+            if (latlngsTmp[i].lat && latlngsTmp[i].lng) {
+                resultsTmp.push(new L.LatLng(latlngsTmp[i].lat, latlngsTmp[i].lng));
+            } else {
+                let subresult = [];
+                for (var j = 0; j < latlngsTmp[i].length; j++) {
+                    if (latlngsTmp[i][j].lat && latlngsTmp[i][j].lng) {
+                        subresult.push(new L.LatLng(latlngsTmp[i][j].lat, latlngsTmp[i][j].lng));
+                    } else {
+                        console.error('Unable to properly copy the feature', latlngsTmp[i][j]);
+                    }
+                }
+
+                resultsTmp.push(subresult);
+            }
+        }
+
+        latlngs = resultsTmp;
 
         // add the last segment for L.Polygon
         if (layer instanceof L.Polygon) {
