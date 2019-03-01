@@ -288,6 +288,11 @@ module.exports = {
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
                             }
+
+                            // Show log in button if session module is enabled
+                            if (window.vidiConfig.enabledExtensions.includes("session") && !enabledExtensionsCopy.includes("session")) {
+                                $("#session").show();
+                            }
                         }
                     }
 
