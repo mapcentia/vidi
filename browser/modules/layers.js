@@ -55,7 +55,7 @@ var layerTree;
 
 var currentlyLoadedLayers = [];
 
-var uri = null
+var uri = null;
 
 let _self = false;
 
