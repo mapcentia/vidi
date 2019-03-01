@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+
+## [2019.1.0.rc2] - 2019-01-03
 - Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
 - WebGL layer type added.
 - Support of MVT base layers. 
