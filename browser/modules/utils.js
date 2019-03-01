@@ -19,8 +19,8 @@ module.exports = {
     },
     formatArea: (areaInSquareMeters) => {
         let result = Math.round(areaInSquareMeters);
-        let ha = (Math.round(areaInSquareMeters / 10000 * 100) / 100);
-        let km2 = (Math.round(areaInSquareMeters / 1000000 * 100) / 100);
+        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
         if (areaInSquareMeters < 10000) {
             // Display square meters
             result = (Math.round(areaInSquareMeters) + ' m2');
