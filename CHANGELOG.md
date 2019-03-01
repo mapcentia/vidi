@@ -8,6 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
 - WebGL layer type added.
 - Support of MVT base layers. 
+- Hide login button if session module is disabled.
 
 ## [2019.1.0.rc1] - 2019-14-02
 ### Added
