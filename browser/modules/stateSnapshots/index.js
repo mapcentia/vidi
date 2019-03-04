@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -161,7 +161,7 @@ module.exports = {
                         snapshot: state,
                         database: vidiConfig.appDatabase,
                         schema: vidiConfig.appDatabase,
-                        host: vidiConfig.gc2.host
+                        host: urlparser.hostname
                     };
 
                     console.log(`### data`, data);
