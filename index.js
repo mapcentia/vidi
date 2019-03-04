@@ -9,6 +9,7 @@ var path = require('path');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
+var FileStore = require('session-file-store')(session);
 var cors = require('cors');
 var config = require('./config/config.js');
 
@@ -27,9 +28,14 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
 
 app.use(cookieParser());
 
-app.set('trust proxy', 1) // trust first proxy
+app.set('trust proxy', 1); // trust first proxy
 
 app.use(session({
+    store: new FileStore({
+        ttl: 3600,
+        logFn: function () {},
+        path: "/tmp/sessions"
+    }),
     secret: 'keyboard cat',
     resave: false,
     saveUninitialized: false,
