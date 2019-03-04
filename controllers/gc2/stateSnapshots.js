@@ -158,6 +158,11 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
 const generateToken = (stateSnapshot) => {
     let stateSnapshotCleanedUpCopy = Object.assign({}, stateSnapshot);
 
+    // Delete the token property, so the token itself is not encoded
+    if (stateSnapshotCleanedUpCopy.token !== undefined) {
+        delete stateSnapshotCleanedUpCopy.token;
+    }
+
     // No need to carry the "snapshot" property
     stateSnapshotCleanedUpCopy.snapshot = false;
 
