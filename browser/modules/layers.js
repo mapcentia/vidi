@@ -218,7 +218,7 @@ module.exports = {
 
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let { useCache, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
                     isBaseLayer = !!layerDescription.baselayer;
@@ -229,7 +229,7 @@ module.exports = {
                         db: db,
                         isBaseLayer: isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
-                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
@@ -283,7 +283,7 @@ module.exports = {
             let layerWasAdded = false;
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let { useCache, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -296,7 +296,7 @@ module.exports = {
                         db: db,
                         isBaseLayer: isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
-                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        tileCached: useCache, // Use MapCache or "real" WMS.
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
@@ -345,14 +345,16 @@ module.exports = {
      */
     getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
-        let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-        let useLiveWMS = ((appendedFiltersString.length > 0 && appendedFiltersString[0] !=="") || singleTiled);
+        let setAsCached = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        let useCache = setAsCached;
+        if (appendedFiltersString.length > 0 && appendedFiltersString[0] !=="") {
+            useCache = false;
+        }
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
         let mapRequestProxy = false;
-        if (useLiveWMS && layerDescription.authentication === `Read/write`) {
+        if (useCache && layerDescription.authentication === `Read/write`) {
             mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
         }
-
-        return { useLiveWMS, mapRequestProxy };
+        return { useCache, mapRequestProxy };
     }
 };
