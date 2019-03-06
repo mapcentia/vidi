@@ -32,7 +32,7 @@ app.set('trust proxy', 1); // trust first proxy
 
 app.use(session({
     store: new FileStore({
-        ttl: 3600,
+        ttl: 86400,
         logFn: function () {},
         path: "/tmp/sessions"
     }),
