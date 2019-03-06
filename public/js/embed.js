@@ -14,7 +14,7 @@
         var token = targetDiv.attributes["data-vidi-token"].value;
         var width = targetDiv.getAttribute("data-vidi-width") || "500px";
         var height = targetDiv.getAttribute("data-vidi-height") || "500px";
-        var temp = targetDiv.getAttribute("data-vidi-temp") || "embed.tmpl";
+        var tmpl = targetDiv.getAttribute("data-vidi-tmpl") || "embed.tmpl";
         try {
             var obj = JSON.parse(atob(token));
         } catch (e) {
@@ -26,7 +26,7 @@
         var iframe = document.createElement("iframe");
         iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
         iframe.setAttribute("allowfullscreen", "");
-        iframe.setAttribute("src", host + "/app/" + database + "/?state=" + id + "&tmpl=" + temp);
+        iframe.setAttribute("src", host + "/app/" + database + "/?state=" + id + "&tmpl=" + tmpl);
         targetDiv.append(iframe);
     };
     // If script is loaded at bottom of page, when select above elements
