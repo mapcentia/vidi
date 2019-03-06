@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS } from './constants';
+import {LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -47,6 +47,7 @@ let urlparser = require('./../urlparser');
  * @type {*|exports|module.exports}
  */
 import OfflineModeControlsManager from './OfflineModeControlsManager';
+
 let offlineModeControlsManager = false;
 
 /**
@@ -57,6 +58,7 @@ let MarkupGenerator = require('./MarkupGenerator');
 let markupGeneratorInstance = new MarkupGenerator();
 
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
+
 let layerSortingInstance = new LayerSorting();
 
 /**
@@ -92,7 +94,7 @@ let extensions = false, editor = false, qstore = [];
 
 /**
  * Getting ready for React future of the layerTree by implementing single source-of-truth
- */ 
+ */
 let moduleState = {
     isReady: false,
     wasBuilt: false,
@@ -158,42 +160,52 @@ module.exports = {
      *
      * @returns {Boolean}
      */
-    isReady: () => { return moduleState.isReady; },
+    isReady: () => {
+        return moduleState.isReady;
+    },
 
     /**
      * Returns last available layers order
      *
      * @returns {Object}
      */
-    getLatestLayersOrder: () => { return moduleState.layerTreeOrder; },
+    getLatestLayersOrder: () => {
+        return moduleState.layerTreeOrder;
+    },
 
     /**
      * Returns vector stores
      *
      * @returns {Array}
      */
-    getStores: () => { return moduleState.vectorStores; },
+    getStores: () => {
+        return moduleState.vectorStores;
+    },
 
     /**
      * Returns WebGL stores
-     * 
+     *
      * @returns {Object}
      */
-    getWebGLStores: () => { return moduleState.webGLStores; },
+    getWebGLStores: () => {
+        return moduleState.webGLStores;
+    },
 
     /**
      * Resets search
      *
      * @returns {void}
      */
-    resetSearch: function () { sqlQuery.reset(qstore); },
+    resetSearch: function () {
+        sqlQuery.reset(qstore);
+    },
 
     /**
      * Sets the layer type selector presentation according to provided type
-     * 
+     *
      * @param {String} name Layer name
      * @param {String} type Layer type
-     * 
+     *
      * @returns {void}
      */
     setSelectorValue: (name, type) => {
@@ -208,9 +220,9 @@ module.exports = {
 
     /**
      * Returns tile filter string for specific tile layer
-     * 
+     *
      * @param {String} layerKey Layer identifier
-     * 
+     *
      * @returns {String}
      */
     getLayerFilterString: (layerKey) => {
@@ -233,7 +245,7 @@ module.exports = {
 
     /**
      * Returns list of currently enabled layers
-     * 
+     *
      * @returns {Array}
      */
     getActiveLayers: () => {
@@ -313,7 +325,7 @@ module.exports = {
                         return controlElement;
                     }
                 };
-        
+
                 let el = getLayerSwitchControl();
                 if (el) {
                     el.prop('checked', layerIsEnabled);
@@ -334,8 +346,8 @@ module.exports = {
                         $(container).find(`.js-toggle-table-view`).show(0);
                     } else {
                         hideAddFeature();
-                        hideFilters();                   
-                        hideOfflineMode();                   
+                        hideFilters();
+                        hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
                     }
@@ -359,8 +371,15 @@ module.exports = {
                         hideOpacity();
                     }
 
-                    if ((parsedMeta && !parsedMeta.single_tile) || (!parsedMeta && typeof parsedMeta.single_tile === "undefined")) {
-                        hideFilters();
+                    // Hide filters if cached, but not if layer has a valid predefined filter
+                    if (parsedMeta && parsedMeta.single_tile) {
+                        try {
+                            if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
+                                hideFilters();
+                            }
+                        } catch (e) {
+                            hideFilters();
+                        }
                     }
 
                     $(container).find('.js-layer-settings-filters').hide(0);
@@ -370,8 +389,8 @@ module.exports = {
                     }
                 } else if (desiredSetupType === LAYER.WEBGL) {
                     hideAddFeature();
-                    hideFilters();                   
-                    hideOfflineMode();                   
+                    hideFilters();
+                    hideOfflineMode();
                     hideLoadStrategy();
                     hideTableView();
                     hideOpacity();
@@ -411,7 +430,7 @@ module.exports = {
 
     /**
      * Creates virtual layer in scope of the layerTree module
-     * 
+     *
      * @returns {Promise}
      */
     createVirtualLayer: (store, uncheckedItems) => {
@@ -527,10 +546,10 @@ module.exports = {
      * Creating request for building the tree.
      * In order to avoid race condition as simultaneous calling of run() the pending create()
      * requests are performed one by one.
-     * 
+     *
      * @param {Object} forcedState             Externally provided state of the layerTree
      * @param {Array}  ignoredInitialStateKeys Keys of the initial state that should be ignored
-     * 
+     *
      * @returns {Promise}
      */
     create: (forcedState = false, ignoredInitialStateKeys = []) => {
@@ -696,7 +715,7 @@ module.exports = {
 
                     // Emptying the tree
                     $("#layers").empty();
-                    _self.applyStoredSettings(ignoredInitialStateKeys).then(({order, offlineModeSettings }) => {
+                    _self.applyStoredSettings(ignoredInitialStateKeys).then(({order, offlineModeSettings}) => {
 
                         try {
 
@@ -717,7 +736,7 @@ module.exports = {
                                     moduleState.virtualLayers = forcedState.virtualLayers;
                                     moduleState.virtualLayers.map(item => {
                                         let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
-                                        meta.addMetaData({ data: [simulatedMetaData]});
+                                        meta.addMetaData({data: [simulatedMetaData]});
                                     });
                                 }
 
@@ -846,14 +865,14 @@ module.exports = {
                                                         legend.init();
                                                     });
                                                 }
-        
+
                                                 moduleState.isReady = true;
                                                 moduleState.isBeingBuilt = false;
                                                 backboneEvents.get().trigger(`${MODULE_NAME}:ready`);
                                                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
-        
+
                                                 if (LOG) console.log(`${MODULE_NAME}: finished building the tree`);
-        
+
                                                 localResolve();
                                             });
                                         };
@@ -874,7 +893,7 @@ module.exports = {
                                                             });
                                                         });
                                                     } else {
-                                                        layerTreeUtils.queryServiceWorker({ action: `disableOfflineModeForAll` }).then(result => {
+                                                        layerTreeUtils.queryServiceWorker({action: `disableOfflineModeForAll`}).then(result => {
                                                             turnOnActiveLayersAndFinishBuilding().then(() => {
                                                                 layerTreeUtils.queryServiceWorker({action: `getListOfCachedRequests`}).then((response) => {
                                                                     localResolve();
@@ -958,7 +977,7 @@ module.exports = {
      * Returns layers order in corresponding groups
      *
      * @param {Array<String>} ignoredInitialStateKeys Settings that need to be ignored
-     * 
+     *
      * @returns {Promise}
      */
     applyStoredSettings: (ignoredInitialStateKeys) => {
@@ -980,7 +999,7 @@ module.exports = {
                 applySetting(`opacitySettings`, {});
                 applySetting(`dynamicLoad`, {});
 
-                resolve({order, offlineModeSettings });
+                resolve({order, offlineModeSettings});
             });
         });
 
@@ -1070,7 +1089,7 @@ module.exports = {
                                         } else {
                                             offlineModeControlsManager.setControlState(key, false, cachedRequest.bbox);
                                         }
-                                        
+
                                         promises.push(layerTreeUtils.queryServiceWorker({
                                             action: serviceWorkerAPIKey,
                                             payload: {layerKey: cachedRequest.layerKey}
@@ -1138,7 +1157,7 @@ module.exports = {
      */
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-    
+
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
 
         let whereClauses = [];
@@ -1265,7 +1284,7 @@ module.exports = {
 
         let custom_data = ``;
         if (`virtual_layer` in layer && layer.virtual_layer) {
-            custom_data = encodeURIComponent(JSON.stringify({ virtual_layer: layerKey }));
+            custom_data = encodeURIComponent(JSON.stringify({virtual_layer: layerKey}));
         }
 
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
@@ -1443,7 +1462,7 @@ module.exports = {
      * Returns active layer filters
      *
      * @param {String} layerKey Layer identifier
-     * 
+     *
      * @returns {Array}
      */
     getActiveLayerFilters(layerKey) {
@@ -1462,7 +1481,7 @@ module.exports = {
         if (layerDescription) {
             let parsedMeta = _self.parseLayerMeta(layerDescription);
             if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
-                || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                    || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
                 if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
                     moduleState.predefinedFiltersWarningFired = true;
                     console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
@@ -1473,8 +1492,9 @@ module.exports = {
                 try {
                     let parsedPredefinedFiltersLocal = JSON.parse(predefinedFiltersRaw);
                     parsedPredefinedFilters = parsedPredefinedFiltersLocal;
-                } catch (e) {}
-    
+                } catch (e) {
+                }
+
                 if (parsedPredefinedFilters) {
                     for (let key in parsedPredefinedFilters) {
                         if (filters === false || filters.indexOf(key) === -1) {
@@ -1539,7 +1559,7 @@ module.exports = {
                     }
                 });
             }
-        
+
             if (arbitraryConditions.length > 0) {
                 let additionalConditions = ``;
                 if (moduleState.arbitraryFilters[layerKey].match === `any`) {
@@ -1614,7 +1634,7 @@ module.exports = {
         if (isVirtualGroup) {
             moduleState.virtualLayers.map(item => {
                 let simulatedMetaData = _self.createSimulatedLayerDescriptionForVirtualLayer(item);
-                meta.addMetaData({ data: [simulatedMetaData]});
+                meta.addMetaData({data: [simulatedMetaData]});
                 notSortedLayersAndSubgroupsForCurrentGroup.push({
                     type: GROUP_CHILD_TYPE_LAYER,
                     layer: simulatedMetaData
@@ -1689,7 +1709,7 @@ module.exports = {
 
         let layersToCheckOpacity = _self.getActiveLayers();
         layersToProcess.map(layer => {
-            let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+            let {layerIsActive} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
 
             if (layerIsActive) {
@@ -1699,12 +1719,12 @@ module.exports = {
 
             localNumberOfAddedLayers++;
 
-            let { isVectorLayer, isVectorTileLayer, isWebGLLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let {isVectorLayer, isVectorTileLayer, isWebGLLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
             let parsedMeta = false;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
             }
-    
+
             if (isVectorLayer) {
                 // Filling up default dynamic load values if they are absent
                 if (layerKey in moduleState.dynamicLoad === false || [true, false].indexOf(moduleState.dynamicLoad[layerKey]) === -1) {
@@ -1718,10 +1738,10 @@ module.exports = {
                         }
                     }
                 }
-    
+
                 _self.createStore(layer, isVirtualGroup);
             }
-    
+
             if (isVectorTileLayer) {
                 _self.createStore(layer, false, true);
             }
@@ -1803,7 +1823,7 @@ module.exports = {
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
 
-                    let { layerIsActive } = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
+                    let {layerIsActive} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
 
                     if (layerIsActive && moduleState.setLayerStateRequests[layerKey]) {
                         let settings = moduleState.setLayerStateRequests[layerKey];
@@ -1850,7 +1870,7 @@ module.exports = {
                 });
             }
 
-            cloud.get().map.eachLayer(function(layer){
+            cloud.get().map.eachLayer(function (layer) {
                 if (layer.id && layerTreeUtils.stripPrefix(layer.id) === name && !layer.baseLayer) {
                     layerIsActive = true;
                     activeLayerName = layer.id;
@@ -1922,7 +1942,7 @@ module.exports = {
      * @returns {void}
      */
     createLayerRecord: (layer, base64GroupName, layerIsActive, activeLayerName,
-        subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
+                        subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
 
@@ -1936,7 +1956,7 @@ module.exports = {
                 </div>
             </div>`);
         } else {
-            let { detectedTypes, specifiers } = layerTreeUtils.getPossibleLayerTypes(layer);
+            let {detectedTypes, specifiers} = layerTreeUtils.getPossibleLayerTypes(layer);
             let singleTypeLayer = (detectedTypes === 1);
 
             let condition = layerTreeUtils.getDefaultLayerType(layer);
@@ -2005,11 +2025,20 @@ module.exports = {
                 let type = false;
                 let className = $(e.target).attr(`class`);
                 switch (className.replace(`js-layer-type-selector-`, ``)) {
-                    case `tile`: type = LAYER.RASTER_TILE; break;
-                    case `vector`: type = LAYER.VECTOR; break;
-                    case `vector-tile`: type = LAYER.VECTOR_TILE; break;
-                    case `webgl`: type = LAYER.WEBGL; break;
-                    default: throw new Error(`Invalid selector type`);
+                    case `tile`:
+                        type = LAYER.RASTER_TILE;
+                        break;
+                    case `vector`:
+                        type = LAYER.VECTOR;
+                        break;
+                    case `vector-tile`:
+                        type = LAYER.VECTOR_TILE;
+                        break;
+                    case `webgl`:
+                        type = LAYER.WEBGL;
+                        break;
+                    default:
+                        throw new Error(`Invalid selector type`);
                 }
 
                 let switcher = $(e.target).closest('.layer-item').find('.js-show-layer-control');
@@ -2085,11 +2114,11 @@ module.exports = {
     /**
      * Renders widgets for the particular layer record in tree, shoud be called
      * only when widgets are really needed (for example, when layer is activated)
-     * 
+     *
      * @param {String}  defaultLayerType Default layer type
      * @param {Object}  layer            Layer description
      * @param {Boolean} isVirtual        Specifies if layer is virtual
-     * 
+     *
      * @returns {void}
      */
     _setupLayerWidgets: (defaultLayerType, layer, isVirtual) => {
@@ -2105,7 +2134,7 @@ module.exports = {
             parsedMeta = _self.parseLayerMeta(layer);
         }
 
-        let { isVectorLayer, isRasterTileLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+        let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
@@ -2210,7 +2239,7 @@ module.exports = {
 
                     let localPredefinedFilters = {};
                     if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
-                        || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                            || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
                         if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
                             moduleState.predefinedFiltersWarningFired = true;
                             console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
@@ -2237,7 +2266,7 @@ module.exports = {
                                 arbitraryFilters={localArbitraryfilters}
                                 onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
                                 onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
-                                />, document.getElementById(componentContainerId));
+                            />, document.getElementById(componentContainerId));
                         $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
                         $(layerContainer).find(`.js-toggle-filters`).click(() => {
@@ -2258,9 +2287,9 @@ module.exports = {
                         $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
                         if (document.getElementById(componentContainerId)) {
                             ReactDOM.render(<LoadStrategyToggle
-                                layerKey={layerKey}
-                                initialValue={value}
-                                onChange={_self.onChangeLoadStrategyHandler}/>,
+                                    layerKey={layerKey}
+                                    initialValue={value}
+                                    onChange={_self.onChangeLoadStrategyHandler}/>,
                                 document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
                             $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
@@ -2414,7 +2443,7 @@ module.exports = {
         let correspondingLayer = meta.getMetaByKey(layerKey);
         backboneEvents.get().trigger(`${MODULE_NAME}:dynamicLoadLayersChange`);
         _self.createStore(correspondingLayer);
-        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);       
+        _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
