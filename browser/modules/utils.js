@@ -129,16 +129,17 @@ module.exports = {
 
     },
 
-    fullScreen: function () {
-        let elem = document.getElementsByTagName("body")[0];
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+    toggleFullScreen: function() {
+        let fullScreenMode;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenMode = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenMode = false;
+            }
         }
+        return fullScreenMode;
     }
 };
