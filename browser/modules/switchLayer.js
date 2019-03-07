@@ -470,7 +470,7 @@ module.exports = module.exports = {
         }
 
         pushState.init();
-        if (!doNotLegend) {
+        if (!doNotLegend && enable) {
             legend.init();
         }
     },
