@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+- Layers which have been switch off, will not be removed from legend.
+- No re-load of legend if its not necessary.
+- Home button on embed.tmpl will set the map to the initial extent if a snapshot-state is invoked. 
 
 ## [2019.1.0.rc2] - 2019-01-03
 - Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
