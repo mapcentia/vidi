@@ -7,7 +7,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [Unreleased]
 - Layers which have been switch off, will not be removed from legend.
 - No re-load of legend if its not necessary.
-- Home button on embed.tmpl will set the map to the initial extent if a snapshot-state is invoked. 
+- Home button on embed.tmpl will set the map to the initial extent if a snapshot-state is invoked.
+- Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
 
 ## [2019.1.0.rc2] - 2019-01-03
 - Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
