@@ -6,7 +6,6 @@
 
 'use strict';
 
-var extensions;
 var modules;
 var tmpl;
 var urlparser = require('./../modules/urlparser');
@@ -17,6 +16,8 @@ require('snackbarjs');
 
 const semver = require('semver');
 require("bootstrap");
+
+const cookie = require('js-cookie');
 
 module.exports = {
 
@@ -36,6 +37,10 @@ module.exports = {
      */
     init: function () {
         var me = this, configFile, stop = false;
+
+        if (typeof urlVars.session === "string") {
+            cookie.set("connect.gc2", urlVars.session, {expires: 1});
+        }
 
         var loadConfig = function () {
             $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
@@ -173,15 +178,6 @@ module.exports = {
      */
     startApp: function () {
 
-        // Load style sheet
-        //===================
-
-        $('<link/>').attr({
-            rel: 'stylesheet',
-            type: 'text/css',
-            href: '/css/styles.css'
-        }).appendTo('head');
-
         // Add the tooltip div
         // ===================
 
@@ -192,11 +188,15 @@ module.exports = {
         if (splitLocation.length === 4 || splitLocation.length === 5) {
             let database = splitLocation[2];
             let schema = splitLocation[3];
-            if (!database || database.length === 0 || !schema || schema.length === 0) {
-                console.warn(`Unable to detect current database and schema`);
+            if (!schema || schema.length === 0) {
+                console.log(`Schema not provided in URL`);
+            } else {
+                window.vidiConfig.appSchema = schema;
+            }
+            if (!database || database.length === 0) {
+                alert(`Could not detect databse. Check URL`);
             } else {
                 window.vidiConfig.appDatabase = database;
-                window.vidiConfig.appSchema = schema;
             }
         } else {
             console.warn(`Unable to detect current database and schema`);
@@ -210,7 +210,7 @@ module.exports = {
 
         // Calling mandatory init method
         [`backboneEvents`, `socketId`, `bindEvent`, `baseLayer`, `infoClick`,
-            `advancedInfo`, `draw`, `measurements`, `stateSnapshots`, `print`, `layerTree`].map(name => {
+            `advancedInfo`, `draw`, `measurements`, `mapcontrols`, `stateSnapshots`, `print`, `layerTree`, `reset`].map(name => {
             modules[name].init();
         });
 
@@ -222,12 +222,13 @@ module.exports = {
             return modules.setting.init();
         }, (error) => {
             console.log(error); // Stacktrace
-            alert("Vidi is loaded without schema. Can't set extent or add layers");
+            //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
         }).then(() => {
             return modules.layerTree.create();
         }).finally(() => {
             modules.state.init().then(() => {
+                modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
 
                 try {
 
@@ -252,8 +253,8 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./../../extensions/*/browser/*.js', {glob: true});
-                        require('./../../extensions/*/browser/*/*.js', {glob: true});
+                        require('./../../extensions/!(vectorLayers)/browser/*.js', {glob: true});
+                        require('./../../extensions/!(vectorLayers)/browser/*/*.js', {glob: true});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -275,6 +276,7 @@ module.exports = {
                                         } catch (e) {
                                             console.warn(`Module ${Object.keys(v)[0]} could not be initiated`)
                                         }
+
                                         let enabledExtensionIndex = enabledExtensionsCopy.indexOf(Object.keys(v)[0]);
                                         if (enabledExtensionIndex > -1) {
                                             enabledExtensionsCopy.splice(enabledExtensionIndex, 1);
@@ -282,8 +284,14 @@ module.exports = {
                                     }
                                 })
                             });
+
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                            }
+
+                            // Show log in button if session module is enabled
+                            if (window.vidiConfig.enabledExtensions.includes("session") && !enabledExtensionsCopy.includes("session")) {
+                                $("#session").show();
                             }
                         }
                     }
@@ -294,15 +302,22 @@ module.exports = {
                         }, 100);
                     });
 
+                    backboneEvents.get().trigger(`extensions:initialized`);
                 } catch (e) {
-                    console.error("Could not perform application initialization", e.message);
+                    console.error("Could not perform application initialization", e.message, e);
                 }
             });
         });
 
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.bundle.js').then((registration) => {
-                console.log('Service worker registration succeeded');
+                let checkInterval = setInterval(() => {
+                    if (navigator.serviceWorker.controller) {
+                        console.log('Service worker was registered and activated');
+                        backboneEvents.get().trigger(`ready:serviceWorker`);
+                        clearInterval(checkInterval);
+                    }
+                }, 1000);
             }).catch(error => {
                 console.error(`Unable to register the service worker, please load the application over HTTPS in order to use its full functionality`);
             });

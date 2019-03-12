@@ -9,7 +9,7 @@ describe('Editor', () => {
     describe('(if user is authorized)', () => {
         it('should add, update and delete features', async () => {
             let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+            await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -40,25 +40,24 @@ describe('Editor', () => {
                 await page.click(`#map`);
                 await helpers.sleep(1000);
             }
+            
+            // Open layer panel
+            await page.evaluate(`$('[href="#layer-content"]').last().trigger('click')`);
+            await helpers.sleep(1000);
+            await page.evaluate(`$('[id="layer-panel-UHVibGljIGdyb3Vw"]').find('.js-toggle-layer-panel').trigger('click')`);
+            await helpers.sleep(1000);
 
             // Adding feature
-            await page.click(`#burger-btn`);
-            await helpers.sleep(1000);
-            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
-                await helpers.sleep(2000);
-            }
-
-            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
             await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
             await page.click(`#map`);
             await helpers.sleep(1000);
+    
             await page.focus('#root_id');
             await page.keyboard.type('2000');
             await page.focus('#root_stringfield');
             await page.keyboard.type('333');
             await helpers.sleep(1000);
+
             await page.evaluate(`$('#editor-attr-dialog').find('[type="submit"]').trigger('click')`);
             await helpers.sleep(4000);
 
@@ -84,7 +83,7 @@ describe('Editor', () => {
                 if (interceptedRequest.url().indexOf(`api/feature/aleksandrshumilov/public.test.the_geom/4326`) !== -1) {
                     requestWasSent = true;
                 }
-    
+
                 interceptedRequest.continue();
             });
 
@@ -128,7 +127,7 @@ describe('Editor', () => {
     describe('(if user is not authorized)', () => {
         it('should put add feature request to the queue', async () => {
             let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+            await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test,public.test_poly`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -137,8 +136,10 @@ describe('Editor', () => {
                 dialog.accept();
             });
 
-            // Selecting point on map and open the attribute editing dialog
-            await page.click(`#burger-btn`);
+            // Open layer panel
+            await page.evaluate(`$('[href="#layer-content"]').last().trigger('click')`);
+            await helpers.sleep(1000);
+            await page.evaluate(`$('[id="layer-panel-UHVibGljIGdyb3Vw"]').find('.js-toggle-layer-panel').trigger('click')`);
             await helpers.sleep(1000);
 
             let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
@@ -164,7 +165,7 @@ describe('Editor', () => {
 
         it('should put update feature request to the queue', async () => {
 	        let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test`);
+            await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -173,12 +174,15 @@ describe('Editor', () => {
                 dialog.accept();
             });
 
-            await page.click(`#burger-btn`);
+            // Open layer panel
+            await page.evaluate(`$('[href="#layer-content"]').last().trigger('click')`);
+            await helpers.sleep(1000);
+            await page.evaluate(`$('[id="layer-panel-UHVibGljIGdyb3Vw"]').find('.js-toggle-layer-panel').trigger('click')`);
             await helpers.sleep(1000);
 
-            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
+            let layerIsSetOffline = await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`);
+            if (layerIsSetOffline === false) {
+                await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
                 await helpers.sleep(1000);
             }
 
@@ -191,7 +195,8 @@ describe('Editor', () => {
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
-            await mouse.click(markerPosition.left + 10 - 24, markerPosition.top + 10 - 48);
+            await page.evaluate(`$('.js-vector-layer-popup').find('.ge-start-edit').trigger('click')`);
+            await helpers.sleep(500);
 
             // Editing attributes of the selected feature
             await helpers.sleep(2000);
@@ -201,10 +206,7 @@ describe('Editor', () => {
             await helpers.sleep(500);
 
             // Checking if the queue indicator shows that element was added to the queue
-            await page.click(`#burger-btn`);
-            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-            await helpers.sleep(4000);
-
+            await helpers.sleep(5000);
             expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update"]').is(':visible')`)).to.be.true;
 
             // Cleanup
@@ -214,7 +216,7 @@ describe('Editor', () => {
 
         it('should put delete feature request to the queue', async () => {
 	        let page = await browser.newPage();
-            await page.goto(`${helpers.PAGE_URL}v:public.test`);
+            await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test`);
             await page.emulate(helpers.EMULATED_SCREEN);
             page = await helpers.waitForPageToLoad(page);
 
@@ -223,19 +225,10 @@ describe('Editor', () => {
                 dialog.accept();
             });
 
-            await page.click(`#burger-btn`);
+            // Open layer panel
+            await page.evaluate(`$('[href="#layer-content"]').last().trigger('click')`);
             await helpers.sleep(1000);
-
-            let offlineModeIsForced = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-            if (offlineModeIsForced) {
-                await page.evaluate(`$('.toggle').trigger('click');`);
-                await helpers.sleep(1000);
-            }
-
-            await page.evaluate(`$('#layer-slide .close').trigger('click')`);
-            await helpers.sleep(1000);
-
-            await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
+            await page.evaluate(`$('[id="layer-panel-UHVibGljIGdyb3Vw"]').find('.js-toggle-layer-panel').trigger('click')`);
             await helpers.sleep(1000);
             await page.evaluate(`$('.js-clear').trigger('click')`);
             await helpers.sleep(2000);
@@ -245,7 +238,8 @@ describe('Editor', () => {
             let mouse = page.mouse;
             await mouse.click(markerPosition.left + 10, markerPosition.top + 10);
             await helpers.sleep(500);
-            await mouse.click(markerPosition.left + 10 + 24, markerPosition.top + 10 - 48);
+            await page.evaluate(`$('.js-vector-layer-popup').find('.ge-delete').trigger('click')`);
+            await helpers.sleep(500);
 
             // Checking if the queue indicator shows that element was added to the queue
             await helpers.sleep(10000);
@@ -260,7 +254,7 @@ describe('Editor', () => {
 
     it('should react to Force offline mode setting', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}v:public.test,public.test_poly`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}v:public.test,public.test_poly`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -269,20 +263,35 @@ describe('Editor', () => {
             dialog.accept();
         });
 
-        // Selecting point on map and open the attribute editing dialog
-        await page.click(`#burger-btn`);
-        await page.evaluate(`$('[data-parent="#layers"]').last().trigger('click')`);
-
-        let offlineModeIsOn = await page.evaluate(`$('.js-toggle-offline-mode').is(':checked')`);
-        if (offlineModeIsOn === false) {
-            await page.evaluate(`$('.toggle').trigger('click');`);
-        }
-
+        // Open layer group
+        await page.evaluate(`$('[href="#layer-content"]').last().trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[id="layer-panel-UHVibGljIGdyb3Vw"]').find('.js-toggle-layer-panel').trigger('click')`);
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
-        await page.click(`#map`);
+        // Disable and enable layer
+        await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-gc2-id="public.test"]').first().trigger('click')`);
+        await helpers.sleep(1000);
 
+        // Check if offline mode controls are enabled
+        await helpers.sleep(6000);
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.true;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.false;
+        await helpers.sleep(1000);
+
+        // Enable the offline mode
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
+	    await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').prop('disabled')`)).to.be.false;
+        expect(await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').prop('disabled')`)).to.be.true;
+        await helpers.sleep(1000);
+
+        // Add feature
+        await page.evaluate(`$('[data-gc2-key="public.test.the_geom"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.click(`#map`);
         await helpers.sleep(1000);
 
         // Filling in attributes of the added feature
@@ -294,14 +303,12 @@ describe('Editor', () => {
         await helpers.sleep(4000);
 
         // Created feature is not rejected by server yet, so checking the failed indicator
-        
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-failed-add"]').is(':visible')`)).to.be.true;
         expect(await page.evaluate(`$('[class="btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add"]').is(':visible')`)).to.be.false;
-
         await helpers.sleep(1000);
 
-        await page.evaluate(`$('.toggle').trigger('click');`);
-
+        // Disable the offline mode
+        await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-online').trigger('click')`);
 	    await helpers.sleep(6000);
 
 	    // Created feature is already rejected by server, so checking corresponding indicator

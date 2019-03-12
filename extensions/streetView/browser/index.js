@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -34,7 +34,7 @@ var transformPoint;
  *
  * @type {string}
  */
-var exId = "streetview";
+var exId = "streetView";
 
 /**
  *
@@ -97,8 +97,8 @@ module.exports = {
         var dict = {
 
             "Info": {
-                "da_DK": "Start Google Street View eller Mapillary op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
-                "en_US": "Start Google Street View or Mapillary from where you click on the map. The service starts in a new browser window."
+                "da_DK": "Start Google Street View, Mapillary eller skråfoto op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
+                "en_US": "Start Google Street View, Mapillary or Oblique Photo from where you click on the map. The service starts in a new browser window."
             },
 
             "Street View": {
@@ -143,45 +143,7 @@ module.exports = {
                     selectedOption: "google"
                 };
 
-                this.onActive = this.onActive.bind(this);
                 this.onChange = this.onChange.bind(this);
-            }
-
-            /**
-             *
-             * @param e
-             */
-            onActive(e) {
-                this.setState({
-                    active: e.target.checked
-                });
-
-                if (e.target.checked) {
-
-                    // Turn info click off
-                    //====================
-                    backboneEvents.get().trigger("off:infoClick");
-
-                    // Emit "on" event
-                    //================
-                    backboneEvents.get().trigger("on:" + exId);
-
-                    utils.cursorStyle().crosshair();
-
-                } else {
-
-                    // Turn info click on again
-                    //=========================
-                    backboneEvents.get().trigger("on:infoClick");
-
-                    // Emit "off" event
-                    //=================
-                    backboneEvents.get().trigger("off:" + exId);
-
-                    utils.cursorStyle().reset();
-
-                }
-
             }
 
             onChange(changeEvent) {
@@ -194,10 +156,22 @@ module.exports = {
              *
              */
             componentDidMount() {
-                var me = this;
+                let me = this;
 
-                // Listen and reacting to the global Reset ALL event
-                backboneEvents.get().on("reset:all", function () {
+                // Stop listening to any events, deactivate controls, but
+                // keep effects of the module until they are deleted manually or reset:all is emitted
+                backboneEvents.get().on("deactivate:all", () => {});
+
+                // Activates module
+                backboneEvents.get().on(`on:${exId}`, () => {
+                    me.setState({
+                        active: true
+                    });
+                    utils.cursorStyle().crosshair();
+                });
+
+                // Deactivates module
+                backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
                     me.setState({
                         active: false
                     });
@@ -211,7 +185,7 @@ module.exports = {
                     clicktimer = undefined;
                 });
                 mapObj.on("click", function (e) {
-                    var event = new geocloud.clickEvent(e, cloud);
+                    let event = new geocloud.clickEvent(e, cloud);
                     if (clicktimer) {
                         clearTimeout(clicktimer);
                     }
@@ -234,6 +208,10 @@ module.exports = {
                                 case "mapillary":
                                     url = "https://www.mapillary.com/app/?lat=" + p.y + "&lng=" + p.x + "&z=17";
                                     break;
+
+                                case "skraafoto":
+                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                                    break;
                             }
 
                             parentThis.callBack(url);
@@ -252,13 +230,6 @@ module.exports = {
 
                     <div role="tabpanel">
                         <div className="form-group">
-                            <div className="togglebutton">
-                                <label><input id="streetview-btn" type="checkbox"
-                                              checked={this.state.active}
-                                              onChange={this.onActive}/>{__("Activate")}
-                                </label>
-
-                            </div>
                             <h3>{__("Choose service")}</h3>
                             <div className="radio">
                                 <label>
@@ -279,13 +250,23 @@ module.exports = {
                                 </label>
                             </div>
 
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-skraafoto"
+                                           name="streetview-service" value="skraafoto"
+                                           checked={this.state.selectedOption === 'skraafoto'}
+                                           onChange={this.onChange}/>
+                                    Skråfoto
+                                </label>
+                            </div>
+
                         </div>
                     </div>
                 );
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera");
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
 
         // Append to DOM
         //==============

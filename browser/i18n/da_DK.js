@@ -10,6 +10,7 @@ module.exports = {
         "About": "Om",
         "Meters": "Meter",
         "Buffer": "Buffer",
+        "Main page": "Hovedside",
         "Search": "Søg",
         "Result": "Resultat",
         "Info": "Info",
@@ -79,7 +80,7 @@ module.exports = {
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
         "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
-        "Help text baselayers": "Vælg baggrundskort.",
+        "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",
         "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
         "Help text print": "Lav skaleret PDF kort. Juster den orange firkant i kortet for at sætte udsnittets omfang og skala.",
@@ -165,6 +166,15 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Predefined": "Foruddefineret",
+        "Arbitrary": "Vilkårlig",
+        "No items selected": "Ingen emner valgt",
+        "Create virtual layer": "Opret virtuelt lag",
+        "Virtual layers": "Virtuelle lag",
+        "Dynamic load": "Dynamisk load",
+        "Load strategy": "Load strategi",
+        "Network status": "Netværk status",
+        "Set all layers to be": "Sæt alle lag til",
         "Force offline mode": "Tving offline tilstand",
         "Tile": "Raster",
         "Vector": "Vektor",
@@ -179,6 +189,7 @@ module.exports = {
         "any": "enhver",
         "all": "alle",
         "Select": "Vælg",
+        "Opacity": "Gennemsigtighed",
         "Filters": "Filtre",
         "Disable": "Deaktiver",
         "Table view": "Tabel view",
@@ -187,19 +198,38 @@ module.exports = {
         "Yes": "Ja",
         "No": "Nej",
         "Add condition": "Tilføj betingelsebetingelse",
+        "Refresh cache for layer": "Genindlæs cache for lag",
+        "Fetch layer data from server": "Hent data fra server",
+        "Fetch layer data from cache": "Hent data fra cache",
+        "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
+        "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
 
         // Base layers
-        "Side-by-side mode": "Side-by-side tilstand",
+        "Side-by-side mode": "Dobbelt baggrundskort",
+        "Display two layers at once": "Vis to baggrundskort på en gang",
+        "Side-by-side": "Swipe",
+        "Overlap": "Overlap",
+        "Display layers": "Vis baggrundskort som",
+
+        // Map controls
+        "Map controls": "Kort knapper",
+        "Clear map": "Ryd kortet",
+        "Default map extent": "Går tilbage til start udsnittet",
+        "Previous extent": "Forrige udsnit",
+        "Next extent": "Næste udsnit",
+        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter et firkant på kortet for at zoome til et område område",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
 
         //Editor
         "Application is offline, tiles will not be updated. Proceed?": "App'en er offline og kortlaget vil ikke blive opdateret. Fortsæt?",
-        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+        "Are you sure you want to delete the feature?": "Er du sikker på, at du vil slette objektet?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "Siden blev indlæst uden Service Workers aktiveret. Redigering er ikke tilgængelig (siden blev indlæst via almindelig HTTP eller browseren understøtter ikke Service Workers. Brug evt. en moderne browser)",
 
         // OfflineMap
+        "tiles failed to load": "fliser mangler at indlæse",
         "OfflineMap block description": "Her kan specifikke kortområder opbevares for at blive brugt offline",
         "OfflineMap instructions": "Udvalgte områder af ethvert baggrundkort kan gemmes, så det kan bruges i offline-tilstand. Hvis lagerpladsen for din browser overskrides, kan du slette allerede gemte baggrundkort for at frigiv plads.",
         "Extent": "kortområde",
@@ -211,7 +241,7 @@ module.exports = {
         "Delete map area?": "Slet kortområde?",
         "Refresh map area?": "Opdater kortområde?",
         "No map areas have been stored yet": "Ingen kortområder er gemt endnu",
-        "Saved tiles will be used in...": "# Saved tiles will be used in...",
+        "Saved tiles will be used in...": "Gemte fliser vil blive brugt i...",
         "Processing tiles": "Processerer kort-fliser ",
         "Please reload the page": "Genindlæs venligst siden",
         "Checking the cache status": "Tjekker cache status",
@@ -244,11 +274,12 @@ module.exports = {
         "Add local state snapshots to user's ones": "Overfør lokale projekter til bruger",
         "Add local state snapshot to user's ones": "Overfør lokal projekter til bruger",
         "copy link": "Kopier link",
+        "copy token": "Kopier token",
         "New title": "Ny titel",
         "StateSnapshots description": "Gem, genskab og del projekter. Et projekt indeholder kortets udstrækning, hvilket baggrundskort er tændt og hvilke lag er vist, hvilke filtre er aktive samt dine tegninger. Du kan dele et projekt ved at dele den viste URL. Hvis du ikke er logget ind, vil projekter blive knyttet den den browser du bruger. Ellers vil de blive gemt under dit bruger login. Det er muligt at overføre projekter fra browser til login",
 
         //Measurements
-        "Measure distance": "# Measure distance",
+        "Measure distance": "Mål afstand",
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
@@ -262,15 +293,35 @@ module.exports = {
         "Visible": "Synlige",
         "No layers available": "Ingen synlige lag",
 
-        //Boreholes
-        "Plots": "# Plots",
-        "Available plots": "# Available plots",
-        "At least one y axis has to be provided": "# At least one y axis has to be provided",
-        "Data series": "# Data series",
-        "Borehole": "# Borehole",
-        "No plots were created yet": "# No plots were created yet",
-        "Please select the measurement": "# Please select the measurement",
+        //WatsonC
+        "Drag and drop measurement to add it to time series": "Træk og slip måling for at tilføje det til tidsserier",
+        "Remove from time series": "Fjern fra tidsserier",
+        "Time series": "Tidsserier",
+        "Water level": "Vandstand",
+        "Select data": "Vælg data",
+        "Filter measurements": "Filtrér målinger",
+        "Found time series": "Fundne tidsserier",
+        "Plots": "Grafer",
+        "units": "Enheder",
+        "updated at": "Opdateret",
+        "Uncategorized": "Ikke kategoriseret",
+        "Available plots": "Tilgængelige grafer",
+        "At least one y axis has to be provided": "Der skal være mindst en y-akse",
+        "Data series": "Data serier",
+        "Borehole": "DGU",
+        "No time series were created yet": "Ingen tidsserier er oprettet endnu",
+        "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
+        "Please select the measurement": "Vælg venligst målingen",
+        "Show legend on top the map": "Vis signaturen ovenpå kortet",
+        "Not all measurements in plot were loaded by this moment": "Ikke alle værdier i grafen er indlæst i dette øjeblik",
 
-        "Show legend on top the map": "Vis signaturen ovenpå kortet"
+        // Search
+        "Didn't find anything": "Fandt ikke noget",
+        "Searchable fields": "Søgbare felter",
+        "Like": "Like",
+        "Similarity": "Similarity",
+        "Tsvector": "Tsvector",
+        "No searchable fields on layer": "Ingen søgbare felter på laget",
+        "Method": "Metode"
     }
 };

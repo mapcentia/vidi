@@ -6,6 +6,8 @@
 
 'use strict';
 
+import { LAYER, SYSTEM_FIELD_PREFIX } from '../../../browser/modules/layerTree/constants';
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -18,7 +20,7 @@ let PANEL_DOCKING_PARAMETER = 1024;
  *
  * @type {*|exports|module.exports}
  */
-let utils, state, backboneEvents, layerTree, meta, cloud, infoClick, sqlQuery;
+let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
 
 let apiBridgeInstance = false;
 
@@ -53,6 +55,14 @@ const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
 const EDITOR_CONTAINER_ID = 'editor-attr-dialog';
 
+const serviceWorkerCheck = () => {
+    if (('serviceWorker' in navigator) === false || !navigator.serviceWorker || !navigator.serviceWorker.controller) {
+        const message = __(`The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)`);
+        console.warn(message);
+        alert(message);
+    }
+};
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -85,9 +95,8 @@ module.exports = {
         utils = o.utils;
         meta = o.meta;
         cloud = o.cloud;
-        state = o.state;
         sqlQuery = o.sqlQuery;
-        infoClick = o.infoClick;
+        layers = o.layers;
         layerTree = o.layerTree;
         switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
@@ -120,7 +129,7 @@ module.exports = {
         }, function () {
             $(this).on("click", function (e) {
                 let isVectorLayer = false;
-                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === 'vector') {
+                if ($(this).closest('.layer-item').find('.js-show-layer-control').data('gc2-layer-type') === LAYER.VECTOR) {
                     isVectorLayer = true;
                 }
 
@@ -133,6 +142,7 @@ module.exports = {
         // Listen to close of attr box
         $(".editor-attr-dialog__close-hide").on("click", function (e) {
             _self.stopEdit(editedFeature);
+            backboneEvents.get().trigger("sqlQuery:clear");
         });
 
         $(".editor-attr-dialog__expand-less").on("click", function () {
@@ -151,11 +161,6 @@ module.exports = {
                 $(".editor-attr-dialog__expand-less").show();
                 $(".editor-attr-dialog__expand-more").hide();
             });
-        });
-
-        // Listen to arrival of edit-tools
-        $(document).arrive('.gc2-edit-tools', function () {
-            $(this).css("visibility", "visible");
         });
 
         backboneEvents.get().on("ready:meta", function () {
@@ -270,7 +275,7 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column) {
+            if (key !== pkey && key !== f_geometry_column && key.indexOf(SYSTEM_FIELD_PREFIX) !== 0) {
                 let title = key;
                 if (fieldConf[key] !== undefined && fieldConf[key].alias) {
                     title = fieldConf[key].alias;
@@ -287,6 +292,9 @@ module.exports = {
                         case `int`:
                         case `integer`:
                             properties[key].type = `integer`;
+                            break;
+                        case `double precision`:
+                            properties[key].type = `number`;
                             break;
                         case `date`:
                             properties[key].format = `date-time`;
@@ -371,22 +379,16 @@ module.exports = {
         }
 
         const addFeature = () => {
+            serviceWorkerCheck();
+
             me.stopEdit();
-            infoClick.deactivate();
   
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
             const uiSchema = formBuildInformation.uiSchema;
 
-            /*
-            $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: "0"
-            }, 500, function () {
-                $(".editor-attr-dialog__expand-less").show();
-                $(".editor-attr-dialog__expand-more").hide();
-            });
-            */
+            _self.enableSnapping(type, false);
 
             // Start editor with the right type
             if (type === "POLYGON" || type === "MULTIPOLYGON") {
@@ -432,6 +434,8 @@ module.exports = {
                  */
                 const featureIsSaved = (result) => {
                     console.log('Editor: featureIsSaved, updating', schemaQualifiedName);
+
+                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
 
                     sqlQuery.reset(qstore);
 
@@ -481,7 +485,7 @@ module.exports = {
             addFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         addFeature();
                     }
@@ -496,6 +500,110 @@ module.exports = {
         }
     },
 
+    /**
+     * Enables snapping for created / edited feature
+     * 
+     * @param {String}  geometryType        Geometry type of created / edited feature
+     * @param {Boolean} featureAlreadyExist Specifies if feature already exists 
+     * @param {String}  enabledLayerName    Specifies what layer is enabled for snapping
+     * @param {String}  enabledFeatureId    Specifies what layer feature identifier is enabled for snapping
+     */
+    enableSnapping: function (geometryType, featureAlreadyExist = true, enabledFeature = false) {
+        let guideLayers = [];
+        layers.getMapLayers().map(layer => {
+            if (`id` in layer && layer.id && layer.id.indexOf(`v:`) === 0 && guideLayers.indexOf(layer.id) === -1) {
+                if (`_layers` in layer) {
+                    guideLayers.push(layer);
+                }
+            }
+        });
+
+        // Enabling snapping only if there are visible vector layers
+        if (guideLayers.length > 0) {
+            if (geometryType.toLowerCase() === `point` && featureAlreadyExist) {
+                markers[0].snapediting = new L.Handler.MarkerSnap(cloud.get().map, markers[0]);                
+                guideLayers.map(layer => { markers[0].snapediting.addGuideLayer(layer); });
+                markers[0].snapediting.enable();
+            } else {
+                if (enabledFeature) {
+                    enabledFeature._snapping_active = true;
+                }
+
+                var snap = new L.Handler.MarkerSnap(cloud.get().map);
+                guideLayers.map(layer => { snap.addGuideLayer(layer); });
+                var snapMarker = L.marker(cloud.get().map.getCenter(), {
+                    icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
+                    opacity: 1,
+                    zIndexOffset: 1000
+                });
+
+                if (featureAlreadyExist === false) snap.watchMarker(snapMarker);
+
+                cloud.get().map.on('editable:vertex:dragstart', function (e) {
+                    snap.watchMarker(e.vertex);
+                });
+                cloud.get().map.on('editable:vertex:dragend', function (e) {
+                    snap.unwatchMarker(e.vertex);
+                });
+                cloud.get().map.on('editable:drawing:start', function () {
+                    this.on('mousemove', followMouse);
+                });
+                cloud.get().map.on('editable:drawing:end', function () {
+                    this.off('mousemove', followMouse);
+                    snapMarker.remove();
+                });
+                cloud.get().map.on('editable:drawing:click', function (e) {
+                    // Leaflet copy event data to another object when firing,
+                    // so the event object we have here is not the one fired by
+                    // Leaflet.Editable; it's not a deep copy though, so we can change
+                    // the other objects that have a reference here.
+                    var latlng = snapMarker.getLatLng();
+                    e.latlng.lat = latlng.lat;
+                    e.latlng.lng = latlng.lng;
+                });
+
+                snapMarker.on('snap', function (e) {
+                    snapMarker.addTo(cloud.get().map);
+                });
+                snapMarker.on('unsnap', function (e) {
+                    snapMarker.remove();
+                });
+                var followMouse = function (e) {
+                    snapMarker.setLatLng(e.latlng);
+                }
+            }
+        }
+    },
+
+    // @todo the initial value is not parsed as number
+
+    /**
+     * Removes duplicates from polygon data (duplicate is two or more consecutive vertices with same coordinates)
+     * 
+     * @param {Object} geoJSON GeoJSON data
+     * 
+     * @returns {Object}
+     */
+    removeDuplicates: function (geoJSON) {
+        geoJSON.geometry.coordinates.map((polygon, index) => {
+            let result = [];
+            let polygonCoordinates = polygon;
+
+            let hashTable = {};
+            polygonCoordinates.map(coordinates => {
+                let key = (coordinates[0] + `:` + coordinates[1]);
+                if (key in hashTable === false) {
+                    result.push(coordinates);
+                    hashTable = {};
+                    hashTable[key] = true;
+                }
+            });
+
+            geoJSON.geometry.coordinates[index] = result;
+        });
+
+        return geoJSON;
+    },
 
     /**
      * Change existing feature
@@ -506,8 +614,9 @@ module.exports = {
     edit: function (e, k, qstore, isVectorLayer = false) {
         editedFeature = e;
         nonCommitedEditedFeature = {};
-
         const editFeature = () => {
+            serviceWorkerCheck();
+
             let React = require('react');
 
             let ReactDOM = require('react-dom');
@@ -530,7 +639,6 @@ module.exports = {
             }
 
             me.stopEdit();
-            infoClick.deactivate();
 
             e.on(`editable:editing`, () => {
                 featureWasEdited = true;
@@ -588,15 +696,29 @@ module.exports = {
                     break;
             }
 
+            _self.enableSnapping(e.feature.geometry.type, true, e);
+
             // Delete some system attributes
             let eventFeatureCopy = JSON.parse(JSON.stringify(e.feature));
             delete eventFeatureCopy.properties._vidi_content;
             delete eventFeatureCopy.properties._id;
 
             // Set NULL values to undefined, because NULL is a type
-            Object.keys(eventFeatureCopy.properties).map(function (key) {
+            Object.keys(eventFeatureCopy.properties).map(key => {
                 if (eventFeatureCopy.properties[key] === null) {
                     eventFeatureCopy.properties[key] = undefined;
+                }
+            });
+
+            // Transform field values according to their types
+            Object.keys(fields).map(key => {
+                switch (fields[key].type) {
+                    case `double precision`:
+                        if (eventFeatureCopy.properties[key]) {
+                            eventFeatureCopy.properties[key] = parseFloat(eventFeatureCopy.properties[key]);
+                        }
+                    default:
+                        break;
                 }
             });
 
@@ -636,6 +758,10 @@ module.exports = {
                     }
                 });
 
+                if (eventFeatureCopy.geometry.type === `Polygon`) {
+                    GeoJSON = _self.removeDuplicates(GeoJSON);
+                }
+
                 // Set the GeoJSON FeatureCollection
                 // This is committed to GC2
                 featureCollection = {
@@ -647,6 +773,8 @@ module.exports = {
 
                 const featureIsUpdated = () => {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
+
+                    switchLayer.registerLayerDataAlternation(schemaQualifiedName);
  
                     sqlQuery.reset(qstore);
                     me.stopEdit();
@@ -656,6 +784,8 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
                 };
+
+                console.log(`### featureCollection`, featureCollection);
 
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
@@ -708,7 +838,7 @@ module.exports = {
             editFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (`id` in editedFeature && apiBridgeInstance.offlineModeIsEnforcedForLayer(editedFeature.id.replace(`v:`, ``))) {
                     if (confirm(confirmMessage)) {
                         editFeature();
                     }
@@ -761,10 +891,11 @@ module.exports = {
 
         let schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
             metaDataKeys = meta.getMetaDataKeys(),
-            GeoJSON = e.toGeoJSON(),
-            gid = GeoJSON.properties[metaDataKeys[schemaQualifiedName].pkey];
+            GeoJSON = e.toGeoJSON();
 
         const deleteFeature = () => {
+            serviceWorkerCheck();
+
             const featureIsDeleted = () => {
                 console.log('Editor: featureIsDeleted, isVectorLayer:', isVectorLayer);
 
@@ -796,7 +927,7 @@ module.exports = {
             deleteFeature();
         } else {
             this.checkIfAppIsOnline().then(() => {
-                if (apiBridgeInstance.offlineModeIsEnforced()) {
+                if (apiBridgeInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                     if (confirm(confirmMessage)) {
                         deleteFeature();
                     }
@@ -816,10 +947,6 @@ module.exports = {
      * @param e
      */
     stopEdit: function (editedFeature) {
-        infoClick.activate();
-
-        let me = this;
-
         cloud.get().map.editTools.stopDrawing();
 
         if (editor) {
@@ -828,6 +955,10 @@ module.exports = {
 
         // If feature was edited, then reload the layer
         if (editedFeature) {
+            if (`snapediting` in editedFeature && editedFeature.snapediting) {
+                editedFeature.snapediting.disable();
+            }
+
             // No need to reload layer if point feature was edited, as markers are destroyed anyway
             if (editedFeature.feature.geometry.type !== `Point` && editedFeature.feature.geometry.type !== `MultiPoint`) {
                 editedFeature.disableEdit();

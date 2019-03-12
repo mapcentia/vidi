@@ -14,6 +14,7 @@ module.exports = {
 
     // ========================================
     // Which back-end is used. "gc2" or "carto"
+    // ONLY GC2 IS SUPPORTED
     // ========================================
 
     "backend": "gc2",
@@ -25,7 +26,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "https://gc2.mapcentia.com"
+        "host": "GC2_HOST"
     },
 
 
@@ -39,7 +40,6 @@ module.exports = {
     "print": {
         "templates": {
 
-
             // ================================
             // The "print" template is build-in
             // ================================
@@ -48,51 +48,51 @@ module.exports = {
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
-                        mapsizeMm: [280, 192]
+                        mapsizeMm: [280, 167]
                     },
                     p: {
                         mapsizePx: [730, 1060],
-                        mapsizeMm: [192, 280]
+                        mapsizeMm: [167, 280]
                     }
                 },
                 A3: {
                     l: {
                         mapsizePx: [1525, 1065],
-                        mapsizeMm: [401, 282]
+                        mapsizeMm: [403, 255]
                     },
                     p: {
                         mapsizePx: [1065, 1525],
-                        mapsizeMm: [282, 401]
+                        mapsizeMm: [255, 403]
                     }
                 },
                 A2: {
                     l: {
                         mapsizePx: [2185, 1525],
-                        mapsizeMm: [576, 400]
+                        mapsizeMm: [578, 376]
                     },
                     p: {
                         mapsizePx: [1525, 2185],
-                        mapsizeMm: [400, 576]
+                        mapsizeMm: [376, 578]
                     }
                 },
                 A1: {
                     l: {
                         mapsizePx: [3120, 2185],
-                        mapsizeMm: [820, 576]
+                        mapsizeMm: [826, 552]
                     },
                     p: {
                         mapsizePx: [2185, 3120],
-                        mapsizeMm: [576, 820]
+                        mapsizeMm: [552, 826]
                     }
                 },
                 A0: {
                     l: {
                         mapsizePx: [4430, 3120],
-                        mapsizeMm: [1173, 825]
+                        mapsizeMm: [1172, 800]
                     },
                     p: {
                         mapsizePx: [3120, 4430],
-                        mapsizeMm: [825, 1173]
+                        mapsizeMm: [800, 1173]
                     }
                 }
             },
@@ -131,17 +131,17 @@ module.exports = {
 
     "extensions": {
         "browser": [
-            //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
-            //{"layerSearch": ["index", "controller"]},
+            {"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             {"streetView": ["index"]},
             {"coordinates": ["index"]},
             {"offlineMap": ["index"]},
-            {"session": ["index"]}
+            {"session": ["index"]},
+            {"editor": ["index"]},
+
         ],
         "server": [
-            /*{conflictSearch: ["index"]},*/
-            /*{layerSearch: ["index", "indexInEs"]},*/
-            {"session": ["index"]}
+            {"conflictSearch": ["index"]},
+            {"session": ["index"]},
         ]
     },
 
@@ -178,7 +178,7 @@ module.exports = {
     // (Database name in GC2 and account name in Carto)
     // ==========================================================
 
-    "autoLoadingConfig": true,
+    "autoLoadingConfig": false,
 
 
     // ====================================================================================
@@ -186,7 +186,7 @@ module.exports = {
     // OR URL / auto loading is returning a 404 or a invalid jSON file
     // ====================================================================================
 
-    "defaultConfig": "vidi.json",
+    //"defaultConfig": "vidi.json",
 
 
     // =============================================================
@@ -215,10 +215,12 @@ module.exports = {
     // ===================================================
 
     "enabledExtensions": [
-        /*"conflictSearch",*/
+        "conflictSearch",
         "streetView",
-        "layerSearch",
-        "coordinates"
+        "session",
+        "coordinates",
+        "offlineMap",
+        "editor",
     ],
 
 

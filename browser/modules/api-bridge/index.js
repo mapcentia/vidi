@@ -8,7 +8,7 @@
 
 const Queue = require('./Queue');
 
-const LOG = false;
+const { LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 let singletoneInstance = false;
 
@@ -26,16 +26,17 @@ class APIBridge {
     constructor() {
         console.log('APIBridge: initializing');
 
-        this._forcedOffline = false;
+        this._forcedOfflineLayers = {};
         this._queue = new Queue((queueItem, queue) => {
             let result = new Promise((resolve, reject) => {
+                let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
+                const pkey = (queueItem.meta && queueItem.meta.pkey ? queueItem.meta.pkey : QUEUE_DEFAULT_PKEY);
+
                 if (LOG) {
                     console.log('APIBridge: in queue processor', queueItem);
-                    console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforced());
+                    console.log('APIBridge: offline mode is enforced:', singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName));
                 }
-
-                let schemaQualifiedName = queueItem.meta.f_table_schema + "." + queueItem.meta.f_table_name;
-
+                
                 let generalRequestParameters = {
                     dataType: 'json',
                     contentType: 'application/json',
@@ -93,9 +94,9 @@ class APIBridge {
                 switch (queueItem.type) {
                     case Queue.ADD_REQUEST:
                         let queueItemCopy = JSON.parse(JSON.stringify(queueItem));
-                        delete queueItemCopy.feature.features[0].properties.gid;
+                        delete queueItemCopy.feature.features[0].properties[pkey];
 
-                        if (singletoneInstance.offlineModeIsEnforced()) {
+                        if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                             
                             if (LOG) console.log('APIBridge: offline mode is enforced, add request was not performed');
                             
@@ -109,13 +110,13 @@ class APIBridge {
                         }
                         break;
                     case Queue.UPDATE_REQUEST:
-                        if (queueItem.feature.features[0].properties.gid < 0) {
+                        if (queueItem.feature.features[0].properties[pkey] < 0) {
                             
-                            console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (update), skipping');
+                            console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (update), skipping`);
                             
                             resolve();
                         } else {
-                            if (singletoneInstance.offlineModeIsEnforced()) {
+                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
                                 
                                 if (LOG) console.log('APIBridge: offline mode is enforced, update request was not performed');
 
@@ -131,20 +132,20 @@ class APIBridge {
 
                         break;
                     case Queue.DELETE_REQUEST:
-                        if (queueItem.feature.features[0].properties.gid < 0) {
+                        if (queueItem.feature.features[0].properties[pkey] < 0) {
                             
-                            if (LOG) console.warn('APIBridge: feature with virtual gid is not supposed to be commited to server (delete), skipping');
+                            if (LOG) console.warn(`APIBridge: feature with virtual ${pkey} is not supposed to be commited to server (delete), skipping`);
 
                             resolve();
                         } else {
-                            if (singletoneInstance.offlineModeIsEnforced()) {
-                                
-                                if (LOG) console.log('APIBridge: offline mode is enforced, delete request was not performed');
+                            if (singletoneInstance.offlineModeIsEnforcedForLayer(schemaQualifiedName)) {
+
+                                if (LOG) console.log(`APIBridge: offline mode is enforced, delete request was not performed`);
 
                                 reject();
                             } else {
                                 $.ajax(Object.assign(generalRequestParameters, {
-                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties.gid,
+                                    url: "/api/feature/" + queueItem.db + "/" + schemaQualifiedName + "." + queueItem.meta.f_geometry_column + "/" + queueItem.feature.features[0].properties[pkey],
                                     type: "DELETE"
                                 }));
                             }
@@ -199,21 +200,26 @@ class APIBridge {
     }
 
     /**
-     * Sets offline mode
-     * 
+     * Sets offline mode for specific layer
+     *
+     * @param {String}  layerKey Layer key
+     * @param {Boolean} mode     Specifies the offline mode
+     *  
      * @param {Function} listener Listening function
      */
-    setOfflineMode(mode) {
-        this._forcedOffline = mode;
+    setOfflineModeForLayer(layerKey, mode) {
+        this._forcedOfflineLayers[layerKey] = mode;
     }
 
     /**
-     * Tells if the offline mode is currently enforced
+     * Tells if the offline mode is currently enforced for specific layer
+     * 
+     * @param {String} layerKey Layer key
      * 
      * @return {Boolean}
      */
-    offlineModeIsEnforced() {
-        return this._forcedOffline;
+    offlineModeIsEnforcedForLayer(layerKey) {
+        return (this._forcedOfflineLayers[layerKey] ? true : false);
     }
 
     /**
@@ -244,12 +250,14 @@ class APIBridge {
             let currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
+
                 if (itemParentTable === tableId) {
                     switch (item.type) {
                         case Queue.DELETE_REQUEST:
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
-                                if (features[i].properties.gid === item.feature.features[0].properties.gid) {
+                                if (features[i].properties[pkey] === item.feature.features[0].properties[pkey]) {
 
                                     if (LOG) console.log('APIBridge: ## DELETE', item);
 
@@ -267,26 +275,29 @@ class APIBridge {
             // Deleting non-commited feature management requests
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
+
                 let localQueueItems = this._queue.getItems();
-                let gidsToRemove = [];
+                let primaryKeysToRemove = [];
                 if (itemParentTable === tableId) {
-                    if (item.type === Queue.DELETE_REQUEST && item.feature.features[0].properties.gid < 0) {
-                        let virtualGid = item.feature.features[0].properties.gid;
+                    if (item.type === Queue.DELETE_REQUEST && item.feature.features[0].properties[pkey] < 0) {
+                        let virtualPrimaryKey = item.feature.features[0].properties[pkey];
                         localQueueItems.map(localItem => {
                             if ([Queue.ADD_REQUEST, Queue.UPDATE_REQUEST].indexOf(localItem.type) !== -1
-                                && localItem.feature.features[0].properties.gid === virtualGid) {
-                                gidsToRemove.push(virtualGid);
+                                && localItem.feature.features[0].properties[pkey] === virtualPrimaryKey) {
+                                    primaryKeysToRemove.push(virtualPrimaryKey);
                             }
                         });
                     }
                 }
 
-                this._queue.removeByGID(gidsToRemove);
+                this._queue.removeByPrimaryKeys(primaryKeysToRemove);
             });
 
             currentQueueItems = this._queue.getItems();
             currentQueueItems.map(item => {
                 let itemParentTable = 'v:' + item.meta.f_table_schema + '.' + item.meta.f_table_name;
+                const pkey = (item.meta && item.meta.pkey ? item.meta.pkey : QUEUE_DEFAULT_PKEY);
 
                 item.feature.features[0].meta = {};
                 item.feature.features[0].meta.apiRecognitionStatus = 'pending';
@@ -311,7 +322,7 @@ class APIBridge {
                         case Queue.UPDATE_REQUEST:
                             features = copyArray(response.features);
                             for (let i = 0; i < features.length; i++) {
-                                if (features[i].properties.gid === item.feature.features[0].properties.gid) {
+                                if (features[i].properties[pkey] === item.feature.features[0].properties[pkey]) {
 
                                     if (LOG) console.log('APIBridge: ## UPDATE', item);
 
@@ -345,8 +356,9 @@ class APIBridge {
         let copiedFeature = JSON.parse(JSON.stringify(feature));
         let date = new Date();
         let timestamp = date.getTime();
+        const pkey = (meta && meta.pkey ? meta.pkey : QUEUE_DEFAULT_PKEY);
 
-        copiedFeature.features[0].properties['gid'] = (-1 * timestamp);
+        copiedFeature.features[0].properties[pkey] = (-1 * timestamp);
 
         this._validateFeatureData(db, meta, copiedFeature);
         return this._queue.pushAndProcess({ type: Queue.ADD_REQUEST, feature: copiedFeature, db, meta });

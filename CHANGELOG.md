@@ -5,7 +5,83 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
-- Specific vector layers can be cached in browser including applied filters. 
+- Layers which have been switch off, will not be removed from legend.
+- No re-load of legend if its not necessary.
+- Home button on embed.tmpl will set the map to the initial extent if a snapshot-state is invoked.
+- Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
+
+## [2019.1.0.rc2] - 2019-01-03
+- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
+- WebGL layer type added.
+- Support of MVT base layers. 
+- Hide login button if session module is disabled.
+
+## [2019.1.0.rc1] - 2019-14-02
+### Added
+- Fall back mechanism for base layers. If the current base layer responses with error codes the next one is switched no.
+- Touch drag enabled in layer tree.
+- Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
+- Visual grouping of map tools in GUI.
+- Support of Mapbox Vector Tiles (MVT). 
+- Cross hair cursor when info click is on.
+- When drawing or editing with the Editor module, snapping to other vector layers is added.
+- Unify filter methods for vector and tile layers.
+- After a query with the sqlQuery module is made, its now possible to store the query as a new "virtual" layer. The new layer is a vector layer, which acts like any other vector layer.
+
+### Changed
+- State shots are now stored in GC2 database using the new keyvalue API.
+- Protected WMS layers requests result in `401` being routed through the WMS backend. A authentication is implemented in order to request protected WMS layers correctly.
+- One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
+- Google API files are no longer requested locally, because things break when Google makes updates. The files are requested remotely and are not cached in Service Workers due to CORS issues. The Google API doesn't work offline anyway. Google API must be set in GC2 config (App.php) with the kay ``
+```javascript
+module.exports = {
+   set: function (o) {},
+   init: function () {
+     // Reset state and clear any effects of the module
+     backboneEvents.get().on("reset:all", () => {});
+ 
+     // Stop listening to any events, deactivate controls, but
+     // keep effects of the module until they are deleted manually or reset:all is emitted
+     backboneEvents.get().on("deactivate:all", () => {});
+ 
+     // Activates module
+     backboneEvents.get().on("on:myModule", () => {});
+ 
+     // Deactivates module
+     backboneEvents.get().on("off:myModule", () => {});
+   }
+ }
+ ```
+
+## [2018.2.0.rc1] - 2018-07-12
+### Added
+- New mode for double base-layers: Overlay base-layers, where the opacity of the top one can be changed
+- Filters for WMS single tile layers. Predefine filters in GC2 Meta, which will be displayed as checkboxes in a layertree panel. For now only supports QGIS layers.
+
+### Changed
+- Vector filters can now be applied before switching a vector layer on.
+- Table view are moved inside the layer tree, which makes it possible to see more than one table at a time.
+- Table view clicks now pan to feature - not zooming.
+- Popups for raster and vectors are now similar.
+
+### Fixed
+- When clicking in a table with points, panning now works.
+- Workaround missing Service Workers features in Edge 17/18.
+- Filters work in Edge 17/18.
+- A lot of smaller issues were fixed.
+
+## [2018.1] - 2018-07-12
+### Added
+- Specific vector layers can be set to offline. If offline the cached version of the vector layer is always used. Also if browser is reloaded.
+- Control to switch all vector layers on and off. See above.
+- Vector layers can now be set to two different load strategies: Static and Dynamic. The former is default and will load the entire layer at once. The latter will load only whats inside the view port (plus a buffer) and fetch new data when needed (when zoom/pan occurs). The load strategy is controlled by the GC2 `load_strategy` meta setting. Can be either `s` or `d`.  
+- New map controls: Reset zoom, set previous/next extent and box-zoom. The latter now has a button, before this could only be achieved by holding shift down and drag the zoom box. 
+- Opacity slider for all tile layers.
+
+### Fixed
+- Preset base layer in URL will not longer change to `undefined` when resizing browser during refresh.
+- System field with prefix `gc2_` is no longer displayed in Editor attribute form.
+- Stalling of print is fixed. 
 
 
 ## [2018.1.0.RC1] - 2018-10-9
@@ -41,5 +117,5 @@ and this project adheres to [CalVer](https://calver.org/).
 - Calculation of area on drawing module now works.
 
 ### Security
-- A lot of modules are updated.
+- A lot of modules where updated.
 

@@ -1,374 +1,377 @@
 /*
- * @author     Martin Høgh <mh@mapcentia.com>
+ * @author     Alexander Shumilov
  * @copyright  2013-2018 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-let fs = require('fs');
-let crypto = require('crypto');
+let config = require('./../../config/config');
 let express = require('express');
 let router = express.Router();
+const uuid = require('uuid/v1');
+const request = require('request');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
-const storage = `./temporary-state-storage.json`;
-const throwError = (response, errorCode) => {
+
+const throwError = (response, error, data) => {
+    console.error(`Error occured: ${error}`);
+    if (data) console.error(`Error details: ${JSON.stringify(data)}`);
+
     response.status(400);
-    response.json({ error: errorCode });
+    response.json({ error });
 };
 
-const getSnapshots = (browserId = false, userId = false, all = false) => {
-    return new Promise((resolve, reject) => {
-        fs.readFile(storage, (error, data) => {
-            if (error) {
-                console.log(error);
-                reject(`UNABLE_TO_READ_FILE`);
-            } else {
-                let result = [];
-                let parsedData = JSON.parse(data.toString());
-                parsedData.map(item => {
-                    if (!item.userId && !item.browserId) {
-                        throw new Error(`Unable to detect to whom snapshot belongs`);
-                    }
+if (!config.gc2.host) throw new Error(`Unable to get the GC2 host from config`);
+const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
 
-                    if (all) {
-                        result.push(item);
-                    } else {
-                        if (browserId && item.browserId && item.browserId === browserId) {
-                            result.push(item);
-                        } else if (userId && item.userId && item.userId === userId) {
-                            result.push(item);
-                        }
+/**
+ * Return identifiers of the currently authenticated user
+ * 
+ * @returns {Object}
+ */
+const getCurrentUserIdentifiers = (request) => {
+    let browserId = false;
+    if (TRACKER_COOKIE_NAME in request.cookies) {
+        browserId = request.cookies[TRACKER_COOKIE_NAME];
+    }
+
+    let userId = false;
+    if (`gc2UserName` in request.session && request.session.gc2UserName) {
+        userId = request.session.gc2UserName;
+    }
+
+    return { browserId, userId };
+};
+
+/*
+How state snapshot is stored in the key-value storage:
+
+{
+    // Snapshot identifier, used as a key in storage
+    id: "state_snapshot_123",
+    // Optional title
+    title: "abc",
+    // Database
+    database: "test",
+    // Schema
+    schema: "schema",
+    // Host
+    host: "https://example.com/",
+    // Property that specifies owner of the snapshot
+    browserId: "123" || userId: "123",
+    // Snapshot body
+    body: {
+        map: { ... }
+        modules: { ... }
+    }
+}
+
+*/
+
+/**
+ * List available state snapshots
+ */
+router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
+    let { browserId, userId } = getCurrentUserIdentifiers(req);
+
+    if (!browserId && !userId) {
+        res.send([]);
+    } else {
+        request({
+            method: 'GET',
+            encoding: 'utf8',
+            uri: API_LOCATION + `/` + req.params.dataBase
+        }, (error, response) => {
+            if (error) {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
+                return;
+            }
+
+            let parsedBody = false;
+            try {
+                let localParsedBody = JSON.parse(response.body);
+                parsedBody = localParsedBody;
+            } catch (e) {}
+
+            if (parsedBody) {
+                // Filter by browser and user ownership
+                let results = [];
+                parsedBody.data.map(item => {
+                    let parsedSnapshot = JSON.parse(item.value);
+                    if (parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                        parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                        results.push(parsedSnapshot);
                     }
                 });
 
-                resolve(result);
+                res.send(results);
+            } else {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
+                    body: response.body,
+                    url: API_LOCATION + `/` + req.params.dataBase
+                });
             }
         });
-    });
-};
+    }
+});
 
-const saveSnapshots = (snapshots) => {
-    return new Promise((resolve, reject) => {
-        fs.writeFile(storage, JSON.stringify(snapshots), (error) => {
-            if (error) {
-                console.log(error);
-                reject(`UNABLE_TO_WRITE_FILE`);
-            } else {                        
-                resolve();
+/**
+ * Get specific state snapshots
+ */
+router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
+    let { browserId, userId } = getCurrentUserIdentifiers(req);
+
+    if (!browserId && !userId) {
+        res.send([]);
+    } else {
+        request({
+            method: 'GET',
+            encoding: 'utf8',
+            uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
+        }, (error, response) => {
+            let parsedBody = false;
+            try {
+                let localParsedBody = JSON.parse(response.body);
+                parsedBody = localParsedBody;
+            } catch (e) {}
+
+            if (parsedBody) {
+                if (parsedBody.data === false) {
+                    res.status(404);
+                    res.json({ error: `NOT_FOUND` });
+                } else {
+                    res.send(parsedBody.data.value);
+                }
+            } else {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
             }
         });
-    });
+    }
+});
+
+/**
+ * Generates token for state snapshot
+ * 
+ * @param {Object} stateSnapshot Tokenized state snapshot
+ * 
+ * @returns {String}
+ */
+const generateToken = (stateSnapshot) => {
+    let stateSnapshotCleanedUpCopy = Object.assign({}, stateSnapshot);
+
+    // Delete the token property, so the token itself is not encoded
+    if (stateSnapshotCleanedUpCopy.token !== undefined) {
+        delete stateSnapshotCleanedUpCopy.token;
+    }
+
+    // No need to carry the "snapshot" property
+    stateSnapshotCleanedUpCopy.snapshot = false;
+
+    // Specifying "config" and "tmpl" options at higher level
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.config) stateSnapshotCleanedUpCopy.config = stateSnapshot.snapshot.meta.config;
+    if (stateSnapshot.snapshot.meta && stateSnapshot.snapshot.meta.tmpl) stateSnapshotCleanedUpCopy.tmpl = stateSnapshot.snapshot.meta.tmpl;
+
+    let token = Buffer.from(JSON.stringify(stateSnapshotCleanedUpCopy)).toString('base64');
+    return token;
 };
 
-const appendToSnapshots = (snapshot, browserId) => {
-    return new Promise((resolve, reject) => {
-        getSnapshots(false, false, true).then(data => {
-            let hash = crypto.randomBytes(20).toString('hex');
-            snapshot.id = hash;
+/**
+ * Create state snapshot
+ */
+router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
+    if (`snapshot` in req.body) {
+        let { browserId, userId } = getCurrentUserIdentifiers(req);
 
+        let save = false;
+        let stateSnapshotCopy = JSON.parse(JSON.stringify(req.body));
+        if ((req.body.anonymous === 'true' || req.body.anonymous === true) && browserId) {
+            stateSnapshotCopy.browserId = browserId;
+            save = true;
+        } else if ((req.body.anonymous === 'false' || req.body.anonymous === false) && userId) {
+            stateSnapshotCopy.userId = userId;
+            save = true;
+        } else {
+            throwError(res, 'INVALID_SNAPSHOT_OWNERSHIP');
+        }
+
+        if (save) {
+            let generatedKey = `state_snapshot_` + uuid();
             let currentDate = new Date();
-            snapshot.created_at = currentDate.toISOString();
+            stateSnapshotCopy.id = generatedKey;
+            stateSnapshotCopy.created_at = currentDate.toISOString();
 
-            if (browserId) {
-                snapshot.browserId = browserId;
+            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database || !stateSnapshotCopy.schema) {
+                throwError(res, 'MISSING_DATA');
             } else {
-                snapshot.userId = 100; // @todo Provide GC2 user id (owner's)
-            }
+                let token = generateToken(stateSnapshotCopy);
+                stateSnapshotCopy.token = token;
 
-            data.push(snapshot);
-            saveSnapshots(data).then(() => {
-                resolve(hash);
-            }).catch(errorCode => {
-                reject(errorCode);
-            });
+                request({
+                    method: 'POST',
+                    encoding: 'utf8',
+                    uri: API_LOCATION + `/` + req.params.dataBase + `/` + generatedKey,
+                    form: JSON.stringify(stateSnapshotCopy)
+                }, (error, response) => {
+                    let parsedBody = false;
+                    try {
+                        let localParsedBody = JSON.parse(response.body);
+                        parsedBody = localParsedBody;
+                    } catch (e) {}
 
-        }).catch(errorCode => {
-            reject(errorCode);
-        });
-    });
-};
-
-const updateSnapshot = (snapshot) => {
-    return new Promise((resolve, reject) => {
-        if (`title` in snapshot === false || !snapshot.title
-            || `id` in snapshot === false || !snapshot.id
-            || `snapshot` in snapshot === false || !snapshot.snapshot) {
-            reject(`INCOMPLETE_DATA_WAS_PROVIDED`);
-        } else {
-            getSnapshots(false, false, true).then(data => {
-                let itemWasUpdated = false;
-                for (let i = 0; i < data.length; i++) {
-                    if (data[i].id === snapshot.id) {
-                        let item = data.splice(i, 1).pop();
-                        item.title = snapshot.title;
-                        item.snapshot = snapshot.snapshot;
-
-                        itemWasUpdated = true;
-                        data.push(item);
-                        break;
-                    }
-                }
-
-                if (itemWasUpdated) {
-                    saveSnapshots(data).then(() => {
-                        resolve();
-                    }).catch(errorCode => {
-                        reject(errorCode);
-                    });
-                } else {
-                    reject(`UNABLE_TO_FIND_STATE_SNAPSHOT`);
-                }
-            }).catch(errorCode => {
-                reject(errorCode);
-            });
-        }
-    });
-};
-
-/**
- * Listing available state snapshots
- */
-router.get('/api/state-snapshots', (request, response, next) => {
-    fs.stat(storage, (error, stats) => {
-        if (error) fs.writeFileSync(storage, `[]`);
-
-        /*
-            Get all state snapshots that have current browserId (taken from
-            cookies) and (if user is authorized) userId
-        */
-
-        // Mock code <--
-        let browserId = false;
-        if (TRACKER_COOKIE_NAME in request.cookies) {
-            browserId = request.cookies[TRACKER_COOKIE_NAME];
-        }
-
-        let userId = false;
-        if (`connect.gc2` in request.cookies) {
-            userId = 100;
-        }
-        // -->
-
-        getSnapshots(browserId, userId).then(data => {
-            response.json(data);
-        }).catch(error => {
-            console.log(error);
-            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-        });
-    });
-});
-
-/**
- * Returning specific state snapshot
- */
-router.get('/api/state-snapshots/:id', (request, response, next) => {
-    fs.stat(storage, (error, stats) => {
-        if (error) fs.writeFileSync(storage, `[]`);
-
-        /*
-            Get specific state snapshot with identifier
-        */
-        getSnapshots(false, false, true).then(data => {
-            let result = false;
-            data.map(item => {
-                if (item.id === request.params.id) {
-                    result = item;
-                    return false;
-                }
-            });
-
-            if (result) {
-                response.json(result);
-            } else {
-                throwError(response, 'INVALID_SNAPSHOT_ID');
-            }
-        }).catch(error => {
-            console.log(error);
-            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-        }); 
-    });
-});
-
-/**
- * Update specific state snapshot
- */
-router.put('/api/state-snapshots/:id', (request, response, next) => {
-    fs.stat(storage, (error, stats) => {
-        if (error) fs.writeFileSync(storage, `[]`);
-
-        /*
-            Update specific state snapshot with identifier, clear the browserId
-            field and set userId field with the authorized user identifier
-        */
-        getSnapshots(false, false, true).then(data => {
-            let searched = false;
-            for (let i = 0; i < data.length; i++) {
-                if (data[i].id === request.params.id) {
-                    searched = data.splice(i, 1).pop();
-                    break;
-                }
-            }
-
-            if (searched) {
-                let newElement = JSON.parse(JSON.stringify(searched));
-                newElement.anonymous = false;
-                newElement.browserId = false;
-                newElement.userId = 100;
-                data.push(newElement);
-
-                saveSnapshots(data).then(() => {
-                    response.json({ status: 'success' });
-                }).catch(errorCode => {
-                    throwError(response, errorCode);
+                    if (parsedBody) {
+                        if (parsedBody.success) {
+                            res.json({
+                                id: generatedKey,
+                                token: token,
+                                status: 'success'
+                            });
+                        } else {
+                            throwError(res, parsedBody.message);
+                        }
+                    } else {
+                        throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    } 
                 });
-            } else {
-                throwError(response, 'SNAPSHOT_WAS_NOT_FOUND');
             }
-        }).catch(error => {
-            console.log(error);
-            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
-        }); 
-    });
-});
-router.post('/api/state-snapshots', (request, response, next) => {
-    if (`snapshot` in request.body) {
-
-        /*
-            If "anonymous" parameter is set to "true", then stored state snapshot should belong
-            to the browser, so the browserId should be set. Otherwise, the created state snapshot
-            belongs to current user and has its userId field set.
-        */
-        if (request.body.anonymous === 'true' || request.body.anonymous === true) {
-            if (TRACKER_COOKIE_NAME in request.cookies) {
-                appendToSnapshots(request.body, request.cookies[TRACKER_COOKIE_NAME]).then(id => {
-                    response.json({ id, status: 'success' });
-                }).catch(errorCode => {
-                    throwError(response, errorCode);
-                });
-            } else {
-                throw new Error(`Cannot find ${TRACKER_COOKIE_NAME} in cookies`);
-            }
-        } else if (request.body.anonymous === 'false' || request.body.anonymous === false) {
-            // @todo Push to GC2
-            // By this moment user has to be authorized, otherwise 403 will be returned
-            appendToSnapshots(request.body).then(id => {
-                response.json({ id, status: 'success' });
-            }).catch(errorCode => {
-                throwError(response, errorCode);
-            });
-        } else {
-            throwError(response, 'INVALID_SNAPSHOT_OWNERSHIP');
         }
     } else {
-        throwError(response, 'MISSING_DATA');
+        throwError(res, 'MISSING_DATA');
     }
 });
 
-router.put('/api/state-snapshots', (request, response, next) => {
-    // Mock code <--
-    let browserId = false;
-    if (TRACKER_COOKIE_NAME in request.cookies) {
-        browserId = request.cookies[TRACKER_COOKIE_NAME];
-    }
-
-    let userId = false;
-    if (`connect.gc2` in request.cookies) {
-        userId = 100;
-    }
-    // -->
-
-    if (`snapshot` in request.body) {
-        getSnapshots(false, false, true).then(data => {
-            let searched = false;
-            for (let i = 0; i < data.length; i++) {
-                if (data[i].id === request.body.id) {
-                    searched = data.splice(i, 1).pop();
-                    break;
-                }
-            }
-
-            let updateAccessGranted = false;
-            if (searched) {
-                if (searched.browserId && searched.browserId.length > 0) {
-                    if (searched.browserId === browserId) {
-                        updateAccessGranted = true;
-                    }
-                } else {
-                    if (searched.userId === userId) {
-                        updateAccessGranted = true;
-                    }
-                }
-
-                if (updateAccessGranted) {
-                    updateSnapshot(request.body).then(id => {
-                        response.json({ id, status: 'success' });
-                    }).catch(errorCode => {
-                        throwError(response, errorCode);
+/**
+ * Seize state snapshot
+ */
+router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, next) => {
+    let { browserId, userId } = getCurrentUserIdentifiers(req);
+    if (userId && browserId) {
+        // Get the specified state snapshot
+        request({
+            method: 'GET',
+            encoding: 'utf8',
+            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+        }, (error, response) => {
+            if (response.body.data === false) {
+                throwError(res, 'INVALID_SNAPSHOT_ID');
+            } else {
+                let parsedBody = false;
+                try {
+                    let localParsedBody = JSON.parse(response.body);
+                    parsedBody = localParsedBody;
+                } catch (e) {}
+    
+                if (parsedBody) {
+                    let parsedSnapshotData = JSON.parse(parsedBody.data.value);
+                    parsedSnapshotData.browserId = false;
+                    parsedSnapshotData.anonymous = false;
+                    parsedSnapshotData.userId = userId;
+                    request({
+                        method: 'PUT',
+                        encoding: 'utf8',
+                        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                        form: JSON.stringify(parsedSnapshotData)
+                    }, (error, response) => {
+                        res.send({ status: 'success' });
                     });
                 } else {
-                    throwError(response, 'ACCESS_DENIED');
+                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
-            } else {
-                throwError(response, 'SNAPSHOT_WAS_NOT_FOUND');
             }
-        }).catch(error => {
-            console.log(error);
-            throwError(response, 'UNABLE_TO_OPEN_DATABASE');
         });
     } else {
-        throwError(response, 'MISSING_DATA');
+        throwError(res, 'UNABLE_TO_GET_USER_IDENTIFIERS');
     }
 });
 
-router.delete('/api/state-snapshots/:id', (request, response, next) => {
-    // Mock code <--
-    let browserId = false;
-    if (TRACKER_COOKIE_NAME in request.cookies) {
-        browserId = request.cookies[TRACKER_COOKIE_NAME];
-    }
+/**
+ * Update state snapshot
+ */
+router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
+    if (`snapshot` in req.body) {
+        let { browserId, userId } = getCurrentUserIdentifiers(req);
+        // Get the specified state snapshot
+        request({
+            method: 'GET',
+            encoding: 'utf8',
+            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+        }, (error, response) => {
+            if (response.body.data === false) {
+                throwError(res, 'INVALID_SNAPSHOT_ID');
+            } else {
+                let parsedBody = false;
+                try {
+                    let localParsedBody = JSON.parse(response.body);
+                    parsedBody = localParsedBody;
+                } catch (e) {}
+    
+                if (parsedBody) {
+                    let parsedSnapshotData = JSON.parse(parsedBody.data.value);
+                    if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
+                        `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
+                        parsedSnapshotData.snapshot = req.body.snapshot;
+                        if (req.body.title) parsedSnapshotData.title = req.body.title;
 
-    let userId = false;
-    if (`connect.gc2` in request.cookies) {
-        userId = 100;
-    }
-    // -->
-
-    /*
-        Delete specific state snapshot with identifier
-    */
-    getSnapshots(false, false, true).then(data => {
-        let snapshotIndex = -1;
-        data.map((item, index) => {
-            if (item.id === request.params.id) {
-                if (item.browserId && item.browserId.length > 0) {
-                    if (item.browserId === browserId) {
-                        snapshotIndex = index;
-                        return false;
+                        let token = generateToken(parsedSnapshotData);
+                        parsedSnapshotData.token = token;
+                        request({
+                            method: 'PUT',
+                            encoding: 'utf8',
+                            uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                            form: JSON.stringify(parsedSnapshotData)
+                        }, (error, response) => {
+                            res.send({ status: 'success' });
+                        });
+                    } else {
+                        throwError(res, 'ACCESS_DENIED');
                     }
                 } else {
-                    if (item.userId === userId) {
-                        snapshotIndex = index;
-                        return false;
-                    }
+                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
             }
         });
+    } else {
+        throwError(res, 'MISSING_DATA');
+    }
+});
 
-        if (snapshotIndex < 0) {
-            throwError(response, 'UNABLE_TO_FIND_SNAPSHOT');
+/**
+ * Delete state snapshot
+ */
+router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
+    let { browserId, userId } = getCurrentUserIdentifiers(req);
+    // Get the specified state snapshot
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+    }, (error, response) => {
+        if (response.body.data === false) {
+            throwError(res, 'INVALID_SNAPSHOT_ID');
         } else {
-            data.splice(snapshotIndex, 1);
-            saveSnapshots(data).then(() => {
-                response.json({ status: 'success' });
-            }).catch(errorCode => {
-                throwError(response, errorCode);
-            });
+            let parsedBody = false;
+            try {
+                let localParsedBody = JSON.parse(response.body);
+                parsedBody = localParsedBody;
+            } catch (e) {}
+
+            if (parsedBody && parsedBody.data.value) {
+                let parsedSnapshotData = JSON.parse(parsedBody.data.value);
+                if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
+                    `userId` in parsedSnapshotData && parsedSnapshotData.userId === userId) {
+                    request({
+                        method: 'DELETE',
+                        encoding: 'utf8',
+                        uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
+                    }, (error, response) => {
+                        res.send({ status: 'success' });
+                    });
+                } else {
+                    throwError(res, 'ACCESS_DENIED');
+                }
+            } else {
+                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+            }
         }
-    }).catch(error => {
-        console.log(error);
-        throwError(response, 'UNABLE_TO_OPEN_DATABASE');
     });
 });
 
 module.exports = router;
-

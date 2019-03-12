@@ -6,6 +6,23 @@
 
 module.exports = function (grunt) {
     "use strict";
+
+    // Detecting optional theme
+    let theme = false;
+    process.argv.forEach(val => {
+        if (val.indexOf(`--theme=`) !== -1) {
+            theme = val.replace(`--theme=`, ``);
+        }
+    });
+
+    // Default build parameters
+    let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+    let lessConfig = { "public/css/styles.css": "public/less/styles.default.less" };
+    if (theme && theme === 'watsonc') {
+        copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
+        lessConfig = { "public/css/styles.css": "public/less/styles." + theme + ".less" };
+    }
+
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         env: {
@@ -28,9 +45,7 @@ module.exports = function (grunt) {
                     optimization: 2
                 },
                 files: [
-                    {
-                        "public/css/styles.css": "public/less/styles.less" // destination file and source file
-                    },
+                    lessConfig,
                     {
                         expand: true,        // Enable dynamic expansion.
                         cwd: 'extensions',  // Src matches are relative to this path.
@@ -49,13 +64,25 @@ module.exports = function (grunt) {
                 },
                 files: {
                     'public/css/build/all.min.css': [
+                        // Material Design fonts
+                        'public/fonts/fonts.css',
+                        'public/icons/material-icons.css',
+                        // jQuery UI
+                        'public/js/lib/jquery-ui/jquery-ui.min.css',
+                        // Font Awesome
+                        'public/css/font-awesome.min.css',
+                        'public/css/font-awesome.v520.solid.css',
+                        'public/css/font-awesome.v520.regular.css',
+                        'public/css/font-awesome.v520.css',
                         // Leaflet
                         'public/js/lib/leaflet/leaflet.css',
                         'public/js/lib/leaflet-draw/leaflet.draw.css',
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.css',
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
+                        'public/js/lib/leaflet-history/leaflet-history.css',
                         'public/js/lib/leaflet-measure/leaflet-measure.css',
+                        'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
                         'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
                         'public/js/lib/q-cluster/css/q-cluster.css',
@@ -196,6 +223,8 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.js',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
+                        'public/js/lib/leaflet-history/leaflet-history.js',
+                        'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-measure/leaflet-measure.min.js',
                         'public/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
@@ -204,19 +233,22 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
+                        'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/q-cluster/src/utils.js',
                         'public/js/lib/q-cluster/src/clustering.js',
                         'public/js/point-clusterer.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
-
+                        'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
+                        'public/js/lib/leaflet-snap/leaflet.snap.js',
+                        'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
                         'public/js/lib/jquery/jquery.js',
                         'public/js/lib/jquery-ui/jquery-ui.min.js',
+                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
-                        //'public/js/lib/raphael/raphael.min.js',
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
                         'public/js/lib/d3/d3.js',
@@ -266,14 +298,14 @@ module.exports = function (grunt) {
         shell: {
             default: {
                 command: [
-                    'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less',
+                    copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
                 ].join('&&')
             }
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'css/build/all.min.css'],
+                assets: ['js/build/all.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,
@@ -336,7 +368,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'hogan', 'version']);
+    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
     grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

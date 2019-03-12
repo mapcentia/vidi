@@ -32,6 +32,7 @@ geocloud = (function () {
         storeClass,
         extend,
         geoJsonStore,
+        webGLStore,
         cartoDbStore,
         sqlStore,
         tweetStore,
@@ -39,6 +40,7 @@ geocloud = (function () {
         tileLayer,
         createTileLayer,
         createTMSLayer,
+        createMVTLayer,
         clickEvent,
         transformPoint,
         base64,
@@ -60,10 +62,13 @@ geocloud = (function () {
         DTKSKAERMKORT = "dtkSkaermkort",
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
-        HERENORMALDAYGREY = "hereNormalDayGrey",
         GEODKBRIGHT = "geodkBright",
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
+        // Here maps
+        HERENORMALDAY = "hereNormalDay",
+        HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
+
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
             4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
@@ -136,6 +141,7 @@ geocloud = (function () {
         base64: true,
         custom_data: null
     };
+
     // Base class for stores
     storeClass = function () {
         //this.defaults = STOREDEFAULTS;
@@ -151,34 +157,15 @@ geocloud = (function () {
         this.init = function () {
             this.onLoad = this.defaults.onLoad;
             this.loading = this.defaults.loading;
-            switch (MAPLIB) {
-                case 'ol2':
-                    this.layer = new OpenLayers.Layer.Vector(this.defaults.name, {
-                        styleMap: this.defaults.styleMap,
-                        visibility: this.defaults.visibility,
-                        renderers: ['Canvas', 'SVG', 'VML'],
-                        rendererOptions: this.defaults.rendererOptions
-                    });
-                    break;
-                case 'ol3':
-                    this.layer = new ol.layer.Vector({
-                        source: new ol.source.GeoJSON(),
-                        style: this.defaults.styleMap
-                    });
-                    this.layer.id = this.defaults.name;
-                    break;
+            this.layer = L.geoJson(null, {
+                style: this.defaults.styleMap,
+                pointToLayer: this.defaults.pointToLayer,
+                onEachFeature: this.defaults.onEachFeature,
+                interactive: this.defaults.clickable,
+                bubblingMouseEvents: false
+            });
 
-                case 'leaflet':
-                    this.layer = L.geoJson(null, {
-                        style: this.defaults.styleMap,
-                        pointToLayer: this.defaults.pointToLayer,
-                        onEachFeature: this.defaults.onEachFeature,
-                        interactive: this.defaults.clickable,
-                        bubblingMouseEvents: false
-                    });
-                    this.layer.id = this.defaults.name;
-                    break;
-            }
+            this.layer.id = this.defaults.name;
         };
         this.geoJSON = null;
         this.featureStore = null;
@@ -206,6 +193,7 @@ geocloud = (function () {
             return new OpenLayers.Format.WKT().write(this.layer.features);
         };
     };
+
     geoJsonStore = sqlStore = function (config) {
         var prop, me = this, map, sql, xhr = {
             abort: function () {/* stub */
@@ -233,31 +221,51 @@ geocloud = (function () {
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
-        this.load = function (doNotShowAlertOnError) {
 
+        this.buffered_bbox = false;
+
+        this.load = function (doNotShowAlertOnError) {
             try {
                 me.abort();
             } catch (e) {
                 console.error(e.message);
             }
 
-            try {
-                map = me.map;
-                sql = this.sql;
+            sql = this.sql;
+
+            var dynamicQueryIsUsed = false;
+            map = me.layer._map;
+            if (map) {
+                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
+                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
+                    dynamicQueryIsUsed = true;
+                }
+
+                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
+                var extendedBounds = map.getBounds().pad(1);
+                this.buffered_bbox = extendedBounds;
+
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
-                sql = sql.replace("{centerY}", map.getCenter().lon.toString());
-                sql = sql.replace("{minX}", map.getExtent().left);
-                sql = sql.replace("{maxX}", map.getExtent().right);
-                sql = sql.replace("{minY}", map.getExtent().bottom);
-                sql = sql.replace("{maxY}", map.getExtent().top);
-                sql = sql.replace("{bbox}", map.getExtent().toString());
-            } catch (e) {
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{maxY}", extendedBounds.getNorth());
+                sql = sql.replace("{maxX}", extendedBounds.getEast());
+                sql = sql.replace("{minY}", extendedBounds.getSouth());
+                sql = sql.replace("{minX}", extendedBounds.getWest());
+
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
             }
+
             me.loading();
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: 'q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) + '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding + '&key=' + this.defaults.key + '&custom_data=' + this.custom_data,
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
+                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
@@ -265,6 +273,7 @@ geocloud = (function () {
                     if (response.success === false && doNotShowAlertOnError === undefined) {
                         alert(response.message);
                     }
+
                     if (response.success === true) {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
@@ -283,6 +292,10 @@ geocloud = (function () {
 
                                     break;
                                 case "leaflet":
+                                    if (dynamicQueryIsUsed) {
+                                        me.layer.clearLayers();
+                                    }
+
                                     me.layer.addData(response);
                                     break;
                             }
@@ -295,14 +308,165 @@ geocloud = (function () {
                 complete: function () {
                     me.onLoad(me);
                 }
-
             });
+
             return xhr;
         };
+
         this.abort = function () {
             xhr.abort();
         }
     };
+
+    /**
+     * WebGL representation for SQL stored layer
+     */
+    webGLStore = function (config) {
+        var prop, me = this, map, sql, xhr = {
+            abort: function () {/* stub */
+            }
+        };
+
+        this.init = function () {
+            this.onLoad = this.defaults.onLoad;
+            this.loading = this.defaults.loading;
+        };
+
+        this.defaults = $.extend({}, STOREDEFAULTS);
+        if (config) {
+            for (prop in config) {
+                this.defaults[prop] = config[prop];
+            }
+        }
+
+        this.init();
+        this.name = this.defaults.name;
+        this.id = this.defaults.id;
+        this.sql = this.defaults.sql;
+        this.db = this.defaults.db;
+        this.onLoad = this.defaults.onLoad;
+        this.transformResponse = this.defaults.transformResponse;
+        this.loading = this.defaults.loading;
+        this.dataType = this.defaults.dataType;
+        this.async = this.defaults.async;
+        this.jsonp = this.defaults.jsonp;
+        this.method = this.defaults.method;
+        this.uri = this.defaults.uri;
+        this.host = this.defaults.host;
+        this.base64 = this.defaults.base64;
+        this.custom_data = this.defaults.custom_data;
+
+        this.buffered_bbox = false;
+
+        this.load = function (showAlertOnError = true, onLoadCallback) {
+            try {
+                me.abort();
+            } catch (e) {
+                console.error(e.message);
+            }
+
+            sql = this.sql;
+
+            var dynamicQueryIsUsed = false;
+
+            map = me.defaults.map;
+            if (map) {
+                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
+                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
+                    dynamicQueryIsUsed = true;
+                }
+
+                // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
+                var extendedBounds = map.getBounds().pad(1);
+                this.buffered_bbox = extendedBounds;
+
+                sql = sql.replace("{centerX}", map.getCenter().lat.toString());
+                sql = sql.replace("{centerY}", map.getCenter().lng.toString());
+                sql = sql.replace("{maxY}", extendedBounds.getNorth());
+                sql = sql.replace("{maxX}", extendedBounds.getEast());
+                sql = sql.replace("{minY}", extendedBounds.getSouth());
+                sql = sql.replace("{minX}", extendedBounds.getWest());
+
+                if (sql.indexOf("{bbox}") !== -1) {
+                    console.warn("The bounding box ({bbox}) was not replaced in SQL query");
+                }
+            } else {
+                console.error("Unable to get map object");
+            }
+
+            me.loading();
+            xhr = $.ajax({
+                dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
+                async: this.defaults.async,
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                    '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
+                    '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
+                jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
+                url: this.host + this.uri + '/' + this.db,
+                type: this.defaults.method,
+                success: function (response) {
+                    if (response.success === false && showAlertOnError) {
+                        alert(response.message);
+                    }
+
+                    if (response.success === true) {
+                        if (response.features !== null) {
+                            response = me.transformResponse(response, me.id);
+                            me.geoJSON = response;
+
+                            let layer = false;
+                            if (me.defaults.type === 'POINT') {
+                                let data = [];
+                                me.geoJSON.features.map(feature => data.push(feature.geometry.coordinates));
+
+                                layer = L.glify.points({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    size: 8,
+                                    data
+                                });
+                            } else if (me.defaults.type === 'LINESTRING') {
+                                layer = L.glify.lines({
+                                    latitudeKey: 1,
+                                    longitudeKey: 0,
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else if (me.defaults.type === 'POLYGON') {
+                                layer = L.glify.shapes({
+                                    map: me.defaults.map,
+                                    data: me.geoJSON,
+                                });
+                            } else {
+                                throw new Error('Layer features type (' + this.defaults.type + ') is not supported by WebGL');
+                            }
+
+                            me.layer = layer.glLayer;
+                            me.layer.id = me.defaults.name;
+
+                            if (me.onLoad) me.onLoad();
+                        } else {
+                            me.geoJSON = null;
+                        }
+                    }
+
+                    if (onLoadCallback) onLoadCallback();
+                },
+                error: this.defaults.error,
+                complete: function () {
+                    me.onLoad(me);
+                }
+            });
+
+            return xhr;
+        };
+
+        this.abort = function () {
+            xhr.abort();
+        }
+    };
+
     cartoDbStore = function (config) {
         var prop, me = this, map, sql, xhr;
         this.defaults = $.extend({}, STOREDEFAULTS);
@@ -504,6 +668,7 @@ geocloud = (function () {
     };
     // Extend store classes
     extend(sqlStore, storeClass);
+    extend(webGLStore, storeClass);
     extend(tweetStore, storeClass);
     extend(elasticStore, storeClass);
     extend(cartoDbStore, storeClass);
@@ -540,12 +705,16 @@ geocloud = (function () {
 
         if (!defaults.tileCached) {
             if (!defaults.uri) {
-                uri = "/wms/" + defaults.db + "/" + parts[0] + "?";
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
             } else {
                 uri = defaults.uri;
             }
             url = defaults.host + uri;
             urlArray = [url];
+
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+            }
         } else {
             url = defaults.host + "/mapcache/" + defaults.db + "/wms";
             var url1 = url;
@@ -556,6 +725,7 @@ geocloud = (function () {
             // For leaflet
             url = url.replace("cdn.", "{s}.");
         }
+
         switch (MAPLIB) {
             case "ol2":
                 l = new OpenLayers.Layer.WMS(defaults.name, urlArray, {
@@ -575,7 +745,6 @@ geocloud = (function () {
                 l.id = layer;
                 break;
             case "leaflet":
-
                 var options = {
                     layers: layer,
                     format: 'image/png',
@@ -670,6 +839,67 @@ geocloud = (function () {
         }
         return l;
     };
+
+    /**
+     * Creates MVT layer
+     * 
+     * @param {String} layer    Layer identifier
+     * @param {Object} defaults Default settings
+     * 
+     * @return {Object}
+     */
+    createMVTLayer = function (layer, defaults) {
+        var l, url, uri;
+        
+        let parts = layer.split(".");
+        var options = {
+            attribution: defaults.attribution,
+            maxZoom: defaults.maxZoom,
+            maxNativeZoom: defaults.maxNativeZoom,
+            tileSize: 256,
+            ran: function () {
+                return Math.random();
+            }
+        };
+
+        if (defaults.tileCached) {
+            url = defaults.host + "/mapcache/" + defaults.db + "/gmaps/" + layer + ".mvt/{z}/{x}/{y}.png";
+        } else {
+            if (!defaults.uri) {
+                uri = "/wms/" + defaults.db + "/" + parts[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+                    + "&format=mvt&map.imagetype=mvt&" + (defaults.additionalURLParameters.length > 0 ? defaults.additionalURLParameters.join('&') : '');
+            } else {
+                uri = defaults.uri;
+            }
+
+            url = defaults.host + uri;
+            if ('mapRequestProxy' in defaults && defaults.mapRequestProxy !== false) {
+                // The LayerVectorGrid needs to have {x|y|z} templates in the URL, which will disappear after encodeURIComponent(), so need to store them temporary
+                url = url.replace('{x}', 'REPLACE_THE_X').replace('{y}', 'REPLACE_THE_Y').replace('{z}', 'REPLACE_THE_Z');
+                url = defaults.mapRequestProxy + '?request=' + encodeURIComponent(url);
+                url = url.replace('REPLACE_THE_X', '{x}').replace('REPLACE_THE_Y', '{y}').replace('REPLACE_THE_Z', '{z}');
+            }
+        }
+
+        l = new L.vectorGrid.protobuf(url, options);
+
+        if (defaults.layerId) {
+            l.id = defaults.layerId;
+        }  else {
+            l.id = layer;
+        }
+
+        if (defaults.loadEvent) {
+            l.on("load", defaults.loadEvent);
+        }
+
+        if (defaults.loadingEvent) {
+            l.on("loading", defaults.loadingEvent);
+        }
+
+        return l;
+    };
+
 
     // Set map constructor
     map = function (config) {
@@ -780,10 +1010,10 @@ geocloud = (function () {
             return layerArr;
         };
         this.getActiveBaseLayer = function () {
-            var layers = lControl._layers
+            var layers = lControl._layers;
             for (var layerId in layers) {
                 if (layers.hasOwnProperty(layerId)) {
-                    var layer = layers[layerId]
+                    var layer = layers[layerId];
                     if (!layer.overlay && lControl._map.hasLayer(layer.layer)) {
                         return layer
                     }
@@ -1202,7 +1432,7 @@ geocloud = (function () {
             // Load Google Maps API and make sure its not loaded more than once
             if (typeof window.GoogleMapsDirty === "undefined" && !(typeof google !== "undefined" && typeof google.maps !== "undefined")) {
                 window.GoogleMapsDirty = true;
-                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places");
+                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=" + window.googleApiKey);
                 // Google Maps API is loaded
             }
 
@@ -1312,39 +1542,38 @@ geocloud = (function () {
         };
         //ol2 and leaflet
         this.addHere = function (type) {
-            var l, name, prettyName;
+            var l, name, prettyName, baseUrl,
+                aerialTilesBaseUrl = "https://{s}.aerial.maps.api.here.com",
+                baseMapTilesBaseUrl = "https://{s}.base.maps.api.here.com",
+                panoTilesBaseUrl,
+                trafficTiles,
+                path = "/maptile/2.1/";
             switch (type) {
-                case "hereNormalNightGrey":
-                    name = "normal.night.grey";
-                    prettyName = "HERE Normal Night Grey"
+                case HERENORMALDAY:
+                    name = "normal.day";
+                    prettyName = "HERE Normal day";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
-                case "hereNormalDayGrey":
+                case HERENORMALDAYGREY:
                     name = "normal.day.grey";
-                    prettyName = "HERE Normal day Grey"
+                    prettyName = "HERE Normal day Grey";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
+                case HERENORMALNIGHTGREY:
+                    name = "normal.night.grey";
+                    prettyName = "HERE Normal Night Grey";
+                    baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
             }
-            switch (MAPLIB) {
-                case "ol2":
-                    l = new OpenLayers.Layer.XYZ(
-                        type,
-                        "https://1.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/${z}/${x}/${y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code,
-                        {
-                            attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='//api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>",
-                            resolutions: resolutions
-                        }
-                    );
-                    this.map.addLayer(l);
-                    l.setVisibility(false);
-                    break;
-                case "leaflet":
-                    l = new L.TileLayer("https://{s}.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/" + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
-                        maxZoom: 21,
-                        subdomains: ["1", "2", "3", "4"],
-                        attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='https://api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>"
-                    });
-                    lControl.addBaseLayer(l, prettyName);
-                    break;
-            }
+
+            l = new L.TileLayer(baseUrl + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
+                maxZoom: 21,
+                subdomains: ["1", "2", "3", "4"],
+                attribution: "&copy; Nokia</span>&nbsp;<a href='https://maps.nokia.com/services/terms' target='_blank' title='Terms of Use' style='color:#333;text-decoration: underline;'>Terms of Use</a></div> <img src='https://api.maps.nokia.com/2.2.4/assets/ovi/mapsapi/by_here.png' border='0'>"
+            });
+
+            lControl.addBaseLayer(l, prettyName);
+
             l.baseLayer = true;
             l.id = type;
             return (l);
@@ -1352,7 +1581,7 @@ geocloud = (function () {
         //ol2 and leaflet
         this.addDtkSkaermkort = function (name, layer) {
             var l,
-                url = "https://cdn.eu1.mapcentia.com/wms/dk/tilecache/";
+                url = "https://eu1.mapcentia.com/wms/dk/tilecache/";
 
             switch (MAPLIB) {
                 case "ol2":
@@ -1619,7 +1848,7 @@ geocloud = (function () {
         };
 
         //ol2, ol3 and leaflet
-        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent) {
+        this.setBaseLayer = function (baseLayerName, loadEvent, loadingEvent, tileErrorEvent, layerNotFoundEvent) {
             var me = this;
             var layers;
             (function poll() {
@@ -1664,11 +1893,14 @@ geocloud = (function () {
                                 }
                             }
 
+                            var layerWasFound = false;
                             // Adding specified layer to map
                             for (var key in layers) {
                                 if (layers.hasOwnProperty(key)) {
                                     if (layers[key].layer.baseLayer === true) {
                                         if (layers[key].layer.id === baseLayerName) {
+                                            layerWasFound = true;
+
                                             // Move all others than Google maps back
                                             if (baseLayerName.search("google") === -1 && baseLayerName.search("yandex") === -1) {
                                                 layers[key].layer.setZIndex(1);
@@ -1684,11 +1916,19 @@ geocloud = (function () {
                                                 }
                                             }
 
+                                            if (!tileErrorEvent) {
+                                                tileErrorEvent = function () {
+                                                }
+                                            }
+
                                             layers[key].layer.off("load");
                                             layers[key].layer.on("load", loadEvent);
 
                                             layers[key].layer.off("loading");
                                             layers[key].layer.on("loading", loadingEvent);
+
+                                            layers[key].layer.off("tileerror");
+                                            layers[key].layer.on("tileerror", tileErrorEvent);
 
                                             me.map.addLayer(layers[key].layer);
                                         }
@@ -1696,7 +1936,9 @@ geocloud = (function () {
                                 }
                             }
 
-                            //
+                            if (layerWasFound === false && layerNotFoundEvent) {
+                                layerNotFoundEvent();
+                            }
 
                             break;
                     }
@@ -1778,11 +2020,14 @@ geocloud = (function () {
                 case "DigitalGlobe:Imagery":
                     o = this.addDigitalGlobe("DigitalGlobe:Imagery");
                     break;
-                case "hereNormalDayGrey":
-                    o = this.addHere("hereNormalDayGrey");
+                case HERENORMALDAY:
+                    o = this.addHere(HERENORMALDAY);
                     break;
-                case "hereNormalNightGrey":
-                    o = this.addHere("hereNormalNightGrey");
+                case HERENORMALDAYGREY:
+                    o = this.addHere(HERENORMALDAYGREY);
+                    break;
+                case HERENORMALNIGHTGREY:
+                    o = this.addHere(HERENORMALNIGHTGREY);
                     break;
                 case "geodkBright":
                     o = this.addGeoDk("geodkBright", "geodk.bright");
@@ -1810,8 +2055,10 @@ geocloud = (function () {
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
+                layerId: false,
                 layers: [],
                 db: null,
+                mapRequestProxy: false,
                 singleTile: false,
                 opacity: 1,
                 isBaseLayer: false,
@@ -1828,11 +2075,13 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
+
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
+
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -1844,32 +2093,28 @@ geocloud = (function () {
                     case "tms":
                         l = createTMSLayer(layers[i], defaults);
                         break;
+                    case "mvt":
+                        l = createMVTLayer(layers[i], defaults);
+                        break;
                     default:
                         l = createTileLayer(layers[i], defaults);
                         break;
                 }
+
                 l.baseLayer = defaults.isBaseLayer;
-                switch (MAPLIB) {
-                    case "ol2":
-                        this.map.addLayer(l);
-                        break;
-                    case "ol3":
-                        this.map.addLayer(l);
-                        break;
-                    case "leaflet":
-                        if (defaults.isBaseLayer === true) {
-                            lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
-                        }
-                        else {
-                            lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
-                        }
-                        if (defaults.visibility === true) {
-                            this.showLayer(layers[i]);
-                        }
-                        break;
+                if (defaults.isBaseLayer === true) {
+                    lControl.addBaseLayer(l, defaults.name || defaults.names[i]);
+                } else {
+                    lControl.addOverlay(l, defaults.name || defaults.names[i] || layers[i]);
                 }
+
+                if (defaults.visibility === true) {
+                    this.showLayer(layers[i]);
+                }
+
                 layersArr.push(l);
             }
+
             return layersArr;
         };
 
@@ -1957,51 +2202,37 @@ geocloud = (function () {
                     break;
             }
         };
-        //ol2, ol3 and leaflet
+        
         this.showLayer = function (name) {
-            switch (MAPLIB) {
-                case "ol2":
-                    this.getLayersByName(name).setVisibility(true);
-                    break;
-                case "ol3":
-                    this.getLayersByName(name).set("visible", true);
-                    break;
-                case "leaflet":
-                    this.getLayersByName(name).addTo(this.map);
-                    break;
-            }
+            this.getLayersByName(name).addTo(this.map);
         };
+
         //ol2
         this.getLayerById = function (id) {
             return this.map.getLayer(id);
         };
-        //ol2, ol3 and leaflet (rename to getLayerByName)
-        this.getLayersByName = function (name) {
+
+        //leaflet (rename to getLayerByName)
+        this.getLayersByName = function (name, searchBaseLayers = true) {
             var l;
-            switch (MAPLIB) {
-                case "ol2":
-                    l = this.map.getLayersByName(name)[0];
-                    break;
-                case "ol3":
-                    for (var i = 0; i < this.map.getLayers().getLength(); i++) {
-                        if (this.map.getLayers().a[i].id === name) {
-                            l = this.map.getLayers().a[i];
+            var layers = lControl._layers;
+            for (var key in layers) {
+                if (layers.hasOwnProperty(key)) {
+                    if (layers[key].layer.id === name || layers[key].layer.id === ('mvt:' + name)) {
+                        if (searchBaseLayers) {
+                            l = layers[key].layer;
+                        } else if (!layers[key].layer.baseLayer) {
+                            l = layers[key].layer;
                         }
                     }
-                    break;
-                case "leaflet":
-                    var layers = lControl._layers;
-                    for (var key in layers) {
-                        if (layers.hasOwnProperty(key)) {
-                            if (layers[key].layer.id === name) {
-                                l = layers[key].layer;
-                            }
-                        }
-                    }
-                    break;
+                }
             }
+
+            //if (!l) throw new Error('Unable to find layer with identifier ' + name);
+
             return l;
         };
+
         //ol2
         this.hideAllTileLayers = function () {
             for (var i = 0; i < this.map.layers.length; i++) {
@@ -2375,6 +2606,7 @@ geocloud = (function () {
     return {
         geoJsonStore: geoJsonStore,
         sqlStore: sqlStore,
+        webGLStore: webGLStore,
         tileLayer: tileLayer,
         elasticStore: elasticStore,
         tweetStore: tweetStore,
@@ -2511,4 +2743,3 @@ geocloud = (function () {
     }
 
 })(typeof exports === "undefined" ? this : exports);
-

@@ -17,11 +17,44 @@ module.exports = {
     },
     init: function () {
     },
-    createMainTab: function (id, name, info, height, icon) {
+    formatArea: (areaInSquareMeters) => {
+        let result = Math.round(areaInSquareMeters);
+        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
+        if (areaInSquareMeters < 10000) {
+            // Display square meters
+            result = (Math.round(areaInSquareMeters) + ' m2');
+        } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
+            // Display hectars
+            result = (ha + ' ha');
+        } else if (areaInSquareMeters >= 1000000) {
+            // Display square kilometers and hectars
+            result = (km2 + ' km2 (' + ha + ' ha)');
+        }
+
+        return result;
+    },
+    /**
+     * @todo Remove deprecated "height" parameter
+     */
+    createMainTab: function (id, name, info, height, icon, rawIconWasProvided = false, moduleId = false) {
         let el = `#${id}-content`;
-        icon = icon || "help";
-        $(`<li role="presentation"><a href="#${id}-content" aria-controls role="tab" data-toggle="tab"><i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}"
-                                class="material-icons">${icon}</i>${name}</a></li>`).appendTo("#main-tabs");
+
+        let iconRaw = ``;
+        if (rawIconWasProvided) {
+            iconRaw = icon;
+        } else {
+            icon = icon || "help";
+            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="material-icons">${icon}</i>`;
+        }
+
+        if (moduleId === false) {
+            moduleId = ``;
+        }
+
+        $(`<li role="presentation">
+            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab">${iconRaw}${name}</a>
+        </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
             $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
@@ -94,5 +127,19 @@ module.exports = {
             return txt;
         }
 
+    },
+
+    toggleFullScreen: function() {
+        let fullScreenMode;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenMode = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenMode = false;
+            }
+        }
+        return fullScreenMode;
     }
 };

@@ -11,6 +11,12 @@ const MODULE_NAME = `measurements`;
 const drawTools = require(`./drawTools`);
 
 /**
+ * Browser detection
+ */
+const { detect } = require('detect-browser');
+const browser = detect();
+
+/**
  * @type {*|exports|module.exports}
  */
 let cloud, state, serializeLayers, backboneEvents, utils;
@@ -47,6 +53,12 @@ module.exports = {
     },
 
     init: () => {
+        backboneEvents.get().on(`reset:all reset:${MODULE_NAME} off:all` , () => {
+            _self.toggleMeasurements(false, false);
+        });
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.toggleMeasurements(); });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.toggleMeasurements(false, false); });
+
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
 
@@ -154,13 +166,10 @@ module.exports = {
                     position: 'topright'
                 },
                 onAdd: function (map) {
-                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
-                    container.style.backgroundColor = 'white';
-                    container.style.width = `30px`;
-                    container.style.height = `30px`;
+                    let container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom leaflet-control-measurements');
                     container.title = __(`Measure distance`);
 
-                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single" style="outline: none;">
+                    container = $(container).append(`<a class="leaflet-bar-part leaflet-bar-part-single js-measurements-control" style="outline: none; background-color: white;">
                         <span class="fa fa-ruler"></span>
                     </a>`)[0];
 
@@ -174,17 +183,25 @@ module.exports = {
 
             measurementControlButton = new MeasurementControl();
             cloud.get().map.addControl(measurementControlButton);
-        }
-        cloud.get().map.addLayer(drawnItems);
-    },
 
-    off: () => {
-        _self.toggleMeasurements(false, false);
+            setTimeout(() => {
+                $(`.leaflet-control`).each((index, item) => {
+                    if ($(item).html() === ``) {
+                        $(item).remove();
+                    }
+                });
+            }, 100);
+        }
+
+        cloud.get().map.addLayer(drawnItems);
     },
 
     toggleMeasurements: (activate = false, triggerEvents = true) => {
         if (activate) {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ban"></span>');
+            backboneEvents.get().trigger(`off:all`);
+            backboneEvents.get().trigger(`hide:all`);
+
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ban"></span>');
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOn`);
             drawOn = true;
 
@@ -221,7 +238,12 @@ module.exports = {
                 }
             });
 
-            cloud.get().map.addControl(drawControl);
+            if ($(`.leaflet-control-measurements div`).length === 0) {
+                $(`.leaflet-control-measurements`).append(`<div class="appended-leaflet-control"></div>`)
+            }
+
+            $(`.leaflet-control-measurements div`).append(drawControl.onAdd(cloud.get().map));
+            $(`.leaflet-control-measurements .appended-leaflet-control`).show();
 
             let eventsToUnbind = [`created`, `drawstart`, `drawstop`, `editstart`, `editstop`, `deletestart`, `deletestop`, `deleted`, `created`, `edited`];
             eventsToUnbind.map(item => {
@@ -289,7 +311,7 @@ module.exports = {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
             });
         } else {
-            $('.leaflet-control-custom').find('.leaflet-bar-part-single').html('<span class="fa fa-ruler"></span>');
+            $('.leaflet-control-custom').find('.js-measurements-control').html('<span class="fa fa-ruler"></span>');
 
             if (triggerEvents) backboneEvents.get().trigger(`${MODULE_NAME}:turnedOff`);
 
@@ -300,6 +322,8 @@ module.exports = {
             }
 
             if (drawControl) {
+                $(`.leaflet-control-measurements div`).empty();
+                $(`.leaflet-control-measurements .appended-leaflet-control`).hide();
                 cloud.get().map.removeControl(drawControl);
             }
 
@@ -315,7 +339,9 @@ module.exports = {
     setStyle: (l, type) => {
         l.hideMeasurements();
 
-        l.showMeasurements({ showTotal: true });
+        l.showMeasurements({
+            formatArea: utils.formatArea
+        });
 
         let defaultMeasurementsStyle = {
             dashArray: `none`,
@@ -333,7 +359,7 @@ module.exports = {
 
         l.setStyle(defaultMeasurementsStyle);
 
-        if (type === 'polyline') {
+        if (type === 'polyline' && browser && [`ie`, `edge`].indexOf(browser.name) === -1) {
             window.lag = l.showExtremities(defaultExtermitiesStyle.pattern, defaultExtermitiesStyle.size, defaultExtermitiesStyle.where);
             l._extremities = defaultExtermitiesStyle;
         }

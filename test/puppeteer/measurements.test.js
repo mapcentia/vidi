@@ -8,7 +8,7 @@ const helpers = require(`./../helpers`);
 describe('Measurements', () => {
     it('should allow measuring distance and area in default template', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -22,9 +22,11 @@ describe('Measurements', () => {
         expect(await page.evaluate(`$('.leaflet-draw-draw-polygon').is(':visible')`)).to.be.true;
     });
 
+    /*
+    // Embedded template now does not contain measurements module, so this test should be removed
     it('should allow measuring distance and area in embed template', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL}`);
+        await page.goto(`${helpers.PAGE_URL_EMBEDDED}`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
         
@@ -48,4 +50,5 @@ describe('Measurements', () => {
 
         expect(await page.evaluate(`$('#measurements-module-cancel-btn').is(':visible')`)).to.be.false;
     });
+    */
 });

@@ -197,50 +197,6 @@ describe("Queue", () => {
 		queue.terminate();
 	});
 
-    it("removes items by their gids", async () => {
-		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
-			let result = new Promise((resolve, reject) => { reject(); });
-			return result;
-		});
-
-		// Adding add feature request
-		let firstItem = helpers.duplicate(dummyRequest);
-		firstItem.type = Queue.ADD_REQUEST;
-		firstItem.feature.features[0].properties.gid = -1;
-		queue.pushAndProcess(firstItem);
-
-		await helpers.sleep(1000);
-
-		// Adding update feature request
-		let secondItem = helpers.duplicate(dummyRequest);
-		secondItem.type = Queue.UPDATE_REQUEST;
-		secondItem.feature.features[0].properties.gid = 1;
-		queue.pushAndProcess(secondItem);
-
-		expect(queue.getItems().length).to.equal(2);
-		queue.removeByGID([1, -1]);
-		expect(queue.getItems().length).to.equal(0);
-		queue.terminate();
-	});
-
-    it("replaces gids for items", async () => {
-		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
-			let result = new Promise((resolve, reject) => { reject(); });
-			return result;
-		});
-
-		// Adding add feature request
-		queue.pushAndProcess(helpers.duplicate(dummyRequest));
-
-		await helpers.sleep(1000);
-
-		expect(queue.getItems().length).to.equal(1);
-		expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(-1);
-		queue.replaceVirtualGid(-1, 1);
-		expect(queue.getItems()[0].feature.features[0].properties.gid).to.equal(1);
-		queue.terminate();
-	});
-
     it("resubmits previously skipped requests", async () => {
 		let queue = new Queue((oldestNonSkippedItem, queueInstance) => {
 			let result = new Promise((resolve, reject) => {

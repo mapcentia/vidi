@@ -15,7 +15,7 @@ module.exports = {
     getHost: function () {
         var host;
 
-        host = require('../../config/config.js').gc2.host;
+        host = window.gc2host;
 
         return host;
     }

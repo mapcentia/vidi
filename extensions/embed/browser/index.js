@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {state} from "../../../public/js/leaflet-easybutton/easy-button";
+
 /**
  *
  */
@@ -22,6 +24,7 @@ var setting;
 var print;
 
 var meta;
+var anchor;
 
 var legend;
 
@@ -46,11 +49,51 @@ module.exports = {
         print = o.print;
         meta = o.meta;
         legend = o.legend;
+        anchor = o.anchor;
         return this;
     },
     init: function () {
+        backboneEvents.get().trigger(`on:infoClick`);
 
-        var map = cloud.get().map;
+        let id = "#legend-dialog";
+        $(id).animate({
+            bottom: ("-233px")
+        }, 500, function () {
+            $(id + " .expand-less").hide();
+            $(id + " .expand-more").show();
+        });
+
+        let map = cloud.get().map, showInfo = function (e) {
+            let t = ($(this).data('gc2-id')), html,
+                meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
+                name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
+                title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
+                abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
+
+            html = (meta !== null
+                && typeof meta.meta_desc !== "undefined"
+                && meta.meta_desc !== "") ?
+                converter.makeHtml(meta.meta_desc) : abstract;
+
+            moment.locale('da');
+
+            for (let key in  metaDataKeys[t]) {
+                if (metaDataKeys[t].hasOwnProperty(key)) {
+                    console.log(key + " -> " + metaDataKeys[t][key]);
+                    if (key === "lastmodified") {
+                        metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
+                    }
+                }
+            }
+
+            html = html ? Mustache.render(html, metaDataKeys[t]) : "";
+            $("#info-modal-top.slide-left").show();
+            $("#info-modal-top.slide-left").animate({left: "0"}, 200);
+            $("#info-modal-top .modal-title").html(title || name);
+            $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
+            legend.init([t], "#info-modal-legend");
+            e.stopPropagation();
+        };
 
         metaDataKeys = meta.getMetaDataKeys();
 
@@ -59,39 +102,10 @@ module.exports = {
 
         // Set custom
         $(document).arrive('.info-label', function () {
-            $(this).on("click", function (e) {
-                var t = ($(this).data('gc2-id')), html,
-                    meta = metaDataKeys[t] ? $.parseJSON(metaDataKeys[t].meta) : null,
-                    name = metaDataKeys[t] ? metaDataKeys[t].f_table_name : null,
-                    title = metaDataKeys[t] ? metaDataKeys[t].f_table_title : null,
-                    abstract = metaDataKeys[t] ? metaDataKeys[t].f_table_abstract : null;
-
-                html = (meta !== null
-                    && typeof meta.meta_desc !== "undefined"
-                    && meta.meta_desc !== "") ?
-                    converter.makeHtml(meta.meta_desc) : abstract;
-
-                moment.locale('da');
-
-                for (var key in  metaDataKeys[t]) {
-                    if (metaDataKeys[t].hasOwnProperty(key)) {
-                        console.log(key + " -> " + metaDataKeys[t][key]);
-                        if (key === "lastmodified") {
-                            metaDataKeys[t][key] = moment(metaDataKeys[t][key]).format('LLLL');
-                        }
-                    }
-                }
-
-                html = html ? Mustache.render(html, metaDataKeys[t]) : "";
-                $("#info-modal-top.slide-left").show();
-                $("#info-modal-top.slide-left").animate({left: "0"}, 200);
-                $("#info-modal-top .modal-title").html(title || name);
-                $("#info-modal-top .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-                legend.init([t], "#info-modal-legend");
-                e.stopPropagation();
-            });
-
+            $(this).on("click", showInfo);
         });
+
+        $('.info-label').on("click", showInfo);
 
         $("#btn-about").on("click", function (e) {
             $("#about-modal").modal({});
@@ -127,15 +141,17 @@ module.exports = {
         });
 
         $("#zoom-default-btn").on("click", function () {
-            cloud.get().zoomToExtent(setting.getExtent());
+            let parameters = anchor.getInitMapParameters();
+            if (parameters) {
+                cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+            } else {
+                cloud.get().zoomToExtent(setting.getExtent());
+            }
+
         });
 
         $("#measurements-module-btn").on("click", function () {
             measurements.toggleMeasurements(true);
-
-
         });
-        $("#locale-btn").append($(".leaflet-control-locate"));
-
     }
 };

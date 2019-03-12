@@ -5,7 +5,7 @@
 const { expect } = require("chai");
 const helpers = require("./../helpers");
 
-const PAGE_URL = `${helpers.PAGE_URL_BASE.replace(`8082`, `8081`)}app/aleksandrshumilov/test/#stamenTonerLite/13/39.2681/-6.8108/v:test.testpointfilters`;
+const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTonerLite/13/39.2681/-6.8108/v:test.testpointfilters`;
 
 const createPage = async () => {
     let page = await browser.newPage();
@@ -14,29 +14,27 @@ const createPage = async () => {
     page = await helpers.waitForPageToLoad(page);
 
     await page._client.send('Network.enable');
-        
-    await page.evaluate(`$('#search-border').trigger('click')`);
-    await helpers.sleep(500);
+
     await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
     await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
     await page.evaluate(`$('[data-gc2-layer-key="test.testpointfilters.the_geom"]').find('.js-toggle-filters').trigger('click')`);
-    await helpers.sleep(500);
+    await helpers.sleep(1000);
 
     return page;
 };
 
-const setTextFilterValue = async (page, field, expression, value, index = 0, submit = true) => {
-    await page.select(`select[id="column_select_testpointfilters.test_${index}"]`, field);
+const setTextFilterValue = async (page, field, expression, value, index = 0, submit = true, layer = `testpointfilters`) => {
+    await page.select(`select[id="column_select_${layer}.test_${index}"]`, field);
     await helpers.sleep(500);
-    await page.select(`select[id="expression_select_testpointfilters.test_${index}"]`, expression);
+    await page.select(`select[id="expression_select_${layer}.test_${index}"]`, expression);
     await helpers.sleep(500);
-    await page.type(`[id="expression_input_testpointfilters.test_${index}"]`, value);
+    await page.type(`[id="expression_input_${layer}.test_${index}"]`, value);
     await helpers.sleep(500);
 
     if (submit) {
-        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm btn-success"]').trigger('click')`);
+        await page.evaluate(`$('[id="layer-settings-filters-test.${layer}"').find('[class="btn btn-sm btn-success"]').trigger('click')`);
         await helpers.sleep(2000);
     }
 };
@@ -71,9 +69,24 @@ reactTriggerChange(target);`);
     await helpers.sleep(2000);
 };
 
+const disablePredefinedFilters = async (page) => {
+    // Turn off the predefined filter
+    await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"]').find('.js-predefined-filters').find('input').trigger('click')`);
+    await helpers.sleep(2000);
+
+    // Switch to arbitrary filters tab
+    await page.evaluate(`$($('[id="layer-settings-filters-test.testpointfilters"]').find('.btn-group')[2]).find('button').trigger('click')`);
+    await helpers.sleep(2000);
+}
+
 describe('Layer tree filters', () => {
-    it('should store filters in state snapshot', async () => {
+    it('should store arbitrary filters values after reload and in the state snapshot', async () => {
         let page = await createPage();
+
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
 
         let numberOfFilteredItems = false;
         page.on(`response`, async response => {
@@ -83,13 +96,18 @@ describe('Layer tree filters', () => {
             }
         });
 
+        await disablePredefinedFilters(page);
+        await helpers.img(page);
+
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
+
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm"]').first().trigger('click')`));
         await setTextFilterValue(page, `decimalfield`, `=`, `1.4`, 1);
-
         expect(numberOfFilteredItems).to.equal(4);
 
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);   
+        await page.click(`[href="#state-snapshots-content"]`);
         await helpers.sleep(1000);
 
         // Create state snapshot
@@ -102,22 +120,211 @@ describe('Layer tree filters', () => {
         await page.reload();
         await helpers.sleep(5000);
 
+        // Checking if filters are after reload
+        expect(numberOfFilteredItems).to.equal(4);
+        await helpers.sleep(1000);
+
+        // Checking if reset drops filters
+        await page.click(`#btn-reset`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('[data-gc2-id="test.testpointfilters"]').first().trigger('click')`);
+        await helpers.sleep(2000);
+
+
+        await disablePredefinedFilters(page);
+
         expect(numberOfFilteredItems).to.equal(7);
 
         // Restore snapshot
-        await page.evaluate(`$('#search-border').trigger('click')`);
-        await helpers.sleep(500);
-        await page.click(`[href="#state-snapshots-dialog-content-content"]`);   
+        await page.click(`[href="#state-snapshots-content"]`);   
         await helpers.sleep(1000);
-
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
+
         expect(numberOfFilteredItems).to.equal(4);
 
         await page.close();
     });
 
-    it('should allow AND / OR modes of filtering, as well as adding and deleting of rules', async () => {
+    it('should store predefined filters values after reload and in the state snapshot for vector layer', async () => {
+        let page = await createPage();
+
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
+        let numberOfFilteredItems = false;
+        page.on(`response`, async response => {
+            if (response.url().indexOf(`/api/sql/aleksandrshumilov`) !== -1) {
+                let parsedResponse = await response.json();
+                numberOfFilteredItems = parsedResponse.features.length;
+            }
+        });
+
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
+
+        await page.click(`[href="#state-snapshots-content"]`);   
+        await helpers.sleep(1000);
+
+        // Create state snapshot
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('.js-browser-owned').find('button').first().trigger('click')`);
+        await helpers.sleep(3000);
+
+        // Reload page
+        await page.reload();
+        await helpers.sleep(5000);
+
+        // Checking if filters are after reload
+        expect(numberOfFilteredItems).to.equal(7);
+        await helpers.sleep(1000);
+
+        // Checking if reset drops filters
+        await page.click(`#btn-reset`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#search-border').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[data-gc2-id="test.testpointfilters"]').first().trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(2);
+        expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').is(':checked')`)).to.be.true;
+
+        // Restore snapshot
+        await page.evaluate(`$('#search-border').trigger('click')`);
+        await helpers.sleep(500);
+        await page.click(`[href="#state-snapshots-content"]`);   
+        await helpers.sleep(1000);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
+        expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').is(':checked')`)).to.be.false;
+        await page.close();
+    });
+
+    it('should apply predefined filters for vector layers', async () => {
+        let page = await createPage();
+
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
+        let numberOfFilteredItems = false;
+        page.on(`response`, async response => {
+            if (response.url().indexOf(`/api/sql/aleksandrshumilov`) !== -1) {
+                let parsedResponse = await response.json();
+                numberOfFilteredItems = parsedResponse.features.length;
+            }
+        });
+
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
+
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(2);
+ 
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.js-predefined-filters').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(numberOfFilteredItems).to.equal(7);
+
+        await page.close();
+    });
+
+    it('should store predefined and arbitrary filters values after reload for tile layer', async () => {
+        let page = await createPage();
+
+        // Accepting the dialog
+        page.on('dialog', (dialog) => {
+            dialog.accept();
+        });
+
+        let filtersString = false;
+
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+            if (request.url().indexOf(`wms`) > -1) {
+                filtersString = false;
+                request.url().split(`?`)[1].split(`&`).map(item => {
+                    if (item.split(`=`)[0] === `filters`) {
+                        filtersString = JSON.parse(decodeURIComponent(item.replace(`filters=`, ``)));
+                    }
+                });
+            }
+
+            request.continue();
+        });
+
+        await helpers.sleep(500);   
+        await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('input[type="checkbox"][data-gc2-id="test.polygon"][class="js-show-layer-control"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        expect(filtersString[`test.polygon`][0]).to.equal(`id = 2`);
+
+        await page.evaluate(`$('[data-gc2-layer-key="test.polygon.the_geom"]').find('.js-toggle-filters').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[id="layer-settings-filters-test.polygon"').find('.js-predefined-filters').find('input').trigger('click')`);
+        await helpers.sleep(2000);
+        expect(filtersString).to.equal(false);
+
+        await page.evaluate(`$($('[id="layer-settings-filters-test.polygon"').find('.btn-group')[2]).find('button').trigger('click')`);
+        await helpers.sleep(1000);
+        await setTextFilterValue(page, `id`, `=`, `1`, 0, true, `polygon`);
+        await helpers.sleep(1000);
+
+        await page.click(`[href="#state-snapshots-content"]`);   
+        await helpers.sleep(1000);
+
+        // Create state snapshot
+        await page.type(`.js-browser-owned input`, `test snapshot title`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('.js-browser-owned').find('button').first().trigger('click')`);
+        await helpers.sleep(3000);
+
+        // Checking if reset drops filters
+        await page.click(`#btn-reset`);
+        await helpers.sleep(2000);
+        await page.evaluate(`$('#search-border').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
+        await helpers.sleep(500);
+        await page.evaluate(`$('[data-gc2-id="test.polygon"]').first().trigger('click')`);
+        await helpers.sleep(2000);
+        expect(await page.evaluate(`$('[id="layer-settings-filters-test.polygon"').find('.js-predefined-filters').find('input').is(':checked')`)).to.be.true;
+        expect(filtersString[`test.polygon`].length).to.equal(1);
+
+        // Restore snapshot
+        await page.evaluate(`$('#search-border').trigger('click')`);
+        await helpers.sleep(500);
+        await page.click(`[href="#state-snapshots-content"]`);   
+        await helpers.sleep(1000);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await helpers.sleep(2000);
+        expect(filtersString[`test.polygon`][0]).to.equal(`(id = 1)`);
+        expect(await page.evaluate(`$('[id="layer-settings-filters-test.polygon"').find('.js-predefined-filters').find('input').is(':checked')`)).to.be.false;
+
+        await page.close();
+    });
+
+    it('should allow AND / OR modes for arbitrary filtering, as well as adding and deleting rules', async () => {
         let page = await createPage();
 
         let numberOfFilteredItems = false;
@@ -127,6 +334,8 @@ describe('Layer tree filters', () => {
                 numberOfFilteredItems = parsedResponse.features.length;
             }
         });
+
+        await disablePredefinedFilters(page);
 
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm"]').first().trigger('click')`));
@@ -147,6 +356,12 @@ describe('Layer tree filters', () => {
 
         expect(numberOfFilteredItems).to.equal(2);
 
+        // Testing the Disable button
+        await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('.fa-eraser').parent().first().trigger('click')`);
+        await helpers.sleep(2000);
+
+        expect(numberOfFilteredItems).to.equal(7);
+
         await page.close();
     });
 
@@ -161,11 +376,15 @@ describe('Layer tree filters', () => {
             }
         });
 
+        await disablePredefinedFilters(page);
+
+        await helpers.img(page);
+
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm btn-success"]').is(':disabled')`)).to.be.true;
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm btn-success"]').is(':disabled')`)).to.be.false;
         await setTextFilterValue(page, `stringfield`, `=`, `abc`);
-        expect(numberOfFilteredItems).to.equal(2);
+        expect(numberOfFilteredItems).to.equal(1);
 
         await page.close();
     });
@@ -181,10 +400,12 @@ describe('Layer tree filters', () => {
             }
         });
 
+        await disablePredefinedFilters(page);
+
         await setTextFilterValue(page, `stringfield`, `like`, `abc`);
         expect(numberOfFilteredItems).to.equal(3);
         await setTextFilterValue(page, `stringfield`, `=`, `abc`);
-        expect(numberOfFilteredItems).to.equal(2);
+        expect(numberOfFilteredItems).to.equal(1);
 
         await page.close();
    });
@@ -199,6 +420,8 @@ describe('Layer tree filters', () => {
                 numberOfFilteredItems = parsedResponse.features.length;
             }
         });
+
+        await disablePredefinedFilters(page);
 
         await setTextFilterValue(page, `integerfield`, `=`, `12`);
         expect(numberOfFilteredItems).to.equal(2);
@@ -225,6 +448,8 @@ describe('Layer tree filters', () => {
             }
         });
 
+        await disablePredefinedFilters(page);
+
         await setTextFilterValue(page, `decimalfield`, `=`, `1.16`);
         expect(numberOfFilteredItems).to.equal(1);
         await setTextFilterValue(page, `decimalfield`, `<>`, `1.16`);
@@ -250,6 +475,8 @@ describe('Layer tree filters', () => {
             }
         });
 
+        await disablePredefinedFilters(page);
+
         await setBooleanFilterValue(page, `booleanfield`, `=`, `true`);
         expect(numberOfFilteredItems).to.equal(2);
         await setBooleanFilterValue(page, `booleanfield`, `=`, `false`);
@@ -268,6 +495,8 @@ describe('Layer tree filters', () => {
                 numberOfFilteredItems = parsedResponse.features.length;
             }
         });
+
+        await disablePredefinedFilters(page);
 
         /**
          * Thanks to https://www.npmjs.com/package/react-trigger-change

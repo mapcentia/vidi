@@ -10,6 +10,7 @@ module.exports = {
         "About": "About",
         "Meters": "Meters",
         "Buffer": "Buffer",
+        "Main page": "Main page",
         "Search": "Search",
         "Result": "Result",
         "Info": "Info",
@@ -163,6 +164,15 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Predefined": "Predefined",
+        "Arbitrary": "Arbitrary",
+        "No items selected": "No items selected",
+        "Create virtual layer": "Create virtual layer",
+        "Virtual layers": "Virtual layers",
+        "Dynamic load": "Dynamic load",
+        "Load strategy": "Load strategy",
+        "Network status": "Network status",
+        "Set all layers to be": "Set all layers to be",
         "Force offline mode": "Force offline mode",
         "Tile": "Raster",
         "Vector": "Vector",
@@ -177,6 +187,7 @@ module.exports = {
         "any": "any",
         "all": "all",
         "Select": "Select",
+        "Opacity": "Opacity",
         "Filters": "Filters",
         "Disable": "Disable",
         "Table view": "Table view",
@@ -185,19 +196,38 @@ module.exports = {
         "Yes": "Yes",
         "No": "No",
         "Add condition": "Add condition",
+        "Refresh cache for layer": "Refresh cache for layer",
+        "Fetch layer data from server": "Fetch data from server",
+        "Fetch layer data from cache": "Fetch data from cache",
+        "Refresh existing cache for layer": "Refresh existing cache for layer",
+        "Dynamic layer is cached only within the last requested bounding box": "Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",
+        "Display two layers at once": "Display two base layers at once",
+        "Side-by-side": "Side-by-side",
+        "Overlap": "Overlap",
+        "Display layers": "Display layers as",
+
+        // Map controls
+        "Map controls": "Map controls",
+        "Clear map": "Clear map",
+        "Default map extent": "Default map extent",
+        "Previous extent": "Previous extent",
+        "Next extent": "Next extent",
+        "Click here then draw a square on the map, to zoom in to an area": "Click here then draw a square on the map, to zoom in to an area",
 
         // APIBridge
         "Not authorized to perform this action": "Not authorized to perform this action",
 
         //Editor
-        "Application is offline, tiles will not be updated. Proceed?": "# Application is offline, tiles will not be updated. Proceed?",
-        "Are you sure you want to delete the feature?": "# Are you sure you want to delete the feature?",
+        "Application is offline, tiles will not be updated. Proceed?": "Application is offline, tiles will not be updated. Proceed?",
+        "Are you sure you want to delete the feature?": "Are you sure you want to delete the feature?",
+        "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)": "The page was loaded without service workers enabled, features editing is not available (the page was loaded via plain HTTP or browser does not support service workers)",
 
         // OfflineMap
+        "tiles failed to load": "tiles failed to load",
         "OfflineMap block description": "Here specific map areas can be stored to be used offline",
         "OfflineMap instructions": "Specific area of any base layer can be saved, so it can be used in offline mode. If the storage limit of your browser is exceeded, you can delete already cached layers in order to save space.",
         "Extent": "Extent",
@@ -228,7 +258,7 @@ module.exports = {
         "Define": "Define",
         "Redefine": "Redefine",
         "Show on map": "Show on map",
-        "Store map area": "# Store map area",
+        "Store map area": "Store map area",
 
         //StateSnapshots
         "State snapshots": "State snapshots",
@@ -242,6 +272,7 @@ module.exports = {
         "Add local state snapshots to user's ones": "Add local snapshots to user's ones",
         "Add local state snapshot to user's ones": "Add local snapshot to user's ones",
         "copy link": "Copy link",
+        "copy token": "Copy token",
         "New title": "New title",
         "StateSnapshots description": "Save, restore and share projects. A project contains the extent of the map, which background map is visible and which layers are turned on, which filters are active as well as your drawings. You can share a project by sharing the displayed URL. If you are not logged in, projects will be linked to the browser you are using. Otherwise, they will be stored under your user login. It is possible to transfer projects from browser to login.",
 
@@ -259,16 +290,35 @@ module.exports = {
         "Visible": "Visible",
         "No layers available": "No layers available",
 
-        //Boreholes
-        "Plots": "# Plots",
-        "Available plots": "# Available plots",
-        "At least one y axis has to be provided": "# At least one y axis has to be provided",
-        "Data series": "# Data series",
-        "Borehole": "# Borehole",
-        "No plots were created yet": "# No plots were created yet",
-        "Please select the measurement": "# Please select the measurement",
+        //WatsonC
+        "Drag and drop measurement to add it to time series": "Drag and drop measurement to add it to time series",
+        "Remove from time series": "Remove from time series",
+        "Time series": "Time series",
+        "Water level": "Water level",
+        "Select data": "Select data",
+        "Filter measurements": "Filter measurements",
+        "Found time series": "Found time series",
+        "Plots": "Plots",
+        "units": "units",
+        "updated at": "updated at",
+        "Uncategorized": "Uncategorized",
+        "Available plots": "Available plots",
+        "At least one y axis has to be provided": "At least one y axis has to be provided",
+        "Data series": "Data series",
+        "Borehole": "Borehole",
+        "No time series were created yet": "No time series were created yet",
+        "No plots were created yet": "No plots were created yet",
+        "Please select the measurement": "Please select the measurement",
+        "Show legend on top the map": "Show legend on top of the map",
+        "Not all measurements in plot were loaded by this moment": "Not all measurements in plot were loaded by this moment",
 
-        "Show legend on top the map": "Show legend on top the map"
-
+        // Search
+        "Didn't find anything": "Didn't find anything",
+        "Searchable fields": "Searchable fields",
+        "Like": "Like",
+        "Similarity": "Similarity",
+        "Tsvector": "Tsvector",
+        "No searchable fields on layer": "No searchable fields on layer",
+        "Method": "Method"
     }
 };

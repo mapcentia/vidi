@@ -152,8 +152,10 @@ module.exports = {
                     loading: false,
                     tilesLoaded: 0,
                     tilesLeftToLoad: 0,
+                    tilesFailed: 0,
                     mapAreasTilesLoaded: 0,
                     mapAreasTilesLeftToLoad: 0,
+                    mapAreasTilesFailed: 0,
                 };
 
                 this.setExtent = this.setExtent.bind(this);
@@ -182,7 +184,7 @@ module.exports = {
                 });
 
                 const checkServiceWorkerRegistration = () => {
-                    if (navigator.serviceWorker.controller) {
+                    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
                         this.setState({
                             cacheIsAvailable: 1
                         });
@@ -261,12 +263,12 @@ module.exports = {
                 var fetchTileQueue = async.queue((requestURL, callback) => {
                     let img = new Image();
                     img.onload = () => {
-                        onloadCallback();
+                        onloadCallback(requestURL);
                         callback();
                     };
 
                     img.onerror = () => {
-                        onerrorCallback();
+                        onerrorCallback(requestURL);
                         callback();
                     };
 
@@ -325,7 +327,8 @@ module.exports = {
                                             setTimeout(() => {
                                                 this.setState({
                                                     mapAreasTilesLoaded: 0,
-                                                    mapAreasTilesLeftToLoad: 0
+                                                    mapAreasTilesLeftToLoad: 0,
+                                                    mapAreasTilesFailed: 0
                                                 });
                                             }, 1000);
                                         }
@@ -335,9 +338,13 @@ module.exports = {
                                     this.fetchAndCacheTiles(item.data.tileURLs, () => {
                                         this.setState({mapAreasTilesLoaded: (this.state.mapAreasTilesLoaded + 1)});
                                         checkRefreshStatus();
-                                    }, () => {
-                                        console.log('Unable to fetch tile');
-                                        this.setState({mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad--});
+                                    }, (requestURL) => {
+                                        console.warn(`Unable to fetch tile (${requestURL})`);
+                                        this.setState({
+                                            mapAreasTilesLeftToLoad: this.state.mapAreasTilesLeftToLoad - 1,
+                                            mapAreasTilesFailed: this.state.mapAreasTilesFailed + 1
+                                        });
+
                                         checkRefreshStatus();
                                     });
                                 });
@@ -430,7 +437,8 @@ module.exports = {
 
                     this.setState({
                         tilesLoaded: 0,
-                        tilesLeftToLoad: tileURLs.length
+                        tilesLeftToLoad: tileURLs.length,
+                        tilesFailed: 0
                     });
 
                     navigator.serviceWorker.controller.postMessage({force: true});
@@ -439,9 +447,13 @@ module.exports = {
                     this.fetchAndCacheTiles(tileURLs, () => {
                         this.setState({tilesLoaded: (this.state.tilesLoaded + 1)});
                         this.attemptToSaveCachedArea(tileURLs, layer);
-                    }, () => {
-                        console.log('Unable to fetch tile');
-                        this.setState({tilesLeftToLoad: this.state.tilesLeftToLoad--});
+                    }, (requestURL) => {
+                        console.warn(`Unable to fetch tile (${requestURL})`);
+                        this.setState({
+                            tilesLeftToLoad: this.state.tilesLeftToLoad - 1,
+                            tilesFailed: this.state.tilesFailed + 1
+                        });
+
                         this.attemptToSaveCachedArea(tileURLs, layer);
                     });
 
@@ -462,7 +474,7 @@ module.exports = {
                     return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
                 };
 
-                if (browser && browser.name.toLowerCase() !== 'safari' && browser.name.toLowerCase() !== 'ios') {
+                if (browser && browser.name.toLowerCase() !== 'safari' && browser.name.toLowerCase() !== 'ios' && `webkitTemporaryStorage` in navigator) {
                     navigator.webkitTemporaryStorage.queryUsageAndQuota((usedBytes, grantedBytes) => {
                         this.setState({
                             storageUsed: bytesToSize(usedBytes),
@@ -573,7 +585,8 @@ module.exports = {
                 let loadingOverlay = false;
                 if (this.state.loading) {
                     loadingOverlay = (<LoadingOverlay tilesLoaded={this.state.tilesLoaded}
-                                                      tilesLeftToLoad={this.state.tilesLeftToLoad}>
+                                                      tilesLeftToLoad={this.state.tilesLeftToLoad}
+                                                      tilesFailed={this.state.tilesFailed}>
                         <button onClick={this.clearAddForm} className="btn btn-primary"
                                 type="button">{__("Store another")}</button>
                     </LoadingOverlay>);
@@ -583,7 +596,8 @@ module.exports = {
                 if (this.state.mapAreasTilesLeftToLoad > 0) {
                     mapAreasRefreshOverlay = (<LoadingOverlay
                         tilesLoaded={this.state.mapAreasTilesLoaded}
-                        tilesLeftToLoad={this.state.mapAreasTilesLeftToLoad}/>);
+                        tilesLeftToLoad={this.state.mapAreasTilesLeftToLoad}
+                        tilesFailed={this.state.mapAreasTilesFailed}/>);
                 }
 
                 let pageIsSecured = ((document.location.protocol.indexOf('https') === 0) ? true : false);

@@ -6,25 +6,13 @@
 
 'use strict';
 
-/**
- * @type {*|exports|module.exports}
- */
-var cloud;
+const layerTreeUtils = require('./layerTree/utils');
+import { SYSTEM_FIELD_PREFIX } from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
  */
-var backboneEvents;
-
-/**
- * @type {*|exports|module.exports}
- */
-var meta;
-
-/**
- * @type {*|exports|module.exports}
- */
-var advancedInfo;
+var cloud, backboneEvents, meta, layerTree, advancedInfo, switchLayer;
 
 /**
  * @type {*|exports|module.exports}
@@ -50,11 +38,8 @@ var db = urlparser.db;
 var JSONSchemaForm = require("react-jsonschema-form");
 const Form = JSONSchemaForm.default;
 
-/**
- *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
+var jquery = require('jquery');
+require('snackbarjs');
 
 var extensions;
 
@@ -75,7 +60,9 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         meta = o.meta;
+        layerTree = o.layerTree;
         advancedInfo = o.advancedInfo;
+        switchLayer = o.switchLayer;
         backboneEvents = o.backboneEvents;
         _layers = o.layers;
         extensions = o.extensions;
@@ -85,18 +72,22 @@ module.exports = {
     },
 
     /**
+     * Performs spatial SQL query and display results on map and in gc2table
+     * 
      * @param qstore
      * @param wkt
      * @param proj
      * @param callBack
      * @param num
-     * @param point
+     * @param infoClickPoint
+     * @param whereClause
+     * @param includes
+     * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint) {
-        var layers, count = {index: 0}, hit = false, distance,
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick) {
+        let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
 
-        let editor = false;
         if (`editor` in extensions) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
@@ -104,6 +95,9 @@ module.exports = {
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
+
+        // Set layers to passed array of layers if set
+        layers = includes || layers;
 
         // Remove not queryable layers from array
         for (var i = layers.length - 1; i >= 0; i--) {
@@ -119,13 +113,20 @@ module.exports = {
          * @type {string}
          */
         var defaultTemplate =
-            `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden">
-                    <button class="btn btn-primary btn-xs popup-edit-btn">
-                        <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                    </button>
-                    <button class="btn btn-primary btn-xs popup-delete-btn">
-                        <i class="fa fa-trash" aria-hidden="true"></i></button>
+                `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="visibility: hidden; width: 90%;">
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-xs popup-edit-btn">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-xs popup-delete-btn">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 {{#_vidi_content.fields}}
                     {{#title}}<h4>{{title}}</h4>{{/title}}
@@ -148,10 +149,12 @@ module.exports = {
              </div>`;
 
         $.each(layers, function (index, value) {
-            // No need to search in the already displayed vector layer
+            // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
                 return true;
             }
+
+            value = layerTreeUtils.stripPrefix(value);
 
             if (layers[0] === "") {
                 return false;
@@ -190,7 +193,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, out = [], cm = [], storeId = this.id, sql = this.sql,
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
                         template;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
@@ -202,10 +205,21 @@ module.exports = {
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
-                        $("#info-tab").append('<li><a id="tab_' + storeId + '" data-toggle="tab" href="#_' + storeId + '">' + layerTitel + '</a></li>');
-                        $("#info-pane").append('<div class="tab-pane" id="_' + storeId + '">' +
-                            '<div><a class="btn btn-sm btn-raised" id="_download_geojson_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> GeoJson</a> <a class="btn btn-sm btn-raised" id="_download_excel_' + storeId + '" target="_blank" href="javascript:void(0)"><i class="fa fa-download" aria-hidden="true"></i> Excel</a></div>' +
-                            '<table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table></div>');
+                        $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
+                        $("#info-pane").append(`<div class="tab-pane" id="_${storeId}">
+                            <div>
+                                <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                                </a> 
+                                <a class="btn btn-sm btn-raised" id="_download_excel_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> Excel
+                                </a>
+                                <button class="btn btn-sm btn-raised" id="_create_layer_${storeId}" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
+                                </button>
+                            </div>
+                            <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
+                        </div>`);
 
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
@@ -221,8 +235,8 @@ module.exports = {
                             setViewOnSelect: true,
                             responsive: false,
                             callCustomOnload: false,
-                            checkBox: false,
-                            height: 400,
+                            checkBox: true,
+                            height: 300,
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
@@ -230,6 +244,13 @@ module.exports = {
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                            let popup = e.getPopup();
+                            if (popup._closeButton) {
+                                popup._closeButton.onclick = function(clickEvent) {
+                                    if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
+                                }
+                            }
+
                             let layerIsEditable = false;
                             if (metaDataKeys[value].meta) {
                                 let parsedMeta = JSON.parse(metaDataKeys[value].meta);
@@ -240,13 +261,17 @@ module.exports = {
                                 }
                             }
 
-                            if (editingIsEnabled && layerIsEditable) {
-                                $(".popup-edit-btn").show();
-                                $(".popup-delete-btn").show();
-                            } else {
-                                $(".popup-edit-btn").hide();
-                                $(".popup-delete-btn").hide();
-                            }
+                            setTimeout(() => {
+                                if (editingIsEnabled && layerIsEditable) {
+                                    $(".gc2-edit-tools").css(`visibility`, `visible`);
+                                    $(".popup-edit-btn").show();
+                                    $(".popup-delete-btn").show();
+                                } else {
+                                    $(".gc2-edit-tools").css(`visibility`, `hidden`);
+                                    $(".popup-edit-btn").hide();
+                                    $(".popup-delete-btn").hide();
+                                }
+                            }, 100);
 
                             $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
                                 editor.edit(e, _key_, qstore);
@@ -260,13 +285,15 @@ module.exports = {
                         });
 
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
-                        _table.loadDataInTable();
+                        _table.loadDataInTable(false, true);
 
                         // If only one feature is selected, when activate it.
                         if (Object.keys(layerObj.layer._layers).length === 1) {
                             _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
                         }
+
                         hit = true;
+
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
                         // Stop the click on detail icon from bubbling up the DOM tree
@@ -280,26 +307,46 @@ module.exports = {
                         $("#_download_geojson_" + storeId).click(function () {
                             download(sql, "geojson");
                         });
-
-
+                        $("#_create_layer_" + storeId).click(function () {
+                            let _self = this;
+                            $(_self).prop(`disabled`, true);
+                            let uncheckedIds = _table.getUncheckedIds();
+                            // Remove query results and open them as created virtual layer in layerTree
+                            layerTree.createVirtualLayer(layerObj, {pkey, ids: uncheckedIds}).then(newLayerKey => {
+                                switchLayer.init(`v:` + newLayerKey, true).then(() => {
+                                    $(_self).prop(`disabled`, false);
+                                });
+                            }).catch(error => {
+                                $(_self).prop(`disabled`, false)
+                                console.error(`Error occured while creating the virtual layer`, error);
+                            });
+                        });
                     } else {
                         layerObj.reset();
                     }
+
                     count.index++;
                     if (count.index === layers.length) {
-                        //$('#info-tab a:first').tab('show');
-
                         if (!hit) {
                             $('#modal-info-body').hide();
+                            jquery.snackbar({
+                                content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
+                                htmlAllowed: true,
+                                timeout: 2000
+                            });
+                        } else {
+                            $('#main-tabs a[href="#info-content"]').tab('show');
+                            if (zoomToResult) {
+                                cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
+                            }
+                            setTimeout(()=>{
+                                $('#modal-info-body table').bootstrapTable('resetView');
+                            }, 300);
                         }
-                        $("#info-content button").click(function (e) {
-                            //clearDrawItems();
-                            //makeConflict(qstore[$(this).data('gc2-store')].geoJSON.features [0], 0, false, __("From object in layer") + ": " + $(this).data('gc2-title'));
-                        });
-                        $('#main-tabs a[href="#info-content"]').tab('show');
                     }
                 };
             }
+
             qstore[index] = new geocloud.sqlStore({
                 jsonp: false,
                 method: "POST",
@@ -344,6 +391,7 @@ module.exports = {
 
                 }
             });
+
             cloud.get().addGeoJsonStore(qstore[index]);
 
             var sql, f_geometry_column = metaDataKeys[value].f_geometry_column, fieldNames = [], fieldStr;
@@ -360,43 +408,51 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
-            if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
-                sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
-                    "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
-                    "WHERE ST_Intersects(rast,the_geom) ";
+            if (!whereClause) {
+                if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
+                    sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
+                        "FROM " + value + " CROSS JOIN (SELECT ST_transform(ST_GeomFromText('" + wkt + "'," + proj + ")," + srid + ") As the_geom) As foo " +
+                        "WHERE ST_Intersects(rast,the_geom) ";
 
-                qstore[index].custom_data = [
-                    value,
-                    cloud.get().map.getSize().x,
-                    cloud.get().map.getSize().y,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
-                    cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
-                    cloud.get().getExtent().left,
-                    cloud.get().getExtent().bottom,
-                    cloud.get().getExtent().right,
-                    cloud.get().getExtent().top
-                ];
-
-            } else {
-                if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
-                    }
-                    sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                    qstore[index].custom_data = [
+                        value,
+                        cloud.get().map.getSize().x,
+                        cloud.get().map.getSize().y,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).x,
+                        cloud.get().map.latLngToContainerPoint(infoClickPoint).y,
+                        cloud.get().getExtent().left,
+                        cloud.get().getExtent().bottom,
+                        cloud.get().getExtent().right,
+                        cloud.get().getExtent().top
+                    ];
                 } else {
-                    sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
-                    if (versioning) {
-                        sql = sql + " AND gc2_version_end_date IS NULL ";
+                    if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
+                    } else {
+                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        if (versioning) {
+                            sql = sql + " AND gc2_version_end_date IS NULL ";
+                        }
+                        qstore[index].custom_data = "";
                     }
-                    qstore[index].custom_data = "";
                 }
+            } else {
+                sql = "SELECT " + fieldStr + " FROM " + value + " WHERE " + whereClause;
+                if (versioning) {
+                    sql = sql + " AND gc2_version_end_date IS NULL ";
+                }
+                qstore[index].custom_data = "";
             }
+
             sql = sql + " LIMIT " + (num || 500);
+
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;
             qstore[index].load();
-
         });
     },
 
@@ -438,17 +494,20 @@ module.exports = {
         let cm = [];
         let out = [];
         $.each(features, function (i, feature) {
-            var fi = [];
+            var fields = [];
             if (fieldConf === null) {
                 $.each(feature.properties, function (name, property) {
-                    fi.push({
-                        title: name,
-                        value: feature.properties[name]
-                    });
-                    out.push([name, 0, name, false]);
+                    if (name.indexOf(SYSTEM_FIELD_PREFIX) !== 0 && name !== `_id` && name !== `_vidi_content`) {
+                        fields.push({
+                            title: name,
+                            value: feature.properties[name]
+                        });
+
+                        out.push([name, 0, name, false]);
+                    }
                 });
             } else {
-                $.each(sortObject(fieldConf), function (name, property) {
+                $.each(sortObject(fieldConf), (name, property) => {
                     if (property.value.querable) {
                         let value = feature.properties[property.key];
                         if (property.value.link) {
@@ -466,20 +525,22 @@ module.exports = {
                             </a>`;
                             }
                         }
-                        fi.push({title: property.value.alias || property.key, value});
+
+                        fields.push({title: property.value.alias || property.key, value});
                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                         if (feature.properties[property.key] !== undefined) {
                             out.push([property.key, property.value.sort_id, fieldLabel, property.value.link]);
                         }
                     }
                 });
+
                 out.sort(function (a, b) {
                     return a[1] - b[1];
                 });
             }
 
             feature.properties._vidi_content = {};
-            feature.properties._vidi_content.fields = fi; // Used in a "loop" template
+            feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
                     cm.push({

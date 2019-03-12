@@ -14,52 +14,7 @@ const MODULE_NAME = `state`;
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var setting;
-
-/**
- * @type {*|exports|module.exports}
- */
-var baseLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var setBaseLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var switchLayer;
-
-/**
- * @type {*|exports|module.exports}
- */
-var legend;
-
-/**
- * @type {*|exports|module.exports}
- */
-var print;
-
-/**
- * @type {*|exports|module.exports}
- */
-var draw;
-
-/**
- * @type {*|exports|module.exports}
- */
-var advancedInfo;
-
-/**
- * @type {*|exports|module.exports}
- */
-var meta;
+var cloud, setting, baseLayer, setBaseLayer, switchLayer, legend, print, draw, advancedInfo, meta;
 
 /**
  * @type {*|exports|module.exports}
@@ -127,7 +82,7 @@ const _getInternalState = () => {
             if (LOG) console.log('State: after getting state');
 
             if (error) {
-                throw new Error('State: error occured while accessing the store');
+                throw new Error('State: error occured while accessing the store', error);
             }
 
             let localState = { modules: {} };
@@ -261,13 +216,11 @@ module.exports = {
                  * 
                  * @param {String} data Input data for underlying function
                  * 
-                 * @return {Function} 
+                 * @return {Function}
                  */
                 const createPromise = (data) => {
                     return new Promise(resolve => {
-                        switchLayer.init(data, true, true).then(() => {
-                            resolve();
-                        });
+                        switchLayer.init(data, true, true).then(resolve);
                     })
                 };
 
@@ -336,6 +289,13 @@ module.exports = {
                         },
                         scriptCharset: "utf-8",
                         success: function (response) {
+                            // Server replies have different structure
+                            if (`anchor` in response.data === false && `bounds` in response.data === false && `data` in response.data && response.data.data) {
+                                if (`anchor` in response.data.data && `bounds` in response.data.data) {
+                                    response.data = response.data.data;
+                                }
+                            }
+
                             if (response.data.bounds !== null) {
                                 var bounds = response.data.bounds;
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
@@ -538,7 +498,7 @@ module.exports = {
             if (urlVars.state) {
                 stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
                     if (state) {
-                        this.applyState(state.snapshot);
+                        this.applyState(state.snapshot).then(initResolve);
                     } else {
                         initializeFromHashPart();
                     }
@@ -582,10 +542,19 @@ module.exports = {
      * 
      * @return {Promise}
      */
-    resetState: () => {
+    resetState: (customModulesToReset = []) => {
+        backboneEvents.get().trigger(`reset:infoClick`);
         let appliedStatePromises = [];
-        for (let key in listened) {
-            appliedStatePromises.push(listened[key].applyState(false));
+        if (customModulesToReset.length > 0) {
+            for (let key in listened) {
+                if (customModulesToReset.indexOf(key) !== -1) {
+                    appliedStatePromises.push(listened[key].applyState(false));
+                }
+            }
+        } else {
+            for (let key in listened) {
+                appliedStatePromises.push(listened[key].applyState(false));
+            }
         }
 
         return Promise.all(appliedStatePromises).then(() => {
@@ -648,7 +617,14 @@ module.exports = {
                             promises.push(listened[name].applyState(state.modules[name]));
                             modulesWithAppliedState.push(name);
                         } else {
-                            console.warn(`Module or extension ${name} is not registered in state module, so its state is not applied`);
+                            console.warn(`Module or extension ${name} is not registered in state module, so its state will be applied when the "${name}:initialized" event will be fired`);
+                            backboneEvents.get().once(`${name}:initialized`, () => {
+                                if (name in listened) {
+                                    listened[name].applyState(state.modules[name]).catch(error => {
+                                        console.error(`Unable to apply state to ${name}, though the event was fired`, error);
+                                    });
+                                }
+                            });
                         }
                     }
                 }
@@ -719,6 +695,35 @@ module.exports = {
 
     setBaseLayer: function (b) {
         setBaseLayer = b;
+    },
+
+    /**
+     * Updates overall state of the application on provided event (less optimized than listen())
+     */
+    listenAny: (eventName, updatedModules = []) => {
+        backboneEvents.get().on(eventName, () => {
+            _getInternalState().then(localState => {
+                if (`modules` in localState === false || !localState.modules) {
+                    localState.modules = {};
+                }
+
+                if (updatedModules.length === 0) {
+                    for (let name in listened) {
+                        localState.modules[name] = listened[name].getState();
+                    }
+                } else {
+                    for (let name in listened) {
+                        if (updatedModules.indexOf(name) > -1) {
+                            localState.modules[name] = listened[name].getState();
+                        }
+                    }
+                }
+
+                _setInternalState(localState);
+            }).catch(error => {
+                console.error(error);
+            });
+        });
     },
 
     /**

@@ -8,7 +8,7 @@ const helpers = require("./../helpers");
 describe('Draw', () => {
     it('should allow drawing features and restoring them switching base layers', async () => {
         let page = await browser.newPage();
-        await page.goto(`${helpers.PAGE_URL.replace('8082', '8081')}`);
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         await page.emulate(helpers.EMULATED_SCREEN);
         page = await helpers.waitForPageToLoad(page);
 
@@ -20,10 +20,9 @@ describe('Draw', () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('[href="#draw-content"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('#draw-btn').trigger('click')`);
-        await helpers.sleep(1000);
 
         // Draw one-segement line
+        expect(await page.evaluate(`$('.leaflet-draw-draw-polyline').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-polyline`);
         await helpers.sleep(1000);
         await page.mouse.move(100, 100);
@@ -37,6 +36,7 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Draw circle marker
+        expect(await page.evaluate(`$('.leaflet-draw-draw-circlemarker').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-circlemarker`);
         await helpers.sleep(1000);
         await page.mouse.move(400, 400);
@@ -44,6 +44,7 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Draw marker
+        expect(await page.evaluate(`$('.leaflet-draw-draw-marker').length`) === 1).to.be.true;
         await page.click(`.leaflet-draw-draw-marker`);
         await helpers.sleep(1000);
         await page.mouse.move(300, 300);
@@ -51,11 +52,12 @@ describe('Draw', () => {
         await page.mouse.up();
 
         // Save drawings in snapshot
-        await page.evaluate(`$('[href="#state-snapshots-dialog-content-content"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#state-snapshots-content"]').trigger('click')`);
         await helpers.sleep(1000);
         await page.type(`.js-browser-owned input`, `test snapshot title`);
         await helpers.sleep(2000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('h4').first().find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('h4').first().find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         await page.reload();
@@ -63,9 +65,9 @@ describe('Draw', () => {
 
         await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('[href="#state-snapshots-dialog-content-content"]').trigger('click')`);
+        await page.evaluate(`$('[href="#state-snapshots-content"]').trigger('click')`);
         await helpers.sleep(1000);
-        await page.evaluate(`$('#state-snapshots-dialog-content').find('.panel-default').eq(0).find('button').first().trigger('click')`);
+        await page.evaluate(`$('#state-snapshots').find('.panel-default').eq(0).find('button').first().trigger('click')`);
         await helpers.sleep(2000);
 
         await page.evaluate(`$('[href="#draw-content"]').trigger('click')`);

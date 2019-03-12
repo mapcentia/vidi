@@ -12,17 +12,29 @@
     <meta name="google" value="notranslate">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <!-- Preload fonts. -->
+    <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/roboto-v18-latin-300.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/fa-solid-900.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/icons/MaterialIcons-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/js/lib/bootstrap/dist/fonts/glyphicons-halflings-regular.woff2" as="font" type="font/woff2" crossorigin>
+    <!-- Build -->
+    <!-- build:css /css/build/all.min.css -->
     <!-- Material Design fonts -->
     <link rel="stylesheet" href="/fonts/fonts.css">
     <link rel="stylesheet" href="/icons/material-icons.css">
+    <!-- jQuery UI -->
+    <link rel="stylesheet" href="/js/lib/jquery-ui/jquery-ui.min.css">
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="/css/font-awesome.min.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.solid.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.regular.css"/>
     <link rel="stylesheet" href="/css/font-awesome.v520.css"/>
-    <!-- build:css /css/build/all.min.css -->
     <!-- Leafet -->
     <link rel="stylesheet" href="/js/lib/leaflet/leaflet.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-history/leaflet-history.css">
+    <link rel="stylesheet" href="/js/lib/leaflet-boxzoom/leaflet-boxzoom.css">
     <link rel="stylesheet" href="/js/lib/leaflet-draw/leaflet.draw.css">
     <link rel="stylesheet" href="/js/lib/leaflet.locatecontrol/L.Control.Locate.css">
     <link rel="stylesheet" href="/js/lib/leaflet.toolbar/leaflet.toolbar.css">
@@ -94,6 +106,8 @@
 <!-- build:js /js/build/all.min.js -->
 <!-- Leaflet -->
 <script src="/js/lib/leaflet/leaflet-src.js"></script>
+<script src="/js/lib/leaflet-history/leaflet-history.js"></script>
+<script src="/js/lib/leaflet-boxzoom/leaflet-boxzoom.js"></script>
 <script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
 <script src="/js/lib/Path.Drag.js/src/Path.Drag.js"></script>
 <script src="/js/lib/leaflet.editable/Leaflet.Editable.js"></script>
@@ -108,20 +122,25 @@
 <script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
 <script src="/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js"></script>
 <script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
+<script src="/js/lib/leaflet-glify/glify.js"></script>
 <script src="/js/lib/q-cluster/src/utils.js"></script>
 <script src="/js/lib/q-cluster/src/clustering.js"></script>
 <script src="/js/point-clusterer.js"></script>
 <script src="/js/lib/localforage/localforage.js"></script>
 <script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
+<script src="/js/lib/leaflet-geometryutil/leaflet.geometryutil.js"></script>
+<script src="/js/lib/leaflet-snap/leaflet.snap.js"></script>
+<script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
+
 <!-- Core -->
 <script src="/js/lib/jquery/jquery.js"></script>
 <script src="/js/lib/jquery-ui/jquery-ui.min.js"></script>
+<script src="/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js"></script>
 <script src="/js/lib/jquery.canvasResize.js/jquery.canvasResize.js"></script>
 <script src="/js/lib/jquery.canvasResize.js/jquery.exif.js"></script>
 <script src="/js/lib/jrespond/jRespond.js"></script>
 <script src="/js/lib/mustache.js/mustache.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
-<script src="/js/lib/raphael/raphael.min.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
 <script src="/js/lib/momentjs/moment-with-locales.js"></script>
 <script src="/js/lib/d3/d3.js"></script>

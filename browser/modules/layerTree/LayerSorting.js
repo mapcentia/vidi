@@ -136,7 +136,8 @@ class LayerSorting {
      * Checking the order object structure
      * 
      * [{
-     *   id: "Group name",
+     *   id: "Group with children",
+     *   panelWasInitialized: true,
      *   children: [{
      *     id: "public.test",
      *     type: "layer"
@@ -145,6 +146,12 @@ class LayerSorting {
      *     type: "group",
      *     children: [{ id: "public.test_line" }, { .. }]
      *   }]
+     * }]
+     * 
+     * [{
+     *   id: "Group without children",
+     *   panelWasInitialized: false,
+     *   children: []
      * }]
      * 
      * @returns {Boolean}
@@ -157,7 +164,7 @@ class LayerSorting {
                 return false;
             }
 
-            if (`children` in group === false || !Array.isArray(group.children) || group.children.length === 0) {
+            if (`children` in group === false || !Array.isArray(group.children) || (group.children.length === 0 && group.panelWasInitialized)) {
                 errorMessage = `No group children`;
                 return false;
             }

@@ -104,6 +104,8 @@ var gc2table = (function () {
                 height: 300,
                 setSelectedStyle: true,
                 openPopUp: false,
+                onPopupClose: false,
+                onPopupCloseButtonClick: false,
                 setViewOnSelect: true,
                 responsive: true,
                 autoPan: false,
@@ -144,12 +146,14 @@ var gc2table = (function () {
             tableBodyHeight = defaults.tableBodyHeight,
             assignFeatureEventListenersOnDataLoad = defaults.assignFeatureEventListenersOnDataLoad,
             styleSelected = defaults.styleSelected,
-            el = defaults.el, click, loadDataInTable, moveEndOff, moveEndOn,
+            el = defaults.el, click, loadDataInTable, getUncheckedIds, moveEndOff, moveEndOn,
             setSelectedStyle = defaults.setSelectedStyle,
             setViewOnSelect = defaults.setViewOnSelect,
             onSelect = defaults.onSelect,
             onMouseOver = defaults.onMouseOver,
             openPopUp = defaults.openPopUp,
+            onPopupClose = defaults.onPopupClose,
+            onPopupCloseButtonClick = defaults.onPopupCloseButtonClick,
             autoPan = defaults.autoPan,
             responsive = defaults.responsive,
             callCustomOnload = defaults.callCustomOnload,
@@ -175,13 +179,13 @@ var gc2table = (function () {
                 var clearSelection = function () {
                     $(el + ' tr').removeClass("selected");
                     $.each(store.layer._layers, function (i, v) {
-
-                        if (uncheckedIds.indexOf(v._leaflet_id) === -1) {
-
-
+                        let databaseIdentifier = getDatabaseIdForLayerId(v._leaflet_id);
+                        if (uncheckedIds.indexOf(databaseIdentifier) === -1) {
                             try {
                                 v.closePopup();
-                                store.layer.resetStyle(v);
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(v);
+                                }
                             } catch (e) {
                                 console.log(e);
                             }
@@ -230,6 +234,18 @@ var gc2table = (function () {
                             minWidth: 160
                         }).openPopup();
 
+                        m.map._layers[id].on('popupclose', function(e) {
+                            // Removing the selectedStyle from feature
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
+                                store.layer._layers[id].setStyle(uncheckedStyle);
+                            } else {
+                                store.layer.resetStyle(store.layer._layers[id]);
+                            }
+
+                            if (onPopupClose) onPopupClose(id);
+                        });
+
                         object.trigger("openpopup" + "_" + uid, m.map._layers[id]);
                     }
                 });
@@ -251,7 +267,7 @@ var gc2table = (function () {
                 $(el).append("<thead><tr></tr></thead>");
 
                 if (checkBox) {
-                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'</th>");
+                    $(el + ' thead tr').append("<th data-field='" + pkey + "' data-checkbox='true'></th>");
                 }
 
                 $.each(cm, function (i, v) {
@@ -286,19 +302,42 @@ var gc2table = (function () {
                         bindEvent();
                     }, 500);
 
+                var getDatabaseIdForLayerId = function(layerId) {
+                    if (!store.geoJSON) return false;
+
+                    var databaseIdentifier = false;                    
+                    store.geoJSON.features.map(item => {
+                        if (parseInt(item.properties._id) === parseInt(layerId)) {
+                            databaseIdentifier = item.properties[pkey];
+                            return false;
+                        }
+                    });
+
+                    if (databaseIdentifier === false) {
+                        console.error("Unable to find primary key value for layer with identifier " + layerId);
+                    }
+
+                    return databaseIdentifier;
+                };
+
                 var bindEvent = function (e) {
                     setTimeout(function () {
-
                         $(el + ' > tbody > tr').on("click", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1 || checkBox === false) {
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
                                 object.trigger("selected" + "_" + uid, id);
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
                                     if (setViewOnSelect) {
-                                        m.map.fitBounds(layer.getBounds());
+                                        try {
+                                            m.map.panTo(layer.getBounds().getCenter());
+                                        } catch (e) {
+                                            m.map.panTo(layer.getLatLng());
+                                        }
                                     }
                                 }, 100);
+
                                 onSelect(id, layer);
                             }
                         });
@@ -306,23 +345,34 @@ var gc2table = (function () {
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
                             var id = $(this).data('uniqueid');
                             var layer = m.map._layers[id];
-                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                                 store.layer._layers[id].setStyle({
                                     fillColor: "#660000",
                                     fillOpacity: "0.6"
                                 });
+
                                 onMouseOver(id, layer);
                             }
                         });
 
                         $(el + ' > tbody > tr').on("mouseout", function (e) {
                             var id = $(this).data('uniqueid');
-                            if (uncheckedIds.indexOf(id) === -1 && checkBox === true) {
-                                store.layer.resetStyle(store.layer._layers[id])
+                            var databaseIdentifier = getDatabaseIdForLayerId(id);
+                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                                if (store.layer && store.layer.resetStyle) {
+                                    store.layer.resetStyle(store.layer._layers[id]);
+                                }
                             }
                         });
                     }, 100);
                 };
+
+                var uncheckedStyle = {
+                    fillOpacity: 0.0,
+                    opacity: 0.0
+                };
+
                 $(el).bootstrapTable({
                     uniqueId: "_id",
                     height: height,
@@ -333,21 +383,43 @@ var gc2table = (function () {
                     onColumnSearch: filterMap
                 });
 
+                $(el).on('check-all.bs.table', function (e, m) {
+                    m.map(function(checkedRowItem) {
+                        if (store.layer && store.layer.resetStyle) {
+                            store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
+                        }
+                    });
+
+                    uncheckedIds = [];
+                });
+
+                $(el).on('uncheck-all.bs.table', function (e, m) {
+                    m.map(function(uncheckedRowItem) {
+                        var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
+                        uncheckedIds.push(parseInt(databaseIdentifier));
+
+                        store.layer._layers[uncheckedRowItem._id].setStyle(uncheckedStyle);
+
+                        store.layer._layers[uncheckedRowItem._id].closePopup()
+                    });
+                });
+
                 $(el).on('check.bs.table uncheck.bs.table', function (e, m) {
-
+                    var databaseIdentifier = getDatabaseIdForLayerId(m._id);
                     if (m[pkey] === false) {
-                        uncheckedIds.push(parseInt(m._id));
-                        store.layer._layers[m._id].setStyle({
-                            fillOpacity: 0.0,
-                            opacity: 0.2
-                        });
-                        store.layer._layers[m._id].closePopup()
+                        uncheckedIds.push(parseInt(databaseIdentifier));
 
+                        store.layer._layers[m._id].setStyle(uncheckedStyle);
+
+                        store.layer._layers[m._id].closePopup()
                     } else {
                         uncheckedIds = uncheckedIds.filter(function (item) {
-                            return item !== parseInt(m._id);
+                            return item !== parseInt(databaseIdentifier);
                         });
-                        store.layer.resetStyle(store.layer._layers[m._id])
+
+                        if (store.layer && store.layer.resetStyle) {
+                            store.layer.resetStyle(store.layer._layers[m._id]);
+                        }
                     }
                 });
 
@@ -385,18 +457,18 @@ var gc2table = (function () {
                     loadDataInTable();
                 };
 
-                loadDataInTable = function (doNotCallCustomOnload) {
+                loadDataInTable = function (doNotCallCustomOnload = false, forceDataLoad = false) {
                     data = [];
                     $.each(store.layer._layers, function (i, v) {
                         v.feature.properties._id = i;
                         $.each(v.feature.properties, function (n, m) {
                             $.each(cm, function (j, k) {
                                 if (k.dataIndex === n && ((typeof k.link === "boolean" && k.link === true) || (typeof k.link === "string"))) {
-                                    v.feature.properties[n] = "<a target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
+                                    //v.feature.properties[n] = "<a target='_blank' rel='noopener' href='" + v.feature.properties[n] + "'>" + (typeof k.link === "string" ? k.link : "Link") + "</a>";
                                 }
                             });
                         });
-                        data.push(v.feature.properties);
+                        data.push(JSON.parse(JSON.stringify(v.feature.properties)));
 
                         if (assignFeatureEventListenersOnDataLoad) {
                             assignEventListeners();
@@ -405,7 +477,9 @@ var gc2table = (function () {
 
                     originalLayers = jQuery.extend(true, {}, store.layer._layers);
 
-                    $(el).bootstrapTable("load", data);
+                    if ($(el).is(':visible') || forceDataLoad) {
+                        $(el).bootstrapTable("load", data);
+                    }
 
                     bindEvent();
 
@@ -417,6 +491,10 @@ var gc2table = (function () {
                     $(".fixed-table-body").css("max-height", tableBodyHeight + "px");
                     $(".fixed-table-body").css("height", tableBodyHeight + "px");
                 };
+
+                getUncheckedIds = function () {
+                    return uncheckedIds;
+                }
 
                 var moveEndEvent = function () {
                     store.reset();
@@ -473,6 +551,7 @@ var gc2table = (function () {
             loadDataInTable: loadDataInTable,
             destroy: destroy,
             assignEventListeners: assignEventListeners,
+            getUncheckedIds: getUncheckedIds,
             object: object,
             uid: uid,
             store: store,

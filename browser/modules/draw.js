@@ -13,17 +13,7 @@ const drawTools = require(`./drawTools`);
 /**
  * @type {*|exports|module.exports}
  */
-var cloud;
-
-/**
- * @type {*|exports|module.exports}
- */
-var state;
-
-/**
- * @type {*|exports|module.exports}
- */
-var serializeLayers;
+var cloud, utils, state, serializeLayers;
 
 /**
  *
@@ -74,6 +64,7 @@ module.exports = {
     set: function (o) {
         cloud = o.cloud;
         state = o.state;
+        utils = o.utils;
         serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
         _self = this;
@@ -81,19 +72,20 @@ module.exports = {
     },
 
     init: () => {
+        backboneEvents.get().on(`reset:all`, () => {
+            _self.resetState();
+        });
+
+        backboneEvents.get().on(`off:all`, () => {
+            _self.control(false);
+            _self.off();
+        });
+
+        backboneEvents.get().on(`on:${MODULE_NAME}`, () => { _self.control(true); });
+        backboneEvents.get().on(`off:${MODULE_NAME}`, () => { _self.control(false); });
+
         state.listenTo(MODULE_NAME, _self);
         state.listen(MODULE_NAME, `update`);
-
-        var me = _self;
-
-        // Bind events
-        $("#draw-btn").on("click", () => {
-            if ($("#draw-btn").is(':checked')) {
-                me.control(true);
-            } else {
-                me.control(false);
-            }
-        });
 
         $("#draw-line-extremity").on("change", function () {
             var b = $("#draw-line-extremity").val() === "none";
@@ -152,8 +144,6 @@ module.exports = {
     },
 
     off: () => {
-        $("#draw-btn").prop("checked", false);
-
         // Unbind events
         cloud.get().map.off('draw:created');
         cloud.get().map.off('draw:drawstart');
@@ -183,8 +173,6 @@ module.exports = {
      * Adds drawings control to the map
      */
     control: (enable = false, triggerEvents = true) => {
-        var me = _self;
-
         if (enable && !drawControl) {
             if (triggerEvents) backboneEvents.get().trigger(`drawing:turnedOn`);
 
@@ -296,11 +284,11 @@ module.exports = {
                 drawnItems.addLayer(drawLayer);
                 drawLayer.openTooltip();
 
-                me.setStyle(drawLayer, type);
+                _self.setStyle(drawLayer, type);
 
                 if (type !== 'circlemarker') {
                     drawLayer.on('click', function (event) {
-                        me.bindPopup(event);
+                        _self.bindPopup(event);
                     });
                 }
 
@@ -328,11 +316,11 @@ module.exports = {
                 };
 
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
             cloud.get().map.on('draw:deleted', function (e) {
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
             cloud.get().map.on('draw:edited', function (e) {
 
@@ -357,7 +345,7 @@ module.exports = {
                 });
 
                 backboneEvents.get().trigger(`${MODULE_NAME}:update`);
-                table.loadDataInTable();
+                table.loadDataInTable(false, true);
             });
 
             var po1 = $('.leaflet-draw-section:eq(0)').popover({content: __("Use these tools for creating markers, lines, areas, squares and circles."), placement: "left"});
@@ -545,7 +533,7 @@ module.exports = {
             });
         }
 
-        t.loadDataInTable();
+        t.loadDataInTable(false, true);
 
         if (enableControl) {
             _self.control(true);
@@ -558,14 +546,14 @@ module.exports = {
             return;
         }
 
-        var popup = L.popup(), me = this;
+        var popup = L.popup();
 
         popup.setLatLng(event.latlng)
             .setContent('<p style="width: 200px">' + __("Apply default style settings for this drawing?") + '</p><a href="javascript:void(0)" id="btn-draw-apply-style-cancel" class="btn btn-raised btn-default btn-xs">' + __("Cancel") + '</a><a href="javascript:void(0)" id="btn-draw-apply-style-ok" class="btn btn-raised btn-primary btn-xs">' + __("Ok") + '</a>')
             .openOn(cloud.get().map);
 
         $("#btn-draw-apply-style-ok").on("click", function () {
-            me.setStyle(event.target, event.target.feature.properties.type);
+            _self.setStyle(event.target, event.target.feature.properties.type);
             cloud.get().map.closePopup(popup);
             backboneEvents.get().trigger(`${MODULE_NAME}:update`);
         });
@@ -584,7 +572,8 @@ module.exports = {
         if ($("#draw-measure").is(":checked") && type !== 'marker' && type !== 'circlemarker') {
             l.hideMeasurements();
             l.showMeasurements({
-                showTotal: $("#draw-line-total-dist").is(":checked")
+                showTotalPolylineLength: $("#draw-line-total-dist").is(":checked"),
+                formatArea: utils.formatArea
             });
         } else {
             if (type !== 'marker' && type !== 'circlemarker' ) {
