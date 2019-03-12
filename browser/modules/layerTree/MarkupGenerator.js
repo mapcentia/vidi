@@ -86,7 +86,7 @@ class MarkupGenerator {
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
-                <div style="overflow: auto">
+                <div style="overflow: auto; min-height: 40px;">
                     <div style="float: left;">
                         <div style="display: inline-block;">
                             <div class="checkbox" style="width: 34px; top: 2px">
