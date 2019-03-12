@@ -168,7 +168,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify']
                 }
             },
             publish_sw: {
@@ -198,7 +198,7 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify'],
+                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify'],
                     watch: true,
                     keepAlive: true,
                     browserifyOptions: {
@@ -270,8 +270,6 @@ module.exports = function (grunt) {
                         'public/js/proj4js-combined.js',
                         'public/js/bundle.js',
                         'public/js/vidi.js',
-                        'public/js/gc2/geocloud.js',
-                        'public/js/gc2/gc2table.js'
                     ]
                 }
             }
