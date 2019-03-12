@@ -1231,6 +1231,61 @@ module.exports = {
     },
 
     /**
+     * Creates gc2table control for layer
+     * 
+     * @param {String}  layerKey      Layer key     
+     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     * 
+     * @returns {void}
+     */
+    createTable(layerKey, forceDataLoad = false) {
+        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
+        if (layerWithData.length === 1) {
+            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+
+            let metaDataKeys = meta.getMetaDataKeys();
+            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                && metaDataKeys[layerKey].infowindow.template !== "")
+                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+
+            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.2
+            });
+
+            let localTable = gc2table.init({
+                el: tableContainerId + ` table`,
+                ns: tableContainerId,
+                geocloud2: cloud.get(),
+                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
+                cm: tableHeaders,
+                autoUpdate: false,
+                autoPan: false,
+                openPopUp: false,
+                setViewOnSelect: true,
+                responsive: false,
+                callCustomOnload: true,
+                assignFeatureEventListenersOnDataLoad: true,
+                height: 250,
+                locale: window._vidiLocale.replace("_", "-"),
+                template: template,
+                styleSelected
+            });
+
+            localTable.loadDataInTable(true, forceDataLoad);
+            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+        } else {
+            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
+        }
+    },
+
+    /**
      * Creates SQL store for vector layers
      *
      * @param {Object}  layer        Layer description
@@ -1305,47 +1360,7 @@ module.exports = {
             onLoad: (l) => {
                 if (l === undefined) return;
 
-                let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-                if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-                $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
-
-                let metaDataKeys = meta.getMetaDataKeys();
-                let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                    && metaDataKeys[layerKey].infowindow.template !== "")
-                    ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-                let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
-
-                let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
-                    weight: 5,
-                    color: '#666',
-                    dashArray: '',
-                    fillOpacity: 0.2
-                });
-
-                let localTable = gc2table.init({
-                    el: tableContainerId + ` table`,
-                    ns: tableContainerId,
-                    geocloud2: cloud.get(),
-                    store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
-                    cm: tableHeaders,
-                    autoUpdate: false,
-                    autoPan: false,
-                    openPopUp: false,
-                    setViewOnSelect: true,
-                    responsive: false,
-                    callCustomOnload: true,
-                    assignFeatureEventListenersOnDataLoad: true,
-                    height: 250,
-                    locale: window._vidiLocale.replace("_", "-"),
-                    template: template,
-                    styleSelected
-                });
-
-                if ($(tableContainerId + ` table`).is(`:visible`)) {
-                    localTable.loadDataInTable(true);
-                }
-
-                tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
 
                 $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
 
@@ -1945,7 +1960,6 @@ module.exports = {
                         subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
 
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
-
         if (layer.baselayer) {
             console.error(`Non-supported way of adding the base layer`);
             $("#base-layer-list").append(`<div class='list-group-item'>
@@ -2301,16 +2315,17 @@ module.exports = {
 
                     // Table view
                     $(layerContainer).find(`.js-toggle-table-view`).click(() => {
+                        let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+                        if ($(tableContainerId + ` table`).length === 1) $(tableContainerId + ` table`).empty();
+                        _self.createTable(layerKey, true);
+
                         _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
 
-                        let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
 
                         // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-
-                        tables[LAYER.VECTOR + ':' + layerKey].loadDataInTable(true);
                     });
 
                     // @todo Test

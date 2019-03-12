@@ -785,8 +785,6 @@ module.exports = {
                     }
                 };
 
-                console.log(`### featureCollection`, featureCollection);
-
                 apiBridgeInstance.updateFeature(featureCollection, db, metaDataKeys[schemaQualifiedName]).then(featureIsUpdated).catch(error => {
                     console.log('Editor: error occured while performing updateFeature()');
                     throw new Error(error);

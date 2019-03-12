@@ -210,14 +210,26 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
         var latlngsTmp = layer.getLatLngs();
         for (var i = 0; i < latlngsTmp.length; i++) {
             if (latlngsTmp[i].lat && latlngsTmp[i].lng) {
+                // Copying POINT
                 resultsTmp.push(new L.LatLng(latlngsTmp[i].lat, latlngsTmp[i].lng));
             } else {
                 let subresult = [];
                 for (var j = 0; j < latlngsTmp[i].length; j++) {
+                    // Copying MULTIPOINT, LINESTRING or POLYGON
                     if (latlngsTmp[i][j].lat && latlngsTmp[i][j].lng) {
                         subresult.push(new L.LatLng(latlngsTmp[i][j].lat, latlngsTmp[i][j].lng));
                     } else {
-                        console.error('Unable to properly copy the feature', latlngsTmp[i][j]);
+                        // Copying MULTILINESTRING or MULTIPOLYGON
+                        let deepestSubResult = [];
+                        for (var k = 0; k < latlngsTmp[i][j].length; k++) {
+                            if (latlngsTmp[i][j][k].lat && latlngsTmp[i][j][k].lng) {
+                                deepestSubResult.push(new L.LatLng(latlngsTmp[i][j][k].lat, latlngsTmp[i][j][k].lng));
+                            } else {
+                                console.error('Unable to properly copy the feature', latlngsTmp[i][j][k]);
+                            }
+                        }
+
+                        subresult.push(deepestSubResult);
                     }
                 }
 

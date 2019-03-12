@@ -132,8 +132,6 @@ let urlsToCache = [
     '/js/point-clusterer.js',
     '/js/leaflet-easybutton/easy-button.js',
     '/js/proj4js-combined.js',
-    '/js/gc2/gc2table.js',
-    '/js/gc2/geocloud.js',
     '/js/point-clusterer.js',
     '/js/bundle.js',
     '/js/lib/jquery-ui/jquery-ui.min.css',
