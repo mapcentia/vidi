@@ -44,8 +44,9 @@ module.exports = module.exports = {
             let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param;
             hasBeenVisible = arrayUnique([...hasBeenVisible, ...layerArr ? layerArr : visibleLayers.split(";")]);
             if (hasBeenVisible.length === hasBeenVisibleTmp.length && hasBeenVisible.every((value, index) => value === hasBeenVisibleTmp[index])) {
-                return;
+                resolve();
             }
+
             hasBeenVisibleTmp = hasBeenVisible;
             param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
             $.ajax({
