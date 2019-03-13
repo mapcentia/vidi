@@ -61,6 +61,7 @@ geocloud = (function () {
         DTKSKAERMKORT_25832 = "dtkSkaermkort@25832",
         DTKSKAERMKORT = "dtkSkaermkort",
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
+        DTKSKAERMKORTGRAA = "dtkSkaermkortGraa",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         GEODKBRIGHT = "geodkBright",
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
@@ -842,15 +843,15 @@ geocloud = (function () {
 
     /**
      * Creates MVT layer
-     * 
+     *
      * @param {String} layer    Layer identifier
      * @param {Object} defaults Default settings
-     * 
+     *
      * @return {Object}
      */
     createMVTLayer = function (layer, defaults) {
         var l, url, uri;
-        
+
         let parts = layer.split(".");
         var options = {
             attribution: defaults.attribution,
@@ -885,7 +886,7 @@ geocloud = (function () {
 
         if (defaults.layerId) {
             l.id = defaults.layerId;
-        }  else {
+        } else {
             l.id = layer;
         }
 
@@ -1581,7 +1582,7 @@ geocloud = (function () {
         //ol2 and leaflet
         this.addDtkSkaermkort = function (name, layer) {
             var l,
-                url = "https://eu1.mapcentia.com/wms/dk/tilecache/";
+                url = "https://gc2.io/mapcache/baselayers/tms/";
 
             switch (MAPLIB) {
                 case "ol2":
@@ -1603,9 +1604,8 @@ geocloud = (function () {
                         attribution: "&copy; Geodatastyrelsen",
                         maxZoom: 21,
                         maxNativeZoom: 19
-
                     });
-                    lControl.addBaseLayer(l);
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -1838,8 +1838,7 @@ geocloud = (function () {
                         maxNativeZoom: 19
 
                     });
-                    lControl.addBaseLayer(l);
-                    console.log(l)
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -2006,10 +2005,13 @@ geocloud = (function () {
                     o = this.addYandex("publicMapHybrid");
                     break;
                 case "dtkSkaermkort":
-                    o = this.addDtkSkaermkort("dtkSkaermkort", "dtk_skaermkort");
+                    o = this.addDtkSkaermkort("dtkSkaermkort", "kortforsyningen.dtk_skaermkort");
                     break;
                 case "dtkSkaermkortDaempet":
-                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "dtk_skaermkort_daempet");
+                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "kortforsyningen.dtk_skaermkort_daempet");
+                    break;
+                case "dtkSkaermkortGraa":
+                    o = this.addDtkSkaermkort("dtkSkaermkortGraa", "kortforsyningen.dtk_skaermkort_graa");
                     break;
                 case "dtkSkaermkort@25832":
                     o = this.addDtkSkaermkortUtm("dtkSkaermkort@25832", "dtk_skaermkort");
@@ -2202,7 +2204,7 @@ geocloud = (function () {
                     break;
             }
         };
-        
+
         this.showLayer = function (name) {
             this.getLayersByName(name).addTo(this.map);
         };
@@ -2639,6 +2641,7 @@ geocloud = (function () {
         DTKSKAERMKORT: DTKSKAERMKORT,
         DTKSKAERMKORT_25832: DTKSKAERMKORT_25832,
         DTKSKAERMKORTDAEMPET: DTKSKAERMKORTDAEMPET,
+        DTKSKAERMKORTGRAA: DTKSKAERMKORTGRAA,
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,
