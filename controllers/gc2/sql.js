@@ -46,9 +46,9 @@ router.all('/api/sql/:db', function (req, response) {
         postData = postData + "&key=" + req.body.key;
     }
 
-    uri = custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
+    uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
 
-    console.log(uri)
+    console.log(uri);
 
     options = {
         method: 'POST',

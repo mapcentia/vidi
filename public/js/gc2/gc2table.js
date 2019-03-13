@@ -305,7 +305,7 @@ var gc2table = (function () {
                 var getDatabaseIdForLayerId = function(layerId) {
                     if (!store.geoJSON) return false;
 
-                    var databaseIdentifier = false;                    
+                    var databaseIdentifier = false;
                     store.geoJSON.features.map(item => {
                         if (parseInt(item.properties._id) === parseInt(layerId)) {
                             databaseIdentifier = item.properties[pkey];

@@ -19,6 +19,7 @@ class MarkupGenerator {
     }
 
     getAddButton(layerKeyWithGeom) {
+        let addButtonStyle = regularButtonStyle.replace(`padding: 2px 10px 2px 10px;`, `padding: 6px 10px 6px 10px;`);
         return (`<button type="button" data-gc2-key="${layerKeyWithGeom}" style="${regularButtonStyle} visibility: hidden;" 
             data-toggle="tooltip" data-placement="left" title="Add new feature to layer" data-layer-type="tile" class="btn gc2-add-feature gc2-edit-tools">
             <i class="fa fa-plus"></i>
@@ -85,93 +86,98 @@ class MarkupGenerator {
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
             <div>
-                <div style="display: inline-block;">
-                    <div class="checkbox" style="width: 34px; top: 2px">
-                        <label>
-                            <input type="checkbox"
-                                ${(layerIsActive ? `checked="checked"` : ``)}
-                                class="js-show-layer-control"
-                                id="${layer.f_table_name}"
-                                data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
-                                data-gc2-layer-type="${layerType}">
-                        </label>
+                <div style="overflow: auto; min-height: 40px;">
+                    <div style="float: left;">
+                        <div style="display: inline-block;">
+                            <div class="checkbox" style="width: 34px; top: 2px">
+                                <label>
+                                    <input type="checkbox"
+                                        ${(layerIsActive ? `checked="checked"` : ``)}
+                                        class="js-show-layer-control"
+                                        id="${layer.f_table_name}"
+                                        data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
+                                        data-gc2-layer-type="${layerType}">
+                                </label>
+                            </div>
+                        </div>
+        
+                        <div style="display: inline-block;">${layerTypeSelector}</div>
+        
+                        <div style="display: inline-block;">
+                            <span>
+                                ${text}${lockedLayer} 
+                                <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
+                            </span>
+                        </div>
+        
+                        <div style="display: inline-block;">
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
+                                <i class="fa fa-plus"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
+                                <i class="fa fa-edit"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
+                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
+                                <i class="fa fa-plus"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
+                                <i class="fa fa-edit"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
+                                <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
+                            </button>
+                            <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
+                                <i class="fa fa-undo"></i>
+                            </button>
+                        </div>
                     </div>
-                </div>
-
-                <div style="display: inline-block;">${layerTypeSelector}</div>
-
-                <div style="display: inline-block;">
-                    <span>
-                        ${text}${lockedLayer} 
-                        <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
-                    </span>
-                </div>
-
-                <div style="display: inline-block;">
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-add" style="${queueFailedButtonStyle}" disabled>
-                        <i class="fa fa-plus"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-update" style="${queueFailedButtonStyle}" disabled>
-                        <i class="fa fa-edit"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-failed-delete" style="${queueFailedButtonStyle}" disabled>
-                        <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-add" style="${queueRejectedByServerButtonStyle}" disabled>
-                        <i class="fa fa-plus"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-update" style="${queueRejectedByServerButtonStyle}" disabled>
-                        <i class="fa fa-edit"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" class="hidden btn btn-sm btn-secondary js-statistics-field js-rejectedByServer-delete" style="${queueRejectedByServerButtonStyle}" disabled>
-                        <i class="fa fa-minus-circle"></i> <span class="js-value"></span>
-                    </button>
-                    <button type="button" data-gc2-id="${layerKey}" class="hidden btn btn-sm btn-secondary js-clear" style="${regularButtonStyle}">
-                        <i class="fa fa-undo"></i>
-                    </button>
-                </div>
-
-                <div class="js-toggle-layer-offline-mode-container" style="display: none;">
-                    <div class="btn-group" role="group">
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
-                            <i class="fa fa-signal"></i>
-                        </button>
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px" disabled>
-                            <i class="fas fa-database"></i>
-                        </button>
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px" disabled>
-                            <i class="fa fa-refresh"></i>
-                        </button>
-                        <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
-                            <i class="fa fa-exclamation"></i>
-                        </button>
+                    <div style="float: right; text-align: right;">
+                        <div class="js-toggle-layer-offline-mode-container" style="display: none;">
+                            <div class="btn-group" role="group">
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
+                                    <i class="fa fa-signal"></i>
+                                </button>
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-danger btn-xs js-set-offline" title="${__(`Fetch layer data from cache`)}" style="padding: 4px" disabled>
+                                    <i class="fas fa-database"></i>
+                                </button>
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-refresh" title="${__(`Refresh existing cache for layer`)}" style="padding: 4px" disabled>
+                                    <i class="fa fa-refresh"></i>
+                                </button>
+                                <button type="button" data-layer-key="${layerKey}" class="btn btn-secondary btn-xs js-bbox" title="${__(`Dynamic layer is cached only within the last requested bounding box`)}" style="padding: 4px; display: none;">
+                                    <i class="fa fa-exclamation"></i>
+                                </button>
+                            </div>
+                        </div>
+        
+                        <div class="js-toggles-container" style="display: none; padding-right: 10px; padding-left: 10px;">
+                            <a href="javascript:void(0);" class="js-toggle-search" >
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
+                            </a>
+                            <a href="javascript:void(0);" class="js-toggle-opacity">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
+                            </a>
+                            <a href="javascript:void(0);" class="js-toggle-table-view">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
+                            </a>
+                            <a href="javascript:void(0);" class="js-toggle-load-strategy">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
+                            </a>
+                            <a href="javascript:void(0);" class="js-toggle-filters">
+                                <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
+                            </a><span class="js-toggle-filters-number-of-filters">0</span>
+                        </div>
+        
+                        <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
+                        
+                        <i style="float: right; padding-top: 9px;" class="material-icons layer-move-vert">more_vert</i>
+        
+                        <div style="float: right; padding-top: 7px; padding-right: 10px;">${addButton}
+                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
+                        </div>
                     </div>
-                </div>
-
-                <div class="js-toggles-container" style="display: none;">
-                    <a href="javascript:void(0);" class="js-toggle-search" >
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
-                    </a>
-                    <a href="javascript:void(0);" class="js-toggle-opacity">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
-                    </a>
-                    <a href="javascript:void(0);" class="js-toggle-table-view">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Table view`)}" class="material-icons">list</i>
-                    </a>
-                    <a href="javascript:void(0);" class="js-toggle-load-strategy">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Load strategy`)}" class="material-icons">branding_watermark</i>
-                    </a>
-                    <a href="javascript:void(0);" class="js-toggle-filters">
-                        <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Filters`)}" class="material-icons">filter_list</i>
-                    </a><span class="js-toggle-filters-number-of-filters">0</span>
-                </div>
-
-                <div class="js-rejectedByServerItems hidden" style="width: 100%; padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>
-                
-                <i style="float: right; padding-top: 9px;" class="material-icons layer-move-vert">more_vert</i>
-
-                <div style="float: right; padding-top: 7px; padding-right: 10px;">${addButton}
-                    <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
                 </div>
             </div>
             <div class="js-layer-settings-filters" style="display: none;"></div>
