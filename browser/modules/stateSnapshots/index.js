@@ -164,7 +164,6 @@ module.exports = {
                         host: vidiConfig.gc2.host
                     };
 
-                    console.log(`### data`, data);
                     $.ajax({
                         url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
