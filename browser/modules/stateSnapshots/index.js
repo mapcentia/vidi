@@ -164,7 +164,6 @@ module.exports = {
                         host: urlparser.hostname
                     };
 
-                    console.log(`### data`, data);
                     $.ajax({
                         url: API_URL + '/' + vidiConfig.appDatabase,
                         method: 'POST',
