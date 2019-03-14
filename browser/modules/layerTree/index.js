@@ -529,7 +529,7 @@ module.exports = {
             } else {
                 newState.virtualLayers = layersCopy;
             }
-        } else {
+        } else if (newState !== false) {
             newState.virtualLayers = [];
         }
 
