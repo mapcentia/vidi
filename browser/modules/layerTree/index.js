@@ -468,10 +468,17 @@ module.exports = {
             }
         }
 
+        let preparedVirtualLayers = [];
+        moduleState.virtualLayers.map(layer => {
+            let localLayer = Object.assign({}, layer);
+            localLayer.store.sqlEncoded = Base64.encode(localLayer.store.sql).replace(/=/g, "");
+            preparedVirtualLayers.push(localLayer);
+        });
+
         let state = {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
-            virtualLayers: moduleState.virtualLayers,
+            virtualLayers: preparedVirtualLayers,
             predefinedFilters: moduleState.predefinedFilters,
             activeLayers,
             layersOfflineMode,
@@ -502,6 +509,28 @@ module.exports = {
             moduleState.predefinedFilters = newState.predefinedFilters;
         } else {
             moduleState.predefinedFilters = {};
+        }
+
+        // Setting virtual layers
+        if (newState !== false && `virtualLayers` in newState && Array.isArray(newState.virtualLayers) && newState.virtualLayers.length > 0) {
+            let layersCopy = JSON.parse(JSON.stringify(newState.virtualLayers));
+            let someLayersAreOutdated = false;
+            layersCopy.map((layer, index) => {
+                if (`sqlEncoded` in layer.store && layer.store.sqlEncoded) {
+                    layersCopy[index].store.sql = atob(layer.store.sqlEncoded);
+                } else {
+                    someLayersAreOutdated = true;
+                    console.warn(`Please update the snapshot, virtual layers have unsupported format`);
+                }
+            });
+
+            if (someLayersAreOutdated) {
+                newState.virtualLayers = [];
+            } else {
+                newState.virtualLayers = layersCopy;
+            }
+        } else {
+            newState.virtualLayers = [];
         }
 
         queueStatistsics.setLastStatistics(false);
