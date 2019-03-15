@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
 describe('Layer tree table view', () => {
     it(`should load data for vector layers`, async () => {
