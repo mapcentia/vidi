@@ -12,8 +12,8 @@
      */
     var create = function (targetDiv) {
         var token = targetDiv.attributes["data-vidi-token"].value;
-        var width = targetDiv.getAttribute("data-vidi-width") || "500px";
-        var height = targetDiv.getAttribute("data-vidi-height") || "500px";
+        var width = targetDiv.getAttribute("data-vidi-width") || "100%";
+        var height = targetDiv.getAttribute("data-vidi-height") || "100%";
         var tmpl = targetDiv.getAttribute("data-vidi-tmpl") || "embed.tmpl";
         try {
             var obj = JSON.parse(atob(token));
@@ -36,14 +36,17 @@
         }
     });
     // If script is loaded at top of page, when use MutationObserver to detect arriving elements
-    new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-            mutation.addedNodes.forEach(function (object) {
-                if (object.attributes && object.attributes["data-vidi-token"] && object.attributes["data-vidi-token"] !== null && object.attributes["data-vidi-token"].value !== undefined) {
-                    create(object);
+    if (typeof(window.MutationObserver) !== "undefined") {
+        new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                for (var i = 0; i < mutation.addedNodes.length; i++) {
+                    if (mutation.addedNodes[i].attributes && mutation.addedNodes[i].attributes["data-vidi-token"] && mutation.addedNodes[i].attributes["data-vidi-token"] !== null && mutation.addedNodes[i].attributes["data-vidi-token"].value !== undefined) {
+                        create(mutation.addedNodes[i]);
+                    }
                 }
-
             });
-        });
-    }).observe(document, {childList: true, subtree: true});
+        }).observe(document, {childList: true, subtree: true});
+    } else {
+        console.info("Browser doesn't support MutationObsderver. Please upgrade to modern browser.")
+    }
 }());
