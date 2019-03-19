@@ -858,6 +858,15 @@ geocloud = (function () {
             maxZoom: defaults.maxZoom,
             maxNativeZoom: defaults.maxNativeZoom,
             tileSize: 256,
+            // vectorTileLayerStyles:{
+            //
+            //     "feature.multipolygon": {
+            //         weight: 0,
+            //         fillColor: '#9bc2c4',
+            //         fillOpacity: 1,
+            //         fill: true
+            //     },
+            // },
             ran: function () {
                 return Math.random();
             }
