@@ -38,13 +38,14 @@
     // If script is loaded at top of page, when use MutationObserver to detect arriving elements
     if (typeof(window.MutationObserver) !== "undefined") {
         new MutationObserver(function (mutations) {
-            mutations.forEach(function (mutation) {
+            for (var u = 0; u < mutations.length; u++) {
+                var mutation = mutations[u];
                 for (var i = 0; i < mutation.addedNodes.length; i++) {
                     if (mutation.addedNodes[i].attributes && mutation.addedNodes[i].attributes["data-vidi-token"] && mutation.addedNodes[i].attributes["data-vidi-token"] !== null && mutation.addedNodes[i].attributes["data-vidi-token"].value !== undefined) {
                         create(mutation.addedNodes[i]);
                     }
                 }
-            });
+            }
         }).observe(document, {childList: true, subtree: true});
     } else {
         console.info("Browser doesn't support MutationObsderver. Please upgrade to modern browser.")
