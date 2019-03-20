@@ -481,6 +481,13 @@
             padding: 10px 0px;
         }
     }
+
+    #mapcontrols-history-backward {
+        display: {{_displayhistory}};
+    }
+    #mapcontrols-history-forward {
+        display: {{_displayhistory}};
+    }
 </style>
 <!-- map -->
 <div id="pane">
@@ -509,7 +516,7 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div id="place-search">
+        <div id="place-search" style="display: {{_displaySearch}}">
             <div class="places">
                 <div class="btn-group">
                     <input id="custom-search" class="custom-search typeahead" type="text"
