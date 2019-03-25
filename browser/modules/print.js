@@ -26,7 +26,7 @@ var printC = config.print.templates;
 var scales = config.print.scales;
 var tmpl;
 var pageSize;
-var orientation;
+var printingOrientation;
 var backboneEvents;
 var legend;
 var moment = require('moment');
@@ -52,7 +52,7 @@ var _cleanUp = function (hard) {
         scales = config.print.scales;
         scale = null;
         pageSize = null;
-        orientation = null;
+        printingOrientation = null;
         tmpl = null;
     }
 };
@@ -206,7 +206,7 @@ module.exports = {
                 _cleanUp();
                 tmpl = arr[0].value;
                 pageSize = arr[1].value;
-                orientation = arr[2].value;
+                printingOrientation = arr[2].value;
                 me.control();
             } else {
                 _cleanUp();
@@ -239,10 +239,10 @@ module.exports = {
         scales = s ? s : scales;
         tmpl = t ? t : tmpl;
         pageSize = pa ? pa : pageSize;
-        orientation = o ? o : orientation;
+        printingOrientation = o ? o : printingOrientation;
         legend = l ? l : null;
 
-        var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
+        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
         var _getScale = function (scaleObject) {
             var bounds = scaleObject.getBounds(),
                 sw = bounds.getSouthWest(),
@@ -443,7 +443,7 @@ module.exports = {
                     scale: scale,
                     tmpl: tmpl,
                     pageSize: pageSize,
-                    orientation: orientation,
+                    printingOrientation: printingOrientation,
                     title: encodeURIComponent($("#print-title").val()),
                     comment: encodeURIComponent($("#print-comment").val()),
                     legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
@@ -452,8 +452,8 @@ module.exports = {
                     date: moment().format('Do MMMM YYYY'),
                     customData: customData || null,
                     metaData: meta.getMetaData(),
-                    px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
-                    py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
+                    px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
+                    py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
                     queryString: uriObj.search(),
                     state: applicationState
                 };
