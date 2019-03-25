@@ -2490,7 +2490,13 @@ module.exports = {
                     // Reloading as a vector layer
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
-                    _self.reloadLayer(activeLayerKey);
+                    _self.reloadLayer(activeLayerKey).then(() => {
+                        backboneEvents.get().once(`doneLoading:layers`, (layerName) => {
+                            if ($(`[data-gc2-layer-key^="${layerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                _self.createTable(layerKey, true);
+                            }
+                        });
+                    });
                 } else {
                     console.error(`Unable to apply filters to layer ${layerKey}`);
                 }
