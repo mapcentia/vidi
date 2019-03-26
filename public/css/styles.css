@@ -581,7 +581,7 @@ div.olControlZoom {
 .table-data > tbody > tr {
   border-top: 1px solid #e6e6e6;
 }
-.leaflet-control-print {
+inline .leaflet-control-print {
   display: none !important;
 }
 .base-layer-item {
@@ -602,7 +602,7 @@ div.olControlZoom {
   display: none;
 }
 .leaflet-control-layers {
-  display: inline;
+  display: none;
 }
 .panel-title,
 .panel-title:hover {
