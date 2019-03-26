@@ -119,6 +119,7 @@
     "require-globify": "^1.4.0",
     "semver": "^5.5.1",
     "serialijse": "0.0.17",
+    "session-file-store": "^1.2.0",
     "showdown": "^1.5.1",
     "snackbarjs": "^1.1.0",
     "snapshot": "0.0.0",

@@ -6,6 +6,8 @@
 
 'use strict';
 
+import {state} from "../../../public/js/leaflet-easybutton/easy-button";
+
 /**
  *
  */
@@ -22,6 +24,7 @@ var setting;
 var print;
 
 var meta;
+var anchor;
 
 var legend;
 
@@ -46,6 +49,7 @@ module.exports = {
         print = o.print;
         meta = o.meta;
         legend = o.legend;
+        anchor = o.anchor;
         return this;
     },
     init: function () {
@@ -53,7 +57,7 @@ module.exports = {
 
         let id = "#legend-dialog";
         $(id).animate({
-            bottom: ("-229px")
+            bottom: ("-233px")
         }, 500, function () {
             $(id + " .expand-less").hide();
             $(id + " .expand-more").show();
@@ -137,7 +141,13 @@ module.exports = {
         });
 
         $("#zoom-default-btn").on("click", function () {
-            cloud.get().zoomToExtent(setting.getExtent());
+            let parameters = anchor.getInitMapParameters();
+            if (parameters) {
+                cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+            } else {
+                cloud.get().zoomToExtent(setting.getExtent());
+            }
+
         });
 
         $("#measurements-module-btn").on("click", function () {

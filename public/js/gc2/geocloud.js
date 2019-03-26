@@ -38,6 +38,7 @@ geocloud = (function () {
         tweetStore,
         elasticStore,
         tileLayer,
+        createUTFGridLayer,
         createTileLayer,
         createTMSLayer,
         createMVTLayer,
@@ -61,6 +62,7 @@ geocloud = (function () {
         DTKSKAERMKORT_25832 = "dtkSkaermkort@25832",
         DTKSKAERMKORT = "dtkSkaermkort",
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
+        DTKSKAERMKORTGRAA = "dtkSkaermkortGraa",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         GEODKBRIGHT = "geodkBright",
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
@@ -774,6 +776,67 @@ geocloud = (function () {
         }
         return l;
     };
+    /**
+     *
+     * @param layer
+     * @param defaults
+     * @returns {*}
+     */
+    createUTFGridLayer = function (layer, defaults) {
+        var defaultTemplate =
+            `<div>
+        {{#each data}}
+			{{this.title}}: {{this.value}} <br>
+        {{/each}}
+        </div>`;
+        var uri = defaults.host + "/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+            + "&format=json&map.imagetype=application/json&";
+        var utfGrid = new L.utfGrid(uri, {
+            resolution: 4,
+            pointerCursor: true,
+            //mouseInterval: 66  // Delay for mousemove events
+        }), flag = false;
+        var template, tooltipHtml;
+        utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
+        utfGrid.on('mouseover', _.debounce(function (e) {
+            var tmp = $.extend(true, {}, e.data), fi = [];
+            flag = true;
+            $.each(tmp, function (name, property) {
+                if (typeof defaults.fieldConf[name] !== "undefined" && defaults.fieldConf[name].mouseover) {
+                    let title;
+                    if (
+                        typeof defaults.fieldConf[name] !== "undefined" &&
+                        typeof defaults.fieldConf[name].alias !== "undefined" &&
+                        defaults.fieldConf[name].alias !== ""
+                    ) {
+                        title = defaults.fieldConf[name].alias
+                    } else {
+                        title = name;
+                    }
+                    fi.push({
+                        title: title,
+                        value: property
+                    });
+                }
+            });
+            tmp.data = fi; // Used in a "loop" template
+            template = Handlebars.compile(defaultTemplate);
+            tooltipHtml = template(tmp);
+            $("#tail").fadeIn(100);
+            $("#tail").html(tooltipHtml);
+
+        }, 0));
+        utfGrid.on('mouseout', function (e) {
+            flag = false;
+            setTimeout(function () {
+                if (!flag) {
+                    $("#tail").fadeOut(100);
+                }
+            }, 200)
+
+        });
+        return utfGrid;
+    };
 
     /**
      * ol2 and leaflet
@@ -842,21 +905,30 @@ geocloud = (function () {
 
     /**
      * Creates MVT layer
-     * 
+     *
      * @param {String} layer    Layer identifier
      * @param {Object} defaults Default settings
-     * 
+     *
      * @return {Object}
      */
     createMVTLayer = function (layer, defaults) {
         var l, url, uri;
-        
+
         let parts = layer.split(".");
         var options = {
             attribution: defaults.attribution,
             maxZoom: defaults.maxZoom,
             maxNativeZoom: defaults.maxNativeZoom,
             tileSize: 256,
+            // vectorTileLayerStyles:{
+            //
+            //     "feature.multipolygon": {
+            //         weight: 0,
+            //         fillColor: '#9bc2c4',
+            //         fillOpacity: 1,
+            //         fill: true
+            //     },
+            // },
             ran: function () {
                 return Math.random();
             }
@@ -885,7 +957,7 @@ geocloud = (function () {
 
         if (defaults.layerId) {
             l.id = defaults.layerId;
-        }  else {
+        } else {
             l.id = layer;
         }
 
@@ -1581,7 +1653,7 @@ geocloud = (function () {
         //ol2 and leaflet
         this.addDtkSkaermkort = function (name, layer) {
             var l,
-                url = "https://eu1.mapcentia.com/wms/dk/tilecache/";
+                url = "https://gc2.io/mapcache/baselayers/tms/";
 
             switch (MAPLIB) {
                 case "ol2":
@@ -1603,9 +1675,8 @@ geocloud = (function () {
                         attribution: "&copy; Geodatastyrelsen",
                         maxZoom: 21,
                         maxNativeZoom: 19
-
                     });
-                    lControl.addBaseLayer(l);
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -1838,8 +1909,7 @@ geocloud = (function () {
                         maxNativeZoom: 19
 
                     });
-                    lControl.addBaseLayer(l);
-                    console.log(l)
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -2006,10 +2076,13 @@ geocloud = (function () {
                     o = this.addYandex("publicMapHybrid");
                     break;
                 case "dtkSkaermkort":
-                    o = this.addDtkSkaermkort("dtkSkaermkort", "dtk_skaermkort");
+                    o = this.addDtkSkaermkort("dtkSkaermkort", "kortforsyningen.dtk_skaermkort");
                     break;
                 case "dtkSkaermkortDaempet":
-                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "dtk_skaermkort_daempet");
+                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "kortforsyningen.dtk_skaermkort_daempet");
+                    break;
+                case "dtkSkaermkortGraa":
+                    o = this.addDtkSkaermkort("dtkSkaermkortGraa", "kortforsyningen.dtk_skaermkort_graa");
                     break;
                 case "dtkSkaermkort@25832":
                     o = this.addDtkSkaermkortUtm("dtkSkaermkort@25832", "dtk_skaermkort");
@@ -2051,7 +2124,44 @@ geocloud = (function () {
             }
             return o;
         };
-        //ol2, ol3 and leaflet
+
+        /**
+         *
+         * @param config
+         * @returns {Array}
+         */
+        this.addUTFGridLayers = function (config) {
+            var layers, layersArr = [],
+                defaults = {
+                host: host,
+                layerId: false,
+                layers: [],
+                db: null,
+                mapRequestProxy: false,
+                visibility: true,
+                wrapDateLine: true,
+                tileCached: true,
+                name: null,
+                names: [],
+                uri: null,
+                fieldConf: {}
+            };
+
+            if (config) {
+                for (prop in config) {
+                    defaults[prop] = config[prop];
+                }
+            }
+            layers = defaults.layers;
+
+            for (var i = 0; i < layers.length; i++) {
+                var l = createUTFGridLayer(layers[i], defaults);
+                this.map.addLayer(l, defaults.name || defaults.names[i] || layers[i]);
+                layersArr.push(l);
+            }
+            return layersArr;
+        };
+
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
@@ -2075,13 +2185,11 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
-
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
-
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -2117,6 +2225,7 @@ geocloud = (function () {
 
             return layersArr;
         };
+
 
         //ol2 and leaflet
         this.removeTileLayerByName = function (name) {
@@ -2202,7 +2311,7 @@ geocloud = (function () {
                     break;
             }
         };
-        
+
         this.showLayer = function (name) {
             this.getLayersByName(name).addTo(this.map);
         };
@@ -2639,6 +2748,7 @@ geocloud = (function () {
         DTKSKAERMKORT: DTKSKAERMKORT,
         DTKSKAERMKORT_25832: DTKSKAERMKORT_25832,
         DTKSKAERMKORTDAEMPET: DTKSKAERMKORTDAEMPET,
+        DTKSKAERMKORTGRAA: DTKSKAERMKORTGRAA,
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,

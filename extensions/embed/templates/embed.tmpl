@@ -427,6 +427,15 @@
     #measurements-module-btn, #measurements-module-cancel-btn, #mapcontrols-clear-map {
         display: none;
     }
+    .modal-header h3 {
+        font-size: 18px;
+    }
+    .dialog-bottom .modal-header {
+        padding: 0 15px 5px;
+    }
+    .js-toggles-container a:not(.js-toggle-opacity), .js-toggles-container span {
+        display: none !important;
+    }
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
@@ -452,6 +461,7 @@
             right: 0;
             left: 0;
         }
+
     }
     @media (max-width: 767px) {
         .dialog-bottom .modal-body {
@@ -470,6 +480,13 @@
             height: 50px;
             padding: 10px 0px;
         }
+    }
+
+    #mapcontrols-history-backward {
+        display: {{_displayhistory}};
+    }
+    #mapcontrols-history-forward {
+        display: {{_displayhistory}};
     }
 </style>
 <!-- map -->
@@ -499,7 +516,7 @@
                 <span class="icon-bar"></span>
             </button>
         </div>
-        <div id="place-search">
+        <div id="place-search" style="display: {{_displaySearch}}">
             <div class="places">
                 <div class="btn-group">
                     <input id="custom-search" class="custom-search typeahead" type="text"
@@ -509,7 +526,7 @@
             </div>
         </div>
     </div>
-    <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
+        <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
             </button>
@@ -571,7 +588,10 @@
         </div>
     </div>
 </div>
-
+<!-- The state-snapshot div must be in the template -->
+<div id="state-snapshots-content" style="display: none">
+    <div id="state-snapshots"></div>
+</div>
 
 
 

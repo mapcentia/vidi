@@ -6,14 +6,44 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
 ### Added
+- Embed script for easy embedding of Vidi in web pages using a snap-shot token.
+- A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
+
+### Changed
+- Layers which have been switch off, will not be removed from legend.
+- No re-load of legend if its not necessary.
+- `embed.tmpl` is now a minimal template for embedding in web pages.
+- Home button on `embed.tmpl` will set the map to the initial extent if a snapshot-state is invoked.
+- Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
+
+### Fixed
+- Better wrapping of layer tools when side panel is narrow.
+- Snapping bugs.
+
+## [2019.1.0.rc2] - 2019-01-03
+### Added
+- Tentative support of WebGL layer type added.
+- Support of MVT base layers.
+
+### Changed
+- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools. 
+- Hide login button if session module is disabled.
+
+## [2019.1.0.rc1] - 2019-14-02
+### Added
 - Fall back mechanism for base layers. If the current base layer responses with error codes the next one is switched no.
 - Touch drag enabled in layer tree.
 - Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
 - Visual grouping of map tools in GUI.
-- Support of Mapbox Vector Tiles (MVT). 
+- Tentative support of Mapbox Vector Tiles (MVT). Needs latest version of GC2 with MVT support. 
 - Cross hair cursor when info click is on.
+- When drawing or editing with the Editor module, snapping to other vector layers is added.
+- Unify filter methods for vector and tile layers.
+- After a query with the sqlQuery module is made, its now possible to store the query as a new "virtual" layer. The new layer is a vector layer, which acts like any other vector layer.
 
 ### Changed
+- State shots are now stored in GC2 database using the new keyvalue API.
+- Protected WMS layers requests result in `401` being routed through the WMS backend. A authentication is implemented in order to request protected WMS layers correctly.
 - One click activation scheme where the module is activated when clicking the Tab. All others modules will be reset. A typical module should look like this:
 - Google API files are no longer requested locally, because things break when Google makes updates. The files are requested remotely and are not cached in Service Workers due to CORS issues. The Google API doesn't work offline anyway. Google API must be set in GC2 config (App.php) with the kay ``
 ```javascript

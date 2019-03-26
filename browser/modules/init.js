@@ -150,6 +150,13 @@ module.exports = {
         if (urlVars.l) {
             gc2i18n.dict._showLegend = urlVars.l;
         }
+        if (urlVars.s) {
+            gc2i18n.dict._displaySearch = urlVars.s || "inline";
+        }
+        if (urlVars.his) {
+            gc2i18n.dict._displayhistory = urlVars.his || "inline";
+        }
+
         gc2i18n.dict._showHeader = urlVars.h || "inline";
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
@@ -287,6 +294,11 @@ module.exports = {
 
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                            }
+
+                            // Show log in button if session module is enabled
+                            if (window.vidiConfig.enabledExtensions.includes("session") && !enabledExtensionsCopy.includes("session")) {
+                                $("#session").show();
                             }
                         }
                     }
