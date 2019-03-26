@@ -248,6 +248,7 @@ module.exports = function (grunt) {
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
+                        'public/js/lib/handlebars.js',
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
