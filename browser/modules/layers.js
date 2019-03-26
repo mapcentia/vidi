@@ -210,6 +210,10 @@ module.exports = {
             fieldConf = {};
         }
         let result = new Promise((resolve, reject) => {
+            if (metaData[layerKey].type === "RASTER") {
+                reject();
+                return;
+            }
             cloud.get().addUTFGridLayers({
                 host: host,
                 layers: [layerKey],
@@ -217,14 +221,8 @@ module.exports = {
                 uri: uri,
                 fieldConf: fieldConf
             });
-            let layerWasAdded = true;
-            if (layerWasAdded) {
-                console.info(`${layerKey} was added to the map`);
-                resolve();
-            } else {
-                console.warn(`${layerKey} was not added to the map`);
-                reject();
-            }
+            console.info(`${layerKey} was added to the map`);
+            resolve();
         });
         return result;
     },
