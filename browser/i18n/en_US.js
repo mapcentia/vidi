@@ -291,6 +291,13 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Back to main menu": "Back to main menu",
+        "Get started": "Get started",
+        "New project": "New project",
+        "Open existing project": "Open existing project",
+        "What would you like to see": "What would you like to see",
+        "Choose data sources": "Choose data sources",
+        "Choose data type": "Choose data type",
         "Drag and drop measurement to add it to time series": "Drag and drop measurement to add it to time series",
         "Remove from time series": "Remove from time series",
         "Time series": "Time series",

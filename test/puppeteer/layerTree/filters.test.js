@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
 const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTonerLite/13/39.2681/-6.8108/v:test.testpointfilters`;
 

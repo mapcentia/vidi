@@ -213,14 +213,14 @@ L.GeometryUtil = L.extend(L.GeometryUtil || {}, {
                 // Copying POINT
                 resultsTmp.push(new L.LatLng(latlngsTmp[i].lat, latlngsTmp[i].lng));
             } else {
-                let subresult = [];
+                var subresult = [];
                 for (var j = 0; j < latlngsTmp[i].length; j++) {
                     // Copying MULTIPOINT, LINESTRING or POLYGON
                     if (latlngsTmp[i][j].lat && latlngsTmp[i][j].lng) {
                         subresult.push(new L.LatLng(latlngsTmp[i][j].lat, latlngsTmp[i][j].lng));
                     } else {
                         // Copying MULTILINESTRING or MULTIPOLYGON
-                        let deepestSubResult = [];
+                        var deepestSubResult = [];
                         for (var k = 0; k < latlngsTmp[i][j].length; k++) {
                             if (latlngsTmp[i][j][k].lat && latlngsTmp[i][j][k].lng) {
                                 deepestSubResult.push(new L.LatLng(latlngsTmp[i][j][k].lat, latlngsTmp[i][j][k].lng));

@@ -294,6 +294,13 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Back to main menu": "# Back to main menu",
+        "Get started": "# Get started",
+        "New project": "# New project",
+        "Open existing project": "# Open existing project",
+        "What would you like to see": "# What would you like to see",
+        "Choose data sources": "# Choose data sources",
+        "Choose data type": "# Choose data type",
         "Drag and drop measurement to add it to time series": "Træk og slip måling for at tilføje det til tidsserier",
         "Remove from time series": "Fjern fra tidsserier",
         "Time series": "Tidsserier",
