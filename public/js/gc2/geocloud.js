@@ -38,6 +38,7 @@ geocloud = (function () {
         tweetStore,
         elasticStore,
         tileLayer,
+        createUTFGridLayer,
         createTileLayer,
         createTMSLayer,
         createMVTLayer,
@@ -774,6 +775,67 @@ geocloud = (function () {
                 break;
         }
         return l;
+    };
+    /**
+     *
+     * @param layer
+     * @param defaults
+     * @returns {*}
+     */
+    createUTFGridLayer = function (layer, defaults) {
+        var defaultTemplate =
+            `<div>
+        {{#each data}}
+			{{this.title}}: {{this.value}} <br>
+        {{/each}}
+        </div>`;
+        var uri = defaults.host + "/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+            + "&format=json&map.imagetype=application/json&";
+        var utfGrid = new L.utfGrid(uri, {
+            resolution: 4,
+            pointerCursor: true,
+            //mouseInterval: 66  // Delay for mousemove events
+        }), flag = false;
+        var template, tooltipHtml;
+        utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
+        utfGrid.on('mouseover', _.debounce(function (e) {
+            var tmp = $.extend(true, {}, e.data), fi = [];
+            flag = true;
+            $.each(tmp, function (name, property) {
+                if (typeof defaults.fieldConf[name] !== "undefined" && defaults.fieldConf[name].mouseover) {
+                    let title;
+                    if (
+                        typeof defaults.fieldConf[name] !== "undefined" &&
+                        typeof defaults.fieldConf[name].alias !== "undefined" &&
+                        defaults.fieldConf[name].alias !== ""
+                    ) {
+                        title = defaults.fieldConf[name].alias
+                    } else {
+                        title = name;
+                    }
+                    fi.push({
+                        title: title,
+                        value: property
+                    });
+                }
+            });
+            tmp.data = fi; // Used in a "loop" template
+            template = Handlebars.compile(defaultTemplate);
+            tooltipHtml = template(tmp);
+            $("#tail").fadeIn(100);
+            $("#tail").html(tooltipHtml);
+
+        }, 0));
+        utfGrid.on('mouseout', function (e) {
+            flag = false;
+            setTimeout(function () {
+                if (!flag) {
+                    $("#tail").fadeOut(100);
+                }
+            }, 200)
+
+        });
+        return utfGrid;
     };
 
     /**
@@ -2062,7 +2124,44 @@ geocloud = (function () {
             }
             return o;
         };
-        //ol2, ol3 and leaflet
+
+        /**
+         *
+         * @param config
+         * @returns {Array}
+         */
+        this.addUTFGridLayers = function (config) {
+            var layers, layersArr = [],
+                defaults = {
+                host: host,
+                layerId: false,
+                layers: [],
+                db: null,
+                mapRequestProxy: false,
+                visibility: true,
+                wrapDateLine: true,
+                tileCached: true,
+                name: null,
+                names: [],
+                uri: null,
+                fieldConf: {}
+            };
+
+            if (config) {
+                for (prop in config) {
+                    defaults[prop] = config[prop];
+                }
+            }
+            layers = defaults.layers;
+
+            for (var i = 0; i < layers.length; i++) {
+                var l = createUTFGridLayer(layers[i], defaults);
+                this.map.addLayer(l, defaults.name || defaults.names[i] || layers[i]);
+                layersArr.push(l);
+            }
+            return layersArr;
+        };
+
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
@@ -2086,13 +2185,11 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
-
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
-
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -2128,6 +2225,7 @@ geocloud = (function () {
 
             return layersArr;
         };
+
 
         //ol2 and leaflet
         this.removeTileLayerByName = function (name) {
