@@ -443,7 +443,7 @@ module.exports = {
                     scale: scale,
                     tmpl: tmpl,
                     pageSize: pageSize,
-                    printingOrientation: printingOrientation,
+                    orientation: printingOrientation,
                     title: encodeURIComponent($("#print-title").val()),
                     comment: encodeURIComponent($("#print-comment").val()),
                     legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
