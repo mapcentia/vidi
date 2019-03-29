@@ -11,6 +11,7 @@ var request = require('request');
 var fs = require('fs');
 
 router.all('/api/sql/:db', function (req, response) {
+    req.setTimeout(0); // no timeout
     var db = req.params.db,
         q = req.body.q || req.query.q,
         srs = req.body.srs || req.query.srs,
@@ -25,6 +26,7 @@ router.all('/api/sql/:db', function (req, response) {
         writeStream,
         rem,
         headers,
+        uri,
         key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
@@ -44,9 +46,13 @@ router.all('/api/sql/:db', function (req, response) {
         postData = postData + "&key=" + req.body.key;
     }
 
+    uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
+
+    console.log(uri);
+
     options = {
         method: 'POST',
-        uri: custom_data ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v1/sql/" + userName,
+        uri: uri,
         form: postData
     };
 

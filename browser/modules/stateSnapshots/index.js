@@ -1,29 +1,19 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-const API_URL = `/api/state-snapshots`;
-
-import TitleFieldComponent from './../shared/TitleFieldComponent';
+import StateSnapshotsDashboard from './components/StateSnapshotsDashboard';
 
 /**
  * @type {*|exports|module.exports}
  */
-var cloud, anchor, utils, state, print, urlparser, serializeLayers, backboneEvents;
+var anchor, state, urlparser, backboneEvents;
 
-/**
- *
- * @type {exports|module.exports}
- */
-const uuidv4 = require('uuid/v4');
-
-const cookie = require('js-cookie');
-
-let _self = false;
+const API_URL = `/api/state-snapshots`;
 
 const exId = `state-snapshots`;
 
@@ -39,15 +29,10 @@ module.exports = {
      */
     set: function (o) {
         anchor = o.anchor;
-        cloud = o.cloud;
         state = o.state;
-        print = o.print;
         urlparser = o.urlparser;
-        serializeLayers = o.serializeLayers;
         backboneEvents = o.backboneEvents;
-        utils = o.utils;
 
-        _self = this;
         return this;
     },
 
@@ -55,14 +40,7 @@ module.exports = {
      * Module initialization
      */
     init: function () {
-        /**
-         *
-         */
         var React = require('react');
-
-        /**
-         *
-         */
         var ReactDOM = require('react-dom');
 
         let buttonStyle = {
@@ -161,7 +139,7 @@ module.exports = {
                         snapshot: state,
                         database: vidiConfig.appDatabase,
                         schema: vidiConfig.appDatabase,
-                        host: vidiConfig.gc2.host
+                        host: urlparser.hostname
                     };
 
                     $.ajax({
@@ -533,12 +511,16 @@ module.exports = {
 
         if (document.getElementById(exId)) {
             try {
-                ReactDOM.render(<StateSnapshots/>, document.getElementById(exId));
+                ReactDOM.render(<StateSnapshotsDashboard
+                    anchor={anchor}
+                    state={state}
+                    urlparser={urlparser}
+                    backboneEvents={backboneEvents}/>, document.getElementById(exId));
             } catch (e) {
                 console.log(e);
             }
         } else {
-            console.warn(`Unable to find the container for offlineMap extension (element id: ${exId})`);
+            console.warn(`Unable to find the container for state snapshots extension (element id: ${exId})`);
         }
     },
 

@@ -11,6 +11,8 @@ module.exports = {
     PAGE_URL_BASE: `https://vidi.alexshumilov.ru:8081/`,
     // Vidi instance with default template
     PAGE_URL_DEFAULT: `https://vidi.alexshumilov.ru:8081/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
+    // Vidi instance that works with newest backend (swarm.gc2.tio testing:aDvvi9802dmosd)
+    PAGE_URL_LATEST_GC2: `https://vidi.alexshumilov.ru:8086/app/testing/public/#osm/13/39.2963/-6.8335/`,
     // Vidi instance with default template without SSL
     PAGE_URL_DEFAULT_NO_SSL: `http://vidi.alexshumilov.ru:8084/app/aleksandrshumilov/public/#osm/13/39.2963/-6.8335/`,
     // Vidi instance with embedded template

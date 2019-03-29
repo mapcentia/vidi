@@ -226,7 +226,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
                         'public/js/lib/leaflet-measure/leaflet-measure.min.js',
-                        'public/js/lib/Leaflet.utfgrid/leaflet.utfgrid.js',
+                        'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/leaflet-plugins/Yandex.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
@@ -248,6 +248,7 @@ module.exports = function (grunt) {
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
                         'public/js/lib/jrespond/jRespond.js',
                         'public/js/lib/mustache.js/mustache.js',
+                        'public/js/lib/handlebars/handlebars.js',
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
@@ -303,7 +304,7 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'css/build/all.min.css'],
+                assets: ['js/build/all.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,

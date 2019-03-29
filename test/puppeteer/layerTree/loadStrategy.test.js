@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
 describe('Layer tree load strategy', () => {
     it(`should display controls only for vector layers`, async () => {

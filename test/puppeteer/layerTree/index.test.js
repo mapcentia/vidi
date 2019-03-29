@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
 describe('Layer tree common', () => {
     it(`should keep offline mode settings for layers after page reload`, async () => {

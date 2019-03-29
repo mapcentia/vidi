@@ -431,7 +431,7 @@ module.exports = {
             var id = ($(this)).parent().parent().attr('id');
 
             $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 20) + "px"
+                bottom: (($("#" + id).height() * -1) + 10) + "px"
             }, 500, function () {
                 $("#" + id + " .expand-less").hide();
                 $("#" + id + " .expand-more").show();
@@ -457,8 +457,7 @@ module.exports = {
             var id = ($(this)).attr('href');
 
             if (id === "#full-screen"){
-                utils.fullScreen();
-                return;
+                utils.toggleFullScreen();
             }
 
             // If print when activate
@@ -533,6 +532,15 @@ module.exports = {
                 id.addClass("active");
             });
         })
+
+        // Listen for fullscreen changes
+        document.addEventListener("fullscreenchange", function(event) {
+            if (document.fullscreenElement) {
+                $("#full-screen-btn i").html("fullscreen_exit")
+            } else {
+                $("#full-screen-btn i").html("fullscreen")
+            }
+        });
 
     }
 };

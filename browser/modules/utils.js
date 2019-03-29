@@ -19,8 +19,8 @@ module.exports = {
     },
     formatArea: (areaInSquareMeters) => {
         let result = Math.round(areaInSquareMeters);
-        let ha = (Math.round(areaInSquareMeters / 10000 * 100) / 100);
-        let km2 = (Math.round(areaInSquareMeters / 1000000 * 100) / 100);
+        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
         if (areaInSquareMeters < 10000) {
             // Display square meters
             result = (Math.round(areaInSquareMeters) + ' m2');
@@ -129,16 +129,17 @@ module.exports = {
 
     },
 
-    fullScreen: function () {
-        let elem = document.getElementsByTagName("body")[0];
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+    toggleFullScreen: function() {
+        let fullScreenMode;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenMode = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenMode = false;
+            }
         }
+        return fullScreenMode;
     }
 };
