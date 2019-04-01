@@ -230,15 +230,16 @@ module.exports = {
     /**
      * Add raster layer
      *
-     * @param {String} layerKey                Layer key
-     * @param {Array}  additionalURLParameters Additional URL parameters
+     * @param {String}  layerKey                Layer key
+     * @param {Array}   additionalURLParameters Additional URL parameters
+     * @param {Booelan} isBaseLayer             Specifies if the layer is the base one
      *
      * @returns {Promise}
      */
-    addLayer: function (layerKey, additionalURLParameters = []) {
+    addLayer: function (layerKey, additionalURLParameters = [], isBaseLayer = false) {
         var me = this;
         let result = new Promise((resolve, reject) => {
-            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+            var layers = [], metaData = meta.getMetaData();
 
             let layerWasAdded = false;
 
@@ -246,30 +247,38 @@ module.exports = {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
-                    // Check if the opacity value differs from the default one
-                    isBaseLayer = !!layerDescription.baselayer;
+                    isBaseLayer = (isBaseLayer || !!layerDescription.baselayer);
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,
                         host: host,
                         layers: [layer],
                         db: db,
-                        isBaseLayer: isBaseLayer,
+                        isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
                         tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
+                        //name: layerDescription.f_table_name,
                         name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
                         uri: uri,
                         loadEvent: function () {
-                            me.decrementCountLoading(layer);
-                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                            if (isBaseLayer) {
+                                backboneEvents.get().trigger("doneLoading:setBaselayer", layer);
+                            } else {
+                                me.decrementCountLoading(layer);
+                                backboneEvents.get().trigger("doneLoading:layers", layer);
+                            }
                         },
                         loadingEvent: function () {
-                            me.incrementCountLoading(layer);
-                            backboneEvents.get().trigger("startLoading:layers", layer);
+                            if (isBaseLayer) {
+                                backboneEvents.get().trigger("startLoading:setBaselayer", layer);
+                            } else {
+                                me.incrementCountLoading(layer);
+                                backboneEvents.get().trigger("startLoading:layers", layer);
+                            }
                         },
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
@@ -278,7 +287,6 @@ module.exports = {
                     me.reorderLayers();
 
                     layerWasAdded = true;
-
 
                     return false;
                 }
