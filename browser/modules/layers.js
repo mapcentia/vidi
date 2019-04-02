@@ -216,7 +216,6 @@ module.exports = {
         }
         for (let key in fieldConf) {
             if (fieldConf.hasOwnProperty(key)) {
-                console.log(key, fieldConf[key]);
                 if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
                     useUTFGrid = true;
                     break;
