@@ -202,7 +202,7 @@ describe("Application", () => {
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.true;
     });
 
-    it("should update coordinates upon map changes", async () => {
+    it("should update coordinates after map manipulations", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         page = await helpers.waitForPageToLoad(page);
@@ -227,5 +227,79 @@ describe("Application", () => {
         let updatedCoordinates = await page.evaluate(`$('#coordinates').find('h3').eq(1).next().html()`);
 
         expect(initialCoordinates === updatedCoordinates).to.be.false;
+    });
+
+    it("should not accept GC2 layers as base ones if this is not specified in configuration", async () => {
+        /*
+        Configuration file aleksandrshumilov_baselayers_with_GC2.json:
+
+        {
+            "baseLayers": [{
+                "id": "osm",
+                "name": "OSM"
+            }, {
+                "id": "public.test_poly",
+                "name": "Polygon",
+                "db": "aleksandrshumilov",
+                "host": "https://gc2.mapcentia.com",
+                "config": {
+                    "maxZoom": 21,
+                    "maxNativeZoom": 20,
+                    "attribution": "&copy; Mapbox"
+                }
+            }],
+            "brandName": "Test",
+	        "aboutBox": "Test"
+        }
+        */
+
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_DEFAULT.replace(`public/#osm`, `public/?config=aleksandrshumilov_baselayers_with_GC2.json#public.test_poly`)}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(2000);
+
+        expect(page.url().indexOf(`#public.test_poly/`) > -1).to.be.true;
+        expect(page.url().indexOf(`/public.test_poly`) === -1).to.be.true;
+
+        await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#coordinates-content"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-module-id="baseLayer"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('[name="baselayers"][value="public.test_poly"]').is(':checked')`)).to.be.true;
+    });
+
+    it("should accept GC2 layers as base ones if this is specified in configuration", async () => {
+        /*
+        Configuration file aleksandrshumilov_baselayers_without_GC2.json:
+
+        {
+            "baseLayers": [{
+                "id": "osm",
+                "name": "OSM"
+            }],
+            "brandName": "Test",
+	        "aboutBox": "Test"
+        }
+        */
+
+       let page = await browser.newPage();
+       await page.goto(`${helpers.PAGE_URL_DEFAULT.replace(`public/#osm`, `public/?config=aleksandrshumilov_baselayers_without_GC2.json#public.test_poly`)}`);
+       page = await helpers.waitForPageToLoad(page);
+       await helpers.sleep(2000);
+
+       expect(page.url().indexOf(`#osm/`) > 0).to.be.true;
+       expect(page.url().indexOf(`/public.test_poly`) === -1).to.be.true;
+
+       await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
+       await helpers.sleep(1000);
+       await page.evaluate(`$('[href="#coordinates-content"]').trigger('click')`);
+       await helpers.sleep(1000);
+       await page.evaluate(`$('[data-module-id="baseLayer"]').trigger('click')`);
+       await helpers.sleep(1000);
+
+       expect(await page.evaluate(`$('[name="baselayers"][value="osm"]').is(':checked')`)).to.be.true;
     });
 });
