@@ -135,6 +135,10 @@ class MarkupGenerator {
                         </div>
                     </div>
                     <div style="text-align: right; flex-grow: 1;">
+                        <div style="display: inline-block;">
+                            <div class="btn-group" role="group" style="height: 23px; width: 1px; margin: 10px;"></div>
+                        </div>
+
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
                             <div class="btn-group" role="group">
                                 <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
