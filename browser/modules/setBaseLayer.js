@@ -52,19 +52,32 @@ module.exports = module.exports = {
             var u, l;
             layers.removeHidden();
             
-            let baseLayerWasAddedAsRegularGC2One = false;
             if (!cloud.get().getLayersByName(str)) {
                 let layerAddedFromConfiguration = baseLayer.addBaseLayer(str);
-                if (layerAddedFromConfiguration === false) {
-                    // If the layer looks like a GC2 layer, then add it as a normal GC2 layer (if it was not added before)
-                    if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
-                        baseLayerWasAddedAsRegularGC2One = true;
-                        layers.addLayer(str, [], true);
+                if (layerAddedFromConfiguration) {
+                    console.info(str + " is added as base layer (from base layers configuration)");
+                } else {
+                    let newBaseLayer = false;
+                    if (window.setBaseLayers && window.setBaseLayers.length > 0) {
+                        newBaseLayer = window.setBaseLayers[0].id;
+                    } else {
+                        throw new Error(`Please set at least one base layer in configuration`);
                     }
 
-                    console.info(str + " is added as base layer (from layer meta)");
-                } else {
-                    console.info(str + " is added as base layer (from base layers configuration)");
+                    if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
+                        /*
+                        // @todo Remove in next releases, currently if the GC2 layer is set as a base one, it should have been already added above
+                        // If this is enabled, keep in mind that GC2 layers, enabled as base ones, should emit base layers events upon loading
+                        layers.addLayer(str, [], true);
+                        */
+
+                        console.warn(`${str} was not added as base layer (GC2 layer should be set as a base one in cofiguration as well), selecting first available (${newBaseLayer})`);
+                    } else {
+                        console.warn(`${str} was not added as base layer, selecting first available (${newBaseLayer})`);
+                    }
+
+                    str = newBaseLayer;
+                    baseLayer.addBaseLayer(str);
                 }
             }
 
@@ -100,68 +113,66 @@ module.exports = module.exports = {
 
             let numberOfErroredTiles = 0, timerHasStarted = false;
             let alreadyLoaded = false;
-            if (baseLayerWasAddedAsRegularGC2One === false) {
-                cloud.get().setBaseLayer(str, (e) => {
-                    // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
-                    // MVT layers, so the single time event firing guard was added
-                    if (layerTreeUtils.isVectorTileLayerId(str)) {
-                        if (alreadyLoaded) return;
-                        alreadyLoaded = true;
-                    }
+            cloud.get().setBaseLayer(str, (e) => {
+                // _tileReady() in src/layer/tile/GridLayer.js@879 is firing more than once on first load for
+                // MVT layers, so the single time event firing guard was added
+                if (layerTreeUtils.isVectorTileLayerId(str)) {
+                    if (alreadyLoaded) return;
+                    alreadyLoaded = true;
+                }
 
-                    // If 100 tiles fails within 10 secs the next base layer is chosen
-                    if (numberOfErroredTiles > 100) {
-                        jquery.snackbar({
-                            content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
-                            htmlAllowed: true,
-                            timeout: 7000
-                        });
+                // If 100 tiles fails within 10 secs the next base layer is chosen
+                if (numberOfErroredTiles > 100) {
+                    jquery.snackbar({
+                        content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
+                        htmlAllowed: true,
+                        timeout: 7000
+                    });
 
-                        let alternativeLayer = false;
-                        failedLayers.push(str);
-                        window.setBaseLayers.map(item => {
-                            if (failedLayers.indexOf(item.id) === -1) {
-                                alternativeLayer = item.id;
-                                return false;
-                            }
-                        });
-
-                        backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                        if (alternativeLayer === false) {
-                            console.error(`Unable to load any of available base layers`);
-                        } else {
-                            setTimeout(() => {
-                                _self.init(alternativeLayer);
-                            });
+                    let alternativeLayer = false;
+                    failedLayers.push(str);
+                    window.setBaseLayers.map(item => {
+                        if (failedLayers.indexOf(item.id) === -1) {
+                            alternativeLayer = item.id;
+                            return false;
                         }
-                    } else {
-                        backboneEvents.get().trigger("doneLoading:setBaselayer", str);
-                        if (!timerHasStarted) {
-                            timerHasStarted = true;
-                            setTimeout(() => {
-                                numberOfErroredTiles = 0;
-                                timerHasStarted = false;
-                                console.log("Timer for failed tiles was reset")
-                            }, 10000)
-                        }
-                    }
-                }, (e) => {
-                    if (layerTreeUtils.isVectorTileLayerId(str)) {
-                        alreadyLoaded = false;
-                    }
+                    });
 
-                    backboneEvents.get().trigger("startLoading:setBaselayer", str);
-                }, (e) => {
-                    numberOfErroredTiles++;
-                }, () => {
-                    console.warn(`Base layer ${str} was not found, switching to first available base layer`);
-                    if (window.setBaseLayers && window.setBaseLayers.length > 0) {
-                        _self.init(window.setBaseLayers[0].id).then(resolve);
+                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                    if (alternativeLayer === false) {
+                        console.error(`Unable to load any of available base layers`);
                     } else {
-                        throw new Error(`No default layers were set`);
+                        setTimeout(() => {
+                            _self.init(alternativeLayer);
+                        });
                     }
-                });
-            }
+                } else {
+                    backboneEvents.get().trigger("doneLoading:setBaselayer", str);
+                    if (!timerHasStarted) {
+                        timerHasStarted = true;
+                        setTimeout(() => {
+                            numberOfErroredTiles = 0;
+                            timerHasStarted = false;
+                            console.log("Timer for failed tiles was reset")
+                        }, 10000)
+                    }
+                }
+            }, (e) => {
+                if (layerTreeUtils.isVectorTileLayerId(str)) {
+                    alreadyLoaded = false;
+                }
+
+                backboneEvents.get().trigger("startLoading:setBaselayer", str);
+            }, (e) => {
+                numberOfErroredTiles++;
+            }, () => {
+                console.warn(`Base layer ${str} was not found, switching to first available base layer`);
+                if (window.setBaseLayers && window.setBaseLayers.length > 0) {
+                    _self.init(window.setBaseLayers[0].id).then(resolve);
+                } else {
+                    throw new Error(`No default layers were set`);
+                }
+            });
 
             baseLayer.redraw(str);
 

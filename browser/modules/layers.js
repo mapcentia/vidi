@@ -232,11 +232,10 @@ module.exports = {
      *
      * @param {String}  layerKey                Layer key
      * @param {Array}   additionalURLParameters Additional URL parameters
-     * @param {Booelan} isBaseLayer             Specifies if the layer is the base one
      *
      * @returns {Promise}
      */
-    addLayer: function (layerKey, additionalURLParameters = [], isBaseLayer = false) {
+    addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
             var layers = [], metaData = meta.getMetaData();
@@ -247,7 +246,7 @@ module.exports = {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
-                    isBaseLayer = (isBaseLayer || !!layerDescription.baselayer);
+                    var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,
                         host: host,
@@ -265,20 +264,12 @@ module.exports = {
                         format: "image/png",
                         uri: uri,
                         loadEvent: function () {
-                            if (isBaseLayer) {
-                                backboneEvents.get().trigger("doneLoading:setBaselayer", layer);
-                            } else {
-                                me.decrementCountLoading(layer);
-                                backboneEvents.get().trigger("doneLoading:layers", layer);
-                            }
+                            me.decrementCountLoading(layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
                         },
                         loadingEvent: function () {
-                            if (isBaseLayer) {
-                                backboneEvents.get().trigger("startLoading:setBaselayer", layer);
-                            } else {
-                                me.incrementCountLoading(layer);
-                                backboneEvents.get().trigger("startLoading:layers", layer);
-                            }
+                            me.incrementCountLoading(layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
                         },
                         subdomains: window.gc2Options.subDomainsForTiles
                     });
