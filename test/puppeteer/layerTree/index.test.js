@@ -30,6 +30,7 @@ describe('Layer tree common', () => {
         await page.evaluate(`$('[data-gc2-layer-key="public.test_point_no_type.the_geom"]').find('.js-set-offline').trigger('click')`);
         await page.evaluate(`$('[data-gc2-layer-key="public.test.the_geom"]').find('.js-set-offline').trigger('click')`);
         await helpers.sleep(2000);
+        await helpers.img(page);
 
         // Reload page
         await page.reload(helpers.PAGE_LOAD_TIMEOUT);
@@ -37,7 +38,7 @@ describe('Layer tree common', () => {
         
         await page.evaluate(`$('[href="#layer-content"]').trigger('click')`);
         await page.evaluate(`$('[href="#collapseUHVibGljIGdyb3Vw"]').trigger('click')`);
-        await helpers.sleep(2000);
+        await helpers.sleep(4000);
 
         expect(await page.evaluate(`$('#layers').find('.js-app-is-online-badge').hasClass('hidden');`)).to.be.false;
         expect(await page.evaluate(`$('#layers').find('.js-app-is-offline-badge').hasClass('hidden');`)).to.be.true;
