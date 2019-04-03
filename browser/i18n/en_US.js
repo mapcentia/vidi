@@ -291,6 +291,7 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Please select at least one layer": "Please select at least one layer",
         "Back to main menu": "Back to main menu",
         "Get started": "Get started",
         "New project": "New project",
