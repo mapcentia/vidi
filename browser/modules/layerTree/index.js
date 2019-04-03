@@ -355,10 +355,10 @@ module.exports = {
                     // Opacity and filters should be kept opened after setLayerState()
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                         hideLoadStrategy();
-                        hideOfflineMode();
                         hideTableView();
                     }
 
+                    hideOfflineMode();
                     if (layerIsEnabled) {
                         $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
 
