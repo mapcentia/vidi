@@ -230,15 +230,15 @@ module.exports = {
     /**
      * Add raster layer
      *
-     * @param {String} layerKey                Layer key
-     * @param {Array}  additionalURLParameters Additional URL parameters
+     * @param {String}  layerKey                Layer key
+     * @param {Array}   additionalURLParameters Additional URL parameters
      *
      * @returns {Promise}
      */
     addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
-            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+            var layers = [], metaData = meta.getMetaData();
 
             let layerWasAdded = false;
 
@@ -246,19 +246,19 @@ module.exports = {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
                 let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
-                    // Check if the opacity value differs from the default one
-                    isBaseLayer = !!layerDescription.baselayer;
+                    var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,
                         host: host,
                         layers: [layer],
                         db: db,
-                        isBaseLayer: isBaseLayer,
+                        isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
                         tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
+                        //name: layerDescription.f_table_name,
                         name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
@@ -278,7 +278,6 @@ module.exports = {
                     me.reorderLayers();
 
                     layerWasAdded = true;
-
 
                     return false;
                 }

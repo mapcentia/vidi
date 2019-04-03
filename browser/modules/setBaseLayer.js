@@ -51,14 +51,34 @@ module.exports = module.exports = {
         let result = new Promise((resolve, reject) => {
             var u, l;
             layers.removeHidden();
+            
             if (!cloud.get().getLayersByName(str)) {
-                baseLayer.addBaseLayer(str);
-                // If the layer looks like a GC2 layer, then add it as a normal GC2 layer
-                if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
-                    layers.addLayer(str);
-                }
+                let layerAddedFromConfiguration = baseLayer.addBaseLayer(str);
+                if (layerAddedFromConfiguration) {
+                    console.info(str + " is added as base layer (from base layers configuration)");
+                } else {
+                    let newBaseLayer = false;
+                    if (window.setBaseLayers && window.setBaseLayers.length > 0) {
+                        newBaseLayer = window.setBaseLayers[0].id;
+                    } else {
+                        throw new Error(`Please set at least one base layer in configuration`);
+                    }
 
-                console.info(str + " is added as base layer.");
+                    if (str.split(".")[1] && layerTreeUtils.isVectorTileLayerId(str) === false) {
+                        /*
+                        // @todo Remove in next releases, currently if the GC2 layer is set as a base one, it should have been already added above
+                        // If this is enabled, keep in mind that GC2 layers, enabled as base ones, should emit base layers events upon loading
+                        layers.addLayer(str, [], true);
+                        */
+
+                        console.warn(`${str} was not added as base layer (GC2 layer should be set as a base one in cofiguration as well), selecting first available (${newBaseLayer})`);
+                    } else {
+                        console.warn(`${str} was not added as base layer, selecting first available (${newBaseLayer})`);
+                    }
+
+                    str = newBaseLayer;
+                    baseLayer.addBaseLayer(str);
+                }
             }
 
             if (typeof window.setBaseLayers !== "undefined") {
@@ -100,7 +120,7 @@ module.exports = module.exports = {
                     if (alreadyLoaded) return;
                     alreadyLoaded = true;
                 }
-                
+
                 // If 100 tiles fails within 10 secs the next base layer is chosen
                 if (numberOfErroredTiles > 100) {
                     jquery.snackbar({
@@ -153,7 +173,6 @@ module.exports = module.exports = {
                     throw new Error(`No default layers were set`);
                 }
             });
-            
 
             baseLayer.redraw(str);
 

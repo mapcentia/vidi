@@ -13,6 +13,7 @@ import StateSnapshotsDashboard from './components/StateSnapshotsDashboard';
  */
 var anchor, state, urlparser, backboneEvents;
 
+const API_URL = `/api/state-snapshots`;
 
 const exId = `state-snapshots`;
 
