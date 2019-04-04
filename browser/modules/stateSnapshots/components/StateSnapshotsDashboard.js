@@ -17,8 +17,6 @@ class StateSnapshotsDashboard extends React.Component {
         super(props);
 
         this.state = {
-            // Specifies if editing controls should be available
-            readOnly: (props.readOnly ? true : false),
             apiUrl: (props.apiUrl ? props.apiUrl : DEFAULT_API_URL),
             browserOwnerSnapshots: [],
             userOwnerSnapshots: [],
@@ -120,11 +118,13 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     /**
-        * Applies snapshot
-        * 
-        * @param {Object} item Applies snapshot
-        */
+     * Applies snapshot
+     * 
+     * @param {Object} item Applies snapshot
+     */
     applySnapshot(item) {
+        if (this.props.onStateSnapshotApply) this.props.onStateSnapshotApply();
+
         this.setState({ stateApplyingIsBlocked: true });
         this.props.state.applyState(item.snapshot).then(() => {
             this.setState({ stateApplyingIsBlocked: false });
@@ -132,10 +132,10 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     /**
-        * Deletes snapshot
-        * 
-        * @param {String} id Snapshot identifier
-        */
+     * Deletes snapshot
+     * 
+     * @param {String} id Snapshot identifier
+     */
     deleteSnapshot(id) {
         if (confirm(`${__(`Delete state snapshot`)}?`)) {
             let _self = this;
@@ -359,38 +359,43 @@ class StateSnapshotsDashboard extends React.Component {
                 </div>);
             }
 
+            let playButton = (<button
+                type="button"
+                className="btn btn-xs btn-primary"
+                onClick={() => { this.applySnapshot(item); }}
+                disabled={this.state.stateApplyingIsBlocked}
+                title={__(`Apply state snapshot`)}
+                style={buttonStyle}>
+                <i className="material-icons">play_arrow</i></button>);
+
             return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                 <div className="panel-body" style={{padding: '8px'}}>
-                    <div>
+                    {this.props.playOnly ? (<div>
                         {titleLabel}
                         <span className="label label-default">{dateFormatted}</span>
-                        <button
-                            type="button"
-                            className="btn btn-xs btn-primary"
-                            onClick={() => { this.applySnapshot(item); }}
-                            disabled={this.state.stateApplyingIsBlocked}
-                            title={__(`Apply state snapshot`)}
-                            style={buttonStyle}>
-                            <i className="material-icons">play_arrow</i>
-                        </button>
+                        {playButton}
+                    </div>) : (<div>
+                        {titleLabel}
+                        <span className="label label-default">{dateFormatted}</span>
+                        {playButton}
                         {updateSnapshotControl}
-                        <button
-                            type="button"
-                            className="btn btn-xs btn-primary"
-                            onClick={() => this.deleteSnapshot(item.id)}
-                            title={__(`Delete state snapshot`)}
-                            style={buttonStyle}>
-                            <i className="material-icons">delete</i>
-                        </button>
+                            <button
+                                type="button"
+                                className="btn btn-xs btn-primary"
+                                onClick={() => this.deleteSnapshot(item.id)}
+                                title={__(`Delete state snapshot`)}
+                                style={buttonStyle}>
+                                <i className="material-icons">delete</i>
+                            </button>
                         {importButton}
-                    </div>
-                    <div>
+                    </div>)}
+                    {this.props.playOnly ? false : (<div>
                         <div className="input-group form-group">
                             <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
                             <input className="form-control" type="text" defaultValue={permaLink}/>
                         </div>
                         {tokenField}
-                    </div>
+                    </div>)}
                 </div>
             </div>);
         };
@@ -422,7 +427,7 @@ class StateSnapshotsDashboard extends React.Component {
         let userOwnerSnapshotsPanel = false;
         if (this.state.authenticated) {
             let createNewSnapshotControl = false;
-            if (this.state.readOnly) {
+            if (this.props.readOnly) {
                 createNewSnapshotControl = (<div>
                     <h4>
                         {__(`User snapshots`)}
@@ -452,13 +457,13 @@ class StateSnapshotsDashboard extends React.Component {
                 width: '100%',
                 height: '100%',
                 backgroundColor: 'white',
-                opacity: '0.7',
+                opacity: '0.8',
                 zIndex:  '1000'
             }}></div>);
         }
 
         let createNewSnapshotControl = false;
-        if (this.state.readOnly) {
+        if (this.props.readOnly) {
             createNewSnapshotControl = (<h4>
                 {__(`Local snapshots`)} 
             </h4>);
@@ -486,5 +491,10 @@ class StateSnapshotsDashboard extends React.Component {
         </div>);
     }
 }
+
+StateSnapshotsDashboard.defaultProps = {
+    readOnly: false,
+    playOnly: false,
+};
 
 export default StateSnapshotsDashboard;
