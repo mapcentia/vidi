@@ -50,6 +50,7 @@ class SearchFieldComponent extends React.Component {
                 value={this.state.searchTerm}
                 type="text" className="form-control"
                 placeholder={__("Search")}
+                disabled={this.props.disabled}
                 onChange={this.onChange.bind(this)}
                 onKeyPress={this.handleKeyPress.bind(this)}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
@@ -57,6 +58,7 @@ class SearchFieldComponent extends React.Component {
                     title={__(`Search`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSearch.bind(this)}
+                    disabled={this.props.disabled}
                     style={buttonStyle}>
                     <i className="material-icons">search</i>
                 </button>
@@ -64,7 +66,7 @@ class SearchFieldComponent extends React.Component {
                     title={__(`Clear`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onClear.bind(this)}
-                    disabled={!this.state.searchTerm}
+                    disabled={this.props.disabled || !this.state.searchTerm}
                     style={buttonStyle}>
                     <i className="material-icons">clear</i>
                 </button>
@@ -73,8 +75,13 @@ class SearchFieldComponent extends React.Component {
     }
 }
 
+SearchFieldComponent.defaultProps = {
+    disabled: false
+};
+
 SearchFieldComponent.propTypes = {
-    onSearch: PropTypes.func.isRequired
+    onSearch: PropTypes.func.isRequired,
+    disabled: PropTypes.bool
 };
 
 export default SearchFieldComponent;
