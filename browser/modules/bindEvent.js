@@ -159,7 +159,7 @@ module.exports = {
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
-            console.log("Start loading: " + e);
+            console.log("Start loading base layer: " + e);
             doneB = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
@@ -185,7 +185,7 @@ module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading: " + e);
+            console.log("Done loading base layer: " + e);
             doneB = true;
             loadingB = false;
 
