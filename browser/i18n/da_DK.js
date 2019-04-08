@@ -24,6 +24,7 @@ module.exports = {
         "Data from conflicts": "Data fra konflikter",
         "Without conflicts": "Uden konflikter",
         "Errors": "Fejl",
+        "Move": "# Move",
         "Layer": "Lag",
         "Number of objects": "Antal objekter",
         "Show": "Vis",
