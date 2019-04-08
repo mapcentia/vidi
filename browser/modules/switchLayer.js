@@ -56,6 +56,20 @@ module.exports = module.exports = {
     },
 
     /**
+     * Loads missing meta for layer
+     * 
+     * @returns {Promise}
+     */
+    loadMissingMeta: (gc2Id) => {
+        let loadedSchema = gc2Id;
+        if (gc2Id.split(`.`).length === 2) {
+            loadedSchema = gc2Id.split(`.`)[0];
+        }
+
+        return meta.init(loadedSchema, true, true);
+    },
+
+    /**
      * Enables vector layer
      *
      * @param {String}  gc2Id         Layer name (with prefix)
@@ -88,12 +102,12 @@ module.exports = module.exports = {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
                     console.error(`Failed to switch layer while attempting to get the vector data store for ${vectorLayerId} (probably it is not the vector layer)`);
                 } else {
-                    console.error(`Unknown switch layer failure for ${vectorLayerId}`);
+                    console.error(`Unknown switch layer failure for ${vectorLayerId}`, failedBefore);
                 }
 
                 resolve();
             } else {
-                meta.init(gc2Id, true, true).then(layerMeta => {
+                _self.loadMissingMeta(gc2Id).then(() => {
                     // Trying to recreate the layer tree with updated meta and switch layer again
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -111,7 +125,7 @@ module.exports = module.exports = {
                         });
                     });
                 }).catch(() => {
-                    console.error(`Could not add ${gc2Id} vector layer`);
+                    console.error(`Could not add ${gc2Id} vector layer (schema ${loadedSchema})`);
                     layers.decrementCountLoading(vectorLayerId);
                     resolve();
                 });
@@ -179,7 +193,7 @@ module.exports = module.exports = {
                 _self.enableUTFGrid(gc2Id);
                 resolve();
             }).catch((err) => {
-                meta.init(gc2Id, true, true).then(layerMeta => {
+                _self.loadMissingMeta(gc2Id).then(() => {
                     // Trying to recreate the layer tree with updated meta and switch layer again                           
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -193,7 +207,7 @@ module.exports = module.exports = {
                         _self.init(gc2Id, true).then(resolve);
                     });
                 }).catch(() => {
-                    console.error(`Could not add ${gc2Id} raster tile layer`);
+                    console.error(`Could not add ${gc2Id} raster tile layer (schema ${loadedSchema})`);
                     layers.decrementCountLoading(gc2Id);
                     resolve();
                 });
@@ -251,7 +265,7 @@ module.exports = module.exports = {
                         console.error(err);
                         reject();
                     } else {
-                        meta.init(gc2Id, true, true).then(layerMeta => {
+                        _self.loadMissingMeta(gc2Id).then(() => {
                             // Trying to recreate the layer tree with updated meta and switch layer again
                             layerTree.create().then(() => {
                                 // All layers are guaranteed to exist in meta
@@ -321,7 +335,7 @@ module.exports = module.exports = {
 
                     resolve();
                 } else {
-                    meta.init(gc2Id, true, true).then(layerMeta => {
+                    _self.loadMissingMeta(gc2Id).then(() => {
                         // Trying to recreate the layer tree with updated meta and switch layer again
                         layerTree.create().then(() => {
                             // All layers are guaranteed to exist in meta
