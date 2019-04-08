@@ -24,6 +24,7 @@ module.exports = {
         "Data from conflicts": "Data from conflicts",
         "Without conflicts": "Without conflicts",
         "Errors": "Errors",
+        "Move": "Move",
         "Layer": "Layer",
         "Number of objects": "Number of objects",
         "Show": "Show",
