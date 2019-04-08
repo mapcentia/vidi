@@ -10,7 +10,6 @@ const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTone
 const createPage = async () => {
     let page = await browser.newPage();
     await page.emulate(helpers.EMULATED_SCREEN);
-    console.log(`### PAGE_URL`, PAGE_URL);
     await page.goto(PAGE_URL, { timeout: 0 });
     page = await helpers.waitForPageToLoad(page);
 
