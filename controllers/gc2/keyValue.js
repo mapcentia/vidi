@@ -59,9 +59,7 @@ router.post('/api/key-value/:dataBase/:key', (req, res) => {
 
         if (parsedBody) {
             if (parsedBody.success) {
-                res.json({
-                    status: 'success'
-                });
+                res.json(parsedBody);
             } else {
                 shared.throwError(res, parsedBody.message);
             }
@@ -89,9 +87,7 @@ router.put('/api/key-value/:dataBase/:key', (req, res) => {
 
         if (parsedBody) {
             if (parsedBody.success) {
-                res.json({
-                    status: 'success'
-                });
+                res.json(parsedBody);
             } else {
                 shared.throwError(res, parsedBody.message);
             }
