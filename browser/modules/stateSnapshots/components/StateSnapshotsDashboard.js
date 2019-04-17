@@ -428,11 +428,13 @@ class StateSnapshotsDashboard extends React.Component {
         if (this.state.authenticated) {
             let createNewSnapshotControl = false;
             if (this.props.readOnly) {
-                createNewSnapshotControl = (<div>
-                    <h4>
-                        {__(`User snapshots`)}
-                    </h4>
-                </div>);
+                if (this.props.showStateSnapshotTypes) {
+                    createNewSnapshotControl = (<div>
+                        <h4>
+                            {__(`User snapshots`)}
+                        </h4>
+                    </div>);
+                }
             } else {
                 createNewSnapshotControl = (<div>
                     <h4>
@@ -464,9 +466,11 @@ class StateSnapshotsDashboard extends React.Component {
 
         let createNewSnapshotControl = false;
         if (this.props.readOnly) {
-            createNewSnapshotControl = (<h4>
-                {__(`Local snapshots`)} 
-            </h4>);
+            if (this.props.showStateSnapshotTypes) {
+                createNewSnapshotControl = (<h4>
+                    {__(`Local snapshots`)} 
+                </h4>);
+            }
         } else {
             createNewSnapshotControl = (<h4>
                 {__(`Local snapshots`)} 
@@ -495,6 +499,7 @@ class StateSnapshotsDashboard extends React.Component {
 StateSnapshotsDashboard.defaultProps = {
     readOnly: false,
     playOnly: false,
+    showStateSnapshotTypes: true,
 };
 
 export default StateSnapshotsDashboard;
