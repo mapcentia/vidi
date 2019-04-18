@@ -70,6 +70,8 @@ geocloud = (function () {
         HERENORMALDAY = "hereNormalDay",
         HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
+        HERESATELLITEDAY = "hereSatelliteDay",
+        HEREHYBRIDDAY = "hereHybridDay",
 
         attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
@@ -1636,6 +1638,16 @@ geocloud = (function () {
                     prettyName = "HERE Normal Night Grey";
                     baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
+                case HERESATELLITEDAY:
+                    name = "satellite.day";
+                    prettyName = "HERE Satellite Day";
+                    baseUrl = aerialTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
+                case HEREHYBRIDDAY:
+                    name = "hybrid.day";
+                    prettyName = "HERE Hybrid Day";
+                    baseUrl = aerialTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
             }
 
             l = new L.TileLayer(baseUrl + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
@@ -2102,6 +2114,12 @@ geocloud = (function () {
                 case HERENORMALNIGHTGREY:
                     o = this.addHere(HERENORMALNIGHTGREY);
                     break;
+                case HERESATELLITEDAY:
+                    o = this.addHere(HERESATELLITEDAY);
+                    break;
+                case HEREHYBRIDDAY:
+                    o = this.addHere(HEREHYBRIDDAY);
+                    break;
                 case "geodkBright":
                     o = this.addGeoDk("geodkBright", "geodk.bright");
                     break;
@@ -2133,19 +2151,19 @@ geocloud = (function () {
         this.addUTFGridLayers = function (config) {
             var layers, layersArr = [],
                 defaults = {
-                host: host,
-                layerId: false,
-                layers: [],
-                db: null,
-                mapRequestProxy: false,
-                visibility: true,
-                wrapDateLine: true,
-                tileCached: true,
-                name: null,
-                names: [],
-                uri: null,
-                fieldConf: {}
-            };
+                    host: host,
+                    layerId: false,
+                    layers: [],
+                    db: null,
+                    mapRequestProxy: false,
+                    visibility: true,
+                    wrapDateLine: true,
+                    tileCached: true,
+                    name: null,
+                    names: [],
+                    uri: null,
+                    fieldConf: {}
+                };
 
             if (config) {
                 for (prop in config) {
@@ -2752,6 +2770,8 @@ geocloud = (function () {
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,
+        HERESATELLITEDAY: HERESATELLITEDAY,
+        HEREHYBRIDDAY: HEREHYBRIDDAY,
         GEODKBRIGHT: GEODKBRIGHT,
         LUFTFOTOSERIER2017: LUFTFOTOSERIER2017,
         setHost: setHost
