@@ -400,9 +400,12 @@ class StateSnapshotsDashboard extends React.Component {
             </div>);
         };
 
-        let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-            {__(`No local snapshots`)}
-        </div>);
+        let browserOwnerSnapshots = false;
+        if (!this.state.loading) {
+            browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
+                {__(`No local snapshots`)}
+            </div>);
+        }
 
         let importAllIsDisabled = true;
         if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
@@ -460,8 +463,16 @@ class StateSnapshotsDashboard extends React.Component {
                 height: '100%',
                 backgroundColor: 'white',
                 opacity: '0.8',
-                zIndex:  '1000'
-            }}></div>);
+                zIndex:  '1000',
+                textAlign: `center`
+            }}>
+                <div style={{width: `150px`, display: `inline-block`}}>
+                    <div>{__(`Loading data`)}</div>
+                    <div className="progress progress-striped active">
+                        <div className="progress-bar" style={{width: `100%`}}></div>
+                    </div>
+                </div>
+            </div>);
         }
 
         let createNewSnapshotControl = false;
