@@ -492,17 +492,20 @@ module.exports = {
 
         // Module icons
         $("#side-panel ul li a").on("click", function (e) {
-            
-            
             backboneEvents.get().trigger(`off:all`);
 
             let moduleId = $(this).data(`module-id`);
+            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
             setTimeout(() => {
                 if (moduleId && moduleId !== ``) {
                     if (moduleId in applicationModules) {
                         backboneEvents.get().trigger(`on:${moduleId}`);
                     } else {
-                        console.error(`Module ${moduleId} was not found`);
+                        if (moduleIgnoreErrors) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
                     }
                 }
             }, 100);

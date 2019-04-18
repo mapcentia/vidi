@@ -292,6 +292,9 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Specify the buffer": "Specify the buffer",
+        "Draw the profile": "Draw the profile",
+        "Profile drawing": "Profile drawing",
         "Enter borehole, installation, station": "Enter borehole, installation, station",
         "Select another chemical": "Select another chemical",
         "Nothing found": "Nothing found",
