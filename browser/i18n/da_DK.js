@@ -295,6 +295,7 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Enter borehole, installation, station": "Indtast DGU, anlæg, station",
         "Select another chemical": "# Select another chemical",
         "Nothing found": "# Nothing found",
         "Continue": "# Continue",

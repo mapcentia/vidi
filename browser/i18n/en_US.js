@@ -292,6 +292,7 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Enter borehole, installation, station": "Enter borehole, installation, station",
         "Select another chemical": "Select another chemical",
         "Nothing found": "Nothing found",
         "Continue": "Continue",
