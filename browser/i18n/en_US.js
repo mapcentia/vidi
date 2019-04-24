@@ -292,6 +292,10 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Specify the buffer": "Specify the buffer",
+        "Draw the profile": "Draw the profile",
+        "Profile drawing": "Profile drawing",
+        "Enter borehole, installation, station": "Enter borehole, installation, station",
         "Select another chemical": "Select another chemical",
         "Nothing found": "Nothing found",
         "Continue": "Continue",
@@ -300,7 +304,8 @@ module.exports = {
         "sensordata_with_correction": "Sensor data with correction",
         "Please select at least one layer": "Please select at least one layer",
         "Back to main menu": "Back to main menu",
-        "Get started": "Get started",
+        "Welcome to Calypso": "Welcome to Calypso",
+        "Register new data": "Register new data",
         "New project": "New project",
         "Open existing project": "Open existing project",
         "What would you like to see": "What would you like to see",

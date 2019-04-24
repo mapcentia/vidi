@@ -15,7 +15,7 @@ router.all('/api/sql/:db', function (req, response) {
     var db = req.params.db,
         q = req.body.q || req.query.q,
         srs = req.body.srs || req.query.srs,
-        lifetime = req.body.lifetime || req.query.lifetime,
+        lifetime = req.body.lifetime || req.query.lifetime || "0",
         client_encoding = req.body.client_encoding || req.query.client_encoding,
         base64 = req.body.base64 || req.query.base64,
         format = req.body.format || req.query.format,

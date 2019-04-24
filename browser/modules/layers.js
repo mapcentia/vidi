@@ -202,28 +202,43 @@ module.exports = {
         }
     },
 
+    /**
+     * Adds a layers UTFGrid. Checks if any fields has mouse over set. Or else the grid is not added.
+     * @param layerKey      Layer key
+     * @returns {boolean}
+     */
     addUTFGridLayer: function (layerKey) {
-        let metaData = meta.getMetaDataKeys(), fieldConf;
+        let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
         try {
             fieldConf = JSON.parse(metaData[layerKey].fieldconf);
         } catch (e) {
             fieldConf = {};
         }
-        let result = new Promise((resolve, reject) => {
-            if (metaData[layerKey].type === "RASTER") {
-                reject();
-                return;
+        for (let key in fieldConf) {
+            if (fieldConf.hasOwnProperty(key)) {
+                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
+                    useUTFGrid = true;
+                    break;
+                }
             }
-            cloud.get().addUTFGridLayers({
-                host: host,
-                layers: [layerKey],
-                db: db,
-                uri: uri,
-                fieldConf: fieldConf
+        }
+        if (useUTFGrid) {
+            result = new Promise((resolve, reject) => {
+                if (metaData[layerKey].type === "RASTER") {
+                    reject();
+                    return;
+                }
+                cloud.get().addUTFGridLayers({
+                    host: host,
+                    layers: [layerKey],
+                    db: db,
+                    uri: uri,
+                    fieldConf: fieldConf
+                });
+                console.info(`${layerKey} UTFgrid was added to the map`);
+                resolve();
             });
-            console.info(`${layerKey} was added to the map`);
-            resolve();
-        });
+        }
         return result;
     },
 
