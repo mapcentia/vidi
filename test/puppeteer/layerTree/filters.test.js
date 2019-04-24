@@ -107,7 +107,6 @@ describe('Layer tree filters', () => {
         await setTextFilterValue(page, `id`, `>`, `2`, 0, false, `testpresetpointfilters`);
         await setTextFilterValue(page, `stringfield`, `=`, `def`, 1, true, `testpresetpointfilters`);
 
-        await helpers.img(page);
         await helpers.sleep(2000);
 
         expect(numberOfFilteredItems).to.equal(2);
@@ -130,7 +129,6 @@ describe('Layer tree filters', () => {
         });
 
         await disablePredefinedFilters(page);
-        await helpers.img(page);
 
         await helpers.sleep(2000);
         expect(numberOfFilteredItems).to.equal(7);
@@ -410,8 +408,6 @@ describe('Layer tree filters', () => {
         });
 
         await disablePredefinedFilters(page);
-
-        await helpers.img(page);
 
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm btn-success"]').is(':disabled')`)).to.be.true;
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);
