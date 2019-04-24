@@ -22,7 +22,7 @@ import { StringControl, NumberControl, BooleanControl, DateControl } from './con
  */
 const SELECT_WIDTH = `50px`;
 
-const STRING_TYPES = [`string`, `character varying`];
+const STRING_TYPES = [`text`, `string`, `character varying`];
 const NUMBER_TYPES = [`integer`, `double precision`];
 const DATE_TYPES = [`date`];
 const BOOLEAN_TYPES = [`boolean`];
@@ -73,6 +73,25 @@ class VectorLayerFilter extends React.Component {
         if (`columns` in arbitraryFilters === false) arbitraryFilters[`columns`] = new Array();
         if (arbitraryFilters.columns.length === 0) {
             arbitraryFilters.columns.push(DUMMY_RULE);
+        }
+
+        if (this.props.presetFilters) {
+            this.props.presetFilters.map(item => {
+                let filterIsAlreadySet = false;
+                arbitraryFilters.columns.map(alreadyExistingFilterItem => {
+                    if (alreadyExistingFilterItem.fieldname === item.field) {
+                        filterIsAlreadySet = true;
+                    }
+                });
+
+                if (filterIsAlreadySet === false) {
+                    arbitraryFilters.columns.push({
+                        fieldname: item.field,
+                        expression: item.operator,
+                        value: ``        
+                    });
+                }
+            });
         }
 
         // Validating the arbitraryFilters structure
@@ -428,6 +447,7 @@ class VectorLayerFilter extends React.Component {
 
 VectorLayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
+    presetFilters: PropTypes.array,
     predefinedFilters: PropTypes.object.isRequired,
     disabledPredefinedFilters: PropTypes.array.isRequired,
     arbitraryFilters: PropTypes.object.isRequired,

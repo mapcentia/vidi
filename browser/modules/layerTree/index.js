@@ -1574,6 +1574,7 @@ module.exports = {
 
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         break;
+                                    case `text`:
                                     case `string`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
@@ -2293,8 +2294,18 @@ module.exports = {
                             let filters = JSON.parse(predefinedFiltersRaw);
                             localPredefinedFilters = filters;
                         } catch (e) {
-                            console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                            console.warn(`Unable to parse filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
                             $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                        }
+                    }
+
+                    let presetFilters = [];
+                    if (parsedMeta.filter_config) {
+                        try {
+                            let filters = JSON.parse(parsedMeta.filter_config);
+                            presetFilters = filters;
+                        } catch (e) {
+                            console.warn(`Unable to parse preset filters settings for ${layerKey}`, parsedMeta[`filter_config`]);
                         }
                     }
 
@@ -2304,6 +2315,7 @@ module.exports = {
                         ReactDOM.render(
                             <LayerFilter
                                 layer={layer}
+                                presetFilters={presetFilters}
                                 predefinedFilters={localPredefinedFilters}
                                 disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
                                 arbitraryFilters={localArbitraryfilters}
