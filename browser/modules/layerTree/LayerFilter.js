@@ -71,11 +71,8 @@ class VectorLayerFilter extends React.Component {
 
         if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = MATCHES[0];
         if (`columns` in arbitraryFilters === false) arbitraryFilters[`columns`] = new Array();
-        if (arbitraryFilters.columns.length === 0) {
-            arbitraryFilters.columns.push(DUMMY_RULE);
-        }
 
-        if (this.props.presetFilters) {
+        if (this.props.presetFilters.length > 0) {
             this.props.presetFilters.map(item => {
                 let filterIsAlreadySet = false;
                 arbitraryFilters.columns.map(alreadyExistingFilterItem => {
@@ -92,6 +89,8 @@ class VectorLayerFilter extends React.Component {
                     });
                 }
             });
+        } else if (arbitraryFilters.columns.length === 0) {
+            arbitraryFilters.columns.push(DUMMY_RULE);
         }
 
         // Validating the arbitraryFilters structure
