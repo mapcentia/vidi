@@ -400,9 +400,12 @@ class StateSnapshotsDashboard extends React.Component {
             </div>);
         };
 
-        let browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-            {__(`No local snapshots`)}
-        </div>);
+        let browserOwnerSnapshots = false;
+        if (!this.state.loading) {
+            browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
+                {__(`No local snapshots`)}
+            </div>);
+        }
 
         let importAllIsDisabled = true;
         if (this.state.browserOwnerSnapshots && this.state.browserOwnerSnapshots.length > 0) {
@@ -428,11 +431,13 @@ class StateSnapshotsDashboard extends React.Component {
         if (this.state.authenticated) {
             let createNewSnapshotControl = false;
             if (this.props.readOnly) {
-                createNewSnapshotControl = (<div>
-                    <h4>
-                        {__(`User snapshots`)}
-                    </h4>
-                </div>);
+                if (this.props.showStateSnapshotTypes) {
+                    createNewSnapshotControl = (<div>
+                        <h4>
+                            {__(`User snapshots`)}
+                        </h4>
+                    </div>);
+                }
             } else {
                 createNewSnapshotControl = (<div>
                     <h4>
@@ -458,15 +463,25 @@ class StateSnapshotsDashboard extends React.Component {
                 height: '100%',
                 backgroundColor: 'white',
                 opacity: '0.8',
-                zIndex:  '1000'
-            }}></div>);
+                zIndex:  '1000',
+                textAlign: `center`
+            }}>
+                <div style={{width: `150px`, display: `inline-block`}}>
+                    <div>{__(`Loading data`)}</div>
+                    <div className="progress progress-striped active">
+                        <div className="progress-bar" style={{width: `100%`}}></div>
+                    </div>
+                </div>
+            </div>);
         }
 
         let createNewSnapshotControl = false;
         if (this.props.readOnly) {
-            createNewSnapshotControl = (<h4>
-                {__(`Local snapshots`)} 
-            </h4>);
+            if (this.props.showStateSnapshotTypes) {
+                createNewSnapshotControl = (<h4>
+                    {__(`Local snapshots`)} 
+                </h4>);
+            }
         } else {
             createNewSnapshotControl = (<h4>
                 {__(`Local snapshots`)} 
@@ -495,6 +510,7 @@ class StateSnapshotsDashboard extends React.Component {
 StateSnapshotsDashboard.defaultProps = {
     readOnly: false,
     playOnly: false,
+    showStateSnapshotTypes: true,
 };
 
 export default StateSnapshotsDashboard;
