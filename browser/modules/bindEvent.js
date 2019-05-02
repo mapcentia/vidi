@@ -8,6 +8,8 @@
 
 import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
 
+var mobile = require('is-mobile');
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -121,6 +123,10 @@ module.exports = {
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             if (!isStarted) {
+                if (mobile()) {
+                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
+                }
+
                 isStarted = true;
                 setTimeout(
                     function () {
