@@ -367,11 +367,40 @@ class VectorLayerFilter extends React.Component {
             </div>);
         });
 
+
+
         /**
          * Builds the arbitrary filters tab
          */
         const buildArbitraryTab = () => {
+
+            /**
+             * Build notification about the existing children
+             */
+            const childrenInfo = () => {
+                let result = false;
+                if (this.state.layer.children && Array.isArray(this.state.layer.children)) {
+                    let records = [];
+                    this.state.layer.children.map((item, index) => {
+                        if (item.rel && item.parent_column && item.child_column) {
+                            records.push(<li key={`child_record_${index}`} style={{fontFamily: `"Courier New", Courier, monospace`}}>
+                                {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
+                            </li>);
+                        }
+                    });
+
+                    result = (<div style={{borderBottom: `1px solid #c4c4c4`, paddingBottom: `10px`, marginBottom: `6px`}}>
+                        <p>{__(`Layer has following children`)}:</p>
+                        <ul>{records}</ul>
+                    </div>);
+                }
+
+                return result;
+            };
+
+            let childrenInfoMarkup = childrenInfo();
             return (<div className="js-arbitrary-filters">
+                {childrenInfoMarkup}
                 <div className="form-group">
                     <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                 </div>

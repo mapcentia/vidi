@@ -165,6 +165,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Layer has following children": "Layer has following children",
         "Predefined": "Predefined",
         "Arbitrary": "Arbitrary",
         "No items selected": "No items selected",
