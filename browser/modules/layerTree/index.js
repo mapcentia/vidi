@@ -2532,9 +2532,14 @@ module.exports = {
                     let correspondingLayer = meta.getMetaByKey(layerKey);
                     _self.createStore(correspondingLayer);
                     _self.reloadLayer(activeLayerKey).then(() => {
-                        backboneEvents.get().once(`doneLoading:layers`, (layerName) => {
+                        backboneEvents.get().once(`doneLoading:layers`, () => {
                             if ($(`[data-gc2-layer-key^="${layerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
                                 _self.createTable(layerKey, true);
+                            }
+
+                            let layerMeta = meta.getMetaByKey(layerKey);
+                            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                                console.log(`### enable children filters`);
                             }
                         });
                     });
@@ -2562,7 +2567,7 @@ module.exports = {
     reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false, setupControls = true) => {
         return new Promise((resolve, reject) => {
             switchLayer.init(layerId, false, doNotLegend, forceTileRedraw, false).then(() => {
-                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, setupControls).then(() => {
+                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, false).then(() => {
                     resolve();
                 });
             });

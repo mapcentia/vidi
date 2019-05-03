@@ -167,6 +167,7 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "Layer has following children": "# Layer has following children",
         "Predefined": "Foruddefineret",
         "Arbitrary": "Vilkårlig",
         "No items selected": "Ingen emner valgt",
