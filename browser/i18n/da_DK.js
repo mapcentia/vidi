@@ -297,6 +297,8 @@ module.exports = {
 
         //WatsonC
         "Data sources and -types": "Datakilder and -types",
+        "Delete plot": "Slet plot",
+        "Calypso dashboard": "# Calypso dashboard",
         "Timeseries": "Tidsserier",
         "Projects": "Projekter",
         "Profiles": "Profiler",
