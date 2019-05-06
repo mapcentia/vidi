@@ -296,6 +296,11 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Data sources and -types": "Datakilder and -types",
+        "Timeseries": "Tidsserier",
+        "Projects": "Projekter",
+        "Profiles": "Profiler",
+        "My profile": "Min konto",
         "Specify the buffer": "# Specify the buffer",
         "Draw the profile": "# Draw the profile",
         "Profile drawing": "# Profile drawing",

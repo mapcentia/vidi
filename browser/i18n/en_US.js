@@ -293,6 +293,11 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Data sources and -types": "Data sources and -types",
+        "Timeseries": "Timeseries",
+        "Projects": "Projects",
+        "Profiles": "Profiles",
+        "My profile": "My profile",
         "Specify the buffer": "Specify the buffer",
         "Draw the profile": "Draw the profile",
         "Profile drawing": "Profile drawing",
