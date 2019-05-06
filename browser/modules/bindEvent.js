@@ -269,7 +269,7 @@ module.exports = {
         });
 
         // Set up the open/close functions for side panel
-        var searchPanelOpen, width, collapsedWidth = 250;
+        var searchPanelOpen, width, defaultCollapsedWidth = 260;
 
         $("#main-tabs a").on("click", function (e) {
             $("#module-container.slide-right").css("right", "0");
@@ -315,9 +315,17 @@ module.exports = {
         }
 
         var searchShow = function () {
-            $("#search-ribbon").css("right", "-" + (width - collapsedWidth) + "px");
-            $("#pane").css("right", (collapsedWidth - 40) + "px");
-            $('#map').css("width", "calc(100% - " + (collapsedWidth / 2) + "px)");
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a').map(function(){ return $(this).width(); }).get());
+            if (localCollapsedWidth > 0) {
+                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
+                localCollapsedWidth = localCollapsedWidth + 80;
+            } else {
+                localCollapsedWidth = defaultCollapsedWidth + 80;
+            }
+
+            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
+            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
             searchPanelOpen = true;
         }
 
