@@ -39,7 +39,6 @@ module.exports = {
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
-        "Cancel": "Afbryd",
         "Delete last point drawn": "Slet sidste punkt tegnet.",
         "Delete last point": "Slet sidste punkt",
         "Search with a line": "Søg med en linje",
@@ -114,7 +113,6 @@ module.exports = {
         "Area": "Areal",
         "Distance/Radius": "Afstand/Radius",
         "Type": "Type",
-
         "Disclaimer": "Disclaimer",
         "Contact": "Kontakt",
         "Loading data": "Henter data",
@@ -156,6 +154,7 @@ module.exports = {
         "Total distance": "Totalmål",
         "Color": "Farve",
         "Enter a text for the marker or cancel to add without text": "Indtast en tekst til markøren eller annuller for at tilføje uden tekst",
+        "Cancel": "Cancel",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Anvend standard stilindstillinger til denne tegning?",
 
@@ -285,7 +284,6 @@ module.exports = {
         "Expand measurements control": "Aktiver måleværktøj",
         "Collapse measurements control": "Deaktiver måleværktøj",
         "Measure the distance": "Mål distance",
-        "Measure distance": "Mål objekter",
         "Measure the area": "Mål areal",
         "Delete all measurements": "Slet alle målinger",
 
@@ -296,6 +294,8 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Timeseries total": "# Timeseries total",
+        "timeseries active": "# timeseries active",
         "Data sources and -types": "Datakilder and -types",
         "Delete plot": "Slet plot",
         "Calypso dashboard": "# Calypso dashboard",
@@ -337,7 +337,8 @@ module.exports = {
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
         "Borehole": "DGU",
-        "No time series were created yet": "Ingen tidsserier er oprettet endnu",
+        "No timeseries were created yet": "Ingen tidsserier er oprettet endnu",
+        "No timeseries were created or set as active yet": "# No timeseries were created or set as active yet",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",
         "Show legend on top the map": "Vis signaturen ovenpå kortet",
