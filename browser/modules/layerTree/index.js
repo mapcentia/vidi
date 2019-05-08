@@ -232,14 +232,16 @@ module.exports = {
 
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
-        if (activeFilters.length > 0) {
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        if (overallFilters.length > 0) {
             let data = {};
-            data[layerKey] = activeFilters;
+            data[layerKey] = overallFilters;
             parameterString = `filters=` + JSON.stringify(data);
         }
 
-        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
+        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
     },
 
@@ -1503,6 +1505,37 @@ module.exports = {
     },
 
     /**
+     * Returns parent layer filters (some layers can depend on others, forming child-parent relation,
+     * so whenver there are active filters for the parent layer, it should be applied for child layers as well).
+     *
+     * @param {String} layerKey Layer identifier
+     *
+     * @returns {Array}
+     */
+    getParentLayerFilters(layerKey) {
+        let parentLayers = [];
+        let activeLayers = _self.getActiveLayers();
+        
+        activeLayers.map(activeLayerName => {
+            let layerMeta = meta.getMetaByKey(activeLayerName, false);
+            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                layerMeta.children.map(child => {
+                    if (child.rel === layerKey) {
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(activeLayerName);
+                        if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
+                            activeFiltersForParentLayer.map(filter => {
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${activeLayerName} WHERE ${filter})`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return parentLayers;
+    },
+
+    /**
      * Returns active layer filters
      *
      * @param {String} layerKey Layer identifier
@@ -2519,35 +2552,43 @@ module.exports = {
         }
 
         backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+
+        let childrenLayerNames = [];
+        let layerMeta = meta.getMetaByKey(layerKey, false);
+        if (layerMeta.children && Array.isArray(layerMeta.children)) {
+            layerMeta.children.map(child => {
+                childrenLayerNames.push(child.rel);
+            });
+        }
+
         _self.getActiveLayers().map(activeLayerKey => {
-            if (activeLayerKey.indexOf(layerKey) !== -1) {
-                if (activeLayerKey === layerKey) {
+            if (activeLayerKey.indexOf(layerKey) !== -1 || childrenLayerNames.indexOf(activeLayerKey) !== -1) {
+                let localLayerKey = layerKey;
+                if (childrenLayerNames.indexOf(activeLayerKey) !== -1) localLayerKey = activeLayerKey;
+                if (activeLayerKey === localLayerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + layerKey)) {
+                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + localLayerKey)) {
                     // Reloading as a vector tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
+                } else if (activeLayerKey === (LAYER.VECTOR + `:` + localLayerKey)) {
                     // Reloading as a vector layer
-                    let correspondingLayer = meta.getMetaByKey(layerKey);
+                    let correspondingLayer = meta.getMetaByKey(localLayerKey);
                     _self.createStore(correspondingLayer);
                     _self.reloadLayer(activeLayerKey).then(() => {
                         backboneEvents.get().once(`doneLoading:layers`, () => {
-                            if ($(`[data-gc2-layer-key^="${layerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
-                                _self.createTable(layerKey, true);
-                            }
-
-                            let layerMeta = meta.getMetaByKey(layerKey);
-                            if (layerMeta.children && Array.isArray(layerMeta.children)) {
-                                console.log(`### enable children filters`);
+                            if ($(`[data-gc2-layer-key^="${localLayerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                _self.createTable(localLayerKey, true);
                             }
                         });
                     });
                 } else {
-                    console.error(`Unable to apply filters to layer ${layerKey}`);
+                    console.error(`Unable to apply filters to layer ${localLayerKey}`);
                 }
             }
         });
+
+        
     },
 
     /**
