@@ -398,11 +398,6 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceReload, setupControls = true, failedBefore = false) {
-
-
-        console.log(`###`, name, enable);
-
-
         if (LOG) console.log(`switchLayer: switch layer ${name} (enable: ${enable})`);
 
         if (!name) {

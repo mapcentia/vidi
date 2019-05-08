@@ -39,7 +39,6 @@ module.exports = {
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
-        "Cancel": "Cancel",
         "Delete last point drawn": "Delete last point drawn",
         "Delete last point": "Delete last point",
         "Search with a line": "Search with a line",
@@ -114,6 +113,8 @@ module.exports = {
         "Area": "Area",
         "Distance/Radius": "Distance/Radius",
         "Type": "Type",
+        "Disclaimer": "Disclaimer",
+        "Contact": "Contact",
         "Loading data": "Loading data",
         "Reset": "Reset",
         "Do you really want to reset the map?": "Do you really want to reset the map?",
@@ -165,6 +166,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Layer has following children": "Layer has following children",
         "Predefined": "Predefined",
         "Arbitrary": "Arbitrary",
         "No items selected": "No items selected",
@@ -292,6 +294,15 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Timeseries total": "Timeseries total",
+        "timeseries active": "timeseries active",
+        "Data sources and -types": "Data sources and -types",
+        "Delete plot": "Delete plot",
+        "Calypso dashboard": "Calypso dashboard",
+        "Timeseries": "Timeseries",
+        "Projects": "Projects",
+        "Profiles": "Profiles",
+        "My profile": "My profile",
         "Specify the buffer": "Specify the buffer",
         "Draw the profile": "Draw the profile",
         "Profile drawing": "Profile drawing",
@@ -327,6 +338,7 @@ module.exports = {
         "Data series": "Data series",
         "Borehole": "Borehole",
         "No time series were created yet": "No time series were created yet",
+        "No timeseries were created or set as active yet": "No timeseries were created or set as active yet",
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
         "Show legend on top the map": "Show legend on top of the map",
