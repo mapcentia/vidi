@@ -357,11 +357,9 @@ module.exports = module.exports = {
                 $("#base-layer-list").find('.info-label').on('click', e => {
                     let rawHtml = $(e.target).attr(`data-baselayer-info`);
                     let layerName = $(e.target).attr(`data-baselayer-name`);
-                    let html = rawHtml ? Mustache.render(rawHtml, {}) : "";
-    
                     $("#info-modal.slide-right").css("right", "0");
                     $("#info-modal .modal-title").html(layerName);
-                    $("#info-modal .modal-body").html(html);
+                    $("#info-modal .modal-body").html(rawHtml);
                     e.stopPropagation();
                 });
 

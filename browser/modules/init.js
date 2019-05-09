@@ -15,6 +15,7 @@ let jquery = require('jquery');
 require('snackbarjs');
 
 const semver = require('semver');
+const md5 = require('md5');
 require("bootstrap");
 
 const cookie = require('js-cookie');
@@ -45,6 +46,7 @@ module.exports = {
         var loadConfig = function () {
             $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
+                window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
@@ -184,6 +186,42 @@ module.exports = {
      *
      */
     startApp: function () {
+        // Show the startup modal if needed
+        console.log(window.vidiConfig.startUpModal);
+        if (window.vidiConfig.startUpModal) {
+            if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
+                if ($(`#startup-message-modal`).length === 0) {
+                    $(`body`).append(`<div class="modal fade" id="startup-message-modal" tabindex="-1" role="dialog" aria-labelledby="startup-message-modalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="startup-message-modalLabel">${__(`Startup message`)}</h4>
+                                </div>
+                                <div class="modal-body"></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default js-close-modal" data-dismiss="modal">${__(`Close`)}</button>
+                                    <button type="button" class="btn btn-default js-close-modal-do-not-show" data-dismiss="modal">${__(`Close and do not show in the future`)}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`);
+                }
+
+                $(`#startup-message-modal`).find(`.modal-body`).html(window.vidiConfig.startUpModal);
+                $(`#startup-message-modal`).find(`.js-close-modal`).click(() => {
+                    $(`#startup-message-modal`).modal('show');
+                });
+
+                $(`#startup-message-modal`).find(`.js-close-modal-do-not-show`).click(() => {
+                    $(`#startup-message-modal`).modal('hide');
+                    cookie.set("vidi-startup-message", md5(window.vidiConfig.startUpModal), {expires: 90});
+                });
+
+                $(`#startup-message-modal`).modal('show');
+            } else {
+                console.log(`### not showing because of cookie`)
+            }
+        }
 
         // Add the tooltip div
         // ===================
