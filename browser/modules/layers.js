@@ -299,11 +299,9 @@ module.exports = {
             });
 
             if (layerWasAdded) {
-                console.info(`${layerKey} was added to the map`);
                 resolve();
             } else {
-                console.warn(`${layerKey} was not added to the map`);
-                reject();
+                reject(`${layerKey} was not added to the map`);
             }
         });
 

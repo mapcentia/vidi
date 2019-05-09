@@ -232,14 +232,16 @@ module.exports = {
 
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
-        if (activeFilters.length > 0) {
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        if (overallFilters.length > 0) {
             let data = {};
-            data[layerKey] = activeFilters;
+            data[layerKey] = overallFilters;
             parameterString = `filters=` + JSON.stringify(data);
         }
 
-        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
+        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
     },
 
@@ -355,10 +357,10 @@ module.exports = {
                     // Opacity and filters should be kept opened after setLayerState()
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                         hideLoadStrategy();
-                        hideOfflineMode();
                         hideTableView();
                     }
 
+                    hideOfflineMode();
                     if (layerIsEnabled) {
                         $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
 
@@ -710,7 +712,7 @@ module.exports = {
         if (moduleState.isBeingBuilt) {
             result = new Promise((resolve, reject) => {
                 console.trace(`async`);
-                console.error(`Asynchronous layerTree.create() attempt`);
+                console.error(`Asynchronous layerTree.create() attempt, forced state:`, forcedState);
                 reject();
             });
         } else {
@@ -1503,6 +1505,37 @@ module.exports = {
     },
 
     /**
+     * Returns parent layer filters (some layers can depend on others, forming child-parent relation,
+     * so whenver there are active filters for the parent layer, it should be applied for child layers as well).
+     *
+     * @param {String} layerKey Layer identifier
+     *
+     * @returns {Array}
+     */
+    getParentLayerFilters(layerKey) {
+        let parentLayers = [];
+        let activeLayers = _self.getActiveLayers();
+        
+        activeLayers.map(activeLayerName => {
+            let layerMeta = meta.getMetaByKey(activeLayerName, false);
+            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                layerMeta.children.map(child => {
+                    if (child.rel === layerKey) {
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(activeLayerName);
+                        if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
+                            activeFiltersForParentLayer.map(filter => {
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${activeLayerName} WHERE ${filter})`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return parentLayers;
+    },
+
+    /**
      * Returns active layer filters
      *
      * @param {String} layerKey Layer identifier
@@ -1574,6 +1607,7 @@ module.exports = {
 
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         break;
+                                    case `text`:
                                     case `string`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
@@ -2292,8 +2326,18 @@ module.exports = {
                             let filters = JSON.parse(predefinedFiltersRaw);
                             localPredefinedFilters = filters;
                         } catch (e) {
-                            console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                            console.warn(`Unable to parse filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
                             $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                        }
+                    }
+
+                    let presetFilters = [];
+                    if (parsedMeta.filter_config) {
+                        try {
+                            let filters = JSON.parse(parsedMeta.filter_config);
+                            presetFilters = filters;
+                        } catch (e) {
+                            console.warn(`Unable to parse preset filters settings for ${layerKey}`, parsedMeta[`filter_config`]);
                         }
                     }
 
@@ -2303,6 +2347,7 @@ module.exports = {
                         ReactDOM.render(
                             <LayerFilter
                                 layer={layer}
+                                presetFilters={presetFilters}
                                 predefinedFilters={localPredefinedFilters}
                                 disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
                                 arbitraryFilters={localArbitraryfilters}
@@ -2506,30 +2551,43 @@ module.exports = {
         }
 
         backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+
+        let childrenLayerNames = [];
+        let layerMeta = meta.getMetaByKey(layerKey, false);
+        if (layerMeta.children && Array.isArray(layerMeta.children)) {
+            layerMeta.children.map(child => {
+                childrenLayerNames.push(child.rel);
+            });
+        }
+
         _self.getActiveLayers().map(activeLayerKey => {
-            if (activeLayerKey.indexOf(layerKey) !== -1) {
-                if (activeLayerKey === layerKey) {
+            if (activeLayerKey.indexOf(layerKey) !== -1 || childrenLayerNames.indexOf(activeLayerKey) !== -1) {
+                let localLayerKey = layerKey;
+                if (childrenLayerNames.indexOf(activeLayerKey) !== -1) localLayerKey = activeLayerKey;
+                if (activeLayerKey === localLayerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + layerKey)) {
+                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + localLayerKey)) {
                     // Reloading as a vector tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
+                } else if (activeLayerKey === (LAYER.VECTOR + `:` + localLayerKey)) {
                     // Reloading as a vector layer
-                    let correspondingLayer = meta.getMetaByKey(layerKey);
+                    let correspondingLayer = meta.getMetaByKey(localLayerKey);
                     _self.createStore(correspondingLayer);
                     _self.reloadLayer(activeLayerKey).then(() => {
-                        backboneEvents.get().once(`doneLoading:layers`, (layerName) => {
-                            if ($(`[data-gc2-layer-key^="${layerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
-                                _self.createTable(layerKey, true);
+                        backboneEvents.get().once(`doneLoading:layers`, () => {
+                            if ($(`[data-gc2-layer-key^="${localLayerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                _self.createTable(localLayerKey, true);
                             }
                         });
                     });
                 } else {
-                    console.error(`Unable to apply filters to layer ${layerKey}`);
+                    console.error(`Unable to apply filters to layer ${localLayerKey}`);
                 }
             }
         });
+
+        
     },
 
     /**
@@ -2549,7 +2607,7 @@ module.exports = {
     reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false, setupControls = true) => {
         return new Promise((resolve, reject) => {
             switchLayer.init(layerId, false, doNotLegend, forceTileRedraw, false).then(() => {
-                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, setupControls).then(() => {
+                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, false).then(() => {
                     resolve();
                 });
             });

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/api --grep \"\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"ld load layers from page URL from differen\""
   },
   "repository": {
     "type": "git",
@@ -85,6 +85,7 @@
     "handlebars": "^4.0.6",
     "html-react-parser": "^0.4.7",
     "ipaddr.js": "^1.5.4",
+    "is-mobile": "^2.0.0",
     "jquery": "^3.0.0",
     "jrespond": "^1.0.0",
     "js-cookie": "^2.2.0",

@@ -4,6 +4,8 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
+var fs = require('fs');
+
 module.exports = function (grunt) {
     "use strict";
 
@@ -332,6 +334,16 @@ module.exports = function (grunt) {
         }
     });
 
+    grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function() {
+        if (theme && theme === 'watsonc') {
+            fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
+            fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
+        } else {
+            fs.createReadStream('./public/index.html.default').pipe(fs.createWriteStream('./public/index.html'));
+            fs.createReadStream('./public/favicon.ico.default').pipe(fs.createWriteStream('./public/favicon.ico'));
+        }
+    });
+
     grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function() {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
@@ -367,7 +379,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-watchify');
     grunt.loadNpmTasks('grunt-version');
 
-    grunt.registerTask('default', ['browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
+    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

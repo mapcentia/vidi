@@ -7,6 +7,8 @@
 module.exports = {
     dict: {
         /* Start of viewer and widget */
+        "Startup message": "Startup message",
+        "Close and do not show in the future": "Close and do not show in the future",
         "About": "About",
         "Meters": "Meters",
         "Buffer": "Buffer",
@@ -24,6 +26,7 @@ module.exports = {
         "Data from conflicts": "Data from conflicts",
         "Without conflicts": "Without conflicts",
         "Errors": "Errors",
+        "Move": "Move",
         "Layer": "Layer",
         "Number of objects": "Number of objects",
         "Show": "Show",
@@ -38,7 +41,6 @@ module.exports = {
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
-        "Cancel": "Cancel",
         "Delete last point drawn": "Delete last point drawn",
         "Delete last point": "Delete last point",
         "Search with a line": "Search with a line",
@@ -113,6 +115,8 @@ module.exports = {
         "Area": "Area",
         "Distance/Radius": "Distance/Radius",
         "Type": "Type",
+        "Disclaimer": "Disclaimer",
+        "Contact": "Contact",
         "Loading data": "Loading data",
         "Reset": "Reset",
         "Do you really want to reset the map?": "Do you really want to reset the map?",
@@ -164,6 +168,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "Layer has following children": "Layer has following children",
         "Predefined": "Predefined",
         "Arbitrary": "Arbitrary",
         "No items selected": "No items selected",
@@ -291,8 +296,29 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Timeseries total": "Timeseries total",
+        "timeseries active": "timeseries active",
+        "Data sources and -types": "Data sources and -types",
+        "Delete plot": "Delete plot",
+        "Calypso dashboard": "Calypso dashboard",
+        "Timeseries": "Timeseries",
+        "Projects": "Projects",
+        "Profiles": "Profiles",
+        "My profile": "My profile",
+        "Specify the buffer": "Specify the buffer",
+        "Draw the profile": "Draw the profile",
+        "Profile drawing": "Profile drawing",
+        "Enter borehole, installation, station": "Enter borehole, installation, station",
+        "Select another chemical": "Select another chemical",
+        "Nothing found": "Nothing found",
+        "Continue": "Continue",
+        "Continue without selecting chemical": "Continue without selecting chemical",
+        "boreholes_time_series_with_chemicals": "Boreholes time series with chemicals",
+        "sensordata_with_correction": "Sensor data with correction",
+        "Please select at least one layer": "Please select at least one layer",
         "Back to main menu": "Back to main menu",
-        "Get started": "Get started",
+        "Welcome to Calypso": "Welcome to Calypso",
+        "Register new data": "Register new data",
         "New project": "New project",
         "Open existing project": "Open existing project",
         "What would you like to see": "What would you like to see",
@@ -314,6 +340,7 @@ module.exports = {
         "Data series": "Data series",
         "Borehole": "Borehole",
         "No time series were created yet": "No time series were created yet",
+        "No timeseries were created or set as active yet": "No timeseries were created or set as active yet",
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
         "Show legend on top the map": "Show legend on top of the map",

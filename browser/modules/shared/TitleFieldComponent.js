@@ -62,6 +62,11 @@ class TitleFieldComponent extends React.Component {
             }
         }
 
+        let inputStyle = {};
+        if (this.props.layout === `dense`) {
+            inputStyle.marginBottom = `0px`;
+        }
+
         return (<div className="input-group" style={containerStyle}>
             <input
                 id={(this.props.id ? this.props.id : ``)}
@@ -70,7 +75,8 @@ class TitleFieldComponent extends React.Component {
                 className="form-control"
                 placeholder={__("New title")}
                 onChange={this.onChange.bind(this)}
-                onKeyPress={this.handleKeyPress.bind(this)}/>
+                onKeyPress={this.handleKeyPress.bind(this)}
+                style={inputStyle}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
                     title={__(`Save`)}
@@ -89,7 +95,12 @@ class TitleFieldComponent extends React.Component {
 TitleFieldComponent.propTypes = {
     value: PropTypes.string,
     onAdd: PropTypes.func.isRequired,
-    onCancel: PropTypes.func
+    onCancel: PropTypes.func,
+    layout: PropTypes.string
+};
+
+TitleFieldComponent.defaultProps = {
+    layout: 'regular'
 };
 
 export default TitleFieldComponent;
