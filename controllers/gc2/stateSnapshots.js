@@ -66,45 +66,41 @@ How state snapshot is stored in the key-value storage:
 router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
     let { browserId, userId } = getCurrentUserIdentifiers(req);
 
-    if (!browserId && !userId) {
-        res.send([]);
-    } else {
-        request({
-            method: 'GET',
-            encoding: 'utf8',
-            uri: API_LOCATION + `/` + req.params.dataBase
-        }, (error, response) => {
-            if (error) {
-                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
-                return;
-            }
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase
+    }, (error, response) => {
+        if (error) {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
+            return;
+        }
 
-            let parsedBody = false;
-            try {
-                let localParsedBody = JSON.parse(response.body);
-                parsedBody = localParsedBody;
-            } catch (e) {}
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
 
-            if (parsedBody) {
-                // Filter by browser and user ownership
-                let results = [];
-                parsedBody.data.map(item => {
-                    let parsedSnapshot = JSON.parse(item.value);
-                    if (parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
-                        parsedSnapshot.userId && parsedSnapshot.userId === userId) {
-                        results.push(parsedSnapshot);
-                    }
-                });
+        if (parsedBody) {
+            // Filter by browser and user ownership
+            let results = [];
+            parsedBody.data.map(item => {
+                let parsedSnapshot = JSON.parse(item.value);
+                if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                    parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                    results.push(parsedSnapshot);
+                }
+            });
 
-                res.send(results);
-            } else {
-                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
-                    body: response.body,
-                    url: API_LOCATION + `/` + req.params.dataBase
-                });
-            }
-        });
-    }
+            res.send(results);
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
+                body: response.body,
+                url: API_LOCATION + `/` + req.params.dataBase
+            });
+        }
+    });
 });
 
 /**
