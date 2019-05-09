@@ -187,7 +187,6 @@ module.exports = {
      */
     startApp: function () {
         // Show the startup modal if needed
-        console.log(window.vidiConfig.startUpModal);
         if (window.vidiConfig.startUpModal) {
             if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
                 if ($(`#startup-message-modal`).length === 0) {
@@ -218,8 +217,6 @@ module.exports = {
                 });
 
                 $(`#startup-message-modal`).modal('show');
-            } else {
-                console.log(`### not showing because of cookie`)
             }
         }
 
