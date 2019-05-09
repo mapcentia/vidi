@@ -1,0 +1,23 @@
+<!-- override standard styles -->
+<style>
+    body {
+        background-color: white;
+    }
+
+    .leaflet-control-graphicscale {
+        box-shadow: none;
+        -webkit-box-shadow: none;
+        white-space: nowrap;
+    }
+
+    #legend, #header, #date-time, #scale-box {
+        -webkit-box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+        box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12);
+    }
+</style>
+<!-- map -->
+<div id="pane1" style="position: absolute; width: 100%; height: 100%; display: block; overflow: hidden; padding: 10px;">
+    <div id="container1" style="position: relative; width: 100%; height: 100%;">
+        <div id="map"></div>
+    </div>
+</div>
