@@ -7,7 +7,7 @@
 module.exports = {
     dict: {
         /* Start of viewer and widget */
-        "Startup message": "Opstartbesked",
+        "Startup message": "Besked",
         "Close and do not show in the future": "Luk og vis ikke igen",
         "About": "Om",
         "Meters": "Meter",
