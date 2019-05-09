@@ -113,32 +113,35 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
 router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
     let { browserId, userId } = getCurrentUserIdentifiers(req);
 
-    if (!browserId && !userId) {
-        res.send([]);
-    } else {
-        request({
-            method: 'GET',
-            encoding: 'utf8',
-            uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
-        }, (error, response) => {
-            let parsedBody = false;
-            try {
-                let localParsedBody = JSON.parse(response.body);
-                parsedBody = localParsedBody;
-            } catch (e) {}
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
+    }, (error, response) => {
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
 
-            if (parsedBody) {
-                if (parsedBody.data === false) {
-                    res.status(404);
-                    res.json({ error: `NOT_FOUND` });
-                } else {
-                    res.send(parsedBody.data.value);
-                }
-            } else {
-                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+        if (parsedBody) {
+            let result = false;
+            let parsedSnapshot = JSON.parse(parsedBody.data.value);
+            if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                result = parsedSnapshot;
             }
-        });
-    }
+
+            if (result === false) {
+                res.status(404);
+                res.json({ error: `NOT_FOUND` });
+            } else {
+                res.send(result);
+            }
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+        }
+    });
 });
 
 /**
