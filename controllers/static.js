@@ -39,7 +39,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                     page.screenshot({
                                         encoding: `base64`
                                     }).then(data => {
-                                        let img = new Buffer(data, 'base64');
+                                        let img = new Buffer.from(data, 'base64');
                                         localResponse.writeHead(200, {
                                             'Content-Type': 'image/png',
                                             'Content-Length': img.length
@@ -72,7 +72,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     }
 };
 
-router.get('/api/static/:db/:scheme', returnPNGForStateSnapshot);
-router.get('/api/static/:db/:scheme/', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?/', returnPNGForStateSnapshot);
 
 module.exports = router;
