@@ -494,7 +494,7 @@ module.exports = {
                     });
                 }
             };
-
+            
             if (urlVars.state) {
                 stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
                     if (state) {
@@ -604,10 +604,16 @@ module.exports = {
      */
     applyState: (state) => {
 
-        if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
+        if (LOG) console.log(`${MODULE_NAME}: applying state`);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {
+            if (!state) {
+                console.error(`Provided state is empty`);
+                reject(`Provided state is empty`);
+                return;
+            }
+
             const applyStateToModules = () => {
                 let promises = [];
                 let modulesWithAppliedState = [];
@@ -639,12 +645,18 @@ module.exports = {
     
                 Promise.all(promises).then(() => {
                     resolve();
+                }).catch(errors => {
+                    console.error(errors);
+                    reject(errors);
                 });
             };
 
             if ('map' in state) {
                 anchor.applyMapParameters(state.map).then(() => {
                     applyStateToModules();
+                }).catch(error => {
+                    console.error(error);
+                    reject(error);
                 });
             } else {
                 applyStateToModules();
