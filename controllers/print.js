@@ -8,15 +8,7 @@ var express = require('express');
 var router = express.Router();
 var http = require('http');
 var fs = require('fs');
-const puppeteer = require('puppeteer');
-let browser = false;
-puppeteer.launch({
-    headless: true,
-    timeout: 10000,
-    args: ["--no-sandbox", "--ignore-certificate-errors", "--enable-features=NetworkService"]
-}).then(instance => {
-    browser = instance;
-});
+var headless = require('./headlessBrowser');
 
 /**
  *
@@ -40,7 +32,7 @@ router.post('/api/print', function (req, response) {
         let url = q.applicationHost + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log(`Printing ` + url);
 
-        const page = await browser.newPage();
+        const page = await headless.getBrowser().newPage();
         await page.emulateMedia('screen');
         page.on('console', msg => {
             if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
