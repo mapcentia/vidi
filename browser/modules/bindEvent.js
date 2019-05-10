@@ -508,6 +508,10 @@ module.exports = {
         $("#side-panel ul li a").on("click", function (e) {
             backboneEvents.get().trigger(`off:all`);
 
+            let moduleTitle = $(this).data(`module-title`);
+            $('#module-container').find(`.js-module-title`).text('');
+            if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
+
             let moduleId = $(this).data(`module-id`);
             let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
             setTimeout(() => {

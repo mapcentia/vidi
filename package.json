@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"ld load layers from page URL from differen\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\""
   },
   "repository": {
     "type": "git",
@@ -105,6 +105,7 @@
     "proj4": "^2.4.3",
     "prop-types": "^15.6.2",
     "puppeteer": "1.7.0",
+    "rc-slider": "^8.6.9",
     "react": "^16.5.1",
     "react-addons": "^0.9.1-deprecated",
     "react-bootstrap": "^0.32.4",
