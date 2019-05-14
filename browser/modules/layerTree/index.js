@@ -2063,7 +2063,7 @@ module.exports = {
             }
 
             let layerIsEditable = false;
-            let displayInfo = `hidden`;
+            let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
             let parsedMeta = false;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
@@ -2077,7 +2077,6 @@ module.exports = {
                     }
                 }
             }
-
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
