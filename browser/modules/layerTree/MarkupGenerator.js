@@ -30,7 +30,7 @@ class MarkupGenerator {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
             <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
                 <h4 class="panel-title">
-                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
+                    <i style="float: right;" class="material-icons layer-move-vert layer-move-vert-group">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
@@ -78,10 +78,12 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
+
+        console.log(layerKeyWithGeom, isSubLayer);
 
         return (`
         <li class="layer-item list-group-item" data-gc2-layer-key="${layerKeyWithGeom}" style="min-height: 36px; margin-top: 1px; border-bottom: 1px solid #CCC; background-color: white;">
@@ -174,7 +176,7 @@ class MarkupGenerator {
                             </a><span class="js-toggle-filters-number-of-filters">0</span>
                         </div>
                         
-                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
+                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert ${isSubLayer ? `layer-move-vert-subgroup` : `layer-move-vert-group`}">more_vert</i>
         
                         <div style="float: right; padding-top: 12px; padding-right: 10px;">${addButton}
                             <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>

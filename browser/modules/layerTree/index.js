@@ -858,6 +858,7 @@ module.exports = {
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
+                                        handle: `.layer-move-vert-group`,
                                         stop: (event, ui) => {
                                             _self.calculateOrder();
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1871,6 +1872,7 @@ module.exports = {
 
                 $("#collapse" + base64GroupName).sortable({
                     axis: 'y',
+                    handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2004,6 +2006,7 @@ module.exports = {
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
+            handle: `.layer-move-vert-subgroup`,
             stop: (event, ui) => {
                 _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2094,7 +2097,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
