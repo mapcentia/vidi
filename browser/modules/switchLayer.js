@@ -510,7 +510,7 @@ module.exports = module.exports = {
         }
 
         pushState.init();
-        if (!doNotLegend && enable) {
+        if (!doNotLegend && (window.vidiConfig.removeDisabledLayersFromLegend ? true : enable)) {
             legend.init();
         }
     },

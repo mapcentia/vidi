@@ -1,5 +1,6 @@
 var React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
+import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const uuidv4 = require('uuid/v4');
 const cookie = require('js-cookie');
@@ -491,22 +492,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         let overlay = false;
         if (this.state.loading) {
-            overlay = (<div style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'white',
-                opacity: '0.8',
-                zIndex:  '1000',
-                textAlign: `center`
-            }}>
-                <div style={{width: `150px`, display: `inline-block`}}>
-                    <div>{__(`Loading data`)}</div>
-                    <div className="progress progress-striped active">
-                        <div className="progress-bar" style={{width: `100%`}}></div>
-                    </div>
-                </div>
-            </div>);
+            overlay = (<LoadingOverlay/>);
         }
 
         let createNewSnapshotControl = false;
