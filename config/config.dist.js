@@ -29,6 +29,13 @@ module.exports = {
         "host": "GC2_HOST"
     },
 
+    // =====================================================================
+    // Legend behaviour.
+    // Specifies if the switched off layers should be left in legend or not.
+    // Default value: false
+    // =====================================================================
+
+    "removeDisabledLayersFromLegend": true,
 
     // ===============================================================
     // Configuration of print templates.
