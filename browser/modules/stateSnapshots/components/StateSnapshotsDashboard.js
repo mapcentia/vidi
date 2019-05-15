@@ -1,5 +1,6 @@
 var React = require('react');
 import TitleFieldComponent from './../../shared/TitleFieldComponent';
+import LoadingOverlay from './../../shared/LoadingOverlay';
 
 const uuidv4 = require('uuid/v4');
 const cookie = require('js-cookie');
@@ -23,7 +24,8 @@ class StateSnapshotsDashboard extends React.Component {
             loading: false,
             authenticated: false,
             updatedItemId: false,
-            stateApplyingIsBlocked: false
+            stateApplyingIsBlocked: false,
+            imageLinkSizes: {}
         };
 
         this.applySnapshot = this.applySnapshot.bind(this);
@@ -31,6 +33,7 @@ class StateSnapshotsDashboard extends React.Component {
         this.deleteSnapshot = this.deleteSnapshot.bind(this);
         this.seizeSnapshot = this.seizeSnapshot.bind(this);               
         this.seizeAllSnapshots = this.seizeAllSnapshots.bind(this);
+        this.setImageLinkSize = this.setImageLinkSize.bind(this);
         this.copyToClipboard = this.copyToClipboard.bind(this);
 
         // Setting unique cookie if it have not been set yet
@@ -277,6 +280,12 @@ class StateSnapshotsDashboard extends React.Component {
         document.body.removeChild(el);
     }
 
+    setImageLinkSize (value, id) {
+        let sizesCopy = JSON.parse(JSON.stringify(this.state.imageLinkSizes));
+        sizesCopy[id] = value;
+        this.setState({imageLinkSizes: sizesCopy})
+    }
+
     /**
      * Renders the component
      * 
@@ -286,6 +295,15 @@ class StateSnapshotsDashboard extends React.Component {
         let snapshotIdStyle = {
             fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`,
             marginRight: `10px`
+        };
+
+        const generateSizeSelector = (item, value) => {
+            let options = [];
+            [`600x600`, `800x600`, `1024x768`, `1080x1080`, `1280x720`, `1920x1080`].map(size => {
+                options.push(<option key={`${item.id}_size_key_${size}`} value={size}>{size}</option>);
+            });
+
+            return (<select className="form-control" value={value} onChange={(event) => { this.setImageLinkSize(event.target.value, item.id); }}>{options}</select>)
         };
 
         const createSnapshotRecord = (item, index, local = false) => {
@@ -354,7 +372,7 @@ class StateSnapshotsDashboard extends React.Component {
             let tokenField = false;
             if (token) {
                 tokenField = (<div className="input-group form-group">
-                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(token) }}>{__(`copy token`)}</a>
+                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(token) }}>{__(`Copy token`)}</a>
                     <input className="form-control" type="text" defaultValue={token}/>
                 </div>);
             }
@@ -368,6 +386,12 @@ class StateSnapshotsDashboard extends React.Component {
                 style={buttonStyle}>
                 <i className="material-icons">play_arrow</i></button>);
 
+
+            let sizeValue = `1920x1080`;
+            if (item.id in this.state.imageLinkSizes) sizeValue = this.state.imageLinkSizes[item.id];
+            
+            let selectSize = generateSizeSelector(item, sizeValue);
+            let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}`;
             return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                 <div className="panel-body" style={{padding: '8px'}}>
                     {this.props.playOnly ? (<div>
@@ -391,10 +415,21 @@ class StateSnapshotsDashboard extends React.Component {
                     </div>)}
                     {this.props.playOnly ? false : (<div>
                         <div className="input-group form-group">
-                            <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`copy link`)}</a>
+                            <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(permaLink) }}>{__(`Copy Vidi link`)}</a>
                             <input className="form-control" type="text" defaultValue={permaLink}/>
                         </div>
                         {tokenField}
+                        <div className="input-group form-group" style={{width: `100%`}}>
+                            <div style={{display: `flex`, width: `100%`}}>
+                                <div style={{paddingTop: `10px`}}>
+                                    <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(imageLink) }}>{__(`Copy PNG link`)}</a>
+                                </div>
+                                <div style={{paddingLeft: `10px`, paddingRight: `10px`}}>{selectSize}</div>
+                                <div style={{flexGrow: `1`}}>
+                                    <input className="form-control" type="text" onChange={() => {}} value={imageLink}/>
+                                </div>
+                            </div>
+                        </div>
                     </div>)}
                 </div>
             </div>);
@@ -457,22 +492,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         let overlay = false;
         if (this.state.loading) {
-            overlay = (<div style={{
-                position: 'absolute',
-                width: '100%',
-                height: '100%',
-                backgroundColor: 'white',
-                opacity: '0.8',
-                zIndex:  '1000',
-                textAlign: `center`
-            }}>
-                <div style={{width: `150px`, display: `inline-block`}}>
-                    <div>{__(`Loading data`)}</div>
-                    <div className="progress progress-striped active">
-                        <div className="progress-bar" style={{width: `100%`}}></div>
-                    </div>
-                </div>
-            </div>);
+            overlay = (<LoadingOverlay/>);
         }
 
         let createNewSnapshotControl = false;

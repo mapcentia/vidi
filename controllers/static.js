@@ -10,43 +10,50 @@
 
 var express = require('express');
 var router = express.Router();
-var config = require('../config/config.js').gc2;
 var headless = require('./headlessBrowser');
 
 const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let errorMessages = [];
     if (!localRequest.params.db) errorMessages.push(`database is not defined`);
-    if (!localRequest.params.scheme) errorMessages.push(`scheme is not defined`);
     if (!localRequest.query.state) errorMessages.push(`state is not defined`);
+    if (!localRequest.headers.host) errorMessages.push(`"Host" header has to be correctly passed to the app`);
+
+    let width = (localRequest.query.width && parseInt(localRequest.query.width) > 0 ? parseInt(localRequest.query.width) : 800);
+    let height = (localRequest.query.height && parseInt(localRequest.query.height) > 0 ? parseInt(localRequest.query.height) : 600);
 
     if (errorMessages.length === 0) {
-        let url = `${localRequest.protocol}://${localRequest.get('host')}/app/${localRequest.params.db}/${localRequest.params.scheme}/?state=${localRequest.query.state}`;
+        let url = `http://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl&state=${localRequest.query.state}`;        
         headless.getBrowser().newPage().then(page => {
             page.emulate({
-                viewport: {
-                    width: 1920,
-                    height: 1080
-                },
+                viewport: { width, height },
                 userAgent: 'Puppeteer'
             }).then(() => {
                 page.on('console', msg => {
+                    console.log(msg.text());
                     if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
                         console.log('App was loaded, generating PNG');
                         setTimeout(() => {
-                            page.screenshot({
-                                encoding: `base64`
-                            }).then(data => {
-                                let img = new Buffer(data, 'base64');
-                                localResponse.writeHead(200, {
-                                    'Content-Type': 'image/png',
-                                    'Content-Length': img.length
-                                });
+                            page.evaluate(`$('.leaflet-top').remove();`).then(() => {
+                                setTimeout(() => {
+                                    page.screenshot({
+                                        encoding: `base64`
+                                    }).then(data => {
+                                        let img = new Buffer.from(data, 'base64');
+                                        localResponse.writeHead(200, {
+                                            'Content-Type': 'image/png',
+                                            'Content-Length': img.length
+                                        });
 
-                                page.close();
-                                localResponse.end(img); 
+                                        page.close();
+                                        localResponse.end(img); 
+                                    }).catch(error => {
+                                        localResponse.status(500);
+                                        localResponse.send(error);
+                                    });
+                                }, 1000);
                             }).catch(error => {
-                                response.status(500);
-                                response.send(error);
+                                localResponse.status(500);
+                                localResponse.send(error);
                             });
                         }, 2000);
                     }
@@ -54,17 +61,17 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
                 page.goto(url);
             }).catch(error => {
-                response.status(500);
-                response.send(error);
+                localResponse.status(500);
+                localResponse.send(error);
             });
         });
     } else {
-        response.status(400);
-        response.send(`Errors occured: ${errorMessages.join(`,`)}`);
+        localResponse.status(400);
+        localResponse.send(`Errors occured: ${errorMessages.join(`,`)}`);
     }
 };
 
-router.get('/api/static/:db/:scheme', returnPNGForStateSnapshot);
-router.get('/api/static/:db/:scheme/', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?/', returnPNGForStateSnapshot);
 
 module.exports = router;

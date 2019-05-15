@@ -52,6 +52,7 @@ module.exports = {
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
+                window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
@@ -186,9 +187,10 @@ module.exports = {
      *
      */
     startApp: function () {
-        // Show the startup modal if needed
-        console.log(window.vidiConfig.startUpModal);
-        if (window.vidiConfig.startUpModal) {
+        // Show the startup modal if needed (if there are machine-used templates, the modal is not shown)
+        let humanUsedTemplate = true;
+        if (`tmpl` in urlVars && [`blank.tmpl`, `print.tmpl`].indexOf(urlVars.tmpl) > -1) humanUsedTemplate = false;
+        if (humanUsedTemplate && window.vidiConfig.startUpModal) {
             if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
                 if ($(`#startup-message-modal`).length === 0) {
                     $(`body`).append(`<div class="modal fade" id="startup-message-modal" tabindex="-1" role="dialog" aria-labelledby="startup-message-modalLabel">
@@ -218,8 +220,6 @@ module.exports = {
                 });
 
                 $(`#startup-message-modal`).modal('show');
-            } else {
-                console.log(`### not showing because of cookie`)
             }
         }
 

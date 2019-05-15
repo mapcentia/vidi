@@ -51,7 +51,6 @@ module.exports = module.exports = {
         let result = new Promise((resolve, reject) => {
             var u, l;
             layers.removeHidden();
-            
             if (!cloud.get().getLayersByName(str)) {
                 let layerAddedFromConfiguration = baseLayer.addBaseLayer(str);
                 if (layerAddedFromConfiguration) {
