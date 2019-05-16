@@ -1602,6 +1602,7 @@ module.exports = {
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
                                         break;
                                     case `date`:
+                                    case `timestamp with time zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
