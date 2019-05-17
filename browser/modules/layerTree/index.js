@@ -226,6 +226,7 @@ module.exports = {
      * @returns {String}
      */
     getLayerFilterString: (layerKey) => {
+        
         if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
@@ -1516,16 +1517,15 @@ module.exports = {
     getParentLayerFilters(layerKey) {
         let parentLayers = [];
         let activeLayers = _self.getActiveLayers();
-        
         activeLayers.map(activeLayerName => {
-            let layerMeta = meta.getMetaByKey(activeLayerName, false);
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
             if (layerMeta.children && Array.isArray(layerMeta.children)) {
                 layerMeta.children.map(child => {
                     if (child.rel === layerKey) {
-                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(activeLayerName);
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
                         if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
                             activeFiltersForParentLayer.map(filter => {
-                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${activeLayerName} WHERE ${filter})`);
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
                             });
                         }
                     }
@@ -2568,6 +2568,7 @@ module.exports = {
             if (activeLayerKey.indexOf(layerKey) !== -1 || childrenLayerNames.indexOf(activeLayerKey) !== -1) {
                 let localLayerKey = layerKey;
                 if (childrenLayerNames.indexOf(activeLayerKey) !== -1) localLayerKey = activeLayerKey;
+
                 if (activeLayerKey === localLayerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);
