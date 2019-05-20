@@ -54,6 +54,9 @@ class LayerSorting {
      * @returns {Array}
      */
     sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName) {
+
+        console.log(`### order`, order);
+
         if (order === false) {
             return notSortedLayersAndSubgroupsForCurrentGroup;
         } else if (this.validateOrderObject(order) === false) {
@@ -72,6 +75,9 @@ class LayerSorting {
         if (order && groupOrder) {
             for (let key in groupOrder) {
                 let groupOrderItem = groupOrder[key];
+
+
+
                 if (groupOrderItem.type === GROUP_CHILD_TYPE_LAYER || groupOrderItem.type === GROUP_CHILD_TYPE_GROUP) {
                     for (let i = (notSortedLayersAndSubgroupsForCurrentGroup.length - 1); i >= 0; i--) {
                         let groupChildId = false;
@@ -99,20 +105,36 @@ class LayerSorting {
                 }
             }
 
+            const orderLayersInSubgroup = (alreadyOrdered, beingOrdered) => {
+                //console.log(`###`, alreadyOrdered, beingOrdered);
+            };
+
             // Ordering layers in subgroups
             for (let orderKey in groupOrder) {
                 for (let key in sortedLayersAndSubgroups) {
                     if (sortedLayersAndSubgroups[key].type === GROUP_CHILD_TYPE_GROUP && sortedLayersAndSubgroups[key].id === groupOrder[orderKey].id) {
                         let alreadyOrderedCopy = JSON.parse(JSON.stringify(groupOrder[orderKey].children));
                         let sortedCopy = JSON.parse(JSON.stringify(sortedLayersAndSubgroups[key].children));
-                        let resultingSortedLayers = [];
 
+                        //console.log(`### orderKey`, JSON.parse(JSON.stringify(alreadyOrderedCopy)), JSON.parse(JSON.stringify(sortedCopy)));
+
+                        let resultingSortedLayers = [];
                         for (let alreadyOrderedKey in alreadyOrderedCopy) {
                             for (let i = (sortedCopy.length - 1); i >= 0; i--) {
-                                let layerId = sortedCopy[i].f_table_schema + '.' + sortedCopy[i].f_table_name;
-                                if (alreadyOrderedCopy[alreadyOrderedKey].id === layerId) {
-                                    resultingSortedLayers.push(sortedCopy.splice(i, 1).pop());
-                                    break;
+                                if (sortedCopy[i].type === GROUP_CHILD_TYPE_GROUP) {
+                                    if (alreadyOrderedCopy[alreadyOrderedKey].id === (sortedCopy[i].id)) {
+                                        // sort subgroup
+
+                                        //orderLayersInSubgroup(alreadyOrderedCopy[alreadyOrderedKey], sortedCopy[i]);
+
+                                        resultingSortedLayers.push(sortedCopy.splice(i, 1).pop());
+                                        break;
+                                    }
+                                } else {
+                                    if (alreadyOrderedCopy[alreadyOrderedKey].id === (sortedCopy[i].layer.f_table_schema + '.' + sortedCopy[i].layer.f_table_name)) {
+                                        resultingSortedLayers.push(sortedCopy.splice(i, 1).pop());
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -129,7 +151,11 @@ class LayerSorting {
             }
         }
 
-        return ((sortedLayersAndSubgroups.length > 0) ? sortedLayersAndSubgroups : notSortedLayersAndSubgroupsForCurrentGroup);
+        let result = ((sortedLayersAndSubgroups.length > 0) ? sortedLayersAndSubgroups : notSortedLayersAndSubgroupsForCurrentGroup);
+        
+        console.log(`### result for ${groupName}`, result);
+
+        return result;
     }
 
     /**
