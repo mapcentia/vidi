@@ -12,7 +12,11 @@ var fs = require('fs');
 
 router.all('/api/tileRequestProxy', (req, response) => {
     let requestURL = decodeURIComponent(req.url.substr(req.url.indexOf('?request=') + 9));
-
+    // Rewrite URL in case of subUser
+    if (req.session.subUser) {
+        requestURL = requestURL.replace(`/${req.session.screenName}/`, `/${req.session.subUser}@${req.session.screenName}/`);
+    }
+    console.log(requestURL);
     if (requestURL.indexOf(config.host) === 0) {
         if (req.session.gc2SessionId) {
             request({
