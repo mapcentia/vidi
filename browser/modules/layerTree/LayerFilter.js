@@ -24,7 +24,7 @@ const SELECT_WIDTH = `50px`;
 
 const STRING_TYPES = [`text`, `string`, `character varying`];
 const NUMBER_TYPES = [`integer`, `double precision`];
-const DATE_TYPES = [`date`];
+const DATE_TYPES = [`date`, `timestamp with time zone`];
 const BOOLEAN_TYPES = [`boolean`];
 const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 

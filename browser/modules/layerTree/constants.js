@@ -18,6 +18,8 @@ const SYSTEM_FIELD_PREFIX = `gc2_`;
 
 const SQL_QUERY_LIMIT = 100;
 
+const SUB_GROUP_DIVIDER = `|`;
+
 /**
  * Layer type prefixes
  */
@@ -48,5 +50,6 @@ export {
     SQL_QUERY_LIMIT,
     LAYER,
     ICONS,
-    LAYER_TYPE_DEFAULT
+    LAYER_TYPE_DEFAULT,
+    SUB_GROUP_DIVIDER
 };

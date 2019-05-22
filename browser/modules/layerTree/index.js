@@ -10,7 +10,7 @@
 
 'use strict';
 
-import {LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
+import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -226,6 +226,7 @@ module.exports = {
      * @returns {String}
      */
     getLayerFilterString: (layerKey) => {
+        
         if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
@@ -858,6 +859,7 @@ module.exports = {
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
+                                        handle: `.layer-move-vert-group`,
                                         stop: (event, ui) => {
                                             _self.calculateOrder();
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1515,16 +1517,15 @@ module.exports = {
     getParentLayerFilters(layerKey) {
         let parentLayers = [];
         let activeLayers = _self.getActiveLayers();
-        
         activeLayers.map(activeLayerName => {
-            let layerMeta = meta.getMetaByKey(activeLayerName, false);
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
             if (layerMeta.children && Array.isArray(layerMeta.children)) {
                 layerMeta.children.map(child => {
                     if (child.rel === layerKey) {
-                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(activeLayerName);
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
                         if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
                             activeFiltersForParentLayer.map(filter => {
-                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${activeLayerName} WHERE ${filter})`);
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
                             });
                         }
                     }
@@ -1601,6 +1602,7 @@ module.exports = {
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
                                         break;
                                     case `date`:
+                                    case `timestamp with time zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
@@ -1724,12 +1726,67 @@ module.exports = {
                     let layer = metaData.data[u];
                     let parsedMeta = _self.parseLayerMeta(layer);
                     if (parsedMeta && `vidi_sub_group` in parsedMeta) {
-                        layer.subGroup = parsedMeta.vidi_sub_group;
+                        if (parsedMeta.vidi_sub_group.indexOf(SUB_GROUP_DIVIDER) === -1) {
+                            layer.subGroup = parsedMeta.vidi_sub_group;
+                        } else {
+                            if (layerTreeUtils.occurrences(parsedMeta.vidi_sub_group, `|`) === 1) {
+                                layer.subGroup = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER)[1];
+                                layer.parentSubGroup = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER)[0].trim();
+                            } else {
+                                console.warn(`Group nesting is not supported below "Group > 1st level sub group > 2nd level sub group" case`);
+                            }
+                        }
                     } else {
                         layer.subGroup = false;
                     }
 
-                    if (layer.subGroup) {
+                    if (layer.parentSubGroup) {
+                        let parentSubGroupIndex = false;
+                        notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
+                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.parentSubGroup) {
+                                parentSubGroupIndex = index;
+                                return false;
+                            }
+                        });
+
+                        // Parent subgroup does not exist
+                        if (parentSubGroupIndex === false) {
+                            notSortedLayersAndSubgroupsForCurrentGroup.push({
+                                id: layer.parentSubGroup,
+                                type: GROUP_CHILD_TYPE_GROUP,
+                                children: []
+                            });
+
+                            parentSubGroupIndex = (notSortedLayersAndSubgroupsForCurrentGroup.length - 1);
+                        }
+
+                        // Parent subgroup is created, creating current subgroup
+                        let subGroupIndex = false;
+                        notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children.map((item, index) => {
+                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
+                                subGroupIndex = index;
+                                return false;
+                            }
+                        });
+
+                        if (subGroupIndex === false) {
+                            notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children.push({
+                                id: layer.subGroup,
+                                type: GROUP_CHILD_TYPE_GROUP,
+                                children: [{
+                                    type: GROUP_CHILD_TYPE_LAYER,
+                                    layer
+                                }]
+                            });
+                        } else {
+                            notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children[subGroupIndex].children.push({
+                                type: GROUP_CHILD_TYPE_LAYER,
+                                layer
+                            });
+                        }
+
+
+                    } else if (layer.subGroup) {
                         let subGroupIndex = false;
                         notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
                             if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
@@ -1743,10 +1800,16 @@ module.exports = {
                             notSortedLayersAndSubgroupsForCurrentGroup.push({
                                 id: layer.subGroup,
                                 type: GROUP_CHILD_TYPE_GROUP,
-                                children: [layer]
+                                children: [{
+                                    type: GROUP_CHILD_TYPE_LAYER,
+                                    layer
+                                }]
                             });
                         } else {
-                            notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push(layer);
+                            notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push({
+                                type: GROUP_CHILD_TYPE_LAYER,
+                                layer
+                            });
                         }
                     } else {
                         notSortedLayersAndSubgroupsForCurrentGroup.push({
@@ -1765,7 +1828,7 @@ module.exports = {
             }
         });
 
-        // Reverse groups
+        // Sort groups
         let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
 
         // Create stores and calculate active / added layers before the layer panel is shown
@@ -1778,7 +1841,15 @@ module.exports = {
                 layersToProcess.push(localItem.layer);
             } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
                 localItem.children.map(childLocalItem => {
-                    layersToProcess.push(childLocalItem);
+                    if (childLocalItem.type === GROUP_CHILD_TYPE_LAYER) {
+                        layersToProcess.push(childLocalItem.layer);
+                    } else if (childLocalItem.type === GROUP_CHILD_TYPE_GROUP) {
+                        childLocalItem.children.map(item => {
+                            layersToProcess.push(item.layer);
+                        });
+                    } else {
+                        throw new Error(`Invalid sorting element type`);
+                    }
                 });
             } else {
                 throw new Error(`Invalid sorting element type`);
@@ -1858,10 +1929,10 @@ module.exports = {
                             numberOfActiveLayers++;
                         }
 
-                        _self.createLayerRecord(localItem.layer, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
+                        _self.createLayerRecord(localItem.layer, $("#collapse" + base64GroupName), layerIsActive, activeLayerName, false, isVirtualGroup);
                         numberOfAddedLayers++;
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
+                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $("#collapse" + base64GroupName), 0);
                         numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                         numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
                     } else {
@@ -1871,6 +1942,7 @@ module.exports = {
 
                 $("#collapse" + base64GroupName).sortable({
                     axis: 'y',
+                    handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1913,7 +1985,15 @@ module.exports = {
                     if (item.type === GROUP_CHILD_TYPE_LAYER) {
                         applyQueriedSetupControlRequests(item.layer);
                     } else {
-                        item.children.map(applyQueriedSetupControlRequests);
+                        item.children.map(item => {
+                            if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                                applyQueriedSetupControlRequests(item.layer);
+                            } else {
+                                item.children.map(item => {
+                                    applyQueriedSetupControlRequests(item.layer);
+                                });
+                            }
+                        });
                     }
                 });
             }
@@ -1964,12 +2044,13 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
-        let addedLayers = 0, activeLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`).replace(/=/g, "");
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
+        let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
-        $("#collapse" + base64GroupName).append(markup);
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
+
+        $(parentNode).append(markup);
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
             <p>
                 <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
                     <i class="fa fa-arrow-down"></i>
@@ -1978,32 +2059,39 @@ module.exports = {
             </p>
         </div>`);
 
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
-            let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`);
-            if (subgroupRootElement.find(`.js-subgroup-children`).is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
-                subgroupRootElement.find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`).first();
+            if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).first().hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
-                subgroupRootElement.find(`.js-subgroup-children`).show();
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).first().show();
             }
         });
 
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
 
+        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`);
         subgroup.children.map(child => {
-            // For now expecting nothing but regular layers
-            let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child);
-            if (layerIsActive) {
-                activeLayers++;
-            }
+            if (child.type === GROUP_CHILD_TYPE_LAYER) {
+                let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                if (layerIsActive) numberOfActiveLayers++;
 
-            _self.createLayerRecord(child, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
-            addedLayers++;
+                _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
+                numberOfAddedLayers++;
+            } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
+                let {activeLayers, addedLayers} = _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, 1);
+                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
+                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+            } else {
+                throw new Error(`Invalid layer group`);
+            }        
         });
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
+            handle: `.layer-move-vert-subgroup`,
             stop: (event, ui) => {
                 _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2011,7 +2099,10 @@ module.exports = {
             }
         });
 
-        return {addedLayers, activeLayers};
+        return {
+            addedLayers: numberOfAddedLayers,
+            activeLayers: numberOfActiveLayers
+        };
     },
 
     /**
@@ -2019,9 +2110,7 @@ module.exports = {
      *
      * @returns {void}
      */
-    createLayerRecord: (layer, base64GroupName, layerIsActive, activeLayerName,
-                        subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
-
+    createLayerRecord: (layer, parentNode, layerIsActive, activeLayerName, subgroupId = false, isVirtual = false) => {
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
         if (layer.baselayer) {
             console.error(`Non-supported way of adding the base layer`);
@@ -2094,7 +2183,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
@@ -2177,11 +2266,7 @@ module.exports = {
                 e.stopPropagation();
             });
 
-            if (base64SubgroupName) {
-                $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
-            } else {
-                $("#collapse" + base64GroupName).append(layerControlRecord);
-            }
+            $(parentNode).append(layerControlRecord);
 
             _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
         }
@@ -2211,6 +2296,7 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
+
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
@@ -2564,6 +2650,7 @@ module.exports = {
             if (activeLayerKey.indexOf(layerKey) !== -1 || childrenLayerNames.indexOf(activeLayerKey) !== -1) {
                 let localLayerKey = layerKey;
                 if (childrenLayerNames.indexOf(activeLayerKey) !== -1) localLayerKey = activeLayerKey;
+
                 if (activeLayerKey === localLayerKey) {
                     // Reloading as a tile layer
                     _self.reloadLayer(activeLayerKey, false, false, false);

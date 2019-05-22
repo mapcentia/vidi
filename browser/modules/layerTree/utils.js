@@ -87,8 +87,24 @@ const calculateOrder = () => {
                         children: []
                     };
 
-                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
-                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
+                    $(layerElement).find(`.js-subgroup-children`).first().children().each((subgroupLayerIndex, subgroupLayerElement) => {
+                        if ($(subgroupLayerElement).data(`gc2-layer-key`)) {
+                            // Processing layer record
+                            subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
+                        } else if ($(subgroupLayerElement).data(`gc2-subgroup-id`)) {
+                            // Processing subgroup record
+                            let localSubgroupDescription = {
+                                id: $(subgroupLayerElement).data(`gc2-subgroup-id`),
+                                type: GROUP_CHILD_TYPE_GROUP,
+                                children: []
+                            };
+
+                            $(subgroupLayerElement).find(`.js-subgroup-children`).first().children().each((subgroupLayerIndex, localSubgroupLayerElement) => {
+                                localSubgroupDescription.children.push(processLayerRecord(localSubgroupLayerElement));
+                            });
+
+                            subgroupDescription.children.push(localSubgroupDescription);
+                        }
                     });
 
                     children.push(subgroupDescription);
@@ -111,6 +127,8 @@ const calculateOrder = () => {
             throw new Error(`Unable to decode the layer group identifier (${id})`);
         }
     });
+
+    console.log(`### layerTreeOrder`, layerTreeOrder);
 
     return layerTreeOrder;
 };
@@ -164,6 +182,34 @@ const stripPrefix = (layerName) => {
         .replace(LAYER.RASTER_TILE + `:`, ``)
         .replace(LAYER.WEBGL + `:`, ``);
 };
+
+/** Function that count occurrences of a substring in a string;
+ * @param {String} string               The string
+ * @param {String} subString            The sub string to search for
+ * @param {Boolean} [allowOverlapping]  Optional. (Default:false)
+ *
+ * @author Vitim.us https://gist.github.com/victornpb/7736865
+ * @see Unit Test https://jsfiddle.net/Victornpb/5axuh96u/
+ * @see http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string/7924240#7924240
+ */
+const occurrences = (string, subString, allowOverlapping = false) => {
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
+}
 
 /**
  * Checks if the current layer type is the vector tile one
@@ -299,5 +345,6 @@ module.exports = {
     getPossibleLayerTypes,
     getDefaultLayerType,
     setupLayerNumberIndicator,
-    isVectorTileLayerId
+    isVectorTileLayerId,
+    occurrences
 };
