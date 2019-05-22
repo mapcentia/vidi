@@ -1195,7 +1195,10 @@ module.exports = {
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
-        activeFilters.map(item => {
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        overallFilters.map(item => {
             whereClauses.push(item);
         });
 
@@ -1347,7 +1350,9 @@ module.exports = {
         } else {
             let whereClauses = [];
             let activeFilters = _self.getActiveLayerFilters(layerKey);
-            activeFilters.map(item => {
+            let parentFilters = _self.getParentLayerFilters(layerKey);
+            let overallFilters = activeFilters.concat(parentFilters);
+            overallFilters.map(item => {
                 whereClauses.push(item);
             });
 
