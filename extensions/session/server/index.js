@@ -67,6 +67,7 @@ router.post('/api/session/start', function (req, response) {
         req.session.gc2ApiKey = data.api_key;
         req.session.gc2UserName = data.subuser ? data.subuser : data.screen_name;
         req.session.subUser = data.subuser;
+        req.session.screenName = data.screen_name;
 
         console.log("Session started");
         response.send({

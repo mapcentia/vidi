@@ -16,7 +16,7 @@ const VIRTUAL_LAYERS_SCHEMA = `virtual_layer`;
 
 const SYSTEM_FIELD_PREFIX = `gc2_`;
 
-const SQL_QUERY_LIMIT = 10;
+const SQL_QUERY_LIMIT = 100;
 
 const SUB_GROUP_DIVIDER = `|`;
 
