@@ -41,19 +41,33 @@ module.exports = module.exports = {
     },
     init: function (layerArr, el) {
         return new Promise(function (resolve, reject) {
+            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param = ``;
 
-            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param;
             // No layers visible
             if (metaDataKeys.length === 0) {
                 resolve();
             }
-            hasBeenVisible = arrayUnique([...hasBeenVisible, ...layerArr ? layerArr : visibleLayers.split(";")]);
-            // No need to update the legend because no new layers added
-            if (hasBeenVisible.length === hasBeenVisibleTmp.length && hasBeenVisible.every((value, index) => value === hasBeenVisibleTmp[index])) {
-                resolve();
+
+            if (window.vidiConfig.removeDisabledLayersFromLegend) {
+                if (layerArr) {
+                    layers = layerArr.join(";");
+                } else {
+                    layers = visibleLayers;
+                }
+
+                param = 'l=' + layers + '&db=' + db;
+            } else {
+                hasBeenVisible = arrayUnique([...hasBeenVisible, ...layerArr ? layerArr : visibleLayers.split(";")]);
+
+                // No need to update the legend because no new layers added
+                if (hasBeenVisible.length === hasBeenVisibleTmp.length && hasBeenVisible.every((value, index) => value === hasBeenVisibleTmp[index])) {
+                    resolve();
+                }
+    
+                hasBeenVisibleTmp = hasBeenVisible;
+                param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
             }
-            hasBeenVisibleTmp = hasBeenVisible;
-            param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
+
             $.ajax({
                 url: '/api/legend/' + db + '?' + param,
                 success: function (response) {

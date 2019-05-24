@@ -14,6 +14,40 @@ if (!config.gc2.host) throw new Error(`Unable to get the GC2 host from config`);
 const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
 
 /**
+ * Get all key-value data for database
+ */
+router.get('/api/key-value/:dataBase', (req, res) => {
+    let params = ``;
+    if (req.query && req.query.like) {
+        params = `like=${req.query.like} `;
+    }
+
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: `${API_LOCATION}/${req.params.dataBase}?${params}`
+    }, (error, response) => {
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
+
+        if (parsedBody) {
+            if (parsedBody.data === false) {
+                res.status(404);
+                res.json({ error: `NOT_FOUND` });
+            } else {
+                res.send(parsedBody);
+            }
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+        }
+    });
+});
+
+
+/**
  * Get specific key-value pair
  */
 router.get('/api/key-value/:dataBase/:key', (req, res) => {

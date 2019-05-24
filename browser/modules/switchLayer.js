@@ -87,9 +87,16 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
             layerTree.setSelectorValue(name, LAYER.VECTOR);
-
             let vectorDataStores = layerTree.getStores();
             if (vectorLayerId in vectorDataStores) {
+                let parentFilters = layerTree.getParentLayerFilters(gc2Id);
+                let parentFiltersHash = btoa(JSON.stringify(parentFilters));
+                if (vectorDataStores[vectorLayerId].defaults.parentFiltersHash !== parentFiltersHash) {
+                    let layerMeta = meta.getMetaByKey(gc2Id);
+                    layerTree.createStore(layerMeta);
+                    vectorDataStores = layerTree.getStores();
+                }
+
                 cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
                 let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                 cloud.get().map.addLayer(existingLayer);
@@ -510,7 +517,7 @@ module.exports = module.exports = {
         }
 
         pushState.init();
-        if (!doNotLegend && enable) {
+        if (!doNotLegend && (window.vidiConfig.removeDisabledLayersFromLegend ? true : enable)) {
             legend.init();
         }
     },

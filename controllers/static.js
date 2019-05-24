@@ -15,7 +15,6 @@ var headless = require('./headlessBrowser');
 const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let errorMessages = [];
     if (!localRequest.params.db) errorMessages.push(`database is not defined`);
-    if (!localRequest.params.scheme) errorMessages.push(`scheme is not defined`);
     if (!localRequest.query.state) errorMessages.push(`state is not defined`);
     if (!localRequest.headers.host) errorMessages.push(`"Host" header has to be correctly passed to the app`);
 
@@ -39,7 +38,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                     page.screenshot({
                                         encoding: `base64`
                                     }).then(data => {
-                                        let img = new Buffer(data, 'base64');
+                                        let img = new Buffer.from(data, 'base64');
                                         localResponse.writeHead(200, {
                                             'Content-Type': 'image/png',
                                             'Content-Length': img.length
@@ -72,7 +71,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     }
 };
 
-router.get('/api/static/:db/:scheme', returnPNGForStateSnapshot);
-router.get('/api/static/:db/:scheme/', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?', returnPNGForStateSnapshot);
+router.get('/api/static/:db/:scheme?/', returnPNGForStateSnapshot);
 
 module.exports = router;

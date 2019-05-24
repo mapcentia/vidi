@@ -71,6 +71,7 @@ class TitleFieldComponent extends React.Component {
             <input
                 id={(this.props.id ? this.props.id : ``)}
                 value={this.state.title}
+                disabled={this.props.disabled}
                 type="text"
                 className="form-control"
                 placeholder={__("New title")}
@@ -82,7 +83,7 @@ class TitleFieldComponent extends React.Component {
                     title={__(`Save`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSave.bind(this)}
-                    disabled={!this.state.title}
+                    disabled={this.props.disabled || !this.state.title}
                     style={buttonStyle}>
                     <i className="material-icons">save</i>{(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
