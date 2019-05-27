@@ -2669,20 +2669,21 @@ module.exports = {
                 }
 
                 const reloadLayer = () => {
-                    if (activeLayerKey === layerTreeUtils.stripPrefix(localLayerKey)) {
+                    let noPrefixLayerName = layerTreeUtils.stripPrefix(localLayerKey);
+                    if (activeLayerKey === noPrefixLayerName) {
                         // Reloading as a tile layer
                         _self.reloadLayer(activeLayerKey, false, false, false);
-                    } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + layerTreeUtils.stripPrefix(localLayerKey))) {
+                    } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + noPrefixLayerName)) {
                         // Reloading as a vector tile layer
                         _self.reloadLayer(activeLayerKey, false, false, false);
-                    } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerTreeUtils.stripPrefix(localLayerKey))) {
+                    } else if (activeLayerKey === (LAYER.VECTOR + `:` + noPrefixLayerName)) {
                         // Reloading as a vector layer
-                        let correspondingLayer = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerKey));
+                        let correspondingLayer = meta.getMetaByKey(noPrefixLayerName);
                         _self.createStore(correspondingLayer);
                         _self.reloadLayer(activeLayerKey).then(() => {
                             backboneEvents.get().once(`doneLoading:layers`, () => {
-                                if ($(`[data-gc2-layer-key^="${localLayerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
-                                    _self.createTable(localLayerKey, true);
+                                if ($(`[data-gc2-layer-key^="${noPrefixLayerName}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                    _self.createTable(noPrefixLayerName, true);
                                 }
                             });
                         });
