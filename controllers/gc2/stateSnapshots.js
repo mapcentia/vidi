@@ -122,10 +122,13 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
 
         if (parsedBody) {
             let result = false;
-            let parsedSnapshot = JSON.parse(parsedBody.data.value);
-            if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
-                parsedSnapshot.userId && parsedSnapshot.userId === userId) {
-                result = parsedSnapshot;
+
+            if (`data` in parsedBody && parsedBody.data.value) {
+                let parsedSnapshot = JSON.parse(parsedBody.data.value);
+                if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                    parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                    result = parsedSnapshot;
+                }
             }
 
             if (result === false) {

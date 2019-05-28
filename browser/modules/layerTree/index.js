@@ -1195,7 +1195,10 @@ module.exports = {
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
-        activeFilters.map(item => {
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        overallFilters.map(item => {
             whereClauses.push(item);
         });
 
@@ -1330,6 +1333,7 @@ module.exports = {
     createStore: (layer, isVirtual = false, isVectorTile = false) => {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
 
+        let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
         if (isVirtual) {
@@ -1347,9 +1351,15 @@ module.exports = {
         } else {
             let whereClauses = [];
             let activeFilters = _self.getActiveLayerFilters(layerKey);
-            activeFilters.map(item => {
+            let parentFilters = _self.getParentLayerFilters(layerKey);
+            let overallFilters = activeFilters.concat(parentFilters);
+            overallFilters.map(item => {
                 whereClauses.push(item);
             });
+
+            if (parentFilters && parentFilters.length > 0) {
+                parentFiltersHash = btoa(JSON.stringify(parentFilters));
+            }
 
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
 
@@ -1378,6 +1388,7 @@ module.exports = {
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
+            parentFiltersHash,
             jsonp: false,
             method: "POST",
             host: "",
@@ -2647,34 +2658,51 @@ module.exports = {
         }
 
         _self.getActiveLayers().map(activeLayerKey => {
-            if (activeLayerKey.indexOf(layerKey) !== -1 || childrenLayerNames.indexOf(activeLayerKey) !== -1) {
-                let localLayerKey = layerKey;
-                if (childrenLayerNames.indexOf(activeLayerKey) !== -1) localLayerKey = activeLayerKey;
+            if (layerTreeUtils.stripPrefix(activeLayerKey) === layerKey
+                || childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
 
-                if (activeLayerKey === localLayerKey) {
-                    // Reloading as a tile layer
-                    _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + localLayerKey)) {
-                    // Reloading as a vector tile layer
-                    _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR + `:` + localLayerKey)) {
-                    // Reloading as a vector layer
-                    let correspondingLayer = meta.getMetaByKey(localLayerKey);
-                    _self.createStore(correspondingLayer);
-                    _self.reloadLayer(activeLayerKey).then(() => {
-                        backboneEvents.get().once(`doneLoading:layers`, () => {
-                            if ($(`[data-gc2-layer-key^="${localLayerKey}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
-                                _self.createTable(localLayerKey, true);
-                            }
+                let localLayerKey = layerKey;
+                let childIsReloaded = false;
+                if (childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
+                    childIsReloaded = true;
+                    localLayerKey = activeLayerKey;
+                }
+
+                const reloadLayer = () => {
+                    let noPrefixLayerName = layerTreeUtils.stripPrefix(localLayerKey);
+                    if (activeLayerKey === noPrefixLayerName) {
+                        // Reloading as a tile layer
+                        _self.reloadLayer(activeLayerKey, false, false, false);
+                    } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + noPrefixLayerName)) {
+                        // Reloading as a vector tile layer
+                        _self.reloadLayer(activeLayerKey, false, false, false);
+                    } else if (activeLayerKey === (LAYER.VECTOR + `:` + noPrefixLayerName)) {
+                        // Reloading as a vector layer
+                        let correspondingLayer = meta.getMetaByKey(noPrefixLayerName);
+                        _self.createStore(correspondingLayer);
+                        _self.reloadLayer(activeLayerKey).then(() => {
+                            backboneEvents.get().once(`doneLoading:layers`, () => {
+                                if ($(`[data-gc2-layer-key^="${noPrefixLayerName}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                    _self.createTable(noPrefixLayerName, true);
+                                }
+                            });
                         });
+                    } else {
+                        console.error(`Unable to apply filters to layer ${localLayerKey}`);
+                    }
+                }
+
+                if (childIsReloaded) {
+                    backboneEvents.get().once("doneLoading:layers", function (e) {
+                        if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
+                            reloadLayer();
+                        }
                     });
                 } else {
-                    console.error(`Unable to apply filters to layer ${localLayerKey}`);
+                    reloadLayer();
                 }
             }
         });
-
-        
     },
 
     /**
