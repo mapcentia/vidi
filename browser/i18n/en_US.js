@@ -300,7 +300,9 @@ module.exports = {
 
         //WatsonC
         "Timeseries total": "Timeseries total",
+        "Profiles total": "Profiles total",
         "timeseries active": "timeseries active",
+        "profiles active": "profiles active",
         "Data sources and -types": "Data sources and -types",
         "Delete plot": "Delete plot",
         "Delete profile": "Delete profile",
