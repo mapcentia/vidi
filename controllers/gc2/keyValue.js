@@ -131,4 +131,31 @@ router.put('/api/key-value/:dataBase/:key', (req, res) => {
     });
 });
 
+/**
+ * Delete key-value pair
+ */
+router.delete('/api/key-value/:dataBase/:key', (req, res) => {
+    request({
+        method: 'DELETE',
+        encoding: 'utf8',
+        uri: `${API_LOCATION}/${req.params.dataBase}/${req.params.key}`,
+    }, (error, response) => {
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
+
+        if (parsedBody) {
+            if (parsedBody.success) {
+                res.json(parsedBody);
+            } else {
+                shared.throwError(res, parsedBody.message);
+            }
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+        } 
+    });
+});
+
 module.exports = router;
