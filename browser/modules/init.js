@@ -20,6 +20,11 @@ require("bootstrap");
 
 const cookie = require('js-cookie');
 
+const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
+    regularExpression: true,
+    name: 'print_[\\w]+\\.tmpl'
+}];
+
 module.exports = {
 
     /**
@@ -60,6 +65,7 @@ module.exports = {
                 window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
                 window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
+                window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -187,9 +193,31 @@ module.exports = {
      *
      */
     startApp: function () {
-        // Show the startup modal if needed (if there are machine-used templates, the modal is not shown)
         let humanUsedTemplate = true;
-        if (`tmpl` in urlVars && [`blank.tmpl`, `print.tmpl`].indexOf(urlVars.tmpl) > -1) humanUsedTemplate = false;
+        if (`tmpl` in urlVars) {
+            let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
+            if (`startupModalSupressionTemplates` in window.vidiConfig && Array.isArray(window.vidiConfig.startupModalSupressionTemplates)) {
+                supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
+            }
+
+            supressedModalTemplates.map(item => {
+                if (typeof item === 'string' || item instanceof String) {
+                    // Exact string template name
+                    if (urlVars.tmpl === item) {
+                        humanUsedTemplate = false;
+                    }
+                } else if (`regularExpression` in item && item.regularExpression) {
+                    // Regular expression
+                    let regexp = new RegExp(item.name);
+                    if (regexp.test(urlVars.tmpl)) {
+                        humanUsedTemplate = false;
+                    }
+                } else {
+                    console.warn(`Unable to process the startup modal supression template, should be either string or RegExp`);
+                }
+            });
+        }
+
         if (humanUsedTemplate && window.vidiConfig.startUpModal) {
             if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
                 if ($(`#startup-message-modal`).length === 0) {

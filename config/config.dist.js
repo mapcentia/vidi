@@ -37,6 +37,18 @@ module.exports = {
 
     "removeDisabledLayersFromLegend": true,
 
+
+    // ===============================================================
+    // Startup modal supression templates.
+    // Setting contains list of templates, where the startup modal is
+    // disabled. Can be a plain template name or the RegExp
+    // ===============================================================
+
+    "startupModalSupressionTemplates": ["print.tmpl", "blank.tmpl", {
+        regularExpression: true,
+        name: "print_[\\w]+\\.tmpl"
+    }],
+
     // ===============================================================
     // Configuration of print templates.
     // Print templates must be enabled - look further down.
