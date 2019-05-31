@@ -299,6 +299,8 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Matrix view": "Matrix view",
+        "Row view": "Row view",
         "Timeseries total": "Timeseries total",
         "Profiles total": "Profiles total",
         "timeseries active": "timeseries active",
