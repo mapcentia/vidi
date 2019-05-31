@@ -72,7 +72,7 @@ class MarkupGenerator {
         return (`<li
         class="layer-item list-group-item"
         data-gc2-subgroup-id="${name}"
-        style="min-height: 40px; margin-top: 10px; background-color: white;">
+        style="min-height: 40px; margin-top: 10px; background-color: white; border-bottom: 1px solid #CCC;">
             <div class="js-subgroup-id" style="padding-left: 14px;"></div>
             <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
         </li>`);
