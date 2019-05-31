@@ -75,7 +75,33 @@ const calculateOrder = () => {
                 };
             };
 
+            const calculateChildrenOrder = (parentElement) => {
+                let children = [];
+                $(parentElement).children().each((layerIndex, layerElement) => {
+                    if ($(layerElement).data(`gc2-layer-key`)) {
+                        children.push(processLayerRecord(layerElement));
+                    } else if ($(layerElement).data(`gc2-subgroup-id`)) {
+                        let subgroupDescription = {
+                            id: $(layerElement).data(`gc2-subgroup-id`),
+                            type: GROUP_CHILD_TYPE_GROUP,
+                            children: calculateChildrenOrder($(layerElement).find(`.js-subgroup-children`).first())
+                        };
+
+                        children.push(subgroupDescription);
+                    }
+                });
+
+                return children;
+            };
+
+            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`));
+
+
+
+
+            /*
             $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
+
                 if ($(layerElement).data(`gc2-layer-key`)) {
                     // Processing layer record
                     children.push(processLayerRecord(layerElement));
@@ -86,6 +112,8 @@ const calculateOrder = () => {
                         type: GROUP_CHILD_TYPE_GROUP,
                         children: []
                     };
+
+
 
                     $(layerElement).find(`.js-subgroup-children`).first().children().each((subgroupLayerIndex, subgroupLayerElement) => {
                         if ($(subgroupLayerElement).data(`gc2-layer-key`)) {
@@ -100,7 +128,23 @@ const calculateOrder = () => {
                             };
 
                             $(subgroupLayerElement).find(`.js-subgroup-children`).first().children().each((subgroupLayerIndex, localSubgroupLayerElement) => {
-                                localSubgroupDescription.children.push(processLayerRecord(localSubgroupLayerElement));
+                                if ($(localSubgroupLayerElement).data(`gc2-layer-key`)) {
+                                    // Processing layer record
+                                    subgroupDescription.children.push(processLayerRecord(localSubgroupLayerElement));
+                                } else if ($(localSubgroupLayerElement).data(`gc2-subgroup-id`)) {
+                                    // Processing subgroup record
+                                    let localSubgroupDescription = {
+                                        id: $(localSubgroupLayerElement).data(`gc2-subgroup-id`),
+                                        type: GROUP_CHILD_TYPE_GROUP,
+                                        children: []
+                                    };
+        
+                                    $(localSubgroupLayerElement).find(`.js-subgroup-children`).first().children().each((subgroupLayerIndex, localLocalSubgroupLayerElement) => {
+                                        localSubgroupDescription.children.push(processLayerRecord(localLocalSubgroupLayerElement));
+                                    });
+        
+                                    localSubgroupDescription.children.push(localSubgroupDescription);
+                                }
                             });
 
                             subgroupDescription.children.push(localSubgroupDescription);
@@ -112,6 +156,9 @@ const calculateOrder = () => {
                     throw new Error(`Unable to detect the group child element`);
                 }
             });
+            */
+
+
         } else {
             panelWasInitialized = false;
         }
