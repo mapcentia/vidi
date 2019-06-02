@@ -299,8 +299,12 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Matrix view": "# Matrix view",
+        "Row view": "# Row view",
         "Timeseries total": "Tidsserier, total",
+        "Profiles total": "Profil, total",
         "timeseries active": "Tidsserier, aktive",
+        "profiles active": "profil, aktive",
         "Data sources and -types": "Datakilder and -types",
         "Delete plot": "Slet plot",
         "Delete profile": "Slet profil",

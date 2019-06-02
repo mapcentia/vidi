@@ -1333,6 +1333,10 @@ module.exports = {
     createStore: (layer, isVirtual = false, isVectorTile = false) => {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
 
+        if (layer.virtual_layer) {
+            isVirtual = true;
+        }
+
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
         let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
@@ -1732,104 +1736,131 @@ module.exports = {
                 });
             });
         } else {
+            let LOG_HIERARCHY_BUILDING = false;
+            const LOG_LEVEL = '|  ';
+            //if (groupName === `Deep group`) LOG_HIERARCHY_BUILDING = true;
+
             for (let u = 0; u < metaData.data.length; ++u) {
                 if (metaData.data[u].layergroup == groupName) {
                     let layer = metaData.data[u];
                     let parsedMeta = _self.parseLayerMeta(layer);
-                    if (parsedMeta && `vidi_sub_group` in parsedMeta) {
+                    if (parsedMeta && `vidi_sub_group` in parsedMeta && parsedMeta.vidi_sub_group.length > 0) {
                         if (parsedMeta.vidi_sub_group.indexOf(SUB_GROUP_DIVIDER) === -1) {
-                            layer.subGroup = parsedMeta.vidi_sub_group;
+                            layer.nesting = [parsedMeta.vidi_sub_group.trim()];
                         } else {
-                            if (layerTreeUtils.occurrences(parsedMeta.vidi_sub_group, `|`) === 1) {
-                                layer.subGroup = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER)[1];
-                                layer.parentSubGroup = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER)[0].trim();
-                            } else {
-                                console.warn(`Group nesting is not supported below "Group > 1st level sub group > 2nd level sub group" case`);
-                            }
+                            layer.nesting = [];
+                            let splitGroups = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER);
+                            splitGroups.map(item => {
+                                layer.nesting.push(item.trim());
+                            });
                         }
                     } else {
-                        layer.subGroup = false;
+                        layer.nesting = [];
                     }
 
-                    if (layer.parentSubGroup) {
-                        let parentSubGroupIndex = false;
-                        notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
-                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.parentSubGroup) {
-                                parentSubGroupIndex = index;
+                    /**
+                     * Returns reference to the parent children container
+                     * 
+                     * @param {Array}  searchedLevelPath Depth specification
+                     * @param {String} prefix            Recursion depth logging helper
+                     * 
+                     * @returns {Array<Object>}
+                     */
+                    const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 1`, searchedLevelPath);
+
+                        let parent = notSortedLayersAndSubgroupsForCurrentGroup;
+                        if (searchedLevelPath.length > 0) {
+                            let indexes = getNestedGroupsIndexes(searchedLevelPath, localPrefix);
+                            for (let i = 0; i < indexes.length; i++) {
+                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### parent ${i}`, parent);
+                                if (i === 0) {
+                                    parent = notSortedLayersAndSubgroupsForCurrentGroup[indexes[0]].children;
+                                } else {
+                                    parent = parent[indexes[i]].children;
+                                }
+                            }
+                        }
+
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 2`, parent);
+                        return parent;
+                    }
+
+                    /**
+                     * Ensures that specified group exists on specific hierarchy level
+                     * 
+                     * @param {String} name              Group name
+                     * @param {Array}  searchedLevelPath Depth specification
+                     * @param {String} prefix            Recursion depth logging helper
+                     * 
+                     * @returns {Number}
+                     */
+                    const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
+
+                        let parent = getParentChildrenContainer(searchedLevelPath, localPrefix);
+                        let groupIndex = false;
+                        parent.map((item, index) => {
+                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === name) {
+                                groupIndex = index;
                                 return false;
                             }
                         });
 
-                        // Parent subgroup does not exist
-                        if (parentSubGroupIndex === false) {
-                            notSortedLayersAndSubgroupsForCurrentGroup.push({
-                                id: layer.parentSubGroup,
+                        if (groupIndex === false) {
+                            parent.push({
+                                id: name,
                                 type: GROUP_CHILD_TYPE_GROUP,
                                 children: []
                             });
-
-                            parentSubGroupIndex = (notSortedLayersAndSubgroupsForCurrentGroup.length - 1);
+ 
+                            groupIndex = (parent.length - 1);
                         }
 
-                        // Parent subgroup is created, creating current subgroup
-                        let subGroupIndex = false;
-                        notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children.map((item, index) => {
-                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
-                                subGroupIndex = index;
-                                return false;
-                            }
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### groupIndex`, groupIndex);
+                        return groupIndex;
+                    };
+
+                    /**
+                     * Returns indexes for every nesting level, creates the group if does not exist
+                     * 
+                     * @param {Array}  nestingData Depth specification
+                     * @param {String} prefix      Recursion depth logging helper
+                     * 
+                     * @returns {Array<Number>}
+                     */
+                    const getNestedGroupsIndexes = (nestingData, prefix = '') => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getNestedGroupsIndexes`, nestingData);
+
+                        let indexes = [];
+                        nestingData.map((groupName, level) => {
+                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### it`, groupName, level);
+
+                            let nestingDataCopy = JSON.parse(JSON.stringify(nestingData));
+                            let index = ensureThatGroupExistsAndReturnItsIndex(groupName, nestingDataCopy.slice(0, level), LOG_LEVEL + localPrefix);
+                            indexes.push(index);
                         });
 
-                        if (subGroupIndex === false) {
-                            notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children.push({
-                                id: layer.subGroup,
-                                type: GROUP_CHILD_TYPE_GROUP,
-                                children: [{
-                                    type: GROUP_CHILD_TYPE_LAYER,
-                                    layer
-                                }]
-                            });
-                        } else {
-                            notSortedLayersAndSubgroupsForCurrentGroup[parentSubGroupIndex].children[subGroupIndex].children.push({
-                                type: GROUP_CHILD_TYPE_LAYER,
-                                layer
-                            });
-                        }
-
-
-                    } else if (layer.subGroup) {
-                        let subGroupIndex = false;
-                        notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
-                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
-                                subGroupIndex = index;
-                                return false;
-                            }
-                        });
-
-                        // Group does not exist
-                        if (subGroupIndex === false) {
-                            notSortedLayersAndSubgroupsForCurrentGroup.push({
-                                id: layer.subGroup,
-                                type: GROUP_CHILD_TYPE_GROUP,
-                                children: [{
-                                    type: GROUP_CHILD_TYPE_LAYER,
-                                    layer
-                                }]
-                            });
-                        } else {
-                            notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push({
-                                type: GROUP_CHILD_TYPE_LAYER,
-                                layer
-                            });
-                        }
-                    } else {
-                        notSortedLayersAndSubgroupsForCurrentGroup.push({
-                            type: GROUP_CHILD_TYPE_LAYER,
-                            layer
-                        });
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### indexes`, indexes);
+                        return indexes;
                     }
+
+                    if (LOG_HIERARCHY_BUILDING) console.log(`### layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
+                    let indexes = getNestedGroupsIndexes(JSON.parse(JSON.stringify(layer.nesting)));
+
+                    if (LOG_HIERARCHY_BUILDING) console.log(`### indexes ready`, indexes);
+                    let parent = getParentChildrenContainer(layer.nesting);
+                    parent.push({
+                        type: GROUP_CHILD_TYPE_LAYER,
+                        layer
+                    });
                 }
             }
+
+            if (LOG_HIERARCHY_BUILDING) console.log(`### result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
         }
 
         // Reverse subgroups
@@ -1846,25 +1877,22 @@ module.exports = {
         let localNumberOfActiveLayers = 0;
         let localNumberOfAddedLayers = 0;
         let layersToProcess = [];
+
+        const getLayersToProcess = (items) => {
+            items.map(localItem => {
+                if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
+                    layersToProcess.push(localItem.layer);
+                } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                    getLayersToProcess(localItem.children);
+                } else {
+                    throw new Error(`Invalid sorting element type`);
+                }
+            });
+        };
+
         for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
             let localItem = layersAndSubgroupsForCurrentGroup[u];
-            if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                layersToProcess.push(localItem.layer);
-            } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                localItem.children.map(childLocalItem => {
-                    if (childLocalItem.type === GROUP_CHILD_TYPE_LAYER) {
-                        layersToProcess.push(childLocalItem.layer);
-                    } else if (childLocalItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        childLocalItem.children.map(item => {
-                            layersToProcess.push(item.layer);
-                        });
-                    } else {
-                        throw new Error(`Invalid sorting element type`);
-                    }
-                });
-            } else {
-                throw new Error(`Invalid sorting element type`);
-            }
+            getLayersToProcess([localItem]);
         }
 
         let layersToCheckOpacity = _self.getActiveLayers();
@@ -1947,6 +1975,7 @@ module.exports = {
                         numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                         numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
                     } else {
+                        console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
                     }
                 }
@@ -1983,30 +2012,24 @@ module.exports = {
 
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-
                     let {layerIsActive} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
-
                     if (layerIsActive && moduleState.setLayerStateRequests[layerKey]) {
                         let settings = moduleState.setLayerStateRequests[layerKey];
                         _self.setLayerState(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
                 };
 
-                layersAndSubgroupsForCurrentGroup.map(item => {
-                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
-                        applyQueriedSetupControlRequests(item.layer);
-                    } else {
-                        item.children.map(item => {
-                            if (item.type === GROUP_CHILD_TYPE_LAYER) {
-                                applyQueriedSetupControlRequests(item.layer);
-                            } else {
-                                item.children.map(item => {
-                                    applyQueriedSetupControlRequests(item.layer);
-                                });
-                            }
-                        });
-                    }
-                });
+                const applyControlRequests = (items) => {
+                    items.map(item => {
+                        if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                            applyQueriedSetupControlRequests(item.layer);
+                        } else {
+                            applyControlRequests(item.children);
+                        }
+                    });                    
+                }
+
+                applyControlRequests(layersAndSubgroupsForCurrentGroup);
             }
         });
     },

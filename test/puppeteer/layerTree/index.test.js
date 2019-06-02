@@ -366,17 +366,22 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Public group`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Snapping`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Dynamic load test`);
 
-        let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw');
+        let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw .layer-move-vert-group');
         let box = await e.boundingBox();
         let x = box.x + box.width / 2;
         let y = box.y + box.height / 2;
         await page.mouse.move(x, y);
         await page.mouse.down();
-        await page.mouse.move(x, y - 60);
+        await page.mouse.move(x, y + 50);
+        await helpers.sleep(100);
+        await page.mouse.move(x, y + 55);
+        await page.mouse.move(x, y + 50);
+        await page.mouse.move(x, y + 55);
+        await page.mouse.move(x, y + 50);
         await page.mouse.up();
         await page.mouse.click(1, 1);
         await helpers.sleep(1000);
@@ -386,9 +391,9 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(0).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(1).text()`)).to.equal(`Snapping`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Public group`);
-        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Snapping`);
+        expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Dynamic load test`);
 
         await page.close();
     });
