@@ -1191,7 +1191,14 @@ module.exports = {
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+
+        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
+        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
+            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
+        }
+
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
         let whereClauses = [];
         let activeFilters = _self.getActiveLayerFilters(layerKey);
@@ -1217,7 +1224,7 @@ module.exports = {
         // Gathering all WHERE clauses
         if (whereClauses.length > 0) {
             whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
         }
 
         let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
@@ -1339,7 +1346,15 @@ module.exports = {
 
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
+
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+
+        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
+        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
+            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
+        }
+
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1380,7 +1395,7 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
