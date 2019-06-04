@@ -111,6 +111,9 @@ let urlsIgnoredForCaching = [{
 },{
     regExp: true,
     requested: 'google'
+},{
+    regExp: true,
+    requested: '/api/v2/configuration/'
 }];
 
 /**
@@ -1022,6 +1025,8 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
             });
+        }).catch((e) => {
+            console.log(e)
         }));
     }
 });
