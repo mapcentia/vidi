@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -37,14 +37,20 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this, configFile, stop = false;
+        let me = this, configFile, stop = false;
 
         if (typeof urlVars.session === "string") {
             cookie.set("connect.gc2", urlVars.session, {expires: 1});
         }
 
-        var loadConfig = function () {
-            $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
+        let loadConfig = function () {
+            let configParam;
+            if (configFile.startsWith("/")) {
+                configParam = window.gc2host + configFile
+            } else {
+                configParam = "/api/config/" + urlparser.db + "/" + configFile;
+            }
+            $.getJSON(configParam, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
