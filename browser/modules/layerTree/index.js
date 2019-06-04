@@ -2472,6 +2472,7 @@ module.exports = {
                         ReactDOM.render(
                             <LayerFilter
                                 layer={layer}
+                                layerMeta={meta.parseLayerMeta(layerKey)}
                                 presetFilters={presetFilters}
                                 predefinedFilters={localPredefinedFilters}
                                 disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
