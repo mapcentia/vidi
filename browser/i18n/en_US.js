@@ -299,8 +299,12 @@ module.exports = {
         "No layers available": "No layers available",
 
         //WatsonC
+        "Matrix view": "Matrix view",
+        "Row view": "Row view",
         "Timeseries total": "Timeseries total",
+        "Profiles total": "Profiles total",
         "timeseries active": "timeseries active",
+        "profiles active": "profiles active",
         "Data sources and -types": "Data sources and -types",
         "Delete plot": "Delete plot",
         "Delete profile": "Delete profile",

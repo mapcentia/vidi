@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"hould keep layer and layer group ord\""
   },
   "repository": {
     "type": "git",
@@ -112,7 +112,7 @@
     "react-dom": "^16.5.1",
     "react-dropzone": "^5.1.0",
     "react-jsonschema-form": "^1.0.4",
-    "react-plotly.js": "^2.2.0",
+    "react-plotly.js": "^2.3.0",
     "react-router": "^4.3.1",
     "react-router-redux": "^4.0.8",
     "redux-thunk": "^2.3.0",
