@@ -299,6 +299,9 @@ module.exports = {
         "No layers available": "Ingen synlige lag",
 
         //WatsonC
+        "Groundwater": "Grundvand",
+        "Streams": "Vandløb",
+        "Rain": "Nedbør",
         "Matrix view": "# Matrix view",
         "Row view": "# Row view",
         "Timeseries total": "Tidsserier, total",
