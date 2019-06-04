@@ -337,10 +337,13 @@ class StateSnapshotsDashboard extends React.Component {
                 }
             }
 
+            let configParameter = ``;
             if (highPriorityConfigString) {
-                parameters.push(`config=${highPriorityConfigString}`);
+                configParameter = `config=${highPriorityConfigString}`;
+                parameters.push(configParameter);
             } else if (lowPriorityConfigString) {
-                parameters.push(`config=${lowPriorityConfigString}`);
+                configParameter = `config=${lowPriorityConfigString}`;
+                parameters.push(configParameter);
             }
 
             let permaLink = `${window.location.origin}${this.props.anchor.getUri()}?${parameters.join(`&`)}`;
@@ -386,12 +389,11 @@ class StateSnapshotsDashboard extends React.Component {
                 style={buttonStyle}>
                 <i className="material-icons">play_arrow</i></button>);
 
-
             let sizeValue = `1920x1080`;
             if (item.id in this.state.imageLinkSizes) sizeValue = this.state.imageLinkSizes[item.id];
             
             let selectSize = generateSizeSelector(item, sizeValue);
-            let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}`;
+            let imageLink = `${window.location.origin}/api/static/${vidiConfig.appDatabase}/${vidiConfig.appSchema}/?state=${item.id}&width=${sizeValue.split(`x`)[0]}&height=${sizeValue.split(`x`)[1]}${configParameter ? `&${configParameter}` : ``}`;
             return (<div className="panel panel-default" key={index} style={{marginBottom: '8px'}}>
                 <div className="panel-body" style={{padding: '8px'}}>
                     {this.props.playOnly ? (<div>

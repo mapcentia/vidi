@@ -20,50 +20,60 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
     let width = (localRequest.query.width && parseInt(localRequest.query.width) > 0 ? parseInt(localRequest.query.width) : 800);
     let height = (localRequest.query.height && parseInt(localRequest.query.height) > 0 ? parseInt(localRequest.query.height) : 600);
+    let config = (localRequest.query.config ? `&config=${localRequest.query.config}` : ``);
 
     if (errorMessages.length === 0) {
-        let url = `http://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl&state=${localRequest.query.state}`;        
-        headless.getBrowser().newPage().then(page => {
-            page.emulate({
-                viewport: { width, height },
-                userAgent: 'Puppeteer'
-            }).then(() => {
-                page.on('console', msg => {
-                    console.log(msg.text());
-                    if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
-                        console.log('App was loaded, generating PNG');
-                        setTimeout(() => {
-                            page.evaluate(`$('.leaflet-top').remove();`).then(() => {
-                                setTimeout(() => {
-                                    page.screenshot({
-                                        encoding: `base64`
-                                    }).then(data => {
-                                        let img = new Buffer.from(data, 'base64');
-                                        localResponse.writeHead(200, {
-                                            'Content-Type': 'image/png',
-                                            'Content-Length': img.length
+        let url = `http://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl&state=${localRequest.query.state}${config}`;
+        
+        console.log(url);
+
+        headless.getBrowser().then(browser => {
+            browser.newPage().then(page => {
+                page.emulate({
+                    viewport: { width, height },
+                    userAgent: 'Puppeteer'
+                }).then(() => {
+                    page.on('console', msg => {
+                        console.log(msg.text());
+                        if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                            console.log('App was loaded, generating PNG');
+                            setTimeout(() => {
+                                page.evaluate(`$('.leaflet-top').remove();`).then(() => {
+                                    setTimeout(() => {
+                                        page.screenshot({
+                                            encoding: `base64`
+                                        }).then(data => {
+                                            let img = new Buffer.from(data, 'base64');
+                                            localResponse.writeHead(200, {
+                                                'Content-Type': 'image/png',
+                                                'Content-Length': img.length
+                                            });
+
+                                            page.close();
+                                            localResponse.end(img); 
+                                        }).catch(error => {
+                                            localResponse.status(500);
+                                            localResponse.send(error);
                                         });
+                                    }, 1000);
+                                }).catch(error => {
+                                    localResponse.status(500);
+                                    localResponse.send(error);
+                                });
+                            }, 2000);
+                        }
+                    });
 
-                                        page.close();
-                                        localResponse.end(img); 
-                                    }).catch(error => {
-                                        localResponse.status(500);
-                                        localResponse.send(error);
-                                    });
-                                }, 1000);
-                            }).catch(error => {
-                                localResponse.status(500);
-                                localResponse.send(error);
-                            });
-                        }, 2000);
-                    }
+                    page.goto(url);
+                }).catch(error => {
+                    localResponse.status(500);
+                    localResponse.send(error);
                 });
-
-                page.goto(url);
-            }).catch(error => {
-                localResponse.status(500);
-                localResponse.send(error);
             });
+        }).catch(error => {
+            console.error(error);
+            localResponse.status(500);
+            localResponse.send(`Error occured: ${error}`);
         });
     } else {
         localResponse.status(400);
