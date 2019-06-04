@@ -1863,15 +1863,20 @@ module.exports = {
             if (LOG_HIERARCHY_BUILDING) console.log(`### result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
         }
 
+        const reverseOrder = (children) => {
+            children.reverse();
+            children.map((item) => {
+                if (item.type === "group") {
+                    reverseOrder(item.children);
+                }
+            });
+        };
+
         // Reverse subgroups
-        notSortedLayersAndSubgroupsForCurrentGroup.map((item) => {
-            if (item.type === "group") {
-                item.children.reverse();
-            }
-        });
+        reverseOrder(notSortedLayersAndSubgroupsForCurrentGroup);
 
         // Sort groups
-        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
+        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
 
         // Create stores and calculate active / added layers before the layer panel is shown
         let localNumberOfActiveLayers = 0;
