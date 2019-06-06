@@ -335,6 +335,8 @@ module.exports = {
         "Continue without selecting chemical": "Continue without selecting chemical",
         "boreholes_time_series_with_chemicals": "Boreholes time series with chemicals",
         "sensordata_with_correction": "Sensor data with correction",
+        "Jupiter drilling": "Jupiter drilling",
+        "CALYPSO stations": "CALYPSO stations",
         "Please select at least one layer": "Please select at least one layer",
         "Back to main menu": "Back to main menu",
         "Welcome to Calypso": "Welcome to Calypso",
