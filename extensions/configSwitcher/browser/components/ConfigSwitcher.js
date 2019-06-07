@@ -93,20 +93,13 @@ class ConfigSwitcher extends React.Component {
                 configurationControlItems.push(<div key={`configuration_${index}`} className="list-group-item">
                     <div style={{display: `flex`}}>
                         <div>{parsedValue.published === false ? (<i className="material-icons" title={__(`Configuration is not published yet`)}>lock</i>) : false}</div>
-                        <div style={{flexGrow: `1`}}>{parsedValue.name}</div>
+                        <div style={{flexGrow: `1`}}>{parsedValue.name} {parsedValue.description ? `(${parsedValue.description})` : ``}</div>
                         <div>
                             <button
                                 type="button"
                                 className="btn btn-primary btn-sm"
                                 style={{margin: `0px`}}
-                                onClick={() => { this.applyConfiguration(url); }}><i className="material-icons">play_circle_filled</i> {__(`Complete reload`)}</button>
-                        </div>
-                        <div>
-                            <button
-                                type="button"
-                                className="btn btn-primary btn-sm"
-                                style={{margin: `0px`}}
-                                onClick={() => { alert(`Not implemented yet`)}}><i className="material-icons">play_circle_outline</i> {__(`Apply partially`)}</button>
+                                onClick={() => { this.applyConfiguration(url); }}><i className="material-icons">play_circle_filled</i> {__(`Apply`)}</button>
                         </div>
                     </div>
                     <div>
