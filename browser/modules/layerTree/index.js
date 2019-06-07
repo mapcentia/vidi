@@ -1421,17 +1421,15 @@ module.exports = {
             styleMap: styles[trackingLayerKey],
             sql,
             onLoad: (l) => {
-                if (l === undefined) return;
-
-                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
-
-                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
+                if (l === undefined || l.geoJSON === null) {
+                    return
+                }
+                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
@@ -1502,7 +1500,11 @@ module.exports = {
             },
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
-            })
+            }),
+            error: (response)=>{
+                alert(response.responseJSON.message);
+                console.error(response.responseJSON.message);
+            }
         });
     },
 
