@@ -298,6 +298,16 @@ module.exports = {
         "Visible": "Visible",
         "No layers available": "No layers available",
 
+        //ConfigSwitcher
+        "Configuration is not published yet": "Configuration is not published yet",
+        "Complete reload": "Complete reload",
+        "Apply partially": "Apply partially",
+        "Total configurations": "Total configurations",
+        "No configurations to display": "No configurations to display",
+        "Configurations source": "Configurations source",
+        "Config switcher": "Config switcher",
+        "Config switcher block description": "Config switcher block description",
+
         //WatsonC
         "Groundwater": "Groundwater",
         "Streams": "Streams",
