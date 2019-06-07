@@ -49,7 +49,13 @@ module.exports = {
         }
 
         var loadConfig = function () {
-            $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
+            let configUrl = "/api/config/" + urlparser.db + "/" + configFile;
+            if (configFile.indexOf(`http://`) === 0 || configFile.indexOf(`https://`) === 0) {
+                // Using proxy in order to get unpublished configuration if session exists
+                configUrl = `/api/requestProxy?request=${encodeURIComponent(configFile)}`;
+            }
+
+            $.getJSON(configUrl, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
                 window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;

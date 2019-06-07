@@ -156,7 +156,7 @@ module.exports = {
             {"offlineMap": ["index"]},
             {"session": ["index"]},
             {"editor": ["index"]},
-
+            {"configSwitcher": ["index"]},
         ],
         "server": [
             {"conflictSearch": ["index"]},
@@ -240,6 +240,7 @@ module.exports = {
         "coordinates",
         "offlineMap",
         "editor",
+        "configSwitcher",
     ],
 
 
