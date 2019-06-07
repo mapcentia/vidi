@@ -19,6 +19,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Better wrapping of layer tools when side panel is narrow.
 - Snapping bugs.
+- SELECT statements like `SELECT * FROM foo WHERE bar LIKE '%foo'` will not longer give problems.
 
 ## [2019.1.0.rc2] - 2019-01-03
 ### Added
