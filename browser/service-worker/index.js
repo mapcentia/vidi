@@ -291,6 +291,7 @@ const normalizeTheURL = (URL) => {
  * @return {Promise}
  */
 const normalizeTheURLForFetch = (event) => {
+    console.log(event);
     let URL = event.request.url;
     let result = new Promise((resolve, reject) => {
         let cleanedRequestURL = normalizeTheURL(URL);
@@ -315,13 +316,11 @@ const normalizeTheURLForFetch = (event) => {
                             resolve(cleanedRequestURL);
                         } else {
                             let decodedQuery = false;
-
                             record = {};
                             if (`q` in mappedObject && mappedObject.q) {
                                 if (method === `POST`) {
                                     let cleanedString = mappedObject.q.replace(/%3D/g, '');
-                                    let decodedString = atob(cleanedString);
-                                    decodedQuery = decodeURI(decodedString);
+                                    decodedQuery = atob(cleanedString);;
                                 } else if (method === `GET`) {
                                     decodedQuery = mappedObject.q;
                                 } else {
@@ -367,12 +366,12 @@ const normalizeTheURLForFetch = (event) => {
 
                             URLToPostDataKeeper.set(cleanedRequestURL, record).then(() => {
                                 resolve(cleanedRequestURL);
-                            }).catch(() => {
-                                reject();
+                            }).catch((e) => {
+                                reject(e);
                             });
                         }
-                    }).catch(() => {
-                        reject();
+                    }).catch((e) => {
+                        reject(e);
                     });
                 } else {
                     resolve(cleanedRequestURL);
@@ -497,7 +496,7 @@ const normalizeTheURLForFetch = (event) => {
             resolve(cleanedRequestURL);
         }
     });
-
+console.log(result)
     return result;
 }
 
@@ -1025,8 +1024,8 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
             });
-        }).catch((e) => {
-            console.log(e)
+        }).catch((err) => {
+            console.log(err)
         }));
     }
 });

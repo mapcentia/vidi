@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -355,13 +355,13 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
+                base64: true,
                 styleMap: {
                     weight: 5,
                     color: '#660000',
                     dashArray: '',
                     fillOpacity: 0.2
                 },
-
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
@@ -525,7 +525,6 @@ module.exports = {
                             </a>`;
                             }
                         }
-
                         fields.push({title: property.value.alias || property.key, value});
                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                         if (feature.properties[property.key] !== undefined) {
@@ -533,6 +532,7 @@ module.exports = {
                         }
                     }
                 });
+
 
                 out.sort(function (a, b) {
                     return a[1] - b[1];
@@ -598,14 +598,14 @@ var sortObject = function (obj) {
     return arr; // returns array
 };
 
-var download = function (sql, format) {
-    var request = new XMLHttpRequest();
+let download = function (sql, format) {
+    let request = new XMLHttpRequest();
     request.open('POST', '/api/sql/' + db, true);
     request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
     request.responseType = 'blob';
     request.onload = function () {
         if (request.status === 200) {
-            var filename, type;
+            let filename, type;
             switch (format) {
                 case "excel":
                     filename = 'file.xlsx';
@@ -616,8 +616,8 @@ var download = function (sql, format) {
                     type = 'application/json';
                     break;
             }
-            var blob = new Blob([request.response], {type: type});
-            var link = document.createElement('a');
+            let blob = new Blob([request.response], {type: type});
+            let link = document.createElement('a');
             link.href = window.URL.createObjectURL(blob);
             link.download = filename;
             document.body.appendChild(link);
@@ -627,6 +627,6 @@ var download = function (sql, format) {
         // some error handling should be done here...
     };
 
-    var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
+    let uri = 'format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
     request.send(uri);
 };
