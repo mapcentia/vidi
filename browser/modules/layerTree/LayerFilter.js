@@ -68,8 +68,7 @@ class VectorLayerFilter extends React.Component {
         }
 
         let arbitraryFilters = props.arbitraryFilters || {};
-
-        if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = MATCHES[0];
+        if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
         if (`columns` in arbitraryFilters === false) arbitraryFilters[`columns`] = new Array();
 
         if (this.props.presetFilters.length > 0) {
@@ -481,6 +480,7 @@ class VectorLayerFilter extends React.Component {
 
 VectorLayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
+    layerMeta: PropTypes.any.isRequired,
     presetFilters: PropTypes.array,
     predefinedFilters: PropTypes.object.isRequired,
     disabledPredefinedFilters: PropTypes.array.isRequired,

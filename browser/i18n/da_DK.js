@@ -298,7 +298,18 @@ module.exports = {
         "Visible": "Synlige",
         "No layers available": "Ingen synlige lag",
 
+        //ConfigSwitcher
+        "Configuration is not published yet": "# Configuration is not published yet",
+        "Total configurations": "# Total configurations",
+        "No configurations to display": "# No configurations to display",
+        "Configurations source": "# Configurations source",
+        "Config switcher": "# Config switcher",
+        "Config switcher block description": "# Config switcher block description",
+
         //WatsonC
+        "Groundwater": "Grundvand",
+        "Streams": "Vandløb",
+        "Rain": "Nedbør",
         "Matrix view": "# Matrix view",
         "Row view": "# Row view",
         "Timeseries total": "Tidsserier, total",
@@ -332,6 +343,8 @@ module.exports = {
         "Continue without selecting chemical": "Fortsæt uden valg af kemikalier",
         "boreholes_time_series_with_chemicals": "Dgu tidsserier med kemikalier",
         "sensordata_with_correction": "Sensor data med korrektion",
+        "Jupiter drilling": "Jupiter boringer",
+        "CALYPSO stations": "CALYPSO stationer",
         "Please select at least one layer": "Vælg mindst et lag",
         "Back to main menu": "Tilbage til hovedmenu",
         "Welcome to Calypso": "Velkommen til Calypso",
