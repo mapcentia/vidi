@@ -46,6 +46,20 @@ var clicktimer;
  */
 var mapObj;
 
+var cowiUrl;
+
+var mapillaryUrl = "https://www.mapillary.com/app/?z=17";
+
+var config = require('../../../config/config.js');
+
+if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
+    if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
+        mapillaryUrl = config.extensionConfig.streetView.mapillary;
+    }
+    if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
+        cowiUrl = config.extensionConfig.streetView.cowi;
+    }
+}
 
 /**
  *
@@ -160,7 +174,8 @@ module.exports = {
 
                 // Stop listening to any events, deactivate controls, but
                 // keep effects of the module until they are deleted manually or reset:all is emitted
-                backboneEvents.get().on("deactivate:all", () => {});
+                backboneEvents.get().on("deactivate:all", () => {
+                });
 
                 // Activates module
                 backboneEvents.get().on(`on:${exId}`, () => {
@@ -196,7 +211,7 @@ module.exports = {
 
                         clicktimer = setTimeout(function (e) {
 
-                            var coords = event.getCoordinate(), p, url;
+                            let coords = event.getCoordinate(), p, url;
                             p = utils.transform("EPSG:3857", "EPSG:4326", coords);
                             clicktimer = undefined;
 
@@ -206,14 +221,17 @@ module.exports = {
                                     break;
 
                                 case "mapillary":
-                                    url = "https://www.mapillary.com/app/?lat=" + p.y + "&lng=" + p.x + "&z=17";
+                                    url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
                                     break;
 
                                 case "skraafoto":
                                     url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
                                     break;
-                            }
 
+                                case "cowi":
+                                    url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
+                                    break;
+                            }
                             parentThis.callBack(url);
 
                         }, 250);
@@ -257,6 +275,16 @@ module.exports = {
                                            checked={this.state.selectedOption === 'skraafoto'}
                                            onChange={this.onChange}/>
                                     Skråfoto
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-cowi"
+                                           name="streetview-service" value="cowi"
+                                           checked={this.state.selectedOption === 'cowi'}
+                                           onChange={this.onChange}/>
+                                    COWI Gadefoto
                                 </label>
                             </div>
 
