@@ -16,3 +16,7 @@ When offline application mode becomes available, following cases has to be proce
 - how layer offline mode controls react to changes in application availability
 - how application loads assets in offline mode
 - editor detecting the offline mode state
+
+## Sample configurations
+
+Some test cases require custom Vidi configuration files that are typically located in `/public/api/config`. Examples of these files can be found in `./config` folder.
