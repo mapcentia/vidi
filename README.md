@@ -44,6 +44,7 @@ Install both [GC2 and Vidi](https://github.com/mapcentia/geocloud2#how-to-instal
 ---
 
 ## Testing ![alt text](https://api.travis-ci.org/sashuk/vidi.svg?branch=develop "Current build status")
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmapcentia%2Fvidi.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmapcentia%2Fvidi?ref=badge_shield)
 
 The `test` folder contains
 
@@ -76,3 +77,7 @@ setTimeout(() => {
     }
 }, 3000);
 ```
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fmapcentia%2Fvidi.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fmapcentia%2Fvidi?ref=badge_large)
