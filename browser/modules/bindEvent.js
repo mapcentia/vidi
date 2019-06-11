@@ -1,126 +1,75 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var draw;
+import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
+
+var mobile = require('is-mobile');
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var advancedInfo;
+var advancedInfo, cloud, switchLayer, meta, utils;
 
 /**
  *
  * @type {*|exports|module.exports}
  */
-var cloud;
+let APIBridgeSingletone = require('./api-bridge');
 
 /**
  *
- * @type {*|exports|module.exports}
+ * @type {APIBridge}
  */
-var print;
+var apiBridgeInstance = false;
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var switchLayer;
+var jRespond = require('jrespond');
 
-/**
- *
- * @type {*|exports|module.exports}
- */
-var setBaseLayer;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var legend;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var meta;
-
-/**
- *
- * @type {array}
- */
-var metaDataKeys;
-
-/**
- *
- * @type {array}
- */
-var reset;
-
-/**
- *
- * @type {*|exports|module.exports}
- */
-var urlparser = require('./urlparser');
-
-/**
- *
- * @type {array}
- */
-var urlVars = urlparser.urlVars;
-
-/**
- *
- * @type {showdown.Converter}
- */
-var showdown = require('showdown');
-var converter = new showdown.Converter();
 
 require('dom-shims');
 require('arrive');
 
 var backboneEvents;
-
 var pushState;
 var layerTree;
 var layers;
 var infoClick;
-
+var setting;
+var state;
+var applicationModules = false;
 var isStarted = false;
 
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
  */
-module.exports = module.exports = {
-    set: function (o) {
-        draw = o.draw;
-        advancedInfo = o.advancedInfo;
-        cloud = o.cloud;
-        print = o.print;
-        switchLayer = o.switchLayer;
-        setBaseLayer = o.setBaseLayer;
-        legend = o.legend;
-        meta = o.meta;
-        pushState = o.pushState;
-        layerTree = o.layerTree;
-        layers = o.layers;
-        infoClick = o.infoClick;
-        backboneEvents = o.backboneEvents;
-        reset = o.reset;
+module.exports = {
+    set: function (modules) {
+        applicationModules = modules;
+        advancedInfo = modules.advancedInfo;
+        print = modules.print;
+        switchLayer = modules.switchLayer;
+        cloud = modules.cloud;
+        meta = modules.meta;
+        pushState = modules.pushState;
+        layerTree = modules.layerTree;
+        layers = modules.layers;
+        infoClick = modules.infoClick;
+        backboneEvents = modules.backboneEvents;
+        setting = modules.setting;
+        state = modules.state;
+        utils = modules.utils;
         return this;
     },
     init: function (str) {
-        var doneL, doneB, loadingL = false, loadingB = false;
-        metaDataKeys = meta.getMetaDataKeys();
+        apiBridgeInstance = APIBridgeSingletone();
+
+        var doneL = false, doneB = false, loadingL = 0, loadingB = 0;
 
         cloud.get().on("dragend", function () {
             pushState.init();
@@ -132,95 +81,92 @@ module.exports = module.exports = {
             $("#tail").fadeOut(100);
         });
 
-        // Advanced info
-        // =============
-
-        $("#advanced-info-btn").on("click", function () {
-            advancedInfo.control();
+        cloud.get().on("dragstart", function () {
+            $(".fade-then-dragging").animate({opacity: "0.3"}, 200);
+            $(".fade-then-dragging").css("pointer-events", "none");
         });
 
-        // Reset
-        // =====
+        cloud.get().on("dragend", function () {
+            $(".fade-then-dragging").animate({opacity: "1"}, 200);
+            $(".fade-then-dragging").css("pointer-events", "all");
 
-        $("#btn-reset").on("click", function () {
-            reset.init();
         });
 
+        /**
+         * Triggered when the layer control is changed in any module
+         */
+        $(document).arrive('[data-gc2-id]', function (e, data) {
+            $(this).on("change", function (e) {
+                let prefix = '';
+                let doNotLegend = false;
+                if ($(this).data(`gc2-layer-type`)) {
+                    prefix = $(e.target).data('gc2-layer-type') + `:`;
+                    if (prefix === LAYER_TYPE_DEFAULT + `:`) {
+                        prefix = ``;
+                    }
+  
+                    if (data) {
+                        doNotLegend = data.doNotLegend;
+                    }
+                }
 
-        $("#info-modal button").on("click", function () {
-            $("#info-modal").animate({
-                right: "-" + $("#myNavmenu").width() + "px"
-            }, 200)
+                switchLayer.init(prefix + $(e.target).attr(`data-gc2-id`), $(e.target).prop(`checked`), doNotLegend);
+                e.stopPropagation();
+
+                backboneEvents.get().trigger(`layerTree:activeLayersChange`);
+            });
         });
 
         $("#searchclear").on("click", function () {
             backboneEvents.get().trigger("clear:search");
         });
 
-        backboneEvents.get().on("ready:meta", function () {
+        backboneEvents.get().on("allDoneLoading:layers", function () {
+            if (!isStarted) {
+                if (mobile()) {
+                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
+                }
 
-            setTimeout(
-                function () {
-                    $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                    if ($(document).width() < 767 && isStarted === false) {
-                        setTimeout(
-                            function () {
-                                $("#navbar-fixed-top .navbar-toggle").trigger("click");
-                            }, 200
-                        );
-                        isStarted = true;
-                    }
-                }, 200
-            );
+                isStarted = true;
+                setTimeout(
+                    function () {
+                        if ($(document).width() > 1024 && typeof window.vidiConfig.activateMainTab === "undefined") {
+                            $("#search-border").trigger("click");
+                        }
+                    }, 200
+                );
 
-            setTimeout(
-                function () {
-                   $("#loadscreen").fadeOut(200);
-
-                }, 600
-            );
-
+                setTimeout(
+                    function () {
+                        if (!window.vidiConfig.doNotCloseLoadScreen) {
+                            $("#loadscreen").fadeOut(200);
+                        }
+                    }, 600
+                );
+            }
         });
 
-        backboneEvents.get().on("off:advancedInfo on:drawing", function () {
-            console.info("Stopping advanced info");
-            advancedInfo.off();
-        });
-
-        backboneEvents.get().on("off:drawing on:advancedInfo", function () {
-            console.info("Stopping drawing");
-            draw.off();
-        });
-
-        // Info click
-        // ==========
-
-        backboneEvents.get().on("on:infoClick", function () {
-            console.info("Activating infoClick");
-            infoClick.active(true);
-        });
-
-        backboneEvents.get().on("off:infoClick", function () {
-            console.info("Deactivating infoClick");
-            infoClick.active(false);
-        });
-
-        backboneEvents.get().on("reset:infoClick", function () {
-            console.info("Resetting infoClick");
+        // Clear all query layers and deactivate tools
+        // ===========================================
+        backboneEvents.get().on("sqlQuery:clear", () => {
+            console.info("Resting SQL Query");
             infoClick.reset();
+            advancedInfo.reset();
+            layerTree.resetSearch();
         });
 
-
+        // Layer loading
+        // =============
         backboneEvents.get().on("startLoading:layers", function (e) {
             console.log("Start loading: " + e);
-            doneB = doneL = false;
+            doneL = false;
             loadingL = true;
             $(".loadingIndicator").fadeIn(200);
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
-            console.log("Start loading: " + e);
-            doneB = doneL = false;
+            console.log("Start loading base layer: " + e);
+            doneB = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
         });
@@ -231,30 +177,32 @@ module.exports = module.exports = {
                 layers.resetCount();
                 doneL = true;
                 loadingL = false;
+
                 if ((doneL && doneB) || loadingB === false) {
                     console.log("Setting timeout to " + window.vidiTimeout + "ms");
                     setTimeout(function () {
-                        window.status = "all_loaded";
                         console.info("Layers all loaded L");
+                        backboneEvents.get().trigger("allDoneLoading:layers");
                         doneB = doneL = false;
                         $(".loadingIndicator").fadeOut(200);
-                    },  window.vidiTimeout)
+                    }, window.vidiTimeout)
                 }
             }
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading: " + e);
+            console.log("Done loading base layer: " + e);
             doneB = true;
             loadingB = false;
-            if ((doneL && doneB) || loadingL === false) {
+
+            if ((doneL && doneB) || loadingL === false || layers.getCountLoading() === 0) {
                 console.log("Setting timeout to " + window.vidiTimeout + "ms");
                 setTimeout(function () {
-                    window.status = "all_loaded";
                     console.info("Layers all loaded B");
+                    backboneEvents.get().trigger("allDoneLoading:layers");
                     doneB = doneL = false;
                     $(".loadingIndicator").fadeOut(200);
-                },  window.vidiTimeout)
+                }, window.vidiTimeout)
             }
         });
 
@@ -265,72 +213,355 @@ module.exports = module.exports = {
             });
         });
 
-        // Print
-        // =====
-        $("#print-btn").on("click", function () {
-            print.activate();
-            $("#get-print-fieldset").prop("disabled", true);
+        backboneEvents.get().on("refresh:auth", function (response) {
+            apiBridgeInstance.resubmitSkippedFeatures();
         });
 
-        $("#start-print-btn").on("click", function () {
-            if (print.print()) {
-                $(this).button('loading');
-                $("#get-print-fieldset").prop("disabled", true);
+        // Refresh browser state. E.g. after a session start
+        // =================================================
+        backboneEvents.get().on("refresh:meta", function (response) {
+            meta.init().then(() => {
+                return setting.init();
+            }, (error) => {
+                console.log(error); // Stacktrace
+                //alert("Vidi is loaded without schema. Can't set extent or add layers");
+                backboneEvents.get().trigger("ready:meta");
+                state.init();
+            }).then(() => {
+                layerTree.create();
+                state.init();
+            });
+        });
+
+        // Init some GUI stuff after modules are loaded
+        // ============================================
+        $("[data-toggle=tooltip]").tooltip();
+        try {
+            $.material.init();
+        } catch (e) {
+            console.warn("Material Design could not be initiated");
+        }
+
+        touchScroll(".tab-pane");
+        touchScroll("#info-modal-body-wrapper");
+        $("#loadscreentext").html(__("Loading data"));
+
+        backboneEvents.get().on(`extensions:initialized`, () => {
+            if (window.vidiConfig.activateMainTab) {
+                setTimeout(function () {
+                    if ($('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').length === 1) {
+                        $('#main-tabs a[href="#' + window.vidiConfig.activateMainTab + '-content"]').trigger('click');
+                    } else {
+                        console.warn(`Unable to locate specified activateMainTab ${window.vidiConfig.activateMainTab}`)
+                    }
+                }, 200);
+            }
+        });
+
+        $(document).arrive('[data-toggle="tooltip"]', function () {
+            $(this).tooltip()
+        });
+
+        $(document).arrive('[data-scale-ul]', function () {
+            $(this).on("click", function (e) {
+                $("#select-scale").val($(this).data('scale-ul')).trigger("change");
+            });
+        });
+
+        // Set up the open/close functions for side panel
+        var searchPanelOpen, width, defaultCollapsedWidth = 260;
+
+        $("#main-tabs a").on("click", function (e) {
+            $("#module-container.slide-right").css("right", "0");
+            searchShowFull();
+        });
+
+        $(document).arrive("#main-tabs a", function () {
+            $(this).on("click", function (e) {
+                $("#module-container.slide-right").css("right", "0");
+                searchShowFull();
+            });
+        });
+
+        $("#info-modal .modal-header button").on("click", function () {
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                infoModalHide();
+                // Ikke den
+            }
+        });
+
+        $("#module-container .modal-header button").on("click", function () {
+            searchShow();
+            if (!$(this).data("extraClickHandlerIsEnabled")) {
+                moduleContainerHide();
+                $("#side-panel ul li").removeClass("active");
+            }
+        });
+
+        let setWidth = function (width) {
+            $("#search-ribbon").css("width", width + "px").css("right", "-" + (width - 40) + "px");
+            $("#module-container").css("width", (width - 100) + "px");
+            $("#info-modal").css("width", (width - 100) + "px");
+            $(".navmenu").css("width", (width) + "px");
+            $(".slide-right").css("right", "-" + (width - 100) + "px");
+        };
+
+        var infoModalHide = function () {
+            $("#info-modal").css("right", "-" + (width - 100) + "px");
+        }
+
+        var moduleContainerHide = function () {
+            $("#module-container.slide-right").css("right", "-" + (width - 100) + "px");
+        }
+
+        var searchShow = function () {
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a').map(function(){ return $(this).width(); }).get());
+            if (localCollapsedWidth > 0) {
+                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
+                localCollapsedWidth = localCollapsedWidth + 80;
+            } else {
+                localCollapsedWidth = defaultCollapsedWidth + 80;
             }
 
-        });
-
-        backboneEvents.get().on("off:print", function () {
-            print.off();
-        });
-
-        backboneEvents.get().on("end:print", function (response) {
-            $("#get-print-fieldset").prop("disabled", false);
-            $("#download-pdf, #open-pdf").attr("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#download-pdf").attr("download", response.key);
-            $("#open-html").attr("href", response.url);
-            $("#start-print-btn").button('reset');
-        });
-
-
-        // HACK. Arrive.js seems to mess up Wkhtmltopdf,
-        // so we don't bind events on print HTML page.
-        // =============================================
-
-        if (!urlVars.px && !urlVars.py) {
-            $(document).arrive('[data-gc2-id]', function () {
-                $(this).on("change", function (e) {
-                    switchLayer.init($(this).data('gc2-id'), $(this).context.checked);
-                    e.stopPropagation();
-                });
-            });
-            $(document).arrive('[data-gc2-base-id]', function () {
-                $(this).on("change", function (e) {
-                    setBaseLayer.init($(this).data('gc2-base-id'));
-                    e.stopPropagation();
-                    $(this).css("background-color", "white");
-                });
-            });
-            $(document).arrive('[data-toggle="tooltip"]', function () {
-                $(this).tooltip()
-            });
-            $(document).arrive('.info-label', function () {
-                $(this).on("click", function (e) {
-                    var t = ($(this).prev().children("input").data('gc2-id')), html;
-                    html = (metaDataKeys[t].meta !== null && $.parseJSON(metaDataKeys[t].meta) !== null && typeof $.parseJSON(metaDataKeys[t].meta).meta_desc !== "undefined" && $.parseJSON(metaDataKeys[t].meta).meta_desc !== "") ? converter.makeHtml($.parseJSON(metaDataKeys[t].meta).meta_desc) : metaDataKeys[t].f_table_abstract;
-                    $("#info-modal.slide-right").animate({right: "0"}, 200);
-                    $("#info-modal .modal-title").html(metaDataKeys[t].f_table_title || metaDataKeys[t].f_table_name);
-                    $("#info-modal .modal-body").html(html + '<div id="info-modal-legend" class="legend"></div>');
-                    legend.init([t], "#info-modal-legend");
-                    e.stopPropagation();
-                });
-
-            });
-            $(document).arrive('[data-scale-ul]', function () {
-                $(this).on("click", function (e) {
-                    $("#select-scale").val($(this).data('scale-ul')).trigger("change");
-                });
-            });
+            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
+            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
+            searchPanelOpen = true;
         }
+
+        var searchShowFull = function () {
+            $("#search-ribbon").css("right", "0");
+            $("#pane").css("right", (width - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (width / 2) + "px");
+            searchPanelOpen = true;
+        }
+
+        var searchHide = function () {
+            $("#pane").css("right", "0");
+            $('#map').css("width", "100%");
+            $("#search-ribbon").css("right", "-" + (width - 40) + "px");
+            searchPanelOpen = false;
+            $("#side-panel ul li").removeClass("active");
+        };
+
+        var jRes = jRespond([
+            {
+                label: 'phone',
+                enter: 0,
+                exit: 500
+            },
+            {
+                label: 'tablet',
+                enter: 501,
+                exit: 1024
+            },
+            {
+                label: 'desktop',
+                enter: 1024,
+                exit: 10000
+            }
+        ]);
+
+        jRes.addFunc({
+            breakpoint: ['phone'],
+            enter: function () {
+                searchHide()
+                width = 400;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit phone");
+
+            }
+        });
+        jRes.addFunc({
+            breakpoint: ['tablet'],
+            enter: function () {
+                searchHide()
+                width = 500;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit tablet");
+
+            }
+        });
+        jRes.addFunc({
+            breakpoint: ['desktop'],
+            enter: function () {
+                searchHide()
+                width = 700;
+                setWidth(width)
+            },
+            exit: function () {
+                console.log("Exit desktop");
+
+            }
+        });
+
+        $('#search-border').click(function () {
+            let id = $("#search-border i");
+            if (searchPanelOpen) {
+                searchHide();
+                infoModalHide();
+                moduleContainerHide();
+                id.removeClass("fa-times");
+                id.addClass("fa-reorder");
+                id.css("padding-left", "12px")
+
+            } else {
+                searchShow();
+                id.removeClass("fa-reorder");
+                id.addClass("fa-times");
+                id.css("padding-left", "14px")
+            }
+        });
+
+        // Bottom dialog
+        $(".close-hide").on("click touchstart", function (e) {
+            var id = ($(this)).parent().parent().attr('id');
+
+            // If print when deactivate
+            if ($(this).data('module') === "print") {
+                backboneEvents.get().trigger(`off:print`);
+            }
+
+            // If legend when deactivate
+            if ($(this).data('module') === "legend") {
+                $("#legend-content").append($("#legend"));
+                $("#btn-show-legend-in-map").prop("disabled", false);
+            }
+
+            $("#" + id).animate({
+                bottom: "-100%"
+            }, 500, function () {
+                $(id + " .expand-less").show();
+                $(id + " .expand-more").hide();
+            });
+        });
+
+        $(".expand-less").on("click touchstart", function () {
+
+            var id = ($(this)).parent().parent().attr('id');
+
+            $("#" + id).animate({
+                bottom: (($("#" + id).height() * -1) + 10) + "px"
+            }, 500, function () {
+                $("#" + id + " .expand-less").hide();
+                $("#" + id + " .expand-more").show();
+            });
+        });
+
+        $(".expand-more").on("click touchstart", function () {
+
+            var id = ($(this)).parent().parent().attr('id');
+
+            $("#" + id).animate({
+                bottom: "0"
+            }, 500, function () {
+                $("#" + id + " .expand-less").show();
+                $("#" + id + " .expand-more").hide();
+            });
+        });
+
+        $(".map-tool-btn").on("click", function (e) {
+
+            e.preventDefault();
+
+            var id = ($(this)).attr('href');
+
+            if (id === "#full-screen"){
+                utils.toggleFullScreen();
+            }
+
+            // If print when activate
+            if ($(this).data('module') === "print") {
+                backboneEvents.get().trigger(`on:print`);
+            }
+
+            // If legend when deactivate
+            if ($(this).data('module') === "legend") {
+                $("#legend-dialog .modal-body").append($("#legend"));
+                $("#btn-show-legend-in-map").prop("disabled", true);
+            }
+
+            $(id).animate({
+                bottom: "0"
+            }, 500, function () {
+                $(id + " .expand-less").show();
+                $(id + " .expand-more").hide();
+            })
+        });
+
+        // Hiding all panels with visible modules
+        backboneEvents.get().on(`hide:all`, () => {
+            if ($(`.modal-header > button[class="close"]`).is(`:visible`)) {
+                $(`.modal-header > button[class="close"]`).trigger(`click`);
+            }
+        });
+
+        $(`.slide-right > .modal-header > button[class="close"]`).click(() => {
+            backboneEvents.get().trigger(`off:all`);
+        });
+
+        // Module icons
+        $("#side-panel ul li a").on("click", function (e) {
+            backboneEvents.get().trigger(`off:all`);
+
+            let moduleTitle = $(this).data(`module-title`);
+            $('#module-container').find(`.js-module-title`).text('');
+            if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
+
+            let moduleId = $(this).data(`module-id`);
+            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
+            setTimeout(() => {
+                if (moduleId && moduleId !== ``) {
+                    if (moduleId in applicationModules) {
+                        backboneEvents.get().trigger(`on:${moduleId}`);
+                    } else {
+                        if (moduleIgnoreErrors) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
+                    }
+                }
+            }, 100);
+
+            let id = ($(this));
+            $("#side-panel ul li").removeClass("active");
+            id.addClass("active");
+            
+        });
+
+        // Listen for extensions
+        $(document).arrive("#side-panel ul li a", function (e, data) {
+            $(this).on("click", function (e) {
+                backboneEvents.get().trigger(`off:all`);
+                let moduleId = $(this).data(`module-id`);
+                setTimeout(() => {
+                    if (moduleId && moduleId !== ``) {
+                        if (moduleId in applicationModules.extensions) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
+                    }
+                }, 100);
+                let id = ($(this));
+                $("#side-panel ul li").removeClass("active");
+                id.addClass("active");
+            });
+        })
+
+        // Listen for fullscreen changes
+        document.addEventListener("fullscreenchange", function(event) {
+            if (document.fullscreenElement) {
+                $("#full-screen-btn i").html("fullscreen_exit")
+            } else {
+                $("#full-screen-btn i").html("fullscreen")
+            }
+        });
+
     }
 };

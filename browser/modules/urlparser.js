@@ -1,23 +1,26 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2019 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-/**
- * @type {string}
- */
-var uri = geocloud.pathName;
+let uriJs = require('urijs');
+let uriObj = new uriJs(window.location.href);
+let queryStr = uriObj.search();
 
 /**
  *
  * @type {{hostname: *, hash: string, db: *, schema: *, urlVars: *}}
  */
 module.exports = {
-    hostname: geocloud_host,
+    hostname: uriObj.protocol() + "://" + uriObj.hostname() + ":" + uriObj.port(),
     hash: decodeURIComponent(geocloud.urlHash),
-    db: uri[2],
-    schema: uri[3],
-    urlVars: geocloud.urlVars
+    db: uriObj.segmentCoded(1),
+    schema: uriObj.segmentCoded(2),
+    staticRoute: uriObj.segmentCoded(3),
+    urlVars: uriJs.parseQuery(queryStr),
+    uriJs: uriJs,
+    uriObj: uriObj
 };

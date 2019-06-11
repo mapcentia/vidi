@@ -1,45 +1,112 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var router = express.Router();
-var http = require('http');
 var config = require('../../config/config.js').gc2;
 var request = require('request');
+var fs = require('fs');
 
-router.post('/api/sql/:db', function (req, response) {
-    var db = req.params.db, q = req.body.q, srs = req.body.srs, lifetime = req.body.lifetime, client_encoding = req.body.client_encoding, data = [];
+router.all('/api/sql/:db', function (req, response) {
+    req.setTimeout(0); // no timeout
+    var db = req.params.db,
+        q = req.body.q || req.query.q,
+        srs = req.body.srs || req.query.srs,
+        lifetime = req.body.lifetime || req.query.lifetime || "0",
+        client_encoding = req.body.client_encoding || req.query.client_encoding,
+        base64 = req.body.base64 || req.query.base64,
+        format = req.body.format || req.query.format,
+        custom_data = req.body.custom_data || req.query.custom_data,
+        store = req.body.store || req.query.store,
+        userName,
+        fileName,
+        writeStream,
+        rem,
+        headers,
+        uri,
+        key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+        });
 
-    var postData = "q=" + encodeURIComponent(q) + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding, options;
+    var postData = "q=" + (base64 === "true" ? q : encodeURIComponent(q)) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
+        options;
 
-    if (req.body.key) {
+    // Check if user is a sub user
+    if (req.session.gc2UserName && req.session.subUser) {
+        userName = req.session.subUser + "@" + db;
+    } else {
+        userName = db;
+    }
+
+    if (req.body.key && !req.session.gc2ApiKey) {
         postData = postData + "&key=" + req.body.key;
     }
 
+    uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
+
+    console.log(uri);
+
     options = {
         method: 'POST',
-        uri: config.host + "/api/v1/sql/" + db,
+        uri: uri,
         form: postData
     };
 
-    request(options, function (err, res, body) {
-
-        if (err) {
-
-            response.header('content-type', 'application/json');
-            response.status(400).send({
-                success: false,
-                message: "Could not get the sql data."
-            });
-
-            return;
+    if (format === "excel") {
+        fileName = key + ".xlsx";
+        headers = {
+            'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition': 'attachment; filename=data.xlsx',
+            'Expires': '0',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'X-Powered-By': 'MapCentia Vidi'
         }
+    } else {
+        fileName = key + ".json";
+        headers = {
+            'Content-Type': 'application/json',
+            'Expires': '0',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'X-Powered-By': 'MapCentia Vidi'
+        }
+    }
 
-        response.header('content-type', 'application/json');
-        response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
-        response.header('Expires', '0');
-        response.header('X-Powered-By', 'MapCentia Vidi');
+    // if (!store) {
+    //     //response.writeHead(200, headers);
+    // }
 
-        response.send(body);
+    rem = request(options);
+
+    if (store) {
+        writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
+    }
+
+    rem.on('response', function(res) {
+        console.log(res.statusCode);
+        if (!store) {
+            response.writeHead(res.statusCode, headers);
+        }
     });
 
+    rem.on('data', function (chunk) {
+        if (store) {
+            writeStream.write(chunk, 'binary');
+        } else {
+            response.write(chunk);
+        }
+    });
+    rem.on('end', function () {
+        if (store) {
+            console.log("Result saved");
+            response.send({"success": true, "file": fileName});
+        } else {
+            response.end();
+        }
+    });
 
 });
 module.exports = router;

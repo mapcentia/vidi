@@ -1,9 +1,13 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
+
+import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './layerTree/LayerSorting';
+import {LAYER} from './layerTree/constants';
 
 /**
  *
@@ -30,12 +34,6 @@ var ready = false;
 
 /**
  *
- * @type {boolean}
- */
-var cartoDbLayersready = false;
-
-/**
- *
  * @type {string}
  */
 var BACKEND = require('../../config/config.js').backend;
@@ -51,18 +49,15 @@ var meta;
  */
 var backboneEvents;
 
-var mustache = require('mustache');
-
-
 var host = require("./connection").getHost();
 
-var switchLayer;
+var layerTree;
 
-var singleTiled = [];
+var currentlyLoadedLayers = [];
 
+var uri = null;
 
-
-var array =[];
+let _self = false;
 
 /**
  *
@@ -75,10 +70,12 @@ module.exports = {
      * @returns {exports}
      */
     set: function (o) {
+        _self = this;
+
         cloud = o.cloud;
         meta = o.meta;
+        layerTree = o.layerTree;
         backboneEvents = o.backboneEvents;
-        switchLayer = o.switchLayer;
         return this;
     },
 
@@ -86,38 +83,51 @@ module.exports = {
      *
      */
     init: function () {
-
-
-
     },
 
     ready: function () {
-        // If CartoDB, we wait for cartodb.createLayer to finish
-        if (BACKEND === "cartodb") {
-            return (ready && cartoDbLayersready);
-        }
-        // GC2 layers are direct tile request
-        else {
-            return ready;
-        }
+        return ready;
     },
 
-    getLayers: function (separator, includeHidden) {
-        var layerArr = [];
+    /**
+     * Fetches Leaflet layers from map
+     */
+    getMapLayers: (includeHidden = false, searchedLayerKey = false) => {
+        var mapLayers = [];
         var layers = cloud.get().map._layers;
+
         for (var key in layers) {
-            if (layers.hasOwnProperty(key)) {
-                if (layers[key].baseLayer !== true && typeof layers[key]._tiles === "object") {
-                    if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
-                        layerArr.push(layers[key].id);
+            if (layers[key].baseLayer !== true) {
+                if (typeof layers[key].id === "undefined" || (typeof layers[key].id !== "undefined" && (layers[key].id.split(".")[0] !== "__hidden") || includeHidden === true)) {
+                    if ((typeof layers[key]._tiles === "object" || typeof layers[key]._wmsUrl !== "undefined")
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR + ':'))
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR_TILE + ':'))
+                        || (layers[key].id && layers[key].id.startsWith(LAYER.WEBGL + ':'))) {
+
+                        if (searchedLayerKey) {
+                            if (searchedLayerKey === layers[key].id) {
+                                mapLayers.push(layers[key]);
+                            }
+                        } else {
+                            mapLayers.push(layers[key]);
+                        }
                     }
                 }
             }
         }
+
+        return mapLayers;
+    },
+
+    getLayers: function (separator, includeHidden) {
+        var layerArr = [];
+        _self.getMapLayers(includeHidden).map(item => {
+            layerArr.push(item.id);
+        });
+
         if (layerArr.length > 0) {
             return layerArr.join(separator ? separator : ",");
-        }
-        else {
+        } else {
             return false;
         }
     },
@@ -132,190 +142,259 @@ module.exports = {
             }
         }
     },
-    resetCount: function (i) {
-        ready = cartoDbLayersready = false;
+
+    resetCount: function () {
+        ready = false;
     },
 
-
-
     incrementCountLoading: function (i) {
-        if (array.indexOf(i) === -1) {
-            array.push(i)
+        if (currentlyLoadedLayers.indexOf(i) === -1) {
+            currentlyLoadedLayers.push(i)
         }
-        return array.length;
+
+        return currentlyLoadedLayers.length;
     },
 
     decrementCountLoading: function (i) {
-        array.splice(array.indexOf(i), 1);
-        return array.length;
+        currentlyLoadedLayers.splice(currentlyLoadedLayers.indexOf(i), 1);
+        return currentlyLoadedLayers.length;
     },
 
-    getCountLoading: function() {
-      return  array.length;
+    getCountLoading: function () {
+        return currentlyLoadedLayers.length;
     },
 
-    getArray: function() {
-      return  array;
+    getArray: function () {
+        return currentlyLoadedLayers;
+    },
+
+    setUri: function (str) {
+        uri = str;
+    },
+
+    reorderLayers: () => {
+        let order = layerTree.getLatestLayersOrder();
+        let layers = _self.getMapLayers();
+        if (order) {
+            order.map((orderItem, groupIndex) => {
+                orderItem.children.map((item, index) => {
+                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                        layers.map(layer => {
+                            if (layer.id && (layer.id.replace(`v:`, ``) === item.id.replace(`v:`, ``))) {
+                                let zIndex = ((orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                layer.setZIndex(zIndex);
+                            }
+                        });
+                    } else if (item.type === GROUP_CHILD_TYPE_GROUP) {
+                        item.children.map((childItem, childIndex) => {
+                            layers.map(layer => {
+                                if (layer.id && (layer.id.replace(`v:`, ``) === childItem.id.replace(`v:`, ``))) {
+                                    let zIndex = ((item.children.length - childIndex) + (orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                                    layer.setZIndex(zIndex);
+                                }
+                            });
+                        });
+                    } else {
+                        throw new Error(`Invalid order object type`);
+                    }
+                });
+            });
+        }
     },
 
     /**
+     * Adds a layers UTFGrid. Checks if any fields has mouse over set. Or else the grid is not added.
+     * @param layerKey      Layer key
+     * @returns {boolean}
+     */
+    addUTFGridLayer: function (layerKey) {
+        let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
+        try {
+            fieldConf = JSON.parse(metaData[layerKey].fieldconf);
+        } catch (e) {
+            fieldConf = {};
+        }
+        for (let key in fieldConf) {
+            if (fieldConf.hasOwnProperty(key)) {
+                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
+                    useUTFGrid = true;
+                    break;
+                }
+            }
+        }
+        if (useUTFGrid) {
+            result = new Promise((resolve, reject) => {
+                if (metaData[layerKey].type === "RASTER") {
+                    reject();
+                    return;
+                }
+                cloud.get().addUTFGridLayers({
+                    host: host,
+                    layers: [layerKey],
+                    db: db,
+                    uri: uri,
+                    fieldConf: fieldConf
+                });
+                console.info(`${layerKey} UTFgrid was added to the map`);
+                resolve();
+            });
+        }
+        return result;
+    },
+
+    /**
+     * Add raster layer
      *
-     * @param l
+     * @param {String}  layerKey                Layer key
+     * @param {Array}   additionalURLParameters Additional URL parameters
+     *
      * @returns {Promise}
      */
-    addLayer: function (l) {
+    addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
+        let result = new Promise((resolve, reject) => {
+            var layers = [], metaData = meta.getMetaData();
 
-        if (typeof window.vidiConfig.singleTiled === "object" && window.vidiConfig.singleTiled.length > 0) {
-            singleTiled = window.vidiConfig.singleTiled
-        }
+            let layerWasAdded = false;
 
-        return new Promise(function (resolve, reject) {
+            $.each(metaData.data, function (i, layerDescription) {
+                let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
+                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                if (layer === layerKey) {
+                    var isBaseLayer = !!layerDescription.baselayer;
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        additionalURLParameters,
+                        host: host,
+                        layers: [layer],
+                        db: db,
+                        isBaseLayer,
+                        mapRequestProxy: mapRequestProxy,
+                        tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
+                        singleTile: true, // Always use single tiled. With or without MapCache
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        //name: layerDescription.f_table_name,
+                        name: layerDescription.f_table_name,
+                        type: "wms", // Always use WMS protocol
+                        format: "image/png",
+                        uri: uri,
+                        loadEvent: function () {
+                            me.decrementCountLoading(layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
 
-            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
+                    me.reorderLayers();
 
-            $.each(metaData.data, function (i, v) {
+                    layerWasAdded = true;
 
-                var layer = v.f_table_schema + "." + v.f_table_name;
-
-                if (layer === l) {
-
-                    switch (BACKEND) {
-
-                        case "gc2":
-
-                            isBaseLayer = v.baselayer ? true : false;
-
-                            layers[[layer]] = cloud.get().addTileLayers({
-                                host: host,
-                                layers: [layer],
-                                db: db,
-                                isBaseLayer: isBaseLayer,
-                                tileCached: singleTiled.indexOf(layer) === -1,
-                                visibility: false,
-                                wrapDateLine: false,
-                                displayInLayerSwitcher: true,
-                                name: v.f_table_name,
-                                // Single tile option
-                                type: singleTiled.indexOf(layer) === -1 ? "tms" : "wms",
-                                tileSize: singleTiled.indexOf(layer) === -1 ? 256 : 9999,
-                                format: "image/png",
-                                loadEvent: function () {
-                                    me.decrementCountLoading(layer);
-                                    backboneEvents.get().trigger("doneLoading:layers", layer);
-                                },
-                                loadingEvent: function () {
-                                    me.incrementCountLoading(layer);
-                                    backboneEvents.get().trigger("startLoading:layers", layer);
-                                },
-                                subdomains: window.gc2Options.subDomainsForTiles
-                            });
-
-                            layers[[layer]][0].setZIndex(v.sort_id + 10000);
-
-                            resolve();
-
-                            break;
-
-                        case "cartodb":
-
-                            var tooltipHtml;
-
-                            var fieldconf = JSON.parse(v.fieldconf), interactivity = ["cartodb_id"], template;
-
-                            template = (typeof v.tooltip !== "undefined" && v.tooltip.template !== "" ) ? v.tooltip.template : null;
-
-                            $.each(fieldconf, function (name, property) {
-                                if (typeof property.utfgrid !== "undefined" && property.utfgrid === true) {
-                                    interactivity.push(name)
-                                }
-                            });
-
-                            cartodb.createLayer(cloud.get().map, {
-                                user_name: db,
-                                type: 'cartodb',
-                                sublayers: [{
-                                    sql: v.sql,
-                                    cartocss: v.cartocss,
-                                    interactivity: interactivity.join(",")
-                                }]
-                            })
-                                .on('done', function (cartoLayer) {
-
-                                    cartoLayer.baseLayer = false;
-                                    cartoLayer.id = v.f_table_schema + "." + v.f_table_name;
-                                    cartoLayer.on("load", function () {
-                                        me.decrementCountLoading(cartoLayer.id);
-                                        backboneEvents.get().trigger("doneLoading:layers", cartoLayer.id);
-                                    });
-                                    cartoLayer.on("loading", function () {
-                                        me.incrementCountLoading(cartoLayer.id);
-                                        backboneEvents.get().trigger("startLoading:layers", cartoLayer.id);
-                                    });
-                                    cloud.get().addLayer(cartoLayer, v.f_table_name);
-
-                                    // We switch the layer on/off, so they become ready for state.
-                                    cloud.get().showLayer(cartoLayer.id);
-                                    cloud.get().hideLayer(cartoLayer.id);
-
-                                    // Carto layer object is not complete(!?), so we poll until _url prop is set
-                                    if (interactivity.length > 0) {
-                                        (function poll1() {
-                                            if (typeof cartoLayer._url !== "undefined") {
-
-                                                // A bit hackery way to set UTFgrid url
-                                                var utfGrid = new L.UtfGrid(cartoLayer._url.replace(".png", "") + '.grid.json?callback={cb}&interactivity=name'), flag = false;
-                                                utfGrid.id = cartoLayer.id + "_vidi_utfgrid";
-                                                cloud.get().addLayer(utfGrid);
-                                                utfGrid.on('mouseover', _.debounce(function (e) {
-                                                    var tmp = $.extend(true, {}, e.data), fi = [];
-                                                    flag = true;
-                                                    $.each(tmp, function (name, property) {
-                                                        if (name !== "cartodb_id") {
-                                                            fi.push({
-                                                                title: fieldconf[name].alias_tooltip || name,
-                                                                value: property
-                                                            });
-                                                        }
-                                                    });
-                                                    tmp.fields = fi; // Used in a "loop" template
-                                                    tooltipHtml = Mustache.render(template, tmp);
-                                                    if (fi.length > 0) {
-                                                        $("#tail").fadeIn(100);
-                                                        $("#tail").html(tooltipHtml);
-                                                    }
-
-                                                }, 0));
-                                                utfGrid.on('mouseout', function (e) {
-                                                    flag = false;
-                                                    // Wait 200 ms before closing tooltip, so its not blinking between close features
-                                                    setTimeout(function () {
-                                                        if (!flag) {
-                                                            $("#tail").fadeOut(100);
-                                                        }
-                                                    }, 200)
-
-                                                });
-                                                cartoDbLayersready = true;
-                                                backboneEvents.get().trigger("ready:layers");
-                                                resolve();
-                                            } else {
-                                                setTimeout(function () {
-                                                    poll1()
-                                                }, 50);
-                                            }
-                                        }());
-                                    } else {
-                                        resolve();
-                                    }
-
-                                });
-                            break;
-                    }
+                    return false;
                 }
             });
 
-            console.info(l + " added to the map.");
-        })
+            if (layerWasAdded) {
+                resolve();
+            } else {
+                reject(`${layerKey} was not added to the map`);
+            }
+        });
+
+        return result;
+    },
+
+    /**
+     * Add vector tile layer
+     *
+     * @param {String} layerKey                Layer key
+     * @param {Array}  additionalURLParameters Additional URL parameters
+     *
+     * @returns {Promise}
+     */
+    addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
+        let me = this;
+        let result = new Promise((resolve, reject) => {
+            let isBaseLayer, layers = [], metaData = meta.getMetaData();
+            let layerWasAdded = false;
+            $.each(metaData.data, function (i, layerDescription) {
+                var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
+                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+
+                if (layer === layerKey) {
+                    // Check if the opacity value differs from the default one
+                    isBaseLayer = !!layerDescription.baselayer;
+                    layers[[layer]] = cloud.get().addTileLayers({
+                        additionalURLParameters,
+                        host: host,
+                        layerId: (LAYER.VECTOR_TILE + `:` + layer),
+                        layers: [layer],
+                        db: db,
+                        isBaseLayer: isBaseLayer,
+                        mapRequestProxy: mapRequestProxy,
+                        tileCached: useCache, // Use MapCache or "real" WMS.
+                        singleTile: true, // Always use single tiled. With or without MapCache
+                        wrapDateLine: false,
+                        displayInLayerSwitcher: true,
+                        name: layerDescription.f_table_name,
+                        type: "mvt",
+                        format: "image/png",
+                        uri: uri,
+                        loadEvent: function () {
+                            me.decrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("doneLoading:layers", layer);
+                        },
+                        loadingEvent: function () {
+                            me.incrementCountLoading(LAYER.VECTOR_TILE + `:` + layer);
+                            backboneEvents.get().trigger("startLoading:layers", layer);
+                        },
+                        subdomains: window.gc2Options.subDomainsForTiles
+                    });
+
+                    layers[[layer]][0].setZIndex(layerDescription.sort_id + 10000);
+                    me.reorderLayers();
+
+                    layerWasAdded = true;
+                    return false;
+                }
+            });
+
+            if (layerWasAdded) {
+                console.info(`${layerKey} was added to the map`);
+                resolve();
+            } else {
+                console.warn(`${layerKey} was not added to the map`);
+                reject();
+            }
+        });
+
+        return result;
+    },
+
+    /**
+     * Extracts cache settings from layer description
+     *
+     * @param {Object} layerDescription        Layer description
+     * @param {String} additionalURLParameters Additional URL parameters
+     *
+     * @returns {Object}
+     */
+    getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
+        // If filters are applied or single_tile is true, then request should not be cached
+        let setAsCached = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        let useCache = setAsCached;
+        if (appendedFiltersString.length > 0 && appendedFiltersString[0] !== "") {
+            useCache = false;
+        }
+        // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
+        let mapRequestProxy = false;
+        if (!useCache && layerDescription.authentication === `Read/write`) {
+            mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
+        }
+        return {useCache, mapRequestProxy};
     }
 };

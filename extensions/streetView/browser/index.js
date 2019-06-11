@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2019 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -33,7 +34,7 @@ var transformPoint;
  *
  * @type {string}
  */
-var exId = "streetview";
+var exId = "streetView";
 
 /**
  *
@@ -45,6 +46,20 @@ var clicktimer;
  */
 var mapObj;
 
+var cowiUrl;
+
+var mapillaryUrl = "https://www.mapillary.com/app/?z=17";
+
+var config = require('../../../config/config.js');
+
+if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
+    if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
+        mapillaryUrl = config.extensionConfig.streetView.mapillary;
+    }
+    if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
+        cowiUrl = config.extensionConfig.streetView.cowi;
+    }
+}
 
 /**
  *
@@ -71,6 +86,8 @@ module.exports = {
      */
     init: function () {
 
+        var parentThis = this;
+
         /**
          *
          * Native Leaflet object
@@ -94,8 +111,8 @@ module.exports = {
         var dict = {
 
             "Info": {
-                "da_DK": "Start Google Street View eller Mapillary op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
-                "en_US": "Start Google Street View or Mapillary from where you click on the map. The service starts in a new browser window."
+                "da_DK": "Start Google Street View, Mapillary eller skråfoto op fra hvor du klikker i kortet. Servicen starter i et nyt browser vindue.",
+                "en_US": "Start Google Street View, Mapillary or Oblique Photo from where you click on the map. The service starts in a new browser window."
             },
 
             "Street View": {
@@ -140,45 +157,7 @@ module.exports = {
                     selectedOption: "google"
                 };
 
-                this.onActive = this.onActive.bind(this);
                 this.onChange = this.onChange.bind(this);
-            }
-
-            /**
-             *
-             * @param e
-             */
-            onActive(e) {
-                this.setState({
-                    active: e.target.checked
-                });
-
-                if (e.target.checked) {
-
-                    // Turn info click off
-                    //====================
-                    backboneEvents.get().trigger("off:infoClick");
-
-                    // Emit "on" event
-                    //================
-                    backboneEvents.get().trigger("on:" + exId);
-
-                    utils.cursorStyle().crosshair();
-
-                } else {
-
-                    // Turn info click on again
-                    //=========================
-                    backboneEvents.get().trigger("on:infoClick");
-
-                    // Emit "off" event
-                    //=================
-                    backboneEvents.get().trigger("off:" + exId);
-
-                    utils.cursorStyle().reset();
-
-                }
-
             }
 
             onChange(changeEvent) {
@@ -191,7 +170,28 @@ module.exports = {
              *
              */
             componentDidMount() {
-                var me = this;
+                let me = this;
+
+                // Stop listening to any events, deactivate controls, but
+                // keep effects of the module until they are deleted manually or reset:all is emitted
+                backboneEvents.get().on("deactivate:all", () => {
+                });
+
+                // Activates module
+                backboneEvents.get().on(`on:${exId}`, () => {
+                    me.setState({
+                        active: true
+                    });
+                    utils.cursorStyle().crosshair();
+                });
+
+                // Deactivates module
+                backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
+                    me.setState({
+                        active: false
+                    });
+                    utils.cursorStyle().reset();
+                });
 
                 // Handle click events on map
                 // ==========================
@@ -200,7 +200,7 @@ module.exports = {
                     clicktimer = undefined;
                 });
                 mapObj.on("click", function (e) {
-                    var event = new geocloud.clickEvent(e, cloud);
+                    let event = new geocloud.clickEvent(e, cloud);
                     if (clicktimer) {
                         clearTimeout(clicktimer);
                     }
@@ -211,7 +211,7 @@ module.exports = {
 
                         clicktimer = setTimeout(function (e) {
 
-                            var coords = event.getCoordinate(), p, url;
+                            let coords = event.getCoordinate(), p, url;
                             p = utils.transform("EPSG:3857", "EPSG:4326", coords);
                             clicktimer = undefined;
 
@@ -221,12 +221,18 @@ module.exports = {
                                     break;
 
                                 case "mapillary":
-                                    url = "https://www.mapillary.com/app/?lat=" + p.y + "&lng=" + p.x + "&z=17";
+                                    url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
+                                    break;
+
+                                case "skraafoto":
+                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                                    break;
+
+                                case "cowi":
+                                    url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
                                     break;
                             }
-
-                            utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
-
+                            parentThis.callBack(url);
 
                         }, 250);
                     }
@@ -241,60 +247,77 @@ module.exports = {
                 return (
 
                     <div role="tabpanel">
-                        <div className="panel panel-default">
-                            <div className="panel-body">
-                                <div className="form-group">
-                                    <div className="togglebutton">
-                                        <label><input id="streetview-btn" type="checkbox"
-                                                      defaultChecked={ this.state.active }
-                                                      onChange={this.onActive}/>{__("Activate")}
-                                        </label>
-
-                                    </div>
-                                    <h3>{__("Choose service")}</h3>
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-google" name="streetview-service"
-                                                   value="google" checked={this.state.selectedOption === 'google'}
-                                                   onChange={this.onChange}/>
-                                            Google Street View
-                                        </label>
-                                    </div>
-
-                                    <div className="radio">
-                                        <label>
-                                            <input type="radio" id="streetview-service-mapillary"
-                                                   name="streetview-service" value="mapillary"
-                                                   checked={this.state.selectedOption === 'mapillary'}
-                                                   onChange={this.onChange}/>
-                                            Mapillary
-                                        </label>
-                                    </div>
-
-                                </div>
-
+                        <div className="form-group">
+                            <h3>{__("Choose service")}</h3>
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-google" name="streetview-service"
+                                           value="google" checked={this.state.selectedOption === 'google'}
+                                           onChange={this.onChange}/>
+                                    Google Street View
+                                </label>
                             </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-mapillary"
+                                           name="streetview-service" value="mapillary"
+                                           checked={this.state.selectedOption === 'mapillary'}
+                                           onChange={this.onChange}/>
+                                    Mapillary
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-skraafoto"
+                                           name="streetview-service" value="skraafoto"
+                                           checked={this.state.selectedOption === 'skraafoto'}
+                                           onChange={this.onChange}/>
+                                    Skråfoto
+                                </label>
+                            </div>
+
+                            <div className="radio">
+                                <label>
+                                    <input type="radio" id="streetview-service-cowi"
+                                           name="streetview-service" value="cowi"
+                                           checked={this.state.selectedOption === 'cowi'}
+                                           onChange={this.onChange}/>
+                                    COWI Gadefoto
+                                </label>
+                            </div>
+
                         </div>
                     </div>
                 );
             }
         }
 
-        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max);
+        utils.createMainTab(exId, __("Street View"), __("Info"), require('./../../../browser/modules/height')().max, "photo_camera", false, exId);
 
         // Append to DOM
         //==============
         try {
 
             ReactDOM.render(
-                <Streetview />,
+                <Streetview/>,
                 document.getElementById(exId)
             );
         } catch (e) {
 
         }
 
+    },
+
+    callBack: function (url) {
+        utils.popupCenter(url, (utils.screen().width - 100), (utils.screen().height - 100), exId);
+    },
+
+    setCallBack: function (fn) {
+        this.callBack = fn;
     }
+
 
 };
 

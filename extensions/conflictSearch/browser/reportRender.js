@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -39,7 +40,11 @@ module.exports = {
                         dataTr = $("<tr></tr>");
                         for (m = 0; m < v.data[u].length; m++) {
                             if (!v.data[u][m].key) {
-                                dataTr.append("<td>" + v.data[u][m].value + "</td>");
+                                if (!v.data[u][m].link) {
+                                    dataTr.append("<td>" + v.data[u][m].value + "</td>");
+                                } else {
+                                    dataTr.append("<td>" + "<a target='_blank' rel='noopener' href='" + (v.data[u][m].linkprefix ? v.data[u][m].linkprefix : "") + v.data[u][m].value + "'>Link</a>" + "</td>");
+                                }
                             }
                         }
                         dataTable.append(dataTr);

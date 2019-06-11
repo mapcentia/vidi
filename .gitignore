@@ -3,6 +3,25 @@
 
 *.iml
 
+# Mock snapshot database, should be removed when state snapshot management is moved to GC2
+temporary-state-storage.json
+
+# Templates should be generated on-site, no need to store it in the repository
+public/js/templates.js
+
+# Following files are restored after running "grunt ..." command
+public/index.html
+public/favicon.ico
+
+# Code coverage files
+.nyc_output
+coverage
+coverageQueue
+
+## Build files
+public/js/build
+public/css/build
+
 ## Directory-based project format:
 .idea/
 # if you remove the above rule, at least ignore the following:
@@ -84,8 +103,12 @@ config/_variables.less
 
 /public/css/build/all.min.css
 /public/js/bundle.js
+/public/service-worker.bundle.js
 /public/js/build/all.min.js
 /config/_styles.less
 /config/configServer.js
 /public/js/templates.js
-/public/bower_components/bootstrap-select/
+/public/bower_components
+/public/css/extensions/all.min.css
+/public/css/styles.css
+/public/css/styles.min.css

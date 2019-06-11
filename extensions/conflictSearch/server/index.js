@@ -1,3 +1,9 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var request = require("request");
 var router = express.Router();
@@ -23,12 +29,32 @@ router.post('/api/extension/conflictSearch', function (req, response) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
-    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField,
+    var url = "http://127.0.0.1:3000/api/meta/" + db + "/" + schema, count = 0, table, sql, geomField, srid,
         startTime, hits = {}, hit, metaDataFinal = {data: []}, metaDataKeys = [], queryables = [];
 
     request.get(url, function (err, res, body) {
         if (!err) {
-            var metaData = JSON.parse(body);
+            var emptyReport = {
+                hits: {},
+                file: null,
+                text: null,
+                dateTime: moment().format('MMMM Do YYYY, H:mm')
+            };
+
+            try {
+                var metaData = JSON.parse(body);
+            } catch (e) {
+                response.send(emptyReport);
+                return;
+            }
+
+            if (metaData.data === undefined || metaData.data.length === 0) {
+
+                response.send(emptyReport);
+                return;
+            }
+
+
             // Count layers
             for (var i = 0; i < metaData.data.length; i = i + 1) {
                 if (metaData.data[i].type !== "RASTER" &&
@@ -39,131 +65,133 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 }
             }
             (function iter() {
+
                 startTime = new Date().getTime();
                 table = metaDataFinal.data[count].f_table_schema + "." + metaDataFinal.data[count].f_table_name;
-                switch (BACKEND) {
-                    case "gc2":
-                        geomField = metaDataFinal.data[count].f_geometry_column;
-                        if (buffer > 0) {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),ST_Buffer(ST_transform(ST_geomfromtext('" + wkt + "',4326),25832)," + buffer + "))";
-                        } else {
-                            sql = "SELECT * FROM " + table + " WHERE  ST_intersects(ST_transform(" + geomField + ",25832),          ST_Transform(ST_geomfromtext('" + wkt + "',4326),25832))";
-                        }
-                        break;
-                    case "cartodb":
-                        geomField = "the_geom_webmercator";
-                        if (buffer > 0) {
-                            sql = "SELECT geography(ST_transform(" + geomField + ",4326)) as _gc2_geom, * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_DWithin(ST_GeogFromText('" + wkt + "'), geography(ST_transform(" + geomField + ",4326)), " + buffer + ")";
-                        } else {
-                            sql = "SELECT * FROM (" + metaDataKeys[table.split(".")[1]].sql + ") as foo WHERE ST_intersects(ST_transform(" + geomField + ",900913),ST_transform(ST_geomfromtext('" + wkt + "',4326),900913))";
-                        }
-                        break;
-                }
+
+                geomField = metaDataFinal.data[count].f_geometry_column;
+                srid = metaDataFinal.data[count].srid;
+
+                sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
+
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
 
                 var postData = "client_encoding=UTF8&srs=4326&lifetime=0&q=" + sql,
+
+
                     options = {
-                        method: 'POST',
-                        host: "127.0.0.1",
-                        port: "3000",
-                        path: '/api/sql/' + db,
+                        uri: "http://127.0.0.1:3000/api/sql/" + db,
+                        encoding: 'utf8',
+                        body: postData,
                         headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded ',
-                            'Content-Length': postData.length
+                            "Content-Type": 'application/x-www-form-urlencoded',
+                            'Content-Length': postData.length,
                         }
                     };
-                var req = http.request(options, function (res) {
-                    var chunks = [], error = false, message = null;
-                    res.on('data', function (chunk) {
-                        chunks.push(chunk);
-                    });
-                    res.on('error', function (e) {
-                        console.log(e);
-                    });
-                    res.on('end', function () {
-                        var jsfile = new Buffer.concat(chunks);
-                        var result = JSON.parse(jsfile);
-                        var time = new Date().getTime() - startTime, data = [], tmp = [];
-                        if (res.statusCode !== 200) {
-                            console.log(result.message);
-                            error = true;
-                            message = result.message;
-                        }
-                        count++;
-                        if (result.features) {
-                            for (var i = 0; i < result.features.length; i++) {
 
-                                for (var prop in queryables) {
-                                    if (queryables.hasOwnProperty(prop)) {
-                                        if (queryables[prop].conflict || (BACKEND === "cartodb" && queryables[prop].querable)) {
-                                            tmp.push({
-                                                name: prop,
-                                                alias: queryables[prop].alias || prop,
-                                                value: result.features[i].properties[prop],
-                                                sort_id: queryables[prop].sort_id,
-                                                key: false
-                                            })
-                                        }
+                request.post(options, function (err, res, body) {
+
+                    var jsfile, message = null, result, time;
+
+                    if (err || res.statusCode !== 200) {
+                        response.status(401).send({
+                            success: false,
+                            message: body
+                        });
+                        return;
+                    }
+
+                    try {
+                        jsfile = JSON.parse(body);
+                    } catch (e) {
+                        response.status(500).send({
+                            success: false,
+                            message: "Could not parse response from GC2 SQL API",
+                            data: body,
+                            query: postData
+                        });
+                        return;
+                    }
+
+                    result = jsfile;
+                    message = result.message;
+                    time = new Date().getTime() - startTime, data = [], tmp = [];
+
+                    count++;
+                    if (result.features) {
+                        for (var i = 0; i < result.features.length; i++) {
+
+                            for (var prop in queryables) {
+                                if (queryables.hasOwnProperty(prop)) {
+                                    if (queryables[prop].conflict || (BACKEND === "cartodb" && queryables[prop].querable)) {
+                                        tmp.push({
+                                            name: prop,
+                                            alias: queryables[prop].alias || prop,
+                                            value: result.features[i].properties[prop],
+                                            sort_id: queryables[prop].sort_id,
+                                            link: queryables[prop].link,
+                                            linkprefix: queryables[prop].linkprefix,
+                                            key: false
+                                        })
                                     }
                                 }
-
-                                if (tmp.length > 0) {
-                                    tmp.push({
-                                        name: metaDataKeys[table.split(".")[1]].pkey,
-                                        alias: null,
-                                        value: result.features[i].properties[metaDataKeys[table.split(".")[1]].pkey],
-                                        sort_id: null,
-                                        key: true
-                                    });
-                                    data.push(tmp);
-                                }
-                                tmp = [];
                             }
+
+                            if (tmp.length > 0) {
+                                tmp.push({
+                                    name: metaDataKeys[table.split(".")[1]].pkey,
+                                    alias: null,
+                                    value: result.features[i].properties[metaDataKeys[table.split(".")[1]].pkey],
+                                    sort_id: null,
+                                    key: true
+                                });
+                                data.push(tmp);
+                            }
+                            tmp = [];
                         }
-                        hit = {
-                            table: table,
-                            title: metaDataKeys[table.split(".")[1]].f_table_title,
-                            group: metaDataKeys[table.split(".")[1]].layergroup,
-                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
-                            data: data,
-                            num: count + "/" + metaDataFinal.data.length,
-                            time: time,
-                            id: socketId,
-                            error: error || null,
-                            message: message,
-                            sql: metaDataKeys[table.split(".")[1]].sql
+                    }
+                    hit = {
+                        table: table,
+                        title: metaDataKeys[table.split(".")[1]].f_table_title,
+                        group: metaDataKeys[table.split(".")[1]].layergroup,
+                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                        data: data,
+                        num: count + "/" + metaDataFinal.data.length,
+                        time: time,
+                        id: socketId,
+                        error: err || null,
+                        message: message,
+                        sql: metaDataKeys[table.split(".")[1]].sql,
+                        meta: metaDataKeys[table.split(".")[1]]
+                    };
+                    hits[table] = hit;
+                    io.emit(socketId, hit);
+                    if (metaDataFinal.data.length === count) {
+                        var report = {
+                            hits: hits,
+                            file: fileName,
+                            text: text,
+                            dateTime: moment().format('MMMM Do YYYY, H:mm')
                         };
-                        hits[table] = hit;
-                        io.emit(socketId, hit);
-                        if (metaDataFinal.data.length === count) {
-                            var report = {
-                                hits: hits,
-                                file: fileName,
-                                text: text,
-                                dateTime: moment().format('MMMM Do YYYY, H:mm')
-                            };
-                            response.send(report);
-                            // Add meta data and date/time to report before writing to file
-                            report.metaData = metaDataFinal;
-                            fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
-                                if (err) {
-                                    console.log(err);
-                                } else {
-                                    console.log("Repport saved");
-                                }
-                            });
-                            return;
-                        }
-                        iter();
-                    });
+                        response.send(report);
+                        // Add meta data and date/time to report before writing to file
+                        report.metaData = metaDataFinal;
+                        fs.writeFile(__dirname + "/../../../tmp/" + fileName, JSON.stringify(report, null, 4), function (err) {
+                            if (err) {
+                                console.log(err);
+                            } else {
+                                console.log("Report saved");
+                            }
+                        });
+                        return;
+                    }
+                    iter();
                 });
-                req.write(postData);
-                req.end();
+
+
             })();
-            //winston.log('info', resultsObj.message, resultsObj);
         } else {
             console.log(err);
-            //winston.log('error', err);
         }
     });
 });

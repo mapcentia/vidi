@@ -1,7 +1,55 @@
-/*@import "../../config/_styles.less";*/
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+/*
+
+To get this list of colors inject jQuery at http://www.google.com/design/spec/style/color.html#color-color-palette
+
+Then, run this script to get the list.
+
+
+(function() {
+  var colors = {}, main = {};
+  $(".color-group").each(function() {
+    var color = $(this).find(".name").text().trim().toLowerCase().replace(" ", "-");
+    colors[color] = {};
+
+    $(this).find(".color").not(".main-color").each(function() {
+      var shade = $(this).find(".shade").text().trim(),
+          hex   = $(this).find(".hex").text().trim();
+
+      colors[color][shade] = hex;
+    });
+    main[color] = color + "-" + $(this).find(".main-color .shade").text().trim();
+
+  });
+  var LESS = "";
+  $.each(colors, function(name, shades) {
+    LESS += "\n\n";
+    $.each(shades, function(shade, hex) {
+      LESS += "@" + name + "-" + shade + ": " + hex + ";\n";
+    });
+    if (main[name]) {
+      LESS += "@" + name + ": " + main[name] + ";\n";
+    }
+  });
+  console.log(LESS);
+})();
+
+
+*/
+/* ANIMATION */
+/* SHADOWS */
 body {
-  margin: 0px;
-  padding: 0px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+#loadscreentext {
+  font-weight: 300;
+  font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 .modal-title {
   line-height: 1;
@@ -16,16 +64,55 @@ body {
 }
 #map {
   position: absolute;
+  width: 100%;
+  transition: opacity 250ms;
+  -moz-transition: opacity 250ms;
+  -webkit-transition: opacity 250ms;
   height: 100%;
+  top: 0;
   right: 0;
-  left: 0;
   z-index: 0;
-  border-right: 1px solid #ddd;
+}
+.leaflet-control {
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: #eee;
+  padding: 2px;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12) !important;
+}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+  border: none;
+}
+.leaflet-control-boxzoom {
+  width: 34px !important;
+  height: 34px !important;
+}
+.leaflet-bar a,
+.leaflet-bar a:hover {
+  border-bottom: 1px solid #eee !important;
+}
+.leaflet-draw-toolbar {
+  margin-top: 2px;
+}
+.leaflet-draw-toolbar-top {
+  margin-top: 0;
+}
+.leaflet-touch .leaflet-bar a:first-child {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+.leaflet-touch .leaflet-bar a:last-child {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
 }
 #side-panel {
   width: 100%;
   right: 0;
   border: 0;
+  overflow: scroll;
+  height: calc(100vh - 30px);
+  background-color: white;
 }
 #legend {
   position: relative;
@@ -41,23 +128,16 @@ body {
   padding: 6px;
   overflow: auto;
 }
-
-.main-content > .tab-pane {
-  height: calc(100vh - 110px)
-}
-
-#place-search {
-    height: calc(100vh - 140px)
-}
-
 #pane {
   position: fixed;
   top: 0px;
   bottom: 0px;
-  right: 0px;
   width: 100%;
   z-index: 0;
-  /*  transition: 300ms linear;*/
+}
+.tab-content.main-content,
+.tab-content .tab-pane {
+  height: 100%;
 }
 #menu {
   z-index: 2 !important;
@@ -77,7 +157,7 @@ img {
 }
 .modal-body {
   overflow: auto;
-  height: calc(48%);
+  height: 100%;
 }
 input[type="radio"],
 input[type="checkbox"] {
@@ -103,8 +183,8 @@ input[type="checkbox"] {
   margin-top: 0 !important;
   padding: 9px 10px 10px;
 }
-.modal-header {
-  padding: 10px 15px;
+.dialog-bottom .modal-header {
+  padding: 0 15px 10px 15px;
 }
 #result_GroupDiv {
   background: white;
@@ -154,13 +234,13 @@ input[type="checkbox"] {
   border-top: 1px solid #f5f5f5;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
   font-weight: 300;
-  border-bottom: 0px;
+  border-bottom: 0;
 }
 .nav-tabs > li > a,
 .dropdown-menu > li > a {
   font-weight: 500;
   font-family: 'Roboto', sans-serif, sans-serif !important;
-  padding: 6px 10px !important;
+  padding: 6px 10px;
   text-decoration: none !important;
 }
 .nav-tabs > .active {
@@ -174,6 +254,7 @@ input[type="checkbox"] {
 .navbar {
   border-radius: 0;
   min-height: 0;
+  margin-bottom: 0;
 }
 .legend-text {
   margin-left: 5px;
@@ -187,6 +268,9 @@ input[type="checkbox"] {
   vertical-align: top !important;
   font-weight: 300;
   font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+}
+.leaflet-top {
+  top: 50px;
 }
 /*
 .leaflet-top {
@@ -400,7 +484,9 @@ div.olControlZoom {
 .typeahead {
   height: auto !important;
 }
-
+.places {
+  height: 100%;
+}
 .places .typeahead-heading {
   margin: 0 20px 5px 20px;
   padding: 3px 0;
@@ -495,7 +581,7 @@ div.olControlZoom {
 .table-data > tbody > tr {
   border-top: 1px solid #e6e6e6;
 }
-.leaflet-control-print {
+inline .leaflet-control-print {
   display: none !important;
 }
 .base-layer-item {
@@ -505,7 +591,11 @@ div.olControlZoom {
   padding: 0 !important;
 }
 .layer-item label {
-  padding: 3px 15px;
+  padding-top: 3px;
+  padding-right: 15px;
+  padding-bottom: 3px;
+  padding-left: 41px;
+  text-indent: -26px;
 }
 .base-layer-item .fa {
   float: right;
@@ -525,7 +615,7 @@ div.olControlZoom {
   margin-bottom: 10px;
 }
 .custom-popup .leaflet-popup-content {
-  margin: 7px 12px !important;
+  margin: 7px 20px 7px 12px !important;
   max-height: 250px;
   overflow: auto;
 }
@@ -562,12 +652,6 @@ div.olControlZoom {
   float: left;
   margin-left: 15px;
 }
-@media (min-width: 0) {
-  .navbar-toggle {
-    display: block;
-    /* force showing the toggle */
-  }
-}
 body {
   padding: 0;
 }
@@ -576,14 +660,10 @@ body {
   background: none;
   border: none;
 }
-.leaflet-top.leaflet-right {
-  top: 50px !important;
-}
-.navmenu,
-.navbar-offcanvas {
-  max-width: 650px;
-  min-width: 350px;
-  width: 30%;
+.navmenu {
+  height: 100%;
+  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
+  position: fixed;
 }
 .navmenu-brand {
   display: block;
@@ -597,38 +677,31 @@ body {
 #info-modal,
 #info-modal-top {
   position: fixed;
-  max-width: 650px;
+  top: 0;
   z-index: 3000;
-  min-width: 350px;
-  width: 30%;
   height: 100%;
   background-color: white;
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
-  display: block;
+  display: inline;
+}
+#module-container {
+  position: fixed;
+  top: 0;
+  z-index: 2000;
+  height: 100%;
+  background-color: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  display: inline;
+  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
 }
 .slide-right {
-  right: -100%;
+  position: fixed;
 }
 .slide-left {
   left: -100%;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 27px 24px 0px, rgba(0, 0, 0, 0.22) 0px 40px 77px 0px;
-}
-@media (max-width: 450px) {
-  .navmenu,
-  .navbar-offcanvas,
-  #info-modal,
-  #info-modal-top {
-    width: 75%;
-    min-width: 240px;
-  }
-  #info-modal,
-  #info-modal-top {
-    right: -75%;
-  }
-  .export {
-    display: none !important;
-  }
 }
 .nav-tabs {
   border-bottom: 0;
@@ -705,12 +778,35 @@ body {
 #main-tabs {
   overflow: hidden !important;
 }
+#side-panel hr {
+  margin-left: -20px;
+}
+#side-panel ul {
+  overflow: hidden !important;
+  list-style-type: none;
+  padding: 0px 17px;
+}
+#side-panel ul li {
+  padding: 7px 0;
+}
+#side-panel ul li .material-icons {
+  margin-right: 17px;
+  padding: 2px;
+  border-radius: 50%;
+}
+#side-panel ul li .material-icons:hover {
+  background-color: #eeeeee;
+}
+#side-panel ul li.active .material-icons {
+  background-color: #03a9f4;
+  color: white;
+}
 .list-group .list-group-separator:before {
   width: 100%;
   margin: 0 !important;
 }
 .list-group-item {
-  padding: 16px;
+  padding: 10px 14px;
   overflow: visible !important;
 }
 .leaflet-control-measure .leaflet-control-measure-toggle,
@@ -773,10 +869,14 @@ body {
   width: 100%;
 }
 .overlay-label {
-  width: calc(50%);
+  width: calc(100% - 50px);
 }
 .info-label {
-  display: none;
+  visibility: hidden;
+  cursor: pointer;
+}
+.edit-label {
+  visibility: hidden;
   cursor: pointer;
 }
 .close {
@@ -791,15 +891,11 @@ body {
 #info-modal .modal-body img {
   width: 100%;
 }
-#info-modal-body-wrapper {
+#info-modal-body-wrapper,
+#module-container-wrapper {
   overflow: auto;
-  height: 100%;
-}
-
-#info-modal-body-wrapper .modal-body {
   height: calc(100vh - 48px);
 }
-
 #searchinput {
   width: 200px;
 }
@@ -898,14 +994,6 @@ input[type=text]::-ms-clear {
 .control-label {
   white-space: nowrap;
 }
-.leaflet-measure-path-measurement {
-  font-size: 10px;
-  padding: 2px;
-  border-radius: 2px;
-  text-align: center;
-  color: black;
-  text-shadow: -1px 0 0 white, -1px -1px 0 white, 0 -1px 0 white, 1px -1px 0 white, 1px 0 0 white, 1px 1px 0 white, 0 1px 0 white, -1px 1px 0 white;
-}
 h4 small {
   font-size: 65%;
 }
@@ -924,10 +1012,23 @@ h4 small {
 .fixed-table-body .card-view .value {
   display: inline-block;
   max-width: 70%;
-  text-align: left!important;
+  text-align: left !important;
 }
 .fixed-table-body .card-view .title {
   vertical-align: top;
+}
+.fixed-table-body {
+  height: 100%;
+}
+.fixed-table-container thead th .th-inner {
+  font-size: 12px;
+  padding: 3px;
+}
+.fixed-table-container td {
+  font-size: 11px;
+}
+.js-layer-settings-table {
+  padding: 5px;
 }
 .mouseover-content {
   background-color: rgba(255, 255, 255, 0.8);
@@ -935,7 +1036,7 @@ h4 small {
   max-width: 180px;
 }
 .mouseover-content p {
-  font-size: 9px;
+  font-size: 11px;
   margin-top: 1px;
   margin-bottom: 7px;
 }
@@ -945,9 +1046,228 @@ h4 small {
   margin-top: 1px;
   margin-bottom: 1px;
 }
-@media (max-width: 319px) {
-  #info-modal,
-  .navbar {
-    display: none;
+.gc2-session-lock {
+  display: inline;
+}
+.offline-map-extension .available-space-container {
+  text-align: right;
+  color: darkgrey;
+}
+.gc2-add-feature,
+.popup-edit-btn,
+.popup-delete-btn {
+  display: inline;
+}
+.api-bridge-popup-warning {
+  background-color: #f0ad4e;
+  color: white;
+  border: #f0ad4e;
+  min-width: 25px;
+  text-align: center;
+}
+.api-bridge-popup-error {
+  background-color: #d9534f;
+  color: white;
+  border: #d9534f;
+  min-width: 25px;
+  text-align: center;
+}
+.leaflet-tooltip-right.api-bridge-popup-warning::before {
+  border-right-color: #f0ad4e;
+}
+.leaflet-tooltip-left.api-bridge-popup-warning::before {
+  border-left-color: #f0ad4e;
+}
+.leaflet-tooltip-bottom.api-bridge-popup-warning::before {
+  border-bottom-color: #f0ad4e;
+}
+.leaflet-tooltip-top.api-bridge-popup-warning::before {
+  border-top-color: #f0ad4e;
+}
+.leaflet-tooltip-right.api-bridge-popup-error::before {
+  border-right-color: #d9534f;
+}
+.leaflet-tooltip-left.api-bridge-popup-error::before {
+  border-left-color: #d9534f;
+}
+.leaflet-tooltip-bottom.api-bridge-popup-error::before {
+  border-bottom-color: #d9534f;
+}
+.leaflet-tooltip-top.api-bridge-popup-error::before {
+  border-top-color: #d9534f;
+}
+.dialog-bottom {
+  padding: 14px 15px;
+  margin-bottom: 20px;
+  height: auto;
+  clear: both;
+  min-width: 288px;
+  max-width: 568px;
+  position: fixed;
+  left: 56px;
+  bottom: -100%;
+  box-shadow: 0 27px 24px 0 rgba(0, 0, 0, 0.2), 0 15px 77px 0 rgba(0, 0, 0, 0.22);
+  background-color: #fff;
+  border-radius: 2px;
+  z-index: 99999;
+  max-height: 80%;
+}
+.dialog-bottom .modal-body {
+  max-height: 60vh;
+}
+.expand-more {
+  display: none;
+}
+#pane {
+  right: 0;
+}
+#search-border {
+  position: relative;
+  float: left;
+  width: 40px;
+  height: 100%;
+}
+#search-ribbon {
+  position: fixed;
+  min-width: 100px;
+  top: 0;
+  height: 48px;
+  background-color: white;
+  box-shadow: 0 1px 12px 0 rgba(0, 0, 0, 0.12);
+}
+#search-ribbon > div > i {
+  top: 15px;
+  font-size: 1.4em;
+  line-height: 1em;
+  color: #1f4164;
+  padding-left: 12px;
+  position: absolute;
+  cursor: pointer;
+}
+#search-container {
+  padding-left: 40px;
+  height: 100%;
+}
+#search-content {
+  height: calc(100vh - 78px);
+}
+.feature-attribute-editing-form {
+  position: relative;
+}
+.feature-attribute-editing-form > .buttons {
+  background-color: white;
+  bottom: -20px;
+  position: sticky !important;
+  position: -webkit-sticky !important;
+  z-index: 1000;
+}
+.date-picker-popover {
+  background-color: white;
+}
+.date-picker-popover.tooltip-inner {
+  color: black !important;
+}
+.date-picker-popover.popover {
+  width: 235px;
+  color: black !important;
+}
+.watsonc-custom-popup {
+  width: 240px;
+}
+#map,
+#pane,
+#search-ribbon,
+#module-container,
+#info-modal {
+  -webkit-transition: all 500ms ease-out;
+  -moz-transition: all 500ms ease-out;
+  -o-transition: all 500ms ease-out;
+  transition: all 500ms ease-out;
+}
+#layer-slide-body-wrapper > div {
+  height: calc(100vh - 48px);
+}
+#conflict-result-content {
+  height: 100% !important;
+}
+.conflict-result-content {
+  height: 100% !important;
+}
+#info-pane > .tab-pane {
+  height: 100%;
+}
+.togglebutton {
+  margin-bottom: 6px;
+}
+.help-btn {
+  color: rgba(0, 0, 0, 0.26);
+  cursor: help;
+}
+.brand-icon {
+  margin-right: 20px;
+}
+.dialog-bottom-wide {
+  min-width: 568px;
+  max-width: 768px;
+}
+.leaflet-measure-path-measurement {
+  font-size: 12px;
+  font-weight: bold;
+}
+.appended-leaflet-control {
+  padding-top: 2px;
+  padding-bottom: 0;
+}
+.leaflet-control-custom .appended-leaflet-control li a {
+  width: 100% !important;
+}
+.navbar .navbar-brand i {
+  font-size: 30px;
+}
+.navbar .navbar-brand {
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+#module-container-body {
+  padding: 0 4px 4px 0;
+}
+.bootstrap-table .table:not(.table-condensed),
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > th,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > th,
+.bootstrap-table .table:not(.table-condensed) > thead > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tbody > tr > td,
+.bootstrap-table .table:not(.table-condensed) > tfoot > tr > td {
+  padding: 3px 6px !important;
+}
+@media (min-width: 769px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 0;
   }
+}
+@media (max-width: 768px) {
+  .navbar .navbar-brand {
+    margin-left: 0 !important;
+    padding-left: 16px;
+  }
+}
+#layers_list .layer-item.list-group-item a {
+  display: inline-block;
+  border-radius: 50%;
+  padding: 1px;
+}
+#layers_list .layer-item.list-group-item .active {
+  background-color: #03a9f4;
+  color: white;
+}
+.layer-move-vert {
+  font-size: 18px;
+  color: rgba(0, 0, 0, 0.5);
+  cursor: move;
+}
+#tail {
+  background-color: white;
+  padding: 5px;
+  opacity: 0.8;
+  border-radius: 4px;
 }

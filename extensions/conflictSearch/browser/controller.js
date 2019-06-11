@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -13,6 +14,7 @@ var infoClick;
 var config = require('../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
+var urlparser = require('../../../browser/modules/urlparser');
 
 /**
  *
@@ -30,9 +32,20 @@ module.exports = {
     init: function () {
         var endPrintEventName = "end:conflictPrint";
 
-        // Turn off if advanced info or drawing is activated
-        backboneEvents.get().on("off:conflict on:advancedInfo on:drawing", function () {
+        // Stop listening to any events, deactivate controls, but
+        // keep effects of the module until they are deleted manually or reset:all is emitted
+        backboneEvents.get().on("deactivate:all", () => {});
+
+        // Activates module
+        backboneEvents.get().on("on:conflictSearch", () => {
+            conflictSearch.control();
+        });
+
+        // Deactivates module
+        backboneEvents.get().on("off:conflictSearch off:all reset:all", () => {
             conflictSearch.off();
+            infoClick.active(false);
+            infoClick.reset();
         });
 
         // Handle GUI when print is done. Using at custom event, so standard print is not triggered
@@ -42,6 +55,9 @@ module.exports = {
             $("#conflict-download-pdf").prop("download", response.key);
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
+            backboneEvents.get().trigger("end:conflictSearchPrint", response);
+            console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" +  urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
+
         });
 
         // When conflict search is done, enable the print button
@@ -53,6 +69,7 @@ module.exports = {
         backboneEvents.get().on("on:conflictInfoClick", function () {
             console.info("Starting conflictInfoClick");
             infoClick.active(true);
+
         });
 
         // Handle conflict info click events
@@ -63,7 +80,7 @@ module.exports = {
 
         backboneEvents.get().on("off:conflictInfoClick", function () {
             console.info("Stopping conflictInfoClick");
-            infoClick.active(false)
+            infoClick.active(false);
         });
 
         // When print module emit on:customData when render the custom data
@@ -78,14 +95,12 @@ module.exports = {
             $("#conflict-get-print-fieldset").prop("disabled", true);
             $(this).button('loading');
             print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
-            print.print(endPrintEventName, conflictSearch.getResult());
-            print.cleanUp(true);
+            print.print(endPrintEventName, conflictSearch.getResult()).then(() => {
+                print.cleanUp(true);
+            });
         });
 
-        // Click event for conflict search on/off toggle button
-        $("#conflict-btn").on("click", function () {
-            conflictSearch.control();
-        });
+
 
 
     }

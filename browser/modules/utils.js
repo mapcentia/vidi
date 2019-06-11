@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -15,22 +16,58 @@ module.exports = {
         return this;
     },
     init: function () {
-
     },
-    createMainTab: function (id, name, info, height) {
-        $('<li role="presentation"><a href="#' + id + '-content" aria-controls role="tab" data-toggle="tab">' + name + '</a></li>').appendTo("#main-tabs");
+    formatArea: (areaInSquareMeters) => {
+        let result = Math.round(areaInSquareMeters);
+        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
+        if (areaInSquareMeters < 10000) {
+            // Display square meters
+            result = (Math.round(areaInSquareMeters) + ' m2');
+        } else if (areaInSquareMeters >= 10000 && areaInSquareMeters < 1000000) {
+            // Display hectars
+            result = (ha + ' ha');
+        } else if (areaInSquareMeters >= 1000000) {
+            // Display square kilometers and hectars
+            result = (km2 + ' km2 (' + ha + ' ha)');
+        }
 
-        $('<div role="tabpanel" class="tab-pane fade" id="' + id + '-content">' +
-            '<div class="alert alert-dismissible alert-info" role="alert">' +
-            '<button type="button" class="close" data-dismiss="alert">×</button>' +
-            info +
-            '</div>' +
-            '<div id="' + id + '"></div>' +
-            '</div>').appendTo("#side-panel .main-content");
+        return result;
+    },
+    /**
+     * @todo Remove deprecated "height" parameter
+     */
+    createMainTab: function (id, name, info, height, icon, rawIconWasProvided = false, moduleId = false) {
+        let el = `#${id}-content`;
+
+        let iconRaw = ``;
+        if (rawIconWasProvided) {
+            iconRaw = icon;
+        } else {
+            icon = icon || "help";
+            iconRaw = `<i data-container="body" data-toggle="tooltip" data-placement="left" title="${name}" class="material-icons">${icon}</i>`;
+        }
+
+        if (moduleId === false) {
+            moduleId = ``;
+        }
+
+        $(`<li role="presentation">
+            <a data-module-id="${moduleId}" href="#${id}-content" aria-controls role="tab" data-toggle="tab">${iconRaw}${name}</a>
+        </li>`).appendTo("#main-tabs");
+        $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
+        $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
+            $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
+                <button type="button" class="close" data-dismiss="alert">×</button>${info}
+            </div>`);
+        });
+        $(`<div></div>`).appendTo(el);
+        $(`<div id="${id}"></div>`).appendTo(el);
+
     },
 
     createNavItem: function (id, dropdown) {
-      $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
+        $('<li id="' + id + '" class="' + (dropdown ? 'dropdown' : '') + '"></li>').appendTo('#main-navbar');
     },
 
     injectCSS: function (css) {
@@ -90,5 +127,19 @@ module.exports = {
             return txt;
         }
 
+    },
+
+    toggleFullScreen: function() {
+        let fullScreenMode;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenMode = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenMode = false;
+            }
+        }
+        return fullScreenMode;
     }
 };

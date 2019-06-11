@@ -1,11 +1,12 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-
+let state, _self = false;
 
 /**
  *
@@ -19,19 +20,27 @@ module.exports = {
      * @returns {exports}
      */
     set: function (o) {
+        state = o.state;
+        _self = this;
         return this;
     },
 
     /**
      *
      */
-    init: function () {
-        var curUrl = window.location.href,
-            newUrl = curUrl.split("#")[0];
+    init: () => {
+        $("#btn-reset").off();
+        $("#btn-reset").on("click", function () {
+            _self.reset();
+        });
+    },
 
-        if (window.confirm(__("Do you really want to reset the map?"))) {
-            location.href = newUrl;
+    reset: () => {
+        var curUrl = window.location.href, newUrl = curUrl.split("#")[0];
+        if (window.confirm(__(`Do you really want to reset the map?`))) {
+            state.resetState().then(() => {
+                location.href = newUrl;
+            });
         }
-
     }
 };

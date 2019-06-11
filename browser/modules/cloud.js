@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -27,7 +28,7 @@ module.exports = {
     init: function () {
         var me = this;
         try {
-            geocloud.setHost(window.vidiConfig.gc2.host);
+            geocloud.setHost(window.gc2host);
         } catch (e) {
             console.info(e.message);
         }
@@ -43,7 +44,8 @@ module.exports = {
             // Set CSS animation true if not print
             fadeAnimation: (window.vidiTimeout === 0),
             zoomAnimation: (window.vidiTimeout === 0),
-            editable: true
+            editable: true,
+            maxBoundsViscosity: 1.0
         });
 
         /**
@@ -58,7 +60,7 @@ module.exports = {
         cloud.map.addControl(zoomControl);
 
         var scaleControl = L.control.scale({
-            position: "bottomleft",
+            position: "bottomright",
             imperial: false
         });
         cloud.map.addControl(scaleControl);
@@ -74,7 +76,10 @@ module.exports = {
             icon: "fa fa-location-arrow",
             iconLoading: "fa fa-circle-o-notch fa-spin",
             keepCurrentZoomLevel: true,
-            drawCircle: false
+            drawCircle: false,
+            locateOptions: {
+                enableHighAccuracy: true
+            }
         }).addTo(map);
 
         /**
@@ -112,9 +117,8 @@ module.exports = {
         if (window._vidiLocale === "en_US") {
             localization = "en";
         }
-        /**
-         *
-         */
+
+        /*
         var measureControl = new L.Control.Measure({
             position: 'topright',
             primaryLengthUnit: 'kilometers',
@@ -138,6 +142,7 @@ module.exports = {
 
         });
         measureControl.addTo(map);
+        */
 
         L.Edit.Poly = L.Edit.Poly.extend({
             options: {

@@ -21,6 +21,9 @@
 
 'use strict';
 
+require('./../public/js/gc2/geocloud.js');
+require('./../public/js/gc2/gc2table.js');
+
 // Hack to compile Glob files. Don´t call this function!
 function ಠ_ಠ() {
     require('./i18n/*.js', {glob: true});
@@ -99,10 +102,14 @@ window.Vidi = function () {
         baseLayer: require('./modules/baseLayer'),
         legend: require('./modules/legend'),
         state: require('./modules/state'),
+        stateSnapshots: require('./modules/stateSnapshots'),
         anchor: require('./modules/anchor'),
         infoClick: require('./modules/infoClick'),
         bindEvent: require('./modules/bindEvent'),
         draw: require('./modules/draw'),
+        measurements: require('./modules/measurements'),
+        mapcontrols: require('./modules/mapcontrols'),
+        tilecache: require('./modules/tileCache'),
         print: require('./modules/print'),
         advancedInfo: require('./modules/advancedInfo'),
         sqlQuery: require('./modules/sqlQuery'),
@@ -130,10 +137,14 @@ window.Vidi = function () {
     modules.baseLayer.set(modules);
     modules.legend.set(modules);
     modules.state.set(modules);
+    modules.stateSnapshots.set(modules);
     modules.anchor.set(modules);
     modules.infoClick.set(modules);
     modules.bindEvent.set(modules);
     modules.draw.set(modules);
+    modules.measurements.set(modules);
+    modules.mapcontrols.set(modules);
+    modules.tilecache.set(modules);
     modules.print.set(modules);
     modules.advancedInfo.set(modules);
     modules.sqlQuery.set(modules);

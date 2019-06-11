@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -11,11 +12,12 @@
  */
 var utils;
 
+var backboneEvents;
+
 var jquery = require('jquery');
 require('snackbarjs');
 
-
-var exId = "session";
+var exId = `login-modal-body`;
 
 /**
  *
@@ -24,9 +26,12 @@ var exId = "session";
 module.exports = {
     set: function (o) {
         utils = o.utils;
+        backboneEvents = o.backboneEvents;
         return this;
     },
     init: function () {
+
+        var parent = this;
 
         /**
          *
@@ -39,8 +44,6 @@ module.exports = {
         var ReactDOM = require('react-dom');
 
 
-        $('<li><a href="#" id="' + exId + '"><i class="fa fa-lock gc2-session-lock" aria-hidden="true" style="display: none"></i><i class="fa fa-unlock-alt gc2-session-unlock" aria-hidden="true"></i></a></li>').appendTo('#main-navbar');
-
         // Check if signed in
         //===================
 
@@ -50,34 +53,18 @@ module.exports = {
             type: "GET",
             success: function (data) {
                 if (data.status.authenticated) {
+                    backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
                 } else {
+                    backboneEvents.get().trigger(`session:authChange`, false);
                     $(".gc2-session-lock").hide();
                     $(".gc2-session-unlock").show();
                 }
-
             },
             error: function (error) {
                 console.error(error.responseJSON);
             }
-        });
-
-
-        $("#" + exId).on("click", function () {
-            $("#info-modal.slide-right").animate({
-                right: "0"
-            }, 200, function () {
-
-                // Render
-                //=======
-
-                ReactDOM.render(
-                    <Session/>,
-                    document.getElementById("info-modal-body-wrapper")
-                );
-
-            });
         });
 
         class Status extends React.Component {
@@ -138,38 +125,36 @@ module.exports = {
                         type: "POST",
                         data: "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public",
                         success: function (data) {
+                            backboneEvents.get().trigger(`session:authChange`, true);
+
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Log out"});
                             me.setState({auth: true});
-                            setTimeout(function () {
-                                $("#info-modal button.close").trigger("click");
-                            }, 1000);
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            parent.update();
                         },
                         error: function (error) {
                             me.setState({statusText: "Wrong user name or password"});
                             me.setState({alertClass: "alert-danger"});
                         }
                     });
-                }
-
-                else {
+                } else {
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/stop",
                         type: "GET",
                         success: function (data) {
+                            backboneEvents.get().trigger(`session:authChange`, false);
+
                             me.setState({statusText: "Not signed in"});
                             me.setState({alertClass: "alert-info"});
                             me.setState({btnText: "Sign in"});
                             me.setState({auth: false});
-                            setTimeout(function () {
-                                $("#info-modal button.close").trigger("click");
-                            }, 1000);
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            parent.update();
                         },
                         error: function (error) {
                             console.error(error.responseJSON);
@@ -187,6 +172,8 @@ module.exports = {
                     type: "GET",
                     success: function (data) {
                         if (data.status.authenticated) {
+                            backboneEvents.get().trigger(`session:authChange`, true);
+
                             me.setState({sessionEmail: data.status.userName});
                             me.setState({statusText: "Signed in as " + me.state.sessionEmail});
                             me.setState({alertClass: "alert-success"});
@@ -195,6 +182,8 @@ module.exports = {
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
                         } else {
+                            backboneEvents.get().trigger(`session:authChange`, false);
+
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
                         }
@@ -259,8 +248,16 @@ module.exports = {
             }
         }
 
+        if (document.getElementById(exId)) {
+            ReactDOM.render(<Session/>, document.getElementById(exId));
+        } else {
+            console.warn(`Unable to find the container for session extension (element id: ${exId})`);
+        }
+    },
 
+    update: function () {
+        backboneEvents.get().trigger("refresh:auth");
+        backboneEvents.get().trigger("refresh:meta");
     }
 };
-
 

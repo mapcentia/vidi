@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Alexander Shumilov
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -20,7 +21,7 @@ var backboneEvents;
  *
  * @type {string}
  */
-var AHOST = "//gc2.io";
+var AHOST = "https://gc2.io";
 
 /**
  *
@@ -32,13 +33,18 @@ var ADB = "dk";
  *
  * @type {string}
  */
-var MHOST = "//gc2.io";
+var MHOST = "https://gc2.io";
 
 /**
  *
  * @type {string}
  */
 var MDB = "dk";
+
+/**
+ * Global var with config object
+ */
+window.vidiConfig = require('../../../config/config.js');
 
 /**
  *
@@ -55,6 +61,19 @@ module.exports = {
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
             esrSearchActive = typeof(window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof(window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+
+        // adjust search text
+        var searchTxt = "Adresse, matr. nr.";
+        if (sfeSearchActive) {
+            $("#custom-search").attr("placeholder",
+                searchTxt
+                + (esrSearchActive ? ", ESR nr. " : "")
+                + " eller SFE nr.");
+        } else if (esrSearchActive) {
+            $("#custom-search").attr("placeholder",
+                searchTxt + " eller ESR nr.");
+        }
+
 
         // Set max zoom then zooming on target
         // ===================================
@@ -96,6 +115,9 @@ module.exports = {
         // ====================
 
         placeStore = new geocloud.sqlStore({
+            jsonp: false,
+            method: "POST",
+            dataType: "json",
             sql: null,
             clickable: false,
             // Make Awesome Markers
@@ -119,21 +141,23 @@ module.exports = {
             onLoad: onLoad
         });
 
-        if (typeof komKode === "string") {
-            komKode = [komKode];
+        if (komKode !== "*") {
+            if (typeof komKode === "string") {
+                komKode = [komKode];
+            }
+            $.each(komKode, function (i, v) {
+                shouldA.push({
+                    "term": {
+                        "properties.kommunekode": "0" + v
+                    }
+                });
+                shouldM.push({
+                    "term": {
+                        "properties.kommunekode": "" + v
+                    }
+                });
+            });
         }
-        $.each(komKode, function (i, v) {
-            shouldA.push({
-                "term": {
-                    "properties.kommunekode": "0" + v
-                }
-            });
-            shouldM.push({
-                "term": {
-                    "properties.kommunekode": "" + v
-                }
-            });
-        });
 
         $("#" + el).typeahead({
             highlight: false
@@ -165,7 +189,7 @@ module.exports = {
                                         "must": {
                                             "query_string": {
                                                 "default_field": "properties.string2",
-                                                "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
+                                                "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
                                         },
@@ -220,7 +244,7 @@ module.exports = {
                                         "must": {
                                             "query_string": {
                                                 "default_field": "properties.string3",
-                                                "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
+                                                "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
                                         },
@@ -269,7 +293,7 @@ module.exports = {
                                         "must": {
                                             "query_string": {
                                                 "default_field": "properties.string1",
-                                                "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
+                                                "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
                                         },
@@ -326,7 +350,7 @@ module.exports = {
                                         "must": {
                                             "query_string": {
                                                 "default_field": "properties.string4",
-                                                "query": encodeURIComponent(query.toLowerCase().replace(",", "")),
+                                                "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
                                         },
@@ -360,26 +384,29 @@ module.exports = {
                     }
 
                     $.ajax({
-                        url: AHOST + '/api/v1/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
-                        data: '&q=' + JSON.stringify(dsl1),
+                        url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
+                        data: JSON.stringify(dsl1),
                         contentType: "application/json; charset=utf-8",
                         scriptCharset: "utf-8",
-                        dataType: 'jsonp',
-                        jsonp: 'jsonp_callback',
+                        dataType: 'json',
+                        type: "POST",
                         success: function (response) {
+                            if (response.hits === undefined) return;
                             if (type1 === "vejnavn,bynavn") {
                                 $.each(response.aggregations["properties.postnrnavn"].buckets, function (i, hit) {
                                     var str = hit.key;
                                     names.push({value: str});
                                 });
                                 $.ajax({
-                                    url: AHOST + '/api/v1/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
-                                    data: '&q=' + JSON.stringify(dsl2),
+                                    url: AHOST + '/api/v2/elasticsearch/search/' + ADB + '/dar/adgangsadresser_view',
+                                    data: JSON.stringify(dsl2),
                                     contentType: "application/json; charset=utf-8",
                                     scriptCharset: "utf-8",
-                                    dataType: 'jsonp',
-                                    jsonp: 'jsonp_callback',
+                                    dataType: 'json',
+                                    type: "POST",
                                     success: function (response) {
+                                        if (response.hits === undefined) return;
+
                                         if (type1 === "vejnavn,bynavn") {
                                             $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
                                                 var str = hit.key;
@@ -394,6 +421,7 @@ module.exports = {
                                         } else {
                                             cb(names);
                                         }
+
                                     }
                                 })
                             } else if (type1 === "vejnavn_bynavn") {
@@ -430,6 +458,7 @@ module.exports = {
                                     cb(names);
                                 }
                             }
+
                         }
                     })
                 })();
@@ -456,7 +485,7 @@ module.exports = {
                                             "must": {
                                                 "query_string": {
                                                     "default_field": "properties.string1",
-                                                    "query": encodeURIComponent(query.toLowerCase()),
+                                                    "query": query.toLowerCase(),
                                                     "default_operator": "AND"
                                                 }
                                             },
@@ -466,7 +495,24 @@ module.exports = {
                                                 }
                                             }
                                         }
-                                    }
+                                    },
+                                    "sort": [
+                                        {
+                                            "properties.nummer": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.litra": {
+                                                "order": "asc"
+                                            }
+                                        },
+                                        {
+                                            "properties.ejerlavsnavn": {
+                                                "order": "asc"
+                                            }
+                                        }
+                                    ]
                                 };
                                 break;
                             case "ejerlav":
@@ -478,7 +524,7 @@ module.exports = {
                                             "must": {
                                                 "query_string": {
                                                     "default_field": "properties.string1",
-                                                    "query": encodeURIComponent(query.toLowerCase()),
+                                                    "query": query.toLowerCase(),
                                                     "default_operator": "AND"
                                                 }
                                             },
@@ -513,13 +559,14 @@ module.exports = {
                         }
 
                         $.ajax({
-                            url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
-                            data: '&q=' + JSON.stringify(dslM),
+                            url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                            data: JSON.stringify(dslM),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
-                            dataType: 'jsonp',
-                            jsonp: 'jsonp_callback',
+                            dataType: 'json',
+                            type: "POST",
                             success: function (response) {
+                                if (response.hits === undefined) return;
                                 if (type2 === "ejerlav") {
                                     $.each(response.aggregations["properties.ejerlavsnavn"].buckets, function (i, hit) {
                                         var str = hit.key;
@@ -540,6 +587,7 @@ module.exports = {
                                 } else {
                                     cb(names);
                                 }
+
                             }
                         })
                     })();
@@ -558,10 +606,12 @@ module.exports = {
                     if (!onlyAddress) {
                         (function ca() {
                             var qry = "";
-                            $.each(komKode, function (i, v) {
-                                qry += (qry.length < 1 ? "" : " OR ");
-                                qry += (query.startsWith(v) ? query.toLowerCase() : v + "*" + query.toLowerCase());
-                            });
+                            if (komKode !== "*") {
+                                $.each(komKode, function (i, v) {
+                                    qry += (qry.length < 1 ? "" : " OR ");
+                                    qry += (query.startsWith(v) ? query.toLowerCase() : v + "*" + query.toLowerCase());
+                                });
+                            }
                             switch (type3) {
                                 case "esr_nr":
                                     dslM = {
@@ -572,7 +622,7 @@ module.exports = {
                                                 "must": {
                                                     "query_string": {
                                                         "default_field": "properties.esr_ejendomsnummer",
-                                                        "query": encodeURIComponent(qry),
+                                                        "query": qry,
                                                         "default_operator": "AND"
                                                     }
                                                 }
@@ -584,12 +634,12 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
-                                data: '&q=' + JSON.stringify(dslM),
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
-                                dataType: 'jsonp',
-                                jsonp: 'jsonp_callback',
+                                dataType: 'json',
+                                type: "POST",
                                 success: function (response) {
                                     $.each(response.hits.hits, function (i, hit) {
                                         var str = hit._source.properties.esr_ejendomsnummer;
@@ -639,7 +689,7 @@ module.exports = {
                                                 "must": {
                                                     "query_string": {
                                                         "default_field": "properties.sfe_ejendomsnummer",
-                                                        "query": encodeURIComponent(query.toLowerCase()),
+                                                        "query": query.toLowerCase(),
                                                         "default_operator": "AND"
                                                     }
                                                 }
@@ -651,12 +701,12 @@ module.exports = {
                             }
 
                             $.ajax({
-                                url: MHOST + '/api/v1/elasticsearch/search/' + MDB + '/matrikel',
-                                data: '&q=' + JSON.stringify(dslM),
+                                url: MHOST + '/api/v2/elasticsearch/search/' + MDB + '/matrikel',
+                                data: JSON.stringify(dslM),
                                 contentType: "application/json; charset=utf-8",
                                 scriptCharset: "utf-8",
-                                dataType: 'jsonp',
-                                jsonp: 'jsonp_callback',
+                                dataType: 'json',
+                                type: "POST",
                                 success: function (response) {
                                     $.each(response.hits.hits, function (i, hit) {
                                         var str = hit._source.properties.sfe_ejendomsnummer;

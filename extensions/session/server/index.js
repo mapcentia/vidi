@@ -1,8 +1,12 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var router = express.Router();
-var http = require('http');
 var request = require('request');
-var session = require('express-session');
 
 /**
  *
@@ -25,6 +29,8 @@ router.post('/api/session/start', function (req, response) {
 
     request(options, function (err, res, body) {
 
+        var data;
+
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
         response.header('Expires', '0');
@@ -39,7 +45,7 @@ router.post('/api/session/start', function (req, response) {
         }
 
         try {
-            JSON.parse(body);
+            data = JSON.parse(body);
         } catch (e) {
             response.status(500).send({
                 success: false,
@@ -57,9 +63,12 @@ router.post('/api/session/start', function (req, response) {
             return;
         }
 
-        req.session.gc2SessionId = JSON.parse(body).session_id;
-        req.session.gc2ApiKey = JSON.parse(body).api_key;
-        req.session.gc2UserName = JSON.parse(body).screen_name;
+        data = (`data` in data ? data.data : data);
+        req.session.gc2SessionId = data.session_id;
+        req.session.gc2ApiKey = data.api_key;
+        req.session.gc2UserName = data.subuser ? data.subuser : data.screen_name;
+        req.session.subUser = data.subuser;
+        req.session.screenName = data.screen_name;
 
         console.log("Session started");
         response.send({
@@ -88,7 +97,6 @@ router.get('/api/session/status', function (req, response) {
             userName: req.session.gc2UserName
         }
     });
-
 });
 
 module.exports = router;

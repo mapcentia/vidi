@@ -1,3 +1,10 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
+"use strict";
 function detailFormatter(index, row) {
     var html = [];
     $.each(row, function (key, value) {
@@ -37,17 +44,9 @@ function touchScroll(selector) {
 }
 
 function array_unique(ar) {
-    if (ar.length && typeof ar !== 'string') {
-        var sorter = {};
-        var out = [];
-        for (var i = 0, j = ar.length; i < j; i++) {
-            if (!sorter[ar[i] + typeof ar[i]]) {
-                out.push(ar[i]);
-                sorter[ar[i] + typeof ar[i]] = true;
-            }
-        }
-    }
-    return out || ar;
+    return ar.filter( function onlyUnique(value, index, self) {
+        return self.indexOf(value) === index;
+    } )
 }
 
 /**
@@ -132,6 +131,9 @@ var Base64 = {
 
     // private method for UTF-8 encoding
     _utf8_encode: function (string) {
+        if (!string) {
+            return "";
+        }
         string = string.replace(/\r\n/g, "\n");
         var utftext = "";
 
@@ -157,10 +159,11 @@ var Base64 = {
 
     // private method for UTF-8 decoding
     _utf8_decode: function (utftext) {
-        var string = "", i, c1, c2, c;
+        var string = "", i, c1, c2, c3, c;
         c = 0;
         c1 = 0;
         c2 = 0;
+        c3 = 0;
 
         while (i < utftext.length) {
             c = utftext.charCodeAt(i);

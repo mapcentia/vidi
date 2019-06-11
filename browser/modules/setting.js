@@ -1,6 +1,7 @@
-/**
- * @fileoverview Description of file, its uses and information
- * about its dependencies.
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
@@ -31,6 +32,8 @@ var ready = false;
  * @type {array}
  */
 var extent;
+
+var maxBounds;
 
 /**
  *
@@ -70,6 +73,9 @@ module.exports = {
                         if (typeof response.data.extents[firstSchema] === "object") {
                             extent = response.data.extents[firstSchema];
                         }
+                        if (typeof response.data.extentrestricts === "object" && typeof response.data.extentrestricts[firstSchema] === "object") {
+                            maxBounds = response.data.extentrestricts[firstSchema];
+                        }
                     }
                     ready = true;
                     backboneEvents.get().trigger("ready:settings");
@@ -88,10 +94,18 @@ module.exports = {
     },
 
     /**
-     * Get the saved extent from the first schema or viz
+     * Get the saved extent from the first schema
      * @returns {array}
      */
     getExtent: function () {
         return extent;
+    },
+
+    /**
+     * Get the saved maxBounds from the first schema
+     * @returns {array}
+     */
+    getMaxBounds: function () {
+        return maxBounds;
     }
 };

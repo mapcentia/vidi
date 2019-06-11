@@ -1,6 +1,11 @@
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2018 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 var express = require('express');
 var router = express.Router();
-var http = require('http');
 var config = require('../../config/config.js').gc2;
 var request = require('request');
 
@@ -20,7 +25,7 @@ router.get('/api/baselayer', function (req, response) {
 
             return;
         }
-
+        body+= ";window.gc2host='" + config.host + "';";
         response.send((body));
     })
 });
