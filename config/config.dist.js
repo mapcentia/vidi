@@ -39,6 +39,12 @@ module.exports = {
 
 
     // ===============================================================
+    // Startup modal.
+    // The modal is shown upon Vidi initialization and can be hidden once or forever (until cookies reset).
+    // ===============================================================
+    //"startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>",
+
+    // ===============================================================
     // Startup modal supression templates.
     // Setting contains list of templates, where the startup modal is
     // disabled. Can be a plain template name or the RegExp
