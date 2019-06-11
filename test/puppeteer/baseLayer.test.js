@@ -149,4 +149,23 @@ describe('Base layers', () => {
 
         expect(await page.evaluate(`$('.leaflet-sbs-range').length`)).to.equal(1);
     });
+
+    it('should be able to show additional infromation about the base layer', async () => {
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
+        await page.emulate(helpers.EMULATED_SCREEN);
+        page = await helpers.waitForPageToLoad(page);
+        await page.evaluate(`$('[data-module-id="baseLayer"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('#info-modal-body').closest('.slide-right').css('right')`)).to.equal(`-600px`);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[data-gc2-base-id="osm"]').closest('.js-base-layer-control').find('.info-label').length`)).to.equal(1);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('[data-gc2-base-id="osm"]').closest('.js-base-layer-control').find('.info-label').first().is(':visible')`)).to.be.true;
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-gc2-base-id="osm"]').closest('.js-base-layer-control').find('.info-label').first().trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('#info-modal-body').closest('.slide-right').css('right')`)).to.equal(`0px`);
+    });
 });

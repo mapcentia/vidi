@@ -1,0 +1,4 @@
+{
+    "brandName": "Test",
+    "startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>"
+}
