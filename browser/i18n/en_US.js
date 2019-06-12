@@ -339,6 +339,7 @@ module.exports = {
         "Enter borehole, installation, station": "Enter borehole, installation, station",
         "Select another chemical": "Select another chemical",
         "Nothing found": "Nothing found",
+        "Boreholes": "Boreholes",
         "Continue": "Continue",
         "Continue without selecting chemical": "Continue without selecting chemical",
         "boreholes_time_series_with_chemicals": "Boreholes time series with chemicals",
