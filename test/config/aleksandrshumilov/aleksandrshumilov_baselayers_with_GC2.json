@@ -1,0 +1,19 @@
+{
+    "baseLayers": [
+        {
+            "id": "osm",
+            "name": "OSM"
+        },
+        {
+            "id": "public.test_poly",
+            "name": "Polygon",
+            "db": "aleksandrshumilov",
+            "host": "https://gc2.mapcentia.com",
+            "config": {
+                "maxZoom": 21,
+                "maxNativeZoom": 20,
+                "attribution": "&copy; Mapbox"
+            }
+        }
+    ]
+}

@@ -291,7 +291,6 @@ const normalizeTheURL = (URL) => {
  * @return {Promise}
  */
 const normalizeTheURLForFetch = (event) => {
-    console.log(event);
     let URL = event.request.url;
     let result = new Promise((resolve, reject) => {
         let cleanedRequestURL = normalizeTheURL(URL);
@@ -496,9 +495,8 @@ const normalizeTheURLForFetch = (event) => {
             resolve(cleanedRequestURL);
         }
     });
-console.log(result)
     return result;
-}
+};
 
 
 /**

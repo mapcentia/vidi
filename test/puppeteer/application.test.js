@@ -71,7 +71,7 @@ describe("Application", () => {
         newPage = await helpers.waitForPageToLoad(newPage);
         await helpers.sleep(1000);
         expect(await newPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
-        await newPage.close();        
+        await newPage.close();
     });
 
     it("should have only one active module at a time", async () => {
@@ -301,5 +301,48 @@ describe("Application", () => {
        await helpers.sleep(1000);
 
        expect(await page.evaluate(`$('[name="baselayers"][value="osm"]').is(':checked')`)).to.be.true;
+    });
+
+    it("should show startup modal and hide it once or forever", async () => {
+        /*
+        Configuration file aleksandrshumilov_with_startup_modal.json
+
+        {
+            "brandName": "Test",
+            "startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>"
+        }
+        */
+
+        let page = await browser.newPage();
+        const url = helpers.PAGE_URL_DEFAULT.replace(`#osm/13/39.2963/-6.8335/`, `?config=aleksandrshumilov_with_startup_modal.json`);
+        await page.goto(`${url}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(2000);
+
+        expect(await page.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.true;
+        await page.evaluate(`$('#startup-message-modal .js-close-modal').trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
+
+        // First reload
+        let firstReloadPage = await browser.newPage();
+        await firstReloadPage.goto(`${url}`);
+        firstReloadPage = await helpers.waitForPageToLoad(firstReloadPage);
+        await helpers.sleep(2000);
+
+        expect(await firstReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.true;
+        await firstReloadPage.evaluate(`$('#startup-message-modal .js-close-modal-do-not-show').trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await firstReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
+
+        expect(await firstReloadPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
+
+        // Second reload
+        let secondReloadPage = await browser.newPage();
+        await secondReloadPage.goto(`${url}`);
+        secondReloadPage = await helpers.waitForPageToLoad(secondReloadPage);
+        await helpers.sleep(2000);
+
+        expect(await secondReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
     });
 });
