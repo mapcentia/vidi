@@ -267,7 +267,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: ('q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) +
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
                     '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
                     '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
@@ -402,7 +402,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: ('q=' + (this.base64 ? base64.encode(sql) + "&base64=true" : encodeURIComponent(sql)) +
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
                     '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
                     '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
