@@ -62,8 +62,8 @@ app.use(require('./extensions'));
 
 app.enable('trust proxy');
 
-var server = app.listen(3001, function () {
-    console.log('Listening on port 3001...');
+var server = app.listen(3000, function () {
+    console.log('Listening on port 3000...');
 });
 
 global.io = require('socket.io')(server);
