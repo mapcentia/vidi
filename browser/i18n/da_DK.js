@@ -339,6 +339,7 @@ module.exports = {
         "Enter borehole, installation, station": "Indtast DGU, anlæg, station",
         "Select another chemical": "Vælg et andet kemikalie",
         "Nothing found": "Fandt ingenting",
+        "Boreholes": "Dgu",
         "Continue": "Fortsæt",
         "Continue without selecting chemical": "Fortsæt uden valg af kemikalier",
         "boreholes_time_series_with_chemicals": "Dgu tidsserier med kemikalier",

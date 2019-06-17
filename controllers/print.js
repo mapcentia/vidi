@@ -34,27 +34,30 @@ router.post('/api/print', function (req, response) {
         let url = "http://127.0.0.1:3000" + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log(`Printing ` + url);
 
-        const page = await headless.getBrowser().newPage();
-        await page.emulateMedia('screen');
-        page.on('console', msg => {
-            if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
-                console.log('App was loaded, generating PDF');
-                setTimeout(() => {
-                    page.pdf({
-                        path: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`,
-                        landscape: (q.orientation === 'l'),
-                        format: q.pageSize,
-                        printBackground: true
-                    }).then(() => {
-                        console.log('Done');
-                        page.close();
-                        response.send({success: true, key, url});
-                    });
-                }, 2000);
-            }
-        });
+        headless.getBrowser().then(browser => {
+            browser.newPage().then(async (page) => {
+                await page.emulateMedia('screen');
+                page.on('console', msg => {
+                    if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+                        console.log('App was loaded, generating PDF');
+                        setTimeout(() => {
+                            page.pdf({
+                                path: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`,
+                                landscape: (q.orientation === 'l'),
+                                format: q.pageSize,
+                                printBackground: true
+                            }).then(() => {
+                                console.log('Done');
+                                page.close();
+                                response.send({success: true, key, url});
+                            });
+                        }, 2000);
+                    }
+                });
 
-        await page.goto(url);
+                await page.goto(url);
+            });
+        });
     });
 });
 
