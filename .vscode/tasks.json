@@ -1,0 +1,29 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558 
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [{
+            "type": "shell",
+            "label": "build",
+            "windows": {
+                "command": "grunt appendBuildHashToVersion browserify:publish version --force"
+            }
+        },
+        {
+            "type": "shell",
+            "label": "start",
+            "windows": {
+                "command": "node ."
+            },
+            "dependsOn": "build",
+            "isBackground": true
+        },
+        {
+            "type": "shell",
+            "label": "stop",
+            "windows": {
+                "command": "taskkill /im node.exe /F"
+            }
+        }
+    ]
+}
