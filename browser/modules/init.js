@@ -64,6 +64,7 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
                 window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
+                window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;

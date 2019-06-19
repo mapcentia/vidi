@@ -99,7 +99,7 @@ class StateSnapshotsDashboard extends React.Component {
                 anonymous,
                 snapshot: state,
                 database: vidiConfig.appDatabase,
-                schema: vidiConfig.appDatabase,
+                schema: vidiConfig.appSchema,
                 host: vidiConfig.gc2.host
             };
 

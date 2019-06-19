@@ -60,7 +60,7 @@ var host;
 /**
  *
  */
-var backboneEvents;
+var backboneEvents, stateSnapshots;
 
 let _self = false;
 
@@ -83,6 +83,7 @@ module.exports = {
      */
     set: function (o) {
         backboneEvents = o.backboneEvents;
+        stateSnapshots = o.stateSnapshots;
 
         _self = this;
         return this;
@@ -113,56 +114,81 @@ module.exports = {
 
             try {
 
-            
-            var schemata;
-
-            if (!doNotLoadExisting) {
-                if (str) {
-                    schemataStr = str;
-                } else {
-                    schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
-                }
-
-                if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
-                    if (schemataStr !== "") {
-                        schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
-                    } else {
-                        schemata = window.vidiConfig.schemata;
+            /**
+             * Loads meta objects from the backend Meta API
+             * 
+             * @param {String} schemataStr Schemata string
+             * 
+             * @returns {void}
+             */
+            const loadMeta = (schemataStr) => {
+                $.ajax({
+                    url: '/api/meta/' + db + '/' + schemataStr,
+                    scriptCharset: "utf-8",
+                    success: function (response) {
+                        if (response.data && response.data.length > 0) {
+                            me.addMetaData(response);
+                            ready = true;
+                            resolve(response);
+                        } else {
+                            reject();
+                        }
+                    },
+                    error: function (response) {
+                        reject();
+                        alert(JSON.parse(response.responseText).message);
                     }
-                    schemataStr = schemata.join(",")
-                }
+                });
 
-                if (!schemataStr) {
-                    reject(new Error('No schemata'));
-                    return;
+            };
+
+            var schemata;
+            if (!doNotLoadExisting) {
+                if (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0) {
+                    stateSnapshots.getSnapshotByID(window.vidiConfig.snapshot).then(snapshot => {
+                        if (snapshot && snapshot.schema) {
+                            loadMeta(snapshot.schema);
+                        } else {
+                            console.warn(`Unable to get "schema" from snapshot`);
+                            loadMeta(str);
+                        }
+                    }).catch(error => {
+                        console.error(`Error occured when getting state snapshot ${window.vidiConfig.snapshot} instead of schemata`);
+                        console.error(error);
+                        loadMeta(str);
+                    });
+                } else {
+                    if (str) {
+                        schemataStr = str;
+                    } else {
+                        schemataStr = (window.gc2Options.mergeSchemata === null ? "" : window.gc2Options.mergeSchemata.join(",") + ',') + (typeof urlVars.i === "undefined" ? "" : urlVars.i.split("#")[1] + ',') + schemataStr;
+                    }
+
+                    if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
+                        if (schemataStr !== "") {
+                            schemata = schemataStr.split(",").concat(window.vidiConfig.schemata);
+                        } else {
+                            schemata = window.vidiConfig.schemata;
+                        }
+                        schemataStr = schemata.join(",")
+                    }
+
+                    if (!schemataStr) {
+                        reject(new Error('No schemata'));
+                        return;
+                    }
+
+                    loadMeta(schemataStr);
                 }
             } else {
-                schemataStr = str;
+                loadMeta(str);
             }
-
-            $.ajax({
-                url: '/api/meta/' + db + '/' + schemataStr,
-                scriptCharset: "utf-8",
-                success: function (response) {
-                    if (response.data && response.data.length > 0) {
-                        me.addMetaData(response);
-                        ready = true;
-                        resolve(response);
-                    } else {
-                        reject();
-                    }
-                },
-                error: function (response) {
-                    reject();
-                    alert(JSON.parse(response.responseText).message);
-                }
-            });
 
             } catch(e) {
                 console.error(e);
             }
 
-        })
+        });
     },
 
     /**
