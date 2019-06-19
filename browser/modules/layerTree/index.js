@@ -142,11 +142,43 @@ module.exports = {
     },
 
     init: function () {
+        _self = this;
+
         if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
             moduleState.editingIsEnabled = true;
         }
 
-        _self = this;
+        if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
+            backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
+                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                for (let layerKey in decodedFilters) {
+                    _self.reloadLayer(`v:${layerTreeUtils.stripPrefix(layerKey)}`).then(() => {
+                        _self.onApplyArbitraryFiltersHandler({
+                            layerKey,
+                            filters: decodedFilters[layerKey]
+                        });
+
+                        // Wait for layer load event
+                        backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
+                            if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                                for (let key in cloud.get().map._layers) {
+                                    let layer = cloud.get().map._layers[key];
+                                    if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
+                                        cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                        setTimeout(() => {
+                                            console.log(`Query filter parameter was applied`);
+                                        }, 1000);
+                                    }
+                                }
+                            }
+                        });
+                    });
+
+                    break;
+                }
+            });
+        }
+
         queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self});
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self._statisticsHandler(statistics, forceLayerUpdate);
@@ -2677,6 +2709,7 @@ module.exports = {
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
+        console.log(`### filters`, layerKey, JSON.stringify(filters));
         moduleState.arbitraryFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey);
     },

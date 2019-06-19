@@ -82,7 +82,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
             parsedBody = localParsedBody;
         } catch (e) {}
 
-        if (parsedBody) {
+        if (parsedBody && parsedBody.data) {
             // Filter by browser and user ownership
             let results = [];
             parsedBody.data.map(item => {
