@@ -26,7 +26,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let filter = (localRequest.query.filter ? `&initialFilter=${localRequest.query.filter}` : ``);
 
     if (errorMessages.length === 0) {
-        let url = `http://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
+        let url = `https://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
         headless.getBrowser().then(browser => {
             browser.newPage().then(page => {
                 page.emulate({
