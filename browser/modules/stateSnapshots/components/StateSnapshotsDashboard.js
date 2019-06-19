@@ -247,7 +247,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         this.setState({ loading: true });
         $.ajax({
-            url: this.state.apiUrl + '/' + vidiConfig.appDatabase,
+            url: this.state.apiUrl + '/' + vidiConfig.appDatabase + '?ownerOnly=true',
             method: 'GET',
             dataType: 'json'
         }).then(data => {
