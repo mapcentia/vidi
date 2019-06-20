@@ -37,6 +37,21 @@ module.exports = {
 
     "removeDisabledLayersFromLegend": true,
 
+    // ===========
+    // Schemata.
+    // Specifies schemas that should be loaded.
+    // ===========
+    "schemata": [
+        "my_schema",
+        "my_schema.my_layer",
+        "tag:my_tag"
+    ],
+
+    // ===============
+    // State snapshot.
+    // Overrides the schemata setting and specifies the schema to load.
+    // ===============
+    "snapshot": "state_snapshot_IDENTIFIER",
 
     // ===============================================================
     // Startup modal.
