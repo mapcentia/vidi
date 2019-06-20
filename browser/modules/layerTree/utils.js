@@ -300,12 +300,22 @@ const getPossibleLayerTypes = (layerDescription) => {
 /**
  * Detects default (fallback) layer type
  * 
- * @param {Object} layerMeta Layer meta
+ * @param {Object} layerMeta  Layer meta
+ * @param {Object} parsedMeta Parsed layer "meta" field
  * 
  * @return {Object}
  */
-const getDefaultLayerType = (layerMeta) => {
+const getDefaultLayerType = (layerMeta, parsedMeta = false) => {
     let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer } = getPossibleLayerTypes(layerMeta);
+    if (parsedMeta) {
+        if (`default_layer_type` in parsedMeta && parsedMeta.default_layer_type) {
+            if (isVectorLayer && parsedMeta.default_layer_type === LAYER.VECTOR) return LAYER.VECTOR;
+            if (isRasterTileLayer && parsedMeta.default_layer_type === LAYER.RASTER_TILE) return LAYER.RASTER_TILE;
+            if (isVectorTileLayer && parsedMeta.default_layer_type === LAYER.VECTOR_TILE) return LAYER.VECTOR_TILE;
+            if (isWebGLLayer && parsedMeta.default_layer_type === LAYER.WEBGL) return LAYER.WEBGL;
+        }
+    }
+
     if (isVectorLayer) {
         return LAYER.VECTOR;
     } else if (isRasterTileLayer) {
