@@ -1679,7 +1679,7 @@ module.exports = {
                                         }
 
                                         if (column.expression === 'like') {
-                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
                                         } else {
                                             arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         }
@@ -2211,7 +2211,7 @@ module.exports = {
             let {detectedTypes, specifiers} = layerTreeUtils.getPossibleLayerTypes(layer);
             let singleTypeLayer = (detectedTypes === 1);
 
-            let condition = layerTreeUtils.getDefaultLayerType(layer);
+            let condition = layerTreeUtils.getDefaultLayerType(layer, meta.parseLayerMeta(`${layer.f_table_schema}.${layer.f_table_name}`));
             if (layerIsActive && activeLayerName) {
                 condition = (activeLayerName.indexOf(`:`) === -1 ? LAYER.RASTER_TILE : activeLayerName.split(`:`)[0]);
             }
