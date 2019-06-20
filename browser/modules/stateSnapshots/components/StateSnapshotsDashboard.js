@@ -99,7 +99,7 @@ class StateSnapshotsDashboard extends React.Component {
                 anonymous,
                 snapshot: state,
                 database: vidiConfig.appDatabase,
-                schema: vidiConfig.appDatabase,
+                schema: vidiConfig.appSchema,
                 host: vidiConfig.gc2.host
             };
 
@@ -247,7 +247,7 @@ class StateSnapshotsDashboard extends React.Component {
 
         this.setState({ loading: true });
         $.ajax({
-            url: this.state.apiUrl + '/' + vidiConfig.appDatabase,
+            url: this.state.apiUrl + '/' + vidiConfig.appDatabase + '?ownerOnly=true',
             method: 'GET',
             dataType: 'json'
         }).then(data => {
