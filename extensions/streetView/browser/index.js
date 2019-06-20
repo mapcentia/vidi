@@ -116,7 +116,7 @@ module.exports = {
             },
 
             "Street View": {
-                "da_DK": "Gadefoto",
+                "da_DK": "Skrå- og gadefoto",
                 "en_US": "Street View"
             },
 
@@ -284,7 +284,7 @@ module.exports = {
                                            name="streetview-service" value="cowi"
                                            checked={this.state.selectedOption === 'cowi'}
                                            onChange={this.onChange}/>
-                                    COWI Gadefoto
+                                    COWI Skråfoto
                                 </label>
                             </div>
 
