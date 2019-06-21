@@ -15,7 +15,7 @@ import {
     EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
-import { StringControl, NumberControl, BooleanControl, DateControl } from './controls';
+import { StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl } from './controls';
 
 /**
  * Layer filter component
@@ -24,9 +24,10 @@ const SELECT_WIDTH = `50px`;
 
 const STRING_TYPES = [`text`, `string`, `character varying`];
 const NUMBER_TYPES = [`integer`, `double precision`];
-const DATE_TYPES = [`date`, `timestamp with time zone`];
+const DATE_TYPES = [`date`];
+const DATETIME_TYPES = [`timestamp with time zone`];
 const BOOLEAN_TYPES = [`boolean`];
-const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
+const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const PREDEFINED_TAB = 0;
 const ARBITRARY_TAB = 1;
@@ -143,7 +144,7 @@ class VectorLayerFilter extends React.Component {
         let expressionSet = EXPRESSIONS_FOR_STRINGS;                
         if (NUMBER_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_NUMBERS;
-        } else if (DATE_TYPES.indexOf(type) !== -1) {
+        } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_DATES;
         } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_BOOLEANS;
@@ -343,6 +344,8 @@ class VectorLayerFilter extends React.Component {
                     control = (<NumberControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (DATE_TYPES.indexOf(type) !== -1) {
                     control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (DATETIME_TYPES.indexOf(type) !== -1) {
+                    control = (<DatetimeControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
                     control = (<BooleanControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else {
@@ -365,8 +368,6 @@ class VectorLayerFilter extends React.Component {
                 <div style={{paddingRight: `10px`, paddingTop: `16px`}}>{ruleValidityIndicator}</div>
             </div>);
         });
-
-
 
         /**
          * Builds the arbitrary filters tab

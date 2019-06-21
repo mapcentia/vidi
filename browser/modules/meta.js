@@ -129,7 +129,7 @@ module.exports = {
                         if (response.data && response.data.length > 0) {
                             me.addMetaData(response);
                             ready = true;
-                            resolve(response);
+                            resolve(schemataStr);
                         } else {
                             reject();
                         }

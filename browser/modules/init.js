@@ -298,9 +298,9 @@ module.exports = {
          * Fetch meta > initialize settings > create layer tree >
          * initialize state > load layers > initialize extensions > finish
          */
-        modules.meta.init().then(() => {
-            return modules.setting.init();
-        }, (error) => {
+        modules.meta.init().then((schemataStr) => {
+            return modules.setting.init(schemataStr);
+        }).catch((error) => {
             console.log(error); // Stacktrace
             //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
