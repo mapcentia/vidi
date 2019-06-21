@@ -20,7 +20,7 @@ class DateControl extends React.Component {
             <input
                 id={this.props.id}
                 className="form-control"
-                type="datetime-local"
+                type="date"
                 placeholder=""
                 value={this.props.value}
                 onChange={(event) => { this.props.onChange(event.target.value) }}/>
