@@ -4,7 +4,7 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-import { MODULE_NAME, LAYER } from './constants';
+import { MODULE_NAME, LAYER, SQL_QUERY_LIMIT } from './constants';
 import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './LayerSorting';
 
 /**
@@ -296,6 +296,23 @@ const getPossibleLayerTypes = (layerDescription) => {
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
 };
 
+/**
+ * Detects the query limit for layer
+ * 
+ * @param {Object} layerMeta Layer meta
+ * 
+ * @return {Number}
+ */
+const getQueryLimit = (layerMeta) => {
+    if (!layerMeta) throw new Error(`Invalid layer meta object`);
+
+    let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
+    if (layerMeta && `max_features` in layerMeta && parseInt(layerMeta.max_features) > 0) {
+        layerSpecificQueryLimit = parseInt(layerMeta.max_features);
+    }
+
+    return layerSpecificQueryLimit;
+};
 
 /**
  * Detects default (fallback) layer type
@@ -335,6 +352,7 @@ module.exports = {
     calculateOrder,
     getDefaultTemplate,
     stripPrefix,
+    getQueryLimit,
     getPossibleLayerTypes,
     getDefaultLayerType,
     setupLayerNumberIndicator,

@@ -10,18 +10,16 @@
 
 'use strict';
 
-import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
+import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {};
 
-/**
- * Layer filters
- */
 var React = require('react');
 var ReactDOM = require('react-dom');
+require('snackbarjs');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
@@ -1214,149 +1212,25 @@ module.exports = {
     },
 
     /**
-     * Creates SQL store for WebGL layers
-     *
-     * @param {Object} layer Layer description
-     *
-     * @returns {void}
-     */
-    createWebGLStore: (layer) => {
-        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
-        let parsedMeta = meta.parseLayerMeta(layerKey);
-
-        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
-        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
-            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
-        }
-
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
-
-        let whereClauses = [];
-        let activeFilters = _self.getActiveLayerFilters(layerKey);
-        let parentFilters = _self.getParentLayerFilters(layerKey);
-
-        let overallFilters = activeFilters.concat(parentFilters);
-        overallFilters.map(item => {
-            whereClauses.push(item);
-        });
-
-        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
-        // Checking if versioning is enabled for layer
-        if (`versioning` in layer && layer.versioning) {
-            whereClauses.push(`gc2_version_end_date is null`);
-        }
-
-        // Checking if dynamic load is enabled for layer
-        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
-            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
-        }
-
-        // Gathering all WHERE clauses
-        if (whereClauses.length > 0) {
-            whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
-        }
-
-        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
-        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
-            type: layer.type,
-            map: cloud.get().map,
-            jsonp: false,
-            method: "POST",
-            host: "",
-            db: urlparser.db,
-            uri: "/api/sql",
-            clickable: true,
-            id: trackingLayerKey,
-            name: trackingLayerKey,
-            lifetime: 0,
-            styleMap: styles[trackingLayerKey],
-            sql,
-            onLoad: (l) => {
-                if (l === undefined) return;
-
-                layers.decrementCountLoading(l.id);
-                backboneEvents.get().trigger("doneLoading:layers", l.id);
-
-                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
-                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
-                }
-            },
-            onEachFeature: (feature, layer) => {
-                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
-                    /*
-                        Checking for correct onEachFeature structure
-                    */
-                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
-                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
-                    }
-
-                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
-                } else {
-                    // If there is no handler for specific layer, then display attributes only
-                    layer.on("click", function (e) {
-                        _self.displayAttributesPopup(feature, layer, e);
-                    });
-                }
-            }
-        });
-    },
-
-    /**
-     * Creates gc2table control for layer
+     * Checks if maximum number of features was reached when loading layer
      * 
-     * @param {String}  layerKey      Layer key     
-     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     * @param {String} layerKey Layer key
+     * @param {Object} l        Layer object
      * 
-     * @returns {void}
+     * @return {void}
      */
-    createTable(layerKey, forceDataLoad = false) {
-        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
-        if (layerWithData.length === 1) {
-            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
-
-            let metaDataKeys = meta.getMetaDataKeys();
-            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
-
-            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
-                weight: 5,
-                color: '#666',
-                dashArray: '',
-                fillOpacity: 0.2
+    maxFeaturesCheck: (layerKey, l, layerSpecificQueryLimit) => {
+        if (l.geoJSON && l.geoJSON.features && l.geoJSON.features.length === layerSpecificQueryLimit) {
+            jquery.snackbar({
+                id: "snackbar-watsonc",
+                content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")}</span>`,
+                htmlAllowed: true,
+                timeout: 9000
             });
 
-            let localTable = gc2table.init({
-                el: tableContainerId + ` table`,
-                ns: tableContainerId,
-                geocloud2: cloud.get(),
-                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
-                cm: tableHeaders,
-                autoUpdate: false,
-                autoPan: false,
-                openPopUp: false,
-                setViewOnSelect: true,
-                responsive: false,
-                callCustomOnload: true,
-                assignFeatureEventListenersOnDataLoad: true,
-                height: 250,
-                locale: window._vidiLocale.replace("_", "-"),
-                template: template,
-                styleSelected
-            });
-
-            localTable.loadDataInTable(true, forceDataLoad);
-            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
-        } else {
-            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
+            setTimeout(() => {
+                switchLayer.init(layerKey, false);
+            }, 1000);
         }
     },
 
@@ -1379,13 +1253,7 @@ module.exports = {
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
 
-        let parsedMeta = meta.parseLayerMeta(layerKey);
-
-        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
-        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
-            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
-        }
-
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
         let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
@@ -1464,6 +1332,8 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
+
+                _self.maxFeaturesCheck(layerKey, l, layerSpecificQueryLimit);
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
@@ -1536,6 +1406,149 @@ module.exports = {
                 return L.circleMarker(latlng);
             })
         });
+    },
+
+    /**
+     * Creates SQL store for WebGL layers
+     *
+     * @param {Object} layer Layer description
+     *
+     * @returns {void}
+     */
+    createWebGLStore: (layer) => {
+        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+
+        let whereClauses = [];
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        overallFilters.map(item => {
+            whereClauses.push(item);
+        });
+
+        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+
+        // Checking if versioning is enabled for layer
+        if (`versioning` in layer && layer.versioning) {
+            whereClauses.push(`gc2_version_end_date is null`);
+        }
+
+        // Checking if dynamic load is enabled for layer
+        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+        }
+
+        // Gathering all WHERE clauses
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+        }
+
+        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
+        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
+            type: layer.type,
+            map: cloud.get().map,
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: urlparser.db,
+            uri: "/api/sql",
+            clickable: true,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
+            lifetime: 0,
+            styleMap: styles[trackingLayerKey],
+            sql,
+            onLoad: (l) => {
+                if (l === undefined) return;
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+
+                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
+                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
+                }
+
+                _self.maxFeaturesCheck(layerKey, l, layerSpecificQueryLimit);
+            },
+            onEachFeature: (feature, layer) => {
+                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
+                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
+                }
+            }
+        });
+    },
+
+    /**
+     * Creates gc2table control for layer
+     * 
+     * @param {String}  layerKey      Layer key     
+     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     * 
+     * @returns {void}
+     */
+    createTable(layerKey, forceDataLoad = false) {
+        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
+        if (layerWithData.length === 1) {
+            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+
+            let metaDataKeys = meta.getMetaDataKeys();
+            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                && metaDataKeys[layerKey].infowindow.template !== "")
+                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+
+            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.2
+            });
+
+            let localTable = gc2table.init({
+                el: tableContainerId + ` table`,
+                ns: tableContainerId,
+                geocloud2: cloud.get(),
+                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
+                cm: tableHeaders,
+                autoUpdate: false,
+                autoPan: false,
+                openPopUp: false,
+                setViewOnSelect: true,
+                responsive: false,
+                callCustomOnload: true,
+                assignFeatureEventListenersOnDataLoad: true,
+                height: 250,
+                locale: window._vidiLocale.replace("_", "-"),
+                template: template,
+                styleSelected
+            });
+
+            localTable.loadDataInTable(true, forceDataLoad);
+            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+        } else {
+            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
+        }
     },
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {

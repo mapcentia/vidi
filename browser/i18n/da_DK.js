@@ -168,6 +168,7 @@ module.exports = {
         "Finish drawing": "Afslut tegning",
 
         // LayerTree
+        "max_number_of_loaded_features_was_reached_notification": "# The maximum number of loaded features was reached, please use filters or set higher 'max_features' meta setting",
         "Layer has following children": "Laget har følgende relationer",
         "Predefined": "Foruddefineret",
         "Arbitrary": "Vilkårlig",
