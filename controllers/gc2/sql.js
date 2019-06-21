@@ -32,7 +32,7 @@ router.all('/api/sql/:db', function (req, response) {
             return v.toString(16);
         });
 
-    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
+    var postData = "q=" + (base64 === "true" ? encodeURIComponent(q) : encodeURIComponent(q)) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
         options;
 
     // Check if user is a sub user
@@ -75,15 +75,22 @@ router.all('/api/sql/:db', function (req, response) {
         }
     }
 
-    if (!store) {
-        response.writeHead(200, headers);
-    }
+    // if (!store) {
+    //     //response.writeHead(200, headers);
+    // }
 
     rem = request(options);
 
     if (store) {
         writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
     }
+
+    rem.on('response', function(res) {
+        console.log(res.statusCode);
+        if (!store) {
+            response.writeHead(res.statusCode, headers);
+        }
+    });
 
     rem.on('data', function (chunk) {
         if (store) {
