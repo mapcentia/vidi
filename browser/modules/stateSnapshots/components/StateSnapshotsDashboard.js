@@ -100,7 +100,7 @@ class StateSnapshotsDashboard extends React.Component {
                 snapshot: state,
                 database: vidiConfig.appDatabase,
                 schema: vidiConfig.appSchema,
-                host: vidiConfig.gc2.host
+                host: this.props.urlparser.hostname
             };
 
             $.ajax({
