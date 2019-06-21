@@ -6,6 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Datetime from 'react-datetime';
+import moment from 'moment';
+
+const FORMAT = `YYYY-MM-DD HH:mm:ss`;
 
 /**
  * Datetime control component
@@ -13,17 +17,26 @@ import PropTypes from 'prop-types';
 class DatetimeControl extends React.Component {
     constructor(props) {
         super(props);
+        moment.locale(navigator.language.indexOf(`da_`) === 0 ? "da" : "en");
     }
 
     render() {
-        return (<div style={{ display: 'inline-table', maxWidth: '140px' }}>
-            <input
-                id={this.props.id}
-                className="form-control"
-                type="datetime-local"
-                placeholder=""
-                value={this.props.value}
-                onChange={(event) => { this.props.onChange(event.target.value) }}/>
+        return (<div style={{ display: 'inline-table', maxWidth: '160px' }}>
+            <Datetime
+                dateFormat="YYYY-MM-DD"
+                timeFormat="HH:mm:ss"
+                onChange={(value) => {
+                    if (typeof value === `string`) {
+                        if (moment(value, FORMAT).isValid()) {
+                            this.props.onChange(value);
+                        } else {
+                            this.props.onChange(false);
+                        }
+                    } else {
+                        this.props.onChange(value.format(FORMAT))
+                    }
+                }}
+                value={this.props.value}/>
         </div>);
     }
 }

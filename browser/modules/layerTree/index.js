@@ -2722,7 +2722,6 @@ module.exports = {
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
-        console.log(`### filters`, layerKey, JSON.stringify(filters));
         moduleState.arbitraryFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey);
     },
