@@ -297,7 +297,7 @@ module.exports = {
                             properties[key].type = `number`;
                             break;
                         case `date`:
-                            properties[key].format = `date-time`;
+                            properties[key].format = `date`;
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
