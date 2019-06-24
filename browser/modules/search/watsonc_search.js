@@ -74,6 +74,7 @@ module.exports = {
                 searchTxt + " eller ESR nr.");
         }
 
+
         // Set max zoom then zooming on target
         // ===================================
 
@@ -741,32 +742,27 @@ module.exports = {
                 },
                 source: function (query, cb) {
                     var names = [];
-                    type5 = "boreholeno";
                     (function ca() {
 
-                        switch (type5) {
-                            case "boreholeno":
-                                dslB = {
-                                    "from": 0,
-                                    "size": 100,
-                                    "query": {
-                                        "bool": {
-                                            "must": {
-                                                "query_string": {
-                                                    "default_field": "properties.boreholeno",
-                                                    "query": query.toLowerCase(),
-                                                    "default_operator": "AND"
-                                                }
-                                            }
+                        dslB = {
+                            "from": 0,
+                            "size": 100,
+                            "query": {
+                                "bool": {
+                                    "must": {
+                                        "query_string": {
+                                            "default_field": "properties.boreholeno",
+                                            "query": query.toLowerCase(),
+                                            "default_operator": "AND"
                                         }
                                     }
-                                };
-                                break;
+                                }
+                            }
+                        };
 
-                        }
 
                         $.ajax({
-                            url: 'https://watsonc.mapcentia.com/api/v2/elasticsearch/search/jupiter/chemicals/boreholes_time_series_without_chemicals',
+                            url: 'https://watsonc.mapcentia.com/api/v2/elasticsearch/search/jupiter/chemicals/boreholes_time_series_without_chemicals_view',
                             data: JSON.stringify(dslB),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
@@ -774,35 +770,24 @@ module.exports = {
                             type: "POST",
                             success: function (response) {
                                 if (response.hits === undefined) return;
-
                                 $.each(response.hits.hits, function (i, hit) {
                                     var str = hit._source.properties.boreholeno;
-                                    // find only the 20 first real properties
                                     names.push({value: str});
                                     gids[str] = hit._source.properties.gid;
 
                                 });
-                                if (names.length === 1 && (type5 === "boreholeno")) {
-                                    type5 = "boreholeno";
-                                    names = [];
-                                    gids = [];
-                                    ca();
-                                } else {
-                                    names.sort(function (a, b) {
-                                        return a.value - b.value
-                                    });
-                                    cb(names);
-                                }
+                                names.sort(function (a, b) {
+                                    return a.value - b.value
+                                });
+                                cb(names);
                             }
                         })
                     })();
-
-
                 }
             });
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
-                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr") || (type5 === "boreholeno" && name === "boreholeno")) {
+                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr") || (name === "boreholeno")) {
                 placeStore.reset();
                 switch (name) {
                     case "boreholeno" :
@@ -819,7 +804,6 @@ module.exports = {
                         placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
                         placeStore.load();
                         break;
-
                     case "sfe_ejdnr" :
                         placeStore.db = MDB;
                         placeStore.host = MHOST;
