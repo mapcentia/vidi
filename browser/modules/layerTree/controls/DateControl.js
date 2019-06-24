@@ -1,29 +1,43 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import Datetime from 'react-datetime';
+import moment from 'moment';
+
+const FORMAT = `YYYY-MM-DD`;
 
 /**
- * Boolean control component
+ * Date control component
  */
 class DateControl extends React.Component {
     constructor(props) {
         super(props);
+        moment.locale(navigator.language.indexOf(`da_`) === 0 ? "da" : "en");
     }
 
     render() {
         return (<div style={{ display: 'inline-table', maxWidth: '140px' }}>
-            <input
-                id={this.props.id}
-                className="form-control"
-                type="date"
-                placeholder=""
-                value={this.props.value}
-                onChange={(event) => { this.props.onChange(event.target.value) }}/>
+            <Datetime
+                dateFormat="YYYY-MM-DD"
+                timeFormat={false}
+                closeOnSelect={true}
+                onChange={(value) => {
+                    if (typeof value === `string`) {
+                        if (moment(value, FORMAT).isValid()) {
+                            this.props.onChange(value);
+                        } else {
+                            this.props.onChange(false);
+                        }
+                    } else {
+                        this.props.onChange(value.format(FORMAT))
+                    }
+                }}
+                value={this.props.value}/>
         </div>);
     }
 }

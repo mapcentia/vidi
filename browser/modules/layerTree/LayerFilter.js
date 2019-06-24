@@ -337,7 +337,10 @@ class VectorLayerFilter extends React.Component {
             let control = false;
             if (column.fieldname !== DUMMY_RULE.fieldname) {
                 let id = (`expression_input_` + layerKey + `_` + index);
-                const changeHandler = (value) => { this.changeValue(value, index) };
+                const changeHandler = (value) => {
+                    this.changeValue(value, index);
+                };
+
                 if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (<StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {

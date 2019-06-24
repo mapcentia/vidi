@@ -1215,23 +1215,16 @@ module.exports = {
      * Checks if maximum number of features was reached when loading layer
      * 
      * @param {String} layerKey Layer key
-     * @param {Object} l        Layer object
      * 
      * @return {void}
      */
-    maxFeaturesCheck: (layerKey, l, layerSpecificQueryLimit) => {
-        if (l.geoJSON && l.geoJSON.features && l.geoJSON.features.length === layerSpecificQueryLimit) {
-            jquery.snackbar({
-                id: "snackbar-watsonc",
-                content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")}</span>`,
-                htmlAllowed: true,
-                timeout: 9000
-            });
-
-            setTimeout(() => {
-                switchLayer.init(layerKey, false);
-            }, 1000);
-        }
+    maxFeaturesNotification: (layerKey) => {
+        jquery.snackbar({
+            id: "snackbar-watsonc",
+            content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
+            htmlAllowed: true,
+            timeout: 16000
+        });
     },
 
     /**
@@ -1252,7 +1245,6 @@ module.exports = {
 
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
         let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
@@ -1312,6 +1304,10 @@ module.exports = {
             method: "POST",
             host: "",
             db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
             uri: "/api/sql",
             clickable: true,
             id: trackingLayerKey,
@@ -1326,8 +1322,6 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
-
-                _self.maxFeaturesCheck(layerKey, l, layerSpecificQueryLimit);
 
                 if (l === undefined || l.geoJSON === null) {
                     return
@@ -1420,7 +1414,6 @@ module.exports = {
      */
     createWebGLStore: (layer) => {
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
         const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
         let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
 
@@ -1459,6 +1452,10 @@ module.exports = {
             method: "POST",
             host: "",
             db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
             uri: "/api/sql",
             clickable: true,
             id: trackingLayerKey,
@@ -1475,8 +1472,6 @@ module.exports = {
                 if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
                     onLoad[LAYER.WEBGL + ':' + layerKey](l);
                 }
-
-                _self.maxFeaturesCheck(layerKey, l, layerSpecificQueryLimit);
             },
             onEachFeature: (feature, layer) => {
                 if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
@@ -1831,13 +1826,13 @@ module.exports = {
                      */
                     const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 1`, searchedLevelPath);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 1`, searchedLevelPath);
 
                         let parent = notSortedLayersAndSubgroupsForCurrentGroup;
                         if (searchedLevelPath.length > 0) {
                             let indexes = getNestedGroupsIndexes(searchedLevelPath, localPrefix);
                             for (let i = 0; i < indexes.length; i++) {
-                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### parent ${i}`, parent);
+                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` parent ${i}`, parent);
                                 if (i === 0) {
                                     parent = notSortedLayersAndSubgroupsForCurrentGroup[indexes[0]].children;
                                 } else {
@@ -1846,7 +1841,7 @@ module.exports = {
                             }
                         }
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 2`, parent);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 2`, parent);
                         return parent;
                     }
 
@@ -1861,7 +1856,7 @@ module.exports = {
                      */
                     const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
 
                         let parent = getParentChildrenContainer(searchedLevelPath, localPrefix);
                         let groupIndex = false;
@@ -1882,7 +1877,7 @@ module.exports = {
                             groupIndex = (parent.length - 1);
                         }
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### groupIndex`, groupIndex);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` groupIndex`, groupIndex);
                         return groupIndex;
                     };
 
@@ -1896,25 +1891,25 @@ module.exports = {
                      */
                     const getNestedGroupsIndexes = (nestingData, prefix = '') => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getNestedGroupsIndexes`, nestingData);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getNestedGroupsIndexes`, nestingData);
 
                         let indexes = [];
                         nestingData.map((groupName, level) => {
-                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### it`, groupName, level);
+                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` it`, groupName, level);
 
                             let nestingDataCopy = JSON.parse(JSON.stringify(nestingData));
                             let index = ensureThatGroupExistsAndReturnItsIndex(groupName, nestingDataCopy.slice(0, level), LOG_LEVEL + localPrefix);
                             indexes.push(index);
                         });
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### indexes`, indexes);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` indexes`, indexes);
                         return indexes;
                     }
 
-                    if (LOG_HIERARCHY_BUILDING) console.log(`### layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
+                    if (LOG_HIERARCHY_BUILDING) console.log(` layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
                     let indexes = getNestedGroupsIndexes(JSON.parse(JSON.stringify(layer.nesting)));
 
-                    if (LOG_HIERARCHY_BUILDING) console.log(`### indexes ready`, indexes);
+                    if (LOG_HIERARCHY_BUILDING) console.log(` indexes ready`, indexes);
                     let parent = getParentChildrenContainer(layer.nesting);
                     parent.push({
                         type: GROUP_CHILD_TYPE_LAYER,
@@ -1923,7 +1918,7 @@ module.exports = {
                 }
             }
 
-            if (LOG_HIERARCHY_BUILDING) console.log(`### result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
+            if (LOG_HIERARCHY_BUILDING) console.log(` result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
         }
 
         const reverseOrder = (children) => {
@@ -2725,7 +2720,6 @@ module.exports = {
 
     onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
         validateFilters(filters);
-        console.log(`### filters`, layerKey, JSON.stringify(filters));
         moduleState.arbitraryFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey);
     },
