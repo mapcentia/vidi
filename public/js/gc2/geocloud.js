@@ -115,6 +115,8 @@ geocloud = (function () {
         q: null,
         name: "Vector",
         id: null,
+        maxFeaturesLimit: false,
+        onMaxFeaturesLimitReached: false,
         rendererOptions: {zIndexing: true},
         projection: (MAPLIB === "leaflet") ? "4326" : "900913",
         //Only leaflet
@@ -203,12 +205,14 @@ geocloud = (function () {
             abort: function () {/* stub */
             }
         };
+
         this.defaults = $.extend({}, STOREDEFAULTS);
         if (config) {
             for (prop in config) {
                 this.defaults[prop] = config[prop];
             }
         }
+
         this.init();
         this.name = this.defaults.name;
         this.id = this.defaults.id;
@@ -225,6 +229,8 @@ geocloud = (function () {
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
+        this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
+        this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
 
         this.buffered_bbox = false;
 
@@ -283,26 +289,20 @@ geocloud = (function () {
                             response = me.transformResponse(response, me.id);
 
                             me.geoJSON = response;
-                            switch (MAPLIB) {
-                                case "ol2":
-                                    me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
-                                    break;
-                                case "ol3":
-                                    me.layer.getSource().addFeatures(new ol.source.GeoJSON(
-                                        {
-                                            object: response.features[0]
-                                        }
-                                    ));
-
-                                    break;
-                                case "leaflet":
-                                    if (dynamicQueryIsUsed) {
-                                        me.layer.clearLayers();
-                                    }
-
-                                    me.layer.addData(response);
-                                    break;
+                            if (dynamicQueryIsUsed) {
+                                me.layer.clearLayers();
                             }
+
+                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                    console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                    me.geoJSON.features = [];
+                                    response.features = [];
+                                    me.onMaxFeaturesLimitReached();
+                                }
+                            }
+
+                            me.layer.addData(response);
                         } else {
                             me.geoJSON = null;
                         }
@@ -359,6 +359,8 @@ geocloud = (function () {
         this.host = this.defaults.host;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
+        this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
+        this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
 
         this.buffered_bbox = false;
 
@@ -371,15 +373,8 @@ geocloud = (function () {
 
             sql = this.sql;
 
-            var dynamicQueryIsUsed = false;
-
             map = me.defaults.map;
             if (map) {
-                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
-                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
-                    dynamicQueryIsUsed = true;
-                }
-
                 // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
                 var extendedBounds = map.getBounds().pad(1);
                 this.buffered_bbox = extendedBounds;
@@ -417,6 +412,14 @@ geocloud = (function () {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
                             me.geoJSON = response;
+                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                    console.warn('WebGL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                    me.geoJSON.features = [];
+                                    response.features = [];
+                                    me.onMaxFeaturesLimitReached();
+                                }
+                            }
 
                             let layer = false;
                             if (me.defaults.type === 'POINT') {
