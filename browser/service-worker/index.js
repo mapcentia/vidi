@@ -114,6 +114,12 @@ let urlsIgnoredForCaching = [{
 },{
     regExp: true,
     requested: '/api/v2/configuration/'
+},{
+    regExp: true,
+    requested: 'https://watsonc.mapcentia.com/api/v2/'
+},{
+    regExp: true,
+    requested: 'https://watsonc.mapcentia.com/api/v1/'
 }];
 
 /**
