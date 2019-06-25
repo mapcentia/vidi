@@ -167,6 +167,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "max_number_of_loaded_features_was_reached_notification": "The maximum number of loaded features was reached, please use filters",
         "Layer has following children": "Layer has following children",
         "Predefined": "Predefined",
         "Arbitrary": "Arbitrary",
