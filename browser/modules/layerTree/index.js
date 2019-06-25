@@ -1223,7 +1223,7 @@ module.exports = {
             id: "snackbar-watsonc",
             content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
             htmlAllowed: true,
-            timeout: 16000
+            timeout: 7000
         });
     },
 
