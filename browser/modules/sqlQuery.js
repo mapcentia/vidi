@@ -30,6 +30,8 @@ var editor;
  */
 var urlparser = require('./urlparser');
 
+var download = require('./download');
+
 /**
  * @type {string}
  */
@@ -302,10 +304,10 @@ module.exports = {
                         });
 
                         $("#_download_excel_" + storeId).click(function () {
-                            download(sql, "excel");
+                            download.download(sql, "excel");
                         });
                         $("#_download_geojson_" + storeId).click(function () {
-                            download(sql, "geojson");
+                            download.download(sql, "geojson");
                         });
                         $("#_create_layer_" + storeId).click(function () {
                             let _self = this;
@@ -576,7 +578,7 @@ module.exports = {
     },
 
     setDownloadFunction: function (fn) {
-        download = fn
+        download.download = fn
     }
 };
 
@@ -596,37 +598,4 @@ var sortObject = function (obj) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array
-};
-
-let download = function (sql, format) {
-    let request = new XMLHttpRequest();
-    request.open('POST', '/api/sql/' + db, true);
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
-    request.responseType = 'blob';
-    request.onload = function () {
-        if (request.status === 200) {
-            let filename, type;
-            switch (format) {
-                case "excel":
-                    filename = 'file.xlsx';
-                    type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    break;
-                default:
-                    filename = 'file.geojson';
-                    type = 'application/json';
-                    break;
-            }
-            let blob = new Blob([request.response], {type: type});
-            let link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        // some error handling should be done here...
-    };
-
-    let uri = 'format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
-    request.send(uri);
 };
