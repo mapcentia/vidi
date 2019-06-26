@@ -63,12 +63,12 @@ router.post('/api/print', function (req, response) {
 
 router.get('/api/postdata', function (req, response) {
     var key = req.query.k;
-    console.log(key);
     fs.readFile(__dirname + "/../public/tmp/print/json/" + key, 'utf8', function (err, data) {
         if (err) {
             response.send({success: true, error: err});
             return;
         }
+
         response.send({success: true, data: JSON.parse(data)});
     });
 });
