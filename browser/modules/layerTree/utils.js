@@ -111,8 +111,6 @@ const calculateOrder = () => {
         }
     });
 
-    console.log(`### layerTreeOrder`, layerTreeOrder);
-
     return layerTreeOrder;
 };
 
@@ -297,6 +295,25 @@ const getPossibleLayerTypes = (layerDescription) => {
 };
 
 /**
+ * Handler for store errors
+ * 
+ * @param {Object} response Response
+ * 
+ * @returns {void}
+ */
+const storeErrorHandler = (response)=>{
+    if (response && response.statusText === `abort`) {
+        // If the request was aborted, then it was sanctioned by Vidi, so no need to inform user
+    } else if (response && response.responseJSON) {
+        alert(response.responseJSON.message);
+        console.error(response.responseJSON.message);
+    } else {
+        alert(`Error occured`);
+        console.error(response);
+    }
+};
+
+/**
  * Detects the query limit for layer
  * 
  * @param {Object} layerMeta Layer meta
@@ -351,6 +368,7 @@ module.exports = {
     applyOpacityToLayer,
     calculateOrder,
     getDefaultTemplate,
+    storeErrorHandler,
     stripPrefix,
     getQueryLimit,
     getPossibleLayerTypes,

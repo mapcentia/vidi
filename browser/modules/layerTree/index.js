@@ -141,35 +141,33 @@ module.exports = {
 
     init: function () {
         _self = this;
-
-        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            moduleState.editingIsEnabled = true;
-        }
+        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
 
         if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
             backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
                 let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
                 for (let layerKey in decodedFilters) {
-                    _self.reloadLayer(`v:${layerTreeUtils.stripPrefix(layerKey)}`).then(() => {
-                        _self.onApplyArbitraryFiltersHandler({
-                            layerKey,
-                            filters: decodedFilters[layerKey]
-                        });
+                    _self.onApplyArbitraryFiltersHandler({
+                        layerKey,
+                        filters: decodedFilters[layerKey]
+                    }, LAYER.VECTOR);
 
-                        // Wait for layer load event
-                        backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
-                            if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
-                                for (let key in cloud.get().map._layers) {
-                                    let layer = cloud.get().map._layers[key];
-                                    if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                        cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
-                                        setTimeout(() => {
-                                            console.log(`Query filter parameter was applied`);
-                                        }, 1000);
-                                    }
+                    // Wait for layer load event
+                    backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
+                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                            for (let key in cloud.get().map._layers) {
+                                let layer = cloud.get().map._layers[key];
+                                if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
+                                    
+                                    console.log(`### bounds`, layer.getBounds());
+                                    
+                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                    setTimeout(() => {
+                                        console.log(`Query filter parameter was applied`);
+                                    }, 1000);
                                 }
                             }
-                        });
+                        }
                     });
 
                     break;
@@ -1398,10 +1396,7 @@ module.exports = {
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
             }),
-            error: (response)=>{
-                alert(response.responseJSON.message);
-                console.error(response.responseJSON.message);
-            }
+            error: layerTreeUtils.storeErrorHandler
         });
     },
 
@@ -1490,7 +1485,8 @@ module.exports = {
                         _self.displayAttributesPopup(feature, layer, e);
                     });
                 }
-            }
+            },
+            error: layerTreeUtils.storeErrorHandler
         });
     },
 
@@ -2718,18 +2714,18 @@ module.exports = {
         _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
-    onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
+    onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    onApplyPredefinedFiltersHandler: ({layerKey, filters}) => {
+    onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         moduleState.predefinedFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    reloadLayerOnFiltersChange: (layerKey) => {
+    reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {
             throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
         }
@@ -2744,10 +2740,21 @@ module.exports = {
             });
         }
 
-        _self.getActiveLayers().map(activeLayerKey => {
+        let activeLayers = _self.getActiveLayers();
+        let layerIsActive = false;
+        activeLayers.map(item => {
+            if (layerTreeUtils.stripPrefix(item) === layerKey) {
+                layerIsActive = true;
+            }
+        });
+
+        if (layerIsActive === false && forcedReloadLayerType !== false) {
+            activeLayers.push(forcedReloadLayerType + ':' + layerKey);
+        }
+
+        activeLayers.map(activeLayerKey => {
             if (layerTreeUtils.stripPrefix(activeLayerKey) === layerKey
                 || childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
-
                 let localLayerKey = layerKey;
                 let childIsReloaded = false;
                 if (childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
@@ -2790,6 +2797,8 @@ module.exports = {
                 }
             }
         });
+
+
     },
 
     /**
