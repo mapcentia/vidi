@@ -116,7 +116,7 @@ module.exports = {
          */
         var defaultTemplate =
                 `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden; width: 90%;">
+                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
                     <div class="btn-group btn-group-justified">
                         <div class="btn-group">
                             <button class="btn btn-primary btn-xs popup-edit-btn">
@@ -130,6 +130,7 @@ module.exports = {
                         </div>
                     </div>
                 </div>
+                <h3 class="popup-title">{{_vidi_content.title}}</h3>
                 {{#_vidi_content.fields}}
                     {{#title}}<h4>{{title}}</h4>{{/title}}
                     {{#value}}
@@ -265,11 +266,11 @@ module.exports = {
 
                             setTimeout(() => {
                                 if (editingIsEnabled && layerIsEditable) {
-                                    $(".gc2-edit-tools").css(`visibility`, `visible`);
+                                    $(".gc2-edit-tools").css(`display`, `inline`);
                                     $(".popup-edit-btn").show();
                                     $(".popup-delete-btn").show();
                                 } else {
-                                    $(".gc2-edit-tools").css(`visibility`, `hidden`);
+                                    $(".gc2-edit-tools").css(`display`, `none`);
                                     $(".popup-edit-btn").hide();
                                     $(".popup-delete-btn").hide();
                                 }
@@ -470,6 +471,9 @@ module.exports = {
         let metaDataKeys = meta.getMetaDataKeys();
         let fieldConf;
 
+        let layerTitel = (metaDataKeys[layerKey].f_table_title !== null && metaDataKeys[layerKey].f_table_title !== "") ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+
+
         // Hardcoded field config for raster layers
         if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
             fieldConf = {
@@ -542,6 +546,7 @@ module.exports = {
             }
 
             feature.properties._vidi_content = {};
+            feature.properties._vidi_content.title = layerTitel;
             feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
