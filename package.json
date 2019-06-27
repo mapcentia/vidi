@@ -69,7 +69,7 @@
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",
-    "cookie-parser": "^1.4.3",
+    "cookie-parser": "^1.4.4",
     "cors": "^2.7.1",
     "crypto-browserify": "^3.11.0",
     "detect-browser": "^2.4.0",
