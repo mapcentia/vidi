@@ -318,9 +318,7 @@ module.exports = {
             rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
 
             if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-
                 scales = config.print.scales;
-                console.log(scales)
 
                 cloud.get().map.removeLayer(recScale);
                 recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
@@ -363,7 +361,7 @@ module.exports = {
             } catch (e) {
             }
 
-            let layerDraw = serializeLayers.serializeDrawnItems();
+            let layerDraw = serializeLayers.serializeDrawnItems(true);
 
             e = serializeLayers.serialize({
                 "printHelper": true,
@@ -372,7 +370,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -387,7 +385,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -402,7 +400,7 @@ module.exports = {
                 "query_result": false, // Get result
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -417,7 +415,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": false // Get print
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
