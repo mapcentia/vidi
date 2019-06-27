@@ -470,12 +470,11 @@ module.exports = {
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
         let fieldConf;
-
-        let layerTitel = (metaDataKeys[layerKey].f_table_title !== null && metaDataKeys[layerKey].f_table_title !== "") ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
-
+        let keyWithOutPrefix= layerKey.replace(`v:`, ``);
+        let layerTitle = (metaDataKeys[keyWithOutPrefix].f_table_title !== null && metaDataKeys[keyWithOutPrefix].f_table_title !== "") ? metaDataKeys[keyWithOutPrefix].f_table_title : metaDataKeys[keyWithOutPrefix].f_table_name;
 
         // Hardcoded field config for raster layers
-        if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
+        if (metaDataKeys[keyWithOutPrefix].type === "RASTER") {
             fieldConf = {
                 class: {
                     "alias": "Class",
@@ -492,9 +491,9 @@ module.exports = {
             };
 
         } else {
-            fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
-                && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
-                ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+            fieldConf = (typeof metaDataKeys[keyWithOutPrefix].fieldconf !== "undefined"
+                && metaDataKeys[keyWithOutPrefix].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[keyWithOutPrefix].fieldconf) : null;
         }
 
         let cm = [];
@@ -546,7 +545,7 @@ module.exports = {
             }
 
             feature.properties._vidi_content = {};
-            feature.properties._vidi_content.title = layerTitel;
+            feature.properties._vidi_content.title = layerTitle;
             feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
