@@ -71,6 +71,8 @@ module.exports = {
         "Click on a drawing to remove": " Klik på en tegning for at slette.",
         "Clear all": "Slet alle",
         "Clear all drawings.": "Slet alle tegninger.",
+        "No drawings in the map": "Ingen tegninger i kortet",
+
 
         // Report
         "Get as PDF": "Hent som PDF",
