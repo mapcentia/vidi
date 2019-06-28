@@ -308,6 +308,8 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Not selected": "Not selected",
+        "Select datatype": "Select datatype",
         "Click on the modal header to expand or minify the Dashboard": "Click on the modal header to expand or minify the Dashboard",
         "Groundwater": "Groundwater",
         "Streams": "Streams",

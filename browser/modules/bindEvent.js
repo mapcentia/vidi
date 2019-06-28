@@ -272,14 +272,18 @@ module.exports = {
         var searchPanelOpen, width, defaultCollapsedWidth = 260;
 
         $("#main-tabs a").on("click", function (e) {
-            $("#module-container.slide-right").css("right", "0");
-            searchShowFull();
+            if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
+                $("#module-container.slide-right").css("right", "0");
+                searchShowFull();
+            }
         });
 
         $(document).arrive("#main-tabs a", function () {
             $(this).on("click", function (e) {
-                $("#module-container.slide-right").css("right", "0");
-                searchShowFull();
+                if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
+                    $("#module-container.slide-right").css("right", "0");
+                    searchShowFull();
+                }
             });
         });
 
@@ -315,7 +319,7 @@ module.exports = {
         }
 
         var searchShow = function () {
-            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a').map(function(){ return $(this).width(); }).get());
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function(){ return $(this).width(); }).get());
             if (localCollapsedWidth > 0) {
                 if (localCollapsedWidth < 170) localCollapsedWidth = 170;
                 localCollapsedWidth = localCollapsedWidth + 80;
@@ -514,6 +518,7 @@ module.exports = {
 
             let moduleId = $(this).data(`module-id`);
             let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
+
             setTimeout(() => {
                 if (moduleId && moduleId !== ``) {
                     if (moduleId in applicationModules) {
@@ -531,7 +536,6 @@ module.exports = {
             let id = ($(this));
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
-            
         });
 
         // Listen for extensions
@@ -548,6 +552,7 @@ module.exports = {
                         }
                     }
                 }, 100);
+
                 let id = ($(this));
                 $("#side-panel ul li").removeClass("active");
                 id.addClass("active");
@@ -562,6 +567,5 @@ module.exports = {
                 $("#full-screen-btn i").html("fullscreen")
             }
         });
-
     }
 };
