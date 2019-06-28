@@ -85,7 +85,7 @@ class TitleFieldComponent extends React.Component {
                     onClick={this.onSave.bind(this)}
                     disabled={this.props.disabled || !this.state.title}
                     style={buttonStyle}>
-                    <i className="material-icons">save</i>{(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
+                    {this.props.showIcon ? (<i className="material-icons">save</i>) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
                 {cancelControl}
             </span>
@@ -101,6 +101,7 @@ TitleFieldComponent.propTypes = {
 };
 
 TitleFieldComponent.defaultProps = {
+    showIcon: true,
     layout: 'regular'
 };
 

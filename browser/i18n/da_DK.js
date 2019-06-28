@@ -327,7 +327,7 @@ module.exports = {
         "Timeseries": "Tidsserier",
         "Adjust buffer": "Juster bufferen",
         "Adjust profile bottom": "Juster profil bund",
-        "Draw profile": "Tegne profil",
+        "Draw profile": "Tegn profil",
         "Projects": "Projekter",
         "Profiles": "Profiler",
         "Information": "Oplysninger",
