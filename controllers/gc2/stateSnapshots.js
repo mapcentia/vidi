@@ -207,7 +207,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
 
-            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database || !stateSnapshotCopy.schema) {
+            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database) {
                 shared.throwError(res, 'MISSING_DATA');
             } else {
                 let token = generateToken(stateSnapshotCopy);
