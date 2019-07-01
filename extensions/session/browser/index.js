@@ -117,13 +117,17 @@ module.exports = {
                 let me = this;
 
                 event.preventDefault();
-
                 if (!me.state.auth) {
+                    let dataToAuthorizeWith = "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public";
+                    if (vidiConfig.appDatabase) {
+                        dataToAuthorizeWith += "&d=" + vidiConfig.appDatabase;
+                    }
+
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/start",
                         type: "POST",
-                        data: "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public",
+                        data: dataToAuthorizeWith,
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
 

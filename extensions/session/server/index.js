@@ -15,20 +15,27 @@ var request = require('request');
 var config = require('../../../config/config.js');
 
 router.post('/api/session/start', function (req, response) {
-    var postData;
-
+    var postData = {};
     if (req.body.u) {
-        postData = "u=" + req.body.u + "&p=" + req.body.p + "&s=" + req.body.s + "";
+        postData = {
+            user: req.body.u,
+            password: req.body.p,
+            schema: req.body.s
+        };
+
+        if (req.body.d) {
+            postData.database = req.body.d;
+        }
     }
 
     var options = {
+        headers: {'content-type': 'application/json'},
         method: 'POST',
-        uri: config.gc2.host + "/api/v1/session/start",
-        form: postData
+        uri: config.gc2.host + "/api/v2/session/start",
+        form: JSON.stringify(postData)
     };
 
     request(options, function (err, res, body) {
-
         var data;
 
         response.header('content-type', 'application/json');
@@ -41,6 +48,7 @@ router.post('/api/session/start', function (req, response) {
                 success: false,
                 message: "Could not log in"
             });
+
             return;
         }
 
@@ -52,6 +60,7 @@ router.post('/api/session/start', function (req, response) {
                 message: "Could not parse response from GC2",
                 data: body
             });
+
             return;
         }
 
@@ -60,6 +69,7 @@ router.post('/api/session/start', function (req, response) {
                 success: true,
                 message: "Already logged in"
             });
+
             return;
         }
 
