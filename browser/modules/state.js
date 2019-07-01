@@ -494,16 +494,20 @@ module.exports = {
                     });
                 }
             };
-            
-            if (urlVars.state) {
-                stateSnapshots.getSnapshotByID(urlVars.state).then((state) => {
+
+            // The configuration "snapshot" property has lesser priority than the URL one
+            let snapshotFromURL = (urlVars.state ? urlVars.state : false);
+            let snapshotFromConfiguration = (`snapshot` in window.vidiConfig && window.vidiConfig.snapshot && window.vidiConfig.snapshot.indexOf(`state_snapshot_`) === 0 ? window.vidiConfig.snapshot : false);
+            let selectedStateSnapshot = (snapshotFromURL ? snapshotFromURL : (snapshotFromConfiguration ? snapshotFromConfiguration : false));
+            if (selectedStateSnapshot) {
+                stateSnapshots.getSnapshotByID(selectedStateSnapshot).then((state) => {
                     if (state) {
                         this.applyState(state.snapshot).then(initResolve);
                     } else {
                         initializeFromHashPart();
                     }
                 }).catch(error => {
-                    console.warn(`Unable to find valid state snapshot with id ${urlVars.state}`);
+                    console.warn(`Unable to find valid state snapshot with id ${selectedStateSnapshot}`);
                     initializeFromHashPart();
                 });            
             } else {
