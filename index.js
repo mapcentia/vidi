@@ -4,10 +4,10 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-require('dotenv').config();
+var path = require('path');
+require('dotenv').config({path: path.join(__dirname, ".env")});
 
 var express = require('express');
-var path = require('path');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
