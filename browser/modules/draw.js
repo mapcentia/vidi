@@ -10,6 +10,8 @@ const MODULE_NAME = `draw`;
 
 const drawTools = require(`./drawTools`);
 
+const fileSaver = require(`file-saver`);
+
 /**
  * @type {*|exports|module.exports}
  */
@@ -72,6 +74,11 @@ module.exports = {
     },
 
     init: () => {
+
+        $("#_draw_download_geojson").click(function () {
+            _self.download();
+        });
+
         backboneEvents.get().on(`reset:all`, () => {
             _self.resetState();
         });
@@ -359,6 +366,7 @@ module.exports = {
             setTimeout(function () {
                 po2.popover("hide");
             }, 2500);
+
         } else {
             if (triggerEvents) backboneEvents.get().trigger(`drawing:turnedOff`);
             _self.off();
@@ -601,7 +609,7 @@ module.exports = {
                 pattern: $("#draw-line-extremity").val(),
                 size: $("#draw-line-extremity-size").val(),
                 where: $("#draw-line-extremity-where").val()
-            }
+            };
 
             console.log({
                 pattern: $("#draw-line-extremity").val(),
@@ -646,6 +654,24 @@ module.exports = {
      */
     setDestruct: function (f) {
         destructFunctions.push(f);
+    },
+
+    download: function () {
+        if (store.layer.getLayers().length === 0) {
+            alert(__("No drawings in the map"));
+            return;
+        }
+        let geojson = {
+            "type": "FeatureCollection",
+            "features": []
+        };
+        store.layer.eachLayer(function (layer) {
+            let feature = layer.toGeoJSON();
+            feature.type = "Feature"; // Is for some reason not set in Leaflet. QGIS needs this.
+            geojson.features.push(feature);
+        });
+        let blob = new Blob([JSON.stringify(geojson)], {type: "text/plain;charset=utf-8"});
+        fileSaver.saveAs(blob, "drawings.geojson");
     }
 };
 

@@ -17,7 +17,7 @@ var config = require('./config/config.js');
 
 var app = express();
 app.use(cors());
-
+app.use(cookieParser());
 app.use(bodyParser.json({
         limit: '50mb'
     })

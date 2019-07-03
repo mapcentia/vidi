@@ -30,6 +30,8 @@ var editor;
  */
 var urlparser = require('./urlparser');
 
+var download = require('./download');
+
 /**
  * @type {string}
  */
@@ -114,7 +116,7 @@ module.exports = {
          */
         var defaultTemplate =
                 `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden; width: 90%;">
+                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
                     <div class="btn-group btn-group-justified">
                         <div class="btn-group">
                             <button class="btn btn-primary btn-xs popup-edit-btn">
@@ -128,6 +130,7 @@ module.exports = {
                         </div>
                     </div>
                 </div>
+                <h3 class="popup-title">{{_vidi_content.title}}</h3>
                 {{#_vidi_content.fields}}
                     {{#title}}<h4>{{title}}</h4>{{/title}}
                     {{#value}}
@@ -263,11 +266,11 @@ module.exports = {
 
                             setTimeout(() => {
                                 if (editingIsEnabled && layerIsEditable) {
-                                    $(".gc2-edit-tools").css(`visibility`, `visible`);
+                                    $(".gc2-edit-tools").css(`display`, `inline`);
                                     $(".popup-edit-btn").show();
                                     $(".popup-delete-btn").show();
                                 } else {
-                                    $(".gc2-edit-tools").css(`visibility`, `hidden`);
+                                    $(".gc2-edit-tools").css(`display`, `none`);
                                     $(".popup-edit-btn").hide();
                                     $(".popup-delete-btn").hide();
                                 }
@@ -302,10 +305,10 @@ module.exports = {
                         });
 
                         $("#_download_excel_" + storeId).click(function () {
-                            download(sql, "excel");
+                            download.download(sql, "excel");
                         });
                         $("#_download_geojson_" + storeId).click(function () {
-                            download(sql, "geojson");
+                            download.download(sql, "geojson");
                         });
                         $("#_create_layer_" + storeId).click(function () {
                             let _self = this;
@@ -467,9 +470,11 @@ module.exports = {
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
         let fieldConf;
+        let keyWithOutPrefix= layerKey.replace(`v:`, ``);
+        let layerTitle = (metaDataKeys[keyWithOutPrefix].f_table_title !== null && metaDataKeys[keyWithOutPrefix].f_table_title !== "") ? metaDataKeys[keyWithOutPrefix].f_table_title : metaDataKeys[keyWithOutPrefix].f_table_name;
 
         // Hardcoded field config for raster layers
-        if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
+        if (metaDataKeys[keyWithOutPrefix].type === "RASTER") {
             fieldConf = {
                 class: {
                     "alias": "Class",
@@ -486,9 +491,9 @@ module.exports = {
             };
 
         } else {
-            fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
-                && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
-                ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+            fieldConf = (typeof metaDataKeys[keyWithOutPrefix].fieldconf !== "undefined"
+                && metaDataKeys[keyWithOutPrefix].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[keyWithOutPrefix].fieldconf) : null;
         }
 
         let cm = [];
@@ -540,6 +545,7 @@ module.exports = {
             }
 
             feature.properties._vidi_content = {};
+            feature.properties._vidi_content.title = layerTitle;
             feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
@@ -576,7 +582,7 @@ module.exports = {
     },
 
     setDownloadFunction: function (fn) {
-        download = fn
+        download.download = fn
     }
 };
 
@@ -596,37 +602,4 @@ var sortObject = function (obj) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array
-};
-
-let download = function (sql, format) {
-    let request = new XMLHttpRequest();
-    request.open('POST', '/api/sql/' + db, true);
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
-    request.responseType = 'blob';
-    request.onload = function () {
-        if (request.status === 200) {
-            let filename, type;
-            switch (format) {
-                case "excel":
-                    filename = 'file.xlsx';
-                    type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    break;
-                default:
-                    filename = 'file.geojson';
-                    type = 'application/json';
-                    break;
-            }
-            let blob = new Blob([request.response], {type: type});
-            let link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        // some error handling should be done here...
-    };
-
-    let uri = 'format=' + format + '&client_encoding=UTF8&&srs=4326&q=' + sql;
-    request.send(uri);
 };
