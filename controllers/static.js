@@ -8,6 +8,8 @@
  * Returning PNG image with a Vidi state snapshot screenshot
  */
 
+require('dotenv').config();
+
 var express = require('express');
 var router = express.Router();
 var headless = require('./headlessBrowser');
@@ -26,7 +28,8 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let filter = (localRequest.query.filter ? `&initialFilter=${localRequest.query.filter}` : ``);
 
     if (errorMessages.length === 0) {
-        let url = `http://127.0.0.1:3000/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
+        const port = process.env.PORT ? process.env.PORT : 3000;
+        let url = `http://127.0.0.1:${port}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
         headless.getBrowser().then(browser => {
             browser.newPage().then(page => {
                 page.emulate({
