@@ -254,7 +254,6 @@ module.exports = {
      * @returns {String}
      */
     getLayerFilterString: (layerKey) => {
-        
         if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
@@ -267,7 +266,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + JSON.stringify(data);
+            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);

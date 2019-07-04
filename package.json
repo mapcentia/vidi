@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
-    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/api --grep \"Static PNG API\""
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree filters\""
   },
   "repository": {
     "type": "git",
@@ -56,6 +56,7 @@
     "@material-ui/core": "^3.6.2",
     "@material-ui/icons": "^3.0.1",
     "@turf/turf": "^5.1.6",
+    "array-move": "^2.1.0",
     "arrive": "^2.3.1",
     "async": "^2.6.0",
     "axios": "^0.18.0",
@@ -69,11 +70,12 @@
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",
-    "cookie-parser": "^1.4.4",
+    "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",
     "crypto-browserify": "^3.11.0",
     "detect-browser": "^2.4.0",
     "dom-shims": "^0.1.4",
+    "dotenv": "^8.0.0",
     "elasticsearch": "^12.1.3",
     "es6-promise": "^4.0.5",
     "express": "^4.13.4",

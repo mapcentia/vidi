@@ -149,7 +149,7 @@ module.exports = {
                         if (snapshot && snapshot.schema) {
                             loadMeta(snapshot.schema);
                         } else {
-                            console.warn(`Unable to get "schema" from snapshot`);
+                            console.warn(`Unable to get "schema" from snapshot, loading the fallback schemata "${str}"`);
                             loadMeta(str);
                         }
                     }).catch(error => {
