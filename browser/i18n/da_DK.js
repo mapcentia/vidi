@@ -309,6 +309,11 @@ module.exports = {
         "Config switcher block description": "# Config switcher block description",
 
         //WatsonC
+        "The profile with the new datatype is being created": "# The profile with the new datatype is being created",
+        "Not selected": "# Not selected",
+        "Datatype": "Datatype",
+        "Change datatype": "# Change datatype",
+        "Select datatype": "Valgt datatype",
         "Click on the modal header to expand or minify the Dashboard": "# Click on the modal header to expand or minify the Dashboard",
         "Groundwater": "Grundvand",
         "Streams": "Vandløb",
@@ -326,7 +331,7 @@ module.exports = {
         "Timeseries": "Tidsserier",
         "Adjust buffer": "Juster bufferen",
         "Adjust profile bottom": "Juster profil bund",
-        "Draw profile": "Tegne profil",
+        "Draw profile": "Tegn profil",
         "Projects": "Projekter",
         "Profiles": "Profiler",
         "Information": "Oplysninger",
