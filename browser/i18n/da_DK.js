@@ -325,7 +325,7 @@ module.exports = {
         "Profiles total": "Profil, total",
         "timeseries active": "Tidsserier, aktive",
         "profiles active": "profil, aktive",
-        "Data sources and -types": "Datakilder and -types",
+        "Data sources and -types": "Datakilder og -typer",
         "Delete plot": "Slet plot",
         "Delete profile": "Slet profil",
         "Calypso dashboard": "Calypso dashboard",
