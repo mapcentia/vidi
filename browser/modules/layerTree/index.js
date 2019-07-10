@@ -10,7 +10,15 @@
 
 'use strict';
 
-import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
+import {
+    LOG,
+    SUB_GROUP_DIVIDER,
+    MODULE_NAME,
+    VIRTUAL_LAYERS_SCHEMA,
+    SYSTEM_FIELD_PREFIX,
+    LAYER,
+    ICONS
+} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -158,9 +166,9 @@ module.exports = {
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                    
+
                                     console.log(`### bounds`, layer.getBounds());
-                                    
+
                                     cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
                                     setTimeout(() => {
                                         console.log(`Query filter parameter was applied`);
@@ -1210,9 +1218,9 @@ module.exports = {
 
     /**
      * Checks if maximum number of features was reached when loading layer
-     * 
+     *
      * @param {String} layerKey Layer key
-     * 
+     *
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
@@ -1491,10 +1499,10 @@ module.exports = {
 
     /**
      * Creates gc2table control for layer
-     * 
-     * @param {String}  layerKey      Layer key     
+     *
+     * @param {String}  layerKey      Layer key
      * @param {Boolean} forceDataLoad Specifies if the data load should be forced
-     * 
+     *
      * @returns {void}
      */
     createTable(layerKey, forceDataLoad = false) {
@@ -1691,8 +1699,43 @@ module.exports = {
                                         }
 
                                         break;
+                                    case `character`:
+                                        if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
+
+                                        if (column.expression === 'like') {
+                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
+                                        } else {
+                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
+                                        }
+
+                                        break;
+                                    case `smallint`:
                                     case `integer`:
+                                    case `bigint`:
                                     case `double precision`:
+                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
+
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
+                                        break;
+                                    case `numeric`:
+                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
+
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
+                                        break;
+                                    case `decimal`:
+                                        if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
+                                            throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
+                                        }
+
+                                        arbitraryConditions.push(`${column.fieldname} ${column.expression} ${column.value}`);
+                                        break;
+                                    case `real`:
                                         if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
@@ -1813,10 +1856,10 @@ module.exports = {
 
                     /**
                      * Returns reference to the parent children container
-                     * 
+                     *
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Object>}
                      */
                     const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
@@ -1842,11 +1885,11 @@ module.exports = {
 
                     /**
                      * Ensures that specified group exists on specific hierarchy level
-                     * 
+                     *
                      * @param {String} name              Group name
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Number}
                      */
                     const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
@@ -1868,7 +1911,7 @@ module.exports = {
                                 type: GROUP_CHILD_TYPE_GROUP,
                                 children: []
                             });
- 
+
                             groupIndex = (parent.length - 1);
                         }
 
@@ -1878,10 +1921,10 @@ module.exports = {
 
                     /**
                      * Returns indexes for every nesting level, creates the group if does not exist
-                     * 
+                     *
                      * @param {Array}  nestingData Depth specification
                      * @param {String} prefix      Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Number>}
                      */
                     const getNestedGroupsIndexes = (nestingData, prefix = '') => {
@@ -2084,7 +2127,7 @@ module.exports = {
                         } else {
                             applyControlRequests(item.children);
                         }
-                    });                    
+                    });
                 }
 
                 applyControlRequests(layersAndSubgroupsForCurrentGroup);
@@ -2178,7 +2221,7 @@ module.exports = {
                 numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
             } else {
                 throw new Error(`Invalid layer group`);
-            }        
+            }
         });
 
         $(`#` + base64SubgroupName).sortable({

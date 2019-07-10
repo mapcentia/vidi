@@ -15,17 +15,17 @@ import {
     EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
-import { StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl } from './controls';
+import {StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl} from './controls';
 
 /**
  * Layer filter component
  */
 const SELECT_WIDTH = `50px`;
 
-const STRING_TYPES = [`text`, `string`, `character varying`];
-const NUMBER_TYPES = [`integer`, `double precision`];
+const STRING_TYPES = [`text`, `string`, `character`, `character varying`];
+const NUMBER_TYPES = [`smallint`, `bigint`, `integer`, `double precision`, `numeric`, `decimal`, 'real'];
 const DATE_TYPES = [`date`];
-const DATETIME_TYPES = [`timestamp with time zone`];
+const DATETIME_TYPES = [`timestamp`, `timestamp with time zone`, `timestamp without time zone`];
 const BOOLEAN_TYPES = [`boolean`];
 const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
@@ -108,13 +108,13 @@ class VectorLayerFilter extends React.Component {
     onRuleDelete(index) {
         let filters = this.state.arbitraryFilters;
         filters.columns.splice(index, 1);
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     onRuleAdd() {
         let filters = this.state.arbitraryFilters;
         filters.columns.push(DUMMY_RULE);
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     onRulesApply() {
@@ -137,11 +137,11 @@ class VectorLayerFilter extends React.Component {
     changeMatchType(value) {
         let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
         filters.match = value;
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     getExpressionSetForType(type) {
-        let expressionSet = EXPRESSIONS_FOR_STRINGS;                
+        let expressionSet = EXPRESSIONS_FOR_STRINGS;
         if (NUMBER_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_NUMBERS;
         } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1) {
@@ -175,19 +175,19 @@ class VectorLayerFilter extends React.Component {
 
         filters.columns[columnIndex].value = DUMMY_RULE.value;
         filters.columns[columnIndex].fieldname = value;
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     changeExpression(value, columnIndex) {
         let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
         filters.columns[columnIndex].expression = value;
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     changeValue(value, columnIndex) {
         let filters = JSON.parse(JSON.stringify(this.state.arbitraryFilters));
         filters.columns[columnIndex].value = value;
-        this.setState({ arbitraryFilters: filters });
+        this.setState({arbitraryFilters: filters});
     }
 
     isValid(value, type) {
@@ -197,9 +197,9 @@ class VectorLayerFilter extends React.Component {
         } else {
             let intReg = /^\d+$/;
             let floatReg = /^[+-]?\d+(\.\d+)?$/;
-            if (type === `integer` && value.match(intReg)) {
+            if ((type === `smallint` || type === `integer` || type === `bigint`) && value.match(intReg)) {
                 valueIsValid = true;
-            } else if (type === `double precision` && value.match(floatReg)) {
+            } else if ((type === `double precision` || type === `numeric` || type === `real` || type === `decimal`) && value.match(floatReg)) {
                 valueIsValid = true;
             }
         }
@@ -209,10 +209,10 @@ class VectorLayerFilter extends React.Component {
 
     /**
      * Constructing select control for column fieldname
-     * 
-     * @param {*} column 
-     * @param {*} index 
-     * @param {*} layerKey 
+     *
+     * @param {*} column
+     * @param {*} index
+     * @param {*} layerKey
      */
     renderFieldControl(column, index, layerKey) {
         let columnOptions = [];
@@ -227,21 +227,23 @@ class VectorLayerFilter extends React.Component {
         }
 
         let fieldControl = (<select
-            id={ `column_select_` + layerKey + `_` + index }
+            id={`column_select_` + layerKey + `_` + index}
             className="form-control"
-            onChange={(event) => { this.changeFieldname(event.target.value, index) }}
+            onChange={(event) => {
+                this.changeFieldname(event.target.value, index)
+            }}
             value={column.fieldname}
-            style={{ width: `100px` }}>{columnOptions}</select>);
+            style={{width: `100px`}}>{columnOptions}</select>);
 
         return fieldControl;
     }
 
     /**
      * Constructing select control for expression
-     * 
-     * @param {*} column 
-     * @param {*} index 
-     * @param {*} layerKey 
+     *
+     * @param {*} column
+     * @param {*} index
+     * @param {*} layerKey
      */
     renderExpressionControl(column, index, layerKey) {
         let expressionControl = false;
@@ -253,24 +255,27 @@ class VectorLayerFilter extends React.Component {
                 if (key === column.fieldname) {
                     let expressionSet = this.getExpressionSetForType(this.state.layer.fields[key].type);
                     expressionSet.map((expression, index) => {
-                        expressionOptions.push(<option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
+                        expressionOptions.push(
+                            <option key={`expression_` + layerKey + `_` + (index + 1)} value={expression}>{expression}</option>);
                     });
                 }
             }
-            
+
             expressionControl = (<select
-                id={ `expression_select_` + layerKey + `_` + index }
+                id={`expression_select_` + layerKey + `_` + index}
                 className="form-control"
-                onChange={(event) => { this.changeExpression(event.target.value, index) }}
+                onChange={(event) => {
+                    this.changeExpression(event.target.value, index)
+                }}
                 value={column.expression}
-                style={{ width: SELECT_WIDTH }}>{expressionOptions}</select>);
+                style={{width: SELECT_WIDTH}}>{expressionOptions}</select>);
         }
 
         return expressionControl;
     }
 
     switchActiveTab() {
-        this.setState({ activeTab: (this.state.activeTab === PREDEFINED_TAB ? ARBITRARY_TAB : PREDEFINED_TAB) });
+        this.setState({activeTab: (this.state.activeTab === PREDEFINED_TAB ? ARBITRARY_TAB : PREDEFINED_TAB)});
     }
 
     handlePredefinedFiltersChange(event, filterName) {
@@ -281,9 +286,9 @@ class VectorLayerFilter extends React.Component {
             disabledPredefinedFilters.push(filterName);
         }
 
-        this.setState({ disabledPredefinedFilters });
+        this.setState({disabledPredefinedFilters});
         this.props.onApplyPredefined({
-            layerKey:  (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
             filters: disabledPredefinedFilters
         });
     }
@@ -293,15 +298,19 @@ class VectorLayerFilter extends React.Component {
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
 
         let matchSelectorOptions = [];
-        MATCHES.map((match, index) => { matchSelectorOptions.push(<option key={`match_` + index} value={match}>{__(match)}</option>); });
+        MATCHES.map((match, index) => {
+            matchSelectorOptions.push(<option key={`match_` + index} value={match}>{__(match)}</option>);
+        });
         let matchSelector = (<select
-            id={ `match_select_` + layerKey }
-            onChange={(event) => { this.changeMatchType(event.target.value) }}
+            id={`match_select_` + layerKey}
+            onChange={(event) => {
+                this.changeMatchType(event.target.value)
+            }}
             value={this.state.arbitraryFilters.match}
             className="form-control" style={{
-                display: `inline`,
-                width: SELECT_WIDTH
-            }}>{matchSelectorOptions}</select>);
+            display: `inline`,
+            width: SELECT_WIDTH
+        }}>{matchSelectorOptions}</select>);
 
         let filterControls = [];
 
@@ -325,9 +334,9 @@ class VectorLayerFilter extends React.Component {
                 valueIsValid = this.isValid(column.value, type);
             }
 
-            let ruleValidityIndicator = (<span style={{ color: 'green' }}><i className="fa fa-check-circle"></i></span>);
+            let ruleValidityIndicator = (<span style={{color: 'green'}}><i className="fa fa-check-circle"></i></span>);
             if (!valueIsValid) {
-                ruleValidityIndicator = (<span style={{ color: 'red' }}><i className="fa fa-ban"></i></span>);
+                ruleValidityIndicator = (<span style={{color: 'red'}}><i className="fa fa-ban"></i></span>);
                 allRulesAreValid = false;
             }
 
@@ -342,9 +351,11 @@ class VectorLayerFilter extends React.Component {
                 };
 
                 if (STRING_TYPES.indexOf(type) !== -1) {
-                    control = (<StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
+                    control = (
+                        <StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
-                    control = (<NumberControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
+                    control = (
+                        <NumberControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (DATE_TYPES.indexOf(type) !== -1) {
                     control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (DATETIME_TYPES.indexOf(type) !== -1) {
@@ -356,7 +367,7 @@ class VectorLayerFilter extends React.Component {
                 }
             }
 
-            let divStyle = { paddingRight: `10px` };
+            let divStyle = {paddingRight: `10px`};
             let controlDivStyle = divStyle;
             controlDivStyle.maxWidth = `160px`;
             filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
@@ -386,16 +397,18 @@ class VectorLayerFilter extends React.Component {
                     let records = [];
                     this.state.layer.children.map((item, index) => {
                         if (item.rel && item.parent_column && item.child_column) {
-                            records.push(<li key={`child_record_${index}`} style={{fontFamily: `"Courier New", Courier, monospace`}}>
-                                {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
-                            </li>);
+                            records.push(
+                                <li key={`child_record_${index}`} style={{fontFamily: `"Courier New", Courier, monospace`}}>
+                                    {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
+                                </li>);
                         }
                     });
 
-                    result = (<div style={{borderBottom: `1px solid #c4c4c4`, paddingBottom: `10px`, marginBottom: `6px`}}>
-                        <p>{__(`Layer has following children`)}:</p>
-                        <ul>{records}</ul>
-                    </div>);
+                    result = (
+                        <div style={{borderBottom: `1px solid #c4c4c4`, paddingBottom: `10px`, marginBottom: `6px`}}>
+                            <p>{__(`Layer has following children`)}:</p>
+                            <ul>{records}</ul>
+                        </div>);
                 }
 
                 return result;
@@ -429,19 +442,21 @@ class VectorLayerFilter extends React.Component {
             let predefinedFiltersTab = [];
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
-                predefinedFiltersTab.push(<div key={ `tile_filter_` + index }>
-                    <div style={{ display: `inline-block` }}>
+                predefinedFiltersTab.push(<div key={`tile_filter_` + index}>
+                    <div style={{display: `inline-block`}}>
                         <div className="checkbox">
                             <label>
                                 <input
                                     checked={filterIsActive}
-                                    onChange={(event) => { this.handlePredefinedFiltersChange(event, item.name) }}
+                                    onChange={(event) => {
+                                        this.handlePredefinedFiltersChange(event, item.name)
+                                    }}
                                     type="checkbox"
                                     name={`tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}/>
                             </label>
                         </div>
                     </div>
-                    <div style={{ display: `inline-block` }}>
+                    <div style={{display: `inline-block`}}>
                         <span>{item.name} ({item.value})</span>
                     </div>
                 </div>);
@@ -457,11 +472,11 @@ class VectorLayerFilter extends React.Component {
                 <div className="btn-group btn-group-justified" role="group">
                     <div className="btn-group" role="group">
                         <button type="button" className="btn btn-default"
-                            disabled={this.state.activeTab === PREDEFINED_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
+                                disabled={this.state.activeTab === PREDEFINED_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Predefined`)}</button>
                     </div>
                     <div className="btn-group" role="group">
                         <button type="button" className="btn btn-default"
-                            disabled={this.state.activeTab === ARBITRARY_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
+                                disabled={this.state.activeTab === ARBITRARY_TAB} onClick={this.switchActiveTab.bind(this)}>{__(`Arbitrary`)}</button>
                     </div>
                 </div>
             </div>);
