@@ -10,7 +10,7 @@ var config = require('../../config/config.js').gc2;
 var request = require('request');
 var fs = require('fs');
 
-router.all('/api/sql/:db', function (req, response) {
+var query = function (req, response) {
     req.setTimeout(0); // no timeout
     var db = req.params.db,
         q = req.body.q || req.query.q,
@@ -108,5 +108,7 @@ router.all('/api/sql/:db', function (req, response) {
         }
     });
 
-});
+}
+router.all('/api/sql/:db', query);
+router.all('/api/sql/nocache/:db', query);
 module.exports = router;

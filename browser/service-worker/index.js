@@ -92,6 +92,9 @@ let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
+    requested: '/api/sql/nocache/'
+},{
+    regExp: true,
     requested: 'bam.nr-data.net'
 }, {
     regExp: true,
@@ -338,6 +341,12 @@ const normalizeTheURLForFetch = (event) => {
                             }
 
                             let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
+
+                            //
+                            if (matches === null) {
+                                resolve(cleanedRequestURL);
+                            }
+
                             if (matches.length === 1) {
                                 let tableName = matches[0].trim().split(`.`);
 
