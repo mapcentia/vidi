@@ -309,6 +309,10 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Max": "Max",
+        "Latest": "Latest",
+        "Intake": "Intake",
+        "n.d.": "n.d.",
         "The profile with the new datatype is being created": "The profile with the new datatype is being created",
         "Not selected": "Not selected",
         "Datatype": "Datatype",
