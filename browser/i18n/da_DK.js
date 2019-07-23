@@ -311,6 +311,11 @@ module.exports = {
 
         //WatsonC
         "Requested borehole is not in a viewport (data is not loaded)": "# Requested borehole is not in a viewport (data is not loaded)",
+        "Minimize dashboard": "Minimer dashboard",
+        "Expand dashboard": "Udvid dashboard",
+        "Open dashboard halfway": "# Open dashboard halfway",
+        "Sign in in order to access user projects": "# Sign in in order to access user projects",
+        "User is already authenticated": "# User is already authenticated",
         "Max": "Max",
         "Latest": "Seneste",
         "Intake": "Intag",
