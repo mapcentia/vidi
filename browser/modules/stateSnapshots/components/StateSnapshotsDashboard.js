@@ -22,7 +22,7 @@ class StateSnapshotsDashboard extends React.Component {
             browserOwnerSnapshots: [],
             userOwnerSnapshots: [],
             loading: false,
-            authenticated: false,
+            authenticated: props.initialAuthenticated ? props.initialAuthenticated : false,
             updatedItemId: false,
             stateApplyingIsBlocked: false,
             imageLinkSizes: {}
@@ -46,15 +46,21 @@ class StateSnapshotsDashboard extends React.Component {
     }
 
     componentDidMount() {
+        this.mounted = true;
+
         let _self = this;
         this.props.backboneEvents.get().on(`session:authChange`, (authenticated) => {
-            if (this.state.authenticated !== authenticated) {
-                this.setState({ authenticated });
-                this.refreshSnapshotsList();
+            if (this.mounted && _self.state.authenticated !== authenticated) {
+                _self.setState({ authenticated });
+                _self.refreshSnapshotsList();
             }
         });
 
-        this.refreshSnapshotsList();
+        _self.refreshSnapshotsList();
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
     }
 
     /**
@@ -238,7 +244,6 @@ class StateSnapshotsDashboard extends React.Component {
         }
     }
 
-
     /**
      * Retrives state snapshots list from server
      */
@@ -251,19 +256,21 @@ class StateSnapshotsDashboard extends React.Component {
             method: 'GET',
             dataType: 'json'
         }).then(data => {
-            let browserOwnerSnapshots = [];
-            let userOwnerSnapshots = [];
-            data.map(item => {
-                if (item.browserId) {
-                    browserOwnerSnapshots.push(item);
-                } else if (item.userId) {
-                    userOwnerSnapshots.push(item);
-                } else {
-                    throw new Error(`Invalid state snapshot`);
-                }
-            });
+            if (this.mounted) {
+                let browserOwnerSnapshots = [];
+                let userOwnerSnapshots = [];
+                data.map(item => {
+                    if (item.browserId) {
+                        browserOwnerSnapshots.push(item);
+                    } else if (item.userId) {
+                        userOwnerSnapshots.push(item);
+                    } else {
+                        throw new Error(`Invalid state snapshot`);
+                    }
+                });
 
-            _self.setState({ browserOwnerSnapshots, userOwnerSnapshots, loading: false });
+                _self.setState({ browserOwnerSnapshots, userOwnerSnapshots, loading: false });
+            }
         }, (jqXHR) => {
             if (jqXHR.responseJSON && jqXHR.responseJSON.error && jqXHR.responseJSON.error === `INVALID_OR_EMPTY_EXTERNAL_API_REPLY`) {
                 console.error(`Seems like Vidi is unable to access key-value storage capabilities, please check if the GC2 supports it (state snapshots module will be disabled)`);
@@ -457,6 +464,7 @@ class StateSnapshotsDashboard extends React.Component {
         let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
             {__(`No user snapshots`)}
         </div>);
+
         if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
             userOwnerSnapshots = [];
             this.state.userOwnerSnapshots.map((item, index) => {
