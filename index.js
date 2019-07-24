@@ -4,8 +4,10 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
 var path = require('path');
+require('dotenv').config({path: path.join(__dirname, ".env")});
+
+var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -15,7 +17,7 @@ var config = require('./config/config.js');
 
 var app = express();
 app.use(cors());
-
+app.use(cookieParser());
 app.use(bodyParser.json({
         limit: '50mb'
     })
@@ -62,8 +64,9 @@ app.use(require('./extensions'));
 
 app.enable('trust proxy');
 
-var server = app.listen(3000, function () {
-    console.log('Listening on port 3000...');
+const port = process.env.PORT ? process.env.PORT : 3000;
+var server = app.listen(port, function () {
+    console.log(`Listening on port ${port}...`);
 });
 
 global.io = require('socket.io')(server);

@@ -99,37 +99,66 @@ class LayerSorting {
                 }
             }
 
+            /**
+             * Ordering layers in subgroup
+             * 
+             * @param {Object} alreadyOrdered Already ordered layers and subgroups
+             * @param {Object} beingOrdered   Layers and subgroups that need to be ordered
+             * 
+             * @returns {Array}
+             */
+            const orderLayersInSubgroup = (alreadyOrdered, beingOrdered) => {
+                if (!alreadyOrdered.children || !beingOrdered.children) {
+                    console.log(alreadyOrdered, beingOrdered);
+                    throw new Error(`Invalid order data or ordered objects`);
+                }
+    
+                let alreadyOrderedCopy = JSON.parse(JSON.stringify(alreadyOrdered.children));
+                let sortedCopy = JSON.parse(JSON.stringify(beingOrdered.children));
+
+                let resultingSortedLayers = [];
+                for (let alreadyOrderedKey in alreadyOrderedCopy) {
+                    for (let i = (sortedCopy.length - 1); i >= 0; i--) {
+                        if (sortedCopy[i].type === GROUP_CHILD_TYPE_GROUP) {
+                            if (alreadyOrderedCopy[alreadyOrderedKey].id === (sortedCopy[i].id)) {
+                                // sort subgroup
+                                let subgroupSortResult = orderLayersInSubgroup(alreadyOrderedCopy[alreadyOrderedKey], sortedCopy[i]);
+                                let takenCopy = sortedCopy.splice(i, 1).pop();
+                                takenCopy.children = subgroupSortResult;
+                                resultingSortedLayers.push(takenCopy);
+
+                                break;
+                            }
+                        } else {
+                            if (alreadyOrderedCopy[alreadyOrderedKey].id === (sortedCopy[i].layer.f_table_schema + '.' + sortedCopy[i].layer.f_table_name)) {
+                                resultingSortedLayers.push(sortedCopy.splice(i, 1).pop());
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (sortedCopy.length > 0) {
+                    for (let j = 0; j < sortedCopy.length; j++) {
+                        resultingSortedLayers.push(sortedCopy[j]);
+                    }
+                }
+
+                return resultingSortedLayers;
+            };
+
             // Ordering layers in subgroups
             for (let orderKey in groupOrder) {
                 for (let key in sortedLayersAndSubgroups) {
                     if (sortedLayersAndSubgroups[key].type === GROUP_CHILD_TYPE_GROUP && sortedLayersAndSubgroups[key].id === groupOrder[orderKey].id) {
-                        let alreadyOrderedCopy = JSON.parse(JSON.stringify(groupOrder[orderKey].children));
-                        let sortedCopy = JSON.parse(JSON.stringify(sortedLayersAndSubgroups[key].children));
-                        let resultingSortedLayers = [];
-
-                        for (let alreadyOrderedKey in alreadyOrderedCopy) {
-                            for (let i = (sortedCopy.length - 1); i >= 0; i--) {
-                                let layerId = sortedCopy[i].f_table_schema + '.' + sortedCopy[i].f_table_name;
-                                if (alreadyOrderedCopy[alreadyOrderedKey].id === layerId) {
-                                    resultingSortedLayers.push(sortedCopy.splice(i, 1).pop());
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (sortedCopy.length > 0) {
-                            for (let j = 0; j < sortedCopy.length; j++) {
-                                resultingSortedLayers.push(sortedCopy[j]);
-                            }
-                        }
-
-                        sortedLayersAndSubgroups[orderKey].children = resultingSortedLayers;
+                        sortedLayersAndSubgroups[orderKey].children = orderLayersInSubgroup(groupOrder[orderKey], sortedLayersAndSubgroups[key]);
                     }
                 }
             }
         }
 
-        return ((sortedLayersAndSubgroups.length > 0) ? sortedLayersAndSubgroups : notSortedLayersAndSubgroupsForCurrentGroup);
+        let result = ((sortedLayersAndSubgroups.length > 0) ? sortedLayersAndSubgroups : notSortedLayersAndSubgroupsForCurrentGroup);
+        return result;
     }
 
     /**

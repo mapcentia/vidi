@@ -26,7 +26,7 @@ var printC = config.print.templates;
 var scales = config.print.scales;
 var tmpl;
 var pageSize;
-var orientation;
+var printingOrientation;
 var backboneEvents;
 var legend;
 var moment = require('moment');
@@ -52,7 +52,7 @@ var _cleanUp = function (hard) {
         scales = config.print.scales;
         scale = null;
         pageSize = null;
-        orientation = null;
+        printingOrientation = null;
         tmpl = null;
     }
 };
@@ -206,7 +206,7 @@ module.exports = {
                 _cleanUp();
                 tmpl = arr[0].value;
                 pageSize = arr[1].value;
-                orientation = arr[2].value;
+                printingOrientation = arr[2].value;
                 me.control();
             } else {
                 _cleanUp();
@@ -239,10 +239,10 @@ module.exports = {
         scales = s ? s : scales;
         tmpl = t ? t : tmpl;
         pageSize = pa ? pa : pageSize;
-        orientation = o ? o : orientation;
+        printingOrientation = o ? o : printingOrientation;
         legend = l ? l : null;
 
-        var ps = printC[tmpl][pageSize][orientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
+        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
         var _getScale = function (scaleObject) {
             var bounds = scaleObject.getBounds(),
                 sw = bounds.getSouthWest(),
@@ -318,9 +318,7 @@ module.exports = {
             rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
 
             if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-
                 scales = config.print.scales;
-                console.log(scales)
 
                 cloud.get().map.removeLayer(recScale);
                 recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
@@ -363,7 +361,7 @@ module.exports = {
             } catch (e) {
             }
 
-            let layerDraw = serializeLayers.serializeDrawnItems();
+            let layerDraw = serializeLayers.serializeDrawnItems(true);
 
             e = serializeLayers.serialize({
                 "printHelper": true,
@@ -372,7 +370,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -387,7 +385,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -402,7 +400,7 @@ module.exports = {
                 "query_result": false, // Get result
                 "draw": true,
                 "print": true
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -417,7 +415,7 @@ module.exports = {
                 "query_result": true,
                 "draw": true,
                 "print": false // Get print
-            });
+            }, true);
 
             $.each(e, function (i, v) {
                 if (v.type === "Vector") {
@@ -443,7 +441,7 @@ module.exports = {
                     scale: scale,
                     tmpl: tmpl,
                     pageSize: pageSize,
-                    orientation: orientation,
+                    orientation: printingOrientation,
                     title: encodeURIComponent($("#print-title").val()),
                     comment: encodeURIComponent($("#print-comment").val()),
                     legend: legend || $("#add-legend-btn").is(":checked") ? "inline" : "none",
@@ -452,8 +450,8 @@ module.exports = {
                     date: moment().format('Do MMMM YYYY'),
                     customData: customData || null,
                     metaData: meta.getMetaData(),
-                    px: config.print.templates[tmpl][pageSize][orientation].mapsizePx[0],
-                    py: config.print.templates[tmpl][pageSize][orientation].mapsizePx[1],
+                    px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
+                    py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
                     queryString: uriObj.search(),
                     state: applicationState
                 };

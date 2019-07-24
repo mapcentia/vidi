@@ -10,18 +10,17 @@
 
 'use strict';
 
-import {LOG, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
+import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {};
 
-/**
- * Layer filters
- */
+const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
+require('snackbarjs');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
@@ -142,11 +141,38 @@ module.exports = {
     },
 
     init: function () {
-        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            moduleState.editingIsEnabled = true;
+        _self = this;
+        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
+
+        if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
+            backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
+                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                for (let layerKey in decodedFilters) {
+                    _self.onApplyArbitraryFiltersHandler({
+                        layerKey,
+                        filters: decodedFilters[layerKey]
+                    }, LAYER.VECTOR);
+
+                    // Wait for layer load event
+                    backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
+                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                            for (let key in cloud.get().map._layers) {
+                                let layer = cloud.get().map._layers[key];
+                                if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
+                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                    setTimeout(() => {
+                                        console.log(`Query filter parameter was applied`);
+                                    }, 1000);
+                                }
+                            }
+                        }
+                    });
+
+                    break;
+                }
+            });
         }
 
-        _self = this;
         queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self});
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self._statisticsHandler(statistics, forceLayerUpdate);
@@ -232,14 +258,16 @@ module.exports = {
 
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
-        if (activeFilters.length > 0) {
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        if (overallFilters.length > 0) {
             let data = {};
-            data[layerKey] = activeFilters;
-            parameterString = `filters=` + JSON.stringify(data);
+            data[layerKey] = overallFilters;
+            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
         }
 
-        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
+        $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
     },
 
@@ -355,10 +383,10 @@ module.exports = {
                     // Opacity and filters should be kept opened after setLayerState()
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                         hideLoadStrategy();
-                        hideOfflineMode();
                         hideTableView();
                     }
 
+                    hideOfflineMode();
                     if (layerIsEnabled) {
                         $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
 
@@ -487,10 +515,17 @@ module.exports = {
             }
         }
 
+        let preparedVirtualLayers = [];
+        moduleState.virtualLayers.map(layer => {
+            let localLayer = Object.assign({}, layer);
+            localLayer.store.sqlEncoded = Base64.encode(localLayer.store.sql).replace(/=/g, "");
+            preparedVirtualLayers.push(localLayer);
+        });
+
         let state = {
             order: moduleState.layerTreeOrder,
             arbitraryFilters: moduleState.arbitraryFilters,
-            virtualLayers: moduleState.virtualLayers,
+            virtualLayers: preparedVirtualLayers,
             predefinedFilters: moduleState.predefinedFilters,
             activeLayers,
             layersOfflineMode,
@@ -521,6 +556,28 @@ module.exports = {
             moduleState.predefinedFilters = newState.predefinedFilters;
         } else {
             moduleState.predefinedFilters = {};
+        }
+
+        // Setting virtual layers
+        if (newState !== false && `virtualLayers` in newState && Array.isArray(newState.virtualLayers) && newState.virtualLayers.length > 0) {
+            let layersCopy = JSON.parse(JSON.stringify(newState.virtualLayers));
+            let someLayersAreOutdated = false;
+            layersCopy.map((layer, index) => {
+                if (`sqlEncoded` in layer.store && layer.store.sqlEncoded) {
+                    layersCopy[index].store.sql = atob(layer.store.sqlEncoded);
+                } else {
+                    someLayersAreOutdated = true;
+                    console.warn(`Please update the snapshot, virtual layers have unsupported format`);
+                }
+            });
+
+            if (someLayersAreOutdated) {
+                newState.virtualLayers = [];
+            } else {
+                newState.virtualLayers = layersCopy;
+            }
+        } else if (newState !== false) {
+            newState.virtualLayers = [];
         }
 
         queueStatistsics.setLastStatistics(false);
@@ -681,7 +738,7 @@ module.exports = {
         if (moduleState.isBeingBuilt) {
             result = new Promise((resolve, reject) => {
                 console.trace(`async`);
-                console.error(`Asynchronous layerTree.create() attempt`);
+                console.error(`Asynchronous layerTree.create() attempt, forced state:`, forcedState);
                 reject();
             });
         } else {
@@ -827,6 +884,7 @@ module.exports = {
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
+                                        handle: `.layer-move-vert-group`,
                                         stop: (event, ui) => {
                                             _self.calculateOrder();
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1149,140 +1207,19 @@ module.exports = {
     },
 
     /**
-     * Creates SQL store for WebGL layers
-     *
-     * @param {Object} layer Layer description
-     *
-     * @returns {void}
-     */
-    createWebGLStore: (layer) => {
-        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
-
-        let whereClauses = [];
-        let activeFilters = _self.getActiveLayerFilters(layerKey);
-        activeFilters.map(item => {
-            whereClauses.push(item);
-        });
-
-        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
-        // Checking if versioning is enabled for layer
-        if (`versioning` in layer && layer.versioning) {
-            whereClauses.push(`gc2_version_end_date is null`);
-        }
-
-        // Checking if dynamic load is enabled for layer
-        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
-            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
-        }
-
-        // Gathering all WHERE clauses
-        if (whereClauses.length > 0) {
-            whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
-        }
-
-        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
-        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
-            type: layer.type,
-            map: cloud.get().map,
-            jsonp: false,
-            method: "POST",
-            host: "",
-            db: urlparser.db,
-            uri: "/api/sql",
-            clickable: true,
-            id: trackingLayerKey,
-            name: trackingLayerKey,
-            lifetime: 0,
-            styleMap: styles[trackingLayerKey],
-            sql,
-            onLoad: (l) => {
-                if (l === undefined) return;
-
-                layers.decrementCountLoading(l.id);
-                backboneEvents.get().trigger("doneLoading:layers", l.id);
-
-                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
-                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
-                }
-            },
-            onEachFeature: (feature, layer) => {
-                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
-                    /*
-                        Checking for correct onEachFeature structure
-                    */
-                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
-                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
-                    }
-
-                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
-                } else {
-                    // If there is no handler for specific layer, then display attributes only
-                    layer.on("click", function (e) {
-                        _self.displayAttributesPopup(feature, layer, e);
-                    });
-                }
-            }
-        });
-    },
-
-    /**
-     * Creates gc2table control for layer
+     * Checks if maximum number of features was reached when loading layer
      * 
-     * @param {String}  layerKey      Layer key     
-     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     * @param {String} layerKey Layer key
      * 
-     * @returns {void}
+     * @return {void}
      */
-    createTable(layerKey, forceDataLoad = false) {
-        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
-        if (layerWithData.length === 1) {
-            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
-
-            let metaDataKeys = meta.getMetaDataKeys();
-            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
-
-            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
-                weight: 5,
-                color: '#666',
-                dashArray: '',
-                fillOpacity: 0.2
-            });
-
-            let localTable = gc2table.init({
-                el: tableContainerId + ` table`,
-                ns: tableContainerId,
-                geocloud2: cloud.get(),
-                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
-                cm: tableHeaders,
-                autoUpdate: false,
-                autoPan: false,
-                openPopUp: false,
-                setViewOnSelect: true,
-                responsive: false,
-                callCustomOnload: true,
-                assignFeatureEventListenersOnDataLoad: true,
-                height: 250,
-                locale: window._vidiLocale.replace("_", "-"),
-                template: template,
-                styleSelected
-            });
-
-            localTable.loadDataInTable(true, forceDataLoad);
-            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
-        } else {
-            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
-        }
+    maxFeaturesNotification: (layerKey) => {
+        jquery.snackbar({
+            id: "snackbar-watsonc",
+            content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
+            htmlAllowed: true,
+            timeout: 7000
+        });
     },
 
     /**
@@ -1297,8 +1234,14 @@ module.exports = {
     createStore: (layer, isVirtual = false, isVectorTile = false) => {
         if (isVirtual && isVectorTile) throw new Error(`Vector tile layer can not be virtual`);
 
+        if (layer.virtual_layer) {
+            isVirtual = true;
+        }
+
+        let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${SQL_QUERY_LIMIT}`;
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
             moduleState.virtualLayers.map(item => {
@@ -1314,9 +1257,15 @@ module.exports = {
         } else {
             let whereClauses = [];
             let activeFilters = _self.getActiveLayerFilters(layerKey);
-            activeFilters.map(item => {
+            let parentFilters = _self.getParentLayerFilters(layerKey);
+            let overallFilters = activeFilters.concat(parentFilters);
+            overallFilters.map(item => {
                 whereClauses.push(item);
             });
+
+            if (parentFilters && parentFilters.length > 0) {
+                parentFiltersHash = btoa(JSON.stringify(parentFilters));
+            }
 
             $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
 
@@ -1333,7 +1282,7 @@ module.exports = {
             // Gathering all WHERE clauses
             if (whereClauses.length > 0) {
                 whereClauses = whereClauses.map(item => `(${item})`);
-                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${SQL_QUERY_LIMIT}`;
+                sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
             }
         }
 
@@ -1345,10 +1294,15 @@ module.exports = {
         let trackingLayerKey = (LAYER.VECTOR + ':' + layerKey);
         moduleState.vectorStores[trackingLayerKey] = new geocloud.sqlStore({
             map: cloud.get().map,
+            parentFiltersHash,
             jsonp: false,
             method: "POST",
             host: "",
             db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
             uri: "/api/sql",
             clickable: true,
             id: trackingLayerKey,
@@ -1358,17 +1312,16 @@ module.exports = {
             styleMap: styles[trackingLayerKey],
             sql,
             onLoad: (l) => {
-                if (l === undefined) return;
-
-                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
-
-                $('*[data-gc2-id-vec="' + l.id + '"]').parent().siblings().children().removeClass("fa-spin");
-
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
+
+                if (l === undefined || l.geoJSON === null) {
+                    return
+                }
+                sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey, l.geoJSON.features);
             },
             transformResponse: (response, id) => {
                 return apiBridgeInstance.transformResponseHandler(response, id);
@@ -1439,8 +1392,154 @@ module.exports = {
             },
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
-            })
+            }),
+            error: layerTreeUtils.storeErrorHandler
         });
+    },
+
+    /**
+     * Creates SQL store for WebGL layers
+     *
+     * @param {Object} layer Layer description
+     *
+     * @returns {void}
+     */
+    createWebGLStore: (layer) => {
+        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+
+        let whereClauses = [];
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        overallFilters.map(item => {
+            whereClauses.push(item);
+        });
+
+        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+
+        // Checking if versioning is enabled for layer
+        if (`versioning` in layer && layer.versioning) {
+            whereClauses.push(`gc2_version_end_date is null`);
+        }
+
+        // Checking if dynamic load is enabled for layer
+        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+        }
+
+        // Gathering all WHERE clauses
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+        }
+
+        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
+        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
+            type: layer.type,
+            map: cloud.get().map,
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
+            uri: "/api/sql",
+            clickable: true,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
+            lifetime: 0,
+            styleMap: styles[trackingLayerKey],
+            sql,
+            onLoad: (l) => {
+                if (l === undefined) return;
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+
+                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
+                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
+                }
+            },
+            onEachFeature: (feature, layer) => {
+                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
+                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
+                }
+            },
+            error: layerTreeUtils.storeErrorHandler
+        });
+    },
+
+    /**
+     * Creates gc2table control for layer
+     * 
+     * @param {String}  layerKey      Layer key     
+     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     * 
+     * @returns {void}
+     */
+    createTable(layerKey, forceDataLoad = false) {
+        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
+        if (layerWithData.length === 1) {
+            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+
+            let metaDataKeys = meta.getMetaDataKeys();
+            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                && metaDataKeys[layerKey].infowindow.template !== "")
+                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+
+            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.2
+            });
+
+            let localTable = gc2table.init({
+                el: tableContainerId + ` table`,
+                ns: tableContainerId,
+                geocloud2: cloud.get(),
+                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
+                cm: tableHeaders,
+                autoUpdate: false,
+                autoPan: false,
+                openPopUp: false,
+                setViewOnSelect: true,
+                responsive: false,
+                callCustomOnload: true,
+                assignFeatureEventListenersOnDataLoad: true,
+                height: 250,
+                locale: window._vidiLocale.replace("_", "-"),
+                template: template,
+                styleSelected
+            });
+
+            localTable.loadDataInTable(true, forceDataLoad);
+            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+        } else {
+            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
+        }
     },
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {
@@ -1471,6 +1570,36 @@ module.exports = {
             ${additionalControls}
             <div>${renderedText}</div>
         </div>`).openOn(cloud.get().map);
+    },
+
+    /**
+     * Returns parent layer filters (some layers can depend on others, forming child-parent relation,
+     * so whenver there are active filters for the parent layer, it should be applied for child layers as well).
+     *
+     * @param {String} layerKey Layer identifier
+     *
+     * @returns {Array}
+     */
+    getParentLayerFilters(layerKey) {
+        let parentLayers = [];
+        let activeLayers = _self.getActiveLayers();
+        activeLayers.map(activeLayerName => {
+            let layerMeta = meta.getMetaByKey(layerTreeUtils.stripPrefix(activeLayerName), false);
+            if (layerMeta.children && Array.isArray(layerMeta.children)) {
+                layerMeta.children.map(child => {
+                    if (child.rel === layerKey) {
+                        let activeFiltersForParentLayer = _self.getActiveLayerFilters(layerTreeUtils.stripPrefix(activeLayerName));
+                        if (activeFiltersForParentLayer && activeFiltersForParentLayer.length > 0) {
+                            activeFiltersForParentLayer.map(filter => {
+                                parentLayers.push(`${child.child_column} IN (SELECT ${child.parent_column} FROM ${layerTreeUtils.stripPrefix(activeLayerName)} WHERE ${filter})`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        return parentLayers;
     },
 
     /**
@@ -1539,12 +1668,14 @@ module.exports = {
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} ${value}`);
                                         break;
                                     case `date`:
+                                    case `timestamp with time zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
 
                                         arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         break;
+                                    case `text`:
                                     case `string`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
@@ -1552,7 +1683,7 @@ module.exports = {
                                         }
 
                                         if (column.expression === 'like') {
-                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
                                         } else {
                                             arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         }
@@ -1656,70 +1787,168 @@ module.exports = {
                 });
             });
         } else {
+            let LOG_HIERARCHY_BUILDING = false;
+            const LOG_LEVEL = '|  ';
+            //if (groupName === `Deep group`) LOG_HIERARCHY_BUILDING = true;
+
             for (let u = 0; u < metaData.data.length; ++u) {
                 if (metaData.data[u].layergroup == groupName) {
                     let layer = metaData.data[u];
                     let parsedMeta = _self.parseLayerMeta(layer);
-                    if (parsedMeta && `vidi_sub_group` in parsedMeta) {
-                        layer.subGroup = parsedMeta.vidi_sub_group;
+                    if (parsedMeta && `vidi_sub_group` in parsedMeta && parsedMeta.vidi_sub_group.length > 0) {
+                        if (parsedMeta.vidi_sub_group.indexOf(SUB_GROUP_DIVIDER) === -1) {
+                            layer.nesting = [parsedMeta.vidi_sub_group.trim()];
+                        } else {
+                            layer.nesting = [];
+                            let splitGroups = parsedMeta.vidi_sub_group.split(SUB_GROUP_DIVIDER);
+                            splitGroups.map(item => {
+                                layer.nesting.push(item.trim());
+                            });
+                        }
                     } else {
-                        layer.subGroup = false;
+                        layer.nesting = [];
                     }
 
-                    if (layer.subGroup) {
-                        let subGroupIndex = false;
-                        notSortedLayersAndSubgroupsForCurrentGroup.map((item, index) => {
-                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === layer.subGroup) {
-                                subGroupIndex = index;
+                    /**
+                     * Returns reference to the parent children container
+                     * 
+                     * @param {Array}  searchedLevelPath Depth specification
+                     * @param {String} prefix            Recursion depth logging helper
+                     * 
+                     * @returns {Array<Object>}
+                     */
+                    const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 1`, searchedLevelPath);
+
+                        let parent = notSortedLayersAndSubgroupsForCurrentGroup;
+                        if (searchedLevelPath.length > 0) {
+                            let indexes = getNestedGroupsIndexes(searchedLevelPath, localPrefix);
+                            for (let i = 0; i < indexes.length; i++) {
+                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` parent ${i}`, parent);
+                                if (i === 0) {
+                                    parent = notSortedLayersAndSubgroupsForCurrentGroup[indexes[0]].children;
+                                } else {
+                                    parent = parent[indexes[i]].children;
+                                }
+                            }
+                        }
+
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 2`, parent);
+                        return parent;
+                    }
+
+                    /**
+                     * Ensures that specified group exists on specific hierarchy level
+                     * 
+                     * @param {String} name              Group name
+                     * @param {Array}  searchedLevelPath Depth specification
+                     * @param {String} prefix            Recursion depth logging helper
+                     * 
+                     * @returns {Number}
+                     */
+                    const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
+
+                        let parent = getParentChildrenContainer(searchedLevelPath, localPrefix);
+                        let groupIndex = false;
+                        parent.map((item, index) => {
+                            if (item.type === GROUP_CHILD_TYPE_GROUP && item.id === name) {
+                                groupIndex = index;
                                 return false;
                             }
                         });
 
-                        // Group does not exist
-                        if (subGroupIndex === false) {
-                            notSortedLayersAndSubgroupsForCurrentGroup.push({
-                                id: layer.subGroup,
+                        if (groupIndex === false) {
+                            parent.push({
+                                id: name,
                                 type: GROUP_CHILD_TYPE_GROUP,
-                                children: [layer]
+                                children: []
                             });
-                        } else {
-                            notSortedLayersAndSubgroupsForCurrentGroup[subGroupIndex].children.push(layer);
+ 
+                            groupIndex = (parent.length - 1);
                         }
-                    } else {
-                        notSortedLayersAndSubgroupsForCurrentGroup.push({
-                            type: GROUP_CHILD_TYPE_LAYER,
-                            layer
+
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` groupIndex`, groupIndex);
+                        return groupIndex;
+                    };
+
+                    /**
+                     * Returns indexes for every nesting level, creates the group if does not exist
+                     * 
+                     * @param {Array}  nestingData Depth specification
+                     * @param {String} prefix      Recursion depth logging helper
+                     * 
+                     * @returns {Array<Number>}
+                     */
+                    const getNestedGroupsIndexes = (nestingData, prefix = '') => {
+                        let localPrefix = LOG_LEVEL + prefix;
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getNestedGroupsIndexes`, nestingData);
+
+                        let indexes = [];
+                        nestingData.map((groupName, level) => {
+                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` it`, groupName, level);
+
+                            let nestingDataCopy = JSON.parse(JSON.stringify(nestingData));
+                            let index = ensureThatGroupExistsAndReturnItsIndex(groupName, nestingDataCopy.slice(0, level), LOG_LEVEL + localPrefix);
+                            indexes.push(index);
                         });
+
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` indexes`, indexes);
+                        return indexes;
                     }
+
+                    if (LOG_HIERARCHY_BUILDING) console.log(` layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
+                    let indexes = getNestedGroupsIndexes(JSON.parse(JSON.stringify(layer.nesting)));
+
+                    if (LOG_HIERARCHY_BUILDING) console.log(` indexes ready`, indexes);
+                    let parent = getParentChildrenContainer(layer.nesting);
+                    parent.push({
+                        type: GROUP_CHILD_TYPE_LAYER,
+                        layer
+                    });
                 }
             }
+
+            if (LOG_HIERARCHY_BUILDING) console.log(` result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
         }
 
-        // Reverse subgroups
-        notSortedLayersAndSubgroupsForCurrentGroup.map((item) => {
-            if (item.type === "group") {
-                item.children.reverse();
-            }
-        });
+        const reverseOrder = (children) => {
+            children.reverse();
+            children.map((item) => {
+                if (item.type === "group") {
+                    reverseOrder(item.children);
+                }
+            });
+        };
 
-        // Reverse groups
-        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup.reverse(), groupName);
+        // Reverse subgroups
+        reverseOrder(notSortedLayersAndSubgroupsForCurrentGroup);
+
+        // Sort groups
+        let layersAndSubgroupsForCurrentGroup = layerSortingInstance.sortLayers(order, notSortedLayersAndSubgroupsForCurrentGroup, groupName);
 
         // Create stores and calculate active / added layers before the layer panel is shown
         let localNumberOfActiveLayers = 0;
         let localNumberOfAddedLayers = 0;
         let layersToProcess = [];
+
+        const getLayersToProcess = (items) => {
+            items.map(localItem => {
+                if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
+                    layersToProcess.push(localItem.layer);
+                } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
+                    getLayersToProcess(localItem.children);
+                } else {
+                    throw new Error(`Invalid sorting element type`);
+                }
+            });
+        };
+
         for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
             let localItem = layersAndSubgroupsForCurrentGroup[u];
-            if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
-                layersToProcess.push(localItem.layer);
-            } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                localItem.children.map(childLocalItem => {
-                    layersToProcess.push(childLocalItem);
-                });
-            } else {
-                throw new Error(`Invalid sorting element type`);
-            }
+            getLayersToProcess([localItem]);
         }
 
         let layersToCheckOpacity = _self.getActiveLayers();
@@ -1795,19 +2024,21 @@ module.exports = {
                             numberOfActiveLayers++;
                         }
 
-                        _self.createLayerRecord(localItem.layer, base64GroupName, layerIsActive, activeLayerName, false, false, isVirtualGroup);
+                        _self.createLayerRecord(localItem.layer, $("#collapse" + base64GroupName), layerIsActive, activeLayerName, false, isVirtualGroup);
                         numberOfAddedLayers++;
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, base64GroupName)
+                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $("#collapse" + base64GroupName), 0);
                         numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                         numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
                     } else {
+                        console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
                     }
                 }
 
                 $("#collapse" + base64GroupName).sortable({
                     axis: 'y',
+                    handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1837,22 +2068,24 @@ module.exports = {
 
                 const applyQueriedSetupControlRequests = (layer) => {
                     let layerKey = layer.f_table_schema + `.` + layer.f_table_name;
-
                     let {layerIsActive} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, layer);
-
                     if (layerIsActive && moduleState.setLayerStateRequests[layerKey]) {
                         let settings = moduleState.setLayerStateRequests[layerKey];
                         _self.setLayerState(settings.desiredSetupType, layerKey, settings.ignoreErrors, settings.layerIsEnabled, true);
                     }
                 };
 
-                layersAndSubgroupsForCurrentGroup.map(item => {
-                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
-                        applyQueriedSetupControlRequests(item.layer);
-                    } else {
-                        item.children.map(applyQueriedSetupControlRequests);
-                    }
-                });
+                const applyControlRequests = (items) => {
+                    items.map(item => {
+                        if (item.type === GROUP_CHILD_TYPE_LAYER) {
+                            applyQueriedSetupControlRequests(item.layer);
+                        } else {
+                            applyControlRequests(item.children);
+                        }
+                    });                    
+                }
+
+                applyControlRequests(layersAndSubgroupsForCurrentGroup);
             }
         });
     },
@@ -1901,12 +2134,13 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, base64GroupName) => {
-        let addedLayers = 0, activeLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}`).replace(/=/g, "");
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
+        let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
-        $("#collapse" + base64GroupName).append(markup);
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
+
+        $(parentNode).append(markup);
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-id`).append(`<div>
             <p>
                 <button type="button" class="btn btn-default btn-xs js-subgroup-toggle-button">
                     <i class="fa fa-arrow-down"></i>
@@ -1915,32 +2149,43 @@ module.exports = {
             </p>
         </div>`);
 
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
-            let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`);
-            if (subgroupRootElement.find(`.js-subgroup-children`).is(`:visible`)) {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-down"></i>`);
-                subgroupRootElement.find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`).first();
+            if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).first().hide();
             } else {
-                subgroupRootElement.find(`.js-subgroup-toggle-button`).html(`<i class="fa fa-arrow-up"></i>`);
-                subgroupRootElement.find(`.js-subgroup-children`).show();
+                subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-up"></i>`);
+                subgroupRootElement.find(`.js-subgroup-children`).first().show();
             }
         });
 
-        $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
+
+        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        if ($(container).length !== 1) {
+            throw new Error(`Error while locating parent node for group children`);
+        }
 
         subgroup.children.map(child => {
-            // For now expecting nothing but regular layers
-            let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child);
-            if (layerIsActive) {
-                activeLayers++;
-            }
+            if (child.type === GROUP_CHILD_TYPE_LAYER) {
+                let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                if (layerIsActive) numberOfActiveLayers++;
 
-            _self.createLayerRecord(child, base64GroupName, layerIsActive, activeLayerName, subgroup.id, base64SubgroupName);
-            addedLayers++;
+                _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
+                numberOfAddedLayers++;
+            } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
+                let {activeLayers, addedLayers} = _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, 1);
+                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
+                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+            } else {
+                throw new Error(`Invalid layer group`);
+            }        
         });
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
+            handle: `.layer-move-vert-subgroup`,
             stop: (event, ui) => {
                 _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -1948,7 +2193,10 @@ module.exports = {
             }
         });
 
-        return {addedLayers, activeLayers};
+        return {
+            addedLayers: numberOfAddedLayers,
+            activeLayers: numberOfActiveLayers
+        };
     },
 
     /**
@@ -1956,9 +2204,7 @@ module.exports = {
      *
      * @returns {void}
      */
-    createLayerRecord: (layer, base64GroupName, layerIsActive, activeLayerName,
-                        subgroupId = false, base64SubgroupName = false, isVirtual = false) => {
-
+    createLayerRecord: (layer, parentNode, layerIsActive, activeLayerName, subgroupId = false, isVirtual = false) => {
         let text = (layer.f_table_title === null || layer.f_table_title === "") ? layer.f_table_name : layer.f_table_title;
         if (layer.baselayer) {
             console.error(`Non-supported way of adding the base layer`);
@@ -1973,7 +2219,7 @@ module.exports = {
             let {detectedTypes, specifiers} = layerTreeUtils.getPossibleLayerTypes(layer);
             let singleTypeLayer = (detectedTypes === 1);
 
-            let condition = layerTreeUtils.getDefaultLayerType(layer);
+            let condition = layerTreeUtils.getDefaultLayerType(layer, meta.parseLayerMeta(`${layer.f_table_schema}.${layer.f_table_name}`));
             if (layerIsActive && activeLayerName) {
                 condition = (activeLayerName.indexOf(`:`) === -1 ? LAYER.RASTER_TILE : activeLayerName.split(`:`)[0]);
             }
@@ -2000,7 +2246,7 @@ module.exports = {
             }
 
             let layerIsEditable = false;
-            let displayInfo = `hidden`;
+            let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
             let parsedMeta = false;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
@@ -2014,7 +2260,6 @@ module.exports = {
                     }
                 }
             }
-
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
@@ -2032,7 +2277,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
@@ -2115,11 +2360,7 @@ module.exports = {
                 e.stopPropagation();
             });
 
-            if (base64SubgroupName) {
-                $("#collapse" + base64GroupName).find(`[data-gc2-subgroup-id="${subgroupId}"]`).find(`.js-subgroup-children`).append(layerControlRecord);
-            } else {
-                $("#collapse" + base64GroupName).append(layerControlRecord);
-            }
+            $(parentNode).append(layerControlRecord);
 
             _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
         }
@@ -2149,6 +2390,7 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
+
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
@@ -2264,8 +2506,18 @@ module.exports = {
                             let filters = JSON.parse(predefinedFiltersRaw);
                             localPredefinedFilters = filters;
                         } catch (e) {
-                            console.warn(`Unable to parse WMS filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
+                            console.warn(`Unable to parse filters settings for ${layerKey}`, parsedMeta[`wms_filters`]);
                             $(layerContainer).find(`.js-toggle-tile-filters`).remove();
+                        }
+                    }
+
+                    let presetFilters = [];
+                    if (parsedMeta.filter_config) {
+                        try {
+                            let filters = JSON.parse(parsedMeta.filter_config);
+                            presetFilters = filters;
+                        } catch (e) {
+                            console.warn(`Unable to parse preset filters settings for ${layerKey}`, parsedMeta[`filter_config`]);
                         }
                     }
 
@@ -2275,6 +2527,8 @@ module.exports = {
                         ReactDOM.render(
                             <LayerFilter
                                 layer={layer}
+                                layerMeta={meta.parseLayerMeta(layerKey)}
+                                presetFilters={presetFilters}
                                 predefinedFilters={localPredefinedFilters}
                                 disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
                                 arbitraryFilters={localArbitraryfilters}
@@ -2461,41 +2715,91 @@ module.exports = {
         _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
-    onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
+    onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    onApplyPredefinedFiltersHandler: ({layerKey, filters}) => {
+    onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         moduleState.predefinedFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    reloadLayerOnFiltersChange: (layerKey) => {
+    reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {
             throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
         }
 
         backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
-        _self.getActiveLayers().map(activeLayerKey => {
-            if (activeLayerKey.indexOf(layerKey) !== -1) {
-                if (activeLayerKey === layerKey) {
-                    // Reloading as a tile layer
-                    _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + layerKey)) {
-                    // Reloading as a vector tile layer
-                    _self.reloadLayer(activeLayerKey, false, false, false);
-                } else if (activeLayerKey === (LAYER.VECTOR + `:` + layerKey)) {
-                    // Reloading as a vector layer
-                    let correspondingLayer = meta.getMetaByKey(layerKey);
-                    _self.createStore(correspondingLayer);
-                    _self.reloadLayer(activeLayerKey);
+
+        let childrenLayerNames = [];
+        let layerMeta = meta.getMetaByKey(layerKey, false);
+        if (layerMeta.children && Array.isArray(layerMeta.children)) {
+            layerMeta.children.map(child => {
+                childrenLayerNames.push(child.rel);
+            });
+        }
+
+        let activeLayers = _self.getActiveLayers();
+        let layerIsActive = false;
+        activeLayers.map(item => {
+            if (layerTreeUtils.stripPrefix(item) === layerKey) {
+                layerIsActive = true;
+            }
+        });
+
+        if (layerIsActive === false && forcedReloadLayerType !== false) {
+            activeLayers.push(forcedReloadLayerType + ':' + layerKey);
+        }
+
+        activeLayers.map(activeLayerKey => {
+            if (layerTreeUtils.stripPrefix(activeLayerKey) === layerKey
+                || childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
+                let localLayerKey = layerKey;
+                let childIsReloaded = false;
+                if (childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
+                    childIsReloaded = true;
+                    localLayerKey = activeLayerKey;
+                }
+
+                const reloadLayer = () => {
+                    let noPrefixLayerName = layerTreeUtils.stripPrefix(localLayerKey);
+                    if (activeLayerKey === noPrefixLayerName) {
+                        // Reloading as a tile layer
+                        _self.reloadLayer(activeLayerKey, false, false, false);
+                    } else if (activeLayerKey === (LAYER.VECTOR_TILE + `:` + noPrefixLayerName)) {
+                        // Reloading as a vector tile layer
+                        _self.reloadLayer(activeLayerKey, false, false, false);
+                    } else if (activeLayerKey === (LAYER.VECTOR + `:` + noPrefixLayerName)) {
+                        // Reloading as a vector layer
+                        let correspondingLayer = meta.getMetaByKey(noPrefixLayerName);
+                        _self.createStore(correspondingLayer);
+                        _self.reloadLayer(activeLayerKey).then(() => {
+                            backboneEvents.get().once(`doneLoading:layers`, () => {
+                                if ($(`[data-gc2-layer-key^="${noPrefixLayerName}."]`).find(`.js-layer-settings-table`).is(`:visible`)) {
+                                    _self.createTable(noPrefixLayerName, true);
+                                }
+                            });
+                        });
+                    } else {
+                        console.error(`Unable to apply filters to layer ${localLayerKey}`);
+                    }
+                }
+
+                if (childIsReloaded) {
+                    backboneEvents.get().once("doneLoading:layers", function (e) {
+                        if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
+                            reloadLayer();
+                        }
+                    });
                 } else {
-                    console.error(`Unable to apply filters to layer ${layerKey}`);
+                    reloadLayer();
                 }
             }
         });
+
+
     },
 
     /**
@@ -2515,7 +2819,7 @@ module.exports = {
     reloadLayer: (layerId, forceTileRedraw = false, doNotLegend = false, setupControls = true) => {
         return new Promise((resolve, reject) => {
             switchLayer.init(layerId, false, doNotLegend, forceTileRedraw, false).then(() => {
-                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, setupControls).then(() => {
+                switchLayer.init(layerId, true, doNotLegend, forceTileRedraw, setupControls, false).then(() => {
                     resolve();
                 });
             });

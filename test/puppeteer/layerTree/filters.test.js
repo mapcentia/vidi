@@ -3,14 +3,15 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
-const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTonerLite/13/39.2681/-6.8108/v:test.testpointfilters`;
+const PAGE_URL = `${helpers.PAGE_URL_BASE}app/aleksandrshumilov/test/#stamenTonerLite/13/39.2681/-6.8108/`;
 
-const createPage = async () => {
+const createPage = async (layerName = `test.testpointfilters`) => {
+    let url = PAGE_URL + `v:` + layerName;
     let page = await browser.newPage();
     await page.emulate(helpers.EMULATED_SCREEN);
-    await page.goto(PAGE_URL, { timeout: 0 });
+    await page.goto(url, { timeout: 0 });
     page = await helpers.waitForPageToLoad(page);
 
     await page._client.send('Network.enable');
@@ -19,7 +20,7 @@ const createPage = async () => {
     await helpers.sleep(1000);
     await page.evaluate(`$('[href="#collapseUHVwcGV0ZWVyIHRlc3Rpbmcgb25seQ"]').trigger('click')`);
     await helpers.sleep(1000);
-    await page.evaluate(`$('[data-gc2-layer-key="test.testpointfilters.the_geom"]').find('.js-toggle-filters').trigger('click')`);
+    await page.evaluate(`$('[data-gc2-layer-key="${layerName}.the_geom"]').find('.js-toggle-filters').trigger('click')`);
     await helpers.sleep(1000);
 
     return page;
@@ -80,6 +81,37 @@ const disablePredefinedFilters = async (page) => {
 }
 
 describe('Layer tree filters', () => {
+    it('should apply preset filters', async () => {
+        let page = await createPage(`test.testpresetpointfilters`);
+
+        let numberOfFilteredItems = false;
+        page.on(`response`, async response => {
+            if (response.url().indexOf(`/api/sql/aleksandrshumilov`) !== -1) {
+                let parsedResponse = await response.json();
+                numberOfFilteredItems = parsedResponse.features.length;
+            }
+        });
+
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`document.getElementById('column_select_testpresetpointfilters.test_0').value`)).to.equal(`id`);
+        expect(await page.evaluate(`document.getElementById('expression_select_testpresetpointfilters.test_0').value`)).to.equal(`>`);
+        expect(await page.evaluate(`document.getElementById('expression_input_testpresetpointfilters.test_0').value`)).to.equal(``);
+
+        expect(await page.evaluate(`document.getElementById('column_select_testpresetpointfilters.test_1').value`)).to.equal(`stringfield`);
+        expect(await page.evaluate(`document.getElementById('expression_select_testpresetpointfilters.test_1').value`)).to.equal(`=`);
+        expect(await page.evaluate(`document.getElementById('expression_input_testpresetpointfilters.test_1').value`)).to.equal(``);
+
+        await helpers.sleep(1000);
+
+        await setTextFilterValue(page, `id`, `>`, `2`, 0, false, `testpresetpointfilters`);
+        await setTextFilterValue(page, `stringfield`, `=`, `def`, 1, true, `testpresetpointfilters`);
+
+        await helpers.sleep(2000);
+
+        expect(numberOfFilteredItems).to.equal(2);
+    });
+
     it('should store arbitrary filters values after reload and in the state snapshot', async () => {
         let page = await createPage();
 
@@ -97,7 +129,6 @@ describe('Layer tree filters', () => {
         });
 
         await disablePredefinedFilters(page);
-        await helpers.img(page);
 
         await helpers.sleep(2000);
         expect(numberOfFilteredItems).to.equal(7);
@@ -257,7 +288,7 @@ describe('Layer tree filters', () => {
 
         await page.setRequestInterception(true);
         page.on('request', request => {
-            if (request.url().indexOf(`wms`) > -1) {
+            if (request.url().indexOf(`format=image`) > -1) {
                 filtersString = false;
                 request.url().split(`?`)[1].split(`&`).map(item => {
                     if (item.split(`=`)[0] === `filters`) {
@@ -273,14 +304,14 @@ describe('Layer tree filters', () => {
         await page.evaluate(`$('[href="#collapseVGVzdCBncm91cA"]').trigger('click')`);
         await helpers.sleep(500);
         await page.evaluate(`$('input[type="checkbox"][data-gc2-id="test.polygon"][class="js-show-layer-control"]').trigger('click')`);
-        await helpers.sleep(1000);
+        await helpers.sleep(2000);
 
         expect(filtersString[`test.polygon`][0]).to.equal(`id = 2`);
 
         await page.evaluate(`$('[data-gc2-layer-key="test.polygon.the_geom"]').find('.js-toggle-filters').trigger('click')`);
         await helpers.sleep(500);
         await page.evaluate(`$('[id="layer-settings-filters-test.polygon"').find('.js-predefined-filters').find('input').trigger('click')`);
-        await helpers.sleep(2000);
+        await helpers.sleep(4000);
         expect(filtersString).to.equal(false);
 
         await page.evaluate(`$($('[id="layer-settings-filters-test.polygon"').find('.btn-group')[2]).find('button').trigger('click')`);
@@ -377,8 +408,6 @@ describe('Layer tree filters', () => {
         });
 
         await disablePredefinedFilters(page);
-
-        await helpers.img(page);
 
         expect(await page.evaluate(`$('[id="layer-settings-filters-test.testpointfilters"').find('[class="btn btn-sm btn-success"]').is(':disabled')`)).to.be.true;
         await setTextFilterValue(page, `stringfield`, `like`, `abc`, 0, false);

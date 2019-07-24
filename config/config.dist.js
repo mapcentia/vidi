@@ -29,6 +29,46 @@ module.exports = {
         "host": "GC2_HOST"
     },
 
+    // =====================================================================
+    // Legend behaviour.
+    // Specifies if the switched off layers should be left in legend or not.
+    // Default value: false
+    // =====================================================================
+
+    "removeDisabledLayersFromLegend": true,
+
+    // ===========
+    // Schemata.
+    // Specifies schemas that should be loaded.
+    // ===========
+    //"schemata": [
+    //    "my_schema",
+    //    "my_schema.my_layer",
+    //    "tag:my_tag"
+    //],
+
+    // ===============
+    // State snapshot.
+    // Overrides the schemata setting and specifies the schema to load.
+    // ===============
+    //"snapshot": "state_snapshot_IDENTIFIER",
+
+    // ===============================================================
+    // Startup modal.
+    // The modal is shown upon Vidi initialization and can be hidden once or forever (until cookies reset).
+    // ===============================================================
+    //"startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>",
+
+    // ===============================================================
+    // Startup modal supression templates.
+    // Setting contains list of templates, where the startup modal is
+    // disabled. Can be a plain template name or the RegExp
+    // ===============================================================
+
+    "startupModalSupressionTemplates": ["print.tmpl", "blank.tmpl", {
+        regularExpression: true,
+        name: "print_[\\w]+\\.tmpl"
+    }],
 
     // ===============================================================
     // Configuration of print templates.
@@ -137,7 +177,7 @@ module.exports = {
             {"offlineMap": ["index"]},
             {"session": ["index"]},
             {"editor": ["index"]},
-
+            {"configSwitcher": ["index"]},
         ],
         "server": [
             {"conflictSearch": ["index"]},
@@ -221,6 +261,7 @@ module.exports = {
         "coordinates",
         "offlineMap",
         "editor",
+        "configSwitcher",
     ],
 
 

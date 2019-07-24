@@ -102,7 +102,7 @@ describe('Session', () => {
 
         await helpers.sleep(1000);
         await page.evaluate(`$('[data-gc2-layer-key="test.polygon_private.the_geom"]').find('.check').trigger('click')`);
-        await helpers.sleep(1000);
+        await helpers.sleep(4000);
 
         expect(tileProxyWasRequested).to.be.true;
         expect(tileProxyResponseCode).to.equal(200);

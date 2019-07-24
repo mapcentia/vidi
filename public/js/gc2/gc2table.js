@@ -343,25 +343,29 @@ var gc2table = (function () {
                         });
 
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
-                            var id = $(this).data('uniqueid');
-                            var layer = m.map._layers[id];
-                            var databaseIdentifier = getDatabaseIdForLayerId(id);
-                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
-                                store.layer._layers[id].setStyle({
-                                    fillColor: "#660000",
-                                    fillOpacity: "0.6"
-                                });
+                            if ($(this).hasClass('no-records-found') === false) {
+                                var id = $(this).data('uniqueid');
+                                var layer = m.map._layers[id];
+                                var databaseIdentifier = getDatabaseIdForLayerId(id);
+                                if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                                    store.layer._layers[id].setStyle({
+                                        fillColor: "#660000",
+                                        fillOpacity: "0.6"
+                                    });
 
-                                onMouseOver(id, layer);
+                                    onMouseOver(id, layer);
+                                }
                             }
                         });
 
                         $(el + ' > tbody > tr').on("mouseout", function (e) {
-                            var id = $(this).data('uniqueid');
-                            var databaseIdentifier = getDatabaseIdForLayerId(id);
-                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
-                                if (store.layer && store.layer.resetStyle) {
-                                    store.layer.resetStyle(store.layer._layers[id]);
+                            if ($(this).hasClass('no-records-found') === false) {
+                                var id = $(this).data('uniqueid');
+                                var databaseIdentifier = getDatabaseIdForLayerId(id);
+                                if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                                    if (store.layer && store.layer.resetStyle) {
+                                        store.layer.resetStyle(store.layer._layers[id]);
+                                    }
                                 }
                             }
                         });

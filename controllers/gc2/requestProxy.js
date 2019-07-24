@@ -10,27 +10,33 @@ var config = require('../../config/config.js').gc2;
 var request = require('request');
 var fs = require('fs');
 
-router.all('/api/tileRequestProxy', (req, response) => {
+const proxifyRequest = (req, response) => {
     let requestURL = decodeURIComponent(req.url.substr(req.url.indexOf('?request=') + 9));
 
+    // Rewrite URL in case of subUser
+    if (req.session.subUser) {
+        requestURL = requestURL.replace(`/${req.session.screenName}/`, `/${req.session.subUser}@${req.session.screenName}/`);
+    }
+
     if (requestURL.indexOf(config.host) === 0) {
+        let options = {
+            method: 'GET',
+            encoding: 'utf8',
+            uri: requestURL
+        };
+
         if (req.session.gc2SessionId) {
-            request({
-                method: 'GET',
-                encoding: 'utf8',
-                uri: requestURL,
-                headers: {
-                    Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";"
-                }
-            }).pipe(response);
-        } else {
-            response.status(400);
-            response.send(`Proxy can be used only for authenticated users`);
+            options.headers = {Cookie: "PHPSESSID=" + req.session.gc2SessionId + ";"}
         }
+
+        request(options).pipe(response);
     } else {
         response.status(403);
         response.send(`Forbidden, only requests to MapCentia backend are allowed`);
     }
-});
+};
+
+router.all('/api/tileRequestProxy', proxifyRequest);
+router.all('/api/requestProxy', proxifyRequest);
 
 module.exports = router;

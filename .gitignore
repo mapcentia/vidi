@@ -9,6 +9,10 @@ temporary-state-storage.json
 # Templates should be generated on-site, no need to store it in the repository
 public/js/templates.js
 
+# Following files are restored after running "grunt ..." command
+public/index.html
+public/favicon.ico
+
 # Code coverage files
 .nyc_output
 coverage
@@ -109,3 +113,6 @@ config/_variables.less
 /public/css/extensions/all.min.css
 /public/css/styles.css
 /public/css/styles.min.css
+
+# Environment variables
+.env

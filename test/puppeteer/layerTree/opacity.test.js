@@ -3,7 +3,7 @@
  */
 
 const { expect } = require("chai");
-const helpers = require("./../helpers");
+const helpers = require("./../../helpers");
 
 describe('Layer tree opacity', () => {
     it(`should display controls only for tile layers`, async () => {

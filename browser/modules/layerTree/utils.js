@@ -4,7 +4,7 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-import { MODULE_NAME, LAYER } from './constants';
+import { MODULE_NAME, LAYER, SQL_QUERY_LIMIT } from './constants';
 import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './LayerSorting';
 
 /**
@@ -75,27 +75,26 @@ const calculateOrder = () => {
                 };
             };
 
-            $(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().each((layerIndex, layerElement) => {
-                if ($(layerElement).data(`gc2-layer-key`)) {
-                    // Processing layer record
-                    children.push(processLayerRecord(layerElement));
-                } else if ($(layerElement).data(`gc2-subgroup-id`)) {
-                    // Processing subgroup record
-                    let subgroupDescription = {
-                        id: $(layerElement).data(`gc2-subgroup-id`),
-                        type: GROUP_CHILD_TYPE_GROUP,
-                        children: []
-                    };
+            const calculateChildrenOrder = (parentElement) => {
+                let children = [];
+                $(parentElement).children().each((layerIndex, layerElement) => {
+                    if ($(layerElement).data(`gc2-layer-key`)) {
+                        children.push(processLayerRecord(layerElement));
+                    } else if ($(layerElement).data(`gc2-subgroup-id`)) {
+                        let subgroupDescription = {
+                            id: $(layerElement).data(`gc2-subgroup-id`),
+                            type: GROUP_CHILD_TYPE_GROUP,
+                            children: calculateChildrenOrder($(layerElement).find(`.js-subgroup-children`).first())
+                        };
 
-                    $(layerElement).find(`.js-subgroup-children`).children().each((subgroupLayerIndex, subgroupLayerElement) => {
-                        subgroupDescription.children.push(processLayerRecord(subgroupLayerElement));
-                    });
+                        children.push(subgroupDescription);
+                    }
+                });
 
-                    children.push(subgroupDescription);
-                } else {
-                    throw new Error(`Unable to detect the group child element`);
-                }
-            });
+                return children;
+            };
+
+            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`));
         } else {
             panelWasInitialized = false;
         }
@@ -164,6 +163,34 @@ const stripPrefix = (layerName) => {
         .replace(LAYER.RASTER_TILE + `:`, ``)
         .replace(LAYER.WEBGL + `:`, ``);
 };
+
+/** Function that count occurrences of a substring in a string;
+ * @param {String} string               The string
+ * @param {String} subString            The sub string to search for
+ * @param {Boolean} [allowOverlapping]  Optional. (Default:false)
+ *
+ * @author Vitim.us https://gist.github.com/victornpb/7736865
+ * @see Unit Test https://jsfiddle.net/Victornpb/5axuh96u/
+ * @see http://stackoverflow.com/questions/4009756/how-to-count-string-occurrence-in-string/7924240#7924240
+ */
+const occurrences = (string, subString, allowOverlapping = false) => {
+    string += "";
+    subString += "";
+    if (subString.length <= 0) return (string.length + 1);
+
+    var n = 0,
+        pos = 0,
+        step = allowOverlapping ? 1 : subString.length;
+
+    while (true) {
+        pos = string.indexOf(subString, pos);
+        if (pos >= 0) {
+            ++n;
+            pos += step;
+        } else break;
+    }
+    return n;
+}
 
 /**
  * Checks if the current layer type is the vector tile one
@@ -267,16 +294,62 @@ const getPossibleLayerTypes = (layerDescription) => {
     return { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer, detectedTypes, specifiers };
 };
 
+/**
+ * Handler for store errors
+ * 
+ * @param {Object} response Response
+ * 
+ * @returns {void}
+ */
+const storeErrorHandler = (response)=>{
+    if (response && response.statusText === `abort`) {
+        // If the request was aborted, then it was sanctioned by Vidi, so no need to inform user
+    } else if (response && response.responseJSON) {
+        alert(response.responseJSON.message);
+        console.error(response.responseJSON.message);
+    } else {
+        alert(`Error occured`);
+        console.error(response);
+    }
+};
+
+/**
+ * Detects the query limit for layer
+ * 
+ * @param {Object} layerMeta Layer meta
+ * 
+ * @return {Number}
+ */
+const getQueryLimit = (layerMeta) => {
+    if (!layerMeta) throw new Error(`Invalid layer meta object`);
+
+    let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
+    if (layerMeta && `max_features` in layerMeta && parseInt(layerMeta.max_features) > 0) {
+        layerSpecificQueryLimit = parseInt(layerMeta.max_features);
+    }
+
+    return layerSpecificQueryLimit;
+};
 
 /**
  * Detects default (fallback) layer type
  * 
- * @param {Object} layerMeta Layer meta
+ * @param {Object} layerMeta  Layer meta
+ * @param {Object} parsedMeta Parsed layer "meta" field
  * 
  * @return {Object}
  */
-const getDefaultLayerType = (layerMeta) => {
+const getDefaultLayerType = (layerMeta, parsedMeta = false) => {
     let { isVectorLayer, isRasterTileLayer, isVectorTileLayer, isWebGLLayer } = getPossibleLayerTypes(layerMeta);
+    if (parsedMeta) {
+        if (`default_layer_type` in parsedMeta && parsedMeta.default_layer_type) {
+            if (isVectorLayer && parsedMeta.default_layer_type === LAYER.VECTOR) return LAYER.VECTOR;
+            if (isRasterTileLayer && parsedMeta.default_layer_type === LAYER.RASTER_TILE) return LAYER.RASTER_TILE;
+            if (isVectorTileLayer && parsedMeta.default_layer_type === LAYER.VECTOR_TILE) return LAYER.VECTOR_TILE;
+            if (isWebGLLayer && parsedMeta.default_layer_type === LAYER.WEBGL) return LAYER.WEBGL;
+        }
+    }
+
     if (isVectorLayer) {
         return LAYER.VECTOR;
     } else if (isRasterTileLayer) {
@@ -295,9 +368,12 @@ module.exports = {
     applyOpacityToLayer,
     calculateOrder,
     getDefaultTemplate,
+    storeErrorHandler,
     stripPrefix,
+    getQueryLimit,
     getPossibleLayerTypes,
     getDefaultLayerType,
     setupLayerNumberIndicator,
-    isVectorTileLayerId
+    isVectorTileLayerId,
+    occurrences
 };

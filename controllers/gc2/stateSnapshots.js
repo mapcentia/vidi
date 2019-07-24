@@ -9,16 +9,9 @@ let express = require('express');
 let router = express.Router();
 const uuid = require('uuid/v1');
 const request = require('request');
+const shared = require('./shared');
 
 const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
-
-const throwError = (response, error, data) => {
-    console.error(`Error occured: ${error}`);
-    if (data) console.error(`Error details: ${JSON.stringify(data)}`);
-
-    response.status(400);
-    response.json({ error });
-};
 
 if (!config.gc2.host) throw new Error(`Unable to get the GC2 host from config`);
 const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
@@ -73,45 +66,54 @@ How state snapshot is stored in the key-value storage:
 router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
     let { browserId, userId } = getCurrentUserIdentifiers(req);
 
-    if (!browserId && !userId) {
-        res.send([]);
-    } else {
-        request({
-            method: 'GET',
-            encoding: 'utf8',
-            uri: API_LOCATION + `/` + req.params.dataBase
-        }, (error, response) => {
-            if (error) {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
-                return;
-            }
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase
+    }, (error, response) => {
+        if (error) {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
+            return;
+        }
 
-            let parsedBody = false;
-            try {
-                let localParsedBody = JSON.parse(response.body);
-                parsedBody = localParsedBody;
-            } catch (e) {}
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
 
-            if (parsedBody) {
-                // Filter by browser and user ownership
-                let results = [];
-                parsedBody.data.map(item => {
-                    let parsedSnapshot = JSON.parse(item.value);
-                    if (parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+        let selectOnlyForOwner = false;
+        if (req.query && req.query.ownerOnly && (req.query.ownerOnly === 'true' || req.query.ownerOnly === true)) {
+            selectOnlyForOwner = true;
+        }
+
+        if (parsedBody && parsedBody.data) {
+            // Filter by browser and user ownership
+            let results = [];
+            parsedBody.data.map(item => {
+                let parsedSnapshot = JSON.parse(item.value);
+                if (selectOnlyForOwner) {
+                    if (browserId && parsedSnapshot.anonymous && parsedSnapshot.browserId === browserId) {
+                        results.push(parsedSnapshot);
+                    } else if (userId && parsedSnapshot.userId === userId) {
+                        results.push(parsedSnapshot);
+                    }
+                } else {
+                    if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
                         parsedSnapshot.userId && parsedSnapshot.userId === userId) {
                         results.push(parsedSnapshot);
                     }
-                });
+                }
+            });
 
-                res.send(results);
-            } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
-                    body: response.body,
-                    url: API_LOCATION + `/` + req.params.dataBase
-                });
-            }
-        });
-    }
+            res.send(results);
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {
+                body: response.body,
+                url: API_LOCATION + `/` + req.params.dataBase
+            });
+        }
+    });
 });
 
 /**
@@ -120,32 +122,38 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
 router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
     let { browserId, userId } = getCurrentUserIdentifiers(req);
 
-    if (!browserId && !userId) {
-        res.send([]);
-    } else {
-        request({
-            method: 'GET',
-            encoding: 'utf8',
-            uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
-        }, (error, response) => {
-            let parsedBody = false;
-            try {
-                let localParsedBody = JSON.parse(response.body);
-                parsedBody = localParsedBody;
-            } catch (e) {}
+    request({
+        method: 'GET',
+        encoding: 'utf8',
+        uri: API_LOCATION + `/` + req.params.dataBase + '/' + req.params.id
+    }, (error, response) => {
+        let parsedBody = false;
+        try {
+            let localParsedBody = JSON.parse(response.body);
+            parsedBody = localParsedBody;
+        } catch (e) {}
 
-            if (parsedBody) {
-                if (parsedBody.data === false) {
-                    res.status(404);
-                    res.json({ error: `NOT_FOUND` });
-                } else {
-                    res.send(parsedBody.data.value);
+        if (parsedBody) {
+            let result = false;
+
+            if (`data` in parsedBody && parsedBody.data.value) {
+                let parsedSnapshot = JSON.parse(parsedBody.data.value);
+                if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                    parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                    result = parsedSnapshot;
                 }
-            } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
             }
-        });
-    }
+
+            if (result === false) {
+                res.status(404);
+                res.json({ error: `NOT_FOUND` });
+            } else {
+                res.send(result);
+            }
+        } else {
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+        }
+    });
 });
 
 /**
@@ -190,7 +198,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             stateSnapshotCopy.userId = userId;
             save = true;
         } else {
-            throwError(res, 'INVALID_SNAPSHOT_OWNERSHIP');
+            shared.throwError(res, 'INVALID_SNAPSHOT_OWNERSHIP');
         }
 
         if (save) {
@@ -199,8 +207,8 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
 
-            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database || !stateSnapshotCopy.schema) {
-                throwError(res, 'MISSING_DATA');
+            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database) {
+                shared.throwError(res, 'MISSING_DATA');
             } else {
                 let token = generateToken(stateSnapshotCopy);
                 stateSnapshotCopy.token = token;
@@ -225,16 +233,16 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                                 status: 'success'
                             });
                         } else {
-                            throwError(res, parsedBody.message);
+                            shared.throwError(res, parsedBody.message);
                         }
                     } else {
-                        throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                        shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                     } 
                 });
             }
         }
     } else {
-        throwError(res, 'MISSING_DATA');
+        shared.throwError(res, 'MISSING_DATA');
     }
 });
 
@@ -251,7 +259,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
         }, (error, response) => {
             if (response.body.data === false) {
-                throwError(res, 'INVALID_SNAPSHOT_ID');
+                shared.throwError(res, 'INVALID_SNAPSHOT_ID');
             } else {
                 let parsedBody = false;
                 try {
@@ -273,12 +281,12 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                         res.send({ status: 'success' });
                     });
                 } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
             }
         });
     } else {
-        throwError(res, 'UNABLE_TO_GET_USER_IDENTIFIERS');
+        shared.throwError(res, 'UNABLE_TO_GET_USER_IDENTIFIERS');
     }
 });
 
@@ -295,7 +303,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
         }, (error, response) => {
             if (response.body.data === false) {
-                throwError(res, 'INVALID_SNAPSHOT_ID');
+                shared.throwError(res, 'INVALID_SNAPSHOT_ID');
             } else {
                 let parsedBody = false;
                 try {
@@ -321,15 +329,15 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                             res.send({ status: 'success' });
                         });
                     } else {
-                        throwError(res, 'ACCESS_DENIED');
+                        shared.throwError(res, 'ACCESS_DENIED');
                     }
                 } else {
-                    throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
                 }
             }
         });
     } else {
-        throwError(res, 'MISSING_DATA');
+        shared.throwError(res, 'MISSING_DATA');
     }
 });
 
@@ -345,7 +353,7 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
     }, (error, response) => {
         if (response.body.data === false) {
-            throwError(res, 'INVALID_SNAPSHOT_ID');
+            shared.throwError(res, 'INVALID_SNAPSHOT_ID');
         } else {
             let parsedBody = false;
             try {
@@ -365,10 +373,10 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
                         res.send({ status: 'success' });
                     });
                 } else {
-                    throwError(res, 'ACCESS_DENIED');
+                    shared.throwError(res, 'ACCESS_DENIED');
                 }
             } else {
-                throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
             }
         }
     });

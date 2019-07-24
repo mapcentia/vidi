@@ -5,15 +5,30 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+### Added
+- Embed script for easy embedding of Vidi in web pages using a snap-shot token.
+- A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
+- Download drawings as GeoJSON
+
+### Changed
 - Layers which have been switch off, will not be removed from legend.
 - No re-load of legend if its not necessary.
-- Home button on embed.tmpl will set the map to the initial extent if a snapshot-state is invoked.
+- `embed.tmpl` is now a minimal template for embedding in web pages.
+- Home button on `embed.tmpl` will set the map to the initial extent if a snapshot-state is invoked.
 - Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
 
+### Fixed
+- Better wrapping of layer tools when side panel is narrow.
+- Snapping bugs.
+- SELECT statements like `SELECT * FROM foo WHERE bar LIKE '%foo'` will not longer give problems.
+
 ## [2019.1.0.rc2] - 2019-01-03
-- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools.
-- WebGL layer type added.
-- Support of MVT base layers. 
+### Added
+- Tentative support of WebGL layer type added.
+- Support of MVT base layers.
+
+### Changed
+- Optimized rendering of layer tree. Implemented lazy rendering of layer groups and tools. 
 - Hide login button if session module is disabled.
 
 ## [2019.1.0.rc1] - 2019-14-02
@@ -22,7 +37,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Touch drag enabled in layer tree.
 - Config `activateMainTab` added, which tells Vidi to activate a tab on startup.
 - Visual grouping of map tools in GUI.
-- Support of Mapbox Vector Tiles (MVT). 
+- Tentative support of Mapbox Vector Tiles (MVT). Needs latest version of GC2 with MVT support. 
 - Cross hair cursor when info click is on.
 - When drawing or editing with the Editor module, snapping to other vector layers is added.
 - Unify filter methods for vector and tile layers.

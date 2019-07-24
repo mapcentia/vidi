@@ -79,8 +79,12 @@ module.exports = {
             } else {
                 initMapParameters = null;
             }
+
             setBaseLayer.init(parameters.baseLayer).then(() => {
                 resolve();
+            }).catch(error => {
+                console.error(error);
+                reject();
             });
         });
 

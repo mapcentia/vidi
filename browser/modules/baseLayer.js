@@ -89,8 +89,8 @@ module.exports = module.exports = {
     init: () => {
         state.listenTo('baseLayer', _self);
 
-        var schemas;
-        schemas = urlparser.schema.split(",");
+        var schemas = urlparser.schema.split(",");
+
         if (typeof window.setBaseLayers !== 'object') {
             window.setBaseLayers = [
                 {"id": "mapQuestOSM", "name": "MapQuset OSM"},
@@ -254,17 +254,34 @@ module.exports = module.exports = {
                         <label class='side-by-side-baselayers-label'>
                             <input type='radio' name='side-by-side-baselayers' value='${layerId}' ${layerId === activeTwoLayersModeLayer ? `checked=""` : ``}>
                         </label>
+
+
                     </div>`;
                 }
 
-                appendedCode += `<div class='list-group-item js-base-layer-control'>
-                    <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
-                        <label class='baselayer-label'>
-                            <input type='radio' name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
-                        </label>
+                let displayInfo = (bl.abstract ? `visible` : `hidden`);
+                let tooltip = (bl.abstract ? $(bl.abstract).text() : ``);
+                appendedCode += `<div class="list-group-item js-base-layer-control" style="display: flex; align-items: center;">
+                    <div style="flex-grow: 1;">
+                        <div class='radio radio-primary base-layer-item' data-gc2-base-id='${layerId}' style='float: left;'>
+                            <label class='baselayer-label'>
+                                <input type='radio' name='baselayers' value='${layerId}' ${layerId === activeBaseLayer ? `checked=""` : ``}> 
+                            </label>
+                        </div>
+                        ${sideBySideLayerControl}
+                        <div>${layerName}</div>
                     </div>
-                    ${sideBySideLayerControl}
-                    <div>${layerName}</div>
+                    <div>
+                        <a
+                            href="javascript:void(0);"
+                            data-toggle="tooltip"
+                            data-placement="left"
+                            title="${tooltip}"
+                            style="visibility: ${displayInfo};"
+                            data-baselayer-name="${layerName}"
+                            data-baselayer-info="${bl.abstract}"
+                            class="info-label">${__(`Info`)}</a>
+                    </div>
                 </div>
                 <div class='list-group-separator'></div>`;
             }
@@ -337,6 +354,15 @@ module.exports = module.exports = {
             };
 
             $("#base-layer-list").append(appendedCode).promise().then(() => {
+                $("#base-layer-list").find('.info-label').on('click', e => {
+                    let rawHtml = $(e.target).attr(`data-baselayer-info`);
+                    let layerName = $(e.target).attr(`data-baselayer-name`);
+                    $("#info-modal.slide-right").css("right", "0");
+                    $("#info-modal .modal-title").html(layerName);
+                    $("#info-modal .modal-body").html(rawHtml);
+                    e.stopPropagation();
+                });
+
                 if (twoLayersAtOnceEnabled) {
                     disableInputs();
 

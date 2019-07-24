@@ -15,7 +15,7 @@ router.all('/api/sql/:db', function (req, response) {
     var db = req.params.db,
         q = req.body.q || req.query.q,
         srs = req.body.srs || req.query.srs,
-        lifetime = req.body.lifetime || req.query.lifetime,
+        lifetime = req.body.lifetime || req.query.lifetime || "0",
         client_encoding = req.body.client_encoding || req.query.client_encoding,
         base64 = req.body.base64 || req.query.base64,
         format = req.body.format || req.query.format,
@@ -32,7 +32,7 @@ router.all('/api/sql/:db', function (req, response) {
             return v.toString(16);
         });
 
-    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
+    var postData = "q=" + (base64 === "true" ? encodeURIComponent(q) : encodeURIComponent(q)) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
         options;
 
     // Check if user is a sub user
@@ -75,15 +75,22 @@ router.all('/api/sql/:db', function (req, response) {
         }
     }
 
-    if (!store) {
-        response.writeHead(200, headers);
-    }
+    // if (!store) {
+    //     //response.writeHead(200, headers);
+    // }
 
     rem = request(options);
 
     if (store) {
         writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
     }
+
+    rem.on('response', function(res) {
+        console.log(res.statusCode);
+        if (!store) {
+            response.writeHead(res.statusCode, headers);
+        }
+    });
 
     rem.on('data', function (chunk) {
         if (store) {

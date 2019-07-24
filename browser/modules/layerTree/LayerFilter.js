@@ -15,18 +15,19 @@ import {
     EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
-import { StringControl, NumberControl, BooleanControl, DateControl } from './controls';
+import { StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl } from './controls';
 
 /**
  * Layer filter component
  */
 const SELECT_WIDTH = `50px`;
 
-const STRING_TYPES = [`string`, `character varying`];
+const STRING_TYPES = [`text`, `string`, `character varying`];
 const NUMBER_TYPES = [`integer`, `double precision`];
 const DATE_TYPES = [`date`];
+const DATETIME_TYPES = [`timestamp with time zone`];
 const BOOLEAN_TYPES = [`boolean`];
-const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
+const ALLOWED_TYPES_IN_FILTER = [].concat(STRING_TYPES).concat(NUMBER_TYPES).concat(DATETIME_TYPES).concat(DATE_TYPES).concat(BOOLEAN_TYPES).filter((v, i, a) => a.indexOf(v) === i);
 
 const PREDEFINED_TAB = 0;
 const ARBITRARY_TAB = 1;
@@ -68,10 +69,27 @@ class VectorLayerFilter extends React.Component {
         }
 
         let arbitraryFilters = props.arbitraryFilters || {};
-
-        if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = MATCHES[0];
+        if (`match` in arbitraryFilters === false) arbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
         if (`columns` in arbitraryFilters === false) arbitraryFilters[`columns`] = new Array();
-        if (arbitraryFilters.columns.length === 0) {
+
+        if (this.props.presetFilters.length > 0) {
+            this.props.presetFilters.map(item => {
+                let filterIsAlreadySet = false;
+                arbitraryFilters.columns.map(alreadyExistingFilterItem => {
+                    if (alreadyExistingFilterItem.fieldname === item.field) {
+                        filterIsAlreadySet = true;
+                    }
+                });
+
+                if (filterIsAlreadySet === false) {
+                    arbitraryFilters.columns.push({
+                        fieldname: item.field,
+                        expression: item.operator,
+                        value: ``
+                    });
+                }
+            });
+        } else if (arbitraryFilters.columns.length === 0) {
             arbitraryFilters.columns.push(DUMMY_RULE);
         }
 
@@ -126,7 +144,7 @@ class VectorLayerFilter extends React.Component {
         let expressionSet = EXPRESSIONS_FOR_STRINGS;                
         if (NUMBER_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_NUMBERS;
-        } else if (DATE_TYPES.indexOf(type) !== -1) {
+        } else if (DATE_TYPES.indexOf(type) !== -1 || DATETIME_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_DATES;
         } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
             expressionSet = EXPRESSIONS_FOR_BOOLEANS;
@@ -145,6 +163,12 @@ class VectorLayerFilter extends React.Component {
                 let expressionSet = this.getExpressionSetForType(type);
                 if (expressionSet.indexOf(filters.columns[columnIndex].expression) === -1) {
                     filters.columns[columnIndex].expression = expressionSet[0];
+                }
+
+                if (this.state.layer.fields[key].restriction) {
+                    filters.columns[columnIndex].restriction = this.state.layer.fields[key].restriction;
+                } else {
+                    filters.columns[columnIndex].restriction = false;
                 }
             }
         }
@@ -222,7 +246,7 @@ class VectorLayerFilter extends React.Component {
     renderExpressionControl(column, index, layerKey) {
         let expressionControl = false;
         if (column.fieldname === DUMMY_RULE.fieldname || column.expression === DUMMY_RULE.expression) {
-            expressionControl = (<p className="text-secondary">{__(`Select field`)}</p>);
+            expressionControl = (<p className="text-secondary" style={{paddingTop: `12px`}}>{__(`Select field`)}</p>);
         } else {
             let expressionOptions = [];
             for (let key in this.state.layer.fields) {
@@ -313,13 +337,18 @@ class VectorLayerFilter extends React.Component {
             let control = false;
             if (column.fieldname !== DUMMY_RULE.fieldname) {
                 let id = (`expression_input_` + layerKey + `_` + index);
-                const changeHandler = (value) => { this.changeValue(value, index) };
+                const changeHandler = (value) => {
+                    this.changeValue(value, index);
+                };
+
                 if (STRING_TYPES.indexOf(type) !== -1) {
-                    control = (<StringControl id={id} value={column.value} onChange={changeHandler}/>);
+                    control = (<StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
-                    control = (<NumberControl id={id} value={column.value} onChange={changeHandler}/>);
+                    control = (<NumberControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (DATE_TYPES.indexOf(type) !== -1) {
                     control = (<DateControl id={id} value={column.value} onChange={changeHandler}/>);
+                } else if (DATETIME_TYPES.indexOf(type) !== -1) {
+                    control = (<DatetimeControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else if (BOOLEAN_TYPES.indexOf(type) !== -1) {
                     control = (<BooleanControl id={id} value={column.value} onChange={changeHandler}/>);
                 } else {
@@ -327,10 +356,10 @@ class VectorLayerFilter extends React.Component {
                 }
             }
 
-            let divStyle = { display: `inline-block`, paddingRight: `10px` };
+            let divStyle = { paddingRight: `10px` };
             let controlDivStyle = divStyle;
             controlDivStyle.maxWidth = `160px`;
-            filterControls.push(<div key={`column_` + index}>
+            filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
                 <div className="form-group" style={divStyle}>
                     <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
                         <i className="fa fa-minus"></i>
@@ -339,7 +368,7 @@ class VectorLayerFilter extends React.Component {
                 <div className="form-group" style={divStyle}>{fieldControl}</div>
                 <div className="form-group" style={divStyle}>{expressionControl}</div>
                 <div className="form-group" style={controlDivStyle}>{control}</div>
-                <div style={divStyle}>{ruleValidityIndicator}</div>
+                <div style={{paddingRight: `10px`, paddingTop: `16px`}}>{ruleValidityIndicator}</div>
             </div>);
         });
 
@@ -347,7 +376,34 @@ class VectorLayerFilter extends React.Component {
          * Builds the arbitrary filters tab
          */
         const buildArbitraryTab = () => {
+
+            /**
+             * Build notification about the existing children
+             */
+            const childrenInfo = () => {
+                let result = false;
+                if (this.state.layer.children && Array.isArray(this.state.layer.children)) {
+                    let records = [];
+                    this.state.layer.children.map((item, index) => {
+                        if (item.rel && item.parent_column && item.child_column) {
+                            records.push(<li key={`child_record_${index}`} style={{fontFamily: `"Courier New", Courier, monospace`}}>
+                                {layerKey}.{item.parent_column} - {item.rel}.{item.child_column}
+                            </li>);
+                        }
+                    });
+
+                    result = (<div style={{borderBottom: `1px solid #c4c4c4`, paddingBottom: `10px`, marginBottom: `6px`}}>
+                        <p>{__(`Layer has following children`)}:</p>
+                        <ul>{records}</ul>
+                    </div>);
+                }
+
+                return result;
+            };
+
+            let childrenInfoMarkup = childrenInfo();
             return (<div className="js-arbitrary-filters">
+                {childrenInfoMarkup}
                 <div className="form-group">
                     <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                 </div>
@@ -428,6 +484,8 @@ class VectorLayerFilter extends React.Component {
 
 VectorLayerFilter.propTypes = {
     layer: PropTypes.object.isRequired,
+    layerMeta: PropTypes.any.isRequired,
+    presetFilters: PropTypes.array,
     predefinedFilters: PropTypes.object.isRequired,
     disabledPredefinedFilters: PropTypes.array.isRequired,
     arbitraryFilters: PropTypes.object.isRequired,
