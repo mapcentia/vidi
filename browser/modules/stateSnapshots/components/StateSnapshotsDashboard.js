@@ -299,6 +299,30 @@ class StateSnapshotsDashboard extends React.Component {
      * @returns {XML}
      */
     render() {
+        let titles = {
+            apply: __(`Apply state snapshot`),
+            remove: __(`Delete state snapshot`),
+            refresh: __(`Update state snapshot with current application state`),
+            seize: __(`Add local state snapshot to user's ones`),
+            localItems: __(`Local snapshots`),
+            noLocalItems: __(`No local snapshots`),
+            userItems: __(`User snapshots`),
+            noUserItems: __(`No user snapshots`),
+        };
+
+        if (this.props.customSetOfTitles) {
+            titles = {
+                apply: __(`Start project`),
+                remove: __(`Delete project`),
+                refresh: __(`Refresh project`),
+                seize: __(`Seize project`),
+                localItems: __(`Local projects`),
+                noLocalItems: __(`No local projects`),
+                userItems: __(`User projects`),
+                noUserItems: __(`No user projects`),
+            };
+        }
+
         let snapshotIdStyle = {
             fontFamily: `"Courier New", Courier, "Lucida Sans Typewriter", "Lucida Typewriter", monospace`,
             marginRight: `10px`
@@ -320,7 +344,7 @@ class StateSnapshotsDashboard extends React.Component {
             let importButton = false;
             if (local && this.state.authenticated) {
                 importButton = (<button type="button" className="btn btn-xs btn-primary" onClick={() => this.seizeSnapshot(item)} style={buttonStyle}>
-                    <i title={__(`Add local state snapshot to user's ones`)} className="material-icons">person_add</i>
+                    <i title={titles.seize} className="material-icons">person_add</i>
                 </button>);
             }
 
@@ -366,7 +390,7 @@ class StateSnapshotsDashboard extends React.Component {
                 type="button"
                 className="btn btn-xs btn-primary"
                 onClick={() => this.enableUpdateSnapshotForm(item.id)}
-                title={__(`Update state snapshot with current application state`)}
+                title={titles.refresh}
                 style={buttonStyle}>
                 <i className="material-icons">autorenew</i>
             </button>);
@@ -392,7 +416,7 @@ class StateSnapshotsDashboard extends React.Component {
                 className="btn btn-xs btn-primary"
                 onClick={() => { this.applySnapshot(item); }}
                 disabled={this.state.stateApplyingIsBlocked}
-                title={__(`Apply state snapshot`)}
+                title={titles.apply}
                 style={buttonStyle}>
                 <i className="material-icons">play_arrow</i></button>);
 
@@ -416,7 +440,7 @@ class StateSnapshotsDashboard extends React.Component {
                                 type="button"
                                 className="btn btn-xs btn-primary"
                                 onClick={() => this.deleteSnapshot(item.id)}
-                                title={__(`Delete state snapshot`)}
+                                title={titles.remove}
                                 style={buttonStyle}>
                                 <i className="material-icons">delete</i>
                             </button>
@@ -447,7 +471,7 @@ class StateSnapshotsDashboard extends React.Component {
         let browserOwnerSnapshots = false;
         if (!this.state.loading) {
             browserOwnerSnapshots = (<div style={{textAlign: `center`}}>
-                {__(`No local snapshots`)}
+                {titles.noLocalItems}
             </div>);
         }
 
@@ -462,7 +486,7 @@ class StateSnapshotsDashboard extends React.Component {
         }
 
         let userOwnerSnapshots = (<div style={{textAlign: `center`}}>
-            {__(`No user snapshots`)}
+            {titles.noUserItems}
         </div>);
 
         if (this.state.userOwnerSnapshots && this.state.userOwnerSnapshots.length > 0) {
@@ -479,14 +503,14 @@ class StateSnapshotsDashboard extends React.Component {
                 if (this.props.showStateSnapshotTypes) {
                     createNewSnapshotControl = (<div>
                         <h4>
-                            {__(`User snapshots`)}
+                            {titles.userItems}
                         </h4>
                     </div>);
                 }
             } else {
                 createNewSnapshotControl = (<div>
                     <h4>
-                        {__(`User snapshots`)}
+                        {titles.userItems}
                         <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title) }} type="userOwned"/>
                     </h4>
                 </div>);
@@ -509,12 +533,12 @@ class StateSnapshotsDashboard extends React.Component {
         if (this.props.readOnly) {
             if (this.props.showStateSnapshotTypes) {
                 createNewSnapshotControl = (<h4>
-                    {__(`Local snapshots`)} 
+                    {titles.localItems} 
                 </h4>);
             }
         } else {
             createNewSnapshotControl = (<h4>
-                {__(`Local snapshots`)} 
+                {titles.localItems} 
                 <TitleFieldComponent onAdd={(title) => { this.createSnapshot(title, true) }} type="browserOwned"/>
                 <button className="btn btn-xs btn-primary" onClick={this.seizeAllSnapshots} disabled={importAllIsDisabled} style={buttonStyle}>
                     <i className="material-icons">person_add</i>
@@ -540,6 +564,7 @@ class StateSnapshotsDashboard extends React.Component {
 StateSnapshotsDashboard.defaultProps = {
     readOnly: false,
     playOnly: false,
+    customSetOfTitles: false,
     showStateSnapshotTypes: true,
 };
 
