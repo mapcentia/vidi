@@ -17,6 +17,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {};
 
+const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
 require('snackbarjs');
@@ -158,9 +159,6 @@ module.exports = {
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                    
-                                    console.log(`### bounds`, layer.getBounds());
-                                    
                                     cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
                                     setTimeout(() => {
                                         console.log(`Query filter parameter was applied`);
@@ -2138,7 +2136,7 @@ module.exports = {
      */
     createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
         let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}`).replace(/=/g, "");
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
 
         $(parentNode).append(markup);
@@ -2162,9 +2160,13 @@ module.exports = {
             }
         });
 
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`);
+        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        if ($(container).length !== 1) {
+            throw new Error(`Error while locating parent node for group children`);
+        }
+
         subgroup.children.map(child => {
             if (child.type === GROUP_CHILD_TYPE_LAYER) {
                 let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
