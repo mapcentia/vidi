@@ -2014,6 +2014,10 @@ module.exports = {
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
+                let virtualLayerTreeNode = $('<div></div>'); 
+
+
+
                 // Add layers and subgroups
                 let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
@@ -2024,10 +2028,10 @@ module.exports = {
                             numberOfActiveLayers++;
                         }
 
-                        _self.createLayerRecord(localItem.layer, $("#collapse" + base64GroupName), layerIsActive, activeLayerName, false, isVirtualGroup);
+                        _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                         numberOfAddedLayers++;
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $("#collapse" + base64GroupName), 0);
+                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
                         numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
                         numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
                     } else {
@@ -2035,6 +2039,8 @@ module.exports = {
                         throw new Error(`Invalid sorting element type`);
                     }
                 }
+
+                $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
 
                 $("#collapse" + base64GroupName).sortable({
                     axis: 'y',
@@ -2162,7 +2168,7 @@ module.exports = {
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
         if ($(container).length !== 1) {
             throw new Error(`Error while locating parent node for group children`);
         }
