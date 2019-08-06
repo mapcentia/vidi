@@ -299,7 +299,7 @@ module.exports = {
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      * @param {Boolean} isVirtual        Specifies if layer is virtual
      */
-    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, container = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
@@ -307,7 +307,10 @@ module.exports = {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
 
-        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if (!container) {
+            container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        }
+
         if (container.length === 1) {
             if ($(container).is(`:visible`) || forced) {
                 let parsedMeta = meta.parseLayerMeta(layerKey);
@@ -2016,8 +2019,6 @@ module.exports = {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
                 let virtualLayerTreeNode = $('<div></div>'); 
 
-
-
                 // Add layers and subgroups
                 let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
@@ -2040,9 +2041,7 @@ module.exports = {
                     }
                 }
 
-                $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
-
-                $("#collapse" + base64GroupName).sortable({
+                $(virtualLayerTreeNode).sortable({
                     axis: 'y',
                     handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
@@ -2051,6 +2050,9 @@ module.exports = {
                         layers.reorderLayers();
                     }
                 });
+
+                // Performing single DOM manipulation to avoid multiple reflows
+                $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
 
                 // Remove the group if empty
                 if (numberOfAddedLayers === 0) {
@@ -2091,7 +2093,9 @@ module.exports = {
                     });                    
                 }
 
-                applyControlRequests(layersAndSubgroupsForCurrentGroup);
+                //setTimeout(() => {
+                    applyControlRequests(layersAndSubgroupsForCurrentGroup);
+                //}, 100);
             }
         });
     },
@@ -2168,7 +2172,8 @@ module.exports = {
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        //let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
         if ($(container).length !== 1) {
             throw new Error(`Error while locating parent node for group children`);
         }
@@ -2368,7 +2373,7 @@ module.exports = {
 
             $(parentNode).append(layerControlRecord);
 
-            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, false, isVirtual, parentNode);
         }
     },
 
