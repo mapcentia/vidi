@@ -308,12 +308,13 @@ module.exports = {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
 
-        if (!container) {
-            container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
-        }
-
+        if (!container) container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            if ($(container).is(`:visible`) || forced) {
+            if (!$(container).attr(`data-gc2-layer-key`)) {
+                console.error(`Invalid container was provided`);
+            }
+
+            if ($(container).is(`:visible`) || forced) {               
                 let parsedMeta = meta.parseLayerMeta(layerKey);
 
                 const hideFilters = () => {
@@ -363,6 +364,8 @@ module.exports = {
                     el.prop('checked', layerIsEnabled);
                 }
 
+                console.log(`### setLayerState`, desiredSetupType, layerKey, layerIsEnabled);
+
                 if (desiredSetupType === LAYER.VECTOR) {
                     // Load strategy and filters should be kept opened after setLayerState()
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
@@ -385,6 +388,9 @@ module.exports = {
                     }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                     // Opacity and filters should be kept opened after setLayerState()
+
+                    console.log(`### here`, container, $(container).attr(`data-last-layer-type`));
+
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                         hideLoadStrategy();
                         hideTableView();
@@ -2359,7 +2365,7 @@ module.exports = {
 
             $(parentNode).append(layerControlRecord);
 
-            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, false, isVirtual, parentNode);
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, true, isVirtual, layerControlRecord);
         }
     },
 
@@ -2387,7 +2393,6 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
-
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
