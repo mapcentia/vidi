@@ -298,6 +298,7 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * @param {DOMNode} container        Optional container node
      */
     setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, container = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
@@ -2020,21 +2021,13 @@ module.exports = {
                 let virtualLayerTreeNode = $('<div></div>'); 
 
                 // Add layers and subgroups
-                let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
                         let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
-                        if (layerIsActive) {
-                            numberOfActiveLayers++;
-                        }
-
                         _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
-                        numberOfAddedLayers++;
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
-                        numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                        numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+                        _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
                     } else {
                         console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
@@ -2053,11 +2046,6 @@ module.exports = {
 
                 // Performing single DOM manipulation to avoid multiple reflows
                 $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
-
-                // Remove the group if empty
-                if (numberOfAddedLayers === 0) {
-                    $("#layer-panel-" + base64GroupName).remove();
-                }
 
                 const setAllControlsProcessors = (type) => {
                     $(`.js-set-all-layer-to-be-${type}`).off();
@@ -2093,9 +2081,7 @@ module.exports = {
                     });                    
                 }
 
-                //setTimeout(() => {
-                    applyControlRequests(layersAndSubgroupsForCurrentGroup);
-                //}, 100);
+                applyControlRequests(layersAndSubgroupsForCurrentGroup);
             }
         });
     },
@@ -2144,8 +2130,7 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
-        let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
         let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
 
@@ -2160,7 +2145,12 @@ module.exports = {
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            // Checking if the subgroup was already drawn
             let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`).first();
+            if (subgroupRootElement.find(`.js-subgroup-children`).children().length === 0) {
+                renderSubgroupChildren();
+            }
+
             if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
                 subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().hide();
@@ -2172,27 +2162,28 @@ module.exports = {
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        //let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
-        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
         if ($(container).length !== 1) {
             throw new Error(`Error while locating parent node for group children`);
         }
 
-        subgroup.children.map(child => {
-            if (child.type === GROUP_CHILD_TYPE_LAYER) {
-                let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
-                if (layerIsActive) numberOfActiveLayers++;
+        const renderSubgroupChildren = () => {
+            subgroup.children.map(child => {
+                if (child.type === GROUP_CHILD_TYPE_LAYER) {
+                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                    _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
+                } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
+                    _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);
+                } else {
+                    throw new Error(`Invalid layer group`);
+                }        
+            });
+        }
 
-                _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
-                numberOfAddedLayers++;
-            } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
-                let {activeLayers, addedLayers} = _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, 1);
-                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
-            } else {
-                throw new Error(`Invalid layer group`);
-            }        
-        });
+        let newLevel = level + 1;
+        if (initiallyClosed === false) {
+            renderSubgroupChildren();
+        }
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
@@ -2203,11 +2194,6 @@ module.exports = {
                 layers.reorderLayers();
             }
         });
-
-        return {
-            addedLayers: numberOfAddedLayers,
-            activeLayers: numberOfActiveLayers
-        };
     },
 
     /**

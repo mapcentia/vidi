@@ -61,7 +61,7 @@ const calculateOrder = () => {
         let children = [];
         let panelWasInitialized = true;
 
-        if ($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().length > 0) {
+        if ($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first().children().length > 0) {
             const processLayerRecord = (layerElement) => {
                 let layerKey = $(layerElement).data(`gc2-layer-key`);
                 let splitLayerKey = layerKey.split('.');
@@ -94,7 +94,7 @@ const calculateOrder = () => {
                 return children;
             };
 
-            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`));
+            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first());
         } else {
             panelWasInitialized = false;
         }
@@ -110,6 +110,8 @@ const calculateOrder = () => {
             throw new Error(`Unable to decode the layer group identifier (${id})`);
         }
     });
+
+    console.log(`### layerTreeOrder`, layerTreeOrder);
 
     return layerTreeOrder;
 };
