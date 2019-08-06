@@ -41,17 +41,17 @@ module.exports = {
     // Schemata.
     // Specifies schemas that should be loaded.
     // ===========
-    "schemata": [
-        "my_schema",
-        "my_schema.my_layer",
-        "tag:my_tag"
-    ],
+    //"schemata": [
+    //    "my_schema",
+    //    "my_schema.my_layer",
+    //    "tag:my_tag"
+    //],
 
     // ===============
     // State snapshot.
     // Overrides the schemata setting and specifies the schema to load.
     // ===============
-    "snapshot": "state_snapshot_IDENTIFIER",
+    //"snapshot": "state_snapshot_IDENTIFIER",
 
     // ===============================================================
     // Startup modal.
@@ -293,7 +293,8 @@ module.exports = {
     // =================================
 
     "searchConfig": {
-        "komkode": ["851", "151"] // Example of config for danish search
+        "komkode": ["851", "151"], // Example of config for danish search
+        "google": {"apiKey": "GOOGLE_MAPS_API_KEY"}
     },
 
     // =========================================================

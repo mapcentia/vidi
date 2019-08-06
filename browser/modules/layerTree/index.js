@@ -17,6 +17,7 @@ var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEv
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {};
 
+const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
 require('snackbarjs');
@@ -158,9 +159,6 @@ module.exports = {
                             for (let key in cloud.get().map._layers) {
                                 let layer = cloud.get().map._layers[key];
                                 if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
-                                    
-                                    console.log(`### bounds`, layer.getBounds());
-                                    
                                     cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
                                     setTimeout(() => {
                                         console.log(`Query filter parameter was applied`);
@@ -300,8 +298,9 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * @param {DOMNode} container        Optional container node
      */
-    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, container = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
@@ -309,9 +308,13 @@ module.exports = {
             _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
         }
 
-        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if (!container) container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
         if (container.length === 1) {
-            if ($(container).is(`:visible`) || forced) {
+            if (!$(container).attr(`data-gc2-layer-key`)) {
+                console.error(`Invalid container was provided`);
+            }
+
+            if ($(container).is(`:visible`) || forced) {               
                 let parsedMeta = meta.parseLayerMeta(layerKey);
 
                 const hideFilters = () => {
@@ -2016,29 +2019,23 @@ module.exports = {
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
+                let virtualLayerTreeNode = $('<div></div>'); 
+
                 // Add layers and subgroups
-                let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
                         let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
-                        if (layerIsActive) {
-                            numberOfActiveLayers++;
-                        }
-
-                        _self.createLayerRecord(localItem.layer, $("#collapse" + base64GroupName), layerIsActive, activeLayerName, false, isVirtualGroup);
-                        numberOfAddedLayers++;
+                        _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $("#collapse" + base64GroupName), 0);
-                        numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                        numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+                        _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
                     } else {
                         console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
                     }
                 }
 
-                $("#collapse" + base64GroupName).sortable({
+                $(virtualLayerTreeNode).sortable({
                     axis: 'y',
                     handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
@@ -2048,10 +2045,8 @@ module.exports = {
                     }
                 });
 
-                // Remove the group if empty
-                if (numberOfAddedLayers === 0) {
-                    $("#layer-panel-" + base64GroupName).remove();
-                }
+                // Performing single DOM manipulation to avoid multiple reflows
+                $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
 
                 const setAllControlsProcessors = (type) => {
                     $(`.js-set-all-layer-to-be-${type}`).off();
@@ -2136,9 +2131,8 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
-        let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}`).replace(/=/g, "");
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
 
         $(parentNode).append(markup);
@@ -2152,7 +2146,12 @@ module.exports = {
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            // Checking if the subgroup was already drawn
             let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`).first();
+            if (subgroupRootElement.find(`.js-subgroup-children`).children().length === 0) {
+                renderSubgroupChildren();
+            }
+
             if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
                 subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().hide();
@@ -2162,24 +2161,30 @@ module.exports = {
             }
         });
 
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`);
-        subgroup.children.map(child => {
-            if (child.type === GROUP_CHILD_TYPE_LAYER) {
-                let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
-                if (layerIsActive) numberOfActiveLayers++;
+        let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        if ($(container).length !== 1) {
+            throw new Error(`Error while locating parent node for group children`);
+        }
 
-                _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
-                numberOfAddedLayers++;
-            } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
-                let {activeLayers, addedLayers} = _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, 1);
-                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
-            } else {
-                throw new Error(`Invalid layer group`);
-            }        
-        });
+        const renderSubgroupChildren = () => {
+            subgroup.children.map(child => {
+                if (child.type === GROUP_CHILD_TYPE_LAYER) {
+                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                    _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
+                } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
+                    _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);
+                } else {
+                    throw new Error(`Invalid layer group`);
+                }        
+            });
+        }
+
+        let newLevel = level + 1;
+        if (initiallyClosed === false) {
+            renderSubgroupChildren();
+        }
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
@@ -2190,11 +2195,6 @@ module.exports = {
                 layers.reorderLayers();
             }
         });
-
-        return {
-            addedLayers: numberOfAddedLayers,
-            activeLayers: numberOfActiveLayers
-        };
     },
 
     /**
@@ -2360,7 +2360,7 @@ module.exports = {
 
             $(parentNode).append(layerControlRecord);
 
-            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, true, isVirtual, layerControlRecord);
         }
     },
 
@@ -2388,7 +2388,6 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
-
         let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
