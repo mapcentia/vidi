@@ -8,6 +8,7 @@ before_script:
   - cp public/js/lib/bootstrap-material-design/less/_variables.less config/_variables.less
   - cd ./extensions/keplergl/browser
   - rm ./package-lock.json
+  - ls
   - npm install
   - cd ../../..
   - cd public/js/lib/bootstrap-material-design
