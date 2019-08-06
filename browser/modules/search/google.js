@@ -26,13 +26,16 @@ module.exports = {
         return this;
     },
     init: function () {
-        if (window.googleApiKey) {
+        let config = window.vidiConfig;
+        const key = window.googleApiKey ? window.googleApiKey : (config.searchConfig.google && config.searchConfig.google.apiKey ? config.searchConfig.google.apiKey : false);
+        if (key) {
             // Load Google Maps API and make sure its not loaded more than once
             if (typeof window.GoogleMapsDirty === "undefined" && !(typeof google !== "undefined" && typeof google.maps !== "undefined")) {
                 window.GoogleMapsDirty = true;
-                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=" + window.googleApiKey);
+                jQuery.getScript("https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false&libraries=places&key=" + key);
                 // Google Maps API is loaded
             }
+
             (function poll() {
                 if (typeof google !== "undefined" && typeof google.maps !== "undefined" && typeof google.maps.Map !== "undefined") {
                     if (document.getElementById('custom-search')) {
@@ -67,7 +70,7 @@ module.exports = {
                 }
             }());
         } else {
-            console.warn(`Google Maps API key is required in search module`);
+            console.warn(`Google Maps API key is required in search module, please specify the valid key in configuration or disable the extension to hide this message`);
         }
     }
 };

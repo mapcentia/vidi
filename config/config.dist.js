@@ -293,7 +293,8 @@ module.exports = {
     // =================================
 
     "searchConfig": {
-        "komkode": ["851", "151"] // Example of config for danish search
+        "komkode": ["851", "151"], // Example of config for danish search
+        "google": {"apiKey": "GOOGLE_MAPS_API_KEY"}
     },
 
     // =========================================================
