@@ -364,8 +364,6 @@ module.exports = {
                     el.prop('checked', layerIsEnabled);
                 }
 
-                console.log(`### setLayerState`, desiredSetupType, layerKey, layerIsEnabled);
-
                 if (desiredSetupType === LAYER.VECTOR) {
                     // Load strategy and filters should be kept opened after setLayerState()
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
@@ -388,9 +386,6 @@ module.exports = {
                     }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                     // Opacity and filters should be kept opened after setLayerState()
-
-                    console.log(`### here`, container, $(container).attr(`data-last-layer-type`));
-
                     if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
                         hideLoadStrategy();
                         hideTableView();
