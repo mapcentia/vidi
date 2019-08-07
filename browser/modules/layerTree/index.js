@@ -2538,25 +2538,29 @@ module.exports = {
 
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(
-                            <LayerFilter
-                                layer={layer}
-                                layerMeta={meta.parseLayerMeta(layerKey)}
-                                presetFilters={presetFilters}
-                                predefinedFilters={localPredefinedFilters}
-                                disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
-                                arbitraryFilters={localArbitraryfilters}
-                                onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
-                                onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
-                            />, document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-filters').hide(0);
+                    setTimeout(() => {
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(
+                                <LayerFilter
+                                    layer={layer}
+                                    layerMeta={meta.parseLayerMeta(layerKey)}
+                                    presetFilters={presetFilters}
+                                    predefinedFilters={localPredefinedFilters}
+                                    disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
+                                    arbitraryFilters={localArbitraryfilters}
+                                    onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
+                                    onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                />, document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
-                        $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
-                            $(layerContainer).find('.js-layer-settings-filters').toggle();
-                        });
-                    }
+                            $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                                _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
+                                $(layerContainer).find('.js-layer-settings-filters').toggle();
+                            });
+                        } else {
+                            console.error(`Unable to find the filter control container`);
+                        }
+                    }, 10);
                 }
 
                 if (isVectorLayer) {
@@ -2568,18 +2572,22 @@ module.exports = {
 
                         let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
                         $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                        if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(<LoadStrategyToggle
-                                    layerKey={layerKey}
-                                    initialValue={value}
-                                    onChange={_self.onChangeLoadStrategyHandler}/>,
-                                document.getElementById(componentContainerId));
-                            $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                            $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                                _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                                $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                            });
-                        }
+                        setTimeout(() => {
+                            if (document.getElementById(componentContainerId)) {
+                                ReactDOM.render(<LoadStrategyToggle
+                                        layerKey={layerKey}
+                                        initialValue={value}
+                                        onChange={_self.onChangeLoadStrategyHandler}/>,
+                                    document.getElementById(componentContainerId));
+                                $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                                $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                                    _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                                    $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                                });
+                            } else {
+                                console.error(`Unable to find the load strategy control container`);
+                            }
+                        }, 10);
                     }
 
                     // Table view
