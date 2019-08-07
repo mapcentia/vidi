@@ -2195,7 +2195,7 @@ module.exports = {
             renderSubgroupChildren();
         }
 
-        $(`#` + base64SubgroupName).sortable({
+        $(parentNode).find(`.js-subgroup-children`).sortable({
             axis: 'y',
             handle: `.layer-move-vert-subgroup`,
             stop: (event, ui) => {
