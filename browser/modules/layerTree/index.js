@@ -859,9 +859,6 @@ module.exports = {
 
                             if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
                             const proceedWithBuilding = () => {
-
-                                console.log(`### layerTreeOrder`, order);
-
                                 moduleState.layerTreeOrder = order;
                                 if (moduleState.editingIsEnabled) {
                                     let toggleOfllineOnlineMode = _self._setupToggleOfflineModeControl();
