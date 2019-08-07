@@ -175,6 +175,9 @@ module.exports = {
 
     reorderLayers: () => {
         let order = layerTree.getLatestLayersOrder();
+
+console.log(`### order`, order);
+
         let layers = _self.getMapLayers();
         if (order) {
             let indexCounter = 100;
