@@ -11,7 +11,10 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var FileStore = require('session-file-store')(session);
+var fileStore = require('session-file-store')(session);
+var redis = require("redis");
+//var redisStore = require('connect-redis')(session);
+//var client = redis.createClient();
 var cors = require('cors');
 var config = require('./config/config.js');
 
@@ -33,9 +36,10 @@ app.use(cookieParser());
 app.set('trust proxy', 1); // trust first proxy
 
 app.use(session({
-    store: new FileStore({
+    store: new fileStore({
         ttl: 86400,
-        logFn: function () {},
+        logFn: function () {
+        },
         path: "/tmp/sessions"
     }),
     secret: 'keyboard cat',
@@ -44,6 +48,24 @@ app.use(session({
     name: "connect.gc2",
     cookie: {secure: false}
 }));
+
+/*
+app.use(session({
+    // create new redis store.
+    store: new redisStore({
+        host: '172.18.0.4',
+        port: 6379,
+        client: client,
+        ttl: 260
+    }),
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    name: "connect.gc2",
+    cookie: {secure: false}
+
+}));
+*/
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
