@@ -94,12 +94,13 @@ build/Release
 # https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
 node_modules
 
+# Templates should be generated every time
+public/js/templates.js
+
 # Created by .ignore support plugin (hsz.mobi)
 
 config/config.js
 config/_variables.less
-
-
 
 /public/css/build/all.min.css
 /public/js/bundle.js
@@ -112,3 +113,6 @@ config/_variables.less
 /public/css/extensions/all.min.css
 /public/css/styles.css
 /public/css/styles.min.css
+
+# Environment variables
+.env

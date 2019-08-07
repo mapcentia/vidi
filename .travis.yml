@@ -7,10 +7,11 @@ before_script:
   - cp config/config.travis.js config/config.js
   - cp public/js/lib/bootstrap-material-design/less/_variables.less config/_variables.less
   - cd ./extensions/keplergl/browser
-  - npm install
+  - echo $PATH
+  - ./../../../node_modules/.bin/npm install
   - cd ../../..
   - cd public/js/lib/bootstrap-material-design
-  - npm install
+  - ./../../../../node_modules/.bin/npm install
   - cd ../../../..
   - grunt production
 language: node_js

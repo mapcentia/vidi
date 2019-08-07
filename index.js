@@ -4,18 +4,23 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
-var express = require('express');
 var path = require('path');
+require('dotenv').config({path: path.join(__dirname, ".env")});
+
+var express = require('express');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
-var FileStore = require('session-file-store')(session);
+var fileStore = require('session-file-store')(session);
+var redis = require("redis");
+//var redisStore = require('connect-redis')(session);
+//var client = redis.createClient();
 var cors = require('cors');
 var config = require('./config/config.js');
 
 var app = express();
 app.use(cors());
-
+app.use(cookieParser());
 app.use(bodyParser.json({
         limit: '50mb'
     })
@@ -31,9 +36,10 @@ app.use(cookieParser());
 app.set('trust proxy', 1); // trust first proxy
 
 app.use(session({
-    store: new FileStore({
+    store: new fileStore({
         ttl: 86400,
-        logFn: function () {},
+        logFn: function () {
+        },
         path: "/tmp/sessions"
     }),
     secret: 'keyboard cat',
@@ -42,6 +48,24 @@ app.use(session({
     name: "connect.gc2",
     cookie: {secure: false}
 }));
+
+/*
+app.use(session({
+    // create new redis store.
+    store: new redisStore({
+        host: '172.18.0.4',
+        port: 6379,
+        client: client,
+        ttl: 260
+    }),
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: false,
+    name: "connect.gc2",
+    cookie: {secure: false}
+
+}));
+*/
 
 app.use('/app/:db/:schema?', express.static(path.join(__dirname, 'public'), {maxage: '60s'}));
 
@@ -62,8 +86,9 @@ app.use(require('./extensions'));
 
 app.enable('trust proxy');
 
-var server = app.listen(3000, function () {
-    console.log('Listening on port 3000...');
+const port = process.env.PORT ? process.env.PORT : 3000;
+var server = app.listen(port, function () {
+    console.log(`Listening on port ${port}...`);
 });
 
 global.io = require('socket.io')(server);

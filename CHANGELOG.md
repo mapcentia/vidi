@@ -8,6 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Embed script for easy embedding of Vidi in web pages using a snap-shot token.
 - A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
+- Download drawings as GeoJSON
 
 ### Changed
 - Layers which have been switch off, will not be removed from legend.

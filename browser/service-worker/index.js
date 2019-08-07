@@ -92,6 +92,9 @@ let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
+    requested: '/api/sql/nocache/'
+},{
+    regExp: true,
     requested: 'bam.nr-data.net'
 }, {
     regExp: true,
@@ -114,6 +117,12 @@ let urlsIgnoredForCaching = [{
 },{
     regExp: true,
     requested: '/api/v2/configuration/'
+},{
+    regExp: true,
+    requested: 'https://watsonc.mapcentia.com/api/v2/'
+},{
+    regExp: true,
+    requested: 'https://watsonc.mapcentia.com/api/v1/'
 }];
 
 /**
@@ -332,6 +341,12 @@ const normalizeTheURLForFetch = (event) => {
                             }
 
                             let matches = decodedQuery.match(/\s+\w*\.\w*\s*/);
+
+                            //
+                            if (matches === null) {
+                                resolve(cleanedRequestURL);
+                            }
+
                             if (matches.length === 1) {
                                 let tableName = matches[0].trim().split(`.`);
 

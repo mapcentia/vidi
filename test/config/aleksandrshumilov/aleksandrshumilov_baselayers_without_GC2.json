@@ -1,0 +1,8 @@
+{
+	"baseLayers": [{
+		"id": "osm",
+		"name": "OSM"
+	}],
+	"brandName": "Test",
+	"aboutBox": "Test"
+}

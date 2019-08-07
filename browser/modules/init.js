@@ -64,6 +64,7 @@ module.exports = {
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
                 window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
+                window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
@@ -297,9 +298,9 @@ module.exports = {
          * Fetch meta > initialize settings > create layer tree >
          * initialize state > load layers > initialize extensions > finish
          */
-        modules.meta.init().then(() => {
-            return modules.setting.init();
-        }, (error) => {
+        modules.meta.init().then((schemataStr) => {
+            return modules.setting.init(schemataStr);
+        }).catch((error) => {
             console.log(error); // Stacktrace
             //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
