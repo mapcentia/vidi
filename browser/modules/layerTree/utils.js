@@ -59,8 +59,6 @@ const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
 const calculateOrder = (currentOrder) => {
     let layerTreeOrder = [];
 
-console.log(`### currentOrder`, currentOrder);
-
     $(`[id^="layer-panel-"]`).each((index, element) => {
         let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
         let children = [];
@@ -114,7 +112,7 @@ console.log(`### currentOrder`, currentOrder);
                             children.push(subgroupDescription);
                         }
                     });
-                } else {
+                } else if (parent && parent.children) {
                     children = JSON.parse(JSON.stringify(parent.children));
                 }
 
@@ -142,8 +140,6 @@ console.log(`### currentOrder`, currentOrder);
             throw new Error(`Unable to decode the layer group identifier (${id})`);
         }
     });
-
-console.log(`### layerTreeOrder`, layerTreeOrder);
 
     return layerTreeOrder;
 };
