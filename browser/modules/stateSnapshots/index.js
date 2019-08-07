@@ -17,6 +17,8 @@ const API_URL = `/api/state-snapshots`;
 
 const exId = `state-snapshots`;
 
+let customSetOfTitles = false;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -32,7 +34,7 @@ module.exports = {
         state = o.state;
         urlparser = o.urlparser;
         backboneEvents = o.backboneEvents;
-
+        extensions = o.extensions;
         return this;
     },
 
@@ -43,10 +45,15 @@ module.exports = {
         var React = require('react');
         var ReactDOM = require('react-dom');
 
+        if (vidiConfig.enabledExtensions.indexOf(`watsonc`) > -1) {
+            customSetOfTitles = true;
+        }
+
         if (document.getElementById(exId)) {
             try {
                 ReactDOM.render(<StateSnapshotsDashboard
                     anchor={anchor}
+                    customSetOfTitles={customSetOfTitles}
                     state={state}
                     urlparser={urlparser}
                     backboneEvents={backboneEvents}/>, document.getElementById(exId));

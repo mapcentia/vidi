@@ -193,11 +193,6 @@ class LayerSorting {
                 return false;
             }
 
-            if (`children` in group === false || !Array.isArray(group.children) || (group.children.length === 0 && group.panelWasInitialized)) {
-                errorMessage = `No group children`;
-                return false;
-            }
-
             group.children.map(groupChild => {
                 if (`id` in groupChild === false || !groupChild.id) {
                     errorMessage = `Invalid group child id`;
@@ -210,11 +205,6 @@ class LayerSorting {
                 }
 
                 if (groupChild.type === GROUP_CHILD_TYPE_GROUP) {
-                    if (`children` in groupChild === false || !Array.isArray(groupChild.children) || groupChild.children.length === 0) {
-                        errorMessage = `No subgroup children`;
-                        return false;
-                    }
-
                     groupChild.children.map(subGroupChild => {
                         if (`id` in subGroupChild === false || !subGroupChild.id) {
                             errorMessage = `Invalid subgroup child id`;
