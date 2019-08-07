@@ -62,6 +62,7 @@ let markupGeneratorInstance = new MarkupGenerator();
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
 
 let layerSortingInstance = new LayerSorting();
+let latestFullTreeStructure = false;
 
 /**
  *
@@ -501,7 +502,7 @@ module.exports = {
             });
 
             _self.create(false, [`virtualLayers`]).then(() => {
-                _self.calculateOrder();
+                _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 resolve(key);
             });
@@ -858,6 +859,9 @@ module.exports = {
 
                             if (LOG) console.log(`${MODULE_NAME}: activeLayers`, activeLayers);
                             const proceedWithBuilding = () => {
+
+                                console.log(`### layerTreeOrder`, order);
+
                                 moduleState.layerTreeOrder = order;
                                 if (moduleState.editingIsEnabled) {
                                     let toggleOfllineOnlineMode = _self._setupToggleOfflineModeControl();
@@ -888,10 +892,17 @@ module.exports = {
                                 }
 
                                 $("#layers").append(`<div id="layers_list"></div>`);
+
                                 // Filling up groups and underlying layers (except ungrouped ones)
+                                latestFullTreeStructure = [];
                                 for (let i = 0; i < arr.length; ++i) {
                                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                        _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        latestFullTreeStructure.push({
+                                            id: arr[i],
+                                            type: GROUP_CHILD_TYPE_GROUP,
+                                            children: sortedLayers
+                                        });
                                     }
                                 }
 
@@ -900,7 +911,7 @@ module.exports = {
                                         axis: 'y',
                                         handle: `.layer-move-vert`,
                                         stop: (event, ui) => {
-                                            _self.calculateOrder();
+                                            _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                             layers.reorderLayers();
                                         }
@@ -1803,8 +1814,6 @@ module.exports = {
         } else {
             let LOG_HIERARCHY_BUILDING = false;
             const LOG_LEVEL = '|  ';
-            //if (groupName === `Deep group`) LOG_HIERARCHY_BUILDING = true;
-
             for (let u = 0; u < metaData.data.length; ++u) {
                 if (metaData.data[u].layergroup == groupName) {
                     let layer = metaData.data[u];
@@ -2048,7 +2057,7 @@ module.exports = {
                     axis: 'y',
                     handle: `.layer-move-vert`,
                     stop: (event, ui) => {
-                        _self.calculateOrder();
+                        _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                         layers.reorderLayers();
                     }
@@ -2094,6 +2103,8 @@ module.exports = {
                 applyControlRequests(layersAndSubgroupsForCurrentGroup);
             }
         });
+
+        return layersAndSubgroupsForCurrentGroup;
     },
 
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
@@ -2200,7 +2211,7 @@ module.exports = {
             axis: 'y',
             handle: `.layer-move-vert`,
             stop: (event, ui) => {
-                _self.calculateOrder();
+                _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                 layers.reorderLayers();
             }
@@ -2807,7 +2818,7 @@ module.exports = {
      * @returns {void}
      */
     calculateOrder: () => {
-        moduleState.layerTreeOrder = layerTreeUtils.calculateOrder();
+        moduleState.layerTreeOrder = layerTreeUtils.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
     },
 
     /**

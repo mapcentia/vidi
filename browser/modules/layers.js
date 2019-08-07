@@ -175,9 +175,6 @@ module.exports = {
 
     reorderLayers: () => {
         let order = layerTree.getLatestLayersOrder();
-
-console.log(`### order`, order);
-
         let layers = _self.getMapLayers();
         if (order) {
             let indexCounter = 100;
@@ -185,7 +182,16 @@ console.log(`### order`, order);
                 order.map((item) => {
                     if (item.type && item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {
-                            if (layer.id && (layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(item.id))) {
+                            let itemId = false;
+                            if (item.layer) {
+                                itemId = item.layer.f_table_schema + '.' + item.layer.f_table_name;
+                            } else {
+                                itemId = item.id;
+                            }
+
+                            if (!itemId) throw Error(`Unable to detect order item identifier`);
+
+                            if (layer.id && (layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(itemId))) {
                                 let zIndex = (10000 - indexCounter);
                                 layer.setZIndex(zIndex);
                                 indexCounter++;

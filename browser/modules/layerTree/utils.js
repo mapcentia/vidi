@@ -49,19 +49,34 @@ const applyOpacityToLayer = (opacity, layerKey, cloud, backboneEvents) => {
 };
 
 /**
- * Calculates layer order using the current markup
+ * Calculates current layer order using the current HTML markup and previous order based on the full-built layer tree order.
+ * The idea is that there is always full layer tree available, generated based on meta data. However, after sorting is done,
+ * the tree needs to be actualized, so whenever one of the tree branches is navigated and there is HTML markup available (so,
+ * it means that something was sorted in this branch), then the layer tree needs to be restructured.
  *
  * @returns {Array}
  */
-const calculateOrder = () => {
+const calculateOrder = (currentOrder) => {
     let layerTreeOrder = [];
+
+console.log(`### currentOrder`, currentOrder);
 
     $(`[id^="layer-panel-"]`).each((index, element) => {
         let id = $(element).attr(`id`).replace(`layer-panel-`, ``);
         let children = [];
-        let panelWasInitialized = true;
+        let readableId = atob(id);
 
+        let correspondingOrderItem = false;
+        if (currentOrder) {
+            currentOrder.map(group => {
+                if (group.id === readableId) {
+                    correspondingOrderItem = group;
+                }
+            });
+        }
+        
         if ($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first().children().length > 0) {
+            // Panel was opened
             const processLayerRecord = (layerElement) => {
                 let layerKey = $(layerElement).data(`gc2-layer-key`);
                 let splitLayerKey = layerKey.split('.');
@@ -75,41 +90,60 @@ const calculateOrder = () => {
                 };
             };
 
-            const calculateChildrenOrder = (parentElement) => {
+            const calculateChildrenOrder = (parentElement, parent) => {
                 let children = [];
-                $(parentElement).children().each((layerIndex, layerElement) => {
-                    if ($(layerElement).data(`gc2-layer-key`)) {
-                        children.push(processLayerRecord(layerElement));
-                    } else if ($(layerElement).data(`gc2-subgroup-id`)) {
-                        let subgroupDescription = {
-                            id: $(layerElement).data(`gc2-subgroup-id`),
-                            type: GROUP_CHILD_TYPE_GROUP,
-                            children: calculateChildrenOrder($(layerElement).find(`.js-subgroup-children`).first())
-                        };
+                if ($(parentElement).children().length > 0) {
+                    $(parentElement).children().each((layerIndex, layerElement) => {
+                        if ($(layerElement).data(`gc2-layer-key`)) {
+                            children.push(processLayerRecord(layerElement));
+                        } else if ($(layerElement).data(`gc2-subgroup-id`)) {
+                            let subgroupId = $(layerElement).data(`gc2-subgroup-id`);
+                            let localParent = false;
+                            parent.children.map(child => {
+                                if (child.id === subgroupId) {
+                                    localParent = child;
+                                }
+                            });
 
-                        children.push(subgroupDescription);
-                    }
-                });
+                            let subgroupDescription = {
+                                id: subgroupId,
+                                type: GROUP_CHILD_TYPE_GROUP,
+                                children: calculateChildrenOrder($(layerElement).find(`.js-subgroup-children`).first(), localParent)
+                            };
+
+                            children.push(subgroupDescription);
+                        }
+                    });
+                } else {
+                    children = JSON.parse(JSON.stringify(parent.children));
+                }
 
                 return children;
             };
 
-            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first());
+            children = calculateChildrenOrder($(`#${$(element).attr(`id`)}`).find(`#collapse${id}`).children().first(), correspondingOrderItem);
         } else {
-            panelWasInitialized = false;
-        }
+            // Panel was not opened
+            if (correspondingOrderItem) {
+                children = JSON.parse(JSON.stringify(correspondingOrderItem.children));
+            }
 
-        let readableId = atob(id);
+            if (children.length === 0) {
+                console.warn(`Unable to get children for the ${atob(id)} group`);
+            }
+        }
+        
         if (readableId) {
             layerTreeOrder.push({
                 id: readableId,
                 children,
-                panelWasInitialized
             });
         } else {
             throw new Error(`Unable to decode the layer group identifier (${id})`);
         }
     });
+
+console.log(`### layerTreeOrder`, layerTreeOrder);
 
     return layerTreeOrder;
 };
