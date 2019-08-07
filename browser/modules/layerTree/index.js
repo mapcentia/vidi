@@ -898,7 +898,7 @@ module.exports = {
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
-                                        handle: `.layer-move-vert-group`,
+                                        handle: `.layer-move-vert`,
                                         stop: (event, ui) => {
                                             _self.calculateOrder();
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2046,7 +2046,7 @@ module.exports = {
 
                 $(virtualLayerTreeNode).sortable({
                     axis: 'y',
-                    handle: `.layer-move-vert-group`,
+                    handle: `.layer-move-vert`,
                     stop: (event, ui) => {
                         _self.calculateOrder();
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2151,6 +2151,7 @@ module.exports = {
                     <i class="fa fa-arrow-down"></i>
                 </button>
                 ${subgroup.id}
+                <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
             </p>
         </div>`);
 
@@ -2197,7 +2198,7 @@ module.exports = {
 
         $(parentNode).find(`.js-subgroup-children`).sortable({
             axis: 'y',
-            handle: `.layer-move-vert-subgroup`,
+            handle: `.layer-move-vert`,
             stop: (event, ui) => {
                 _self.calculateOrder();
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
@@ -2798,8 +2799,6 @@ module.exports = {
                 }
             }
         });
-
-
     },
 
     /**
