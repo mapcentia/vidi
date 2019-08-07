@@ -35,6 +35,9 @@ import {
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
 
+let leafletStream = require('leaflet-geojson-stream');
+window.leafletStream = leafletStream;
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -298,152 +301,158 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      * @param {Boolean} isVirtual        Specifies if layer is virtual
-     * @param {DOMNode} container        Optional container node
+     * @param {DOMNode} virtualContainer Optional container node
      */
-    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, container = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, virtualContainer = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
-        if (layerIsEnabled) {
-            _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
+        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if ($(container).length === 0 && virtualContainer) {
+            container = virtualContainer;
         }
 
-        if (!container) container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if (layerIsEnabled) {
+            _self._setupLayerWidgets(layerMeta, isVirtual, container);
+        }
+
         if (container.length === 1) {
             if (!$(container).attr(`data-gc2-layer-key`)) {
                 console.error(`Invalid container was provided`);
             }
 
-            if ($(container).is(`:visible`) || forced) {               
-                let parsedMeta = meta.parseLayerMeta(layerKey);
+            if ($(container).is(`:visible`) || forced) {
+                setTimeout(() => {                
+                    let parsedMeta = meta.parseLayerMeta(layerKey);
 
-                const hideFilters = () => {
-                    $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
-                };
+                    const hideFilters = () => {
+                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                    };
 
-                const hideOpacity = () => {
-                    $(container).find(`.js-toggle-opacity`).hide(0);
-                    $(container).find('.js-layer-settings-opacity').hide(0);
-                };
+                    const hideOpacity = () => {
+                        $(container).find(`.js-toggle-opacity`).hide(0);
+                        $(container).find('.js-layer-settings-opacity').hide(0);
+                    };
 
-                const hideLoadStrategy = () => {
-                    $(container).find(`.js-toggle-load-strategy`).hide(0);
-                    $(container).find('.js-layer-settings-load-strategy').hide(0);
-                };
+                    const hideLoadStrategy = () => {
+                        $(container).find(`.js-toggle-load-strategy`).hide(0);
+                        $(container).find('.js-layer-settings-load-strategy').hide(0);
+                    };
 
-                const hideTableView = () => {
-                    $(container).find(`.js-toggle-table-view`).hide(0);
-                    $(container).find('.js-layer-settings-table').hide(0);
-                };
+                    const hideTableView = () => {
+                        $(container).find(`.js-toggle-table-view`).hide(0);
+                        $(container).find('.js-layer-settings-table').hide(0);
+                    };
 
-                const hideOfflineMode = () => {
-                    $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
-                };
+                    const hideOfflineMode = () => {
+                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
+                    };
 
-                const hideSearch = () => {
-                    $(container).find(`.js-toggle-search`).hide(0);
-                    $(container).find('.js-layer-settings-search').hide(0);
-                };
+                    const hideSearch = () => {
+                        $(container).find(`.js-toggle-search`).hide(0);
+                        $(container).find('.js-layer-settings-search').hide(0);
+                    };
 
-                const hideAddFeature = () => {
-                    $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
-                };
+                    const hideAddFeature = () => {
+                        $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
+                    };
 
-                const getLayerSwitchControl = () => {
-                    let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
-                    if (!controlElement || controlElement.length !== 1) {
-                        return false;
-                    } else {
-                        return controlElement;
-                    }
-                };
+                    const getLayerSwitchControl = () => {
+                        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
+                        if (!controlElement || controlElement.length !== 1) {
+                            return false;
+                        } else {
+                            return controlElement;
+                        }
+                    };
 
-                let el = getLayerSwitchControl();
-                if (el) {
-                    el.prop('checked', layerIsEnabled);
-                }
-
-                if (desiredSetupType === LAYER.VECTOR) {
-                    // Load strategy and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideOpacity();
+                    let el = getLayerSwitchControl();
+                    if (el) {
+                        el.prop('checked', layerIsEnabled);
                     }
 
-                    if (layerIsEnabled) {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                    if (desiredSetupType === LAYER.VECTOR) {
+                        // Load strategy and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideOpacity();
+                        }
 
-                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
-                        $(container).find(`.js-toggle-load-strategy`).show(0);
-                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                        $(container).find(`.js-toggle-table-view`).show(0);
-                    } else {
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
+                            $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
+                            $(container).find(`.js-toggle-load-strategy`).show(0);
+                            $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
+                            $(container).find(`.js-toggle-table-view`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
+                            hideOfflineMode();
+                            hideLoadStrategy();
+                            hideOpacity();
+                            hideTableView();
+                        }
+                    } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                        // Opacity and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideLoadStrategy();
+                            hideTableView();
+                        }
+
+                        hideOfflineMode();
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-filters`).show(0);
+                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
+                            hideOpacity();
+                        }
+
+                        // Hide filters if cached, but not if layer has a valid predefined filter
+                        if (parsedMeta && parsedMeta.single_tile) {
+                            try {
+                                if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
+                                    hideFilters();
+                                }
+                            } catch (e) {
+                                hideFilters();
+                            }
+                        }
+
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                        if (desiredSetupType === LAYER.VECTOR_TILE) {
+                            hideOpacity();
+                            hideFilters();
+                        }
+                    } else if (desiredSetupType === LAYER.WEBGL) {
                         hideAddFeature();
                         hideFilters();
                         hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
-                    }
-                } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                    // Opacity and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideLoadStrategy();
-                        hideTableView();
-                    }
-
-                    hideOfflineMode();
-                    if (layerIsEnabled) {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
-
-                        $(container).find(`.js-toggle-opacity`).show(0);
-                        $(container).find(`.js-toggle-filters`).show(0);
-                        $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                        hideOpacity();
                     } else {
-                        hideAddFeature();
-                        hideFilters();
-                        hideOpacity();
+                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
 
-                    // Hide filters if cached, but not if layer has a valid predefined filter
-                    if (parsedMeta && parsedMeta.single_tile) {
-                        try {
-                            if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
-                                hideFilters();
-                            }
-                        } catch (e) {
-                            hideFilters();
-                        }
+                    // For all layer types
+                    hideSearch();
+                    if (layerIsEnabled) {
+                        $(container).find(`.js-toggle-search`).show();
+                    } else {
+                        $(container).find(`.js-toggle-search`).hide();
+                        $(container).find('a').removeClass('active');
+
+                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     }
 
-                    $(container).find('.js-layer-settings-filters').hide(0);
-                    if (desiredSetupType === LAYER.VECTOR_TILE) {
-                        hideOpacity();
-                        hideFilters();
-                    }
-                } else if (desiredSetupType === LAYER.WEBGL) {
-                    hideAddFeature();
-                    hideFilters();
-                    hideOfflineMode();
-                    hideLoadStrategy();
-                    hideTableView();
-                    hideOpacity();
-                } else {
-                    throw new Error(`${desiredSetupType} control setup is not supported yet`);
-                }
-
-                // For all layer types
-                hideSearch();
-                if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-search`).show();
-                } else {
-                    $(container).find(`.js-toggle-search`).hide();
-                    $(container).find('a').removeClass('active');
-
-                    // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                }
-
-                $(container).attr(`data-last-layer-type`, desiredSetupType);
+                    $(container).attr(`data-last-layer-type`, desiredSetupType);
+                }, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -2368,16 +2377,13 @@ module.exports = {
      * Renders widgets for the particular layer record in tree, shoud be called
      * only when widgets are really needed (for example, when layer is activated)
      *
-     * @param {String}  defaultLayerType Default layer type
-     * @param {Object}  layer            Layer description
-     * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * @param {Object}  layer     Layer description
+     * @param {Boolean} isVirtual Specifies if layer is virtual
      *
      * @returns {void}
      */
-    _setupLayerWidgets: (defaultLayerType, layer, isVirtual) => {
-        if (!defaultLayerType || !layer) {
-            throw new Error(`Invalid parameters were provided`);
-        }
+    _setupLayerWidgets: (layer, isVirtual, virtualContainer = false) => {
+        if (!layer) throw new Error(`Invalid parameters were provided`);
 
         let layerKey = layer.f_table_schema + "." + layer.f_table_name;
         let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
@@ -2388,7 +2394,7 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
-        let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+        let layerContainer = ($(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).length === 1 ? $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`) : (virtualContainer ? virtualContainer : false));
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
@@ -2578,9 +2584,6 @@ module.exports = {
                         // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     });
-
-                    // @todo Test
-                    //_self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
                 }
 
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
