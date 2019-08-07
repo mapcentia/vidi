@@ -10,18 +10,17 @@
 
 'use strict';
 
-import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, SQL_QUERY_LIMIT, LAYER, ICONS} from './constants';
+import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
     onMouseOver = [], cm = [], styles = [], tables = {};
 
-/**
- * Layer filters
- */
+const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
+require('snackbarjs');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
@@ -35,6 +34,9 @@ import {
     EXPRESSIONS_FOR_DATES,
     EXPRESSIONS_FOR_BOOLEANS
 } from './filterUtils';
+
+let leafletStream = require('leaflet-geojson-stream');
+window.leafletStream = leafletStream;
 
 /**
  *
@@ -142,11 +144,38 @@ module.exports = {
     },
 
     init: function () {
-        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) {
-            moduleState.editingIsEnabled = true;
+        _self = this;
+        if (window.vidiConfig.enabledExtensions.indexOf(`editor`) !== -1) moduleState.editingIsEnabled = true;
+
+        if (urlparser && urlparser.urlVars && urlparser.urlVars.initialFilter) {
+            backboneEvents.get().on(`${MODULE_NAME}:ready`, () => {
+                let decodedFilters = JSON.parse(atob(urlparser.urlVars.initialFilter));
+                for (let layerKey in decodedFilters) {
+                    _self.onApplyArbitraryFiltersHandler({
+                        layerKey,
+                        filters: decodedFilters[layerKey]
+                    }, LAYER.VECTOR);
+
+                    // Wait for layer load event
+                    backboneEvents.get().on(`doneLoading:layers`, (loadedLayerName) => {
+                        if (layerTreeUtils.stripPrefix(loadedLayerName) === layerTreeUtils.stripPrefix(layerKey)) {
+                            for (let key in cloud.get().map._layers) {
+                                let layer = cloud.get().map._layers[key];
+                                if (`id` in layer && layer.id && layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(layerKey)) {
+                                    cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+                                    setTimeout(() => {
+                                        console.log(`Query filter parameter was applied`);
+                                    }, 1000);
+                                }
+                            }
+                        }
+                    });
+
+                    break;
+                }
+            });
         }
 
-        _self = this;
         queueStatistsics = new QueueStatisticsWatcher({switchLayer, offlineModeControlsManager, layerTree: _self});
         apiBridgeInstance = APIBridgeSingletone((statistics, forceLayerUpdate) => {
             _self._statisticsHandler(statistics, forceLayerUpdate);
@@ -226,7 +255,6 @@ module.exports = {
      * @returns {String}
      */
     getLayerFilterString: (layerKey) => {
-        
         if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
@@ -239,7 +267,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + JSON.stringify(data);
+            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
@@ -273,147 +301,158 @@ module.exports = {
      * @param {Boolean} layerIsEnabled   Specifies if layer is enabled
      * @param {Boolean} forced           Specifies if layer visibility should be ignored
      * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * @param {DOMNode} virtualContainer Optional container node
      */
-    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false) => {
+    setLayerState: (desiredSetupType, layerKey, ignoreErrors = true, layerIsEnabled = false, forced = false, isVirtual = false, virtualContainer = false) => {
         layerKey = layerTreeUtils.stripPrefix(layerKey);
         let layerMeta = meta.getMetaByKey(layerKey);
 
-        if (layerIsEnabled) {
-            _self._setupLayerWidgets(desiredSetupType, layerMeta, isVirtual);
+        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if ($(container).length === 0 && virtualContainer) {
+            container = virtualContainer;
         }
 
-        let container = $(`[data-gc2-layer-key="${layerKey}.${layerMeta.f_geometry_column}"]`);
+        if (layerIsEnabled) {
+            _self._setupLayerWidgets(layerMeta, isVirtual, container);
+        }
+
         if (container.length === 1) {
+            if (!$(container).attr(`data-gc2-layer-key`)) {
+                console.error(`Invalid container was provided`);
+            }
+
             if ($(container).is(`:visible`) || forced) {
-                let parsedMeta = meta.parseLayerMeta(layerKey);
+                setTimeout(() => {
+                    let parsedMeta = meta.parseLayerMeta(layerKey);
 
-                const hideFilters = () => {
-                    $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
-                    $(container).find('.js-layer-settings-filters').hide(0);
-                };
+                    const hideFilters = () => {
+                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                    };
 
-                const hideOpacity = () => {
-                    $(container).find(`.js-toggle-opacity`).hide(0);
-                    $(container).find('.js-layer-settings-opacity').hide(0);
-                };
+                    const hideOpacity = () => {
+                        $(container).find(`.js-toggle-opacity`).hide(0);
+                        $(container).find('.js-layer-settings-opacity').hide(0);
+                    };
 
-                const hideLoadStrategy = () => {
-                    $(container).find(`.js-toggle-load-strategy`).hide(0);
-                    $(container).find('.js-layer-settings-load-strategy').hide(0);
-                };
+                    const hideLoadStrategy = () => {
+                        $(container).find(`.js-toggle-load-strategy`).hide(0);
+                        $(container).find('.js-layer-settings-load-strategy').hide(0);
+                    };
 
-                const hideTableView = () => {
-                    $(container).find(`.js-toggle-table-view`).hide(0);
-                    $(container).find('.js-layer-settings-table').hide(0);
-                };
+                    const hideTableView = () => {
+                        $(container).find(`.js-toggle-table-view`).hide(0);
+                        $(container).find('.js-layer-settings-table').hide(0);
+                    };
 
-                const hideOfflineMode = () => {
-                    $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
-                };
+                    const hideOfflineMode = () => {
+                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `none`);
+                    };
 
-                const hideSearch = () => {
-                    $(container).find(`.js-toggle-search`).hide(0);
-                    $(container).find('.js-layer-settings-search').hide(0);
-                };
+                    const hideSearch = () => {
+                        $(container).find(`.js-toggle-search`).hide(0);
+                        $(container).find('.js-layer-settings-search').hide(0);
+                    };
 
-                const hideAddFeature = () => {
-                    $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
-                };
+                    const hideAddFeature = () => {
+                        $(container).find('.gc2-add-feature').css(`visibility`, `hidden`);
+                    };
 
-                const getLayerSwitchControl = () => {
-                    let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
-                    if (!controlElement || controlElement.length !== 1) {
-                        return false;
-                    } else {
-                        return controlElement;
-                    }
-                };
+                    const getLayerSwitchControl = () => {
+                        let controlElement = $('input[class="js-show-layer-control"][data-gc2-id="' + layerKey + '"]');
+                        if (!controlElement || controlElement.length !== 1) {
+                            return false;
+                        } else {
+                            return controlElement;
+                        }
+                    };
 
-                let el = getLayerSwitchControl();
-                if (el) {
-                    el.prop('checked', layerIsEnabled);
-                }
-
-                if (desiredSetupType === LAYER.VECTOR) {
-                    // Load strategy and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideOpacity();
+                    let el = getLayerSwitchControl();
+                    if (el) {
+                        el.prop('checked', layerIsEnabled);
                     }
 
-                    if (layerIsEnabled) {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                    if (desiredSetupType === LAYER.VECTOR) {
+                        // Load strategy and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideOpacity();
+                        }
 
-                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
-                        $(container).find(`.js-toggle-load-strategy`).show(0);
-                        $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                        $(container).find(`.js-toggle-table-view`).show(0);
-                    } else {
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+
+                            $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
+                            $(container).find(`.js-toggle-load-strategy`).show(0);
+                            $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
+                            $(container).find(`.js-toggle-table-view`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
+                            hideOfflineMode();
+                            hideLoadStrategy();
+                            hideOpacity();
+                            hideTableView();
+                        }
+                    } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                        // Opacity and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideLoadStrategy();
+                            hideTableView();
+                        }
+
+                        hideOfflineMode();
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-filters`).show(0);
+                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
+                            hideOpacity();
+                        }
+
+                        // Hide filters if cached, but not if layer has a valid predefined filter
+                        if (parsedMeta && parsedMeta.single_tile) {
+                            try {
+                                if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
+                                    hideFilters();
+                                }
+                            } catch (e) {
+                                hideFilters();
+                            }
+                        }
+
+                        $(container).find('.js-layer-settings-filters').hide(0);
+                        if (desiredSetupType === LAYER.VECTOR_TILE) {
+                            hideOpacity();
+                            hideFilters();
+                        }
+                    } else if (desiredSetupType === LAYER.WEBGL) {
                         hideAddFeature();
                         hideFilters();
                         hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
-                    }
-                } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                    // Opacity and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideLoadStrategy();
-                        hideTableView();
-                    }
-
-                    hideOfflineMode();
-                    if (layerIsEnabled) {
-                        $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
-
-                        $(container).find(`.js-toggle-opacity`).show(0);
-                        $(container).find(`.js-toggle-filters`).show(0);
-                        $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                        hideOpacity();
                     } else {
-                        hideAddFeature();
-                        hideFilters();
-                        hideOpacity();
+                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
 
-                    // Hide filters if cached, but not if layer has a valid predefined filter
-                    if (parsedMeta && parsedMeta.single_tile) {
-                        try {
-                            if (!parsedMeta && parsedMeta.predefined_filters || typeof JSON.parse(parsedMeta.predefined_filters) !== "object") {
-                                hideFilters();
-                            }
-                        } catch (e) {
-                            hideFilters();
-                        }
+                    // For all layer types
+                    hideSearch();
+                    if (layerIsEnabled) {
+                        $(container).find(`.js-toggle-search`).show();
+                    } else {
+                        $(container).find(`.js-toggle-search`).hide();
+                        $(container).find('a').removeClass('active');
+
+                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     }
 
-                    $(container).find('.js-layer-settings-filters').hide(0);
-                    if (desiredSetupType === LAYER.VECTOR_TILE) {
-                        hideOpacity();
-                        hideFilters();
-                    }
-                } else if (desiredSetupType === LAYER.WEBGL) {
-                    hideAddFeature();
-                    hideFilters();
-                    hideOfflineMode();
-                    hideLoadStrategy();
-                    hideTableView();
-                    hideOpacity();
-                } else {
-                    throw new Error(`${desiredSetupType} control setup is not supported yet`);
-                }
-
-                // For all layer types
-                hideSearch();
-                if (layerIsEnabled) {
-                    $(container).find(`.js-toggle-search`).show();
-                } else {
-                    $(container).find(`.js-toggle-search`).hide();
-                    $(container).find('a').removeClass('active');
-
-                    // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                    $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                }
-
-                $(container).attr(`data-last-layer-type`, desiredSetupType);
+                    $(container).attr(`data-last-layer-type`, desiredSetupType);
+                }, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -1182,150 +1221,19 @@ module.exports = {
     },
 
     /**
-     * Creates SQL store for WebGL layers
+     * Checks if maximum number of features was reached when loading layer
      *
-     * @param {Object} layer Layer description
+     * @param {String} layerKey Layer key
      *
-     * @returns {void}
+     * @return {void}
      */
-    createWebGLStore: (layer) => {
-        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
-        let parsedMeta = meta.parseLayerMeta(layerKey);
-
-        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
-        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
-            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
-        }
-
-        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
-
-        let whereClauses = [];
-        let activeFilters = _self.getActiveLayerFilters(layerKey);
-        let parentFilters = _self.getParentLayerFilters(layerKey);
-
-        let overallFilters = activeFilters.concat(parentFilters);
-        overallFilters.map(item => {
-            whereClauses.push(item);
+    maxFeaturesNotification: (layerKey) => {
+        jquery.snackbar({
+            id: "snackbar-watsonc",
+            content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
+            htmlAllowed: true,
+            timeout: 7000
         });
-
-        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-
-        // Checking if versioning is enabled for layer
-        if (`versioning` in layer && layer.versioning) {
-            whereClauses.push(`gc2_version_end_date is null`);
-        }
-
-        // Checking if dynamic load is enabled for layer
-        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
-            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
-        }
-
-        // Gathering all WHERE clauses
-        if (whereClauses.length > 0) {
-            whereClauses = whereClauses.map(item => `(${item})`);
-            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
-        }
-
-        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
-        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
-            type: layer.type,
-            map: cloud.get().map,
-            jsonp: false,
-            method: "POST",
-            host: "",
-            db: urlparser.db,
-            uri: "/api/sql",
-            clickable: true,
-            id: trackingLayerKey,
-            name: trackingLayerKey,
-            lifetime: 0,
-            styleMap: styles[trackingLayerKey],
-            sql,
-            onLoad: (l) => {
-                if (l === undefined) return;
-
-                layers.decrementCountLoading(l.id);
-                backboneEvents.get().trigger("doneLoading:layers", l.id);
-
-                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
-                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
-                }
-            },
-            onEachFeature: (feature, layer) => {
-                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
-                    /*
-                        Checking for correct onEachFeature structure
-                    */
-                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
-                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
-                        throw new Error(`Invalid onEachFeature structure`);
-                    }
-
-                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
-                } else {
-                    // If there is no handler for specific layer, then display attributes only
-                    layer.on("click", function (e) {
-                        _self.displayAttributesPopup(feature, layer, e);
-                    });
-                }
-            }
-        });
-    },
-
-    /**
-     * Creates gc2table control for layer
-     * 
-     * @param {String}  layerKey      Layer key     
-     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
-     * 
-     * @returns {void}
-     */
-    createTable(layerKey, forceDataLoad = false) {
-        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
-        if (layerWithData.length === 1) {
-            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
-            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
-            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
-
-            let metaDataKeys = meta.getMetaDataKeys();
-            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
-                && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
-            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
-                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
-
-            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
-                weight: 5,
-                color: '#666',
-                dashArray: '',
-                fillOpacity: 0.2
-            });
-
-            let localTable = gc2table.init({
-                el: tableContainerId + ` table`,
-                ns: tableContainerId,
-                geocloud2: cloud.get(),
-                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
-                cm: tableHeaders,
-                autoUpdate: false,
-                autoPan: false,
-                openPopUp: false,
-                setViewOnSelect: true,
-                responsive: false,
-                callCustomOnload: true,
-                assignFeatureEventListenersOnDataLoad: true,
-                height: 250,
-                locale: window._vidiLocale.replace("_", "-"),
-                template: template,
-                styleSelected
-            });
-
-            localTable.loadDataInTable(true, forceDataLoad);
-            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
-        } else {
-            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
-        }
     },
 
     /**
@@ -1346,14 +1254,7 @@ module.exports = {
 
         let parentFiltersHash = ``;
         let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
-
-        let parsedMeta = meta.parseLayerMeta(layerKey);
-
-        let layerSpecificQueryLimit = SQL_QUERY_LIMIT;
-        if (parsedMeta && `max_features` in parsedMeta && parseInt(parsedMeta.max_features) > 0) {
-            layerSpecificQueryLimit = parseInt(parsedMeta.max_features);
-        }
-
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
         let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
         if (isVirtual) {
             let storeWasFound = false;
@@ -1412,6 +1313,10 @@ module.exports = {
             method: "POST",
             host: "",
             db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
             uri: "/api/sql",
             clickable: true,
             id: trackingLayerKey,
@@ -1426,6 +1331,7 @@ module.exports = {
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
+
                 if (l === undefined || l.geoJSON === null) {
                     return
                 }
@@ -1501,11 +1407,153 @@ module.exports = {
             pointToLayer: (pointToLayer.hasOwnProperty(LAYER.VECTOR + ':' + layerKey) ? pointToLayer[LAYER.VECTOR + ':' + layerKey] : (feature, latlng) => {
                 return L.circleMarker(latlng);
             }),
-            error: (response)=>{
-                alert(response.responseJSON.message);
-                console.error(response.responseJSON.message);
-            }
+            error: layerTreeUtils.storeErrorHandler
         });
+    },
+
+    /**
+     * Creates SQL store for WebGL layers
+     *
+     * @param {Object} layer Layer description
+     *
+     * @returns {void}
+     */
+    createWebGLStore: (layer) => {
+        let layerKey = layer.f_table_schema + '.' + layer.f_table_name;
+        const layerSpecificQueryLimit = layerTreeUtils.getQueryLimit(meta.parseLayerMeta(layerKey));
+        let sql = `SELECT * FROM ${layerKey} LIMIT ${layerSpecificQueryLimit}`;
+
+        let whereClauses = [];
+        let activeFilters = _self.getActiveLayerFilters(layerKey);
+        let parentFilters = _self.getParentLayerFilters(layerKey);
+
+        let overallFilters = activeFilters.concat(parentFilters);
+        overallFilters.map(item => {
+            whereClauses.push(item);
+        });
+
+        $(`[data-gc2-layer-key="${layerKey + `.` + layer.f_geometry_column}"]`).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
+
+        // Checking if versioning is enabled for layer
+        if (`versioning` in layer && layer.versioning) {
+            whereClauses.push(`gc2_version_end_date is null`);
+        }
+
+        // Checking if dynamic load is enabled for layer
+        if (layerKey in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKey] === true) {
+            whereClauses.push(`ST_Intersects(ST_Force2D(${layer.f_geometry_column}), ST_Transform(ST_MakeEnvelope ({minX}, {minY}, {maxX}, {maxY}, 4326), ${layer.srid}))`);
+        }
+
+        // Gathering all WHERE clauses
+        if (whereClauses.length > 0) {
+            whereClauses = whereClauses.map(item => `(${item})`);
+            sql = `SELECT * FROM ${layerKey} WHERE (${whereClauses.join(` AND `)}) LIMIT ${layerSpecificQueryLimit}`;
+        }
+
+        let trackingLayerKey = (LAYER.WEBGL + ':' + layerKey);
+        moduleState.webGLStores[trackingLayerKey] = new geocloud.webGLStore({
+            type: layer.type,
+            map: cloud.get().map,
+            jsonp: false,
+            method: "POST",
+            host: "",
+            db: urlparser.db,
+            maxFeaturesLimit: layerSpecificQueryLimit,
+            onMaxFeaturesLimitReached: () => {
+                _self.maxFeaturesNotification(layerKey);
+            },
+            uri: "/api/sql",
+            clickable: true,
+            id: trackingLayerKey,
+            name: trackingLayerKey,
+            lifetime: 0,
+            styleMap: styles[trackingLayerKey],
+            sql,
+            onLoad: (l) => {
+                if (l === undefined) return;
+
+                layers.decrementCountLoading(l.id);
+                backboneEvents.get().trigger("doneLoading:layers", l.id);
+
+                if (typeof onLoad[LAYER.WEBGL + ':' + layerKey] === "function") {
+                    onLoad[LAYER.WEBGL + ':' + layerKey](l);
+                }
+            },
+            onEachFeature: (feature, layer) => {
+                if ((LAYER.WEBGL + ':' + layerKey) in onEachFeature) {
+                    /*
+                        Checking for correct onEachFeature structure
+                    */
+                    if (`fn` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].fn ||
+                        `caller` in onEachFeature[LAYER.WEBGL + ':' + layerKey] === false || !onEachFeature[LAYER.WEBGL + ':' + layerKey].caller) {
+                        throw new Error(`Invalid onEachFeature structure`);
+                    }
+
+                    onEachFeature[LAYER.WEBGL + ':' + layerKey].fn(feature, layer);
+                } else {
+                    // If there is no handler for specific layer, then display attributes only
+                    layer.on("click", function (e) {
+                        _self.displayAttributesPopup(feature, layer, e);
+                    });
+                }
+            },
+            error: layerTreeUtils.storeErrorHandler
+        });
+    },
+
+    /**
+     * Creates gc2table control for layer
+     *
+     * @param {String}  layerKey      Layer key
+     * @param {Boolean} forceDataLoad Specifies if the data load should be forced
+     *
+     * @returns {void}
+     */
+    createTable(layerKey, forceDataLoad = false) {
+        let layerWithData = layers.getMapLayers(false, LAYER.VECTOR + ':' + layerKey);
+        if (layerWithData.length === 1) {
+            let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
+            if ($(tableContainerId + ` table`).length > 0) $(tableContainerId).empty();
+            $(tableContainerId).append(`<table class="table" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>`);
+
+            let metaDataKeys = meta.getMetaDataKeys();
+            let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
+                && metaDataKeys[layerKey].infowindow.template !== "")
+                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+            let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
+                JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
+
+            let styleSelected = (onSelectedStyle[LAYER.VECTOR + ':' + layerKey] ? onSelectedStyle[LAYER.VECTOR + ':' + layerKey] : {
+                weight: 5,
+                color: '#666',
+                dashArray: '',
+                fillOpacity: 0.2
+            });
+
+            let localTable = gc2table.init({
+                el: tableContainerId + ` table`,
+                ns: tableContainerId,
+                geocloud2: cloud.get(),
+                store: moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey],
+                cm: tableHeaders,
+                autoUpdate: false,
+                autoPan: false,
+                openPopUp: false,
+                setViewOnSelect: true,
+                responsive: false,
+                callCustomOnload: true,
+                assignFeatureEventListenersOnDataLoad: true,
+                height: 250,
+                locale: window._vidiLocale.replace("_", "-"),
+                template: template,
+                styleSelected
+            });
+
+            localTable.loadDataInTable(true, forceDataLoad);
+            tables[LAYER.VECTOR + ':' + layerKey] = localTable;
+        } else {
+            throw new Error(`Unable to create gc2table, as the data is not loaded yet`);
+        }
     },
 
     displayAttributesPopup(feature, layer, event, additionalControls = ``) {
@@ -1649,7 +1697,7 @@ module.exports = {
                                         }
 
                                         if (column.expression === 'like') {
-                                            arbitraryConditions.push(`${column.fieldname} ${column.expression} '%${column.value}%'`);
+                                            arbitraryConditions.push(`${column.fieldname} ILIKE '%${column.value}%'`);
                                         } else {
                                             arbitraryConditions.push(`${column.fieldname} ${column.expression} '${column.value}'`);
                                         }
@@ -1777,21 +1825,21 @@ module.exports = {
 
                     /**
                      * Returns reference to the parent children container
-                     * 
+                     *
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Object>}
                      */
                     const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 1`, searchedLevelPath);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 1`, searchedLevelPath);
 
                         let parent = notSortedLayersAndSubgroupsForCurrentGroup;
                         if (searchedLevelPath.length > 0) {
                             let indexes = getNestedGroupsIndexes(searchedLevelPath, localPrefix);
                             for (let i = 0; i < indexes.length; i++) {
-                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### parent ${i}`, parent);
+                                if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` parent ${i}`, parent);
                                 if (i === 0) {
                                     parent = notSortedLayersAndSubgroupsForCurrentGroup[indexes[0]].children;
                                 } else {
@@ -1800,22 +1848,22 @@ module.exports = {
                             }
                         }
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getParentChildrenContainer 2`, parent);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getParentChildrenContainer 2`, parent);
                         return parent;
                     }
 
                     /**
                      * Ensures that specified group exists on specific hierarchy level
-                     * 
+                     *
                      * @param {String} name              Group name
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Number}
                      */
                     const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` ensureThatGroupExistsAndReturnsItsIndex`, name, searchedLevelPath);
 
                         let parent = getParentChildrenContainer(searchedLevelPath, localPrefix);
                         let groupIndex = false;
@@ -1832,43 +1880,43 @@ module.exports = {
                                 type: GROUP_CHILD_TYPE_GROUP,
                                 children: []
                             });
- 
+
                             groupIndex = (parent.length - 1);
                         }
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### groupIndex`, groupIndex);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` groupIndex`, groupIndex);
                         return groupIndex;
                     };
 
                     /**
                      * Returns indexes for every nesting level, creates the group if does not exist
-                     * 
+                     *
                      * @param {Array}  nestingData Depth specification
                      * @param {String} prefix      Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Number>}
                      */
                     const getNestedGroupsIndexes = (nestingData, prefix = '') => {
                         let localPrefix = LOG_LEVEL + prefix;
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### getNestedGroupsIndexes`, nestingData);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` getNestedGroupsIndexes`, nestingData);
 
                         let indexes = [];
                         nestingData.map((groupName, level) => {
-                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### it`, groupName, level);
+                            if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` it`, groupName, level);
 
                             let nestingDataCopy = JSON.parse(JSON.stringify(nestingData));
                             let index = ensureThatGroupExistsAndReturnItsIndex(groupName, nestingDataCopy.slice(0, level), LOG_LEVEL + localPrefix);
                             indexes.push(index);
                         });
 
-                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + `### indexes`, indexes);
+                        if (LOG_HIERARCHY_BUILDING) console.log(localPrefix + ` indexes`, indexes);
                         return indexes;
                     }
 
-                    if (LOG_HIERARCHY_BUILDING) console.log(`### layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
+                    if (LOG_HIERARCHY_BUILDING) console.log(` layer.nesting`, layer.f_table_schema + '.' + layer.f_table_name);
                     let indexes = getNestedGroupsIndexes(JSON.parse(JSON.stringify(layer.nesting)));
 
-                    if (LOG_HIERARCHY_BUILDING) console.log(`### indexes ready`, indexes);
+                    if (LOG_HIERARCHY_BUILDING) console.log(` indexes ready`, indexes);
                     let parent = getParentChildrenContainer(layer.nesting);
                     parent.push({
                         type: GROUP_CHILD_TYPE_LAYER,
@@ -1877,7 +1925,7 @@ module.exports = {
                 }
             }
 
-            if (LOG_HIERARCHY_BUILDING) console.log(`### result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
+            if (LOG_HIERARCHY_BUILDING) console.log(` result`, JSON.parse(JSON.stringify(notSortedLayersAndSubgroupsForCurrentGroup)));
         }
 
         const reverseOrder = (children) => {
@@ -1980,29 +2028,23 @@ module.exports = {
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
+                let virtualLayerTreeNode = $('<div></div>');
+
                 // Add layers and subgroups
-                let numberOfAddedLayers = 0;
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
                     let localItem = layersAndSubgroupsForCurrentGroup[u];
                     if (localItem.type === GROUP_CHILD_TYPE_LAYER) {
                         let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, localItem.layer);
-                        if (layerIsActive) {
-                            numberOfActiveLayers++;
-                        }
-
-                        _self.createLayerRecord(localItem.layer, $("#collapse" + base64GroupName), layerIsActive, activeLayerName, false, isVirtualGroup);
-                        numberOfAddedLayers++;
+                        _self.createLayerRecord(localItem.layer, $(virtualLayerTreeNode), layerIsActive, activeLayerName, false, isVirtualGroup);
                     } else if (localItem.type === GROUP_CHILD_TYPE_GROUP) {
-                        let {activeLayers, addedLayers} = _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $("#collapse" + base64GroupName), 0);
-                        numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                        numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
+                        _self.createSubgroupRecord(localItem, forcedState, precheckedLayers, $(virtualLayerTreeNode), 0);
                     } else {
                         console.error(localItem);
                         throw new Error(`Invalid sorting element type`);
                     }
                 }
 
-                $("#collapse" + base64GroupName).sortable({
+                $(virtualLayerTreeNode).sortable({
                     axis: 'y',
                     handle: `.layer-move-vert-group`,
                     stop: (event, ui) => {
@@ -2012,10 +2054,8 @@ module.exports = {
                     }
                 });
 
-                // Remove the group if empty
-                if (numberOfAddedLayers === 0) {
-                    $("#layer-panel-" + base64GroupName).remove();
-                }
+                // Performing single DOM manipulation to avoid multiple reflows
+                $("#collapse" + base64GroupName).append(virtualLayerTreeNode);
 
                 const setAllControlsProcessors = (type) => {
                     $(`.js-set-all-layer-to-be-${type}`).off();
@@ -2048,7 +2088,7 @@ module.exports = {
                         } else {
                             applyControlRequests(item.children);
                         }
-                    });                    
+                    });
                 }
 
                 applyControlRequests(layersAndSubgroupsForCurrentGroup);
@@ -2100,9 +2140,8 @@ module.exports = {
      *
      * @returns {Object}
      */
-    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0) => {
-        let numberOfAddedLayers = 0, numberOfActiveLayers = 0;
-        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}`).replace(/=/g, "");
+    createSubgroupRecord: (subgroup, forcedState, precheckedLayers, parentNode, level = 0, initiallyClosed = true) => {
+        let base64SubgroupName = Base64.encode(`subgroup_${subgroup.id}_level_${level}_${uuidv4()}`).replace(/=/g, "");
         let markup = markupGeneratorInstance.getSubgroupControlRecord(base64SubgroupName, subgroup.id);
 
         $(parentNode).append(markup);
@@ -2116,7 +2155,12 @@ module.exports = {
         </div>`);
 
         $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-toggle-button`).click((event) => {
+            // Checking if the subgroup was already drawn
             let subgroupRootElement = $(event.target).closest(`[data-gc2-subgroup-id]`).first();
+            if (subgroupRootElement.find(`.js-subgroup-children`).children().length === 0) {
+                renderSubgroupChildren();
+            }
+
             if (subgroupRootElement.find(`.js-subgroup-children`).first().is(`:visible`)) {
                 subgroupRootElement.find(`.js-subgroup-toggle-button`).first().html(`<i class="fa fa-arrow-down"></i>`);
                 subgroupRootElement.find(`.js-subgroup-children`).first().hide();
@@ -2126,24 +2170,30 @@ module.exports = {
             }
         });
 
-        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`).hide();
+        $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`).hide();
 
-        let container = $(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children`);
-        subgroup.children.map(child => {
-            if (child.type === GROUP_CHILD_TYPE_LAYER) {
-                let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
-                if (layerIsActive) numberOfActiveLayers++;
+        let container = $(parentNode).find(`[data-gc2-subgroup-id="${subgroup.id}"]`).find(`.js-subgroup-children[id="${base64SubgroupName}"]`);
+        if ($(container).length !== 1) {
+            throw new Error(`Error while locating parent node for group children`);
+        }
 
-                _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
-                numberOfAddedLayers++;
-            } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
-                let {activeLayers, addedLayers} = _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, 1);
-                numberOfActiveLayers = (numberOfActiveLayers + activeLayers);
-                numberOfAddedLayers = (numberOfAddedLayers + addedLayers);
-            } else {
-                throw new Error(`Invalid layer group`);
-            }        
-        });
+        const renderSubgroupChildren = () => {
+            subgroup.children.map(child => {
+                if (child.type === GROUP_CHILD_TYPE_LAYER) {
+                    let {layerIsActive, activeLayerName} = _self.checkIfLayerIsActive(forcedState, precheckedLayers, child.layer);
+                    _self.createLayerRecord(child.layer, container, layerIsActive, activeLayerName, subgroup.id);
+                } else if (child.type === GROUP_CHILD_TYPE_GROUP) {
+                    _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);
+                } else {
+                    throw new Error(`Invalid layer group`);
+                }
+            });
+        }
+
+        let newLevel = level + 1;
+        if (initiallyClosed === false) {
+            renderSubgroupChildren();
+        }
 
         $(`#` + base64SubgroupName).sortable({
             axis: 'y',
@@ -2154,11 +2204,6 @@ module.exports = {
                 layers.reorderLayers();
             }
         });
-
-        return {
-            addedLayers: numberOfAddedLayers,
-            activeLayers: numberOfActiveLayers
-        };
     },
 
     /**
@@ -2181,7 +2226,7 @@ module.exports = {
             let {detectedTypes, specifiers} = layerTreeUtils.getPossibleLayerTypes(layer);
             let singleTypeLayer = (detectedTypes === 1);
 
-            let condition = layerTreeUtils.getDefaultLayerType(layer);
+            let condition = layerTreeUtils.getDefaultLayerType(layer, meta.parseLayerMeta(`${layer.f_table_schema}.${layer.f_table_name}`));
             if (layerIsActive && activeLayerName) {
                 condition = (activeLayerName.indexOf(`:`) === -1 ? LAYER.RASTER_TILE : activeLayerName.split(`:`)[0]);
             }
@@ -2324,7 +2369,7 @@ module.exports = {
 
             $(parentNode).append(layerControlRecord);
 
-            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, isVirtual);
+            _self.setLayerState(defaultLayerType, layerKey, true, layerIsActive, true, isVirtual, layerControlRecord);
         }
     },
 
@@ -2332,16 +2377,13 @@ module.exports = {
      * Renders widgets for the particular layer record in tree, shoud be called
      * only when widgets are really needed (for example, when layer is activated)
      *
-     * @param {String}  defaultLayerType Default layer type
-     * @param {Object}  layer            Layer description
-     * @param {Boolean} isVirtual        Specifies if layer is virtual
+     * @param {Object}  layer     Layer description
+     * @param {Boolean} isVirtual Specifies if layer is virtual
      *
      * @returns {void}
      */
-    _setupLayerWidgets: (defaultLayerType, layer, isVirtual) => {
-        if (!defaultLayerType || !layer) {
-            throw new Error(`Invalid parameters were provided`);
-        }
+    _setupLayerWidgets: (layer, isVirtual, virtualContainer = false) => {
+        if (!layer) throw new Error(`Invalid parameters were provided`);
 
         let layerKey = layer.f_table_schema + "." + layer.f_table_name;
         let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
@@ -2352,8 +2394,7 @@ module.exports = {
         }
 
         let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
-
-        let layerContainer = $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`);
+        let layerContainer = ($(`[data-gc2-layer-key="${layerKeyWithGeom}"]`).length === 1 ? $(`[data-gc2-layer-key="${layerKeyWithGeom}"]`) : (virtualContainer ? virtualContainer : false));
         if ($(layerContainer).length === 1) {
             if ($(layerContainer).attr(`data-widgets-were-initialized`) !== `true`) {
                 $(layerContainer).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
@@ -2543,9 +2584,6 @@ module.exports = {
                         // Refresh all tables when opening one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
                     });
-
-                    // @todo Test
-                    //_self.setLayerState(defaultLayerType, layerKey, true, layerIsActive);
                 }
 
                 $(layerContainer).find(`.js-toggle-search`).click(() => {
@@ -2677,18 +2715,18 @@ module.exports = {
         _self.reloadLayer(LAYER.VECTOR + ':' + layerKey);
     },
 
-    onApplyArbitraryFiltersHandler: ({layerKey, filters}) => {
+    onApplyArbitraryFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         validateFilters(filters);
         moduleState.arbitraryFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    onApplyPredefinedFiltersHandler: ({layerKey, filters}) => {
+    onApplyPredefinedFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
         moduleState.predefinedFilters[layerKey] = filters;
-        _self.reloadLayerOnFiltersChange(layerKey);
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
 
-    reloadLayerOnFiltersChange: (layerKey) => {
+    reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {
             throw new Error(`Filters have to operate only the layer key, without the layer type specifier`);
         }
@@ -2703,10 +2741,21 @@ module.exports = {
             });
         }
 
-        _self.getActiveLayers().map(activeLayerKey => {
+        let activeLayers = _self.getActiveLayers();
+        let layerIsActive = false;
+        activeLayers.map(item => {
+            if (layerTreeUtils.stripPrefix(item) === layerKey) {
+                layerIsActive = true;
+            }
+        });
+
+        if (layerIsActive === false && forcedReloadLayerType !== false) {
+            activeLayers.push(forcedReloadLayerType + ':' + layerKey);
+        }
+
+        activeLayers.map(activeLayerKey => {
             if (layerTreeUtils.stripPrefix(activeLayerKey) === layerKey
                 || childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
-
                 let localLayerKey = layerKey;
                 let childIsReloaded = false;
                 if (childrenLayerNames.indexOf(layerTreeUtils.stripPrefix(activeLayerKey)) > -1) {
@@ -2749,6 +2798,8 @@ module.exports = {
                 }
             }
         });
+
+
     },
 
     /**

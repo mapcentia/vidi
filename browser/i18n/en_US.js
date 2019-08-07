@@ -37,7 +37,6 @@ module.exports = {
         "Search with this object": "Search with this object",
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
-        "Clear map": "Clear map",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",
@@ -159,6 +158,7 @@ module.exports = {
         "Cancel": "Cancel",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
+        "No drawings in the map": "No drawings in the map",
 
         "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
 
@@ -168,6 +168,7 @@ module.exports = {
         "Finish drawing": "Finish drawing",
 
         // LayerTree
+        "max_number_of_loaded_features_was_reached_notification": "The maximum number of loaded features was reached, please use filters",
         "Layer has following children": "Layer has following children",
         "Predefined": "Predefined",
         "Arbitrary": "Arbitrary",
@@ -307,6 +308,34 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Precipitation": "Precipitation",
+        "Requested borehole is not in a viewport (data is not loaded)": "Requested borehole is not in a viewport (data is not loaded)",
+        "Minimize dashboard": "Minimize dashboard",
+        "Expand dashboard": "Expand dashboard",
+        "Open dashboard halfway": "Open dashboard halfway",
+        "Sign in in order to access user projects": "Sign in in order to access user projects",
+        "User is already authenticated": "User is already authenticated",
+        "Add to the dashboard": "Add to the dashboard",
+        "Start project": "Start project",
+        "Delete project": "Delete project",
+        "Refresh project": "Refresh project",
+        "Seize project": "Seize project",
+        "Local projects": "Local projects",
+        "No local projects": "No local projects",
+        "User projects": "User projects",
+        "No user projects": "No user projects",
+        "Edit": "Edit",
+        "Show menu": "Show menu",
+        "Max": "Max",
+        "Latest": "Latest",
+        "Intake": "Intake",
+        "n.d.": "n.d.",
+        "The profile with the new datatype is being created": "The profile with the new datatype is being created",
+        "Not selected": "Not selected",
+        "Datatype": "Datatype",
+        "Change datatype": "Change datatype",
+        "Select datatype": "Select datatype",
+        "Click on the modal header to expand or minify the Dashboard": "Click on the modal header to expand or minify the Dashboard",
         "Groundwater": "Groundwater",
         "Streams": "Streams",
         "Rain": "Rain",
@@ -339,6 +368,7 @@ module.exports = {
         "Enter borehole, installation, station": "Enter borehole, installation, station",
         "Select another chemical": "Select another chemical",
         "Nothing found": "Nothing found",
+        "Boreholes": "Boreholes",
         "Continue": "Continue",
         "Continue without selecting chemical": "Continue without selecting chemical",
         "boreholes_time_series_with_chemicals": "Boreholes time series with chemicals",

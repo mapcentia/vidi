@@ -37,6 +37,27 @@ module.exports = {
 
     "removeDisabledLayersFromLegend": true,
 
+    // ===========
+    // Schemata.
+    // Specifies schemas that should be loaded.
+    // ===========
+    //"schemata": [
+    //    "my_schema",
+    //    "my_schema.my_layer",
+    //    "tag:my_tag"
+    //],
+
+    // ===============
+    // State snapshot.
+    // Overrides the schemata setting and specifies the schema to load.
+    // ===============
+    //"snapshot": "state_snapshot_IDENTIFIER",
+
+    // ===============================================================
+    // Startup modal.
+    // The modal is shown upon Vidi initialization and can be hidden once or forever (until cookies reset).
+    // ===============================================================
+    //"startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>",
 
     // ===============================================================
     // Startup modal supression templates.
@@ -272,7 +293,8 @@ module.exports = {
     // =================================
 
     "searchConfig": {
-        "komkode": ["851", "151"] // Example of config for danish search
+        "komkode": ["851", "151"], // Example of config for danish search
+        "google": {"apiKey": "GOOGLE_MAPS_API_KEY"}
     },
 
     // =========================================================

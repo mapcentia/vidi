@@ -82,14 +82,27 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
             parsedBody = localParsedBody;
         } catch (e) {}
 
-        if (parsedBody) {
+        let selectOnlyForOwner = false;
+        if (req.query && req.query.ownerOnly && (req.query.ownerOnly === 'true' || req.query.ownerOnly === true)) {
+            selectOnlyForOwner = true;
+        }
+
+        if (parsedBody && parsedBody.data) {
             // Filter by browser and user ownership
             let results = [];
             parsedBody.data.map(item => {
                 let parsedSnapshot = JSON.parse(item.value);
-                if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
-                    parsedSnapshot.userId && parsedSnapshot.userId === userId) {
-                    results.push(parsedSnapshot);
+                if (selectOnlyForOwner) {
+                    if (browserId && parsedSnapshot.anonymous && parsedSnapshot.browserId === browserId) {
+                        results.push(parsedSnapshot);
+                    } else if (userId && parsedSnapshot.userId === userId) {
+                        results.push(parsedSnapshot);
+                    }
+                } else {
+                    if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
+                        parsedSnapshot.userId && parsedSnapshot.userId === userId) {
+                        results.push(parsedSnapshot);
+                    }
                 }
             });
 
@@ -194,7 +207,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
             stateSnapshotCopy.id = generatedKey;
             stateSnapshotCopy.created_at = currentDate.toISOString();
 
-            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database || !stateSnapshotCopy.schema) {
+            if (!stateSnapshotCopy.host || !stateSnapshotCopy.database) {
                 shared.throwError(res, 'MISSING_DATA');
             } else {
                 let token = generateToken(stateSnapshotCopy);

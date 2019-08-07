@@ -49,7 +49,7 @@ module.exports = {
     set: function (o) {
         backboneEvents = o.backboneEvents;
     },
-    init: function () {
+    init: function (externalSchemataStr = false) {
         return new Promise(function(resolve, reject) {
             var schemata;
             if (typeof window.vidiConfig.schemata === "object" && window.vidiConfig.schemata.length > 0) {
@@ -58,12 +58,17 @@ module.exports = {
                 } else {
                     schemata = window.vidiConfig.schemata;
                 }
+
                 schemataStr = schemata.join(",");
+            } else if (externalSchemataStr) {
+                schemataStr = externalSchemataStr;
             }
+
             if (!schemataStr) {
                 reject(new Error('No schemata'));
                 return;
             }
+
             $.ajax({
                 url: '/api/setting/' + db + '/' + schemataStr,
                 scriptCharset: "utf-8",

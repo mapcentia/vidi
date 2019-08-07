@@ -8,6 +8,8 @@
  * Returning PNG image with a Vidi state snapshot screenshot
  */
 
+require('dotenv').config();
+
 var express = require('express');
 var router = express.Router();
 var headless = require('./headlessBrowser');
@@ -15,18 +17,19 @@ var headless = require('./headlessBrowser');
 const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let errorMessages = [];
     if (!localRequest.params.db) errorMessages.push(`database is not defined`);
-    if (!localRequest.query.state) errorMessages.push(`state is not defined`);
+    if (!localRequest.query.state && !localRequest.query.filter) errorMessages.push(`state or filter paramter is not defined`);
     if (!localRequest.headers.host) errorMessages.push(`"Host" header has to be correctly passed to the app`);
 
     let width = (localRequest.query.width && parseInt(localRequest.query.width) > 0 ? parseInt(localRequest.query.width) : 800);
     let height = (localRequest.query.height && parseInt(localRequest.query.height) > 0 ? parseInt(localRequest.query.height) : 600);
     let config = (localRequest.query.config ? `&config=${localRequest.query.config}` : ``);
 
-    if (errorMessages.length === 0) {
-        let url = `http://${localRequest.headers.host}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl&state=${localRequest.query.state}${config}`;
-        
-        console.log(url);
+    let state = (localRequest.query.state ? `&state=${localRequest.query.state}` : ``);
+    let filter = (localRequest.query.filter ? `&initialFilter=${localRequest.query.filter}` : ``);
 
+    if (errorMessages.length === 0) {
+        const port = process.env.PORT ? process.env.PORT : 3000;
+        let url = `http://127.0.0.1:${port}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
         headless.getBrowser().then(browser => {
             browser.newPage().then(page => {
                 page.emulate({
@@ -35,7 +38,9 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                 }).then(() => {
                     page.on('console', msg => {
                         console.log(msg.text());
+
                         if (msg.text().indexOf(`Vidi is now loaded`) !== -1) {
+
                             console.log('App was loaded, generating PNG');
                             setTimeout(() => {
                                 page.evaluate(`$('.leaflet-top').remove();`).then(() => {
