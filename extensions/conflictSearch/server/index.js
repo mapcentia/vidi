@@ -72,6 +72,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 geomField = metaDataFinal.data[count].f_geometry_column;
                 srid = metaDataFinal.data[count].srid;
 
+                console.log(table);
+
                 sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
 
                 queryables = JSON.parse(metaDataKeys[table.split(".")[1]].fieldconf);
@@ -92,14 +94,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 request.post(options, function (err, res, body) {
 
                     var jsfile, message = null, result, time;
-
-                    if (err || res.statusCode !== 200) {
-                        response.status(401).send({
-                            success: false,
-                            message: body
-                        });
-                        return;
-                    }
 
                     try {
                         jsfile = JSON.parse(body);
@@ -159,7 +153,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         num: count + "/" + metaDataFinal.data.length,
                         time: time,
                         id: socketId,
-                        error: err || null,
+                        error: res.statusCode !== 200 ? JSON.parse(body).message : null,
                         message: message,
                         sql: metaDataKeys[table.split(".")[1]].sql,
                         meta: metaDataKeys[table.split(".")[1]]
@@ -187,8 +181,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     }
                     iter();
                 });
-
-
             })();
         } else {
             console.log(err);
