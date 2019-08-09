@@ -17,6 +17,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Home button on `embed.tmpl` will set the map to the initial extent if a snapshot-state is invoked.
 - Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
 - Standard template for pop-up can now render videos from URLs in data. Can be set up in GC2.
+- Infinity levels in layer tree. The levels are set with the `vidi_sub_group` Meta property in GC2 like: `sub-group 1|sub-group 2|sub-group 3`
+
 
 ### Fixed
 - Better wrapping of layer tools when side panel is narrow.
