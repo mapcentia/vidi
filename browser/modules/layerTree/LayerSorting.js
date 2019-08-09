@@ -194,7 +194,8 @@ class LayerSorting {
             }
 
             group.children.map(groupChild => {
-                if (`id` in groupChild === false || !groupChild.id) {
+                if ((`id` in groupChild === false || !groupChild.id) &&
+                    (!groupChild.layer || !groupChild.layer.f_table_schema || !groupChild.layer.f_table_name)) {
                     errorMessage = `Invalid group child id`;
                     return false;
                 }
@@ -206,7 +207,8 @@ class LayerSorting {
 
                 if (groupChild.type === GROUP_CHILD_TYPE_GROUP) {
                     groupChild.children.map(subGroupChild => {
-                        if (`id` in subGroupChild === false || !subGroupChild.id) {
+                        if ((`id` in subGroupChild === false || !subGroupChild.id) &&
+                        (!subGroupChild.layer || !subGroupChild.layer.f_table_schema || !subGroupChild.layer.f_table_name)){
                             errorMessage = `Invalid subgroup child id`;
                             return false;
                         }

@@ -6,8 +6,9 @@
 
 'use strict';
 
-import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP} from './layerTree/LayerSorting';
+import {GROUP_CHILD_TYPE_LAYER} from './layerTree/LayerSorting';
 import {LAYER} from './layerTree/constants';
+import layerTreeUtils from './layerTree/utils';
 
 /**
  *
@@ -176,29 +177,36 @@ module.exports = {
         let order = layerTree.getLatestLayersOrder();
         let layers = _self.getMapLayers();
         if (order) {
-            order.map((orderItem, groupIndex) => {
-                orderItem.children.map((item, index) => {
-                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+            let indexCounter = 100;
+            const orderSubgroup = (order) => {
+                order.map((item) => {
+                    if (item.type && item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {
-                            if (layer.id && (layer.id.replace(`v:`, ``) === item.id.replace(`v:`, ``))) {
-                                let zIndex = ((orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                            let itemId = false;
+                            if (item.layer) {
+                                itemId = item.layer.f_table_schema + '.' + item.layer.f_table_name;
+                            } else {
+                                itemId = item.id;
+                            }
+
+                            if (!itemId) throw Error(`Unable to detect order item identifier`);
+
+                            if (layer.id && (layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(itemId))) {
+                                let zIndex = (10000 - indexCounter);
                                 layer.setZIndex(zIndex);
+                                indexCounter++;
                             }
                         });
-                    } else if (item.type === GROUP_CHILD_TYPE_GROUP) {
-                        item.children.map((childItem, childIndex) => {
-                            layers.map(layer => {
-                                if (layer.id && (layer.id.replace(`v:`, ``) === childItem.id.replace(`v:`, ``))) {
-                                    let zIndex = ((item.children.length - childIndex) + (orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
-                                    layer.setZIndex(zIndex);
-                                }
-                            });
-                        });
+                    } else if (item.children) {
+                        orderSubgroup(item.children);
                     } else {
+                        console.error(item);
                         throw new Error(`Invalid order object type`);
                     }
                 });
-            });
+            };
+
+            orderSubgroup(order);            
         }
     },
 

@@ -30,7 +30,7 @@ class MarkupGenerator {
         return (`<div class="panel panel-default panel-layertree" id="layer-panel-${base64GroupName}">
             <div class="panel-heading" role="tab" style="padding: 8px 0px 8px 15px;">
                 <h4 class="panel-title">
-                    <i style="float: right;" class="material-icons layer-move-vert layer-move-vert-group">more_vert</i>
+                    <i style="float: right;" class="material-icons layer-move-vert">more_vert</i>
                     <div class="layer-count badge">
                         <span>0</span> / <span></span>
                     </div>
@@ -174,7 +174,7 @@ class MarkupGenerator {
                             </a><span class="js-toggle-filters-number-of-filters">0</span>
                         </div>
                         
-                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert ${isSubLayer ? `layer-move-vert-subgroup` : `layer-move-vert-group`}">more_vert</i>
+                        <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
         
                         <div style="float: right; padding-top: 12px; padding-right: 10px;">${addButton}
                             <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
