@@ -6,7 +6,7 @@
             "type": "shell",
             "label": "build",
             "windows": {
-                "command": "grunt appendBuildHashToVersion browserify:publish version --force"
+                "command": "grunt appendBuildHashToVersion hogan browserify:publish version --force --verbose"
             }
         },
         {

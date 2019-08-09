@@ -44,6 +44,12 @@ var urlparser = require('./../../../browser/modules/urlparser');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var layers = require('./../../../browser/modules/layers');
+
+/**
+ *
  * @type {exports|module.exports}
  */
 var jsts = require('jsts');
@@ -72,6 +78,14 @@ var form_id = 'document-feature-form'
 
 var request = require('request');
 
+// VMR
+// Check for key in url, else leave undefined
+var aKey = undefined; 
+
+if (urlparser.urlVars.adressKey) {
+    aKey = urlparser.urlVars.adressKey;
+}
+
 /**
  *
  */
@@ -79,7 +93,6 @@ var Terraformer = require('terraformer-wkt-parser');
 var transformPoint;
 
 var _result;
-
 
 var jquery = require('jquery');
 require('snackbarjs');
@@ -112,13 +125,51 @@ var resultLayer = new L.FeatureGroup()
 
 
 /**
+ * VMR get from DB on adress
+ * @private
+ */
+var getExistingDocs = function (key) {
+    // turn on layers with filter on address! - easy peasy?
+    snack(__("Start med nøgle") + ' ' + key)
+
+    //build the right stuff
+    var DClayers = [];
+    metaData.data.forEach(function(d) {
+        if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+        }
+    });
+
+    //common filter
+    var filter = 'Filter=<Filter><PropertyIsEqualTo><PropertyName>'+'adresse'+'</PropertyName><Literal>'+key+'</Literal></PropertyIsEqualTo></Filter>'
+    filter = encodeURI(filter)
+
+    //add layers with filter
+    DClayers.forEach( function(l){
+        layers.addLayer(l,filter)
+    })   
+
+};
+
+
+var clearExistingDocFilters = function() {
+    // clear filters from layers that might be on! - then reload
+    console.log('documentCreate - cleaning filters for reload')
+}
+
+/**
  *
  * @private
  */
 var mapObj;
     
-var onLoad = function () {
+var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
+    
+    // VMR
+    // filter to content on key
+    getExistingDocs($('#documentCreate-custom-search').val());
+    
     // Reset layer
     resultLayer.clearLayers();
     resultLayer.addLayer(this.layer)
@@ -130,7 +181,6 @@ var onLoad = function () {
     $('#documentCreate-feature-meta').html('')
     $('#'+select_id).val('')
     
-
     //move to marker
     cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
 }
@@ -189,42 +239,40 @@ var documentCreateFeatureAdd = function (tablename) {
 }
 
 /**
+ * 
+ * @param {*} tablename 
+ * @param {*} feature 
+ */
+
+var snack = function (msg) {
+    jquery.snackbar({
+        htmlAllowed: true,
+        content: '<p>'+msg+'</p>',
+        timeout: 1000000
+    });
+}
+    
+
+/**
  * Function adds feature to using rest-API, make this configurable to any other rest-based service
  * If it's set in config
  */
 var documentCreateFeatureSend = function (tablename,feature) {
-    // Add the feature to GC2 and Docunote
+    // Send tile feature to DocuNote!
     console.log('documentCreate - Send feature')
     console.log(feature)
 
-    // Ship this off to GC2
-    jquery.ajax({
-        url: gc2host+'/api/v2/feature/'+config.extensionConfig.documentCreate.GC2user+'@'+urlparser.db+'/'+urlparser.schema+'.'+tablename+'.'+metaDataKeys[urlparser.schema+'.'+tablename].f_geometry_column+'/4326',
-        dataType: 'json',
-        type: 'post',
-        contentType: 'application/json',
-        data: JSON.stringify(feature),
-        headers: {
-            'GC2-API-KEY': config.extensionConfig.documentCreate.GC2key,
-            'X-Alt-Referer': gc2host
+    xhr = $.ajax({
+        method: "POST",
+        url: "/api/extension/documentCreateSendFeature",
+        data: feature,
+        scriptCharset: "utf-8",
+        success: function (response) {
+            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
         },
-        success: function( data, textStatus, jQxhr ){
-            jquery.snackbar({
-                htmlAllowed: true,
-                content: '<p>'+__("GC2 Success")+'</p>',
-                timeout: 1000000
-            });
-            console.log( jQxhr )
-        },
-        error: function( jqXhr, textStatus, errorThrown ){
-            jquery.snackbar({
-                htmlAllowed: true,
-                content: '<p>'+__("GC2 Error")+': '+jqXhr.responseJSON.message+'</p>',
-                timeout: 1000000
-            });
-            console.log( jqXhr );
+        error: function () {
+            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
         }
-
     });
 
 }
@@ -328,7 +376,15 @@ module.exports = {
             "GC2 Error": {
                 "da_DK": "Der skete en fejl da hændelsen skulle oprettes",
                 "en_US": "There was an error while saving the action" 
-            }
+            },
+            "Start med nøgle": {
+                "da_DK": "Leder efter hændelser på adresse",
+                "en_US": "Looking for actions on adress" 
+            },
+            "Start uden nøgle": {
+                "da_DK": "Nulstiller filters",
+                "en_US": "Resetting filters" 
+            },
         };
 
         /**
@@ -344,7 +400,6 @@ module.exports = {
                 return txt;
             }
         };
-
 
          /**
          * This function compiles values in selectbox from layers in schema with the correct tag
@@ -601,13 +656,25 @@ module.exports = {
                     utils.cursorStyle().reset();
                     $("#" + id).val('');
                     resultLayer.clearLayers();
+                    clearExistingDocFilters();
                     $('#documentCreate-feature-content').hide();
                 });
 
                 console.log('documentCreate - Mounted')
 
+                //VMR
+                // If key is set, go there and get stuff!
+
+                if (aKey) {
+                    getExistingDocs(aKey)
+                } else {
+                    clearExistingDocFilters()
+                }
+
+
+
                 //Initiate searchBar
-                search.init(onLoad, id, true, false);
+                search.init(onSearchLoad, id, true, false);
                 cloud.get().map.addLayer(resultLayer);
 
                 // Build select box from metadata
