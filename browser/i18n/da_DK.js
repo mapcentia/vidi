@@ -309,6 +309,8 @@ module.exports = {
         "Config switcher block description": "# Config switcher block description",
 
         //WatsonC
+        "Remove": "Fjern",
+        "Create new": "Opret ny",
         "Precipitation": "# Precipitation",
         "Requested borehole is not in a viewport (data is not loaded)": "# Requested borehole is not in a viewport (data is not loaded)",
         "Minimize dashboard": "Minimer dashboard",
@@ -400,7 +402,8 @@ module.exports = {
         "At least one y axis has to be provided": "Der skal være mindst en y-akse",
         "Data series": "Data serier",
         "Borehole": "DGU",
-        "No timeseries were created yet": "Ingen tidsserier er oprettet endnu",
+        "Create a new table and then drag your desired data series into the box - and you're off": "Opret en ny tabel og træk herefter dine ønskede dataserier over i boksen - så er du i gang",
+        "No timeseries were created yet": "Ingen tabeller oprettet",
         "No timeseries were created or set as active yet": "Ingen tidsserier er skabt eller aktiveret endnu",
         "No plots were created yet": "Der er endnu ikke oprettet nogle grafer",
         "Please select the measurement": "Vælg venligst målingen",

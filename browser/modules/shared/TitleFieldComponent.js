@@ -74,7 +74,7 @@ class TitleFieldComponent extends React.Component {
                 disabled={this.props.disabled}
                 type="text"
                 className="form-control"
-                placeholder={__("New title")}
+                placeholder={this.props.inputPlaceholder ? this.props.inputPlaceholder : __("New title")}
                 onChange={this.onChange.bind(this)}
                 onKeyPress={this.handleKeyPress.bind(this)}
                 style={inputStyle}/>
@@ -85,7 +85,7 @@ class TitleFieldComponent extends React.Component {
                     onClick={this.onSave.bind(this)}
                     disabled={this.props.disabled || !this.state.title}
                     style={buttonStyle}>
-                    {this.props.showIcon ? (<i className="material-icons">save</i>) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
+                    {this.props.showIcon ? ((this.props.saveIcon ? this.props.saveIcon : (<i className="material-icons">save</i>))) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
                 {cancelControl}
             </span>
