@@ -50,6 +50,14 @@ var layers = require('./../../../browser/modules/layers');
 
 /**
  *
+ * @type {*|exports|module.exports}
+ */
+var layerTree = require('./../../../browser/modules/layerTree');
+
+
+
+/**
+ *
  * @type {exports|module.exports}
  */
 var jsts = require('jsts');
@@ -130,7 +138,7 @@ var resultLayer = new L.FeatureGroup()
  */
 var getExistingDocs = function (key) {
     // turn on layers with filter on address! - easy peasy?
-    snack(__("Start med nøgle") + ' ' + key)
+    snack(__('Start med nøgle') + ' ' + key)
 
     //build the right stuff
     var DClayers = [];
@@ -140,22 +148,76 @@ var getExistingDocs = function (key) {
         }
     });
 
-    //common filter
-    var filter = 'Filter=<Filter><PropertyIsEqualTo><PropertyName>'+'adresse'+'</PropertyName><Literal>'+key+'</Literal></PropertyIsEqualTo></Filter>'
-    filter = encodeURI(filter)
-
-    //add layers with filter
-    DClayers.forEach( function(l){
-        layers.addLayer(l,filter)
-    })   
-
+ 
+    // TODO byg dette filter pbga config el gc2 - håndbygget nu
+    var filter = {
+        "vmr.vand": {
+          "match": "any",
+          "columns": [
+            {
+              "fieldname": "adresse",
+              "expression": "like",
+              "value": key,
+              "restriction": false
+            }
+          ]
+        },
+        "vmr.spildevand": {
+            "match": "any",
+            "columns": [
+              {
+                "fieldname": "adresse",
+                "expression": "like",
+                "value": key,
+                "restriction": false
+              }
+            ]
+          }
+        }
+    
+    // apply filter
+    documentCreateApplyFilter(filter)
 };
 
+var documentCreateApplyFilter = function (filter) {
+    for (let layerKey in filter){
+        console.log('Apply filter to '+layerKey)
 
-var clearExistingDocFilters = function() {
+        //Make sure layer is on
+        layerTree.reloadLayer(layerKey)
+
+        //Toggle the filter
+        layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+
+        //Reload
+        layerTree.reloadLayerOnFiltersChange(layerKey)
+
+        //TODO fix zoom-to
+        //cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
+
+        continue;
+    }
+};
+
+var clearExistingDocFilters = function () {
     // clear filters from layers that might be on! - then reload
     console.log('documentCreate - cleaning filters for reload')
-}
+
+    //TODO byg dette fra config! - den er bare tom
+    var filter = {
+        "vmr.vand": {
+            "match": "any",
+            "columns": []
+        },
+        "vmr.spildevand": {
+            "match": "any",
+            "columns": []
+        }
+    }
+
+    // apply filter
+    documentCreateApplyFilter(filter)
+};
 
 /**
  *
@@ -656,7 +718,8 @@ module.exports = {
                     utils.cursorStyle().reset();
                     $("#" + id).val('');
                     resultLayer.clearLayers();
-                    clearExistingDocFilters();
+                    //TODO find tne måde at håndtere clear ordentligt
+                    //clearExistingDocFilters();
                     $('#documentCreate-feature-content').hide();
                 });
 
