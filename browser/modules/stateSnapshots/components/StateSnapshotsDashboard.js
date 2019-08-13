@@ -41,7 +41,7 @@ class StateSnapshotsDashboard extends React.Component {
         if (cookie.get('vidi-state-tracker')) {
             trackingCookie = cookie.get('vidi-state-tracker');
         } else {
-            cookie.set('vidi-state-tracker', trackingCookie);
+            cookie.set('vidi-state-tracker', trackingCookie, { expires: 365 });
         }
     }
 
