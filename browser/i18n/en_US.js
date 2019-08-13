@@ -309,6 +309,7 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Create new": "Create new",
         "Precipitation": "Precipitation",
         "Requested borehole is not in a viewport (data is not loaded)": "Requested borehole is not in a viewport (data is not loaded)",
         "Minimize dashboard": "Minimize dashboard",
@@ -400,7 +401,8 @@ module.exports = {
         "At least one y axis has to be provided": "At least one y axis has to be provided",
         "Data series": "Data series",
         "Borehole": "Borehole",
-        "No time series were created yet": "No time series were created yet",
+        "Create a new table and then drag your desired data series into the box - and you're off": "Create a new table and then drag your desired data series into the box - and you're off",
+        "No timeseries were created yet": "No timeseries were created yet",
         "No timeseries were created or set as active yet": "No timeseries were created or set as active yet",
         "No plots were created yet": "No plots were created yet",
         "Please select the measurement": "Please select the measurement",
