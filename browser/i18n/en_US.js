@@ -309,6 +309,7 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Remove": "Remove",
         "Create new": "Create new",
         "Precipitation": "Precipitation",
         "Requested borehole is not in a viewport (data is not loaded)": "Requested borehole is not in a viewport (data is not loaded)",
