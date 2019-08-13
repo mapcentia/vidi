@@ -6,7 +6,7 @@
 
 'use strict';
 
-const { QUEUE_PROCESSING_INTERVAL, QUEUE_STORE_NAME, ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST, LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
+const { QUEUE_PROCESSING_INTERVAL, ONLINE_STATUS_CHECK_LIMIT, QUEUE_STORE_NAME, ADD_REQUEST, UPDATE_REQUEST, DELETE_REQUEST, LOG, QUEUE_DEFAULT_PKEY } = require('./constants');
 
 /*
 Specifies if the first and only element of the queue should
@@ -23,7 +23,6 @@ definitely not be retrieved until page reload
 let onlineStatusCanBeRetrievedAtSomePoint = true;
 
 let attemptsToCheckOnlineStatus = 0;
-let onlineStatusCheckLimit = 3;
 
 /**
  * FIFO queue abstraction. Queue items are stored
@@ -98,9 +97,9 @@ class Queue {
                         }
                     } else if (textStatus === `success`) {
                         attemptsToCheckOnlineStatus++;
-                        if (attemptsToCheckOnlineStatus <= onlineStatusCheckLimit) {
-                            console.warn(`Unable to determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${onlineStatusCheckLimit}`);
-                        } else if (attemptsToCheckOnlineStatus === (onlineStatusCheckLimit + 1)) {
+                        if (attemptsToCheckOnlineStatus <= ONLINE_STATUS_CHECK_LIMIT) {
+                            console.warn(`Unable to determine the online status (connection check is not managed by service worker yet), attempt ${attemptsToCheckOnlineStatus} of ${ONLINE_STATUS_CHECK_LIMIT}`);
+                        } else if (attemptsToCheckOnlineStatus === (ONLINE_STATUS_CHECK_LIMIT + 1)) {
                             console.warn(`Limit of connection check attempts exceeded, please reload page to activate service worker`);
                         }
                     } else {

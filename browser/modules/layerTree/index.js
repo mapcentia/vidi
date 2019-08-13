@@ -268,7 +268,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
+            parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
