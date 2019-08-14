@@ -42,7 +42,9 @@
             "geom_ext": {
               "x": "lat",
               "y": "lng"
-            }
+            },
+            "filterCol": "adresse",
+            "filterExp": "="
           },
           {
             "table": "vand",
@@ -64,7 +66,9 @@
             "geom_ext": {
               "x": "lat",
               "y": "lng"
-            }
+            },
+            "filterCol": "adresse",
+            "filterExp": "="
           }
         ]
       }

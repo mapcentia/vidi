@@ -32,14 +32,6 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     return;
 });
 
-router.get('/api/extension/documentCreategetExistingDocsPos', function (req, response) {
-    //Based on key, return centrepoint for features on selected layers that match query
-    //alternatively zoom to layer in client
-    //Returns lat/lng to zoom to
-    response.send(req.message)
-    return;
-});
-
     /**
     //This sent things to GC2
     jquery.ajax({

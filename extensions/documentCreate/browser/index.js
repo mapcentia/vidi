@@ -10,7 +10,7 @@
  *
  * @type {*|exports|module.exports}
  */
-var cloud;
+var cloud = require('./../../../browser/modules/cloud');
 
 /**
  *
@@ -88,10 +88,10 @@ var request = require('request');
 
 // VMR
 // Check for key in url, else leave undefined
-var aKey = undefined; 
+var filterKey = undefined; 
 
-if (urlparser.urlVars.adressKey) {
-    aKey = urlparser.urlVars.adressKey;
+if (urlparser.urlVars.filterKey) {
+    filterKey = urlparser.urlVars.filterKey;
 }
 
 /**
@@ -130,6 +130,12 @@ var config = require('../../../config/config.js');
  * @private
  */
 var resultLayer = new L.FeatureGroup()
+var DClayers = [];
+metaData.data.forEach(function(d) {
+    if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+        DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+    }
+});
 
 
 /**
@@ -141,49 +147,106 @@ var getExistingDocs = function (key) {
     snack(__('Start med nøgle') + ' ' + key)
 
     //build the right stuff
-    var DClayers = [];
-    metaData.data.forEach(function(d) {
-        if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-        }
-    });
+    var filter = documentCreateBuildFilter(key)
 
- 
-    // TODO byg dette filter pbga config el gc2 - håndbygget nu
-    var filter = {
-        "vmr.vand": {
-          "match": "any",
-          "columns": [
-            {
-              "fieldname": "adresse",
-              "expression": "like",
-              "value": key,
-              "restriction": false
-            }
-          ]
-        },
-        "vmr.spildevand": {
-            "match": "any",
-            "columns": [
-              {
-                "fieldname": "adresse",
-                "expression": "like",
-                "value": key,
-                "restriction": false
-              }
-            ]
-          }
-        }
-    
     // apply filter
     documentCreateApplyFilter(filter)
+
+    // TODO fix zoom-to
+    var bounds = []
+    var bounds = documentCreateGetFilterBounds(key)
+    if (bounds.length !== 0) {
+        //There is stuff, go there
+        console.log(bounds.length)
+        cloud.get().map.fitBounds(bounds);
+    }
 };
+
+var documentCreateGetFilterBounds = function (key) {
+
+    //build query
+    var qrystr = 'WITH CTE (geom) AS ('
+    var tables = []
+    var boundsArr = []
+
+    for (let l in DClayers) {
+        var tablename = DClayers[l].split('.')[1] //hack
+        var filterCol = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol
+        var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
+
+        tables.push('SELECT the_geom FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+    }
+
+    qrystr = qrystr + tables.join(' UNION ')
+    //qrystr = qrystr + ') select ST_Extent(geom) from cte'
+    qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte'
+
+    // query SQL for stuff
+    $.ajax({
+        url: gc2host + '/api/v1/sql/intranote?q='+qrystr,
+        type: "get",
+        async: false,
+        success: function(data) {
+            //check for stuff
+            if (data.features[0].properties.st_extent == null) {
+                //nothing.. return null
+                return null
+            } else {
+                //mangle
+                boundsArr = []
+                var str = data.features[0].properties.st_extent
+                str = str.substring(4, str.length - 1)
+                var arr = str.split(',').join(' ').split(' ')
+
+                boundsArr.push([parseFloat(arr[0]), parseFloat(arr[1])])
+                boundsArr.push([parseFloat(arr[2]), parseFloat(arr[3])])
+
+            }
+        }
+    });
+    return boundsArr
+}
+
+var documentCreateBuildFilter = function (key = undefined) {
+
+    //Empty stuff
+    var filter = {}
+
+    for (let l in DClayers) {
+
+        var tablename = DClayers[l].split('.')[1] //hack
+
+        if (!key) {
+            // If no key is set, create the "clear" filter
+            filter[DClayers[l]] = {
+                "match": "any",
+                "columns": []
+            }
+        } else {
+            // set the filter based on config
+            filter[DClayers[l]] = {
+                "match": "any",
+                "columns": [{
+                    "fieldname": config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol,
+                    "expression": config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp,
+                    "value": key,
+                    "restriction": false
+                }]
+            }
+        }
+
+    }
+    console.log(filter)
+    // Return the stuff
+    return filter
+}
 
 var documentCreateApplyFilter = function (filter) {
     for (let layerKey in filter){
         console.log('Apply filter to '+layerKey)
 
         //Make sure layer is on
+        //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
         layerTree.reloadLayer(layerKey)
 
         //Toggle the filter
@@ -191,9 +254,6 @@ var documentCreateApplyFilter = function (filter) {
 
         //Reload
         layerTree.reloadLayerOnFiltersChange(layerKey)
-
-        //TODO fix zoom-to
-        //cloud.get().map.fitBounds(layer.getBounds(), {maxZoom: 16});
 
         continue;
     }
@@ -203,17 +263,8 @@ var clearExistingDocFilters = function () {
     // clear filters from layers that might be on! - then reload
     console.log('documentCreate - cleaning filters for reload')
 
-    //TODO byg dette fra config! - den er bare tom
-    var filter = {
-        "vmr.vand": {
-            "match": "any",
-            "columns": []
-        },
-        "vmr.spildevand": {
-            "match": "any",
-            "columns": []
-        }
-    }
+    //Buildfilter with no value for "clear" value
+    var filter = documentCreateBuildFilter()
 
     // apply filter
     documentCreateApplyFilter(filter)
@@ -310,7 +361,7 @@ var snack = function (msg) {
     jquery.snackbar({
         htmlAllowed: true,
         content: '<p>'+msg+'</p>',
-        timeout: 1000000
+        timeout: 10000
     });
 }
     
@@ -728,8 +779,8 @@ module.exports = {
                 //VMR
                 // If key is set, go there and get stuff!
 
-                if (aKey) {
-                    getExistingDocs(aKey)
+                if (filterKey) {
+                    getExistingDocs(filterKey)
                 } else {
                     clearExistingDocFilters()
                 }
