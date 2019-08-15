@@ -250,6 +250,8 @@ describe('Layer tree common', () => {
         await helpers.sleep(1000);
         await page.evaluate(`$('[href="#collapseRGFyIGVzIFNhbGFhbSBMYW5kIFVzZSBhbmQgSW5mb3JtYWwgU2V0dGxlbWVudCBEYXRhIFNldA"]').trigger('click')`);
         await helpers.sleep(1000);
+        await page.evaluate(`$('[data-gc2-subgroup-id="Urban spatial development 1"]').find('.js-subgroup-toggle-button').first().trigger('click')`);
+        await helpers.sleep(1000);
 
         expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').length`)).to.equal(1);
         expect(await page.evaluate(`$('input[data-gc2-id="test.polygon"]').is(':checked')`)).to.be.true;
@@ -370,7 +372,7 @@ describe('Layer tree common', () => {
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(2).text()`)).to.equal(`Snapping`);
         expect(await page.evaluate(`$('#layer-slide').find('[data-toggle="collapse"]').eq(3).text()`)).to.equal(`Dynamic load test`);
 
-        let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw .layer-move-vert-group');
+        let e = await page.$('#layer-panel-UHVibGljIGdyb3Vw .layer-move-vert');
         let box = await e.boundingBox();
         let x = box.x + box.width / 2;
         let y = box.y + box.height / 2;
