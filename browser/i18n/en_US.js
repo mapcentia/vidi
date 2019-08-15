@@ -335,6 +335,7 @@ module.exports = {
         "n.d.": "n.d.",
         "The profile with the new datatype is being created": "The profile with the new datatype is being created",
         "Not selected": "Not selected",
+        "Save and exit": "Save and exit",
         "Datatype": "Datatype",
         "Change datatype": "Change datatype",
         "Show without data type": "Show without data type",
