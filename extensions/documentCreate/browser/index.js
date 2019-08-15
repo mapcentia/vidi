@@ -28,7 +28,7 @@ var utils;
  *
  * @type {*|exports|module.exports}
  */
-var backboneEvents;
+var backboneEvents = require('./../../../browser/modules/backboneEvents');
 
 /**
  *
@@ -88,12 +88,15 @@ var request = require('request');
 
 // VMR
 // Check for key in url, else leave undefined
-var filterKey = undefined; 
+var filterKey = undefined;
+var fileIdent = undefined; 
 
 if (urlparser.urlVars.filterKey) {
     filterKey = urlparser.urlVars.filterKey;
 }
-
+if (urlparser.urlVars.fileIdent) {
+    fileIdent = urlparser.urlVars.fileIdent;
+}
 /**
  *
  */
@@ -140,29 +143,36 @@ metaData.data.forEach(function(d) {
 
 /**
  * VMR get from DB on adress
+ * key String - Search phrase
+ * fileIdent  - search "fixed" column
  * @private
  */
-var getExistingDocs = function (key) {
+var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
     snack(__('Start med nøgle') + ' ' + key)
 
     //build the right stuff
-    var filter = documentCreateBuildFilter(key)
+    var filter = documentCreateBuildFilter(key, fileIdent)
 
     // apply filter
     documentCreateApplyFilter(filter)
 
     // TODO fix zoom-to
     var bounds = []
-    var bounds = documentCreateGetFilterBounds(key)
+    var bounds = documentCreateGetFilterBounds(key, fileIdent)
     if (bounds.length !== 0) {
         //There is stuff, go there
-        console.log(bounds.length)
-        cloud.get().map.fitBounds(bounds);
+        var myBounds = new L.LatLngBounds(bounds)
+        //console.log(myBounds)
+
+        //wait for ready event!
+        backboneEvents.get().once('allDoneLoading:layers', () => {
+            cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
+        }) 
     }
 };
 
-var documentCreateGetFilterBounds = function (key) {
+var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 
     //build query
     var qrystr = 'WITH CTE (geom) AS ('
@@ -171,15 +181,26 @@ var documentCreateGetFilterBounds = function (key) {
 
     for (let l in DClayers) {
         var tablename = DClayers[l].split('.')[1] //hack
-        var filterCol = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol
-        var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
+        // set the filter based on config
+        var filterCol, filterExp;
 
-        tables.push('SELECT the_geom FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+        // If looking by fileIdent
+        if (isfileIdent) {
+            //Ident filter
+            var filterCol = config.extensionConfig.documentCreate.fileIdentCol
+            var filterExp = '='
+        } else {
+            //Just reg. filter
+            var filterCol = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol
+            var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
+        }
+
+            tables.push('SELECT the_geom FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
-    //qrystr = qrystr + ') select ST_Extent(geom) from cte'
-    qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte'
+    qrystr = qrystr + ') select ST_Extent(geom) from cte'
+    //qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte' //Example for anything but 4326 - should be automatic TODO
 
     // query SQL for stuff
     $.ajax({
@@ -198,8 +219,9 @@ var documentCreateGetFilterBounds = function (key) {
                 str = str.substring(4, str.length - 1)
                 var arr = str.split(',').join(' ').split(' ')
 
-                boundsArr.push([parseFloat(arr[0]), parseFloat(arr[1])])
-                boundsArr.push([parseFloat(arr[2]), parseFloat(arr[3])])
+                //Get the order right - NE, SW
+                boundsArr.push([parseFloat(arr[3]), parseFloat(arr[2])])
+                boundsArr.push([parseFloat(arr[1]), parseFloat(arr[0])])
 
             }
         }
@@ -207,7 +229,10 @@ var documentCreateGetFilterBounds = function (key) {
     return boundsArr
 }
 
-var documentCreateBuildFilter = function (key = undefined) {
+var documentCreateBuildFilter = function (key = undefined, isfileIdent = false) {
+
+    //console.log(key)
+    //console.log(isfileIdent)
 
     //Empty stuff
     var filter = {}
@@ -224,11 +249,25 @@ var documentCreateBuildFilter = function (key = undefined) {
             }
         } else {
             // set the filter based on config
+            var filterCol, filterExp;
+
+            // If looking by fileIdent
+            if (isfileIdent) {
+                //Ident filter
+                var filterCol = config.extensionConfig.documentCreate.fileIdentCol
+                var filterExp = '='
+            } else {
+                //Just reg. filter
+                var filterCol = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol
+                var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
+            }
+            
+
             filter[DClayers[l]] = {
                 "match": "any",
                 "columns": [{
-                    "fieldname": config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol,
-                    "expression": config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp,
+                    "fieldname": filterCol,
+                    "expression": filterExp,
                     "value": key,
                     "restriction": false
                 }]
@@ -236,14 +275,14 @@ var documentCreateBuildFilter = function (key = undefined) {
         }
 
     }
-    console.log(filter)
+    //console.log(filter)
     // Return the stuff
     return filter
 }
 
 var documentCreateApplyFilter = function (filter) {
     for (let layerKey in filter){
-        console.log('Apply filter to '+layerKey)
+        console.log('documentCreate - Apply filter to '+layerKey)
 
         //Make sure layer is on
         //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
@@ -258,7 +297,6 @@ var documentCreateApplyFilter = function (filter) {
         continue;
     }
 };
-
 var clearExistingDocFilters = function () {
     // clear filters from layers that might be on! - then reload
     console.log('documentCreate - cleaning filters for reload')
@@ -498,6 +536,10 @@ module.exports = {
                 "da_DK": "Nulstiller filters",
                 "en_US": "Resetting filters" 
             },
+            "Nulstil": {
+                "da_DK": "Nulstil",
+                "en_US": "Reset"                 
+            }
         };
 
         /**
@@ -778,9 +820,12 @@ module.exports = {
 
                 //VMR
                 // If key is set, go there and get stuff!
-
                 if (filterKey) {
+                    console.log('filterKey is set')
                     getExistingDocs(filterKey)
+                } else if (fileIdent) {
+                    console.log('fileIdent is set')
+                    getExistingDocs(fileIdent, true)
                 } else {
                     clearExistingDocFilters()
                 }
@@ -811,7 +856,7 @@ module.exports = {
                             return;
                         }
                         //Clear search geom and add clicked as marker
-                        console.log('Moving target')
+                        //console.log('Moving target')
                         resultLayer.clearLayers();
 
                         var coords = event.getCoordinate(), wkt;
@@ -825,8 +870,7 @@ module.exports = {
                                 icon: 'home',
                                 markerColor: '#C31919',
                                 prefix: 'fa'
-                            }
-                        )
+                            })
                         }).addTo(resultLayer);
                         mapObj.setView([coords.lat, coords.lng], config.extensionConfig.documentCreate.maxZoom);
                     }
@@ -835,7 +879,7 @@ module.exports = {
                 // Handle change in service type
                 // ==========================
                 this.onServiceChange = function (e) {
-                    console.log('select was changed')
+                    //console.log('select was changed')
 
                     //reset all boxes
                     $('#documentCreate-feature-meta').html('')

@@ -5,7 +5,13 @@
 Herunder er kort demo af grund-funktionaliteten.
 ![Flow demo](/extensions/documentCreate/doc/documentCreate_use.gif)
 
-Vidi kan startes med `filterKey` som går direkte til indhold med filter på key. Eksempel: `/app/intranote/vmr/?config=dev_vmr.json&filterKey=Adelsvejen%202,%208930%20Randers%20NØ`
+Vidi kan startes med flere parametre alt efter hvilken opførsel man gerne vil have:
+
+* `filterKey` som går direkte til indhold med filter på key. Eksempel: `&filterKey=Adelsvejen 2, 8930 Randers NØ`
+  *  Dette filter søger på de kolonner som er opsat i `filterCol` & `filterExp` - disse kan variere fra tabel til tabel, men kan bedst bruges til at filtrere på en gruppe af features  
+* `fileIdent` som går direkte til indhold med filter på key. Eksempel: `&fileIdent=c`
+  * Dette filter egner sig bedst til entydige værdier - dvs en værdi der er unik for den enkelte feature. Bruges bedst til f.eks. docunote fileIdent. Er altid `=`
+
 
 ## Opsætning
 
@@ -73,10 +79,11 @@ For at sikre at extension kan køre skal flg. egenskaber være sat i den aktive 
     ```json
     "extensionConfig": {
       "documentCreate": {
-        "GC2key": "446be0f3af69b565ac769b78773fb892",                              \\ Bør fjernes og erstattes af session (sample)
+        "GC2key": "446be0f3af69b565ac769b78773fb892",   \\ Bør fjernes og erstattes af session (sample)
         "GC2user": "vmr",                               \\ Bør fjernes og erstattes af session
         "maxZoom": 18,                                  \\ Zoom-niveau når der er fundet en adresse
         "metaTag": "documentCreate",                    \\ Lag med dette tag bliver brugt
+        "fileIdentCol": "fileident",                    \\ Kolonne til ?fileIdent=
         "tables": [                                     \\ Array med lag-opsætning
           {
             "table": "vand",                            \\ Lagnavn

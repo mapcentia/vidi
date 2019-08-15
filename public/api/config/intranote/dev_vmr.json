@@ -20,8 +20,9 @@
       "documentCreate": {
         "GC2key": "446be0f3af69b565ac769b78773fb892",
         "GC2user": "vmr",
-        "maxZoom": 18,
+        "maxZoom": 19,
         "metaTag": "documentCreate",
+        "fileIdentCol": "fileident",
         "tables": [{
             "table": "spildevand",
             "optional": [],
