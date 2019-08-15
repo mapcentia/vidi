@@ -337,6 +337,7 @@ module.exports = {
         "Not selected": "Not selected",
         "Datatype": "Datatype",
         "Change datatype": "Change datatype",
+        "Show without data type": "Show without data type",
         "Select datatype": "Select datatype",
         "Click on the modal header to expand or minify the Dashboard": "Click on the modal header to expand or minify the Dashboard",
         "Groundwater": "Groundwater",
