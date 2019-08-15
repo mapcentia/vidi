@@ -316,22 +316,25 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
-    
+
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
-    
+
     // Reset layer
     resultLayer.clearLayers();
     resultLayer.addLayer(this.layer)
+
+    //this er retur-obj fra DAR evt løft værdi ud i skjult felt adgang is
+    //console.log(this)
 
     //show content
     $('#documentCreate-feature-content').show();
 
     //reset all boxes
     $('#documentCreate-feature-meta').html('')
-    $('#'+select_id).val('')
-    
+    $('#' + select_id).val('')
+
     //move to marker
     cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
 }
@@ -858,12 +861,12 @@ module.exports = {
                         //Clear search geom and add clicked as marker
                         //console.log('Moving target')
                         resultLayer.clearLayers();
-
+                
                         var coords = event.getCoordinate(), wkt;
                         wkt = "POINT(" + coords.lng + " " + coords.lat + ")";
-
+                
                         //console.log(coords)
-
+                
                         //make a marker that behaves like the one from search
                         var marker = L.marker([coords.lat, coords.lng], {
                             icon: L.AwesomeMarkers.icon({
