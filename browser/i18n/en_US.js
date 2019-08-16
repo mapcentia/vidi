@@ -309,6 +309,7 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Please sign in to access Profiles module": "Please sign in to access Profiles module",
         "Remove": "Remove",
         "Create new": "Create new",
         "Precipitation": "Precipitation",
