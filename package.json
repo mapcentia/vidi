@@ -6,7 +6,8 @@
   "scripts": {
     "serve": "grunt && grunt browserify:watch",
     "serve:watsonc": "grunt --theme=watsonc && grunt --theme=watsonc browserify:watch",
-    "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer"
+    "test": "nyc mocha -t 100000 --recursive test/unit && nyc mocha -t 100000 --recursive test/api && nyc mocha test/puppeteer/bootstrap.js -t 100000 --recursive test/puppeteer",
+    "test_custom": "nyc mocha test/puppeteer/bootstrap.js -t 100000 -b --recursive test/puppeteer --grep \"Layer tree layer types\""
   },
   "repository": {
     "type": "git",
@@ -110,7 +111,7 @@
     "pretty-units": "^0.1.0",
     "proj4": "^2.4.3",
     "prop-types": "^15.6.2",
-    "puppeteer": "^1.7.0",
+    "puppeteer": "1.7.0",
     "rc-slider": "^8.6.9",
     "react": "^16.5.1",
     "react-addons": "^0.9.1-deprecated",
