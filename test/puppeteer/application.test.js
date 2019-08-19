@@ -7,7 +7,6 @@ const helpers = require("./../helpers");
 
 describe("Application", () => {
     it("should be able to launch if service workers are not available", async () => {
-        console.log(111);
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_DEFAULT_NO_SSL}`);
         page = await helpers.waitForPageToLoad(page);
