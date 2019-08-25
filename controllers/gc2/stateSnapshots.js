@@ -11,29 +11,8 @@ const uuid = require('uuid/v1');
 const request = require('request');
 const shared = require('./shared');
 
-const TRACKER_COOKIE_NAME = `vidi-state-tracker`;
-
 if (!config.gc2.host) throw new Error(`Unable to get the GC2 host from config`);
 const API_LOCATION = config.gc2.host + `/api/v2/keyvalue`;
-
-/**
- * Return identifiers of the currently authenticated user
- * 
- * @returns {Object}
- */
-const getCurrentUserIdentifiers = (request) => {
-    let browserId = false;
-    if (TRACKER_COOKIE_NAME in request.cookies) {
-        browserId = request.cookies[TRACKER_COOKIE_NAME];
-    }
-
-    let userId = false;
-    if (`gc2UserName` in request.session && request.session.gc2UserName) {
-        userId = request.session.gc2UserName;
-    }
-
-    return { browserId, userId };
-};
 
 /*
 How state snapshot is stored in the key-value storage:
@@ -63,13 +42,13 @@ How state snapshot is stored in the key-value storage:
 /**
  * List available state snapshots
  */
-router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
-    let { browserId, userId } = getCurrentUserIdentifiers(req);
+router.get('/api/state-snapshots/:dataBase', (req, res) => {
+    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
 
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: API_LOCATION + `/` + req.params.dataBase
+        uri: API_LOCATION + `/` + req.params.dataBase + `?like=state_snapshot_%`
     }, (error, response) => {
         if (error) {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
@@ -120,7 +99,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res, next) => {
  * Get specific state snapshots
  */
 router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
-    let { browserId, userId } = getCurrentUserIdentifiers(req);
+    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
 
     request({
         method: 'GET',
@@ -187,7 +166,7 @@ const generateToken = (stateSnapshot) => {
  */
 router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
     if (`snapshot` in req.body) {
-        let { browserId, userId } = getCurrentUserIdentifiers(req);
+        let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
 
         let save = false;
         let stateSnapshotCopy = JSON.parse(JSON.stringify(req.body));
@@ -250,7 +229,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
  * Seize state snapshot
  */
 router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, next) => {
-    let { browserId, userId } = getCurrentUserIdentifiers(req);
+    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
     if (userId && browserId) {
         // Get the specified state snapshot
         request({
@@ -295,7 +274,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
  */
 router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
     if (`snapshot` in req.body) {
-        let { browserId, userId } = getCurrentUserIdentifiers(req);
+        let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
         // Get the specified state snapshot
         request({
             method: 'GET',
@@ -345,7 +324,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
  * Delete state snapshot
  */
 router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
-    let { browserId, userId } = getCurrentUserIdentifiers(req);
+    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
     // Get the specified state snapshot
     request({
         method: 'GET',

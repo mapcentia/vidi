@@ -178,7 +178,7 @@ describe("Application", () => {
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Dynamic load test`);
 
-        expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
+        expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/1/0/0/`);
     });
 
     it("should ignore invalid layer in URL", async () => {

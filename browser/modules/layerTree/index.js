@@ -323,6 +323,7 @@ module.exports = {
             }
 
             if ($(container).is(`:visible`) || forced) {
+                moduleState.setLayerStateRequests[layerKey] = false;
                 setTimeout(() => {
                     let parsedMeta = meta.parseLayerMeta(layerKey);
 
@@ -1783,7 +1784,6 @@ module.exports = {
         }
 
         let metaData = meta.getMetaData();
-        let numberOfActiveLayers = 0;
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
 
         // Add group container
@@ -2276,6 +2276,7 @@ module.exports = {
                     }
                 }
             }
+
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
