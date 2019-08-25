@@ -268,7 +268,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
+            parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
@@ -1231,9 +1231,9 @@ module.exports = {
 
     /**
      * Checks if maximum number of features was reached when loading layer
-     * 
+     *
      * @param {String} layerKey Layer key
-     * 
+     *
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
@@ -1512,10 +1512,10 @@ module.exports = {
 
     /**
      * Creates gc2table control for layer
-     * 
-     * @param {String}  layerKey      Layer key     
+     *
+     * @param {String}  layerKey      Layer key
      * @param {Boolean} forceDataLoad Specifies if the data load should be forced
-     * 
+     *
      * @returns {void}
      */
     createTable(layerKey, forceDataLoad = false) {
@@ -1831,10 +1831,10 @@ module.exports = {
 
                     /**
                      * Returns reference to the parent children container
-                     * 
+                     *
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Object>}
                      */
                     const getParentChildrenContainer = (searchedLevelPath, prefix = '') => {
@@ -1860,11 +1860,11 @@ module.exports = {
 
                     /**
                      * Ensures that specified group exists on specific hierarchy level
-                     * 
+                     *
                      * @param {String} name              Group name
                      * @param {Array}  searchedLevelPath Depth specification
                      * @param {String} prefix            Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Number}
                      */
                     const ensureThatGroupExistsAndReturnItsIndex = (name, searchedLevelPath, prefix) => {
@@ -1886,7 +1886,7 @@ module.exports = {
                                 type: GROUP_CHILD_TYPE_GROUP,
                                 children: []
                             });
- 
+
                             groupIndex = (parent.length - 1);
                         }
 
@@ -1896,10 +1896,10 @@ module.exports = {
 
                     /**
                      * Returns indexes for every nesting level, creates the group if does not exist
-                     * 
+                     *
                      * @param {Array}  nestingData Depth specification
                      * @param {String} prefix      Recursion depth logging helper
-                     * 
+                     *
                      * @returns {Array<Number>}
                      */
                     const getNestedGroupsIndexes = (nestingData, prefix = '') => {
@@ -2034,7 +2034,7 @@ module.exports = {
 
         $("#layer-panel-" + base64GroupName).find(`.js-toggle-layer-panel`).click(() => {
             if ($("#group-" + base64GroupName).find(`#collapse${base64GroupName}`).children().length === 0) {
-                let virtualLayerTreeNode = $('<div></div>'); 
+                let virtualLayerTreeNode = $('<div></div>');
 
                 // Add layers and subgroups
                 for (var u = 0; u < layersAndSubgroupsForCurrentGroup.length; ++u) {
@@ -2094,7 +2094,7 @@ module.exports = {
                         } else {
                             applyControlRequests(item.children);
                         }
-                    });                    
+                    });
                 }
 
                 applyControlRequests(layersAndSubgroupsForCurrentGroup);
@@ -2195,7 +2195,7 @@ module.exports = {
                     _self.createSubgroupRecord(child, forcedState, precheckedLayers, container, newLevel);
                 } else {
                     throw new Error(`Invalid layer group`);
-                }        
+                }
             });
         }
 

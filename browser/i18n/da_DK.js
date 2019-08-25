@@ -37,7 +37,6 @@ module.exports = {
         "Search with this object": "Søg med dette objekt",
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
-        "Clear map": "Ryd kortet",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
