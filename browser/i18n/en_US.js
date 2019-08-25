@@ -308,6 +308,7 @@ module.exports = {
         "Config switcher block description": "Config switcher block description",
 
         //WatsonC
+        "Please sign in to access Profiles module": "Please sign in to access Profiles module",
         "Remove": "Remove",
         "Create new": "Create new",
         "Precipitation": "Precipitation",
@@ -334,8 +335,10 @@ module.exports = {
         "n.d.": "n.d.",
         "The profile with the new datatype is being created": "The profile with the new datatype is being created",
         "Not selected": "Not selected",
+        "Save and exit": "Save and exit",
         "Datatype": "Datatype",
         "Change datatype": "Change datatype",
+        "Show without data type": "Show without data type",
         "Select datatype": "Select datatype",
         "Click on the modal header to expand or minify the Dashboard": "Click on the modal header to expand or minify the Dashboard",
         "Groundwater": "Groundwater",
