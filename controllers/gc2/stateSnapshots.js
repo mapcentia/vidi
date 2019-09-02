@@ -43,7 +43,7 @@ How state snapshot is stored in the key-value storage:
  * List available state snapshots
  */
 router.get('/api/state-snapshots/:dataBase', (req, res) => {
-    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
 
     request({
         method: 'GET',
@@ -51,7 +51,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
         uri: API_LOCATION + `/` + req.params.dataBase + `?like=state_snapshot_%`
     }, (error, response) => {
         if (error) {
-            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { error });
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {error});
             return;
         }
 
@@ -99,7 +99,7 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
  * Get specific state snapshots
  */
 router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
-    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
 
     request({
         method: 'GET',
@@ -110,36 +110,34 @@ router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
         try {
             let localParsedBody = JSON.parse(response.body);
             parsedBody = localParsedBody;
-        } catch (e) {}
+        } catch (e) {
+        }
 
         if (parsedBody) {
             let result = false;
 
             if (`data` in parsedBody && parsedBody.data.value) {
                 let parsedSnapshot = JSON.parse(parsedBody.data.value);
-                if (parsedSnapshot.anonymous || parsedSnapshot.browserId && parsedSnapshot.browserId === browserId ||
-                    parsedSnapshot.userId && parsedSnapshot.userId === userId) {
-                    result = parsedSnapshot;
-                }
+                result = parsedSnapshot;
             }
 
             if (result === false) {
                 res.status(404);
-                res.json({ error: `NOT_FOUND` });
+                res.json({error: `NOT_FOUND`});
             } else {
                 res.send(result);
             }
         } else {
-            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+            shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
         }
     });
 });
 
 /**
  * Generates token for state snapshot
- * 
+ *
  * @param {Object} stateSnapshot Tokenized state snapshot
- * 
+ *
  * @returns {String}
  */
 const generateToken = (stateSnapshot) => {
@@ -166,7 +164,7 @@ const generateToken = (stateSnapshot) => {
  */
 router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
     if (`snapshot` in req.body) {
-        let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+        let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
 
         let save = false;
         let stateSnapshotCopy = JSON.parse(JSON.stringify(req.body));
@@ -202,7 +200,8 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                     try {
                         let localParsedBody = JSON.parse(response.body);
                         parsedBody = localParsedBody;
-                    } catch (e) {}
+                    } catch (e) {
+                    }
 
                     if (parsedBody) {
                         if (parsedBody.success) {
@@ -215,8 +214,8 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
                             shared.throwError(res, parsedBody.message);
                         }
                     } else {
-                        shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
-                    } 
+                        shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
+                    }
                 });
             }
         }
@@ -229,7 +228,7 @@ router.post('/api/state-snapshots/:dataBase', (req, res, next) => {
  * Seize state snapshot
  */
 router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, next) => {
-    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
     if (userId && browserId) {
         // Get the specified state snapshot
         request({
@@ -244,8 +243,9 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                 try {
                     let localParsedBody = JSON.parse(response.body);
                     parsedBody = localParsedBody;
-                } catch (e) {}
-    
+                } catch (e) {
+                }
+
                 if (parsedBody) {
                     let parsedSnapshotData = JSON.parse(parsedBody.data.value);
                     parsedSnapshotData.browserId = false;
@@ -257,10 +257,10 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
                         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                         form: JSON.stringify(parsedSnapshotData)
                     }, (error, response) => {
-                        res.send({ status: 'success' });
+                        res.send({status: 'success'});
                     });
                 } else {
-                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
                 }
             }
         });
@@ -274,7 +274,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey/seize', (req, res, 
  */
 router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
     if (`snapshot` in req.body) {
-        let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+        let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
         // Get the specified state snapshot
         request({
             method: 'GET',
@@ -288,8 +288,9 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                 try {
                     let localParsedBody = JSON.parse(response.body);
                     parsedBody = localParsedBody;
-                } catch (e) {}
-    
+                } catch (e) {
+                }
+
                 if (parsedBody) {
                     let parsedSnapshotData = JSON.parse(parsedBody.data.value);
                     if (`browserId` in parsedSnapshotData && parsedSnapshotData.browserId === browserId ||
@@ -305,13 +306,13 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
                             uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                             form: JSON.stringify(parsedSnapshotData)
                         }, (error, response) => {
-                            res.send({ status: 'success' });
+                            res.send({status: 'success'});
                         });
                     } else {
                         shared.throwError(res, 'ACCESS_DENIED');
                     }
                 } else {
-                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                    shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
                 }
             }
         });
@@ -324,7 +325,7 @@ router.put('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) 
  * Delete state snapshot
  */
 router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, next) => {
-    let { browserId, userId } = shared.getCurrentUserIdentifiers(req);
+    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
     // Get the specified state snapshot
     request({
         method: 'GET',
@@ -338,7 +339,8 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
             try {
                 let localParsedBody = JSON.parse(response.body);
                 parsedBody = localParsedBody;
-            } catch (e) {}
+            } catch (e) {
+            }
 
             if (parsedBody && parsedBody.data.value) {
                 let parsedSnapshotData = JSON.parse(parsedBody.data.value);
@@ -349,13 +351,13 @@ router.delete('/api/state-snapshots/:dataBase/:stateSnapshotKey', (req, res, nex
                         encoding: 'utf8',
                         uri: API_LOCATION + `/` + req.params.dataBase + `/` + req.params.stateSnapshotKey,
                     }, (error, response) => {
-                        res.send({ status: 'success' });
+                        res.send({status: 'success'});
                     });
                 } else {
                     shared.throwError(res, 'ACCESS_DENIED');
                 }
             } else {
-                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', { body: response.body });
+                shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {body: response.body});
             }
         }
     });
