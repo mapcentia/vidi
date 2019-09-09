@@ -145,17 +145,26 @@ metaData.data.forEach(function(d) {
  * VMR get from DB on adress
  * key String - Search phrase
  * fileIdent  - search "fixed" column
- * @private
+ * @privates
  */
 var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
     snack(__('Start med nøgle') + ' ' + key)
-
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
 
     // apply filter
     documentCreateApplyFilter(filter)
+
+    // make list of existing cases
+    var existingcases = documentGetExistingCasesFilter(key, fileIdent)
+    $('#documentList-feature-content').html('')
+    if (existingcases) {
+        for (let l in existingcases) {
+            $('#documentList-feature-content').append('<a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a>' + existingcases[l].properties.sagsstatus+' <br>')
+        }
+        $('#documentList-feature-content').show();
+    }
 
     // TODO fix zoom-to
     var bounds = []
@@ -169,8 +178,12 @@ var getExistingDocs = function (key, fileIdent = false) {
         backboneEvents.get().once('allDoneLoading:layers', () => {
             cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
         }) 
+
+        // create list with links 
+
     }
 };
+
 
 var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 
@@ -228,6 +241,60 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
     });
     return boundsArr
 }
+
+var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
+
+    //build query
+    var qrystr = ''
+    var tables = []
+    var result = []
+
+    for (let l in DClayers) {
+        // set the filter based on config
+        var tablename = DClayers[l].split('.')[1]
+        var filterCol, filterExp;
+
+        // If looking by fileIdent
+        if (isfileIdent) {
+            //Ident filter
+            var filterCol = config.extensionConfig.documentCreate.fileIdentCol
+            var filterExp = '='
+        } else {
+            //Just reg. filter
+            var filterCol = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterCol
+            var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
+        }
+
+            tables.push('SELECT casenumber, sagsstatus, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+    }
+
+    qrystr = qrystr + tables.join(' UNION ')
+    qrystr = qrystr + ' ORDER BY henvendelsesdato DESC '
+    //qrystr = qrystr + ') select ST_Extent(geom) from cte'
+    //qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte' //Example for anything but 4326 - should be automatic TODO
+
+    // query SQL for stuff
+    $.ajax({
+        url: gc2host + '/api/v1/sql/intranote?q='+qrystr,
+        type: "get",
+        async: false,
+        success: function(data) {
+            //check for stuff
+            if (data.features[0].properties.fileident == null) {
+                //nothing.. return null
+                return null
+            } else {
+                //create list with links
+                
+                result = data.features;
+
+
+            }
+        }
+    });
+    return result;
+}
+
 
 var documentCreateBuildFilter = function (key = undefined, isfileIdent = false) {
 
@@ -327,9 +394,16 @@ var onSearchLoad = function () {
 
     //this er retur-obj fra DAR evt løft værdi ud i skjult felt adgang is
     //console.log(this)
+    console.log(this.geoJSON.features[0].properties.id)
+    //find esrnr + adresseid
+    getEjdNr(this.geoJSON.features[0].properties.id);
+ 
+    config.extensionConfig.documentCreate.tables[0].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
+    config.extensionConfig.documentCreate.tables[1].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
 
     //show content
     $('#documentCreate-feature-content').show();
+    $('#documentList-feature-content').show();
 
     //reset all boxes
     $('#documentCreate-feature-meta').html('')
@@ -338,6 +412,41 @@ var onSearchLoad = function () {
     //move to marker
     cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
 }
+
+// find ejendomsnummer vha adgangsadresseid samt adresseid
+// bruges senere til at placere sag i docunote
+var getEjdNr = function(adgangsadresseid) {
+    var esr;
+    var adresseid;
+    $.get('https://dawa.aws.dk/adresser?adgangsadresseid='+adgangsadresseid,
+        function(data, status){
+            console.log(data)
+            if (data[0].adgangsadresse == null) {
+                //nothing.. return null
+                return null
+            } else {
+                //danner esr ejendomsnummer
+                var str = data[0].adgangsadresse.esrejendomsnr;
+                var komkode = data[0].adgangsadresse.kommune.kode.replace(/^0+/, '');
+                esr = new Array(7 - data[0].adgangsadresse.esrejendomsnr.length + 1).join("0") + data[0].adgangsadresse.esrejendomsnr;
+                esr = komkode.concat(esr);
+                adresseid = data[0].id;
+
+                config.extensionConfig.documentCreate.tables[0].defaults.esrnr = esr
+                config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr
+                config.extensionConfig.documentCreate.tables[0].defaults.adresseid = adresseid
+                config.extensionConfig.documentCreate.tables[1].defaults.adresseid = adresseid
+
+                // return {
+                //     "adresseid":adresseid,
+                //     "esr":esr
+                // }  
+                return 1             
+            }
+        })
+        //return [adressid,esr]
+      //  return
+    };
 
 /**
  * Function creates Geojson object to be injected back into GC2
@@ -415,17 +524,21 @@ var documentCreateFeatureSend = function (tablename,feature) {
     // Send tile feature to DocuNote!
     console.log('documentCreate - Send feature')
     console.log(feature)
-
-    xhr = $.ajax({
+    var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/documentCreateSendFeature",
         data: feature,
         scriptCharset: "utf-8",
-        success: function (response) {
-            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
+        success: function (xhr) {
+//            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
+//            var jsonmessage = JSON.parse(xhr.responseText);
+            snack(__("GC2 Success")+': '+ xhr.message);
+            window.location = "docunote://casenumber="+xhr.casenumber;
+            // prepend existing cases list
         },
         error: function () {
-            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
+//            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
+            snack(__("GC2 Error")+': '+xhr.responseText);
         }
     });
 
@@ -542,6 +655,10 @@ module.exports = {
             "Nulstil": {
                 "da_DK": "Nulstil",
                 "en_US": "Reset"                 
+            },
+            "List selection": {
+                "da_DK": "Henvendelser på adressen",
+                "en_US": "Requests on the address"                 
             }
         };
 
@@ -761,6 +878,7 @@ module.exports = {
             
             //Then add a button
             $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Submit')+'</button>')
+
         }
                 
         /**
@@ -817,6 +935,7 @@ module.exports = {
                     //TODO find tne måde at håndtere clear ordentligt
                     //clearExistingDocFilters();
                     $('#documentCreate-feature-content').hide();
+                    $('#documentList-feature-content').hide();
                 });
 
                 console.log('documentCreate - Mounted')
@@ -931,6 +1050,11 @@ module.exports = {
                                 </div>
                                     <div id="documentCreate-feature-meta" className=''>
                                 </div>
+                            </div>
+                        </div>
+                        <div className="list-group">
+                            <h3>{__("List selection")}</h3>
+                            <div id="documentList-feature-content" className='collapse'>    
                             </div>
                         </div>
                     </div>

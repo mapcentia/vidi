@@ -30,15 +30,29 @@
               "henvendelsesdato": "_DATETIME",
               "sagsstatus": "Ny",
               "forsyningstype": "Spildevand",
-              "adresse": "_SEARCH"
+              "adresse": "_SEARCH",
+              "adgangsadresseid": "1",
+              "adresseid": "1",
+              "esrnr": "1"
             },
             "hidden": [
               "lat",
               "lng",
               "henvendelsesdato",
+              "prioritet",
+              "problemtype",
+              "ejendomstype",
+              "vejret",
+              "anmeldertype",
+              "kontaktperson",
+              "sagsnavn",
+              "ansvarlig",
               "adresse",
               "forsyningstype",
-              "sagsstatus"
+              "sagsstatus",
+              "adgangsadresseid",
+              "adresseid",
+              "esrnr"
             ],
             "geom_ext": {
               "x": "lat",
@@ -54,15 +68,29 @@
               "henvendelsesdato": "_DATETIME",
               "sagsstatus": "Ny",
               "forsyningstype": "Vand",
-              "adresse": "_SEARCH"
+              "adresse": "_SEARCH",
+              "adgangsadresseid": "1",
+              "adresseid": "1",
+              "esrnr": "1"
             },
             "hidden": [
               "lat",
               "lng",
               "henvendelsesdato",
+              "prioritet",
+              "problemtype",
+              "ejendomstype",
+              "vejret",
+              "anmeldertype",
+              "kontaktperson",
+              "sagsnavn",
+              "ansvarlig",
               "adresse",
               "forsyningstype",
-              "sagsstatus"
+              "sagsstatus",
+              "adgangsadresseid",
+              "adresseid",
+              "esrnr"
             ],
             "geom_ext": {
               "x": "lat",
