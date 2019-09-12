@@ -62,7 +62,18 @@
         display: none !important;
     }
 
+    .conflict-result-content {
+        overflow: unset;
+    }
+
 </style>
+<script>
+    setInterval(function() {
+        try {
+            window.top.postMessage(document.getElementById("conflict-result-content").scrollHeight, "*");
+        } catch (e) {}
+    }, 500);
+</script>
 <!-- map -->
 <div id="pane">
     <div id="container">
