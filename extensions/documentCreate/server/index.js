@@ -203,10 +203,10 @@ function makePartBody(caseId, partid, adrid) {
 
 
 function makeRequestCase(req, parentid, typeid, title ) {
-    if (req.body.features[0].properties.forsyningstype = 'Spildevand') {
-        var custdata ={"forsyningstype": 1}
+    if (req.body.features[0].properties.forsyningstype == 'Spildevand') {
+        var custdata = {"forsyningstype": 1}
     } else {
-        var custdata ={"forsyningstype": 2}
+        var custdata = {"forsyningstype": 2}
     }
     var body = {
         "title": title,

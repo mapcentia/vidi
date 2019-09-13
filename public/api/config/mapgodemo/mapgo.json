@@ -1,0 +1,19 @@
+{
+    "brandName": "MapGOMenu",
+    "aboutBox": "",
+  
+    "enabledPrints": [
+      "vandvaerk2"
+    ],
+    "enabledExtensions": [
+      "MapGOMenu",
+      "session"
+    ],
+    "searchConfig": {
+      "komkode": [
+        "730"
+      ]
+    },
+    "enabledSearch": "danish"
+  }
+  

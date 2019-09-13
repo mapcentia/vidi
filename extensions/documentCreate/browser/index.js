@@ -134,11 +134,20 @@ var config = require('../../../config/config.js');
  */
 var resultLayer = new L.FeatureGroup()
 var DClayers = [];
-metaData.data.forEach(function(d) {
-    if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-        DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-    }
-});
+/**
+ * Tilføjer liste af lag som har korrekt tag
+ */
+try {
+    metaData.data.forEach(function(d) {
+        if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+        }
+    });
+} catch (error) {
+    console.info('documentCreate - Kunne ikke finde lag med korrekt tag')
+    
+}
+
 
 
 /**
@@ -599,6 +608,7 @@ module.exports = {
             wkt: ''
         }
 
+        
         /**
          *
          * @type {{Info: {da_DK: string, en_US: string}, Street View: {da_DK: string, en_US: string}, Choose service: {da_DK: string, en_US: string}, Activate: {da_DK: string, en_US: string}}}
@@ -699,7 +709,15 @@ module.exports = {
         var buildFeatureMeta = function (layer) {
 
             //merge information from metadata
-            var meta = metaDataKeys[layer]
+            var meta
+
+            //TODO: Denne kan nok optimeres til nemmere at finde metadata for laget
+            metaData.data.forEach(function(k){
+				if (k.f_table_schema+'.'+k.f_table_name == layer) {
+                    meta = k
+                }
+            })
+
             var fields = meta.fields
             var fieldconf = JSON.parse(meta.fieldconf)
             var order = []
@@ -959,7 +977,12 @@ module.exports = {
                 cloud.get().map.addLayer(resultLayer);
 
                 // Build select box from metadata
-                buildServiceSelect(select_id);
+                try {
+                    buildServiceSelect(select_id);
+                } catch (error) {
+                    console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+                }
+                
 
                 // Handle click events on map
                 // ==========================
