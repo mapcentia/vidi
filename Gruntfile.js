@@ -348,13 +348,16 @@ module.exports = function (grunt) {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
 
-        var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
-        var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
-        if (jsSource.length !== 1 || cssSource.length !== 1) {
-            throw new Error(`Unable to find all.min.*.js[css] sources`);
-        }
+        // Disables for ease of use - add latør
+        //var jsSource = grunt.file.expand({filter: "isFile", cwd: "public/js/build"}, ["all.min.js"]);
+        //var cssSource = grunt.file.expand({filter: "isFile", cwd: "public/css/build"}, ["all.min.css"]);
+        //if (jsSource.length !== 1 || cssSource.length !== 1) {
+        //    throw new Error(`Unable to find all.min.*.js[css] sources`);
+        //}
 
-        var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+        //var buffer = grunt.file.read('public/js/build/' + jsSource[0]) + grunt.file.read('public/css/build/' + cssSource[0]);
+
+        var buffer = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
         md5.update(buffer);
         var md5Hash = md5.digest('hex');
         var versionJSON = grunt.file.readJSON('public/version.json');

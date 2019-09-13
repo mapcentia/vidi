@@ -139,6 +139,7 @@
     "socket.io-client": "^1.7.1",
     "terraformer": "^1.0.7",
     "terraformer-wkt-parser": "^1.1.2",
+    "then-request": "^6.0.2",
     "underscore": "^1.8.3",
     "urijs": "^1.19.1",
     "utf8": "^3.0.0",

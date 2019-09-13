@@ -25,7 +25,7 @@ module.exports = {
     // ==========================================
 
     "gc2": {
-        "host": "https://mapgogc2.geopartner.com"
+        "host": "https://mapgogc2.geopartner.dk"
     },
 
 
@@ -133,19 +133,19 @@ module.exports = {
         "browser": [
             //{"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
             //{"layerSearch": ["index", "controller"]},
-            {"streetView": ["index"]},
-            {"coordinates": ["index"]},
-            {"offlineMap": ["index"]},
+            //{"streetView": ["index"]},
+            //{"coordinates": ["index"]},
+            //{"offlineMap": ["index"]},
             {"session": ["index"]},
-            {"editor": ["index"]},
-            {"embed": ["index"]},
-            {"documentCreate":["index.js"]}
+            //{"editor": ["index"]},
+            //{"embed": ["index"]},
+            {"documentCreate":["index"]}
         ],
         "server": [
             /*{conflictSearch: ["index"]},*/
             /*{layerSearch: ["index", "indexInEs"]},*/
             {"session": ["index"]},
-            {"documentCreate":["index.js"]}
+            {"documentCreate":["index"]}
         ]
     },
 
@@ -165,7 +165,7 @@ module.exports = {
     // Can be used by adding ?config=vidi.json to the Vidi URL'en
     //=============================================================================
 
-    "configUrl": "https://github.com/geopartner/webgis/mapcentia.github.io/blob/master/",
+    "configUrl": "https://github.com/geopartner/webgis/blob/master",
 
 
     // ==========================================================
@@ -182,7 +182,7 @@ module.exports = {
     // OR URL / auto loading is returning a 404 or a invalid jSON file
     // ====================================================================================
 
-    "defaultConfig": "vidi.json",
+    "defaultConfig": "dev_vmr.json",
 
 
     // =============================================================
@@ -212,13 +212,13 @@ module.exports = {
 
     "enabledExtensions": [
         /*"conflictSearch",*/
-        "streetView",
-        "layerSearch",
-        "coordinates",
+        //"streetView",
+        //"layerSearch",
+        //"coordinates",
         "session",
-        "editor",
-        "embed",
-        "offlineMap",
+        //"editor",
+        //"embed",
+        //"offlineMap",
         "documentCreate"
     ],
 
@@ -228,7 +228,7 @@ module.exports = {
     // default.tmpl is the build-in default
     // ====================================
 
-    "template": "embed.tmpl",
+    "template": "default.tmpl",
 
 
     // ===========================
