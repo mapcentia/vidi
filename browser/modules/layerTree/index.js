@@ -62,6 +62,7 @@ let markupGeneratorInstance = new MarkupGenerator();
 import {GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP, LayerSorting} from './LayerSorting';
 
 let layerSortingInstance = new LayerSorting();
+let latestFullTreeStructure = false;
 
 /**
  *
@@ -267,7 +268,7 @@ module.exports = {
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
-            parameterString = `filters=` + encodeURIComponent(base64.encode(JSON.stringify(data)));
+            parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
         }
 
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
@@ -322,6 +323,7 @@ module.exports = {
             }
 
             if ($(container).is(`:visible`) || forced) {
+                moduleState.setLayerStateRequests[layerKey] = false;
                 setTimeout(() => {
                     let parsedMeta = meta.parseLayerMeta(layerKey);
 
@@ -501,7 +503,7 @@ module.exports = {
             });
 
             _self.create(false, [`virtualLayers`]).then(() => {
-                _self.calculateOrder();
+                _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                 backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 resolve(key);
             });
@@ -888,19 +890,26 @@ module.exports = {
                                 }
 
                                 $("#layers").append(`<div id="layers_list"></div>`);
+
                                 // Filling up groups and underlying layers (except ungrouped ones)
+                                latestFullTreeStructure = [];
                                 for (let i = 0; i < arr.length; ++i) {
                                     if (arr[i] && arr[i] !== "<font color='red'>[Ungrouped]</font>") {
-                                        _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        let sortedLayers = _self.createGroupRecord(arr[i], order, forcedState, precheckedLayers);
+                                        latestFullTreeStructure.push({
+                                            id: arr[i],
+                                            type: GROUP_CHILD_TYPE_GROUP,
+                                            children: sortedLayers
+                                        });
                                     }
                                 }
 
                                 _self._setupToggleOfflineModeControlsForLayers().then(() => {
                                     $(`#layers_list`).sortable({
                                         axis: 'y',
-                                        handle: `.layer-move-vert-group`,
+                                        handle: `.layer-move-vert`,
                                         stop: (event, ui) => {
-                                            _self.calculateOrder();
+                                            _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                                             backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                                             layers.reorderLayers();
                                         }
@@ -1775,7 +1784,6 @@ module.exports = {
         }
 
         let metaData = meta.getMetaData();
-        let numberOfActiveLayers = 0;
         let base64GroupName = Base64.encode(groupName).replace(/=/g, "");
 
         // Add group container
@@ -1803,8 +1811,6 @@ module.exports = {
         } else {
             let LOG_HIERARCHY_BUILDING = false;
             const LOG_LEVEL = '|  ';
-            //if (groupName === `Deep group`) LOG_HIERARCHY_BUILDING = true;
-
             for (let u = 0; u < metaData.data.length; ++u) {
                 if (metaData.data[u].layergroup == groupName) {
                     let layer = metaData.data[u];
@@ -2046,9 +2052,9 @@ module.exports = {
 
                 $(virtualLayerTreeNode).sortable({
                     axis: 'y',
-                    handle: `.layer-move-vert-group`,
+                    handle: `.layer-move-vert`,
                     stop: (event, ui) => {
-                        _self.calculateOrder();
+                        _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                         backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                         layers.reorderLayers();
                     }
@@ -2094,6 +2100,8 @@ module.exports = {
                 applyControlRequests(layersAndSubgroupsForCurrentGroup);
             }
         });
+
+        return layersAndSubgroupsForCurrentGroup;
     },
 
     checkIfLayerIsActive: (forcedState, precheckedLayers, localItem) => {
@@ -2151,6 +2159,7 @@ module.exports = {
                     <i class="fa fa-arrow-down"></i>
                 </button>
                 ${subgroup.id}
+                <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert layer-move-vert-subgroup">more_vert</i>
             </p>
         </div>`);
 
@@ -2195,11 +2204,11 @@ module.exports = {
             renderSubgroupChildren();
         }
 
-        $(`#` + base64SubgroupName).sortable({
+        $(parentNode).find(`.js-subgroup-children`).sortable({
             axis: 'y',
-            handle: `.layer-move-vert-subgroup`,
+            handle: `.layer-move-vert`,
             stop: (event, ui) => {
-                _self.calculateOrder();
+                _self.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
                 backboneEvents.get().trigger(`${MODULE_NAME}:sorted`);
                 layers.reorderLayers();
             }
@@ -2267,6 +2276,7 @@ module.exports = {
                     }
                 }
             }
+
             let layerKey = layer.f_table_schema + "." + layer.f_table_name;
             let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
 
@@ -2526,25 +2536,29 @@ module.exports = {
 
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
-                    if (document.getElementById(componentContainerId)) {
-                        ReactDOM.render(
-                            <LayerFilter
-                                layer={layer}
-                                layerMeta={meta.parseLayerMeta(layerKey)}
-                                presetFilters={presetFilters}
-                                predefinedFilters={localPredefinedFilters}
-                                disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
-                                arbitraryFilters={localArbitraryfilters}
-                                onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
-                                onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
-                            />, document.getElementById(componentContainerId));
-                        $(layerContainer).find('.js-layer-settings-filters').hide(0);
+                    setTimeout(() => {
+                        if (document.getElementById(componentContainerId)) {
+                            ReactDOM.render(
+                                <LayerFilter
+                                    layer={layer}
+                                    layerMeta={meta.parseLayerMeta(layerKey)}
+                                    presetFilters={presetFilters}
+                                    predefinedFilters={localPredefinedFilters}
+                                    disabledPredefinedFilters={moduleState.predefinedFilters[layerKey] ? moduleState.predefinedFilters[layerKey] : []}
+                                    arbitraryFilters={localArbitraryfilters}
+                                    onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
+                                    onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                />, document.getElementById(componentContainerId));
+                            $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
-                        $(layerContainer).find(`.js-toggle-filters`).click(() => {
-                            _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
-                            $(layerContainer).find('.js-layer-settings-filters').toggle();
-                        });
-                    }
+                            $(layerContainer).find(`.js-toggle-filters`).click(() => {
+                                _self._selectIcon($(layerContainer).find('.js-toggle-filters').first());
+                                $(layerContainer).find('.js-layer-settings-filters').toggle();
+                            });
+                        } else {
+                            console.error(`Unable to find the filter control container`);
+                        }
+                    }, 10);
                 }
 
                 if (isVectorLayer) {
@@ -2556,18 +2570,22 @@ module.exports = {
 
                         let componentContainerId = `layer-settings-load-strategy-${layerKey}`;
                         $(layerContainer).find('.js-layer-settings-load-strategy').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
-                        if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(<LoadStrategyToggle
-                                    layerKey={layerKey}
-                                    initialValue={value}
-                                    onChange={_self.onChangeLoadStrategyHandler}/>,
-                                document.getElementById(componentContainerId));
-                            $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
-                            $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
-                                _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
-                                $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
-                            });
-                        }
+                        setTimeout(() => {
+                            if (document.getElementById(componentContainerId)) {
+                                ReactDOM.render(<LoadStrategyToggle
+                                        layerKey={layerKey}
+                                        initialValue={value}
+                                        onChange={_self.onChangeLoadStrategyHandler}/>,
+                                    document.getElementById(componentContainerId));
+                                $(layerContainer).find('.js-layer-settings-load-strategy').hide(0);
+                                $(layerContainer).find(`.js-toggle-load-strategy`).click(() => {
+                                    _self._selectIcon($(layerContainer).find('.js-toggle-load-strategy'));
+                                    $(layerContainer).find('.js-layer-settings-load-strategy').toggle();
+                                });
+                            } else {
+                                console.error(`Unable to find the load strategy control container`);
+                            }
+                        }, 10);
                     }
 
                     // Table view
@@ -2798,8 +2816,6 @@ module.exports = {
                 }
             }
         });
-
-
     },
 
     /**
@@ -2808,7 +2824,7 @@ module.exports = {
      * @returns {void}
      */
     calculateOrder: () => {
-        moduleState.layerTreeOrder = layerTreeUtils.calculateOrder();
+        moduleState.layerTreeOrder = layerTreeUtils.calculateOrder(moduleState.layerTreeOrder ? moduleState.layerTreeOrder : latestFullTreeStructure);
     },
 
     /**

@@ -476,6 +476,8 @@ module.exports = module.exports = {
                 } else {
                     _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }
+
+                layers.reorderLayers();
             } else {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
                 //Remove UTF grid layer

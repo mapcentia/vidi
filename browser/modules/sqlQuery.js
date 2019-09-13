@@ -7,7 +7,7 @@
 'use strict';
 
 const layerTreeUtils = require('./layerTree/utils');
-import { SYSTEM_FIELD_PREFIX } from './layerTree/constants';
+import {SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -75,7 +75,7 @@ module.exports = {
 
     /**
      * Performs spatial SQL query and display results on map and in gc2table
-     * 
+     *
      * @param qstore
      * @param wkt
      * @param proj
@@ -115,7 +115,7 @@ module.exports = {
          * @type {string}
          */
         var defaultTemplate =
-                `<div class="cartodb-popup-content">
+            `<div class="cartodb-popup-content">
                 <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
                     <div class="btn-group btn-group-justified">
                         <div class="btn-group">
@@ -249,7 +249,7 @@ module.exports = {
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                             let popup = e.getPopup();
                             if (popup._closeButton) {
-                                popup._closeButton.onclick = function(clickEvent) {
+                                popup._closeButton.onclick = function (clickEvent) {
                                     if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                 }
                             }
@@ -342,7 +342,7 @@ module.exports = {
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
-                            setTimeout(()=>{
+                            setTimeout(() => {
                                 $('#modal-info-body table').bootstrapTable('resetView');
                             }, 300);
                         }
@@ -470,7 +470,7 @@ module.exports = {
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
         let fieldConf;
-        let keyWithOutPrefix= layerKey.replace(`v:`, ``);
+        let keyWithOutPrefix = layerKey.replace(`v:`, ``);
         let layerTitle = (metaDataKeys[keyWithOutPrefix].f_table_title !== null && metaDataKeys[keyWithOutPrefix].f_table_title !== "") ? metaDataKeys[keyWithOutPrefix].f_table_title : metaDataKeys[keyWithOutPrefix].f_table_name;
 
         // Hardcoded field config for raster layers
@@ -514,10 +514,11 @@ module.exports = {
             } else {
                 $.each(sortObject(fieldConf), (name, property) => {
                     if (property.value.querable) {
+                        console.log(property);
                         let value = feature.properties[property.key];
                         if (property.value.link) {
                             value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
-                        } else if (property.value.image) {
+                        } else if (property.value.content && property.value.content === "image") {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
@@ -525,9 +526,22 @@ module.exports = {
                                 if (property.value.type === `bytea`) {
                                     subValue = atob(feature.properties[property.key]);
                                 }
-                                value = `<a target='_blank' href='${subValue}'>
-                                <img style='width:178px' src='${subValue}'/>
-                            </a>`;
+                                value =
+                                    `<a target='_blank' href='${subValue}'>
+                                        <img style='width:250px' src='${subValue}'/>
+                                     </a>`;
+                            }
+                        } else if (property.value.content && property.value.content === "video") {
+                            if (!feature.properties[property.key]) {
+                                value = `<i class="fa fa-ban"></i>`;
+                            } else {
+                                let subValue = feature.properties[property.key];
+                                value =
+                                    `<video width="250" controls>
+                                        <source src="${subValue}" type="video/mp4">
+                                        <source src="${subValue}" type="video/ogg">
+                                        <source src="${subValue}" type="video/webm">
+                                    </video>`;
                             }
                         }
                         fields.push({title: property.value.alias || property.key, value});

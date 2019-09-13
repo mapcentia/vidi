@@ -8,14 +8,17 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Embed script for easy embedding of Vidi in web pages using a snap-shot token.
 - A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
-- Download drawings as GeoJSON
+- Download drawings as GeoJSON.
 
 ### Changed
-- Layers which have been switch off, will not be removed from legend.
+- Layers which have been switch off, will not be removed from legend (old behavior can be set in config)
 - No re-load of legend if its not necessary.
 - `embed.tmpl` is now a minimal template for embedding in web pages.
 - Home button on `embed.tmpl` will set the map to the initial extent if a snapshot-state is invoked.
 - Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
+- Standard template for pop-up can now render videos from URLs in data. Can be set up in GC2.
+- Infinity levels in layer tree. The levels are set with the `vidi_sub_group` Meta property in GC2 like: `sub-group 1|sub-group 2|sub-group 3`
+
 
 ### Fixed
 - Better wrapping of layer tools when side panel is narrow.
