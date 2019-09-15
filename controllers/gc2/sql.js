@@ -108,7 +108,7 @@ var query = function (req, response) {
         }
     });
 
-}
+};
 router.all('/api/sql/:db', query);
 router.all('/api/sql/nocache/:db', query);
 module.exports = router;
