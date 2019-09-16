@@ -96,7 +96,273 @@ module.exports = {
                     }
                 }
             },
+            "skarupfjv": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "stoholmvarme": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_bordingvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_brobyvaerk2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_durupvand2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_herrestedmaare2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_stoholm2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "vandvaerk_vesteraaby2": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+            },
+            "tvedvand": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
 
+            },
+            "jndata": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+
+            },
+            "engesvangvand": { // Your print templates. "print" is the default
+                A4: {
+                    l: {
+                        mapsizePx: [1060, 730],
+                        mapsizeMm: [280, 192]
+                    },
+                    p: {
+                        mapsizePx: [730, 1060],
+                        mapsizeMm: [192, 280]
+                    }
+                },
+                A3: {
+                    l: {
+                        mapsizePx: [1525, 1065],
+                        mapsizeMm: [401, 282]
+                    },
+                    p: {
+                        mapsizePx: [1065, 1525],
+                        mapsizeMm: [282, 401]
+                    }
+                }
+
+            },
 
             // ========================================================
             // Names starting with "_" will not appear in the Print tab
@@ -138,24 +404,48 @@ module.exports = {
     // =======================================================
 
     "extensions": {
-        "browser": [
-            {"conflictSearch": ["index", "reportRender", "infoClick", "controller"]},
+        "browser": [{
+                "conflictSearch": ["index", "reportRender", "infoClick", "controller"]
+            },
             /*{"layerSearch": ["index", "controller"]},*/
-            {"streetView": ["index"]},
-            {"coordinates": ["index"]},
-            {"offlineMap": ["index"]},
-            {"session": ["index"]},
-            {"editor": ["index"]},
-            {"embed": ["index"]},
-            {"documentCreate":["index"]},
-            {"MapGOMenu": ["index", "reportRender", "infoClick", "controller"]}            
+            {
+                "streetView": ["index"]
+            },
+            {
+                "coordinates": ["index"]
+            },
+            {
+                "offlineMap": ["index"]
+            },
+            {
+                "session": ["index"]
+            },
+            {
+                "editor": ["index"]
+            },
+            {
+                "embed": ["index"]
+            },
+            {
+                "documentCreate": ["index"]
+            },
+            {
+                "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
+            }
         ],
-        "server": [
-            {conflictSearch: ["index"]},
+        "server": [{
+                "conflictSearch": ["index"]
+            },
             /*{layerSearch: ["index", "indexInEs"]},*/
-            {"session": ["index"]},
-            {"documentCreate":["index"]},
-            {"MapGOMenu": ["index"]}
+            {
+                "session": ["index"]
+            },
+            {
+                "documentCreate": ["index"]
+            },
+            {
+                "MapGOMenu": ["index"]
+            }
         ]
     },
 
@@ -175,7 +465,7 @@ module.exports = {
     // Can be used by adding ?config=vidi.json to the Vidi URL'en
     //=============================================================================
 
-    "configUrl": "https://raw.githubusercontent.com/geopartner/webgis/master",
+    "configUrl": "https://geopartner.github.io/webgis",
 
 
     // ==========================================================
@@ -222,15 +512,10 @@ module.exports = {
 
     "enabledExtensions": [
         /*"conflictSearch",*/
-        //"streetView",
-        //"layerSearch",
-        //"coordinates",
-        "session",
-        //"editor",
-        //"embed",
-        //"offlineMap",
-        //"documentCreate",
-        //"MapGOMenu"
+        "streetView",
+        "layerSearch",
+        "coordinates",
+        "session"
     ],
 
 
@@ -309,9 +594,15 @@ module.exports = {
 
 
         // Pre-defined base layers
-        {"id": "osm", "name": "Open Street Map"},
+        {
+            "id": "osm",
+            "name": "Open Street Map"
+        },
 
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
+        {
+            "id": "stamenTonerLite",
+            "name": "Stamen Toner Light"
+        },
 
         // Base layer from GC2
         {
@@ -326,8 +617,7 @@ module.exports = {
             },
 
             // A base layer can comprise one or more overlays
-            "overlays": [
-                {
+            "overlays": [{
                     "id": "tekster.tekster_samlet_wms_web",
                     "db": "geofyn",
                     "host": "https://kort.geofyn.dk",
@@ -342,7 +632,8 @@ module.exports = {
                     "config": {
                         "attribution": "Geofyn A/S"
                     }
-                }]
+                }
+            ]
         }
     ]
-};
+}
