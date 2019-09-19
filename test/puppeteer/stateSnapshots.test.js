@@ -461,6 +461,7 @@ describe("State snapshots", () => {
         await page.click(`[href="#collapseUHVibGljIGdyb3Vw"]`);
         await page.click(`[href="#collapseVGVzdCBncm91cA"]`);
         await helpers.sleep(1000);
+
         expect(await page.evaluate(`$('[data-gc2-id="public.test"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_line"]').prop('checked')`)).to.be.true;
         expect(await page.evaluate(`$('[data-gc2-id="public.test_point_no_type"]').prop('checked')`)).to.be.false;

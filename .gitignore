@@ -99,8 +99,8 @@ public/js/templates.js
 
 # Created by .ignore support plugin (hsz.mobi)
 
-config/config.js
-config/_variables.less
+# config/config.js
+# config/_variables.less
 
 /public/css/build/all.min.css
 /public/js/bundle.js
