@@ -105,6 +105,8 @@ var transformPoint;
 
 var _result;
 
+var _USERSTR;
+
 var jquery = require('jquery');
 require('snackbarjs');
 
@@ -150,6 +152,7 @@ try {
     console.info('documentCreate - Kunne ikke finde lag med korrekt tag')
     
 }
+
 
 
 /**
@@ -228,7 +231,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 
     // query SQL for stuff
     $.ajax({
-        url: gc2host + '/api/v1/sql/intranote?q='+qrystr,
+        url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
@@ -256,7 +259,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
 
     //build query
-    var qrystr = ''
+    var qrystr = 'WITH cases (casenumber, sagsstatus, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -281,16 +284,18 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
 
     qrystr = qrystr + tables.join(' UNION ')
     qrystr = qrystr + ' ORDER BY henvendelsesdato DESC '
+    qrystr = qrystr + ') select * from cases'
     //qrystr = qrystr + ') select ST_Extent(geom) from cte'
     //qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte' //Example for anything but 4326 - should be automatic TODO
 
     // query SQL for stuff
     $.ajax({
-        url: gc2host + '/api/v1/sql/intranote?q='+qrystr,
+        url: gc2host + '/api/v1/sql/' +_USERSTR + '?q='+qrystr,
         type: "get",
         async: false,
         success: function(data) {
             //check for stuff
+            console.log(data)
             if (data.features[0].properties.fileident == null) {
                 //nothing.. return null
                 return null
@@ -394,6 +399,7 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
+    _checkLoginDocMenu();
 
     // VMR
     // filter to content on key
@@ -436,8 +442,11 @@ var onSearchLoad = function () {
 var getEjdNr = function(adgangsadresseid) {
     var esr;
     var adresseid;
-    $.get('https://dawa.aws.dk/adresser?adgangsadresseid='+adgangsadresseid,
-        function(data, status){
+    $.ajax({
+        url: 'https://dawa.aws.dk/adresser?adgangsadresseid='+adgangsadresseid,
+        type: "get",
+        async: false,
+        success: function(data,status) {
             console.log(data)
             if (data[0].adgangsadresse == null) {
                 //nothing.. return null
@@ -461,7 +470,8 @@ var getEjdNr = function(adgangsadresseid) {
                 // }  
                 return 1             
             }
-        })
+        }
+    })
         //return [adressid,esr]
       //  return
     };
@@ -518,6 +528,42 @@ var documentCreateFeatureAdd = function (tablename) {
     //ready the JSON object to be sent to backend
     documentCreateFeatureSend(tablename,feature)
 }
+
+/**
+ * Checks login
+ */
+var _checkLoginDocMenu  = function () {    
+    xhr = $.ajax({
+        method: "GET",
+        url: "/api/session/status",
+        async: false,
+        scriptCharset: "utf-8",
+        success: function (response) {
+            if (response.status.authenticated == true) {
+                // determine user role (USER OR SUB_USER)
+                if (response.status.subUser == false) {
+                    currentUserRole = userRole.USER;
+                    _USERSTR = response.status.userName
+                } else {
+                    currentUserRole = userRole.SUB_USER;
+                    _USERSTR = response.status.userName + '@' +'intranote'
+                    //hide control
+                    // $('#elementselectpicker').hide();
+                }
+
+            } else {
+                //disable submit button
+                // currentUserRole = userRole.ANONYMOUS;
+                // $('#mapGo-btn').attr('checked', false);
+                alert("Du skal logge ind for at anvende funktionen");
+            } 
+        },
+        error: function () {
+            throw new Error('Fejl i request');
+        }
+    })
+    
+};
 
 /**
  * 
@@ -675,7 +721,7 @@ var buildFeatureMeta = function (layer) {
 var FeatureFormFactory = function (order) {
     
     //scaffold form
-    $('#documentCreate-feature-meta').append('<h3>'+__("Metadata")+'</h3>')
+    $('#documentCreate-feature-meta').append('<h3>'+__("Henvendelse")+'</h3>')
     $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
     
     var col;
@@ -746,7 +792,7 @@ var FeatureFormFactory = function (order) {
     })
     
     //Then add a button
-    $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Submit')+'</button>')
+    $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Indsend')+'</button>')
 }
 
 /**
