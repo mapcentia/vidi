@@ -165,7 +165,7 @@ module.exports = {
     // Can be used by adding ?config=vidi.json to the Vidi URL'en
     //=============================================================================
 
-    "configUrl": "https://github.com/geopartner/webgis/blob/master",
+    "configUrl": "https://geopartner.github.io/webgis",
 
 
     // ==========================================================
