@@ -586,14 +586,23 @@ var buildServiceSelect = function (id) {
  */
 var buildFeatureMeta = function (layer) {
     //merge information from metadata
-    var meta = metaDataKeys[layer]
-    var fields = meta.fields
-    var fieldconf = JSON.parse(meta.fieldconf)
+    var m = {}
+
+    metaData.data.forEach(function(d) {
+      if (d.f_table_name == layer.split('.')[1] && d.f_table_schema == layer.split('.')[0]) {
+        m = d
+        }
+    })
+
+    var fields = m.fields
+    var fieldconf = JSON.parse(m.fieldconf)
     var order = []
     var col;
     //Get information from config.json
-    var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == meta.f_table_name)
+    var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == m.f_table_name)
+    
     console.log(conf)
+
     for (col in fields) {
         var obj = {
             "colName": col,
@@ -635,7 +644,7 @@ var buildFeatureMeta = function (layer) {
             obj.defaults = conf["defaults"][col]
         } 
         //Ignore pkey and geom
-        if (meta["pkey"] == obj.colName || meta["f_geometry_column"] == obj.colName){
+        if (m["pkey"] == obj.colName || m["f_geometry_column"] == obj.colName){
             // Just don't add
         } else {
             order.push(obj)
