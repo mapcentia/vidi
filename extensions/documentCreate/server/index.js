@@ -317,7 +317,7 @@ function postToGC2(req) {
     var postData = JSON.stringify(req.body),
     options = {
             method: 'POST',
-            host: 'mapgogc2.geopartner.dk',
+            host: GC2_HOST, //'mapgogc2.geopartner.dk',
             path: '/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
@@ -457,7 +457,7 @@ function ReqToGC2(session, requrl) {
     }
 
     var options = {
-        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/' + userstr + '?q='+requrl,
+        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }
@@ -490,7 +490,7 @@ function SqlInsertToGC2(session, requrl) {
         var userstr = session.gc2UserName;
     }
     var options = {
-        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/' + userstr + '?q='+requrl,
+        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }
