@@ -70,7 +70,6 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     postCaseToGc2Promise.then(function(result){
                         response.status(200).send(resultjson)
                     }, function(err) {
-
                         response.status(500).send('ikke oprettet')
                     })
 
@@ -121,11 +120,13 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                             response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
                             req.body.features[0].properties.fileident = result.caseId
                             req.body.features[0].properties.casenumber = result.number
+
                             var postCaseToGc2Promise = postToGC2(req);
+                            var resultjson = {"message":"Sag oprettet","casenumber": result.number}
                             postCaseToGc2Promise.then(function(result){
-                                response.status(200).send('Sag oprettet')
+                                response.status(200).send(resultjson)
                             }, function(err) {
-                                response.status(500).send('ikke oprettet' + err)
+                                response.status(500).send('ikke oprettet')
                             })
         
                         } else {
@@ -315,36 +316,57 @@ function postToGC2(req) {
         var userstr = req.session.gc2UserName;
     }
     var postData = JSON.stringify(req.body),
-    options = {
-            method: 'POST',
-            host: GC2_HOST, //'mapgogc2.geopartner.dk',
-            path: '/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
+    // options = {
+    //         method: 'POST',
+    //         host: GC2_HOST, //'mapgogc2.geopartner.dk',
+    //         path: '/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
+    //         headers: {
+    //             'Content-Type': 'application/json; charset=utf-8',
+    //             'Content-Length': Buffer.byteLength(postData),
+    //             'GC2-API-KEY': req.session.gc2ApiKey
+    //         }
+    //     };
+        options = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Content-Length': Buffer.byteLength(postData),
                 'GC2-API-KEY': req.session.gc2ApiKey
-            }
+            },
+            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
+            body: postData,
+            method: 'POST'
+
+
         };
     return new Promise(function(resolve, reject) {
-        var req = http.request(options, function (res) {
-            var chunks = [];
-            res.on('error', function (e) {
-                console.log(e);
-                reject(e);
-            });
-            res.on('data', function (chunk) {
-                chunks.push(chunk);
-                console.log('Response: ' + chunk);
-            });
-            res.on("end", function () {
-                var jsfile = new Buffer.concat(chunks); 
-                //chunks = Buffer.concat(chunks).toString;
-                //response.send(jsfile);
-                resolve(jsfile);
-            });
+        request(options, function(err, resp, body) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(JSON.parse(body));
+            }
         })
-        req.write(postData, 'utf8');
-        req.end();  
+
+
+        // var req = http.request(options, function (res) {
+        //     var chunks = [];
+        //     res.on('error', function (e) {
+        //         console.log(e);
+        //         reject(e);
+        //     });
+        //     res.on('data', function (chunk) {
+        //         chunks.push(chunk);
+        //         console.log('Response: ' + chunk);
+        //     });
+        //     res.on("end", function () {
+        //         var jsfile = new Buffer.concat(chunks); 
+        //         //chunks = Buffer.concat(chunks).toString;
+        //         //response.send(jsfile);
+        //         resolve(jsfile);
+        //     });
+        // })
+        // req.write(postData, 'utf8');
+        // req.end();  
     });
 }
 
