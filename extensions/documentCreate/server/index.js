@@ -41,7 +41,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     const qrystr = 'SELECT adrfileid FROM vmr.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adresseid + '\'';
 
 //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
-    var getExistinAdrCaseGc2Promise = ReqToGC2(qrystr);
+    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr);
 
     var getParentCaseDnPromise = getParentCaseDn(req.body.features[0].properties.esrnr);
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse)
@@ -105,7 +105,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     // add parts to case
                     addPartsToCase(req.body.features[0].properties.esrnr, req.body.features[0].properties.adresseid, result.caseId)
 
-                    var insertToGc2Promise = SqlInsertToGC2('INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (' + result.caseId +', \'' + req.body.features[0].properties.adresseid + '\'') 
+                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (' + result.caseId +', \'' + req.body.features[0].properties.adresseid + '\'') 
                     bodyreq = makeRequestCase(req, result.caseId, REQCASETYPEID, dnTitle)
                     // opret adgangsadresseid til brug for seneere opslag.
                     insertToGc2Promise.then(function(result) {
@@ -173,7 +173,7 @@ function makeAddressCase(req, parentid, typeid, title ) {
         "parentId": parentid,
         "parentType": 2,
         "typeId": typeid,
-        "description": "test PDK",
+        "description": "Adressesag fra Mapcentia",
         "synchronizeSource": 1,
         "synchronizeIdentifier": null,
         "discardingCode": 0,
@@ -309,15 +309,20 @@ function getPartId(partsyncid) {
 }
 
 function postToGC2(req) {
+    if (req.session.subUser)
+        var userstr = req.session.gc2UserName + '@' + req.session.screenName;
+    else {
+        var userstr = req.session.gc2UserName;
+    }
     var postData = JSON.stringify(req.body),
     options = {
             method: 'POST',
             host: 'mapgogc2.geopartner.dk',
-            path: '/api/v2/feature/intranote/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
+            path: '/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Content-Length': Buffer.byteLength(postData),
-                'GC2-API-KEY': '555289f8e1dacac4d5b5995234032a0f'//req.session.gc2ApiKey
+                'GC2-API-KEY': req.session.gc2ApiKey
             }
         };
     return new Promise(function(resolve, reject) {
@@ -444,11 +449,17 @@ function ReqToDn(requrl) {
     })
 };
 
-function ReqToGC2(requrl) {
+function ReqToGC2(session, requrl) {
+    if (session.subUser)
+        var userstr = session.gc2UserName + '@' + session.screenName;
+    else {
+        var userstr = session.gc2UserName;
+    }
+
     var options = {
-        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/intranote?q='+requrl,
+        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/' + userstr + '?q='+requrl,
         headers: {
-            'GC2-API-KEY': '555289f8e1dacac4d5b5995234032a0f'//req.session.gc2ApiKey
+            'GC2-API-KEY': session.gc2ApiKey
         }
     };
     console.log(requrl)
@@ -472,11 +483,16 @@ function ReqToGC2(requrl) {
 };
 
 
-function SqlInsertToGC2(requrl) {
+function SqlInsertToGC2(session, requrl) {
+    if (session.subUser)
+        var userstr = session.gc2UserName + '@' + session.screenName;
+    else {
+        var userstr = session.gc2UserName;
+    }
     var options = {
-        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/intranote?q='+requrl,
+        url: 'https://mapgogc2.geopartner.dk/api/v1/sql/' + userstr + '?q='+requrl,
         headers: {
-            'GC2-API-KEY': '555289f8e1dacac4d5b5995234032a0f'//req.session.gc2ApiKey
+            'GC2-API-KEY': session.gc2ApiKey
         }
     };
     console.log(requrl)
