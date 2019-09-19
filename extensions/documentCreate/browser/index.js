@@ -135,9 +135,11 @@ var config = require('../../../config/config.js');
 var resultLayer = new L.FeatureGroup()
 var DClayers = [];
 metaData.data.forEach(function(d) {
-    if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-        DClayers.push(d.f_table_schema+'.'+d.f_table_name);
-    }
+    if (d.tags) {
+        if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+        }
+    } 
 });
 
 
@@ -407,7 +409,14 @@ var onSearchLoad = function () {
 
     //reset all boxes
     $('#documentCreate-feature-meta').html('')
-    $('#' + select_id).val('')
+
+    //Set the value to a default and build
+    if (config.extensionConfig.documentCreate.defaulttable){
+        $('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
+        //build
+        buildFeatureMeta(config.extensionConfig.documentCreate.defaulttable)
+    }
+
 
     //move to marker
     cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
@@ -543,6 +552,184 @@ var documentCreateFeatureSend = function (tablename,feature) {
     });
 
 }
+ /**
+ * This function compiles values in selectbox from layers in schema with the correct tag
+ * @returns {*}
+ * @private
+ */
+var buildServiceSelect = function (id) {
+    metaData.data.forEach(function(d) {
+        if (d.tags) {
+            // Add layer to select box if tag is correctly defined
+            if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
+                $('#'+id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+            };
+        }
+
+    });
+    
+};
+  
+ /**
+ * This function builds metafields from config and how the layers are set up in GC2 and in config file
+ * @returns {*}
+ * @private
+ */
+var buildFeatureMeta = function (layer) {
+    //merge information from metadata
+    var meta = metaDataKeys[layer]
+    var fields = meta.fields
+    var fieldconf = JSON.parse(meta.fieldconf)
+    var order = []
+    var col;
+    //Get information from config.json
+    var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == meta.f_table_name)
+    console.log(conf)
+    for (col in fields) {
+        var obj = {
+            "colName": col,
+            "colNum": fields[col].num,
+            "nullable": fields[col].is_nullable,
+            "type": fields[col].full_type
+        }
+        
+        // Get information from fieldconf
+        ///////////////////////////////////
+        //sort_id is set in GC2
+        if (col in fieldconf) {
+            obj.sort_id = fieldconf[col].sort_id
+        } else {
+            obj.sort_id = 0
+        }
+        //properties is set in GC2
+        if (col in fieldconf) {
+            if (fieldconf[col].properties !== "") {
+                obj.properties = fieldconf[col].properties
+            }
+        } 
+        //alias is set in GC2
+        if (col in fieldconf) {
+            if (fieldconf[col].alias === "") {
+                obj.alias = obj.colName   
+            } else {
+                obj.alias = fieldconf[col].alias
+            }
+        } 
+        // Get information from config file
+        ///////////////////////////////////
+        //hidden is set in config
+        obj.hidden = $.inArray(col,conf["hidden"])
+        //optional is set in config
+        obj.optional = $.inArray(col,conf["optional"])
+        //defaults
+        if (conf["defaults"][col] !== undefined) {
+            obj.defaults = conf["defaults"][col]
+        } 
+        //Ignore pkey and geom
+        if (meta["pkey"] == obj.colName || meta["f_geometry_column"] == obj.colName){
+            // Just don't add
+        } else {
+            order.push(obj)
+        }
+    };
+    // Sort by sort_id
+    order = order.sort(function compare(a, b) {
+        const genreA = a.sort_id;
+        const genreB = b.sort_id;
+      
+        let comparison = 0;
+        if (genreA < genreB) {
+          comparison = 1;
+        } else if (genreA > genreB) {
+          comparison = -1;
+        }
+        return comparison;
+      });
+    //Lets build the stuff!
+    FeatureFormFactory(order);
+};
+/**
+ * This function builds metafields from config and how the layers are set up in GC2 and in config file
+ * @param order Ordered array of fields to be created
+ * @returns {*}
+ * @private
+ */
+var FeatureFormFactory = function (order) {
+    
+    //scaffold form
+    $('#documentCreate-feature-meta').append('<h3>'+__("Metadata")+'</h3>')
+    $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
+    
+    var col;
+    order.forEach(function(col) {
+        // Replace _func defaults with real values
+        /////////////////////////////////////////
+        // _DATETIME - Set value to ISO datetime
+        if (col.defaults === '_DATETIME'){
+            var date = new Date();
+            col.defaults = date.toISOString();
+        }
+        // _SEARCH - Set value from search-component
+        if (col.defaults === '_SEARCH'){
+            col.defaults = $('#'+id).val();
+        }
+        // Build the UI elements
+        ////////////////////////////////////////
+        //Hide element if hidden is set
+        if (col.hidden !== -1) {
+            var formobj = '<div class="form-group collapse">'
+        } else {
+            var formobj = '<div class="form-group">'
+        }
+        //create label for input, colName fallback
+        //console.log(col)
+        var alias
+        if (col.alias) {
+            alias = col.alias
+        } else {
+            alias = col.colName
+        }
+        formobj += '<label for="'+col.colName+'" class="text-capitalize">'+alias+':</label>'
+        //Check if properties is an array
+        try {
+            var propArr = JSON.parse(col.properties.split('\'').join('\"'))
+        } catch (error) {
+            var propArr = ''
+        }
+        //Create select box with array set in properties - is string and contains an array of strings
+        if (col.type.includes('character varying') && Array.isArray(propArr)) {
+            formobj += '<select id="'+col.colName+'" class="form-control">'
+            // if layer has a default value set which is contained in the array, set this as first, then build rest and skip
+            var defaultValindex = propArr.indexOf(col.defaults)
+            
+            if (defaultValindex > -1){
+                formobj += '<option>'+propArr[defaultValindex]+'</option>'
+            }
+            // build the rest, skip default if exists since we already made that
+            propArr.forEach(function(val) {
+                if (val !== '' && val !== col.defaults) {
+                    formobj += '<option>'+val+'</option>'
+                }
+                
+            }) 
+            formobj += '<select/></div>'
+        
+        } else {
+            // Default boxes - keep it string for JSON payloads
+            formobj += '<input id="'+col.colName+'"'
+            formobj += 'type="text" class="form-control" '
+            if(col.defaults) (
+                formobj += ' value="'+col.defaults+'"'
+            )
+            formobj += '></div>'
+        }
+        // Add to form
+        $('#'+form_id).append(formobj)
+    })
+    
+    //Then add a button
+    $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Submit')+'</button>')
+}
 
 /**
  *
@@ -675,211 +862,6 @@ module.exports = {
                 return txt;
             }
         };
-
-         /**
-         * This function compiles values in selectbox from layers in schema with the correct tag
-         * @returns {*}
-         * @private
-         */
-        var buildServiceSelect = function (id) {
-            metaData.data.forEach(function(d) {
-                // Add layer to select box if tag is correctly defined
-                if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-                    $('#'+id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
-                };  
-            });
-            
-        };
-          
-         /**
-         * This function builds metafields from config and how the layers are set up in GC2 and in config file
-         * @returns {*}
-         * @private
-         */
-        var buildFeatureMeta = function (layer) {
-
-            //merge information from metadata
-            var meta = metaDataKeys[layer]
-            var fields = meta.fields
-            var fieldconf = JSON.parse(meta.fieldconf)
-            var order = []
-            var col;
-
-            //Get information from config.json
-            var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == meta.f_table_name)
-
-            for (col in fields) {
-
-                var obj = {
-                    "colName": col,
-                    "colNum": fields[col].num,
-                    "nullable": fields[col].is_nullable,
-                    "type": fields[col].full_type
-                }
-                
-                // Get information from fieldconf
-                ///////////////////////////////////
-
-                //sort_id is set in GC2
-                if (col in fieldconf) {
-                    obj.sort_id = fieldconf[col].sort_id
-                } else {
-                    obj.sort_id = 0
-                }
-
-                //properties is set in GC2
-                if (col in fieldconf) {
-                    if (fieldconf[col].properties !== "") {
-                        obj.properties = fieldconf[col].properties
-                    }
-                } 
-
-                //alias is set in GC2
-                if (col in fieldconf) {
-                    if (fieldconf[col].alias === "") {
-                        obj.alias = obj.colName   
-                    } else {
-                        obj.alias = fieldconf[col].alias
-                    }
-                } 
-
-                // Get information from config file
-                ///////////////////////////////////
-
-                //hidden is set in config
-                obj.hidden = $.inArray(col,conf["hidden"])
-
-                //optional is set in config
-                obj.optional = $.inArray(col,conf["optional"])
-
-                //defaults
-                if (conf["defaults"][col] !== undefined) {
-                    obj.defaults = conf["defaults"][col]
-                } 
-
-
-                //Ignore pkey and geom
-                if (meta["pkey"] == obj.colName || meta["f_geometry_column"] == obj.colName){
-                    // Just don't add
-                } else {
-                    order.push(obj)
-                }
-            };
-
-            // Sort by sort_id
-            order = order.sort(function compare(a, b) {
-                const genreA = a.sort_id;
-                const genreB = b.sort_id;
-              
-                let comparison = 0;
-                if (genreA < genreB) {
-                  comparison = 1;
-                } else if (genreA > genreB) {
-                  comparison = -1;
-                }
-                return comparison;
-              });
-
-            //Lets build the stuff!
-            FeatureFormFactory(order);
-        };
-
-        /**
-         * This function builds metafields from config and how the layers are set up in GC2 and in config file
-         * @param order Ordered array of fields to be created
-         * @returns {*}
-         * @private
-         */
-        var FeatureFormFactory = function (order) {
-            
-            //scaffold form
-            $('#documentCreate-feature-meta').append('<h3>'+__("Metadata")+'</h3>')
-            $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
-            
-            var col;
-            order.forEach(function(col) {
-
-                // Replace _func defaults with real values
-                /////////////////////////////////////////
-
-                // _DATETIME - Set value to ISO datetime
-                if (col.defaults === '_DATETIME'){
-                    var date = new Date();
-                    col.defaults = date.toISOString();
-                }
-                // _SEARCH - Set value from search-component
-                if (col.defaults === '_SEARCH'){
-                    col.defaults = $('#'+id).val();
-                }
-
-                // Build the UI elements
-                ////////////////////////////////////////
-
-                //Hide element if hidden is set
-                if (col.hidden !== -1) {
-                    var formobj = '<div class="form-group collapse">'
-                } else {
-                    var formobj = '<div class="form-group">'
-                }
-
-                //create label for input, colName fallback
-                //console.log(col)
-                var alias
-                if (col.alias) {
-                    alias = col.alias
-                } else {
-                    alias = col.colName
-                }
-
-                formobj += '<label for="'+col.colName+'" class="text-capitalize">'+alias+':</label>'
-
-                //Check if properties is an array
-                try {
-                    var propArr = JSON.parse(col.properties.split('\'').join('\"'))
-                } catch (error) {
-                    var propArr = ''
-                }
-
-                //Create select box with array set in properties - is string and contains an array of strings
-                if (col.type.includes('character varying') && Array.isArray(propArr)) {
-                    formobj += '<select id="'+col.colName+'" class="form-control">'
-
-                    // if layer has a default value set which is contained in the array, set this as first, then build rest and skip
-                    var defaultValindex = propArr.indexOf(col.defaults)
-                    
-                    if (defaultValindex > -1){
-                        formobj += '<option>'+propArr[defaultValindex]+'</option>'
-                    }
-                    // build the rest, skip default if exists since we already made that
-                    propArr.forEach(function(val) {
-                        if (val !== '' && val !== col.defaults) {
-                            formobj += '<option>'+val+'</option>'
-                        }
-                        
-                    }) 
-
-                    formobj += '<select/></div>'
-                
-                } else {
-                    // Default boxes - keep it string for JSON payloads
-                    formobj += '<input id="'+col.colName+'"'
-                    formobj += 'type="text" class="form-control" '
-
-                    if(col.defaults) (
-                        formobj += ' value="'+col.defaults+'"'
-                    )
-
-                    formobj += '></div>'
-                }
-
-                // Add to form
-                $('#'+form_id).append(formobj)
-            })
-            
-            //Then add a button
-            $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Submit')+'</button>')
-
-        }
                 
         /**
          *
@@ -959,7 +941,7 @@ module.exports = {
                 cloud.get().map.addLayer(resultLayer);
 
                 // Build select box from metadata
-                buildServiceSelect(select_id);
+                buildServiceSelect(select_id);             
 
                 // Handle click events on map
                 // ==========================
