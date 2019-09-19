@@ -457,13 +457,13 @@ var getEjdNr = function(adgangsadresseid) {
                 var komkode = data[0].adgangsadresse.kommune.kode.replace(/^0+/, '');
                 esr = new Array(7 - data[0].adgangsadresse.esrejendomsnr.length + 1).join("0") + data[0].adgangsadresse.esrejendomsnr;
                 esr = komkode.concat(esr);
-                adresseid = data[0].id;
+                adresseid = data[0].adgangsadresse.id;
 
                 config.extensionConfig.documentCreate.tables[0].defaults.esrnr = esr
                 config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr
                 config.extensionConfig.documentCreate.tables[0].defaults.adresseid = adresseid
                 config.extensionConfig.documentCreate.tables[1].defaults.adresseid = adresseid
-
+                buildFeatureMeta($('#'+select_id).val())
                 // return {
                 //     "adresseid":adresseid,
                 //     "esr":esr
