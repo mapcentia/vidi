@@ -597,7 +597,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
 //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
 //            var jsonmessage = JSON.parse(xhr.responseText);
             snack(__("GC2 Success")+': '+ xhr.message);
-            window.location = "docunote://casenumber="+xhr.casenumber;
+            window.location = "docunote:/CaseNumber="+xhr.casenumber;
             // prepend existing cases list
         },
         error: function () {
