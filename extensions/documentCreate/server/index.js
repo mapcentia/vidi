@@ -117,7 +117,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     postReqCaseToDnPromise.then(function(result) {
                         if ('caseId' in result) {
                             console.log(result)
-                            response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
+                            //response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
                             req.body.features[0].properties.fileident = result.caseId
                             req.body.features[0].properties.casenumber = result.number
 
@@ -309,6 +309,7 @@ function getPartId(partsyncid) {
     })    
 }
 
+// post case to gc2 
 function postToGC2(req) {
     if (req.session.subUser)
         var userstr = req.session.gc2UserName + '@' + req.session.screenName;
@@ -316,16 +317,6 @@ function postToGC2(req) {
         var userstr = req.session.gc2UserName;
     }
     var postData = JSON.stringify(req.body),
-    // options = {
-    //         method: 'POST',
-    //         host: GC2_HOST, //'mapgogc2.geopartner.dk',
-    //         path: '/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
-    //         headers: {
-    //             'Content-Type': 'application/json; charset=utf-8',
-    //             'Content-Length': Buffer.byteLength(postData),
-    //             'GC2-API-KEY': req.session.gc2ApiKey
-    //         }
-    //     };
         options = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
@@ -347,29 +338,11 @@ function postToGC2(req) {
             }
         })
 
-
-        // var req = http.request(options, function (res) {
-        //     var chunks = [];
-        //     res.on('error', function (e) {
-        //         console.log(e);
-        //         reject(e);
-        //     });
-        //     res.on('data', function (chunk) {
-        //         chunks.push(chunk);
-        //         console.log('Response: ' + chunk);
-        //     });
-        //     res.on("end", function () {
-        //         var jsfile = new Buffer.concat(chunks); 
-        //         //chunks = Buffer.concat(chunks).toString;
-        //         //response.send(jsfile);
-        //         resolve(jsfile);
-        //     });
-        // })
-        // req.write(postData, 'utf8');
-        // req.end();  
     });
 }
 
+// Post case to Docunote API
+// Returns json
 function postCaseToDn(casebody) {
     var postData = JSON.stringify(casebody),
     options = {
@@ -440,7 +413,7 @@ function putPartToCaseDn(partbody, caseId) {
                 //chunks = Buffer.concat(chunks).toString;
                 //response.send(jsfile);
                 console.log(jsfile)
-                res.send(JSON.parse(jsfile));
+                //res.send(JSON.parse(jsfile));
             });
         })
         req.write(postData, 'utf8');
