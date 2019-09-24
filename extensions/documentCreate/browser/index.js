@@ -175,7 +175,7 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').html('')
     if (existingcases) {
         for (let l in existingcases) {
-            $('#documentList-feature-content').append('<a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a>' + existingcases[l].properties.sagsstatus+' <br>')
+            $('#documentList-feature-content').append('<a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a>' +existingcases[l].properties.sagsnavn + ' ' + existingcases[l].properties.sagsstatus + ' <br>')
         }
         $('#documentList-feature-content').show();
     }
@@ -259,7 +259,7 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
 
     //build query
-    var qrystr = 'WITH cases (casenumber, sagsstatus, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
+    var qrystr = 'WITH cases (casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -279,7 +279,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
             var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
         }
 
-            tables.push('SELECT casenumber, sagsstatus, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+            tables.push('SELECT casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
