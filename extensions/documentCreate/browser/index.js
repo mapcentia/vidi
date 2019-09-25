@@ -163,7 +163,7 @@ try {
  */
 var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
-    snack(__('Start med nøgle') + ' ' + key)
+    snack(__('Viser henvendelser på ') + ' ' + key)
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
 
@@ -173,13 +173,24 @@ var getExistingDocs = function (key, fileIdent = false) {
     // make list of existing cases
     var existingcases = documentGetExistingCasesFilter(key, fileIdent)
     $('#documentList-feature-content').html('')
+    $('#documentList-feature-content').append('<table style="width:100%" border="1">')
+    $('#documentList-feature-content').append('<tr>')
+    $('#documentList-feature-content').append('<th>Sagsnummer</th>'
+     + '<th>Sagstatus</th>'
+     + '<th>Titel</th>' )
+    $('#documentList-feature-content').append('</tr>')
+
     if (existingcases) {
         for (let l in existingcases) {
-            $('#documentList-feature-content').append('<a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a>' +existingcases[l].properties.sagsnavn + ' ' + existingcases[l].properties.sagsstatus + ' <br>')
+            $('#documentList-feature-content').append('<tr>')
+            $('#documentList-feature-content').append('<td><a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'
+             + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
+             + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
+            $('#documentList-feature-content').append('</tr>')
         }
         $('#documentList-feature-content').show();
     }
-
+    $('#documentList-feature-content').append('</table>')
     // TODO fix zoom-to
     var bounds = []
     var bounds = documentCreateGetFilterBounds(key, fileIdent)
@@ -400,10 +411,12 @@ var mapObj;
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
     _checkLoginDocMenu();
-
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
+
+    //backboneEvents.get().trigger("clear:search")
+    
 
     // Reset layer
     resultLayer.clearLayers();
@@ -968,6 +981,9 @@ module.exports = {
                         active: true
                     });
                     utils.cursorStyle().crosshair();
+                    //clear existing search marker
+                    $("#searchclear").trigger("click")
+
                 });
 
                 // Deactivates module

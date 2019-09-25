@@ -27,6 +27,11 @@ const APPKEY = '9b8efdfe-8ec9-447b-b8a0-030a6b6e80ba';
 const USERKEY = '1ec2a520-e22d-4ff2-a662-0593b3f8c121';
 const USERNAME = 'RESTapiKortintegration'
 
+// Days from 19000101 to 19700101
+const DAYSSINCE = 25596
+// milisecs pr. day
+const MILISECSDAY = 86400000
+
 
 /**
  * Endpoint for getting 
@@ -104,7 +109,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     // add parts to case
                     addPartsToCase(req.body.features[0].properties.esrnr, req.body.features[0].properties.adresseid, result.caseId)
 
-                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (' + result.caseId +', \'' + req.body.features[0].properties.adresseid + '\'') 
+                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (' + result.caseId +', \'' + req.body.features[0].properties.adresseid + '\')') 
                     bodyreq = makeRequestCase(req, result.caseId, REQCASETYPEID, dnTitle)
                     // opret adgangsadresseid til brug for seneere opslag.
                     insertToGc2Promise.then(function(result) {
@@ -175,7 +180,7 @@ function makeAddressCase(req, parentid, typeid, title ) {
         "parentType": 2,
         "typeId": typeid,
         "description": "Adressesag fra Mapcentia",
-        "synchronizeSource": 1,
+        "synchronizeSource": 101,
         "synchronizeIdentifier": null,
         "discardingCode": 0,
         "status": 1
@@ -204,10 +209,17 @@ function makePartBody(caseId, partid, adrid) {
 
 
 function makeRequestCase(req, parentid, typeid, title ) {
+    var requestdate =  DAYSSINCE + Math.floor((Date.parse(req.body.features[0].properties.henvendelsesdato)/MILISECSDAY))
     if (req.body.features[0].properties.forsyningstype == 'Spildevand') {
-        var custdata = {"forsyningstype": 1}
+        var custdata = {"forsyningstype": 1, 
+                        "vejret":req.body.features[0].properties.vejret, 
+                        "haendelsesdato": requestdate,
+                        "tilbagemelding":2}
     } else {
-        var custdata = {"forsyningstype": 2}
+        var custdata = {"forsyningstype": 2, 
+                        "vejret":req.body.features[0].properties.vejret, 
+                        "haendelsesdato": requestdate,
+                        "tilbagemelding":2}
     }
     var body = {
         "title": title,
@@ -215,7 +227,7 @@ function makeRequestCase(req, parentid, typeid, title ) {
         "parentType": 3,
         "typeId": typeid,
         "description": "Oprettet fra MapCentia",
-        "synchronizeSource": 1,
+        "synchronizeSource": 101,
         "synchronizeIdentifier": null,
         "discardingCode": 0,
         "status": 5,
@@ -452,7 +464,7 @@ function ReqToGC2(session, requrl) {
     }
 
     var options = {
-        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl,
+        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }
@@ -485,7 +497,7 @@ function SqlInsertToGC2(session, requrl) {
         var userstr = session.gc2UserName;
     }
     var options = {
-        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl,
+        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl + '&key='+session.gc2ApiKey,
         headers: {
             'GC2-API-KEY': session.gc2ApiKey
         }
