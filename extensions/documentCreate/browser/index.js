@@ -163,6 +163,7 @@ try {
  */
 var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
+
     snack(__('Viser henvendelser på ') + ' ' + key)
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
@@ -268,7 +269,13 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 }
 
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
-
+    if (!_USERSTR) {
+        $.when(_checkLoginDocMenu()).done(function(a1){
+            // the code here will be executed when all four ajax requests resolve.
+            // a1, a2, a3 and a4 are lists of length 3 containing the response text,
+            // status, and jqXHR object for each of the four ajax calls respectively.
+        });
+    }
     //build query
     var qrystr = 'WITH cases (casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
@@ -415,9 +422,6 @@ var onSearchLoad = function () {
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
 
-    //backboneEvents.get().trigger("clear:search")
-    
-
     // Reset layer
     resultLayer.clearLayers();
     resultLayer.addLayer(this.layer)
@@ -545,7 +549,7 @@ var documentCreateFeatureAdd = function (tablename) {
 /**
  * Checks login
  */
-var _checkLoginDocMenu  = function () {    
+var _checkLoginDocMenu = function () {    
     xhr = $.ajax({
         method: "GET",
         url: "/api/session/status",
@@ -557,11 +561,13 @@ var _checkLoginDocMenu  = function () {
                 if (response.status.subUser == false) {
                     currentUserRole = userRole.USER;
                     _USERSTR = response.status.userName
+                    return response.status.authenticated;
                 } else {
                     currentUserRole = userRole.SUB_USER;
                     _USERSTR = response.status.userName + '@' +'intranote'
                     //hide control
                     // $('#elementselectpicker').hide();
+                    return response.status.authenticated;
                 }
 
             } else {
@@ -569,6 +575,7 @@ var _checkLoginDocMenu  = function () {
                 // currentUserRole = userRole.ANONYMOUS;
                 // $('#mapGo-btn').attr('checked', false);
                 alert("Du skal logge ind for at anvende funktionen");
+                return response.status.authenticated;
             } 
         },
         error: function () {
