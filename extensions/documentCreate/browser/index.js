@@ -183,7 +183,7 @@ var getExistingDocs = function (key, fileIdent = false) {
     if (existingcases) {
         for (let l in existingcases) {
             $('#documentList-feature-content').append('<tr>')
-            $('#documentList-feature-content').append('<td><a href="docunote://casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'
+            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'
              + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
              + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
             $('#documentList-feature-content').append('</tr>')
