@@ -762,7 +762,7 @@ module.exports = {
 
 
                         $.ajax({
-                            url: 'https://watsonc.mapcentia.com/api/v2/elasticsearch/search/jupiter/chemicals/boreholes_time_series_without_chemicals_view',
+                            url: 'https://watsonc.admin.gc2.io/api/v2/elasticsearch/search/jupiter/chemicals/boreholes_time_series_without_chemicals_view',
                             data: JSON.stringify(dslB),
                             contentType: "application/json; charset=utf-8",
                             scriptCharset: "utf-8",
@@ -792,7 +792,7 @@ module.exports = {
                 switch (name) {
                     case "boreholeno" :
                         placeStore.db = "jupiter";
-                        placeStore.host = "https://watsonc.mapcentia.com";
+                        placeStore.host = "https://watsonc.admin.gc2.io";
                         searchString = datum.value;
                         placeStore.sql = "SELECT gid,boreholeno,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM chemicals.boreholes_time_series_without_chemicals WHERE gid='" + gids[datum.value] + "'";
                         placeStore.load();
