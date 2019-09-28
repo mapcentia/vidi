@@ -24,7 +24,6 @@ router.all('/api/sql/:db', function (req, response) {
         });
 
     var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + client_encoding + "&format=" + (format ? format : "geojson") + "&key=" + (typeof req.session.gc2ApiKey !=="undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/);
-        options;
 
     // Check if user is a sub user
     if (req.session.gc2UserName && req.session.subUser) {
