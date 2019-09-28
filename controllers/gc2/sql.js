@@ -36,9 +36,12 @@ router.all('/api/sql/:db', function (req, response) {
         postData = postData + "&key=" + req.body.key;
     }
 
+    console.log(postData);
+
+
     options = {
         method: 'POST',
-        uri: config.host + "/api/v1/sql/" + userName,
+        uri: config.host + "/api/v2/sql/" + userName,
         form: postData
     };
 
