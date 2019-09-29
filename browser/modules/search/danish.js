@@ -348,7 +348,7 @@ module.exports = {
                                     "bool": {
                                         "must": {
                                             "query_string": {
-                                                "default_field": "properties.string4",
+                                                "default_field": "properties.string5",
                                                 "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
