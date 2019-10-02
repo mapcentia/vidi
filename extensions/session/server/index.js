@@ -76,14 +76,24 @@ router.post('/api/session/start', function (req, response) {
         data = (`data` in data ? data.data : data);
         req.session.gc2SessionId = data.session_id;
         req.session.gc2ApiKey = data.api_key;
-        req.session.gc2UserName = data.subuser ? data.subuser : data.screen_name;
+        req.session.gc2Email = data.email;
+        req.session.gc2UserName = data.screen_name;
         req.session.subUser = data.subuser;
         req.session.screenName = data.screen_name;
+        req.session.parentDb = data.parentdb;
+
+        console.log(req.session.gc2SessionId);
+
 
         console.log("Session started");
         response.send({
             success: true,
-            message: "Logged in"
+            message: "Logged in",
+            screen_name: data.screen_name,
+            email: data.email,
+            api_key: data.api_key,
+            parentdb: data.parentdb,
+            subuser: data.subUser
         });
     });
 
@@ -104,7 +114,9 @@ router.get('/api/session/status', function (req, response) {
         success: true,
         status: {
             authenticated: !!req.session.gc2SessionId,
-            userName: req.session.gc2UserName
+            screen_name: req.session.gc2UserName,
+            email: req.session.gc2Email,
+            subuser: req.session.subUser
         }
     });
 });

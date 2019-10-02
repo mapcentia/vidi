@@ -13,8 +13,8 @@ router.put('/api/feature/:db/:layer/:srs', function (req, response) {
     var db = req.params.db, layer = req.params.layer, srs = req.params.srs, body = req.body, userName;
 
     // Check if user is a sub user
-    if (req.session.gc2UserName && req.session.subUser) {
-        userName = req.session.subUser + "@" + db;
+    if (req.session.screenName && req.session.subUser) {
+        userName = req.session.screenName + "@" + db;
     } else {
         userName = db;
     }
@@ -62,8 +62,8 @@ router.post('/api/feature/:db/:layer/:srs', function (req, response) {
     var db = req.params.db, layer = req.params.layer, srs = req.params.srs, body = req.body, userName;
 
     // Check if user is a sub user
-    if (req.session.gc2UserName && req.session.subUser) {
-        userName = req.session.subUser + "@" + db;
+    if (req.session.screenName && req.session.subUser) {
+        userName = req.session.screenName + "@" + db;
     } else {
         userName = db;
     }
@@ -111,8 +111,8 @@ router.delete('/api/feature/:db/:layer/:gid', function (req, response) {
     var db = req.params.db, layer = req.params.layer, gid = req.params.gid, body = req.body, userName;
 
     // Check if user is a sub user
-    if (req.session.gc2UserName && req.session.subUser) {
-        userName = req.session.subUser + "@" + db;
+    if (req.session.screenName && req.session.subUser) {
+        userName = req.session.screenName + "@" + db;
     } else {
         userName = db;
     }
