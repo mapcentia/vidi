@@ -405,7 +405,7 @@ class StateSnapshotsDashboard extends React.Component {
 
             let tokenField = false;
             if (token) {
-                tokenField = (<div className="input-group form-group">
+                tokenField = (<div className="input-group form-group snapshot-copy-token">
                     <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(token) }}>{__(`Copy token`)}</a>
                     <input className="form-control" type="text" defaultValue={token}/>
                 </div>);
@@ -452,7 +452,7 @@ class StateSnapshotsDashboard extends React.Component {
                             <input className="form-control" type="text" defaultValue={permaLink}/>
                         </div>
                         {tokenField}
-                        <div className="input-group form-group" style={{width: `100%`}}>
+                        <div className="input-group form-group snapshot-copy-png-link" style={{width: `100%`}}>
                             <div style={{display: `flex`, width: `100%`}}>
                                 <div style={{paddingTop: `10px`}}>
                                     <a className="input-group-addon" style={{ cursor: `pointer` }} onClick={ () => { this.copyToClipboard(imageLink) }}>{__(`Copy PNG link`)}</a>

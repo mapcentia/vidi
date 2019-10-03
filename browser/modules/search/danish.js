@@ -1,5 +1,5 @@
 /*
- * @author     Alexander Shumilov
+ * @author     Martin Høgh
  * @copyright  2013-2018 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
@@ -349,7 +349,7 @@ module.exports = {
                                     "bool": {
                                         "must": {
                                             "query_string": {
-                                                "default_field": "properties.string4",
+                                                "default_field": "properties.string5",
                                                 "query": query.toLowerCase().replace(",", ""),
                                                 "default_operator": "AND"
                                             }
