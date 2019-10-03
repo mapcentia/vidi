@@ -83,7 +83,7 @@ var exId = "documentCreate";
 var id = "documentCreate-custom-search";
 var select_id = "documentCreate-service";
 var form_id = 'document-feature-form'
-
+var currentSearch = undefined;
 var request = require('request');
 
 // VMR
@@ -152,7 +152,9 @@ try {
     console.info('documentCreate - Kunne ikke finde lag med korrekt tag')
     
 }
-
+/*
+TODO fix formular så den ikke nulstilles hver gang
+*/
 
 
 /**
@@ -429,6 +431,7 @@ var onSearchLoad = function () {
     //this er retur-obj fra DAR evt løft værdi ud i skjult felt adgang is
     //console.log(this)
     console.log(this.geoJSON.features[0].properties.id)
+    filterKey = $('#documentCreate-custom-search').val()
     //find esrnr + adresseid
     getEjdNr(this.geoJSON.features[0].properties.id);
  
@@ -456,6 +459,8 @@ var onSearchLoad = function () {
 
 // find ejendomsnummer vha adgangsadresseid samt adresseid
 // bruges senere til at placere sag i docunote
+// abelsvej 8, https://dawa.aws.dk/adgangsadresser/0a3f5094-9776-32b8-e044-0003ba298018
+// kristrupvej 1, https://dawa.aws.dk/adgangsadresser/0a3f5094-b7b0-32b8-e044-0003ba298018
 var getEjdNr = function(adgangsadresseid) {
     var esr;
     var adresseid;
@@ -480,7 +485,7 @@ var getEjdNr = function(adgangsadresseid) {
                 config.extensionConfig.documentCreate.tables[1].defaults.esrnr = esr
                 config.extensionConfig.documentCreate.tables[0].defaults.adresseid = adresseid
                 config.extensionConfig.documentCreate.tables[1].defaults.adresseid = adresseid
-                buildFeatureMeta($('#'+select_id).val())
+                //buildFeatureMeta($('#'+select_id).val())
                 // return {
                 //     "adresseid":adresseid,
                 //     "esr":esr
@@ -619,6 +624,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
             snack(__("GC2 Success")+': '+ xhr.message);
             window.location = "docunote:/CaseNumber="+xhr.casenumber;
             // prepend existing cases list
+            getExistingDocs($('#documentCreate-custom-search').val());
         },
         error: function () {
 //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
@@ -633,18 +639,20 @@ var documentCreateFeatureSend = function (tablename,feature) {
  * @private
  */
 var buildServiceSelect = function (id) {
+    DClayers = [];
     metaData.data.forEach(function(d) {
         if (d.tags) {
             // Add layer to select box if tag is correctly defined
             if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
                 $('#'+id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                DClayers.push(d.f_table_schema+'.'+d.f_table_name);
             };
         }
 
     });
     
 };
-  
+
  /**
  * This function builds metafields from config and how the layers are set up in GC2 and in config file
  * @returns {*}
@@ -654,83 +662,86 @@ var buildFeatureMeta = function (layer) {
     //merge information from metadata
     var m = {}
 
-    metaData.data.forEach(function(d) {
-      if (d.f_table_name == layer.split('.')[1] && d.f_table_schema == layer.split('.')[0]) {
-        m = d
+    metaData.data.forEach(function (d) {
+        if (d.f_table_name == layer.split('.')[1] && d.f_table_schema == layer.split('.')[0]) {
+            m = d
         }
     })
 
     var fields = m.fields
-    var fieldconf = JSON.parse(m.fieldconf)
-    var order = []
-    var col;
-    //Get information from config.json
-    var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == m.f_table_name)
-    
-    console.log(conf)
+    if (m.fields) {
+        var fieldconf = JSON.parse(m.fieldconf)
+        var order = []
+        var col;
+        //Get information from config.json
+        var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == m.f_table_name)
 
-    for (col in fields) {
-        var obj = {
-            "colName": col,
-            "colNum": fields[col].num,
-            "nullable": fields[col].is_nullable,
-            "type": fields[col].full_type
-        }
-        
-        // Get information from fieldconf
-        ///////////////////////////////////
-        //sort_id is set in GC2
-        if (col in fieldconf) {
-            obj.sort_id = fieldconf[col].sort_id
-        } else {
-            obj.sort_id = 0
-        }
-        //properties is set in GC2
-        if (col in fieldconf) {
-            if (fieldconf[col].properties !== "") {
-                obj.properties = fieldconf[col].properties
+        console.log(conf)
+
+        for (col in fields) {
+            var obj = {
+                "colName": col,
+                "colNum": fields[col].num,
+                "nullable": fields[col].is_nullable,
+                "type": fields[col].full_type
             }
-        } 
-        //alias is set in GC2
-        if (col in fieldconf) {
-            if (fieldconf[col].alias === "") {
-                obj.alias = obj.colName   
+
+            // Get information from fieldconf
+            ///////////////////////////////////
+            //sort_id is set in GC2
+            if (col in fieldconf) {
+                obj.sort_id = fieldconf[col].sort_id
             } else {
-                obj.alias = fieldconf[col].alias
+                obj.sort_id = 0
             }
-        } 
-        // Get information from config file
-        ///////////////////////////////////
-        //hidden is set in config
-        obj.hidden = $.inArray(col,conf["hidden"])
-        //optional is set in config
-        obj.optional = $.inArray(col,conf["optional"])
-        //defaults
-        if (conf["defaults"][col] !== undefined) {
-            obj.defaults = conf["defaults"][col]
-        } 
-        //Ignore pkey and geom
-        if (m["pkey"] == obj.colName || m["f_geometry_column"] == obj.colName){
-            // Just don't add
-        } else {
-            order.push(obj)
-        }
-    };
-    // Sort by sort_id
-    order = order.sort(function compare(a, b) {
-        const genreA = a.sort_id;
-        const genreB = b.sort_id;
-      
-        let comparison = 0;
-        if (genreA < genreB) {
-          comparison = 1;
-        } else if (genreA > genreB) {
-          comparison = -1;
-        }
-        return comparison;
-      });
-    //Lets build the stuff!
-    FeatureFormFactory(order);
+            //properties is set in GC2
+            if (col in fieldconf) {
+                if (fieldconf[col].properties !== "") {
+                    obj.properties = fieldconf[col].properties
+                }
+            }
+            //alias is set in GC2
+            if (col in fieldconf) {
+                if (fieldconf[col].alias === "") {
+                    obj.alias = obj.colName
+                } else {
+                    obj.alias = fieldconf[col].alias
+                }
+            }
+            // Get information from config file
+            ///////////////////////////////////
+            //hidden is set in config
+            obj.hidden = $.inArray(col, conf["hidden"])
+            //optional is set in config
+            obj.optional = $.inArray(col, conf["optional"])
+            //defaults
+            if (conf["defaults"][col] !== undefined) {
+                obj.defaults = conf["defaults"][col]
+            }
+            //Ignore pkey and geom
+            if (m["pkey"] == obj.colName || m["f_geometry_column"] == obj.colName) {
+                // Just don't add
+            } else {
+                order.push(obj)
+            }
+        };
+        // Sort by sort_id
+        order = order.sort(function compare(a, b) {
+            const genreA = a.sort_id;
+            const genreB = b.sort_id;
+
+            let comparison = 0;
+            if (genreA < genreB) {
+                comparison = 1;
+            } else if (genreA > genreB) {
+                comparison = -1;
+            }
+            return comparison;
+        });
+        //Lets build the stuff!
+        FeatureFormFactory(order);
+    }
+
 };
 /**
  * This function builds metafields from config and how the layers are set up in GC2 and in config file
@@ -883,7 +894,7 @@ module.exports = {
             },
 
             "Ext name": {
-                "da_DK": "Hændelse",
+                "da_DK": "Opret henvendelse",
                 "en_US": "Action"
             },
 
@@ -908,16 +919,16 @@ module.exports = {
             },
 
             "GC2 Success": {
-                "da_DK": "Hændelse gemt i GC2",
+                "da_DK": "Henvendelse gemt i GC2",
                 "en_US": "Action saved in GC2" 
             },
 
             "GC2 Error": {
-                "da_DK": "Der skete en fejl da hændelsen skulle oprettes",
+                "da_DK": "Der skete en fejl da henvendelsen skulle oprettes",
                 "en_US": "There was an error while saving the action" 
             },
             "Start med nøgle": {
-                "da_DK": "Leder efter hændelser på adresse",
+                "da_DK": "Leder efter henvendelser på adresse",
                 "en_US": "Looking for actions on adress" 
             },
             "Start uden nøgle": {
@@ -990,6 +1001,11 @@ module.exports = {
                     utils.cursorStyle().crosshair();
                     //clear existing search marker
                     $("#searchclear").trigger("click")
+                    //if ($('#documentCreate-custom-search').val()) {
+                        //filterKey = $('#documentCreate-custom-search').val()
+                        //getExistingDocs(filterKey);
+                    //}
+                    buildServiceSelect(select_id)
 
                 });
 
@@ -1000,12 +1016,14 @@ module.exports = {
                         active: false
                     });
                     utils.cursorStyle().reset();
-                    $("#" + id).val('');
-                    resultLayer.clearLayers();
+                    // reset add. search
+                    //$("#" + id).val('');
+
+                    //resultLayer.clearLayers();
                     //TODO find tne måde at håndtere clear ordentligt
                     //clearExistingDocFilters();
-                    $('#documentCreate-feature-content').hide();
-                    $('#documentList-feature-content').hide();
+                    //$('#documentCreate-feature-content').hide();
+                    //$('#documentList-feature-content').hide();
                 });
 
                 console.log('documentCreate - Mounted')
@@ -1138,8 +1156,7 @@ module.exports = {
         }
 
         // Create tab
-        utils.createMainTab(exId, __("Ext name"), __("Help"), require('./../../../browser/modules/height')().max, "folder", false, exId);
-
+        utils.createMainTab(exId, __("Ext name"), __("Help"), require('./../../../browser/modules/height')().max, "flash_on", false, exId);
         // Append to DOM
         //==============
         try {
