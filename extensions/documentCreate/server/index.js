@@ -27,6 +27,8 @@ const SYNCSOURCE = 101;
 const APPKEY = '9b8efdfe-8ec9-447b-b8a0-030a6b6e80ba';
 const USERKEY = '1ec2a520-e22d-4ff2-a662-0593b3f8c121';
 const USERNAME = 'RESTapiKortintegration'
+const NODETYPECASE = 3;
+const STATUSCODE = 1
 
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569
@@ -52,11 +54,10 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     var getParentCaseDnPromise = getParentCaseDn(req.body.features[0].properties.esrnr);
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse)
 
+    //Check for existing cases if so use existing parentid
     getExistinAdrCaseGc2Promise.then(function(result) {
         console.log(result)
-//        addPartsToCase(req.body.features[0].properties.esrnr, req.body.features[0].properties.adresseid, 108903)
         
-//        let adrcaseid = result.features[0].properties.adrfileid;
         if (result.features.length) {
             // adressesagen er oprettet i DN så skal der bare oprettes henvendelsessager under denne
             // 
@@ -195,9 +196,9 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, adrgui
                 bodyaddresscase = makeAddressCase(parentId, ADRCASETYPEID, dnTitle)
                 var postCaseToDnPromise = postCaseToDn(bodyaddresscase);
                 postCaseToDnPromise.then(function (values) {
-                    result.parentid = values[0][i].nodeId;
-                    result.parenttype = values[0][i].nodeType;
-                    addPartsToCase(esrnr, adrguid, result.parentid)
+                    result.parentid = values.caseId;
+                    result.parenttype = NODETYPECASE;
+                    addPartsToCase(esrnr, adrguid, values.caseId)
                     resolve(result);
                 })
 
@@ -217,6 +218,7 @@ function addPartsToCase(esrnr, adrguid, caseId){
     // get ids for esrnr and adrguid
     var getEsrIdPromise = getPartId(esrnr);
     var getAdrIdPromise = getPartId(adrguid);
+
     Promise.all([getEsrIdPromise,getAdrIdPromise]).then(function(values) {
         console.log(values)
         partbody = makePartBody(caseId,values[0].companyId,values[1].companyId)
@@ -224,7 +226,7 @@ function addPartsToCase(esrnr, adrguid, caseId){
     })
 }
 
-function makeAddressCase(req, parentid, typeid, title ) {
+function makeAddressCase( parentid, typeid, title ) {
     var body = {
         "title": title,
         "parentId": parentid,
@@ -283,7 +285,7 @@ function makeRequestCaseBody(req, parentid, typeid, title, parentType ) {
         "synchronizeSource": SYNCSOURCE,
         "synchronizeIdentifier": null,
         "discardingCode": 0,
-        "status": 5,
+        "status": STATUSCODE,
         "customData": custdata
     }
     return body
@@ -447,8 +449,14 @@ function postCaseToDn(casebody) {
                 var jsfile = new Buffer.concat(chunks); 
                 //chunks = Buffer.concat(chunks).toString;
                 //response.send(jsfile);
+
                 console.log(JSON.parse(jsfile))
-                resolve(JSON.parse(jsfile));
+                if ('errorCode' in JSON.parse(jsfile)) {
+                    reject(JSON.parse(jsfile))
+                } else {
+                    resolve(JSON.parse(jsfile));
+                }
+              
             });
         })
         req.write(postData, 'utf8');
@@ -486,7 +494,7 @@ function putPartToCaseDn(partbody, caseId) {
                 var jsfile = new Buffer.concat(chunks); 
                 //chunks = Buffer.concat(chunks).toString;
                 //response.send(jsfile);
-                console.log(jsfile)
+                console.log(JSON.parse(jsfile))
                 //res.send(JSON.parse(jsfile));
             });
         })
