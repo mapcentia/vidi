@@ -271,13 +271,13 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 }
 
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
-    if (!_USERSTR) {
-        $.when(_checkLoginDocMenu()).done(function(a1){
-            // the code here will be executed when all four ajax requests resolve.
-            // a1, a2, a3 and a4 are lists of length 3 containing the response text,
-            // status, and jqXHR object for each of the four ajax calls respectively.
-        });
-    }
+    // if (!_USERSTR) {
+    //     $.when(_checkLoginDocMenu()).done(function(a1){
+    //         // the code here will be executed when all four ajax requests resolve.
+    //         // a1, a2, a3 and a4 are lists of length 3 containing the response text,
+    //         // status, and jqXHR object for each of the four ajax calls respectively.
+    //     });
+    // }
     //build query
     var qrystr = 'WITH cases (casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
@@ -419,7 +419,7 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
-    _checkLoginDocMenu();
+    //_checkLoginDocMenu();
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
@@ -563,6 +563,7 @@ var _checkLoginDocMenu = function () {
         success: function (response) {
             if (response.status.authenticated == true) {
                 // determine user role (USER OR SUB_USER)
+                $("documentCreate-custom-search").prop('disabled', false);
                 if (response.status.subUser == false) {
                     currentUserRole = userRole.USER;
                     _USERSTR = response.status.userName
@@ -579,8 +580,18 @@ var _checkLoginDocMenu = function () {
                 //disable submit button
                 // currentUserRole = userRole.ANONYMOUS;
                 // $('#mapGo-btn').attr('checked', false);
+                $('#documentCreate-feature-content').hide();
+                $('#documentList-feature-content').hide();
+                clearExistingDocFilters();
+                $('#documentList-feature-content').html('')
+                $("documentCreate-custom-search").prop('disabled', true);
+                DClayers = [];
+                    // reset add. search
+                $("#" + id).val('');
+                resultLayer.clearLayers();
                 alert("Du skal logge ind for at anvende funktionen");
-                return response.status.authenticated;
+                return response.status.unauthorized;
+
             } 
         },
         error: function () {
@@ -640,6 +651,8 @@ var documentCreateFeatureSend = function (tablename,feature) {
  */
 var buildServiceSelect = function (id) {
     DClayers = [];
+    // clear select services
+    $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
     metaData.data.forEach(function(d) {
         if (d.tags) {
             // Add layer to select box if tag is correctly defined
@@ -1005,6 +1018,7 @@ module.exports = {
                         //filterKey = $('#documentCreate-custom-search').val()
                         //getExistingDocs(filterKey);
                     //}
+                    _checkLoginDocMenu()                    
                     buildServiceSelect(select_id)
 
                 });
