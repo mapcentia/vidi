@@ -28,6 +28,7 @@ let jquery = require('jquery');
 require('snackbarjs');
 
 let multiply = require('geojson-multiply');
+let moment = require('moment');
 
 let JSONSchemaForm = require("react-jsonschema-form");
 
@@ -289,7 +290,6 @@ module.exports = {
                 if (fields[key].is_nullable !== true) {
                     required.push(key);
                 }
-                console.log(fields[key])
 
                 if (fields[key]) {
                     switch (fields[key].type) {
@@ -322,7 +322,6 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'imageupload'
                             };
-
                             break;
                     }
                 }
@@ -831,7 +830,14 @@ module.exports = {
                     }
                 }
             }
-
+            let eventFeatureParsed = {};
+            for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
+                if (fields[key].type.includes("timestamp")) {
+                    value = moment(value).format();
+                    //console.log(value);
+                }
+                eventFeatureParsed[key] = value;
+            }
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form
@@ -839,7 +845,7 @@ module.exports = {
                         schema={schema}
                         widgets={widgets}
                         uiSchema={uiSchema}
-                        formData={eventFeatureCopy.properties}
+                        formData={eventFeatureParsed}
                         onSubmit={onSubmit}>
                         <div className="buttons">
                             <button type="submit" className="btn btn-info">Submit</button>
