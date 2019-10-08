@@ -302,17 +302,17 @@ module.exports = {
                             break;
                         case `date`:
                             uiSchema[key] = {
-                                'ui:widget': 'alt-date'
+                                'ui:widget': 'date'
                             };
                             break;
                         case `timestamp without time zone`:
                             uiSchema[key] = {
-                                'ui:widget': 'alt-datetime'
+                                'ui:widget': 'datetime'
                             };
                             break;
                         case `timestamp with time zone`:
                             uiSchema[key] = {
-                                'ui:widget': 'alt-datetime'
+                                'ui:widget': 'datetime'
                             };
                             break;
                         case `boolean`:
@@ -832,9 +832,12 @@ module.exports = {
             }
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
-                if (fields[key].type.includes("timestamp")) {
+                if (fields[key].type.includes("timestamp with time zone")) {
                     value = moment(value).format();
-                    //console.log(value);
+                    console.log(value);
+                } else if (fields[key].type.includes("timestamp without time zone")) {
+                    value = moment(value).format("YYYY-MM-DDTHH:mm:ss");
+                    console.log(value);
                 }
                 eventFeatureParsed[key] = value;
             }
