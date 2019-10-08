@@ -178,9 +178,9 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').html('')
     $('#documentList-feature-content').append('<table style="width:100%" border="1">')
     $('#documentList-feature-content').append('<tr>')
-    $('#documentList-feature-content').append('<th>Sagsnummer</th>'
-     + '<th>Sagstatus</th>'
-     + '<th>Titel</th>' )
+    $('#documentList-feature-content').append('<td>Sagsnummer</td>'
+     + '<td>Sagstatus</td>'
+     + '<td>Titel</td>' )
     $('#documentList-feature-content').append('</tr>')
 
     if (existingcases) {
@@ -271,13 +271,11 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 }
 
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
-    // if (!_USERSTR) {
-    //     $.when(_checkLoginDocMenu()).done(function(a1){
-    //         // the code here will be executed when all four ajax requests resolve.
-    //         // a1, a2, a3 and a4 are lists of length 3 containing the response text,
-    //         // status, and jqXHR object for each of the four ajax calls respectively.
-    //     });
-    // }
+    if (!_USERSTR) {
+         $.when(_checkLoginDocMenu()).done(function(){
+             // Wait for login, we need user
+         });
+    }
     //build query
     var qrystr = 'WITH cases (casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
@@ -419,7 +417,6 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
-    //_checkLoginDocMenu();
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
@@ -589,7 +586,8 @@ var _checkLoginDocMenu = function () {
                     // reset add. search
                 $("#" + id).val('');
                 resultLayer.clearLayers();
-                alert("Du skal logge ind for at anvende funktionen");
+                //Fjerner alert
+                //alert("Du skal logge ind for at anvende funktionen");
                 return response.status.unauthorized;
 
             } 
@@ -1018,7 +1016,8 @@ module.exports = {
                         //filterKey = $('#documentCreate-custom-search').val()
                         //getExistingDocs(filterKey);
                     //}
-                    _checkLoginDocMenu()                    
+                    _checkLoginDocMenu()  
+                                     
                     buildServiceSelect(select_id)
 
                 });
