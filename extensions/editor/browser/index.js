@@ -816,24 +816,16 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
             for (let key in schema.properties) {
                 if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
-                    if (schema.properties[key].type === `string` && schema.properties[key].format === `date-time`) {
-                        if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(eventFeatureCopy.properties[key])) {
-                            let dateObject = new Date(eventFeatureCopy.properties[key]);
-                            eventFeatureCopy.properties[key] = dateObject.toISOString();
-                        }
-                    } else if (schema.properties[key].type === `string`) {
-                        eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
-                    }
+                    eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
                 }
             }
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
-                    value = moment(value).format();
+                    value = moment(value).format("YYYY-MM-DDTHH:mmZ");
                     console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
                     value = moment(value).format("YYYY-MM-DDTHH:mm");
