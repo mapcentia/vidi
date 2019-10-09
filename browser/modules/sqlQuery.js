@@ -514,7 +514,6 @@ module.exports = {
             } else {
                 $.each(sortObject(fieldConf), (name, property) => {
                     if (property.value.querable) {
-                        console.log(property);
                         let value = feature.properties[property.key];
                         if (property.value.link) {
                             value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";

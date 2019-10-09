@@ -15,8 +15,10 @@ const proxifyRequest = (req, response) => {
 
     // Rewrite URL in case of subUser
     if (req.session.subUser) {
-        requestURL = requestURL.replace(`/${req.session.screenName}/`, `/${req.session.subUser}@${req.session.screenName}/`);
+        requestURL = requestURL.replace(`/${req.session.parentDb}/`, `/${req.session.screenName}@${req.session.parentDb}/`);
     }
+
+    console.log(requestURL);
 
     if (requestURL.indexOf(config.host) === 0) {
         let options = {

@@ -6,7 +6,7 @@
 
 'use strict';
 
-import { LAYER, SYSTEM_FIELD_PREFIX } from '../../../browser/modules/layerTree/constants';
+import {LAYER, SYSTEM_FIELD_PREFIX} from '../../../browser/modules/layerTree/constants';
 
 /**
  *
@@ -28,6 +28,7 @@ let jquery = require('jquery');
 require('snackbarjs');
 
 let multiply = require('geojson-multiply');
+let moment = require('moment');
 
 let JSONSchemaForm = require("react-jsonschema-form");
 
@@ -49,7 +50,7 @@ let managePopups = [];
 
 const ImageUploadWidget = require('./ImageUploadWidget');
 
-const widgets = { 'imageupload': ImageUploadWidget };
+const widgets = {'imageupload': ImageUploadWidget};
 
 const MODULE_NAME = `editor`;
 const EDITOR_FORM_CONTAINER_ID = 'editor-attr-form';
@@ -104,7 +105,8 @@ module.exports = {
         _self = this;
         try {
             vectorLayers = o.extensions.vectorLayers.index;
-        } catch(e) {}
+        } catch (e) {
+        }
         return this;
     },
 
@@ -147,7 +149,7 @@ module.exports = {
 
         $(".editor-attr-dialog__expand-less").on("click", function () {
             $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height()*-1)+30) + "px"
+                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
             }, 500, function () {
                 $(".editor-attr-dialog__expand-less").hide();
                 $(".editor-attr-dialog__expand-more").show();
@@ -251,11 +253,13 @@ module.exports = {
                 }, MODULE_NAME);
             }
 
-            let styleFn = () => {};
+            let styleFn = () => {
+            };
             if (layerMeta && layerMeta.vectorstyle !== "undefined") {
                 try {
                     styleFn = eval("(" + layerMeta.vectorstyle + ")");
-                } catch (e) {}
+                } catch (e) {
+                }
             }
 
             layerTree.setStyle(layerName, styleFn);
@@ -275,13 +279,13 @@ module.exports = {
         let uiSchema = {};
 
         Object.keys(fields).map(function (key) {
-            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 || (typeof fieldConf[key] !== "undefined" && fieldConf[key].querable === true ))) {
+            if (key !== pkey && key !== f_geometry_column && (key.indexOf(SYSTEM_FIELD_PREFIX) !== 0 || (typeof fieldConf[key] !== "undefined" && fieldConf[key].querable === true))) {
                 let title = key;
                 if (fieldConf[key] !== undefined && fieldConf[key].alias) {
                     title = fieldConf[key].alias;
                 }
 
-                properties[key] = { title, type: `string` };
+                properties[key] = {title, type: `string`};
 
                 if (fields[key].is_nullable !== true) {
                     required.push(key);
@@ -297,7 +301,21 @@ module.exports = {
                             properties[key].type = `number`;
                             break;
                         case `date`:
-                            properties[key].format = `date`;
+                            uiSchema[key] = {
+                                'ui:widget': 'date'
+                            };
+                            break;
+                        case `timestamp without time zone`:
+                            uiSchema[key] = {
+                                'ui:widget': 'datetime'
+                            };
+                            properties[key].default = moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
+                            break;
+                        case `timestamp with time zone`:
+                            uiSchema[key] = {
+                                'ui:widget': 'datetime'
+                            };
+                            properties[key].default = moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
@@ -306,7 +324,6 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'imageupload'
                             };
-
                             break;
                     }
                 }
@@ -316,7 +333,7 @@ module.exports = {
                     let parsedProperties = false;
                     try {
                         parsedProperties = JSON.parse(fieldConf[key].properties.replace(/'/g, '"'));
-                    } catch(e) {
+                    } catch (e) {
                         console.warn(`"properties" of the ${key} field is not a valid JSON`);
                     }
 
@@ -382,7 +399,7 @@ module.exports = {
             serviceWorkerCheck();
 
             me.stopEdit();
-  
+
             // Create schema for attribute form
             let formBuildInformation = this.createFormObj(fields, metaDataKeys[schemaQualifiedName].pkey, metaDataKeys[schemaQualifiedName].f_geometry_column, fieldconf);
             const schema = formBuildInformation.schema;
@@ -429,7 +446,7 @@ module.exports = {
 
                 /**
                  * Feature saving callback
-                 * 
+                 *
                  * @param {Object} result Saving result
                  */
                 const featureIsSaved = (result) => {
@@ -502,9 +519,9 @@ module.exports = {
 
     /**
      * Enables snapping for created / edited feature
-     * 
+     *
      * @param {String}  geometryType        Geometry type of created / edited feature
-     * @param {Boolean} featureAlreadyExist Specifies if feature already exists 
+     * @param {Boolean} featureAlreadyExist Specifies if feature already exists
      * @param {String}  enabledLayerName    Specifies what layer is enabled for snapping
      * @param {String}  enabledFeatureId    Specifies what layer feature identifier is enabled for snapping
      */
@@ -521,8 +538,10 @@ module.exports = {
         // Enabling snapping only if there are visible vector layers
         if (guideLayers.length > 0) {
             if (geometryType.toLowerCase() === `point` && featureAlreadyExist) {
-                markers[0].snapediting = new L.Handler.MarkerSnap(cloud.get().map, markers[0]);                
-                guideLayers.map(layer => { markers[0].snapediting.addGuideLayer(layer); });
+                markers[0].snapediting = new L.Handler.MarkerSnap(cloud.get().map, markers[0]);
+                guideLayers.map(layer => {
+                    markers[0].snapediting.addGuideLayer(layer);
+                });
                 markers[0].snapediting.enable();
             } else {
                 if (enabledFeature) {
@@ -530,7 +549,9 @@ module.exports = {
                 }
 
                 var snap = new L.Handler.MarkerSnap(cloud.get().map);
-                guideLayers.map(layer => { snap.addGuideLayer(layer); });
+                guideLayers.map(layer => {
+                    snap.addGuideLayer(layer);
+                });
                 var snapMarker = L.marker(cloud.get().map.getCenter(), {
                     icon: cloud.get().map.editTools.createVertexIcon({className: 'leaflet-div-icon leaflet-drawing-icon'}),
                     opacity: 1,
@@ -579,9 +600,9 @@ module.exports = {
 
     /**
      * Removes duplicates from polygon data (duplicate is two or more consecutive vertices with same coordinates)
-     * 
+     *
      * @param {Object} geoJSON GeoJSON data
-     * 
+     *
      * @returns {Object}
      */
     removeDuplicates: function (geoJSON) {
@@ -620,7 +641,7 @@ module.exports = {
             let React = require('react');
 
             let ReactDOM = require('react-dom');
-    
+
             let me = this, schemaQualifiedName = k.split(".")[0] + "." + k.split(".")[1],
                 metaDataKeys = meta.getMetaDataKeys(),
                 type = metaDataKeys[schemaQualifiedName].type,
@@ -775,7 +796,7 @@ module.exports = {
                     console.log('Editor: featureIsUpdated, isVectorLayer:', isVectorLayer);
 
                     switchLayer.registerLayerDataAlternation(schemaQualifiedName);
- 
+
                     sqlQuery.reset(qstore);
                     me.stopEdit();
 
@@ -797,21 +818,23 @@ module.exports = {
             const uiSchema = formBuildInformation.uiSchema;
 
             cloud.get().map.closePopup();
-
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
             for (let key in schema.properties) {
                 if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
-                    if (schema.properties[key].type === `string` && schema.properties[key].format === `date-time`) {
-                        if (/^\d{4}\-\d{1,2}\-\d{1,2}$/.test(eventFeatureCopy.properties[key])) {
-                            let dateObject = new Date(eventFeatureCopy.properties[key]);
-                            eventFeatureCopy.properties[key] = dateObject.toISOString();
-                        }
-                    } else if (schema.properties[key].type === `string`) {
-                        eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
-                    }
+                    eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
                 }
             }
-
+            let eventFeatureParsed = {};
+            for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
+                if (fields[key].type.includes("timestamp with time zone")) {
+                    value = value ? moment(value).format("YYYY-MM-DDTHH:mmZ") : moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
+                    console.log(value);
+                } else if (fields[key].type.includes("timestamp without time zone")) {
+                    value = value ? moment(value).format("YYYY-MM-DDTHH:mm") : moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
+                    console.log(value);
+                }
+                eventFeatureParsed[key] = value;
+            }
             ReactDOM.render((
                 <div style={{"padding": "15px"}}>
                     <Form
@@ -819,7 +842,7 @@ module.exports = {
                         schema={schema}
                         widgets={widgets}
                         uiSchema={uiSchema}
-                        formData={eventFeatureCopy.properties}
+                        formData={eventFeatureParsed}
                         onSubmit={onSubmit}>
                         <div className="buttons">
                             <button type="submit" className="btn btn-info">Submit</button>
@@ -827,7 +850,7 @@ module.exports = {
                     </Form>
                 </div>
             ), document.getElementById(EDITOR_FORM_CONTAINER_ID));
-    
+
             _self.openAttributesDialog();
         };
 
@@ -853,13 +876,13 @@ module.exports = {
 
     /**
      * Opens attribute dialog depending on page width and height
-     * 
+     *
      * @returns {void}
      */
     openAttributesDialog: () => {
         if (embedIsEnabled && ($(window).width() < PANEL_DOCKING_PARAMETER || $(window).height() < (PANEL_DOCKING_PARAMETER / 2))) {
             $("#" + EDITOR_CONTAINER_ID).animate({
-                bottom: (($("#" + EDITOR_CONTAINER_ID).height()*-1)+30) + "px"
+                bottom: (($("#" + EDITOR_CONTAINER_ID).height() * -1) + 30) + "px"
             }, 500, () => {
                 $(".editor-attr-dialog__expand-less").hide();
                 $(".editor-attr-dialog__expand-more").show();
@@ -900,7 +923,7 @@ module.exports = {
                 sqlQuery.reset(qstore);
 
                 cloud.get().map.closePopup();
-                
+
                 // Reloading only vector layers, as uncommited changes can be displayed only for vector layers
                 if (isVectorLayer) {
                     layerTree.reloadLayer("v:" + schemaQualifiedName, true);

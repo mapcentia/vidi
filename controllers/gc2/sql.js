@@ -36,8 +36,8 @@ var query = function (req, response) {
         options;
 
     // Check if user is a sub user
-    if (req.session.gc2UserName && req.session.subUser) {
-        userName = req.session.subUser + "@" + db;
+    if (req.session.screenName && req.session.subUser) {
+        userName = req.session.screenName + "@" + db;
     } else {
         userName = db;
     }

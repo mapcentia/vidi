@@ -21,7 +21,7 @@ var backboneEvents;
  *
  * @type {string}
  */
-var AHOST = "https://gc2.io";
+var AHOST = "https://dk.gc2.io";
 
 /**
  *
@@ -33,7 +33,7 @@ var ADB = "dk";
  *
  * @type {string}
  */
-var MHOST = "https://gc2.io";
+var MHOST = "https://dk.gc2.io";
 
 /**
  *

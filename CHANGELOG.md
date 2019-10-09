@@ -10,6 +10,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
 - Download drawings as GeoJSON.
 - Comment with version in index.html
+- Support of date and datetime in editor. Only time will be handled in a text field.
 
 ### Changed
 - Layers which have been switch off, will not be removed from legend (old behavior can be set in config)
