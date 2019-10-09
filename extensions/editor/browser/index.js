@@ -309,11 +309,13 @@ module.exports = {
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
+                            properties[key].default = moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                             break;
                         case `timestamp with time zone`:
                             uiSchema[key] = {
                                 'ui:widget': 'datetime'
                             };
+                            properties[key].default = moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                             break;
                         case `boolean`:
                             properties[key].type = `boolean`;
@@ -825,10 +827,10 @@ module.exports = {
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
-                    value = moment(value).format("YYYY-MM-DDTHH:mmZ");
+                    value = value ? moment(value).format("YYYY-MM-DDTHH:mmZ") : moment().format("YYYY-MM-DDTHH:mmZ"); // Default is required in IOS Safari
                     console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
-                    value = moment(value).format("YYYY-MM-DDTHH:mm");
+                    value = value ? moment(value).format("YYYY-MM-DDTHH:mm") : moment().format("YYYY-MM-DDTHH:mm"); // Default is required in IOS Safari
                     console.log(value);
                 }
                 eventFeatureParsed[key] = value;
