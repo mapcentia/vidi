@@ -177,23 +177,27 @@ var getExistingDocs = function (key, fileIdent = false) {
     var existingcases = documentGetExistingCasesFilter(key, fileIdent)
     $('#documentList-feature-content').html('')
     $('#documentList-feature-content').append('<table style="width:100%" border="1">')
-    $('#documentList-feature-content').append('<tr>')
-    $('#documentList-feature-content').append('<td>Sagsnummer</td>'
-     + '<td>Sagstatus</td>'
-     + '<td>Titel</td>' )
-    $('#documentList-feature-content').append('</tr>')
+    $('#documentList-feature-content').append('<thead><tr>')
+    $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
+                                            + '<th style="padding-right:5px;">Forsynignsart</th>'
+                                            + '<th style="padding-right:5px;">Sagstatus</th>'
+                                            + '<th style="padding-right:5px;">Ansvarlig</th>'
+                                            + '<th style="padding-right:5px;">Titel</th>' )
+    $('#documentList-feature-content').append('</tr></thead><tbody>')
 
     if (existingcases) {
         for (let l in existingcases) {
             $('#documentList-feature-content').append('<tr>')
-            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'
-             + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
-             + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
+            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'             
+                + '<td>' + existingcases[l].properties.forsyningstype + '</td>'
+                + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
+                + '<td>' + existingcases[l].properties.ansvarlig + '</td>'
+                + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
             $('#documentList-feature-content').append('</tr>')
         }
         $('#documentList-feature-content').show();
     }
-    $('#documentList-feature-content').append('</table>')
+    $('#documentList-feature-content').append('</tbody></table>')
     // TODO fix zoom-to
     var bounds = []
     var bounds = documentCreateGetFilterBounds(key, fileIdent)
@@ -271,13 +275,15 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
 }
 
 var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
-    if (!_USERSTR) {
-         $.when(_checkLoginDocMenu()).done(function(){
-             // Wait for login, we need user
-         });
-    }
+    // if (!_USERSTR) {
+    //     $.when(_checkLoginDocMenu()).done(function(a1){
+    //         // the code here will be executed when all four ajax requests resolve.
+    //         // a1, a2, a3 and a4 are lists of length 3 containing the response text,
+    //         // status, and jqXHR object for each of the four ajax calls respectively.
+    //     });
+    // }
     //build query
-    var qrystr = 'WITH cases (casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
+    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -297,7 +303,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
             var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
         }
 
-            tables.push('SELECT casenumber, sagsstatus, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+            tables.push('SELECT casenumber, sagsstatus, forsyningstype, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
@@ -417,6 +423,7 @@ var mapObj;
     
 var onSearchLoad = function () {
     console.log('documentCreate - search trigered')
+    //_checkLoginDocMenu();
     // VMR
     // filter to content on key
     getExistingDocs($('#documentCreate-custom-search').val());
@@ -444,7 +451,8 @@ var onSearchLoad = function () {
 
     //Set the value to a default and build
     if (config.extensionConfig.documentCreate.defaulttable){
-        $('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
+        //$('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
+        //$('#' + select_id + ' option[value=' + config.extensionConfig.documentCreate.defaulttable + ']').attr('selected','selected');
         //build
         buildFeatureMeta(config.extensionConfig.documentCreate.defaulttable)
     }
@@ -568,8 +576,6 @@ var _checkLoginDocMenu = function () {
                 } else {
                     currentUserRole = userRole.SUB_USER;
                     _USERSTR = response.status.userName + '@' +'intranote'
-                    //hide control
-                    // $('#elementselectpicker').hide();
                     return response.status.authenticated;
                 }
 
@@ -583,11 +589,9 @@ var _checkLoginDocMenu = function () {
                 $('#documentList-feature-content').html('')
                 $("documentCreate-custom-search").prop('disabled', true);
                 DClayers = [];
-                    // reset add. search
+                // reset add. search
                 $("#" + id).val('');
                 resultLayer.clearLayers();
-                //Fjerner alert
-                //alert("Du skal logge ind for at anvende funktionen");
                 return response.status.unauthorized;
 
             } 
@@ -651,11 +655,16 @@ var buildServiceSelect = function (id) {
     DClayers = [];
     // clear select services
     $('#'+select_id).find('option').remove().end().append('<option value=""></option>').val('')
+    
     metaData.data.forEach(function(d) {
         if (d.tags) {
             // Add layer to select box if tag is correctly defined
             if (d.tags.includes(config.extensionConfig.documentCreate.metaTag)) {
-                $('#'+id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                if (d.f_table_schema+'.'+d.f_table_name == config.extensionConfig.documentCreate.defaulttable) {
+                    $('#'+select_id).append('<option selected value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                } else {
+                    $('#'+select_id).append('<option value="'+d.f_table_schema+'.'+d.f_table_name+'">'+d.f_table_title+'</option>');
+                }
                 DClayers.push(d.f_table_schema+'.'+d.f_table_name);
             };
         }
@@ -670,6 +679,7 @@ var buildServiceSelect = function (id) {
  * @private
  */
 var buildFeatureMeta = function (layer) {
+
     //merge information from metadata
     var m = {}
 
@@ -688,7 +698,10 @@ var buildFeatureMeta = function (layer) {
         var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == m.f_table_name)
 
         console.log(conf)
-
+        // set the backgroundlayer visible
+        if (conf.cosmeticbackgroundlayer)
+            layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+        
         for (col in fields) {
             var obj = {
                 "colName": col,
@@ -953,6 +966,10 @@ module.exports = {
             "List selection": {
                 "da_DK": "Henvendelser på adressen",
                 "en_US": "Requests on the address"                 
+            },
+            "MissingLogin": {
+                "da_DK": "NB: Du skal logge ind for at kunne bruge funktionen",
+                "en_US": "Please log in to use this function"                 
             }
         };
 
@@ -1011,17 +1028,17 @@ module.exports = {
                     });
                     utils.cursorStyle().crosshair();
                     //clear existing search marker
-                    $("#searchclear").trigger("click")
-                    //if ($('#documentCreate-custom-search').val()) {
-                        //filterKey = $('#documentCreate-custom-search').val()
-                        //getExistingDocs(filterKey);
-                    //}
-                    _checkLoginDocMenu()  
-                                     
-                    buildServiceSelect(select_id)
-
+                    /*
+                    _checkLoginDocMenu();
+                    */
+                    try {
+                        buildServiceSelect(select_id);
+                    } catch (error) {
+                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+                    }
+                    //$("#searchclear").trigger("click")
                 });
-
+                
                 // Deactivates module
                 backboneEvents.get().on(`off:${exId} off:all reset:all`, () => {
                     console.log('Stopping documentCreate')
@@ -1029,14 +1046,27 @@ module.exports = {
                         active: false
                     });
                     utils.cursorStyle().reset();
-                    // reset add. search
-                    //$("#" + id).val('');
+                });
+                /*
+                backboneEvents.get().on("clear:search", function () {
+                    console.info("Clearing search inside documentCreate,select_id: " + select_id);
+                    try {
+                        buildServiceSelect(select_id);
+                    } catch (error) {
+                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+                    }
+                });*/
 
-                    //resultLayer.clearLayers();
-                    //TODO find tne måde at håndtere clear ordentligt
-                    //clearExistingDocFilters();
-                    //$('#documentCreate-feature-content').hide();
-                    //$('#documentList-feature-content').hide();
+                backboneEvents.get().on("allDoneLoading:layers", function () {
+                    try {
+                        if (me.state.active === true &&
+                            DClayers.length > 0) {
+                            return;
+                        }
+                        buildServiceSelect(select_id);
+                    } catch (error) {
+                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+                    }
                 });
 
                 console.log('documentCreate - Mounted')
@@ -1060,12 +1090,12 @@ module.exports = {
                 cloud.get().map.addLayer(resultLayer);
 
                 // Build select box from metadata
-
+                /*
                 try {
                     buildServiceSelect(select_id);
                 } catch (error) {
                     console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                }
+                }*/
 
                 // Handle click events on map
                 // ==========================
@@ -1104,6 +1134,32 @@ module.exports = {
                     }
                 });
 
+                backboneEvents.get().on(`session:authChange`, (authenticated) => {
+                    _checkLoginDocMenu();
+                    if (authenticated) {
+                        // determine user role (USER OR SUB_USER)
+                        $("documentCreate-custom-search").prop('disabled', false);
+                        $('#documentCreate-feature-login').hide();  
+                        me.setState({
+                            active: true
+                        });  
+                    } else {
+                        //disable submit button
+                        // $('#mapGo-btn').attr('checked', false);
+                        $('#documentCreate-feature-content').hide();
+                        $('#documentList-feature-content').hide();
+                        clearExistingDocFilters();
+                        $('#documentList-feature-content').html('')
+                        $("documentCreate-custom-search").prop('disabled', true);
+                        $('#documentCreate-feature-login').show();
+                        DClayers = [];
+                            // reset add. search
+                        $("#" + id).val('');
+                        resultLayer.clearLayers();
+                        _USERSTR ="";
+                    } 
+                });
+
                 // Handle change in service type
                 // ==========================
                 this.onServiceChange = function (e) {
@@ -1139,6 +1195,10 @@ module.exports = {
 
                     <div role="tabpanel">
                         <div className="form-group">
+
+                            <div id="documentCreate-feature-login" className="alert alert-info" role="alert">
+                                {__("MissingLogin")}
+                            </div>
                             <h3>{__("Pick location")}</h3>
                             <div    id="documentCreate-places"
                                     className="places">
