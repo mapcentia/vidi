@@ -836,7 +836,7 @@ module.exports = {
                     value = moment(value).format();
                     console.log(value);
                 } else if (fields[key].type.includes("timestamp without time zone")) {
-                    value = moment(value).format("YYYY-MM-DDTHH:mm:ss");
+                    value = moment(value).format("YYYY-MM-DDTHH:mm");
                     console.log(value);
                 }
                 eventFeatureParsed[key] = value;
