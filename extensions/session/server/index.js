@@ -7,6 +7,21 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
+var config = require('../../../config/config.js');
+var autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
+var autoLoginMaxAge = null;
+
+if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true)
+{
+    if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
+        if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
+            autoLogin = config.extensionConfig.session.autoLogin;
+        }
+        if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
+            autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
+        }
+    }
+}
 
 /**
  *
@@ -14,18 +29,15 @@ var request = require('request');
  */
 var config = require('../../../config/config.js');
 
-router.post('/api/session/start', function (req, response) {
-    var postData = {};
-    if (req.body.u) {
-        postData = {
-            user: req.body.u,
-            password: req.body.p,
-            schema: req.body.s
-        };
+var start = function (u, p, s, d, req, response, status) {
+    var postData = {
+        user: u,
+        password: p,
+        schema: s
+    };
 
-        if (req.body.d) {
-            postData.database = req.body.d;
-        }
+    if (d) {
+        postData.database = d;
     }
 
     var options = {
@@ -37,7 +49,6 @@ router.post('/api/session/start', function (req, response) {
 
     request(options, function (err, res, body) {
         var data;
-
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
         response.header('Expires', '0');
@@ -82,11 +93,9 @@ router.post('/api/session/start', function (req, response) {
         req.session.screenName = data.screen_name;
         req.session.parentDb = data.parentdb;
 
-        console.log(req.session.gc2SessionId);
-
-
         console.log("Session started");
-        response.send({
+
+        var resBody = {
             success: true,
             message: "Logged in",
             screen_name: data.screen_name,
@@ -94,9 +103,30 @@ router.post('/api/session/start', function (req, response) {
             api_key: data.api_key,
             parentdb: data.parentdb,
             subuser: data.subUser
-        });
+        };
+
+        if (autoLogin) {
+            resBody.password = postData.password;
+            resBody.schema = postData.schema;
+            response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
+                maxAge: 900000,
+                httpOnly: true
+            });
+        }
+
+        if (status) {
+            resBody.status = status;
+            resBody.status.authenticated = true;
+        }
+        response.send(resBody);
     });
 
+};
+
+router.post('/api/session/start', function (req, response) {
+    if (req.body.u) {
+        start(req.body.u, req.body.p, req.body.s, req.body.d, req, response);
+    }
 });
 
 router.get('/api/session/stop', function (req, response) {
@@ -110,15 +140,27 @@ router.get('/api/session/stop', function (req, response) {
 });
 
 router.get('/api/session/status', function (req, response) {
-    response.status(200).send({
-        success: true,
-        status: {
-            authenticated: !!req.session.gc2SessionId,
-            screen_name: req.session.gc2UserName,
-            email: req.session.gc2Email,
-            subuser: req.session.subUser
-        }
-    });
+    let autoLoginCookie = req.cookies['autoconnect.gc2'];
+    if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
+        var creds = JSON.parse(autoLoginCookie);
+        start(creds.screen_name, creds.password, creds.schema, creds.parentdb, req, response,
+            {
+                screen_name: creds.screen_name,
+                email: creds.email,
+                subuser: creds.subUser
+            }
+        );
+    } else {
+        response.status(200).send({
+            success: true,
+            status: {
+                authenticated: !!req.session.gc2SessionId,
+                screen_name: req.session.gc2UserName,
+                email: req.session.gc2Email,
+                subuser: req.session.subUser
+            }
+        });
+    }
 });
 
 module.exports = router;

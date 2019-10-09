@@ -11,6 +11,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Download drawings as GeoJSON.
 - Comment with version in index.html
 - Support of date and datetime in editor. Only time will be handled in a text field.
+- Auto login. WARNING: Insecure and sets cookie with login creds. A build time setting `autoLoginPossible` must be set to `true` to make activation possible. Activation is done in:
+    - `extensionConfig.session.autoLogin = true` and optional `extensionConfig.session.autoLoginMaxAge = 3600 * 1000`. The latter defaults to `null`
 
 ### Changed
 - Layers which have been switch off, will not be removed from legend (old behavior can be set in config)
