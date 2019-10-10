@@ -54,7 +54,15 @@ var layers = require('./../../../browser/modules/layers');
  */
 var layerTree = require('./../../../browser/modules/layerTree');
 
-
+const GUI_CONTROL_STATE = {
+    FEATURE_CONTENT_VISIBLE: 2,
+    ACTIVATE_SUBMIT_CONTROL: 4,
+    FEATURE_INFO_VISIBLE: 8,
+    EDIT_CONTROLS_VISIBLE: 16,
+    AUTHENTICATE_HIDE_ALERT: 32,
+    AUTHENTICATE_SHOW_ALERT: 64,
+    NO_CONTROLS_VISIBLE: 128
+  }
 
 /**
  *
@@ -85,11 +93,14 @@ var select_id = "documentCreate-service";
 var form_id = 'document-feature-form'
 var currentSearch = undefined;
 var request = require('request');
+var coords;
 
 // VMR
 // Check for key in url, else leave undefined
 var filterKey = undefined;
 var fileIdent = undefined; 
+var firstRunner = true; 
+var editingAllowed = false;
 
 if (urlparser.urlVars.filterKey) {
     filterKey = urlparser.urlVars.filterKey;
@@ -105,7 +116,7 @@ var transformPoint;
 
 var _result;
 
-var _USERSTR;
+var _USERSTR = "";
 
 var jquery = require('jquery');
 require('snackbarjs');
@@ -140,6 +151,7 @@ var DClayers = [];
 /**
  * Tilføjer liste af lag som har korrekt tag
  */
+/*
 try {
     metaData.data.forEach(function(d) {
       if (d.tags) {
@@ -151,7 +163,7 @@ try {
 } catch (error) {
     console.info('documentCreate - Kunne ikke finde lag med korrekt tag')
     
-}
+}*/
 /*
 TODO fix formular så den ikke nulstilles hver gang
 */
@@ -179,10 +191,10 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').append('<table style="width:100%" border="1">')
     $('#documentList-feature-content').append('<thead><tr>')
     $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
-                                            + '<th style="padding-right:5px;">Forsynignsart</th>'
-                                            + '<th style="padding-right:5px;">Sagstatus</th>'
+                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+                                            + '<th style="padding-right:5px;">Status</th>'
                                             + '<th style="padding-right:5px;">Ansvarlig</th>'
-                                            + '<th style="padding-right:5px;">Titel</th>' )
+                                            + '<th style="padding-right:5px;">Adresse</th>' )
     $('#documentList-feature-content').append('</tr></thead><tbody>')
 
     if (existingcases) {
@@ -198,6 +210,14 @@ var getExistingDocs = function (key, fileIdent = false) {
         $('#documentList-feature-content').show();
     }
     $('#documentList-feature-content').append('</tbody></table>')
+    if (fileIdent) {
+        // we are in a editing session
+        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
+    } else {
+        // we are in a create session
+        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
+    }
+    
     // TODO fix zoom-to
     var bounds = []
     var bounds = documentCreateGetFilterBounds(key, fileIdent)
@@ -324,11 +344,34 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
                 //nothing.. return null
                 return null
             } else {
+                // we got a result, process- and present it
+                if (fileIdent) {
+                    // create presentation for selected items
+                    $('#documentList-feature-content').html('')
+                    $('#documentList-feature-content').append('<table style="width:100%" border="1">')
+                    $('#documentList-feature-content').append('<thead><tr>')
+                    $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
+                                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+                                                            + '<th style="padding-right:5px;">Status</th>'
+                                                            + '<th style="padding-right:5px;">Ansvarlig</th>'
+                                                            + '<th style="padding-right:5px;">Adresse</th>' )
+                    $('#documentList-feature-content').append('</tr></thead><tbody>')
+                    data.features.forEach(function(d) {
+                        if (d) {
+                            $('#documentList-feature-content').append('<tr>')
+                            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+d.properties.casenumber + '">'+d.properties.casenumber+'</a></td>'             
+                                + '<td>' + d.properties.forsyningstype + '</td>'
+                                + '<td>' + d.properties.sagsstatus + '</td>'
+                                + '<td>' + d.properties.ansvarlig + '</td>'
+                                + '<td>' + d.properties.sagsnavn + '</td>' )
+                            $('#documentList-feature-content').append('</tr>')
+                        }
+                        $('#documentList-feature-content').append('</tbody></table>');
+                        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
+                    });
+                }
                 //create list with links
-                
                 result = data.features;
-
-
             }
         }
     });
@@ -396,8 +439,19 @@ var documentCreateApplyFilter = function (filter) {
         layerTree.reloadLayer(layerKey)
 
         //Toggle the filter
-        layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+        if (filter[layerKey].columns.length == 0) {
+            // insert fixed dummy filter
+            // in order to filter out all features from layer
+            var blankfeed = {expression: "=",
+                            fieldname: "adresse",
+                            restriction: false,
+                            value: "---"};
+            filter[layerKey].columns.push(blankfeed);
 
+            layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+        } else {
+            layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+        }
         //Reload
         layerTree.reloadLayerOnFiltersChange(layerKey)
 
@@ -442,13 +496,6 @@ var onSearchLoad = function () {
     config.extensionConfig.documentCreate.tables[0].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
     config.extensionConfig.documentCreate.tables[1].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
 
-    //show content
-    $('#documentCreate-feature-content').show();
-    $('#documentList-feature-content').show();
-
-    //reset all boxes
-    $('#documentCreate-feature-meta').html('')
-
     //Set the value to a default and build
     if (config.extensionConfig.documentCreate.defaulttable){
         //$('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
@@ -460,6 +507,11 @@ var onSearchLoad = function () {
 
     //move to marker
     cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
+    
+    //set submit button active and allow to edit map location
+    SetGUI_ControlState(GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL);
+    utils.cursorStyle().crosshair();
+    editingAllowed = true;
 }
 
 // find ejendomsnummer vha adgangsadresseid samt adresseid
@@ -502,59 +554,7 @@ var getEjdNr = function(adgangsadresseid) {
         //return [adressid,esr]
       //  return
     };
-
-/**
- * Function creates Geojson object to be injected back into GC2
- */
-var documentCreateFeatureAdd = function (tablename) {
-    // Add the feature to GC2 and Docunote
-    console.log('documentCreate - Add feature')
-
-    // Get the information from form, create properties
-    var feature,featureProperties = {}, tablename
-
-    //only input and select
-    $('#'+form_id+' input, #'+form_id+' select').each(
-        function(index){  
-            var input = $(this);
-            featureProperties[input.attr('id')] = input.val();
-        }
-    );
-
-    // Grab x/y from marker location
-    for (var layer in resultLayer._layers) {
-        feature = resultLayer._layers[layer].toGeoJSON();
-    };
-
-    // IF the feature is already a collection, strip it (from search)
-    if (feature.type === 'FeatureCollection'){
-        feature = feature.features[0]
-        feature.properties = {}
-    }
-
-    // get properties from form
-    feature.properties = featureProperties;
-
-    //if geom is set in config, inject these values
-    tablename = $('#documentCreate-service').val().split('.')[1] //hack
-    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x) {
-        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x] = feature.geometry.coordinates[0]
-    }
-    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y) {
-        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y] = feature.geometry.coordinates[1]
-    }
-
-    // Pack it back into a FeatureCollection (GC2 REST-API)
-    feature = {
-        "type":"FeatureCollection",
-        "features": [
-            feature
-        ]
-    }
-
-    //ready the JSON object to be sent to backend
-    documentCreateFeatureSend(tablename,feature)
-}
+    
 
 /**
  * Checks login
@@ -568,30 +568,27 @@ var _checkLoginDocMenu = function () {
         success: function (response) {
             if (response.status.authenticated == true) {
                 // determine user role (USER OR SUB_USER)
-                $("documentCreate-custom-search").prop('disabled', false);
+                //$("documentCreate-custom-search").prop('disabled', false);
                 if (response.status.subUser == false) {
                     currentUserRole = userRole.USER;
                     _USERSTR = response.status.userName
                     return response.status.authenticated;
                 } else {
                     currentUserRole = userRole.SUB_USER;
-                    _USERSTR = response.status.userName + '@' +'intranote'
+                    _USERSTR = response.status.screen_name + '@' + urlparser.db;
                     return response.status.authenticated;
                 }
 
             } else {
                 //disable submit button
-                // currentUserRole = userRole.ANONYMOUS;
-                // $('#mapGo-btn').attr('checked', false);
-                $('#documentCreate-feature-content').hide();
-                $('#documentList-feature-content').hide();
                 clearExistingDocFilters();
                 $('#documentList-feature-content').html('')
-                $("documentCreate-custom-search").prop('disabled', true);
+                //$("documentCreate-custom-search").prop('disabled', true);
                 DClayers = [];
                 // reset add. search
                 $("#" + id).val('');
                 resultLayer.clearLayers();
+                _USERSTR = "";
                 return response.status.unauthorized;
 
             } 
@@ -630,6 +627,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
         method: "POST",
         url: "/api/extension/documentCreateSendFeature",
         data: feature,
+        db: db,
         scriptCharset: "utf-8",
         success: function (xhr) {
 //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
@@ -775,10 +773,6 @@ var buildFeatureMeta = function (layer) {
  */
 var FeatureFormFactory = function (order) {
     
-    //scaffold form
-    $('#documentCreate-feature-meta').append('<h3>'+__("Henvendelse")+'</h3>')
-    $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
-    
     var col;
     order.forEach(function(col) {
         // Replace _func defaults with real values
@@ -846,9 +840,65 @@ var FeatureFormFactory = function (order) {
         $('#'+form_id).append(formobj)
     })
     
-    //Then add a button
-    $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Indsend')+'</button>')
+};
+/**
+ * This function sets gui contorls visible/invisible according to the specific state
+ * Legal values, choose from GUI_CONTROL_STATE Enumeration.
+ * Important notice, one or more states can be set simultaneuosly
+ * @param state_Enum The number to set controls visible/invisible
+ * @private
+ */
+var SetGUI_ControlState = function (state_Enum) {
+
+    if (state_Enum >= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE) {
+        // implementation specific is to hide all controls
+        $('#documentCreate-feature-editcontent').hide();  
+        $('#documentCreate-feature-content').hide();
+        $('#documentCreate-feature-filter').hide();
+        $('#documentCreate-feature-submit').hide();
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE;
+    }
+    if (state_Enum >= GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT) {
+        $('#documentCreate-feature-login').show(); 
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT;
+    }
+    if (state_Enum >= GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT) {        
+        $('#documentCreate-feature-login').hide(); 
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT;
+    }
+    if (state_Enum >= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE) {
+        $('#documentCreate-feature-editcontent').show();
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE;
+    }
+    if (state_Enum >= GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE) {
+        $('#documentCreate-feature-filter').show();
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE;
+    } 
+    if (state_Enum >= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL) {
+        // Set Submit text and button active (performed, when legal adress is entered)
+        $('#documentCreate-feature-submit').show();
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL;
+    }
+    if (state_Enum >= GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE) {
+        $('#documentCreate-feature-content').show();
+
+        // subtract this enumeration, and continue
+        state_Enum -= GUI_CONTROL_STATE.CREATE_CONTROLS_VISIBLE;
+    }
 }
+
 
 /**
  *
@@ -932,7 +982,22 @@ module.exports = {
                 "en_US": "Search adress"
             },
 
-            "Metadata": {
+            "SaveEditButton": {
+                "da_DK": "Gem ny placering",
+                "en_US": "Save new location"
+            },
+
+            "Edit location": {
+                "da_DK": "Rediger placering",
+                "en_US": "Edit location"
+            },
+
+            "EditButton": {
+                "da_DK": "Udpeg ny placering",
+                "en_US": "Select new location"
+            },
+
+            "Henvendelse": {
                 "da_DK": "Henvendelse",
                 "en_US": "Information"
             },
@@ -1026,16 +1091,18 @@ module.exports = {
                     me.setState({
                         active: true
                     });
-                    utils.cursorStyle().crosshair();
-                    //clear existing search marker
+                    if (_USERSTR.length == 0)
+                        SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
+
+                    if (DClayers.length > 0) {
+                        $('#'+select_id+' option[value="'+config.extensionConfig.documentCreate.defaulttable+'"]').prop('selected', true);
+                    }
                     /*
-                    _checkLoginDocMenu();
-                    */
                     try {
                         buildServiceSelect(select_id);
                     } catch (error) {
                         console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                    }
+                    }*/
                     //$("#searchclear").trigger("click")
                 });
                 
@@ -1045,6 +1112,12 @@ module.exports = {
                     me.setState({
                         active: false
                     });
+                    //SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE);
+                    firstRunner = true;
+                    //DClayers = [];
+                    // reset add. search
+                    //$("#" + id).val('');
+                    //resultLayer.clearLayers();
                     utils.cursorStyle().reset();
                 });
                 /*
@@ -1058,12 +1131,31 @@ module.exports = {
                 });*/
 
                 backboneEvents.get().on("allDoneLoading:layers", function () {
-                    try {
+                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length);
+                    try {    
+                        //check login status
+                        //_checkLoginDocMenu();
                         if (me.state.active === true &&
                             DClayers.length > 0) {
-                            return;
+                            //return;
+                        } else {
+                            buildServiceSelect(select_id);
                         }
-                        buildServiceSelect(select_id);
+                        if (firstRunner && _USERSTR.length > 0) {
+                            firstRunner = false;
+                            // If key is set, go there and get stuff!
+                            if (filterKey) {
+                                console.log('filterKey is set, filterKey: ' + filterKey)
+                                getExistingDocs(filterKey)
+                            } else if (fileIdent) {
+                                console.log('fileIdent is set, fileIdent: ' + fileIdent)
+                                getExistingDocs(fileIdent, true)
+                            } else {
+                                console.log('clearing doc filters')
+                                SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
+                                clearExistingDocFilters()
+                            }
+                        }
                     } catch (error) {
                         console.info('documentCreate - Kunne ikke bygge ServiceSelect')
                     }
@@ -1071,17 +1163,7 @@ module.exports = {
 
                 console.log('documentCreate - Mounted')
 
-                //VMR
-                // If key is set, go there and get stuff!
-                if (filterKey) {
-                    console.log('filterKey is set')
-                    getExistingDocs(filterKey)
-                } else if (fileIdent) {
-                    console.log('fileIdent is set')
-                    getExistingDocs(fileIdent, true)
-                } else {
-                    clearExistingDocFilters()
-                }
+               
 
 
 
@@ -1113,50 +1195,57 @@ module.exports = {
                         if (me.state.active === false) {
                             return;
                         }
-                        //Clear search geom and add clicked as marker
-                        //console.log('Moving target')
-                        resultLayer.clearLayers();
-                
-                        var coords = event.getCoordinate(), wkt;
-                        wkt = "POINT(" + coords.lng + " " + coords.lat + ")";
-                
-                        //console.log(coords)
-                
-                        //make a marker that behaves like the one from search
-                        var marker = L.marker([coords.lat, coords.lng], {
-                            icon: L.AwesomeMarkers.icon({
-                                icon: 'home',
-                                markerColor: '#C31919',
-                                prefix: 'fa'
-                            })
-                        }).addTo(resultLayer);
-                        mapObj.setView([coords.lat, coords.lng], config.extensionConfig.documentCreate.maxZoom);
+                        if (editingAllowed) {
+                            //Clear search geom and add clicked as marker
+                            //console.log('Moving target')
+                            resultLayer.clearLayers();
+                    
+                            coords = event.getCoordinate();
+                            var wkt = "POINT(" + coords.lng + " " + coords.lat + ")";
+                    
+                            //console.log(coords)
+                    
+                            //make a marker that behaves like the one from search
+                            var marker = L.marker([coords.lat, coords.lng], {
+                                icon: L.AwesomeMarkers.icon({
+                                    icon: 'home',
+                                    markerColor: '#C31919',
+                                    prefix: 'fa'
+                                })
+                            }).addTo(resultLayer);
+                            mapObj.setView([coords.lat, coords.lng], config.extensionConfig.documentCreate.maxZoom);
+                        }
                     }
                 });
 
                 backboneEvents.get().on(`session:authChange`, (authenticated) => {
+                    console.log("inside session:authChang, authenticated: " + authenticated);
                     _checkLoginDocMenu();
                     if (authenticated) {
                         // determine user role (USER OR SUB_USER)
-                        $("documentCreate-custom-search").prop('disabled', false);
-                        $('#documentCreate-feature-login').hide();  
+                        //$("documentCreate-custom-search").prop('disabled', false);
+                        SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT);
                         me.setState({
                             active: true
                         });  
+                       
                     } else {
+                        // disable all controls
+                        // notify, no user is logged in
+                        SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE + GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
+                        editingAllowed = false;
+                        /*
                         //disable submit button
                         // $('#mapGo-btn').attr('checked', false);
-                        $('#documentCreate-feature-content').hide();
-                        $('#documentList-feature-content').hide();
-                        clearExistingDocFilters();
-                        $('#documentList-feature-content').html('')
                         $("documentCreate-custom-search").prop('disabled', true);
-                        $('#documentCreate-feature-login').show();
+                        */
+                        clearExistingDocFilters();
+                        $('#documentList-feature-content').html('');
+                        firstRunner = true;
                         DClayers = [];
                             // reset add. search
                         $("#" + id).val('');
                         resultLayer.clearLayers();
-                        _USERSTR ="";
                     } 
                 });
 
@@ -1165,26 +1254,194 @@ module.exports = {
                 this.onServiceChange = function (e) {
                     //console.log('select was changed')
 
-                    //reset all boxes
-                    $('#documentCreate-feature-meta').html('')
-
                     //rebuild from metaData
                     if ($('#'+select_id).val() != '') {
 
                         //Build the boxes
                         buildFeatureMeta($('#'+select_id).val());
-                        //Show the result
-                        $('#documentCreate-feature-meta').show();
 
                     } else {
                         // "Nothing" is chosen, hide the meta
-                        $('#documentCreate-feature-meta').hide();
+                        SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE)
+                        editingAllowed = false;
                     };
 
                 };
                 
 
             }
+
+            /**
+ * Invoked, when EditButton is clickerd
+ */
+editButtonClicked () {
+    utils.cursorStyle().crosshair();
+    editingAllowed = true;
+};
+
+/**
+ * Invoked, when SaveButton is clickerd
+ */
+saveButtonClicked (fileident) {
+    if (coords && fileident) {
+        // block editing until next time edit button is pressed
+        editingAllowed = false;
+        // do save stuff here...
+
+        //build query
+        var qrystr = 'WITH CTE (geom) AS ('
+        var tables = []
+        var boundsArr = []
+
+        for (let l in DClayers) {
+            var tablename = DClayers[l].split('.')[1] //hack
+            // set the filter based on config
+            var filterCol, filterExp;
+            qrystr = ('UPDATE ' + DClayers[l] + ' SET the_geom = ST_GeomFromText(\'POINT(' + coords.lng + ' ' + coords.lat + ')\', 4326) where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
+            console.log(tablename);
+            console.log(qrystr);
+            // query SQL for stuff
+            /*
+            $.ajax({
+                url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+                type: "get",
+                async: false,
+                success: function(data) {
+                    alert("sucess, tablename:" + tablename);
+                },
+                error: function(data) {
+                    alert("error, tablename:" + tablename);
+                }
+            });*/
+
+            /*
+            let store = new geocloud.sqlStore({
+                jsonp: false,
+                method: "POST",
+                host: gc2host,
+                db: db,
+                uri: "/api/sql/nocache",
+                id: "1",
+                base64: true,
+                sql: qrystr,
+                onLoad: () => {
+                    console.log(store.geoJSON);
+                }
+            });
+    
+            setTimeout(() => {
+                store.load()
+            }, 1000)*/
+
+
+            if (tablename == 'spildevand') {
+            var xhr = $.ajax({
+                method: "POST",
+                url: "/api/extension/documentCreateEditFeature",
+                data: "db=" + db + "&sql=" + qrystr,
+                scriptCharset: "utf-8",
+                success: function (response) {
+                    
+                    alert("gemt");
+                },
+                error: function () {
+        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
+                    snack(__("GC2 Error")+': '+xhr.responseText);
+                }
+            });
+        }
+        
+        
+        
+        /*
+            var xhr = $.ajax({
+                method: "POST",
+                url: "/api/extension/documentCreateEditFeature",
+                db: db,
+                sql: qrystr,
+                scriptCharset: "utf-8",
+                success: function (xhr) {
+                    alert("gemt");
+                },
+                error: function () {
+        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
+                    snack(__("GC2 Error")+': '+xhr.responseText);
+                }
+            });
+                    /*
+        //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
+        //            var jsonmessage = JSON.parse(xhr.responseText);
+                    snack(__("GC2 Success")+': '+ xhr.message);
+                    window.location = "docunote:/CaseNumber="+xhr.casenumber;
+                    // prepend existing cases list
+                    getExistingDocs($('#documentCreate-custom-search').val());*//*
+                },
+                error: function () {
+        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
+                    snack(__("GC2 Error")+': '+xhr.responseText);
+                }
+            });*/
+
+        }
+
+        // reset coords
+        coords = null;
+    
+    }
+};
+
+/**
+ * Function creates Geojson object to be injected back into GC2
+ */
+documentCreateFeatureAdd (tablename) {
+    // Add the feature to GC2 and Docunote
+    console.log('documentCreate - Add feature')
+
+    // Get the information from form, create properties
+    var feature,featureProperties = {}, tablename
+
+    //only input and select
+    $('#'+form_id+' input, #'+form_id+' select').each(
+        function(index){  
+            var input = $(this);
+            featureProperties[input.attr('id')] = input.val();
+        }
+    );
+
+    // Grab x/y from marker location
+    for (var layer in resultLayer._layers) {
+        feature = resultLayer._layers[layer].toGeoJSON();
+    };
+
+    // IF the feature is already a collection, strip it (from search)
+    if (feature.type === 'FeatureCollection'){
+        feature = feature.features[0]
+        feature.properties = {}
+    }
+
+    // get properties from form
+    feature.properties = featureProperties;
+
+    //if geom is set in config, inject these values
+    tablename = $('#documentCreate-service').val().split('.')[1] //hack
+    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x) {
+        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x] = feature.geometry.coordinates[0]
+    }
+    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y) {
+        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y] = feature.geometry.coordinates[1]
+    }
+
+    // Pack it back into a FeatureCollection (GC2 REST-API)
+    feature = {
+        "type":"FeatureCollection",
+        "features": [
+            feature
+        ]
+    }
+
+    //ready the JSON object to be sent to backend
+    documentCreateFeatureSend(tablename,feature)
+}
 
             /**
              *
@@ -1199,28 +1456,35 @@ module.exports = {
                             <div id="documentCreate-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
-                            <h3>{__("Pick location")}</h3>
-                            <div    id="documentCreate-places"
-                                    className="places">
-                                <input  id={id}
-                                        className={id + ' typeahead'}
-                                        type="text"
-                                        placeholder="Adresse"/>
-                            </div>
                             <div id="documentCreate-feature-content" className='collapse'>    
+                                <h3>{__("Pick location")}</h3>
+                                <div    id="documentCreate-places"
+                                        className="places">
+                                    <input  id={id}
+                                            className={id + ' typeahead'}
+                                            type="text"
+                                            placeholder="Adresse"/>
+                                </div>
                                 <h3>{__("Choose service")}</h3>
                                 <div>
                                     <select id={select_id} className='form-control' onChange={this.onServiceChange} defaultValue=''>
                                             <option value=""></option>
                                     </select>
-                                </div>
-                                    <div id="documentCreate-feature-meta" className=''>
+                                </div>                                    
+                                <div id="documentCreate-feature-submit" className='collapse'>    
+                                    <h3>{__("Henvendelse")}</h3>
+                                    <button type="button" target={form_id} onClick={(tablename) => this.documentCreateFeatureAdd(tablename)} className="btn btn-primary">{__("Submit")}</button>
                                 </div>
                             </div>
-                        </div>
-                        <div className="list-group">
-                            <h3>{__("List selection")}</h3>
-                            <div id="documentList-feature-content" className='collapse'>    
+                            <div id="documentCreate-feature-editcontent" className='collapse'>    
+                                <h3>{__("Edit location")}</h3>
+                                <button type="button" onClick={this.editButtonClicked} className="btn btn-primary">{__("EditButton")}</button>
+                                <button type="button" onClick={(fileident) => this.saveButtonClicked(fileident)} className="btn btn-primary">{__("SaveEditButton")}</button>
+                            </div>
+                            <div id="documentCreate-feature-filter" className="collapse list-group">
+                                <h3>{__("List selection")}</h3>
+                                <div id="documentList-feature-content" className='collapse'>    
+                                </div>
                             </div>
                         </div>
                     </div>
