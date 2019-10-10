@@ -28,7 +28,6 @@ module.exports = {
         "host": "https://mapgogc2.geopartner.dk"
     },
 
-
     // ===============================================================
     // Configuration of print templates.
     // Print templates must be enabled - look further down.
@@ -640,6 +639,15 @@ module.exports = {
     "searchConfig": {
         "komkode": ["851", "151"] // Example of config for danish search
     },
+
+    // =========================================================
+    // Enables automatic login using persistant cookie.
+    // USE WITH CAUTION! 
+    // Set following in configs extensionConfig:
+    //  session:{autoLogin: true, autoLoginMaxAge: null}
+    // =========================================================
+
+    "autoLoginPossible": true,
 
     // =========================================================
     // Configurations for extension modules
