@@ -36,6 +36,58 @@ const DAYSSINCE = 25569
 // milisecs pr. day
 const MILISECSDAY = 86400000
 
+/**
+ * Endpoint for editing 
+ */
+router.post('/api/extension/documentCreateEditFeature', function (req, response) {
+    var APIKey = req.session.gc2ApiKey;
+    var db = req.body.db;
+    var sql = req.body.sql;
+    console.log("\n\napikey:" + APIKey);
+    console.log("\n\db:" + db);
+    console.log("\n\sql:" + sql);
+    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, sql, db);
+
+
+    //Check for existing cases if so use existing parentid
+    getExistinAdrCaseGc2Promise.then(function(result) {
+        console.log(result)
+        response.status(200).send('Lokationen er opdateret')        
+    });
+
+    /*
+    
+    var postData = "client_encoding=UTF8&srs=4326&lifetime=0&key=" + APIKey + "&q=" + sql,
+    options = {
+        method: 'POST',
+        host: 'mapgogc2.geopartner.dk',
+        key:    APIKEY,
+        //port: "3000",
+        //path: '/api/sql/nocache' + db,
+        path: '/api/v1/sql/' + db,
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded ',
+            'Content-Length': postData.length
+        }
+    };
+    try {
+        var req = http.request(options, function (res) {
+            var chunks = [], error = false, message = null;
+            
+            res.on('error', function (e) {
+                console.log(e);
+            });
+            res.on('end', function () {
+                console.log("end");
+                response.status(200).send('Lokationen er opdateret')
+                req.end();
+            });
+        });
+        req.write(postData);
+    } catch (error) {
+        console.info(error);
+    }*/
+});
 
 /**
  * Endpoint for getting 
@@ -50,7 +102,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     const qrystr = 'SELECT adrfileid, parenttype FROM vmr.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adresseid + '\'';
 
 //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
-    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr);
+    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.db);
 
     var getParentCaseDnPromise = getParentCaseDn(req.body.features[0].properties.esrnr);
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse)
@@ -527,9 +579,9 @@ function ReqToDn(requrl) {
     })
 };
 
-function ReqToGC2(session, requrl) {
+function ReqToGC2(session, requrl, db) {
     if (session.subUser)
-        var userstr = session.gc2UserName + '@' + session.screenName;
+        var userstr = session.screenName + '@' + db;
     else {
         var userstr = session.gc2UserName;
     }
@@ -549,7 +601,7 @@ function ReqToGC2(session, requrl) {
                 reject(err);
             } else {
                 console.log(resp)
-                if (JSON.parse(body).features.length) {
+                if (JSON.parse(body).features && JSON.parse(body).features.length) {
                     resolve(JSON.parse(body));
                 } else { 
                     resolve(JSON.parse(body));
