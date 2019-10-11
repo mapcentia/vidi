@@ -902,6 +902,28 @@ var SetGUI_ControlState = function (state_Enum) {
     }
 }
 
+/**
+ * This function is only ron once pr session and initializes filters
+ * @private
+ */
+var loadAndInitFilters = function () {
+    if (firstRunner && _USERSTR.length > 0) {
+        firstRunner = false;
+        // If key is set, go there and get stuff!
+        if (filterKey) {
+            console.log('filterKey is set, filterKey: ' + filterKey)
+            getExistingDocs(filterKey)
+        } else if (fileIdent) {
+            console.log('fileIdent is set, fileIdent: ' + fileIdent)
+            getExistingDocs(fileIdent, true)
+        } else {
+            console.log('clearing doc filters')
+            SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
+            clearExistingDocFilters()
+        }
+    }
+}
+
 
 /**
  *
@@ -1152,6 +1174,9 @@ module.exports = {
                         } else {
                             buildServiceSelect(select_id);
                         }
+                        // default  method, run when user is logged in and all layers are prepared for filters
+                        loadAndInitFilters();
+                        /*
                         if (firstRunner && _USERSTR.length > 0) {
                             firstRunner = false;
                             // If key is set, go there and get stuff!
@@ -1167,6 +1192,7 @@ module.exports = {
                                 clearExistingDocFilters()
                             }
                         }
+                        */
                     } catch (error) {
                         console.info('documentCreate - Kunne ikke bygge ServiceSelect')
                     }
@@ -1239,7 +1265,12 @@ module.exports = {
                         me.setState({
                             active: true
                         });  
-                       
+                        
+                        // TODO: overveje om dette skal fjernes efter session autologin fix
+
+                        // run method here in order to support switch in event order, when running
+                        // extension along with the session object autoLogin feature
+                        loadAndInitFilters();                        
                     } else {
                         // disable all controls
                         // notify, no user is logged in
