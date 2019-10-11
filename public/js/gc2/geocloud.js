@@ -252,7 +252,7 @@ geocloud = (function () {
                 }
 
                 // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
-                var extendedBounds = map.getBounds().pad(1);
+                var extendedBounds = map.getBounds().pad(0.3);
                 this.buffered_bbox = extendedBounds;
 
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
