@@ -209,14 +209,7 @@ var getExistingDocs = function (key, fileIdent = false) {
         }
         $('#documentList-feature-content').show();
     }
-    $('#documentList-feature-content').append('</tbody></table>')
-    if (fileIdent) {
-        // we are in a editing session
-        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
-    } else {
-        // we are in a create session
-        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
-    }
+    $('#documentList-feature-content').append('</tbody></table>')    
     
     // TODO fix zoom-to
     var bounds = []
@@ -232,7 +225,13 @@ var getExistingDocs = function (key, fileIdent = false) {
         }) 
 
         // create list with links 
-
+    }
+    if (fileIdent) {
+        // we are in a editing session
+        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
+    } else {
+        // we are in a create session
+        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
     }
 };
 
@@ -855,6 +854,8 @@ var SetGUI_ControlState = function (state_Enum) {
         $('#documentCreate-feature-editcontent').hide();  
         $('#documentCreate-feature-content').hide();
         $('#documentCreate-feature-filter').hide();
+        $('#documentCreate-feature-filter-header-create').hide();
+        $('#documentCreate-feature-filter-header-edit').hide();
         $('#documentCreate-feature-submit').hide();
 
         // subtract this enumeration, and continue
@@ -874,6 +875,7 @@ var SetGUI_ControlState = function (state_Enum) {
     }
     if (state_Enum >= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE) {
         $('#documentCreate-feature-editcontent').show();
+        $('#documentCreate-feature-filter-header-edit').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE;
@@ -887,6 +889,7 @@ var SetGUI_ControlState = function (state_Enum) {
     if (state_Enum >= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL) {
         // Set Submit text and button active (performed, when legal adress is entered)
         $('#documentCreate-feature-submit').show();
+        $('#documentCreate-feature-filter-header-create').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL;
@@ -1012,6 +1015,10 @@ module.exports = {
                 "en_US": "Action saved in GC2" 
             },
 
+            "Location saved": {
+                "da_DK": "Den ny placering er gemt",
+                "en_US": "The new location is saved" 
+            },
             "GC2 Error": {
                 "da_DK": "Der skete en fejl da henvendelsen skulle oprettes",
                 "en_US": "There was an error while saving the action" 
@@ -1028,9 +1035,13 @@ module.exports = {
                 "da_DK": "Nulstil",
                 "en_US": "Reset"                 
             },
-            "List selection": {
-                "da_DK": "Henvendelser på adressen",
-                "en_US": "Requests on the address"                 
+            "List selection edit": {
+                "da_DK": "Detaljer på sag",
+                "en_US": "File properties"                 
+            },
+            "List selection create": {
+                "da_DK": "Henvendelser på samme adresse",
+                "en_US": "Requests on the same address"                 
             },
             "MissingLogin": {
                 "da_DK": "NB: Du skal logge ind for at kunne bruge funktionen",
@@ -1284,109 +1295,47 @@ editButtonClicked () {
  */
 saveButtonClicked (fileident) {
     if (coords && fileident) {
-        // block editing until next time edit button is pressed
-        editingAllowed = false;
-        // do save stuff here...
 
-        //build query
-        var qrystr = 'WITH CTE (geom) AS ('
-        var tables = []
-        var boundsArr = []
-
+        // preparing save stuff here...
+        // loop through all layers and attempt save
+        // since we do note know which layer is the origin
         for (let l in DClayers) {
-            var tablename = DClayers[l].split('.')[1] //hack
             // set the filter based on config
             var filterCol, filterExp;
-            qrystr = ('UPDATE ' + DClayers[l] + ' SET the_geom = ST_GeomFromText(\'POINT(' + coords.lng + ' ' + coords.lat + ')\', 4326) where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
-            console.log(tablename);
-            console.log(qrystr);
-            // query SQL for stuff
-            /*
-            $.ajax({
-                url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
-                type: "get",
-                async: false,
-                success: function(data) {
-                    alert("sucess, tablename:" + tablename);
-                },
-                error: function(data) {
-                    alert("error, tablename:" + tablename);
-                }
-            });*/
-
-            /*
-            let store = new geocloud.sqlStore({
-                jsonp: false,
-                method: "POST",
-                host: gc2host,
-                db: db,
-                uri: "/api/sql/nocache",
-                id: "1",
-                base64: true,
-                sql: qrystr,
-                onLoad: () => {
-                    console.log(store.geoJSON);
-                }
-            });
-    
-            setTimeout(() => {
-                store.load()
-            }, 1000)*/
-
-
-            if (tablename == 'spildevand') {
+            var qrystr = ('UPDATE ' + DClayers[l] + ' SET the_geom = ' +
+                        'ST_GeomFromText(\'POINT(' + coords.lng + ' ' + coords.lat + ')\', 4326) ' + 
+                        'where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
+                        /* +
+                            'select * FROM ' + DClayers[l] + 
+                            ' where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
+*/
+            // execute SQL for update thing   
             var xhr = $.ajax({
                 method: "POST",
                 url: "/api/extension/documentCreateEditFeature",
                 data: "db=" + db + "&sql=" + qrystr,
                 scriptCharset: "utf-8",
                 success: function (response) {
-                    
-                    alert("gemt");
+                    // origin layer foun, put message on the screen
+                    snack(__("Location saved"));  
+                    // update filter
+                    getExistingDocs(fileIdent, true)                                     
                 },
-                error: function () {
-        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
-                    snack(__("GC2 Error")+': '+xhr.responseText);
+                error: function (error) {
+                    if (error.message == 'incorrect layer') {
+                    // ignore message, wrong layer, continue to the next layer
+                    } else {
+                        // origin layer foun, put message on the screen
+                        snack(__("GC2 Error: ")+': '+xhr.responseText);                
+                    }
                 }
-            });
-        }
-        
-        
-        
-        /*
-            var xhr = $.ajax({
-                method: "POST",
-                url: "/api/extension/documentCreateEditFeature",
-                db: db,
-                sql: qrystr,
-                scriptCharset: "utf-8",
-                success: function (xhr) {
-                    alert("gemt");
-                },
-                error: function () {
-        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
-                    snack(__("GC2 Error")+': '+xhr.responseText);
-                }
-            });
-                    /*
-        //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
-        //            var jsonmessage = JSON.parse(xhr.responseText);
-                    snack(__("GC2 Success")+': '+ xhr.message);
-                    window.location = "docunote:/CaseNumber="+xhr.casenumber;
-                    // prepend existing cases list
-                    getExistingDocs($('#documentCreate-custom-search').val());*//*
-                },
-                error: function () {
-        //            snack(__("GC2 Error")+': '+xhr.responseJSON.message);
-                    snack(__("GC2 Error")+': '+xhr.responseText);
-                }
-            });*/
-
+            });        
         }
 
+        // block editing until next time edit button is pressed
+        editingAllowed = false;
         // reset coords
-        coords = null;
-    
+        coords = null;    
     }
 };
 
@@ -1481,8 +1430,13 @@ documentCreateFeatureAdd (tablename) {
                                 <button type="button" onClick={this.editButtonClicked} className="btn btn-primary">{__("EditButton")}</button>
                                 <button type="button" onClick={(fileident) => this.saveButtonClicked(fileident)} className="btn btn-primary">{__("SaveEditButton")}</button>
                             </div>
+                            <div id="documentCreate-feature-filter-header-edit" className="collapse list-group">
+                                <h3>{__("List selection edit")}</h3>                                
+                            </div>
+                            <div id="documentCreate-feature-filter-header-create" className="collapse list-group">
+                                <h3>{__("List selection create")}</h3>                                
+                            </div>
                             <div id="documentCreate-feature-filter" className="collapse list-group">
-                                <h3>{__("List selection")}</h3>
                                 <div id="documentList-feature-content" className='collapse'>    
                                 </div>
                             </div>
