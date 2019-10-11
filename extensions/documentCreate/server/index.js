@@ -37,56 +37,24 @@ const DAYSSINCE = 25569
 const MILISECSDAY = 86400000
 
 /**
- * Endpoint for editing 
+ * Endpoint for editing location
  */
 router.post('/api/extension/documentCreateEditFeature', function (req, response) {
     var APIKey = req.session.gc2ApiKey;
     var db = req.body.db;
     var sql = req.body.sql;
-    console.log("\n\napikey:" + APIKey);
-    console.log("\n\db:" + db);
-    console.log("\n\sql:" + sql);
+    
     var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, sql, db);
-
 
     //Check for existing cases if so use existing parentid
     getExistinAdrCaseGc2Promise.then(function(result) {
-        console.log(result)
-        response.status(200).send('Lokationen er opdateret')        
+        if (result.affected_rows > 0)
+            response.status(200).send('Placeringen er opdateret')
+        else
+            response.status(500).send('incorrect layer')
+    }, function(err) {
+        response.status(500).send('Fejl ved gem placering, ' + err)    
     });
-
-    /*
-    
-    var postData = "client_encoding=UTF8&srs=4326&lifetime=0&key=" + APIKey + "&q=" + sql,
-    options = {
-        method: 'POST',
-        host: 'mapgogc2.geopartner.dk',
-        key:    APIKEY,
-        //port: "3000",
-        //path: '/api/sql/nocache' + db,
-        path: '/api/v1/sql/' + db,
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded ',
-            'Content-Length': postData.length
-        }
-    };
-    try {
-        var req = http.request(options, function (res) {
-            var chunks = [], error = false, message = null;
-            
-            res.on('error', function (e) {
-                console.log(e);
-            });
-            res.on('end', function () {
-                console.log("end");
-                response.status(200).send('Lokationen er opdateret')
-                req.end();
-            });
-        });
-        req.write(postData);
-    } catch (error) {
-        console.info(error);
-    }*/
 });
 
 /**
