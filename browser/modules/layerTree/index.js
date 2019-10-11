@@ -1692,6 +1692,7 @@ module.exports = {
                                         break;
                                     case `date`:
                                     case `timestamp with time zone`:
+                                    case `timestamp with timeout zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
@@ -1700,6 +1701,7 @@ module.exports = {
                                         break;
                                     case `text`:
                                     case `string`:
+                                    case `character`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
@@ -1712,7 +1714,12 @@ module.exports = {
                                         }
 
                                         break;
+                                    case `smallint`:
                                     case `integer`:
+                                    case `bigint`:
+                                    case `decimal`:
+                                    case `numeric`:
+                                    case `real`:
                                     case `double precision`:
                                         if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
