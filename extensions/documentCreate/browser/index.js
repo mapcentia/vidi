@@ -178,9 +178,9 @@ TODO fix formular så den ikke nulstilles hver gang
 var getExistingDocs = function (key, fileIdent = false) {
     // turn on layers with filter on address! - easy peasy?
 
-    snack(__('Viser henvendelser på ') + ' ' + key)
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
+    var caseNumber = "", adress = "";
 
     // apply filter
     documentCreateApplyFilter(filter)
@@ -199,6 +199,9 @@ var getExistingDocs = function (key, fileIdent = false) {
 
     if (existingcases) {
         for (let l in existingcases) {
+            
+            caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
+            adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
             $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'             
                 + '<td>' + existingcases[l].properties.forsyningstype + '</td>'
@@ -207,7 +210,9 @@ var getExistingDocs = function (key, fileIdent = false) {
                 + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
             $('#documentList-feature-content').append('</tr>')
         }
-        $('#documentList-feature-content').show();
+        if (fileIdent && caseNumber.length == 0) {
+            throw new Error("No existing cases found")
+        }
     }
     $('#documentList-feature-content').append('</tbody></table>')    
     
@@ -229,9 +234,13 @@ var getExistingDocs = function (key, fileIdent = false) {
     if (fileIdent) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
+        snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
+
     } else {
         // we are in a create session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
+        snack(__('Viser henvendelser på ') + ' ' + adress)
+
     }
 };
 
@@ -273,7 +282,8 @@ var documentCreateGetFilterBounds = function (key, isfileIdent = false) {map
         async: false,
         success: function(data) {
             //check for stuff
-            if (data.features[0].properties.st_extent == null) {
+            if (data.features[0].properties == null ||
+                data.features[0].properties.st_extent == null) {
                 //nothing.. return null
                 return null
             } else {
@@ -436,7 +446,6 @@ var documentCreateApplyFilter = function (filter) {
         //Make sure layer is on
         //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
         layerTree.reloadLayer(layerKey)
-
         //Toggle the filter
         if (filter[layerKey].columns.length == 0) {
             // insert fixed dummy filter
@@ -852,7 +861,8 @@ var SetGUI_ControlState = function (state_Enum) {
     if (state_Enum >= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE) {
         // implementation specific is to hide all controls
         $('#documentCreate-feature-editcontent').hide();  
-        $('#documentCreate-feature-content').hide();
+        $('#documentCreate-feature-content').hide();         
+        $('#documentList-feature-content').hide();        
         $('#documentCreate-feature-filter').hide();
         $('#documentCreate-feature-filter-header-create').hide();
         $('#documentCreate-feature-filter-header-edit').hide();
@@ -876,13 +886,14 @@ var SetGUI_ControlState = function (state_Enum) {
     if (state_Enum >= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE) {
         $('#documentCreate-feature-editcontent').show();
         $('#documentCreate-feature-filter-header-edit').show();
+        $('#documentList-feature-content').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE;
     }
     if (state_Enum >= GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE) {
         $('#documentCreate-feature-filter').show();
-
+        
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE;
     } 
@@ -890,6 +901,7 @@ var SetGUI_ControlState = function (state_Enum) {
         // Set Submit text and button active (performed, when legal adress is entered)
         $('#documentCreate-feature-submit').show();
         $('#documentCreate-feature-filter-header-create').show();
+        $('#documentList-feature-content').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL;
@@ -906,20 +918,39 @@ var SetGUI_ControlState = function (state_Enum) {
  * This function is only ron once pr session and initializes filters
  * @private
  */
-var loadAndInitFilters = function () {
+var loadAndInitFilters = function (active_state) {
+    try {    
+        //check login status
+        //_checkLoginDocMenu();
+        if (active_state === true &&
+            DClayers.length == 0) {   
+
+            buildServiceSelect(select_id);
+        }        
+    } catch (error) {
+        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
+        console.log(error.stack);
+        return;
+    }
     if (firstRunner && _USERSTR.length > 0) {
         firstRunner = false;
-        // If key is set, go there and get stuff!
-        if (filterKey) {
-            console.log('filterKey is set, filterKey: ' + filterKey)
-            getExistingDocs(filterKey)
-        } else if (fileIdent) {
-            console.log('fileIdent is set, fileIdent: ' + fileIdent)
-            getExistingDocs(fileIdent, true)
-        } else {
-            console.log('clearing doc filters')
-            SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
-            clearExistingDocFilters()
+        try {
+            // If key is set, go there and get stuff!
+            if (filterKey) {
+                console.log('filterKey is set, filterKey: ' + filterKey)
+                getExistingDocs(filterKey)
+            } else if (fileIdent) {
+                console.log('fileIdent is set, fileIdent: ' + fileIdent)
+                getExistingDocs(fileIdent, true)
+            } else {
+                console.log('clearing doc filters')
+                SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
+                clearExistingDocFilters()
+            }
+        } catch (error) {
+            console.log(error.stack);
+            console.info('loadAndInitFilters - failed due to layers are not yet loaded, hence reset firstRunnervariable');
+            firstRunner = true;
         }
     }
 }
@@ -1162,47 +1193,18 @@ module.exports = {
                         console.info('documentCreate - Kunne ikke bygge ServiceSelect')
                     }
                 });*/
+                backboneEvents.get().on("doneLoading:layers", function (e) {
+                    console.log("inside doneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active);                    
+                    // default  method, run when user is logged in and all layers are prepared for filters
+                    //loadAndInitFilters();
+                });
 
                 backboneEvents.get().on("allDoneLoading:layers", function () {
-                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length);
-                    try {    
-                        //check login status
-                        //_checkLoginDocMenu();
-                        if (me.state.active === true &&
-                            DClayers.length > 0) {
-                            //return;
-                        } else {
-                            buildServiceSelect(select_id);
-                        }
-                        // default  method, run when user is logged in and all layers are prepared for filters
-                        loadAndInitFilters();
-                        /*
-                        if (firstRunner && _USERSTR.length > 0) {
-                            firstRunner = false;
-                            // If key is set, go there and get stuff!
-                            if (filterKey) {
-                                console.log('filterKey is set, filterKey: ' + filterKey)
-                                getExistingDocs(filterKey)
-                            } else if (fileIdent) {
-                                console.log('fileIdent is set, fileIdent: ' + fileIdent)
-                                getExistingDocs(fileIdent, true)
-                            } else {
-                                console.log('clearing doc filters')
-                                SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
-                                clearExistingDocFilters()
-                            }
-                        }
-                        */
-                    } catch (error) {
-                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                    }
+                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active);                    
+                    loadAndInitFilters(me.state.active);
                 });
 
                 console.log('documentCreate - Mounted')
-
-               
-
-
 
                 //Initiate searchBar
                 search.init(onSearchLoad, id, true, false);
@@ -1267,10 +1269,10 @@ module.exports = {
                         });  
                         
                         // TODO: overveje om dette skal fjernes efter session autologin fix
-
+                        buildServiceSelect(select_id);
                         // run method here in order to support switch in event order, when running
                         // extension along with the session object autoLogin feature
-                        loadAndInitFilters();                        
+                        loadAndInitFilters(me.state.active);                        
                     } else {
                         // disable all controls
                         // notify, no user is logged in
