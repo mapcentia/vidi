@@ -19,6 +19,8 @@ var jquery = require('jquery');
 require('snackbarjs');
 
 var exId = `login-modal-body`;
+var autoLogin = false; // Auto login is insecure and sets cookie with login creds.
+var autoLoginMaxAge = null;
 
 /**
  *
@@ -44,16 +46,29 @@ module.exports = {
          */
         var ReactDOM = require('react-dom');
 
+        if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
+            if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
+                autoLogin = config.extensionConfig.session.autoLogin;
+            }
+            if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
+                autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
+            }
+        }
 
         // Check if signed in
+        // sign in if autoLogin is set to true
         //===================
 
         $.ajax({
             dataType: 'json',
             url: "/api/session/status",
             type: "GET",
+            data: "autoLogin=" + autoLogin + "&autoLoginMaxAge=" + autoLoginMaxAge,
+            scriptCharset: "utf-8",
             success: function (data) {
                 if (data.status.authenticated) {
+                    // inserted by LKM
+                    parent.update();
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
@@ -173,7 +188,7 @@ module.exports = {
                     url: "/api/session/status",
                     type: "GET",
                     success: function (data) {
-                        if (data.status.authenticated) {
+                        if (data.status.authenticated) {                            
                             backboneEvents.get().trigger(`session:authChange`, true);
 
                             me.setState({sessionScreenName: data.status.screen_name});
