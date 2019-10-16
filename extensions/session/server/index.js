@@ -141,6 +141,13 @@ router.get('/api/session/stop', function (req, response) {
 
 router.get('/api/session/status', function (req, response) {
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
+    
+    if (autoLogin == false && req.query.autoLogin)
+        autoLogin = req.query.autoLogin;
+    
+    if (req.query.autoLoginMaxAge)
+        autoLoginMaxAge = req.query.autoLoginMaxAge;
+
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         var creds = JSON.parse(autoLoginCookie);
         start(creds.screen_name, creds.password, creds.schema, creds.parentdb, req, response,
