@@ -621,6 +621,58 @@ var snack = function (msg) {
     });
 }
     
+/**
+ * Function creates Geojson object to be injected back into GC2
+ */
+var documentCreateFeatureAdd = function (tablename) {
+    // Add the feature to GC2 and Docunote
+    console.log('documentCreate - Add feature')
+
+    // Get the information from form, create properties
+    var feature,featureProperties = {}, tablename
+
+    //only input and select
+    $('#'+form_id+' input, #'+form_id+' select').each(
+        function(index){  
+            var input = $(this);
+            featureProperties[input.attr('id')] = input.val();
+        }
+    );
+
+    // Grab x/y from marker location
+    for (var layer in resultLayer._layers) {
+        feature = resultLayer._layers[layer].toGeoJSON();
+    };
+
+    // IF the feature is already a collection, strip it (from search)
+    if (feature.type === 'FeatureCollection'){
+        feature = feature.features[0]
+        feature.properties = {}
+    }
+
+    // get properties from form
+    feature.properties = featureProperties;
+
+    //if geom is set in config, inject these values
+    tablename = $('#documentCreate-service').val().split('.')[1] //hack
+    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x) {
+        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x] = feature.geometry.coordinates[0]
+    }
+    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y) {
+        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y] = feature.geometry.coordinates[1]
+    }
+
+    // Pack it back into a FeatureCollection (GC2 REST-API)
+    feature = {
+        "type":"FeatureCollection",
+        "features": [
+            feature
+        ]
+    }
+
+    //ready the JSON object to be sent to backend
+    documentCreateFeatureSend(tablename,feature)
+}
 
 /**
  * Function adds feature to using rest-API, make this configurable to any other rest-based service
@@ -651,6 +703,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
     });
 
 }
+
  /**
  * This function compiles values in selectbox from layers in schema with the correct tag
  * @returns {*}
@@ -1380,58 +1433,7 @@ saveButtonClicked (fileident) {
     }
 };
 
-/**
- * Function creates Geojson object to be injected back into GC2
- */
-documentCreateFeatureAdd (tablename) {
-    // Add the feature to GC2 and Docunote
-    console.log('documentCreate - Add feature')
 
-    // Get the information from form, create properties
-    var feature,featureProperties = {}, tablename
-
-    //only input and select
-    $('#'+form_id+' input, #'+form_id+' select').each(
-        function(index){  
-            var input = $(this);
-            featureProperties[input.attr('id')] = input.val();
-        }
-    );
-
-    // Grab x/y from marker location
-    for (var layer in resultLayer._layers) {
-        feature = resultLayer._layers[layer].toGeoJSON();
-    };
-
-    // IF the feature is already a collection, strip it (from search)
-    if (feature.type === 'FeatureCollection'){
-        feature = feature.features[0]
-        feature.properties = {}
-    }
-
-    // get properties from form
-    feature.properties = featureProperties;
-
-    //if geom is set in config, inject these values
-    tablename = $('#documentCreate-service').val().split('.')[1] //hack
-    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x) {
-        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.x] = feature.geometry.coordinates[0]
-    }
-    if (config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y) {
-        feature.properties[config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).geom_ext.y] = feature.geometry.coordinates[1]
-    }
-
-    // Pack it back into a FeatureCollection (GC2 REST-API)
-    feature = {
-        "type":"FeatureCollection",
-        "features": [
-            feature
-        ]
-    }
-
-    //ready the JSON object to be sent to backend
-    documentCreateFeatureSend(tablename,feature)
-}
 
             /**
              *
