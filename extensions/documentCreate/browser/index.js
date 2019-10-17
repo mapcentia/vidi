@@ -235,13 +235,7 @@ var getExistingDocs = function (key, fileIdent = false) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
         snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
-
-    } else {
-        // we are in a create session
-        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
-        snack(__('Viser henvendelser på ') + ' ' + adress)
-
-    }
+    } 
 };
 
 
@@ -631,13 +625,13 @@ var snack = function (msg) {
  */
 var documentCreateFeatureSend = function (tablename,feature) {
     // Send tile feature to DocuNote!
-    console.log('documentCreate - Send feature')
-    console.log(feature)
+    feature.db = db
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/documentCreateSendFeature",
+        //ata: "feature=" + feature + "&db=" + db,
         data: feature,
-        db: db,
+        //db: db,
         scriptCharset: "utf-8",
         success: function (xhr) {
 //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
@@ -784,6 +778,8 @@ var buildFeatureMeta = function (layer) {
  */
 var FeatureFormFactory = function (order) {
     
+    // remove previous items
+    $('#documentCreate-feature-meta').empty();
     //scaffold form
     $('#documentCreate-feature-meta').append('<h3>'+__("Henvendelse")+'</h3>')
     $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
@@ -876,7 +872,6 @@ var SetGUI_ControlState = function (state_Enum) {
         $('#documentCreate-feature-filter').hide();
         $('#documentCreate-feature-filter-header-create').hide();
         $('#documentCreate-feature-filter-header-edit').hide();
-        $('#documentCreate-feature-submit').hide();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE;
@@ -909,7 +904,6 @@ var SetGUI_ControlState = function (state_Enum) {
     } 
     if (state_Enum >= GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL) {
         // Set Submit text and button active (performed, when legal adress is entered)
-        $('#documentCreate-feature-submit').show();
         $('#documentCreate-feature-filter-header-create').show();
         $('#documentList-feature-content').show();
 
@@ -1464,12 +1458,7 @@ documentCreateFeatureAdd (tablename) {
                                     </select>
                                     <div id="documentCreate-feature-meta" className=''>
                                     </div>
-                                </div>                                    
-                                <div id="documentCreate-feature-submit" className='collapse'>    
-                                    <h3>{__("Henvendelse")}</h3>
-                                    
-                                    <button type="button" target={form_id} onClick={(tablename) => this.documentCreateFeatureAdd(tablename)} className="btn btn-primary">{__("Submit")}</button>
-                                </div>
+                                </div> 
                             </div>
                             <div id="documentCreate-feature-editcontent" className='collapse'>    
                                 <h3>{__("Edit location")}</h3>
