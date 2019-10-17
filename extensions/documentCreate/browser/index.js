@@ -193,8 +193,8 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
                                             + '<th style="padding-right:5px;">Forsyningsart</th>'
                                             + '<th style="padding-right:5px;">Status</th>'
-                                            + '<th style="padding-right:5px;">Ansvarlig</th>'
-                                            + '<th style="padding-right:5px;">Adresse</th>' )
+                                            + '<th style="padding-right:5px;">Ansvarlig</th>')
+                                            //+ '<th style="padding-right:5px;">Adresse</th>' )
     $('#documentList-feature-content').append('</tr></thead><tbody>')
 
     if (existingcases) {
@@ -206,8 +206,8 @@ var getExistingDocs = function (key, fileIdent = false) {
             $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'             
                 + '<td>' + existingcases[l].properties.forsyningstype + '</td>'
                 + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
-                + '<td>' + existingcases[l].properties.ansvarlig + '</td>'
-                + '<td>' + existingcases[l].properties.sagsnavn + '</td>' )
+                + '<td>' + existingcases[l].properties.ansvarlig + '</td>')
+                //+ '<td>' + existingcases[l].properties.sagsnavn + '</td>' 
             $('#documentList-feature-content').append('</tr>')
         }
         if (fileIdent && caseNumber.length == 0) {
@@ -235,7 +235,10 @@ var getExistingDocs = function (key, fileIdent = false) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
         snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
-    } 
+    }  else {
+        // we are in a create session
+        SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
+    }
 };
 
 
@@ -779,7 +782,7 @@ var buildFeatureMeta = function (layer) {
 var FeatureFormFactory = function (order) {
     
     // remove previous items
-    $('#documentCreate-feature-meta').empty();
+    $('#documentCreate-feature-meta').html('');
     //scaffold form
     $('#documentCreate-feature-meta').append('<h3>'+__("Henvendelse")+'</h3>')
     $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
@@ -853,6 +856,7 @@ var FeatureFormFactory = function (order) {
     
     //Then add a button
     $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Indsend')+'</button>')
+    SetGUI_ControlState(GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL);
 }
 
 /**
