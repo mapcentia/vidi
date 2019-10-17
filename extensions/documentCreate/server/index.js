@@ -65,12 +65,14 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     //send the stuff to docunote
     response.setHeader('Content-Type', 'application/json');
 
-    console.log(req.body)
+    console.log(req.body.features)
+    console.log(req.body.db)
+    
     // check if addresscase is already created
     const qrystr = 'SELECT adrfileid, parenttype FROM vmr.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adresseid + '\'';
 
 //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
-    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.db);
+    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.body.db);
 
     var getParentCaseDnPromise = getParentCaseDn(req.body.features[0].properties.esrnr);
     var dnTitle = oisAddressFormatter(req.body.features[0].properties.adresse)
@@ -78,6 +80,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     //Check for existing cases if so use existing parentid
     getExistinAdrCaseGc2Promise.then(function(result) {
         console.log(result)
+        console.log(result.features)
         
         if (result.features.length) {
             // adressesagen er oprettet i DN så skal der bare oprettes henvendelsessager under denne
@@ -93,7 +96,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     //response.send('Sag oprettet i DN')
                     req.body.features[0].properties.fileident = result.caseId
                     req.body.features[0].properties.casenumber = result.number
-                    var postCaseToGc2Promise = postToGC2(req);
+                    var postCaseToGc2Promise = postToGC2(req, req.body.db);
                     var resultjson = {"message":"Sag oprettet","casenumber": result.number}
                     postCaseToGc2Promise.then(function(result){
                         response.status(200).send(resultjson)
@@ -145,7 +148,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                             req.body.features[0].properties.fileident = result.caseId
                             req.body.features[0].properties.casenumber = result.number
     
-                            var postCaseToGc2Promise = postToGC2(req);
+                            var postCaseToGc2Promise = postToGC2(req, req.body.db);
                             var resultjson = {"message":"Sag oprettet","casenumber": result.number}
                             postCaseToGc2Promise.then(function(result){
                                 response.status(200).send(resultjson)
@@ -351,6 +354,7 @@ function getFoldersDn(caseid, nodetype) {
 // format address as in lifaois 
 
 function oisAddressFormatter(adrString){
+    console.log("adrString: " + adrString);
     var adrSplit = adrString.split(",")
     var nr = adrSplit[0].match(/\d+/)
     var padnr = new Array(4 - nr[0].length + 1).join("0") + nr[0];
@@ -407,9 +411,9 @@ function getPartId(partsyncid) {
 }
 
 // post case to gc2 
-function postToGC2(req) {
+function postToGC2(req, db) {
     if (req.session.subUser)
-        var userstr = req.session.gc2UserName + '@' + req.session.screenName;
+        var userstr = req.session.gc2UserName + '@' + db;
     else {
         var userstr = req.session.gc2UserName;
     }
