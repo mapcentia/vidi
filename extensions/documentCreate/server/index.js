@@ -29,7 +29,7 @@ const USERKEY = '1ec2a520-e22d-4ff2-a662-0593b3f8c121';
 const USERNAME = 'RESTapiKortintegration'
 const NODETYPECASE = 3;
 // status bør være 5, men fejler ved post til DN
-const STATUSCODE = 5
+const STATUSCODE = 1
 
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569
