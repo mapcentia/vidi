@@ -98,6 +98,12 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                     req.body.features[0].properties.casenumber = result.number
                     var postCaseToGc2Promise = postToGC2(req, req.body.db);
                     var resultjson = {"message":"Sag oprettet","casenumber": result.number}
+
+                    // tilføj part
+                    //partbody = makePartBodyHenvendelse(result.caseId,req.body.features[0].properties.adresseid)
+
+                    addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
+
                     postCaseToGc2Promise.then(function(result){
                         response.status(200).send(resultjson)
                     }, function(err) {
@@ -132,7 +138,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                 
                 getParentFolderPromise.then(function(result) {
                     bodyreq = makeRequestCaseBody(req, result.parentid, REQCASETYPEID, dnTitle, result.parenttype)
-                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, parenttype, adresseguid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adresseid + '\')') 
+                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, parenttype, adresseguid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adresseid + '\')', req.body.db) 
                     // opret adgangsadresseid til brug for seneere opslag.
                     insertToGc2Promise.then(function(result) {
                         console.log(result)
@@ -147,7 +153,11 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                             //response.status(200).send('Sag oprettet i DN med journalnummer: ' +result.caseId )
                             req.body.features[0].properties.fileident = result.caseId
                             req.body.features[0].properties.casenumber = result.number
-    
+
+                            // tilføj part
+                            //partbody = makePartBodyHenvendelse(result.caseId,req.body.features[0].properties.adresseid)
+                            //putPartToCaseDn(partbody,result.caseId)
+                            addPartRequestCase(result.caseId,req.body.features[0].properties.adresseid)
                             var postCaseToGc2Promise = postToGC2(req, req.body.db);
                             var resultjson = {"message":"Sag oprettet","casenumber": result.number}
                             postCaseToGc2Promise.then(function(result){
@@ -186,6 +196,18 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
 });
 
 
+
+
+function addPartRequestCase(caseId, adrguid){
+    var getAdrIdPromise = getPartId(adrguid);
+
+    Promise.all([getAdrIdPromise]).then(function(values) {
+        console.log(values)
+        partbody = makePartBodyHenvendelse(caseId,values[0].companyId)
+        putPartToCaseDn(partbody,caseId)
+    })
+}
+
 function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, adrguid) {
     return new Promise(function (resolve, reject) {
         var getParentPromise = getFoldersDn(parentId, parenttype);
@@ -222,6 +244,8 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, adrgui
                 postCaseToDnPromise.then(function (values) {
                     result.parentid = values.caseId;
                     result.parenttype = NODETYPECASE;
+                    //ToDo: Create part to add adressesag
+                    
                     addPartsToCase(esrnr, adrguid, values.caseId)
                     resolve(result);
                 })
@@ -284,6 +308,17 @@ function makePartBody(caseId, partid, adrid) {
     return body
 }
 
+function makePartBodyHenvendelse(caseId, adrid) {
+    var body = [{
+        "pickerName": "Adresse",
+        "parts":[{
+            "recordId" : caseId,
+            "partNodeType": 17,
+            "partRecordId": adrid            
+        }]
+    }]
+    return body
+}
 
 // {{url}}TreeNodes/nodeId/8421/nodeType/2
 
@@ -585,9 +620,9 @@ function ReqToGC2(session, requrl, db) {
 };
 
 
-function SqlInsertToGC2(session, requrl) {
+function SqlInsertToGC2(session, requrl, db) {
     if (session.subUser)
-        var userstr = session.gc2UserName + '@' + session.screenName;
+        var userstr = session.screenName + '@' + db;
     else {
         var userstr = session.gc2UserName;
     }
