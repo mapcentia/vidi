@@ -206,7 +206,7 @@ var getExistingDocs = function (key, fileIdent = false) {
             $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'             
                 + '<td>' + existingcases[l].properties.forsyningstype + '</td>'
                 + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
-                + '<td>' + existingcases[l].properties.ansvarlig + '</td>')
+                + '<td>' + (existingcases[l].properties.ansvarlig == 'undefined' ? '' :  existingcases[l].properties.ansvarlig) + '</td>')
                 //+ '<td>' + existingcases[l].properties.sagsnavn + '</td>' 
             $('#documentList-feature-content').append('</tr>')
         }
@@ -370,7 +370,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
                             $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+d.properties.casenumber + '">'+d.properties.casenumber+'</a></td>'             
                                 + '<td>' + d.properties.forsyningstype + '</td>'
                                 + '<td>' + d.properties.sagsstatus + '</td>'
-                                + '<td>' + d.properties.ansvarlig + '</td>'
+                                + '<td>' + (d.properties.ansvarlig == 'undefined' ? '' :  d.properties.ansvarlig) + '</td>'
                                 + '<td>' + d.properties.sagsnavn + '</td>' )
                             $('#documentList-feature-content').append('</tr>')
                         }
