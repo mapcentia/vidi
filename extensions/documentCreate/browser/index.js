@@ -349,7 +349,9 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
         success: function(data) {
             //check for stuff
             console.log(data)
-            if (data.features[0].properties.fileident == null) {
+            if (data.features.length == 0 ||
+                data.features[0].properties == null ||
+                data.features[0].properties.fileident == null) {
                 //nothing.. return null
                 return null
             } else {
@@ -773,6 +775,7 @@ var buildFeatureMeta = function (layer) {
     }
 
 };
+
 /**
  * This function builds metafields from config and how the layers are set up in GC2 and in config file
  * @param order Ordered array of fields to be created
@@ -780,6 +783,10 @@ var buildFeatureMeta = function (layer) {
  * @private
  */
 var FeatureFormFactory = function (order) {
+    
+    //scaffold form
+    $('#documentCreate-feature-meta').append('<h3>'+__("Henvendelse")+'</h3>')
+    $('#documentCreate-feature-meta').append('<form action="javascript:void(0);" onsubmit="documentCreateFeatureAdd()" id="'+ form_id +'"></form>')
     
     var col;
     order.forEach(function(col) {
@@ -848,7 +855,10 @@ var FeatureFormFactory = function (order) {
         $('#'+form_id).append(formobj)
     })
     
-};
+    //Then add a button
+    $('#'+form_id).append('<button type="submit" class="btn btn-primary">'+__('Indsend')+'</button>')
+}
+
 /**
  * This function sets gui contorls visible/invisible according to the specific state
  * Legal values, choose from GUI_CONTROL_STATE Enumeration.
@@ -1452,9 +1462,12 @@ documentCreateFeatureAdd (tablename) {
                                     <select id={select_id} className='form-control' onChange={this.onServiceChange} defaultValue=''>
                                             <option value=""></option>
                                     </select>
+                                    <div id="documentCreate-feature-meta" className=''>
+                                    </div>
                                 </div>                                    
                                 <div id="documentCreate-feature-submit" className='collapse'>    
                                     <h3>{__("Henvendelse")}</h3>
+                                    
                                     <button type="button" target={form_id} onClick={(tablename) => this.documentCreateFeatureAdd(tablename)} className="btn btn-primary">{__("Submit")}</button>
                                 </div>
                             </div>
