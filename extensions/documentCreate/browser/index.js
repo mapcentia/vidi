@@ -12,6 +12,10 @@
  */
 var cloud = require('./../../../browser/modules/cloud');
 
+var moment = require('moment');
+// Set locale for date/time string
+moment.locale("da_DK");
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -54,6 +58,14 @@ var layers = require('./../../../browser/modules/layers');
  */
 var layerTree = require('./../../../browser/modules/layerTree');
 
+/**
+ *
+ * @type {*|exports|module.exports}
+ */
+var switchLayer = require('./../../../browser/modules/switchLayer');
+
+
+
 const GUI_CONTROL_STATE = {
     FEATURE_CONTENT_VISIBLE: 2,
     ACTIVATE_SUBMIT_CONTROL: 4,
@@ -80,6 +92,8 @@ var reproject = require('reproject');
  * @type {string}
  */
 var db = urlparser.db;
+
+var thePreviousServiceValue = undefined;
 
 /**
  *
@@ -180,7 +194,8 @@ var getExistingDocs = function (key, fileIdent = false) {
 
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
-    var caseNumber = "", adress = "";
+    var caseFound = false;
+    //var caseNumber = "", adress = "";
 
     // apply filter
     documentCreateApplyFilter(filter)
@@ -190,27 +205,30 @@ var getExistingDocs = function (key, fileIdent = false) {
     $('#documentList-feature-content').html('')
     $('#documentList-feature-content').append('<table style="width:100%" border="1">')
     $('#documentList-feature-content').append('<thead><tr>')
-    $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
-                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+    $('#documentList-feature-content').append('<th style="padding-right:5px;">Dato</th>'
                                             + '<th style="padding-right:5px;">Status</th>'
-                                            + '<th style="padding-right:5px;">Ansvarlig</th>')
-                                            //+ '<th style="padding-right:5px;">Adresse</th>' )
+                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+                                            + '<th style="padding-right:5px;">Prioritet</th>'
+                                            + '<th style="padding-right:5px;">Ansvarlig</th>'
+                                            + '<th style="padding-right:5px;">Sagsnr</th>')
     $('#documentList-feature-content').append('</tr></thead><tbody>')
 
     if (existingcases) {
         for (let l in existingcases) {
-            
-            caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
-            adress = existingcases[l].properties.sagsnavn;
+            caseFound = true;
+            //caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
+            //adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
-            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.casenumber+'</a></td>'             
-                + '<td>' + existingcases[l].properties.forsyningstype + '</td>'
-                + '<td>' + existingcases[l].properties.sagsstatus + '</td>'
-                + '<td>' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</td>')
-                //+ '<td>' + existingcases[l].properties.sagsnavn + '</td>' 
+            $('#documentList-feature-content').append(
+                '<td style="padding-right:5px;">' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") + '</td>'
+                + '<td style="padding-right:5px;">' + existingcases[l].properties.sagsstatus + '</td>'
+                + '<td style="padding-right:5px;">' + existingcases[l].properties.forsyningstype + '</td>'
+                + '<td style="padding-right:5px;">' + existingcases[l].properties.prioritet + '</td>'
+                + '<td style="padding-right:5px;">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</td>'               
+                + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.sagsnavn+'</a></td>')
             $('#documentList-feature-content').append('</tr>')
         }
-        if (fileIdent && caseNumber.length == 0) {
+        if (fileIdent && !caseFound) {            
             throw new Error("No existing cases found")
         }
     }
@@ -234,7 +252,7 @@ var getExistingDocs = function (key, fileIdent = false) {
     if (fileIdent) {
         // we are in a editing session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE + GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE);
-        snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
+        //snack(__('Viser henvendelser på sagsnr. ') + ' ' + caseNumber)
     }  else {
         // we are in a create session
         SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_INFO_VISIBLE);
@@ -309,7 +327,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
     //     });
     // }
     //build query
-    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
+    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -329,11 +347,11 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
             var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
         }
 
-            tables.push('SELECT casenumber, sagsstatus, forsyningstype, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+            tables.push('SELECT casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
-    qrystr = qrystr + ' ORDER BY henvendelsesdato DESC '
+    qrystr = qrystr + ' ORDER BY henvendelsesdato DESC, sagsstatus asc, prioritet asc '
     qrystr = qrystr + ') select * from cases'
     //qrystr = qrystr + ') select ST_Extent(geom) from cte'
     //qrystr = qrystr + ') select ST_Extent(ST_Transform(ST_SetSRID(geom,4326),3857)) from cte' //Example for anything but 4326 - should be automatic TODO
@@ -358,20 +376,23 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
                     $('#documentList-feature-content').html('')
                     $('#documentList-feature-content').append('<table style="width:100%" border="1">')
                     $('#documentList-feature-content').append('<thead><tr>')
-                    $('#documentList-feature-content').append('<th style="padding-right:5px;">Sagsnummer</th>'
-                                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+                    $('#documentList-feature-content').append('<th style="padding-right:5px;">Dato</th>'
                                                             + '<th style="padding-right:5px;">Status</th>'
+                                                            + '<th style="padding-right:5px;">Forsyningsart</th>'
+                                                            + '<th style="padding-right:5px;">Prioritet</th>'
                                                             + '<th style="padding-right:5px;">Ansvarlig</th>'
-                                                            + '<th style="padding-right:5px;">Adresse</th>' )
+                                                            + '<th style="padding-right:5px;">Sag</th>' )
                     $('#documentList-feature-content').append('</tr></thead><tbody>')
                     data.features.forEach(function(d) {
                         if (d) {
                             $('#documentList-feature-content').append('<tr>')
-                            $('#documentList-feature-content').append('<td><a href="docunote:/casenumber='+d.properties.casenumber + '">'+d.properties.casenumber+'</a></td>'             
-                                + '<td>' + d.properties.forsyningstype + '</td>'
-                                + '<td>' + d.properties.sagsstatus + '</td>'
-                                + '<td>' + (d.properties.ansvarlig ? d.properties.ansvarlig : '') + '</td>'
-                                + '<td>' + d.properties.sagsnavn + '</td>' )
+                            $('#documentList-feature-content').append(
+                                '<td style="padding-right:5px;">' + new moment(d.properties.henvendelsesdato).format("DD-MM-YYYY") + '</td>'
+                                + '<td style="padding-right:5px;">' + d.properties.sagsstatus + '</td>'
+                                + '<td style="padding-right:5px;">' + d.properties.forsyningstype + '</td>'
+                                + '<td style="padding-right:5px;">' + d.properties.prioritet + '</td>'
+                                + '<td style="padding-right:5px;">' + (d.properties.ansvarlig ? d.properties.ansvarlig : '') + '</td>'               
+                                + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+d.properties.casenumber + '">'+d.properties.sagsnavn+'</a></td>')
                             $('#documentList-feature-content').append('</tr>')
                         }
                         $('#documentList-feature-content').append('</tbody></table>');
@@ -444,7 +465,8 @@ var documentCreateApplyFilter = function (filter) {
 
         //Make sure layer is on
         //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
-        layerTree.reloadLayer(layerKey)
+        layerTree.reloadLayer(layerKey)            
+            
         //Toggle the filter
         if (filter[layerKey].columns.length == 0) {
             // insert fixed dummy filter
@@ -472,8 +494,8 @@ var clearExistingDocFilters = function () {
     //Buildfilter with no value for "clear" value
     var filter = documentCreateBuildFilter()
 
-    // apply filter
-    documentCreateApplyFilter(filter)
+    // apply filter, AND DO NOT RELOAD LAYERS
+    documentCreateApplyFilter(filter, false);
 };
 
 /**
@@ -691,7 +713,7 @@ var documentCreateFeatureSend = function (tablename,feature) {
         success: function (xhr) {
 //            snack(__("GC2 Success")+': '+xhr.responseJSON.message);
 //            var jsonmessage = JSON.parse(xhr.responseText);
-            snack(__("GC2 Success")+': '+ xhr.message);
+            //snack(__("GC2 Success")+': '+ xhr.message);
             window.location = "docunote:/CaseNumber="+xhr.casenumber;
             // prepend existing cases list
             getExistingDocs($('#documentCreate-custom-search').val());
@@ -736,12 +758,21 @@ var buildServiceSelect = function (id) {
  * @returns {*}
  * @private
  */
-var buildFeatureMeta = function (layer) {
+var buildFeatureMeta = function (layer, previousLayer = undefined) {
 
     //merge information from metadata
     var m = {}
 
-    metaData.data.forEach(function (d) {
+    metaData.data.forEach(function (d) {       
+        if(d.fields) {
+            //Get information from config.json
+            var confLayer = config.extensionConfig.documentCreate.tables.find(x => x.table == d.f_table_name)
+            // set the backgroundlayer invisible
+            if (confLayer && confLayer.cosmeticbackgroundlayer) {
+                switchLayer.init(confLayer.cosmeticbackgroundlayer, false, false, false);
+            }
+        }
+
         if (d.f_table_name == layer.split('.')[1] && d.f_table_schema == layer.split('.')[0]) {
             m = d
         }
@@ -755,10 +786,10 @@ var buildFeatureMeta = function (layer) {
         //Get information from config.json
         var conf = config.extensionConfig.documentCreate.tables.find(x => x.table == m.f_table_name)
 
-        console.log(conf)
         // set the backgroundlayer visible
-        if (conf.cosmeticbackgroundlayer)
+        if (conf.cosmeticbackgroundlayer) {
             layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+        }
         
         for (col in fields) {
             var obj = {
@@ -929,6 +960,10 @@ var SetGUI_ControlState = function (state_Enum) {
         $('#documentCreate-feature-filter').hide();
         $('#documentCreate-feature-filter-header-create').hide();
         $('#documentCreate-feature-filter-header-edit').hide();
+        $('#documentCreate-newfeature-content').hide();
+        $('#documentCreate-feature-meta').html('');    
+        
+        
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE;
@@ -948,7 +983,8 @@ var SetGUI_ControlState = function (state_Enum) {
     if (state_Enum >= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE) {
         $('#documentCreate-feature-editcontent').show();
         $('#documentCreate-feature-filter-header-edit').show();
-        $('#documentList-feature-content').show();
+        $('#documentList-feature-content').show();        
+        $('#documentCreate-newfeature-content').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.EDIT_CONTROLS_VISIBLE;
@@ -969,6 +1005,7 @@ var SetGUI_ControlState = function (state_Enum) {
     }
     if (state_Enum >= GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE) {
         $('#documentCreate-feature-content').show();
+        $('#documentCreate-newfeature-content').show();
 
         // subtract this enumeration, and continue
         state_Enum -= GUI_CONTROL_STATE.CREATE_CONTROLS_VISIBLE;
@@ -1113,6 +1150,10 @@ module.exports = {
                 "da_DK": "Udpeg ny placering",
                 "en_US": "Select new location"
             },
+            "NewButton": {
+                "da_DK": "Ny henvendelse",
+                "en_US": "New incident"
+            },
 
             "Henvendelse": {
                 "da_DK": "Henvendelse",
@@ -1123,12 +1164,12 @@ module.exports = {
                 "da_DK": "Indsend",
                 "en_US": "Submit action"
             },
-
+/*
             "GC2 Success": {
                 "da_DK": "Henvendelse gemt i GC2",
                 "en_US": "Action saved in GC2" 
             },
-
+*/
             "Location saved": {
                 "da_DK": "Den ny placering er gemt",
                 "en_US": "The new location is saved" 
@@ -1160,6 +1201,10 @@ module.exports = {
             "MissingLogin": {
                 "da_DK": "NB: Du skal logge ind for at kunne bruge funktionen",
                 "en_US": "Please log in to use this function"                 
+            },
+            "Ingen objekter fundet": {
+                "da_DK": "Der blev ikke fundet oplysninger på henvendelsen, ident: ",
+                "en_US": "No informationer was found on following ident: "                 
             }
         };
 
@@ -1218,10 +1263,10 @@ module.exports = {
                     });
                     if (_USERSTR.length == 0)
                         SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
-
+/*
                     if (DClayers.length > 0) {
                         $('#'+select_id+' option[value="'+config.extensionConfig.documentCreate.defaulttable+'"]').prop('selected', true);
-                    }
+                    }*/
                     /*
                     try {
                         buildServiceSelect(select_id);
@@ -1363,7 +1408,7 @@ module.exports = {
                     if ($('#'+select_id).val() != '') {
 
                         //Build the boxes
-                        buildFeatureMeta($('#'+select_id).val());
+                        buildFeatureMeta($('#'+select_id).val(), thePreviousServiceValue);
 
                     } else {
                         // "Nothing" is chosen, hide the meta
@@ -1372,66 +1417,98 @@ module.exports = {
                     };
 
                 };
+
+                this.onServiceFocus = function (e) {
+                    if ($('#'+select_id).val() != '') {
+                        thePreviousServiceValue = $('#'+select_id).val();
+                    }
+                };
                 
 
             }
 
             /**
- * Invoked, when EditButton is clickerd
- */
-editButtonClicked () {
-    utils.cursorStyle().crosshair();
-    editingAllowed = true;
-};
-
-/**
- * Invoked, when SaveButton is clickerd
- */
-saveButtonClicked (fileident) {
-    if (coords && fileident) {
-
-        // preparing save stuff here...
-        // loop through all layers and attempt save
-        // since we do note know which layer is the origin
-        for (let l in DClayers) {
-            // set the filter based on config
-            var filterCol, filterExp;
-            var qrystr = ('UPDATE ' + DClayers[l] + ' SET the_geom = ' +
-                        'ST_GeomFromText(\'POINT(' + coords.lng + ' ' + coords.lat + ')\', 4326) ' + 
-                        'where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
-                        /* +
-                            'select * FROM ' + DClayers[l] + 
-                            ' where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
-*/
-            // execute SQL for update thing   
-            var xhr = $.ajax({
-                method: "POST",
-                url: "/api/extension/documentCreateEditFeature",
-                data: "db=" + db + "&sql=" + qrystr,
-                scriptCharset: "utf-8",
-                success: function (response) {
-                    // origin layer foun, put message on the screen
-                    snack(__("Location saved"));  
-                    // update filter
-                    getExistingDocs(fileIdent, true)                                     
-                },
-                error: function (error) {
-                    if (error.message == 'incorrect layer') {
-                    // ignore message, wrong layer, continue to the next layer
-                    } else {
-                        // origin layer foun, put message on the screen
-                        snack(__("GC2 Error: ")+': '+xhr.responseText);                
-                    }
+             * Invoked, when EditButton is clickerd
+             */
+            newButtonClicked () {                
+                // reset select to default layer
+                if (DClayers.length > 0) {
+                    $('#'+select_id+' option[value="'+config.extensionConfig.documentCreate.defaulttable+'"]').prop('selected', true);                    
                 }
-            });        
-        }
 
-        // block editing until next time edit button is pressed
-        editingAllowed = false;
-        // reset coords
-        coords = null;    
-    }
-};
+                // reset previous search and selewcted values
+                $('#documentCreate-custom-search').val('');
+                filterKey = '';
+                fileIdent = '';
+                editingAllowed = false;
+
+                // reload map in order to remove selection filters
+                SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE);
+                SetGUI_ControlState(GUI_CONTROL_STATE.FEATURE_CONTENT_VISIBLE);
+                clearExistingDocFilters();
+
+                // reset map
+                utils.cursorStyle().reset();
+                resultLayer.clearLayers();
+            };
+
+            /**
+             * Invoked, when EditButton is clickerd
+             */
+            editButtonClicked () {
+                utils.cursorStyle().crosshair();
+                editingAllowed = true;
+                
+            };
+
+            /**
+             * Invoked, when SaveButton is clickerd
+             */
+            saveButtonClicked (fileident) {
+                if (coords && fileident) {
+
+                    // preparing save stuff here...
+                    // loop through all layers and attempt save
+                    // since we do note know which layer is the origin
+                    for (let l in DClayers) {
+                        // set the filter based on config
+                        var filterCol, filterExp;
+                        var qrystr = ('UPDATE ' + DClayers[l] + ' SET the_geom = ' +
+                                    'ST_GeomFromText(\'POINT(' + coords.lng + ' ' + coords.lat + ')\', 4326) ' + 
+                                    'where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
+                                    /* +
+                                        'select * FROM ' + DClayers[l] + 
+                                        ' where ' + config.extensionConfig.documentCreate.fileIdentCol + '=\'' + fileIdent + '\'');
+            */
+                        // execute SQL for update thing   
+                        var xhr = $.ajax({
+                            method: "POST",
+                            url: "/api/extension/documentCreateEditFeature",
+                            data: "db=" + db + "&sql=" + qrystr,
+                            scriptCharset: "utf-8",
+                            success: function (response) {
+                                // origin layer foun, put message on the screen
+                                //snack(__("Location saved"));  
+                                // update filter
+                                getExistingDocs(fileIdent, true)                                     
+                            },
+                            error: function (error) {
+                                if (error.message == 'incorrect layer') {
+                                // ignore message, wrong layer, continue to the next layer
+                                } else {
+                                    // origin layer foun, put message on the screen
+                                    snack(__("GC2 Error: ")+': '+xhr.responseText);                
+                                }
+                            }
+                        });        
+                    }
+
+                    // block editing until next time edit button is pressed
+                    editingAllowed = false;
+                    // reset coords
+                    coords = null;    
+                }
+            };
 
 
 
@@ -1448,6 +1525,9 @@ saveButtonClicked (fileident) {
                             <div id="documentCreate-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
+                            <div id="documentCreate-newfeature-content" className='collapse'>  
+                                <button type="button" onClick={this.newButtonClicked} className="btn btn-primary">{__("NewButton")}</button>                                
+                            </div>
                             <div id="documentCreate-feature-content" className='collapse'>    
                                 <h3>{__("Pick location")}</h3>
                                 <div    id="documentCreate-places"
@@ -1459,7 +1539,7 @@ saveButtonClicked (fileident) {
                                 </div>
                                 <h3>{__("Choose service")}</h3>
                                 <div>
-                                    <select id={select_id} className='form-control' onChange={this.onServiceChange} defaultValue=''>
+                                    <select id={select_id} className='form-control' onChange={this.onServiceChange} onFocus={this.onServiceFocus} defaultValue=''>
                                             <option value=""></option>
                                     </select>
                                     <div id="documentCreate-feature-meta" className=''>
