@@ -651,7 +651,8 @@ module.exports = {
         "streetView",
         "layerSearch",
         "coordinates",
-        "session"
+        "session",
+        "editor"
     ],
 
 
