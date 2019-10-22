@@ -7,7 +7,14 @@ const puppeteer = require('puppeteer');
 const startupParameters = {
     headless: true,
     timeout: 10000,
-    args: ["--no-sandbox", "--ignore-certificate-errors", "--enable-features=NetworkService"]
+    ignoreHTTPSErrors: true,
+    args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--enable-features=NetworkService",
+        "--use-gl=desktop",
+    ],
+    userDataDir: '/tmp/chromeSession'
 };
 
 let browser = false;
