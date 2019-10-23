@@ -10,23 +10,26 @@ and this project adheres to [CalVer](https://calver.org/).
 - A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
 - Download drawings as GeoJSON.
 - Comment with version in index.html
-- Support of date and datetime in editor. Only time will be handled in a text field.
+- Support of time, date and datetime fields in editor. Only time will be handled in a text field.
 - Auto login. WARNING: Insecure and sets cookie with login creds. A build time setting `autoLoginPossible` must be set to `true` to make activation possible. Activation is done in:
     - `extensionConfig.session.autoLogin = true` and optional `extensionConfig.session.autoLoginMaxAge = 3600 * 1000`. The latter defaults to `null`
+- Static Map API. Generate PNGs of state snapshot. URL to PNG is available from the Snapshot module.
 
 ### Changed
 - Layers which have been switch off, will not be removed from legend (old behavior can be set in config)
 - No re-load of legend if its not necessary.
 - `embed.tmpl` is now a minimal template for embedding in web pages.
 - Home button on `embed.tmpl` will set the map to the initial extent if a snapshot-state is invoked.
-- Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster.
+- Use file based sessions instead of memory based, so sessions can be shared between nodes in a cluster setup.
 - Standard template for pop-up can now render videos from URLs in data. Can be set up in GC2.
 - Infinity levels in layer tree. The levels are set with the `vidi_sub_group` Meta property in GC2 like: `sub-group 1|sub-group 2|sub-group 3`
+- Smaller padding of dynamic loaded vector layers, so less features has to be handled. Padding is set to 0.3 from 1.
 
 ### Fixed
 - Better wrapping of layer tools when side panel is narrow.
 - Snapping bugs.
 - SELECT statements like `SELECT * FROM foo WHERE bar LIKE '%foo'` will not longer give problems.
+- All Postgres types are now recognized in editor. 
 
 ## [2019.1.0.rc2] - 2019-01-03
 ### Added
