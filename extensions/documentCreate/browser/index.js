@@ -217,8 +217,12 @@ var getExistingDocs = function (key, fileIdent = false) {
     if (existingcases) {
         for (let l in existingcases) {
             caseFound = true;
-            layersToReload.push(existingcases[l].properties.forsyningstype);
-
+            var found = layersToReload.some(function(value) {
+                return value === existingcases[l].properties.forsyningstype;
+              });
+            if (!found) {
+                layersToReload.push(existingcases[l].properties.forsyningstype);
+            }
             //caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
             //adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
@@ -249,16 +253,18 @@ var getExistingDocs = function (key, fileIdent = false) {
         //wait for ready event!
         backboneEvents.get().once('allDoneLoading:layers', () => {
             cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
-            // reload cosmetic layer (if specified)
-            layersToReload.forEach(element => {
-                // Get information from config.json
-                var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
-        
-                // set the cosmetic backgroundlayer visible (if specified)
-                if (conf.cosmeticbackgroundlayer) {
-                    layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-                }
-            });
+            // reload cosmetic layer (if layer ident is found and specified)
+            if (fileIdent) {
+                layersToReload.forEach(element => {
+                    // Get information from config.json
+                    var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
+            
+                    // set the cosmetic backgroundlayer visible (if specified)
+                    if (conf.cosmeticbackgroundlayer) {
+                        layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                    }
+                });
+            }
         }) 
 
         // create list with links 
@@ -539,6 +545,13 @@ var onSearchLoad = function () {
     config.extensionConfig.documentCreate.tables[0].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
     config.extensionConfig.documentCreate.tables[1].defaults.adgangsadresseid = this.geoJSON.features[0].properties.id
 
+
+
+    //move to marker
+    cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
+    
+    
+    
     //Set the value to a default and build
     if (config.extensionConfig.documentCreate.defaulttable){
         //$('#' + select_id).val(config.extensionConfig.documentCreate.defaulttable)
@@ -546,11 +559,6 @@ var onSearchLoad = function () {
         //build
         buildFeatureMeta(config.extensionConfig.documentCreate.defaulttable)
     }
-
-
-    //move to marker
-    cloud.get().zoomToExtentOfgeoJsonStore(this, config.extensionConfig.documentCreate.maxZoom);
-    
     //set submit button active and allow to edit map location
     SetGUI_ControlState(GUI_CONTROL_STATE.ACTIVATE_SUBMIT_CONTROL);
     utils.cursorStyle().crosshair();
@@ -1312,6 +1320,9 @@ module.exports = {
                 });
 
                 mapObj.on("click", function (e) {
+                    if (me.state.active === false) {
+                        return;
+                    }
                     let event = new geocloud.clickEvent(e, cloud);
                     if (clicktimer) {
                         clearTimeout(clicktimer);
