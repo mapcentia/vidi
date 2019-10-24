@@ -195,6 +195,7 @@ var getExistingDocs = function (key, fileIdent = false) {
     //build the right stuff
     var filter = documentCreateBuildFilter(key, fileIdent)
     var caseFound = false;
+    var layersToReload = [];
     //var caseNumber = "", adress = "";
 
     // apply filter
@@ -216,6 +217,8 @@ var getExistingDocs = function (key, fileIdent = false) {
     if (existingcases) {
         for (let l in existingcases) {
             caseFound = true;
+            layersToReload.push(existingcases[l].properties.forsyningstype);
+
             //caseNumber = (caseNumber.length == 0 ? existingcases[l].properties.casenumber : ", " + existingcases[l].properties.casenumber);
             //adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
@@ -227,15 +230,6 @@ var getExistingDocs = function (key, fileIdent = false) {
                 + '<td style="padding-right:5px;">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</td>'               
                 + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.sagsnavn+'</a></td>')
             $('#documentList-feature-content').append('</tr>')
-
-            // reload cosmetic layer (if specified)
-            // Get information from config.json
-            var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == existingcases[l].properties.forsyningstype)
-    
-            // set the cosmetic backgroundlayer visible (if specified)
-            if (conf.cosmeticbackgroundlayer) {
-                layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
-            }
         }
         
         if (fileIdent && !caseFound) {            
@@ -255,6 +249,16 @@ var getExistingDocs = function (key, fileIdent = false) {
         //wait for ready event!
         backboneEvents.get().once('allDoneLoading:layers', () => {
             cloud.get().map.fitBounds(myBounds, {maxZoom: config.extensionConfig.documentCreate.maxZoom});
+            // reload cosmetic layer (if specified)
+            layersToReload.forEach(element => {
+                // Get information from config.json
+                var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == element)
+        
+                // set the cosmetic backgroundlayer visible (if specified)
+                if (conf.cosmeticbackgroundlayer) {
+                    layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+                }
+            });
         }) 
 
         // create list with links 
