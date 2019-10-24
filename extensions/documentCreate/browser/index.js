@@ -227,7 +227,17 @@ var getExistingDocs = function (key, fileIdent = false) {
                 + '<td style="padding-right:5px;">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</td>'               
                 + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.sagsnavn+'</a></td>')
             $('#documentList-feature-content').append('</tr>')
+
+            // reload cosmetic layer (if specified)
+            // Get information from config.json
+            var conf = config.extensionConfig.documentCreate.tables.find(x => x.docunotecaseutilitytype == existingcases[l].properties.forsyningstype)
+    
+            // set the cosmetic backgroundlayer visible (if specified)
+            if (conf.cosmeticbackgroundlayer) {
+                layerTree.reloadLayer(conf.cosmeticbackgroundlayer);
+            }
         }
+        
         if (fileIdent && !caseFound) {            
             throw new Error("No existing cases found")
         }
@@ -1253,6 +1263,9 @@ module.exports = {
                 // keep effects of the module until they are deleted manually or reset:all is emitted
                 backboneEvents.get().on("deactivate:all", () => {
                     console.log('Stop listening for documentCreate')
+                    me.setState({
+                        active: false
+                    });
                 });
 
                 // Activates module
@@ -1263,17 +1276,6 @@ module.exports = {
                     });
                     if (_USERSTR.length == 0)
                         SetGUI_ControlState(GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT);
-/*
-                    if (DClayers.length > 0) {
-                        $('#'+select_id+' option[value="'+config.extensionConfig.documentCreate.defaulttable+'"]').prop('selected', true);
-                    }*/
-                    /*
-                    try {
-                        buildServiceSelect(select_id);
-                    } catch (error) {
-                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                    }*/
-                    //$("#searchclear").trigger("click")
                 });
                 
                 // Deactivates module
@@ -1282,29 +1284,10 @@ module.exports = {
                     me.setState({
                         active: false
                     });
-                    //SetGUI_ControlState(GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE);
                     firstRunner = true;
-                    //DClayers = [];
-                    // reset add. search
-                    //$("#" + id).val('');
-                    //resultLayer.clearLayers();
                     utils.cursorStyle().reset();
                 });
-                /*
-                backboneEvents.get().on("clear:search", function () {
-                    console.info("Clearing search inside documentCreate,select_id: " + select_id);
-                    try {
-                        buildServiceSelect(select_id);
-                    } catch (error) {
-                        console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                    }
-                });*/
-                backboneEvents.get().on("doneLoading:layers", function (e) {
-                    console.log("inside doneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active);                    
-                    // default  method, run when user is logged in and all layers are prepared for filters
-                    //loadAndInitFilters();
-                });
-
+                
                 backboneEvents.get().on("allDoneLoading:layers", function () {
                     console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active);                    
                     loadAndInitFilters(me.state.active);
@@ -1316,14 +1299,7 @@ module.exports = {
                 search.init(onSearchLoad, id, true, false);
                 cloud.get().map.addLayer(resultLayer);
 
-                // Build select box from metadata
-                /*
-                try {
-                    buildServiceSelect(select_id);
-                } catch (error) {
-                    console.info('documentCreate - Kunne ikke bygge ServiceSelect')
-                }*/
-
+                
                 // Handle click events on map
                 // ==========================
 
