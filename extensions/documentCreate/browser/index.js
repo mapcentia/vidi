@@ -1301,7 +1301,7 @@ module.exports = {
                 });
                 
                 backboneEvents.get().on("allDoneLoading:layers", function () {
-                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active);                    
+                    console.log("inside allDoneLoading:layers, DClayers.length: " + DClayers.length + " me.state.active: " + me.state.active + " firstRunner: " + firstRunner);                    
                     loadAndInitFilters(me.state.active);
                 });
 
