@@ -51,11 +51,10 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                             go = true;
                         }
 
-                        // Listen to "Layers all loaded L" and not "Vidi is now loaded", because state snapshot layers are loaded after Vidi is fully loaded.
                         if (
                             // Print as soon Vidi is done loading
                             (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
-                            // Wait until layers from snapshot is loaded
+                            // Wait until all overlays from snapshot is loaded
                             (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
                         ) {
                             console.log('App was loaded, generating PNG');
