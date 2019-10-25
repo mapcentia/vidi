@@ -69,7 +69,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
     //console.log(req.body.db)
     
     // check if addresscase is already created
-    const qrystr = 'SELECT adrfileid, parenttype FROM vmr.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
+    const qrystr = 'SELECT adrfileid, parenttype FROM ' + req.body.schema + '.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
 
 //    const qrystr = 'INSERT INTO vmr.adressesager (adrfileid, adresseguid) VALUES (108896,\'0a3f50c1-0523-32b8-e044-0003ba298018\')'
     var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.body.db);
@@ -142,7 +142,7 @@ router.post('/api/extension/documentCreateSendFeature', function (req, response)
                 
                 getParentFolderPromise.then(function(result) {
                     bodyreq = makeRequestCaseBody(req, result.parentid, REQCASETYPEID, dnTitle, result.parenttype)
-                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO vmr.adressesager (adrfileid, parenttype, adresseguid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adgangsadresseid + '\')', req.body.db) 
+                    var insertToGc2Promise = SqlInsertToGC2(req.session, 'INSERT INTO ' + req.body.schema + '.adressesager (adrfileid, parenttype, adresseguid) VALUES (' + result.parentid +', ' + result.parenttype +', \'' + req.body.features[0].properties.adgangsadresseid + '\')', req.body.db) 
                     // opret adgangsadresseid til brug for seneere opslag.
                     insertToGc2Promise.then(function(result) {
                         console.log(result)
@@ -573,7 +573,7 @@ function postToGC2(req, db) {
                 'Content-Length': Buffer.byteLength(postData),
                 'GC2-API-KEY': req.session.gc2ApiKey
             },
-            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' + 'vmr.' + req.body.features[0].properties.forsyningstype.toLowerCase() + '.the_geom' + '/4326',
+            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' +  req.body.schema + '.' + req.body.tablename + '.the_geom' + '/4326',
             body: postData,
             method: 'POST'
 

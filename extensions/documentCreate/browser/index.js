@@ -92,6 +92,7 @@ var reproject = require('reproject');
  * @type {string}
  */
 var db = urlparser.db;
+var schema = urlparser.schema;
 
 var thePreviousServiceValue = undefined;
 
@@ -725,6 +726,8 @@ var documentCreateFeatureAdd = function (tablename) {
 var documentCreateFeatureSend = function (tablename,feature) {
     // Send tile feature to DocuNote!
     feature.db = db
+    feature.schema = schema
+    feature.tablename = tablename
     var xhr = $.ajax({
         method: "POST",
         url: "/api/extension/documentCreateSendFeature",
