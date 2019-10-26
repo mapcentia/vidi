@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -327,54 +327,10 @@ module.exports = {
 
     "baseLayers": [
 
-        {
-            "id": "geodk.bright",
-            "name": "GeoDanmark kort",
-            "db": "baselayers",
-            "host": "https://gc2.io",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "&copy; SDFE & MapCentia ApS"
-            }
-        },
-
-
         // Pre-defined base layers
         {"id": "osm", "name": "Open Street Map"},
 
-        {"id": "stamenTonerLite", "name": "Stamen Toner Light"},
+        {"id": "stamenTonerLite", "name": "Stamen Toner Light"}
 
-        // Base layer from GC2
-        {
-            "id": "gc2_group._b_baggrundskort01.baggrundskort01",
-            "name": "Topografisk kort",
-            "db": "geofyn",
-            "host": "https://kort.geofyn.dk",
-            "config": {
-                "maxZoom": 21,
-                "maxNativeZoom": 19,
-                "attribution": "Geofyn A/S"
-            },
-
-            // A base layer can comprise one or more overlays
-            "overlays": [
-                {
-                    "id": "tekster.tekster_samlet_wms_web",
-                    "db": "geofyn",
-                    "host": "https://kort.geofyn.dk",
-                    "config": {
-                        "attribution": "Geofyn A/S"
-                    }
-                },
-                {
-                    "id": "tekster.adgangsadresseinfo",
-                    "db": "geofyn",
-                    "host": "https://kort.geofyn.dk",
-                    "config": {
-                        "attribution": "Geofyn A/S"
-                    }
-                }]
-        }
     ]
 };
