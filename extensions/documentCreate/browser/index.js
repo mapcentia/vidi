@@ -987,7 +987,8 @@ var SetGUI_ControlState = function (state_Enum) {
         $('#documentCreate-feature-filter-header-edit').hide();
         $('#documentCreate-newfeature-content').hide();
         $('#documentCreate-feature-meta').html('');    
-        
+        $('#documentCreate-status').hide();    
+        $('#documentCreate-feature-missingsynchronization').hide(); 
         
 
         // subtract this enumeration, and continue
@@ -1075,6 +1076,45 @@ var loadAndInitFilters = function (active_state) {
             console.info('loadAndInitFilters - failed due to layers are not yet loaded, hence reset firstRunnervariable');
             firstRunner = true;
         }
+        // query for last synchronization and put in user information
+        var qrystr="WITH cte1 (lastSynchronization) as" + 
+                    " (Select to_char(syncend at time zone 'gmt', 'DD-MM-YYYY, kl. HH24:MI') as lastsynchronization from vmr.dnsync.log" + 
+                    " order by syncend desc" + 
+                    " limit (1))" + 
+                    " , cte2 (lastData) as" + 
+                    " (Select to_char(syncend at time zone 'gmt', 'DD-MM-YYYY, kl. HH24:MI') as lastdata from vmr.dnsync.log" + 
+                    " where rowsupdated > 0" + 
+                    " order by syncend desc" + 
+                    " limit (1))" + 
+                    " , cte3 (showalert) as" + 
+                    " (Select CASE WHEN count(*) > 0 THEN false ELSE true END from vmr.dnsync.log" + 
+                    " where syncend > (NOW() at time zone 'gmt' - INTERVAL '10 MINUTE')" + 
+                    " limit (1))" + 
+                    " select lastSynchronization, lastData, showalert FROM cte1, cte2, cte3"
+        $.ajax({
+            url: gc2host + '/api/v1/sql/' + _USERSTR + '?q='+qrystr,
+            type: "get",
+            async: false,
+            success: function(data) {
+                //check for stuff
+                if (data.features == null  ||
+                    data.features[0].properties == null) {
+                    //nothing.. return null .. do nothing
+                    $('#documentCreate-status').hide();
+                    return null;
+                } else {
+                    $('#documentCreate-status').show();
+                    // put in timestamps for last synchronization
+                    if (data.features[0].properties.lastsynchronization != null) 
+                        $('#documentCreate-status-check').html(data.features[0].properties.lastsynchronization);
+                    if (data.features[0].properties.lastdata != null) 
+                        $('#documentCreate-status-case').html(data.features[0].properties.lastdata);
+                    if (data.features[0].properties.showalert != null &&
+                        data.features[0].properties.showalert) 
+                        $('#documentCreate-feature-missingsynchronization').show();
+                }
+            }
+        });  
     }
 }
 
@@ -1227,9 +1267,21 @@ module.exports = {
                 "da_DK": "NB: Du skal logge ind for at kunne bruge funktionen",
                 "en_US": "Please log in to use this function"                 
             },
+            "MissingSynchronization": {
+                "da_DK": "Ændring af oplysninger i Docunote bliver i øjeblikket ikke kopieret til henvendelsen i kortet. Derfor kan der være forskel mellem data i Docunote og kortet. Så snart synkroniseringen kører, vil oplysninger i Docunote automatisk kopieres til kortet.",
+                "en_US": "Changes in synchronization between Docunote and the map are currently not updates."                 
+            },            
             "Ingen objekter fundet": {
                 "da_DK": "Der blev ikke fundet oplysninger på henvendelsen, ident: ",
                 "en_US": "No informationer was found on following ident: "                 
+            },            
+            "Last syncronization check": {
+                "da_DK": "Seneste kontrol for ajourføringer: ",
+                "en_US": "Last check for updates:  "                 
+            },            
+            "Last syncronization case": {
+                "da_DK": "Seneste ajourføring fra Docunote: ",
+                "en_US": "Last update from Docunote: "                 
             }
         };
 
@@ -1330,30 +1382,25 @@ module.exports = {
                     if (clicktimer) {
                         clearTimeout(clicktimer);
                     }
-                    else {
-                        if (me.state.active === false) {
-                            return;
-                        }
-                        if (editingAllowed) {
-                            //Clear search geom and add clicked as marker
-                            //console.log('Moving target')
-                            resultLayer.clearLayers();
-                    
-                            coords = event.getCoordinate();
-                            var wkt = "POINT(" + coords.lng + " " + coords.lat + ")";
-                    
-                            //console.log(coords)
-                    
-                            //make a marker that behaves like the one from search
-                            var marker = L.marker([coords.lat, coords.lng], {
-                                icon: L.AwesomeMarkers.icon({
-                                    icon: 'home',
-                                    markerColor: '#C31919',
-                                    prefix: 'fa'
-                                })
-                            }).addTo(resultLayer);
-                            mapObj.setView([coords.lat, coords.lng], config.extensionConfig.documentCreate.maxZoom);
-                        }
+                    else if (editingAllowed) {
+                        //Clear search geom and add clicked as marker
+                        //console.log('Moving target')
+                        resultLayer.clearLayers();
+                
+                        coords = event.getCoordinate();
+                        var wkt = "POINT(" + coords.lng + " " + coords.lat + ")";
+                
+                        //console.log(coords)
+                
+                        //make a marker that behaves like the one from search
+                        var marker = L.marker([coords.lat, coords.lng], {
+                            icon: L.AwesomeMarkers.icon({
+                                icon: 'home',
+                                markerColor: '#C31919',
+                                prefix: 'fa'
+                            })
+                        }).addTo(resultLayer);
+                        mapObj.setView([coords.lat, coords.lng], config.extensionConfig.documentCreate.maxZoom);
                     }
                 });
 
@@ -1519,6 +1566,9 @@ module.exports = {
                             <div id="documentCreate-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
+                            <div id="documentCreate-feature-missingsynchronization" className="alert alert-warning" role="alert">
+                                {__("MissingSynchronization")}
+                            </div>                            
                             <div id="documentCreate-newfeature-content" className='collapse'>  
                                 <button type="button" onClick={this.newButtonClicked} className="btn btn-primary">{__("NewButton")}</button>                                
                             </div>
@@ -1555,6 +1605,10 @@ module.exports = {
                                 <div id="documentList-feature-content" className='collapse'>    
                                 </div>
                             </div>
+                        </div>
+                        <div id="documentCreate-status" style={{display: "none", position: "absolute", bottom: "10px", fontSize: "x-small"}}>
+                            {__("Last syncronization check")}<span id="documentCreate-status-check"></span><br/>
+                            {__("Last syncronization case")}<span id="documentCreate-status-case"></span>
                         </div>
                     </div>
                 );
