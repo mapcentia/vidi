@@ -341,11 +341,11 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
                 "urlAddress": "https://webois.lifa.dk/ois/default.aspx?Komnr=" + ejdnr.substring(0, 3) + "&ejdnr=" + ejdnr.substring(3, 10),
                 "customData": {
                     "row": null,
-                    "oisvejkode": "",
-                    "oisejendomsnr": ejdnr.substring(3, 10),
+                    "oisvejkode": values.vejstykke.kode,
+                    "oisejendomsnr": values.esrejendomsnr,
                     "oiskommunenr": ejdnr.substring(0, 3),
-                    "oismatrikelnummer": "",
-                    "oisejerlav": ""
+                    "oismatrikelnummer": values.matrikelnr,
+                    "oisejerlav": values.jordstykke.ejerlav.navn + " (" + values.jordstykke.ejerlav.kode +")"
                 },
                 "account": "",
                 "emails": [],
@@ -353,10 +353,10 @@ function createAddressPart(dnTitle, adrguid, ejdnr) {
                 "addresses": [
                     {
                         "typeId": 1,
-                        "street": dnTitle,
+                        "street": values.vejstykke.navn + " " + values.husnr,
                         "region": "",
-                        "zip": values[0].adgangsadresse.postnummer.nr,
-                        "city": values[0].adgangsadresse.postnummer.navn,
+                        "zip": values.postnummer.nr,
+                        "city": values.postnummer.navn,
                         "country": "",
                         "primary": true
                     }
@@ -492,10 +492,10 @@ function getFoldersDn(caseid, nodetype) {
     })
 
 }
-
+//https://dawa.aws.dk/adgangsadresser/0a3f5094-ae76-32b8-e044-0003ba298018
 function GetDawaAddress(adrguid) {
     var options = {
-        url: 'https://dawa.aws.dk/adresser?adgangsadresseid='+adrguid,
+        url: 'https://dawa.aws.dk/adgangsadresser/'+adrguid,
         method: 'GET',
     };
     return new Promise(function(resolve, reject) {
