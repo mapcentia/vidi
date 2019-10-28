@@ -249,12 +249,14 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                 })
             } else {
                 // make adgangsadressesag
-                bodyaddresscase = makeAddressCase(parentId, ADRCASETYPEID, dnTitle)
+                bodyaddresscase = makeAddressCase(parentId, ADRCASETYPEID, dnTitle, adgadrguid)
                 var postCaseToDnPromise = postCaseToDn(bodyaddresscase);
                 postCaseToDnPromise.then(function (values) {
+                    // if rejected get case by syncid
+
                     result.parentid = values.caseId;
                     result.parenttype = NODETYPECASE;
-                    //ToDo: Create part to add adressesag
+                    //ToDo: Create part to add adressesag // Done
                     var createcontactpromise = createAddressPart(dnTitle,adgadrguid,esrnr)
                     createcontactpromise.then(function(adressbody) {
                         var createaddresspromise = postCompanyToDn(adressbody)
@@ -266,6 +268,16 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                     })
 
                     
+                }, function (error) {
+                    console.log(error)
+                    if (error.message == "Duplicate SynchronizeSource SynchronizeIdentifier pair") {
+                        var getcasepromise = ReqToDn('https://docunoteapi.vmr.dk/api/v1/Cases/synchronizeSource/24/synchronizeId/'+adgadrguid)
+                        getcasepromise.then(function(casebody) {
+                            result.parentid = casebody.caseId;
+                            result.parenttype = NODETYPECASE;
+                            resolve(result);
+                        })                        
+                    }
                 })
 
             }
@@ -369,7 +381,7 @@ function addPartsToCase(esrnr, adrguid, caseId) {
     })
 }
 
-function makeAddressCase( parentid, typeid, title ) {
+function makeAddressCase( parentid, typeid, title, adgadrguid ) {
     var body = {
         "title": title,
         "parentId": parentid,
@@ -377,7 +389,7 @@ function makeAddressCase( parentid, typeid, title ) {
         "typeId": typeid,
         "description": "Adressesag fra Mapcentia",
         "synchronizeSource": SYNCSOURCE,
-        "synchronizeIdentifier": null,
+        "synchronizeIdentifier": adgadrguid,
         "discardingCode": 0,
         "status": 1
     }
@@ -675,8 +687,8 @@ function postCaseToDn(casebody) {
 
                 console.log(JSON.parse(jsfile))
                 if ('errorCode' in JSON.parse(jsfile)) {
-                    //reject(JSON.parse(jsfile))
-                    resolve(JSON.parse(jsfile));
+                    reject(JSON.parse(jsfile))
+                    //resolve(JSON.parse(jsfile));
                 } else {
                     resolve(JSON.parse(jsfile));
                 }
@@ -687,6 +699,7 @@ function postCaseToDn(casebody) {
         req.end();  
     });
 }
+
 
 function putPartToCaseDn(partbody, caseId) {
     var postData = JSON.stringify(partbody),
