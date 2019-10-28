@@ -1566,7 +1566,7 @@ module.exports = {
                             <div id="documentCreate-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
-                            <div id="documentCreate-feature-missingsynchronization" className="alert alert-warning" role="alert">
+                            <div id="documentCreate-feature-missingsynchronization" style={{display: "none"}} className="alert alert-warning" role="alert">
                                 {__("MissingSynchronization")}
                             </div>                            
                             <div id="documentCreate-newfeature-content" className='collapse'>  
