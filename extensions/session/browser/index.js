@@ -54,6 +54,7 @@ module.exports = {
             type: "GET",
             success: function (data) {
                 if (data.status.authenticated) {
+                    parent.update();
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
