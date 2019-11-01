@@ -212,7 +212,7 @@ var getExistingDocs = function (key, fileIdent = false) {
                                             + '<th style="padding-right:5px;">Forsyningsart</th>'
                                             + '<th style="padding-right:5px;">Prioritet</th>'
                                             + '<th style="padding-right:5px;">Ansvarlig</th>'
-                                            + '<th style="padding-right:5px;">Sagsnr</th>')
+                                            + '<th style="padding-right:5px;">Problemtype</th>')
     $('#documentList-feature-content').append('</tr></thead><tbody>')
 
     if (existingcases) {
@@ -228,12 +228,12 @@ var getExistingDocs = function (key, fileIdent = false) {
             //adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
             $('#documentList-feature-content').append(
-                '<td style="padding-right:5px;">' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") + '</td>'
-                + '<td style="padding-right:5px;">' + existingcases[l].properties.sagsstatus + '</td>'
-                + '<td style="padding-right:5px;">' + existingcases[l].properties.forsyningstype + '</td>'
-                + '<td style="padding-right:5px;">' + existingcases[l].properties.prioritet + '</td>'
-                + '<td style="padding-right:5px;">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</td>'               
-                + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+existingcases[l].properties.casenumber + '">'+existingcases[l].properties.sagsnavn+'</a></td>')
+                '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.sagsstatus + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.forsyningstype + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.prioritet + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</a></td>'               
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">'+existingcases[l].properties.problemtype+'</a></td>')
             $('#documentList-feature-content').append('</tr>')
         }
         
@@ -348,7 +348,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
     //     });
     // }
     //build query
-    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
+    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -368,7 +368,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
             var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
         }
 
-            tables.push('SELECT casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+            tables.push('SELECT casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
@@ -402,18 +402,18 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
                                                             + '<th style="padding-right:5px;">Forsyningsart</th>'
                                                             + '<th style="padding-right:5px;">Prioritet</th>'
                                                             + '<th style="padding-right:5px;">Ansvarlig</th>'
-                                                            + '<th style="padding-right:5px;">Sag</th>' )
+                                                            + '<th style="padding-right:5px;">Problemtype</th>' )
                     $('#documentList-feature-content').append('</tr></thead><tbody>')
                     data.features.forEach(function(d) {
                         if (d) {
                             $('#documentList-feature-content').append('<tr>')
                             $('#documentList-feature-content').append(
-                                '<td style="padding-right:5px;">' + new moment(d.properties.henvendelsesdato).format("DD-MM-YYYY") + '</td>'
-                                + '<td style="padding-right:5px;">' + d.properties.sagsstatus + '</td>'
-                                + '<td style="padding-right:5px;">' + d.properties.forsyningstype + '</td>'
-                                + '<td style="padding-right:5px;">' + d.properties.prioritet + '</td>'
-                                + '<td style="padding-right:5px;">' + (d.properties.ansvarlig ? d.properties.ansvarlig : '') + '</td>'               
-                                + '<td style="padding-right:5px;"><a href="docunote:/casenumber='+d.properties.casenumber + '">'+d.properties.sagsnavn+'</a></td>')
+                                '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">' + new moment(d.properties.henvendelsesdato).format("DD-MM-YYYY") + '</a></td>'
+                                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">' + d.properties.sagsstatus + '</a></td>'
+                                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">' + d.properties.forsyningstype + '</a></td>'
+                                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">' + d.properties.prioritet + '</a></td>'
+                                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">' + (d.properties.ansvarlig ? d.properties.ansvarlig : '') + '</a></td>'               
+                                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + d.properties.casenumber + '">'+d.properties.problemtype+'</a></td>')
                             $('#documentList-feature-content').append('</tr>')
                         }
                         $('#documentList-feature-content').append('</tbody></table>');
