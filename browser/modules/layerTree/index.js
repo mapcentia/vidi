@@ -10,7 +10,15 @@
 
 'use strict';
 
-import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
+import {
+    LOG,
+    SUB_GROUP_DIVIDER,
+    MODULE_NAME,
+    VIRTUAL_LAYERS_SCHEMA,
+    SYSTEM_FIELD_PREFIX,
+    LAYER,
+    ICONS
+} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -553,7 +561,17 @@ module.exports = {
     },
 
     /**
+     * Applies externally provided filters
+     * @param filters
+     */
+    applyFilters: (filters) => {
+        moduleState.arbitraryFilters = filters;
+    },
+
+    /**
      * Applies externally provided state
+     * @param newState
+     * @returns {newState}
      */
     applyState: (newState) => {
         // Setting vector filters
@@ -561,7 +579,6 @@ module.exports = {
             for (let key in newState.arbitraryFilters) {
                 validateFilters(newState.arbitraryFilters[key]);
             }
-
             moduleState.arbitraryFilters = newState.arbitraryFilters;
         } else {
             moduleState.arbitraryFilters = {};
@@ -736,6 +753,9 @@ module.exports = {
                         if (`buffered_bbox` in localTypeStores[layerKey]) {
                             if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
                                 needToReload = false;
+                            }
+                            if (localTypeStores[layerKey].featuresLimitReached) {
+                                needToReload = true;
                             }
                         }
                     } else {

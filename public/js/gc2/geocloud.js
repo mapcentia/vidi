@@ -231,6 +231,7 @@ geocloud = (function () {
         this.custom_data = this.defaults.custom_data;
         this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
         this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
+        this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
 
@@ -298,10 +299,12 @@ geocloud = (function () {
                                     console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
                                     me.geoJSON.features = [];
                                     response.features = [];
+                                    me.featuresLimitReached = true;
                                     me.onMaxFeaturesLimitReached();
                                 }
+                            } else {
+                                me.featuresLimitReached = false;
                             }
-
                             me.layer.addData(response);
                         } else {
                             me.geoJSON = null;
