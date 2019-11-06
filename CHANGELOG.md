@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+
+## [2019.1.0.rc3] - 2019-06-11
 ### Added
 - Embed script for easy embedding of Vidi in web pages using a snap-shot token.
 - A corresponding UTFGrid layer is now switch on when a raster tile layer is switch on. The UTFGrid layer is providing mouse over on features. Which fields are displayed in mouse over is set in GC2 field properties.
