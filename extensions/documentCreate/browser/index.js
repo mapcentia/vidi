@@ -348,7 +348,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
     //     });
     // }
     //build query
-    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
+    var qrystr = 'WITH cases (casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ansvarlig, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato ) AS ('
     var tables = []
     var result = []
 
@@ -368,7 +368,7 @@ var documentGetExistingCasesFilter = function (key, isfileIdent = false) {
             var filterExp = config.extensionConfig.documentCreate.tables.find(x => x.table == tablename).filterExp
         }
 
-            tables.push('SELECT casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
+            tables.push('SELECT casenumber, sagsstatus, forsyningstype, prioritet, sagsnavn, ansvarlig, problemtype, ' + config.extensionConfig.documentCreate.fileIdentCol +', henvendelsesdato FROM ' + DClayers[l] + ' where ' + filterCol + ' ' + filterExp + ' \'' + key + '\'');
     }
 
     qrystr = qrystr + tables.join(' UNION ')
@@ -1268,7 +1268,7 @@ module.exports = {
                 "en_US": "Please log in to use this function"                 
             },
             "MissingSynchronization": {
-                "da_DK": "Ændring af oplysninger i Docunote bliver i øjeblikket ikke kopieret til henvendelsen i kortet. Derfor kan der være forskel mellem data i Docunote og kortet. Så snart synkroniseringen kører, vil oplysninger i Docunote automatisk kopieres til kortet.",
+                "da_DK": "Ændring af oplysninger på driftshenvendelser i DocuNote bliver lige nu ikke opdateret på kortet. Kontakt den ansvarlige for driftshenvendelser i DocuNote.",
                 "en_US": "Changes in synchronization between Docunote and the map are currently not updates."                 
             },            
             "Ingen objekter fundet": {
