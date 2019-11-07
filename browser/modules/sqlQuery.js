@@ -522,9 +522,10 @@ module.exports = {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
                                 let subValue = feature.properties[property.key];
+                                /*
                                 if (property.value.type === `bytea`) {
                                     subValue = atob(feature.properties[property.key]);
-                                }
+                                }*/
                                 value =
                                     `<a target='_blank' href='${subValue}'>
                                         <img style='width:250px' src='${subValue}'/>
