@@ -228,12 +228,12 @@ var getExistingDocs = function (key, fileIdent = false) {
             //adress = existingcases[l].properties.sagsnavn;
             $('#documentList-feature-content').append('<tr>')
             $('#documentList-feature-content').append(
-                '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") + '</a></td>'
-                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.sagsstatus + '</a></td>'
-                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.forsyningstype + '</a></td>'
-                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + existingcases[l].properties.prioritet + '</a></td>'
-                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</a></td>'               
-                + '<td style="padding-right:5px;"><a href=docunote:/casenumber="' + existingcases[l].properties.casenumber + '">'+existingcases[l].properties.problemtype+'</a></td>')
+                '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>' + new moment(existingcases[l].properties.henvendelsesdato).format("DD-MM-YYYY") + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>' + existingcases[l].properties.sagsstatus + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>' + existingcases[l].properties.forsyningstype + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>' + existingcases[l].properties.prioritet + '</a></td>'
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>' + (existingcases[l].properties.ansvarlig ? existingcases[l].properties.ansvarlig : '') + '</a></td>'               
+                + '<td style="padding-right:5px;"><a href=docunote:/casenumber=' + existingcases[l].properties.casenumber + '>'+existingcases[l].properties.problemtype+'</a></td>')
             $('#documentList-feature-content').append('</tr>')
         }
         
