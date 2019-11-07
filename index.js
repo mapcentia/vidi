@@ -31,8 +31,6 @@ app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
     limit: '50mb'
 }));
 
-app.use(cookieParser());
-
 app.set('trust proxy', 1); // trust first proxy
 
 app.use(session({
