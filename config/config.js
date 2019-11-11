@@ -117,7 +117,7 @@ module.exports = {
                     }
                 }
             },
-            "kertemindeforsyning": { // Your print templates. "print" is the default
+            "kertemindeforsyningprint": { // Your print templates. "print" is the default
                 A4: {
                     l: {
                         mapsizePx: [1060, 730],
