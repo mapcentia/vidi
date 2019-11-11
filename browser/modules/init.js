@@ -200,7 +200,7 @@ module.exports = {
      *
      */
     startApp: function () {
-        let humanUsedTemplate = true;
+        let humanUsedTemplate = !(urlVars.px && urlVars.py);
         if (`tmpl` in urlVars) {
             let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
             if (`startupModalSupressionTemplates` in window.vidiConfig && Array.isArray(window.vidiConfig.startupModalSupressionTemplates)) {

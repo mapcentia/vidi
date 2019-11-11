@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+### Fixed
+- The startup message set by `startUpModal` is ever shown in print.
 
 ## [2019.1.0.rc3] - 2019-06-11
 ### Added
@@ -16,6 +18,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Auto login. WARNING: Insecure and sets cookie with login creds. A build time setting `autoLoginPossible` must be set to `true` to make activation possible. Activation is done in:
     - `extensionConfig.session.autoLogin = true` and optional `extensionConfig.session.autoLoginMaxAge = 3600 * 1000`. The latter defaults to `null`
 - Static Map API. Generate PNGs of state snapshot. URL to PNG is available from the Snapshot module.
+- Possible to set a welcome message by using `startUpModal` in a config. The user can dismiss the message by either `Close` or `Close and do not show in future`. The latter choise is stored in a cookie.
 
 ### Changed
 - Layers which have been switch off, will not be removed from legend (old behavior can be set in config)
