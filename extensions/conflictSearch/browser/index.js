@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -28,7 +28,7 @@ var utils;
  *
  * @type {*|exports|module.exports}
  */
-var search = require('./../../../browser/modules/search/danish');
+var search;
 
 /**
  *
@@ -263,6 +263,12 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
         print = o.print;
+        // Hack to compile Glob files. Don´t call this function!
+        function ಠ_ಠ() {
+            require('./../../../browser/modules/search/*.js', {glob: true});
+        }
+        search = require('./../../../browser/modules/search/' + window.vidiConfig.enabledSearch + '.js');
+        search.set(o);
         return this;
     },
 
