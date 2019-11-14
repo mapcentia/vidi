@@ -109,7 +109,7 @@ geocloud = (function () {
         visibility: true,
         lifetime: 0,
         host: host,
-        uri: "/api/v1/sql",
+        uri: "/api/v2/sql",
         db: null,
         sql: null,
         q: null,
@@ -641,7 +641,7 @@ geocloud = (function () {
                 async: this.async,
                 jsonp: (this.jsonp) ? 'jsonp_callback' : false,
                 data: 'q=' + encodeURIComponent(q) + "&size=" + this.size,
-                url: this.defaults.host + '/api/v1/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
+                url: this.defaults.host + '/api/v2/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
                 success: function (response) {
                     if (typeof response.error !== "undefined") {
                         return false;
