@@ -162,5 +162,7 @@
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
+<!-- Lazy load Javascript -->
+<script async src="/js/lib/jsts/jsts.min.js"></script>
 </body>
 </html>
