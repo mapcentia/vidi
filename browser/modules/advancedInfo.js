@@ -32,12 +32,6 @@ var _ = require('underscore');
 
 /**
  *
- * @type {exports|module.exports}
- */
-var jsts = require('jsts');
-
-/**
- *
  * @type {boolean}
  */
 var searchOn = false;
