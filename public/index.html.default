@@ -43,7 +43,6 @@
     <link rel="stylesheet" href="/js/lib/leaflet-measure/leaflet-measure.css">
     <link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>
     <link rel="stylesheet" href="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="/js/lib/q-cluster/css/q-cluster.css"/>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="/js/lib/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
@@ -123,15 +122,12 @@
 <script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
 <script src="/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js"></script>
 <script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
-<script src="/js/lib/q-cluster/src/utils.js"></script>
-<script src="/js/lib/q-cluster/src/clustering.js"></script>
-<script src="/js/point-clusterer.js"></script>
 <script src="/js/lib/localforage/localforage.js"></script>
 <script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
 <script src="/js/lib/leaflet-geometryutil/leaflet.geometryutil.js"></script>
 <script src="/js/lib/leaflet-snap/leaflet.snap.js"></script>
 <script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
-<script src="/js/lib/leaflet-glify/glify.js"></script>
+<!--<script src="/js/lib/leaflet-glify/glify.js"></script>-->
 
 <!-- Core -->
 <script src="/js/lib/jquery/jquery.js"></script>
@@ -145,7 +141,6 @@
 <script src="/js/lib/underscore/underscore.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
 <script src="/js/lib/momentjs/moment-with-locales.js"></script>
-<script src="/js/lib/d3/d3.js"></script>
 <script src="/js/proj4js-combined.js"></script>
 <!-- Bootstrap -->
 <script src="/js/lib/typeahead.js/typeahead.jquery.js"></script>

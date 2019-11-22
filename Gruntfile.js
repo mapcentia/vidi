@@ -87,7 +87,6 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
                         'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
-                        'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
                         'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
@@ -236,9 +235,6 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
                         'public/js/lib/leaflet-glify/glify.js',
-                        'public/js/lib/q-cluster/src/utils.js',
-                        'public/js/lib/q-cluster/src/clustering.js',
-                        'public/js/point-clusterer.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/leaflet-snap/leaflet.snap.js',
@@ -254,7 +250,6 @@ module.exports = function (grunt) {
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
                         'public/js/lib/momentjs/moment-with-locales.js',
-                        'public/js/lib/d3/d3.js',
                         'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
@@ -381,5 +376,6 @@ module.exports = function (grunt) {
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
     grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
