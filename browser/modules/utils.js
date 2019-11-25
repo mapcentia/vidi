@@ -1,15 +1,12 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-var proj4 = require('proj4');
-
-proj4.defs("EPSG:25832", "+title=  ETRF89 / UTM zone 32N EPSG:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-
+Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32N +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
 module.exports = {
     set: function () {
@@ -89,7 +86,7 @@ module.exports = {
     },
 
     transform: function (from, to, coordinates) {
-        return proj4(from, to, coordinates);
+        return Proj4js(from, to, coordinates);
     },
 
     popupCenter: function (url, width, height, name) {

@@ -24,9 +24,6 @@ let utils, backboneEvents, layerTree, meta, cloud, sqlQuery, layers;
 
 let apiBridgeInstance = false;
 
-let jquery = require('jquery');
-require('snackbarjs');
-
 let multiply = require('geojson-multiply');
 let moment = require('moment');
 
@@ -463,7 +460,7 @@ module.exports = {
                         layerTree.reloadLayer("v:" + schemaQualifiedName, true);
                     }
 
-                    jquery.snackbar({
+                    $.snackbar({
                         id: "snackbar-conflict",
                         content: "Feature  stedfæstet",
                         htmlAllowed: true,

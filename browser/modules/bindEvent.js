@@ -28,9 +28,6 @@ let APIBridgeSingletone = require('./api-bridge');
  */
 var apiBridgeInstance = false;
 
-var jRespond = require('jrespond');
-
-
 require('dom-shims');
 require('arrive');
 

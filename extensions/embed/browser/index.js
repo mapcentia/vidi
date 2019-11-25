@@ -30,9 +30,6 @@ var legend;
 
 var metaDataKeys;
 
-var jquery = require('jquery');
-require('snackbarjs');
-
 var showdown = require('showdown');
 var converter = new showdown.Converter();
 

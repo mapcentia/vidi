@@ -26,12 +26,6 @@ var reproject = require('reproject');
 
 /**
  *
- * @type {_|exports|module.exports}
- */
-var _ = require('underscore');
-
-/**
- *
  * @type {boolean}
  */
 var searchOn = false;

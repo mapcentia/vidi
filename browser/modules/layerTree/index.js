@@ -28,7 +28,6 @@ var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], on
 const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
-require('snackbarjs');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
@@ -1257,7 +1256,7 @@ module.exports = {
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
-        jquery.snackbar({
+        $.snackbar({
             id: "snackbar-watsonc",
             content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
             htmlAllowed: true,

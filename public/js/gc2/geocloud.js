@@ -73,7 +73,7 @@ geocloud = (function () {
         HERESATELLITEDAY = "hereSatelliteDay",
         HEREHYBRIDDAY = "hereHybridDay",
 
-        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
+        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' rel='noopener' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
             4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
             152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
@@ -1347,7 +1347,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.mapQuestOSM = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 20,
                         maxNativeZoom: 18
                     });
@@ -1405,7 +1405,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.osm = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 21,
                         maxNativeZoom: 18
                     });
@@ -2802,9 +2802,9 @@ geocloud = (function () {
                 "maxZoom": maxZoom,
                 "attribution": [
                     'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
-                    'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
+                    'Data by <a rel="noopener" href="http://openstreetmap.org">OpenStreetMap</a>, ',
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
                 ].join("")
             };
         },

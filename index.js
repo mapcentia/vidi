@@ -76,7 +76,7 @@ if (config.staticRoutes) {
     }
 }
 
-app.use('/', express.static(path.join(__dirname, 'public'), {maxage: '1h'}));
+app.use('/', express.static(path.join(__dirname, 'public'), {maxage: '100d'}));
 
 app.use(require('./controllers'));
 
