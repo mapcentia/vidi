@@ -641,7 +641,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = []) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -704,70 +704,72 @@ module.exports = {
          * Some vector layer needs to be reloaded when the map view is changed if the dynamic
          * loading is enabled for the layer.
          */
-        cloud.get().on(`moveend`, () => {
-            let activeLayers = _self.getActiveLayers();
+        if (!dontRegisterEvents) {
+            cloud.get().on(`moveend`, () => {
+                let activeLayers = _self.getActiveLayers();
 
-            let stores = [];
-            for (let layerKey in moduleState.vectorStores) {
-                stores[layerKey] = moduleState.vectorStores[layerKey];
-            }
-
-            for (let layerKey in moduleState.webGLStores) {
-                stores[layerKey] = moduleState.webGLStores[layerKey];
-            }
-
-            for (let layerKey in stores) {
-                let layerIsEnabled = false;
-                let layerPrefix = ``;
-                for (let i = 0; i < activeLayers.length; i++) {
-                    if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
-                        if (activeLayers[i].indexOf(`:`) > -1) {
-                            layerPrefix = activeLayers[i].split(`:`)[0];
-                        }
-
-                        layerIsEnabled = true;
-                        break;
-                    }
+                let stores = [];
+                for (let layerKey in moduleState.vectorStores) {
+                    stores[layerKey] = moduleState.vectorStores[layerKey];
                 }
 
-                if (layerIsEnabled) {
-                    let localTypeStores = false;
-                    if (layerPrefix === LAYER.VECTOR) {
-                        localTypeStores = moduleState.vectorStores;
-                    } else if (layerPrefix === LAYER.WEBGL) {
-                        localTypeStores = moduleState.webGLStores;
-                    }
+                for (let layerKey in moduleState.webGLStores) {
+                    stores[layerKey] = moduleState.webGLStores[layerKey];
+                }
 
-                    let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
-                    let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
-                    let parsedMeta = _self.parseLayerMeta(layerDescription);
+                for (let layerKey in stores) {
+                    let layerIsEnabled = false;
+                    let layerPrefix = ``;
+                    for (let i = 0; i < activeLayers.length; i++) {
+                        if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
+                            if (activeLayers[i].indexOf(`:`) > -1) {
+                                layerPrefix = activeLayers[i].split(`:`)[0];
+                            }
 
-                    // Reload should always occur except times when current bbox is completely inside
-                    // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
-                    let needToReload;
-                    if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                        || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
-                        needToReload = true;
-                        let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in localTypeStores[layerKey]) {
-                            if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
-                                needToReload = false;
-                            }
-                            if (localTypeStores[layerKey].featuresLimitReached) {
-                                needToReload = true;
-                            }
+                            layerIsEnabled = true;
+                            break;
                         }
-                    } else {
-                        needToReload = false;
                     }
 
-                    if (needToReload) {
-                        localTypeStores[layerKey].abort();
-                        localTypeStores[layerKey].load();
+                    if (layerIsEnabled) {
+                        let localTypeStores = false;
+                        if (layerPrefix === LAYER.VECTOR) {
+                            localTypeStores = moduleState.vectorStores;
+                        } else if (layerPrefix === LAYER.WEBGL) {
+                            localTypeStores = moduleState.webGLStores;
+                        }
+
+                        let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
+                        let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
+                        let parsedMeta = _self.parseLayerMeta(layerDescription);
+
+                        // Reload should always occur except times when current bbox is completely inside
+                        // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
+                        let needToReload;
+                        if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
+                            needToReload = true;
+                            let currentMapBBox = cloud.get().map.getBounds();
+                            if (`buffered_bbox` in localTypeStores[layerKey]) {
+                                if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                                    needToReload = false;
+                                }
+                                if (localTypeStores[layerKey].featuresLimitReached) {
+                                    needToReload = true;
+                                }
+                            }
+                        } else {
+                            needToReload = false;
+                        }
+
+                        if (needToReload) {
+                            localTypeStores[layerKey].abort();
+                            localTypeStores[layerKey].load();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         let result = false;
         if (moduleState.isBeingBuilt) {
