@@ -121,7 +121,7 @@
 <script src="/js/lib/mustache.js/mustache.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
-<script src="/js/lib/proj4/proj4-combidned.js"></script>
+<script src="/js/lib/proj4/proj4-combined.js"></script>
 <!-- Bootstrap -->
 <script src="/js/lib/typeahead.js/typeahead.jquery.js"></script>
 <script src="/js/lib/bootstrap-material-design/dist/js/ripples.js"></script>
