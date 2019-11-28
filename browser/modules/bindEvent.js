@@ -225,8 +225,9 @@ module.exports = {
                 backboneEvents.get().trigger("ready:meta");
                 state.init();
             }).then(() => {
-                layerTree.create();
+                layerTree.create(false, [], true);
                 state.init();
+
             });
         });
 
