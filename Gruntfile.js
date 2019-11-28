@@ -19,10 +19,10 @@ module.exports = function (grunt) {
 
     // Default build parameters
     let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-    let lessConfig = { "public/css/styles.css": "public/less/styles.default.less" };
+    let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     if (theme && theme === 'watsonc') {
         copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = { "public/css/styles.css": "public/less/styles." + theme + ".less" };
+        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
     }
 
     grunt.initConfig({
@@ -167,7 +167,13 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify']
+                    browserifyOptions: {
+                        debug: false
+                    },
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify']
                 }
             },
             publish_sw: {
@@ -178,7 +184,10 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify']
                 }
             },
             publish_sw_dev: {
@@ -189,7 +198,10 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify']
                 }
             },
             watch: {
@@ -197,7 +209,10 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify'],
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify', 'windowify'],
                     watch: true,
                     keepAlive: true,
                     browserifyOptions: {
@@ -211,7 +226,13 @@ module.exports = function (grunt) {
                 options: {
                     sourceMap: true,
                     sourceMapIncludeSources: true,
-                    compress: false
+                    compress: {
+                        dead_code: true,
+                        drop_debugger: true,
+                        global_defs: {
+                            "DEBUG": false
+                        },
+                    }
                 },
                 files: {
                     'public/js/build/all.min.js': [
@@ -318,7 +339,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function() {
+    grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function () {
         if (theme && theme === 'watsonc') {
             fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
             fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
@@ -328,7 +349,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function() {
+    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function () {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
 
@@ -364,7 +385,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
-    grunt.registerTask('production-test', ['env', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production', ['env:prod', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };
