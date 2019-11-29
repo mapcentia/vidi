@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+### Changed
+- A lot of optimization of Javascript code. Code that can is lazy loaded.
+- The server is now using gzip compression.
+- Meta description added to index.html
+
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
 
