@@ -74,6 +74,7 @@
     "browserify-fs": "^1.0.0",
     "bulk-require": "^1.0.0",
     "circular-functions": "0.0.3",
+    "compression": "^1.7.4",
     "connect-redis": "^3.4.1",
     "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",

@@ -8,6 +8,7 @@ var path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
 var express = require('express');
+var compression = require('compression');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
@@ -19,6 +20,7 @@ var cors = require('cors');
 var config = require('./config/config.js');
 
 var app = express();
+app.use(compression());
 app.use(cors());
 app.use(cookieParser());
 app.use(bodyParser.json({
