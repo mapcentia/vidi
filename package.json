@@ -131,7 +131,7 @@
     "redux-thunk": "^2.3.0",
     "reproject": "^1.1.1",
     "request": "^2.81.0",
-    "require-globify": "^1.4.0",
+    "require-globify": "^1.4.1",
     "semver": "^5.5.1",
     "serialijse": "0.0.17",
     "session-file-store": "^1.2.0",

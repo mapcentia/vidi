@@ -315,7 +315,7 @@ module.exports = {
 
                     // Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./search/*.js', {glob: true});
+                        require('./search/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.searchModules !== "undefined") {
@@ -331,8 +331,8 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./../../extensions/*/browser/*.js', {glob: true});
-                        require('./../../extensions/*/browser/*/*.js', {glob: true});
+                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {

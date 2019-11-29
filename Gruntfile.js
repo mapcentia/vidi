@@ -173,7 +173,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
                         plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', 'uglifyify']
+                    }], 'require-globify', 'windowify', 'envify']
                 }
             },
             publish_sw: {
