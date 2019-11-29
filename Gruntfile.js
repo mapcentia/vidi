@@ -268,7 +268,6 @@ module.exports = function (grunt) {
                     'public/js/build/all.async.min.js': [
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
                         'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
-                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
                         'public/js/lib/leaflet-snap/leaflet.snap.js',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
                         'public/js/lib/leaflet.editable/Leaflet.Editable.js',
@@ -276,6 +275,7 @@ module.exports = function (grunt) {
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/jquery-ui/jquery-ui.min.js',
+                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
                         'public/js/lib/snackbarjs/snackbar.min.js',
                         'public/js/lib/jsts/jsts.min.js',
                     ]
