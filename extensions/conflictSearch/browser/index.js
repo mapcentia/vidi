@@ -636,6 +636,7 @@ module.exports = module.exports = {
                         resultOrigin = response.text || "Na";
 
                         $.each(response.hits, function (i, v) {
+                            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
                             groups.push(v.meta.layergroup);
                         });
                         groups = array_unique(groups.reverse());
@@ -643,18 +644,23 @@ module.exports = module.exports = {
                         for (let i = 0; i < groups.length; ++i) {
                             row = "<tr><td><span class='badge'>" + groups[i] + "</span></td><td></td><td></td></tr>";
                             hitsTable.append(row);
+                            var count = 0;
                             $.each(response.hits, function (u, v) {
-                                let metaData = v.meta;
-                                if (metaData.layergroup === groups[i]) {
-                                    let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
-                                    row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                    hitsTable.append(row);
+                                if (v.hits > 0) {
+                                    let metaData = v.meta;
+                                    if (metaData.layergroup === groups[i]) {
+                                        count++;
+                                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
+                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                                        hitsTable.append(row);
+                                    }
                                 }
                             });
-
-                        }
-                        ;
-
+                            // Remove empty groups
+                            if (count === 0) {
+                                hitsTable.find("tr").last().remove();
+                            }
+                        };
                         $.each(response.hits, function (i, v) {
                                 var table = i, table1, table2, tr, td, title, metaData = v.meta;
                                 title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
@@ -663,7 +669,6 @@ module.exports = module.exports = {
                                         title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
                                     }
                                     row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-
                                     if (v.hits > 0) {
                                         //hitsTable.append(row);
                                         hitsCount++;
