@@ -672,7 +672,15 @@ module.exports = module.exports = {
                                             hitsData.append("<h3>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h3>");
                                             let conflictForLayer = meta.parseLayerMeta(table);
                                             if ('short_conflict_meta_desc' in conflictForLayer) {
-                                                hitsData.append("<p>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                            }
+                                            if ('long_conflict_meta_desc' in conflictForLayer) {
+                                                $(`<i style="cursor: pointer; color: #999999">mere...</i>`).appendTo(hitsData).on("click", function () {
+                                                    $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333">
+                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                                                        </div>`);
+                                                });
+                                                $(`<div></div>`).appendTo(hitsData);
                                             }
                                             ;
                                             $.each(v.data, function (u, row) {
