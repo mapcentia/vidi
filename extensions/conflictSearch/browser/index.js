@@ -675,7 +675,7 @@ module.exports = module.exports = {
                                         if (v.data.length > 0) {
                                             table1 = $("<table class='table table-data'/>");
                                             hitsData.append("<h3>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h3>");
-                                            let conflictForLayer = meta.parseLayerMeta(table);
+                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                                             }
