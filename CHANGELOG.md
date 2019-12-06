@@ -8,7 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Changed
 - A lot of optimization of Javascript code. Code that can is lazy loaded.
 - The server is now using gzip compression.
-- Meta description added to index.html
+- Meets the requirements for a Progressive Web App (PWA)   
 
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
