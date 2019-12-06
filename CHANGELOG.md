@@ -12,6 +12,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
+- Images in pop-ups will now open in new tab when using Chrome.  
 
 ## [2019.1.0.rc3] - 2019-06-11
 ### Added

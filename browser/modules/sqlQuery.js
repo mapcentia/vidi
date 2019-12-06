@@ -520,9 +520,9 @@ module.exports = {
                             } else {
                                 let subValue = feature.properties[property.key];
                                 value =
-                                    `<a target='_blank' href='${subValue}'>
+                                    `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
                                         <img style='width:250px' src='${subValue}'/>
-                                     </a>`;
+                                     </div>`;
                             }
                         } else if (property.value.content && property.value.content === "video") {
                             if (!feature.properties[property.key]) {
