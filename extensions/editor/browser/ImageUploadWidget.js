@@ -25,7 +25,7 @@ class ImageUploadWidget extends React.Component {
     onDrop(files) {
         let _self = this;
         $.canvasResize(files[0], {
-            width: 300,
+            width: 1024,
             height: 0,
             crop: false,
             quality: 80,
