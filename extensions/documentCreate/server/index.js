@@ -218,6 +218,8 @@ function addPartRequestCase(caseId, adrguid){
     })
 }
 
+// find parent folder for the new address case
+// resolves to parent id og parent type (either folder or case)
 function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadrguid, adgadrguid) {
     return new Promise(function (resolve, reject) {
         var getParentPromise = getFoldersDn(parentId, parenttype);
@@ -226,34 +228,47 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
             //console.log(values[0])
             parentFolders = values[0];
             var result = { "parentid": 0, "parenttype": 0 };
-            if (parentFolders.length == 2) {
-                // get the case that is not ejdCaseId
-                var parentidx;
+            for (i = 0; i < parentFolders.length; i++) {
+                if (parentFolders[i].name == dnTitle) {
+                    // folder with same address
+                    result.parentid = parentFolders[i].nodeId;
+                    result.parenttype = parentFolders[i].nodeType;
+                    break;
+                }
+            }
+            if (parentFolders.length == 2 && result.parentid == 0) {
                 if (parentFolders[1].nodeId != ejdCaseId) {
                     // now get folders 
-                    parentidx = 1;
+                    result.parentid = parentFolders[1].nodeId;
+                    result.parenttype = parentFolders[1].nodeType;
                 } else {
-                    parentidx = 0;
+                    result.parentid = parentFolders[0].nodeId;
+                    result.parenttype = parentFolders[0].nodeType;
                 }
+            }
+            // parentfolder found now search for folder kundehenvendelse
+            if (result.parentid > 0){
                 getParentPromise = getFoldersDn(parentFolders[parentidx].nodeId, parentFolders[parentidx].nodeType);
                 Promise.all([getParentPromise]).then(function (values) {
                     for (i = 0; i < values[0].length; i++) {
+                        // if kundehenvendelser found use this folder as result else remain current result
                         if (values[0][i].name == "Kundehenvendelser") {
                             // 
                             result.parentid = values[0][i].nodeId;
                             result.parenttype = values[0][i].nodeType;
                             console.log(result)
-                            resolve(result);
                         }
                     }
+                    resolve(result);
                 })
             } else {
+
                 // make adgangsadressesag
+                // creates new address case with aws guid as syncid
                 bodyaddresscase = makeAddressCase(parentId, ADRCASETYPEID, dnTitle, adgadrguid)
                 var postCaseToDnPromise = postCaseToDn(bodyaddresscase);
                 postCaseToDnPromise.then(function (values) {
                     // if rejected get case by syncid
-
                     result.parentid = values.caseId;
                     result.parenttype = NODETYPECASE;
                     //ToDo: Create part to add adressesag // Done
@@ -266,7 +281,6 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                             }
                         )
                     })
-
                     
                 }, function (error) {
                     console.log(error)
@@ -278,54 +292,15 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
                             resolve(result);
                         })                        
                     }
-                })
-
+                })                    
             }
+
         })
     })
     //    parentFolders = getFoldersDn(parentId,parenttype);
 }
 
 
-function test() {
-    new Promise(function (resolve, reject) {
-
-        setTimeout(() => resolve(1), 1000); // (*)
-        var options = {
-            url: 'https://dawa.aws.dk/adresser?adgangsadresseid='+adrguid,
-            method: 'GET',
-        };
-        return new Promise(function(resolve, reject) {
-            request.get(options, function (err, res, body) {
-                if (!err) {
-                    //return result as JSON;
-                    resolve(JSON.parse(body));
-                }
-                else {
-                    console.log(err)
-                    reject(err);
-                }
-            });
-        })        
-
-    }).then(function (result) { // (**)
-
-        alert(result); // 1
-        return result * 2;
-
-    }).then(function (result) { // (***)
-
-        alert(result); // 2
-        return result * 2;
-
-    }).then(function (result) {
-
-        alert(result); // 4
-        return result * 2;
-
-    });
-
-}
 function createAddressPart(dnTitle, adrguid, ejdnr) {
     return new Promise(function (resolve, reject) {
         var getDawaPromise = GetDawaAddress(adrguid);
