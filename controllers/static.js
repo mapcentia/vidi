@@ -12,7 +12,8 @@ require('dotenv').config();
 
 var express = require('express');
 var router = express.Router();
-var headless = require('./headlessBrowser');
+var headless = require('./headlessBrowserPool').pool;
+
 
 const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     let go = false;
@@ -31,7 +32,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
     if (errorMessages.length === 0) {
         const port = process.env.PORT ? process.env.PORT : 3000;
         let url = `http://127.0.0.1:${port}/app/${localRequest.params.db}/${localRequest.params.scheme}/?tmpl=blank.tmpl${state}${filter}${config}`;
-        headless.getBrowser().then(browser => {
+        headless.acquire().then(browser => {
             browser.newPage().then(page => {
                 page.emulate({
                     viewport: { width, height },
@@ -55,7 +56,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                             // Print as soon Vidi is done loading
                             (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
                             // Wait until all overlays from snapshot is loaded
-                            (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
+                            (msg.text().indexOf(`Layers all loaded`) !== -1 && !go)
                         ) {
                             console.log('App was loaded, generating PNG');
                             setTimeout(() => {
@@ -68,7 +69,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                             'Content-Type': 'image/png',
                                             'Content-Length': img.length
                                         });
-                                        page.close();
+                                        headless.destroy(browser);
                                         localResponse.end(img);
                                     }).catch(error => {
                                         localResponse.status(500);

@@ -1,3 +1,10 @@
+
+/*
+ * @author     Martin Høgh <mh@mapcentia.com>
+ * @copyright  2013-2019 MapCentia ApS
+ * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
+ */
+
 /**
  * Keeping single instance of the headless browser and restarting the browser on every request in order to reset cache
  */
@@ -38,4 +45,4 @@ const getBrowser = () => {
 
 module.exports = {
     getBrowser
-}
+};

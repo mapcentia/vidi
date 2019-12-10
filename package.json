@@ -89,6 +89,7 @@
     "express-session": "^1.15.6",
     "fetch": "^1.1.0",
     "file-saver": "^2.0.2",
+    "generic-pool": "^3.7.1",
     "geojson-multiply": "^1.0.3",
     "grunt": "^1.0.3",
     "grunt-contrib-uglify-es": "github:gruntjs/grunt-contrib-uglify#harmony",
