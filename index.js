@@ -97,5 +97,5 @@ cluster(function (worker) {
         console.log(socket.id);
     });
     return server
-}, {verbose: true, count: 0});
+}, {verbose: true, count: 0 });
 
