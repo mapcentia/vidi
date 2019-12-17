@@ -142,6 +142,7 @@
     "snapshot": "0.0.0",
     "socket.io": "^1.7.1",
     "socket.io-client": "^1.7.1",
+    "sticky-session": "^1.1.2",
     "terraformer": "^1.0.7",
     "terraformer-wkt-parser": "^1.1.2",
     "underscore": "^1.8.3",

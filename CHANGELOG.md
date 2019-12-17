@@ -9,9 +9,9 @@ and this project adheres to [CalVer](https://calver.org/).
 - A lot of optimization of Javascript code. Code that can is lazy loaded.
 - The server is now using gzip compression.
 - Meets the requirements for a Progressive Web App (PWA)   
-- Implemented a generic pool for puppeteer, so there is always a warm chromium browser ready for print.
+- Implemented a generic pool for puppeteer processes, so there is always a warm chromium browser ready for print.
 - Node clustering implemented with default count of workers, which is the cpu core count.
-
+- Sticky sessions so Socket.io works with clustering.
 
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
