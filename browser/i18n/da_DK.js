@@ -37,6 +37,7 @@ module.exports = {
         "Search with this object": "Søg med dette objekt",
         "From drawing": "Fra tegning",
         "From object in layer": "Fra objekt i lag",
+        "Waiting to start": "Venter på at starte",
 
         // Drawing
         "Cancel drawing": " Afbryd tegning",
