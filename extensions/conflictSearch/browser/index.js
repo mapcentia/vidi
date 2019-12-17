@@ -594,7 +594,7 @@ module.exports = module.exports = {
 
             $.snackbar({
                 id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>",
+                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
                 htmlAllowed: true,
                 timeout: 1000000
             });
