@@ -29,6 +29,13 @@ module.exports = {
         "host": "GC2_HOST"
     },
 
+    // ==========================================
+    // Redis host for session storage.
+    // If not set file storage will be used.
+    // ==========================================
+    //"redisHost": "127.0.0.1:6379",
+
+
     // =====================================================================
     // Legend behaviour.
     // Specifies if the switched off layers should be left in legend or not.
@@ -55,7 +62,8 @@ module.exports = {
 
     // ===============================================================
     // Startup modal.
-    // The modal is shown upon Vidi initialization and can be hidden once or forever (until cookies reset).
+    // The modal is shown upon Vidi initialization and can be
+    // hidden once or forever (until cookies reset).
     // ===============================================================
     //"startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>",
 
@@ -64,7 +72,6 @@ module.exports = {
     // Setting contains list of templates, where the startup modal is
     // disabled. Can be a plain template name or the RegExp
     // ===============================================================
-
     "startupModalSupressionTemplates": ["print.tmpl", "blank.tmpl", {
         regularExpression: true,
         name: "print_[\\w]+\\.tmpl"
@@ -76,7 +83,6 @@ module.exports = {
     // mapsizePx ~ is the pixel dimension of the map view
     // mapsizeMm ~ is actual size of the map view on the resulting PDF
     // ===============================================================
-
     "print": {
         "templates": {
 
