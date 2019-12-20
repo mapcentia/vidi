@@ -248,7 +248,7 @@ function GetParentFolder(ejdCaseId, parentId, parenttype, dnTitle, esrnr, enhadr
             }
             // parentfolder found now search for folder kundehenvendelse
             if (result.parentid > 0){
-                getParentPromise = getFoldersDn(parentFolders[parentidx].nodeId, parentFolders[parentidx].nodeType);
+                getParentPromise = getFoldersDn(result.parentid, result.parenttype );
                 Promise.all([getParentPromise]).then(function (values) {
                     for (i = 0; i < values[0].length; i++) {
                         // if kundehenvendelser found use this folder as result else remain current result
