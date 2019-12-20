@@ -59,8 +59,8 @@ module.exports = {
     init: function (onLoad, el, onlyAddress, getProperty) {
         var type1, type2, type3, type4, gids = [], searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
-            esrSearchActive = typeof(window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
-            sfeSearchActive = typeof(window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+            esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
+            sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
 
         // adjust search text
         var searchTxt = "Adresse, matr. nr.";
@@ -393,6 +393,8 @@ module.exports = {
                         success: function (response) {
                             if (response.hits === undefined) return;
                             if (type1 === "vejnavn,bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.postnrnavn"] === undefined) return;
                                 $.each(response.aggregations["properties.postnrnavn"].buckets, function (i, hit) {
                                     var str = hit.key;
                                     names.push({value: str});
@@ -406,8 +408,9 @@ module.exports = {
                                     type: "POST",
                                     success: function (response) {
                                         if (response.hits === undefined) return;
-
                                         if (type1 === "vejnavn,bynavn") {
+                                            if (response.aggregations === undefined) return;
+                                            if (response.aggregations["properties.vejnavn"] === undefined) return;
                                             $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
                                                 var str = hit.key;
                                                 names.push({value: str});
@@ -425,6 +428,8 @@ module.exports = {
                                     }
                                 })
                             } else if (type1 === "vejnavn_bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.vejnavn"] === undefined) return;
                                 $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
                                     var str = hit.key;
                                     $.each(hit["properties.postnrnavn"].buckets, function (m, n) {
@@ -568,6 +573,8 @@ module.exports = {
                             success: function (response) {
                                 if (response.hits === undefined) return;
                                 if (type2 === "ejerlav") {
+                                    if (response.aggregations === undefined) return;
+                                    if (response.aggregations["properties.ejerlavsnavn"] === undefined) return;
                                     $.each(response.aggregations["properties.ejerlavsnavn"].buckets, function (i, hit) {
                                         var str = hit.key;
                                         names.push({value: str});
