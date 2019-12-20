@@ -333,6 +333,8 @@ module.exports = {
                     function ಠ_ಠ() {
                         require('./../../extensions/*/browser/*.js', {mode: 'expand'});
                         require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
