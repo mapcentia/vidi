@@ -5,14 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
-### Changed
-- A lot of optimization of Javascript code. Code that can is lazy loaded.
-- The server is now using gzip compression.
-- Meets the requirements for a Progressive Web App (PWA)   
+
+## [2019.1.0] - 2019-20-12
+### Added
 - Implemented a generic pool for puppeteer processes, so there is always a warm chromium browser ready for print.
 - Node clustering implemented with default count of workers, which is the cpu core count.
 - Sticky sessions implemented so Socket.io works with clustering.
 - Redis added as storage for sessions. Just set `redisHost` in `config/config.js`. If not set then file storage will be used.
+
+### Changed
+- A lot of optimization of Javascript code. Code that can is lazy loaded.
+- The server is now using gzip compression.
+- Meets the requirements for a Progressive Web App (PWA)   
 
 ### Fixed
 - The startup message set by `startUpModal` is ever shown in print.
