@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
 ## [Unreleased]
+### Changed
+- Custom searches can now be added to danish search module.
 
 ## [2019.1.0] - 2019-20-12
 ### Added
