@@ -26,7 +26,7 @@ module.exports = {
                 tr = $("<tr><td>" + (v.title || i) + " (" + v.hits + ")</td></tr>");
                 table.append(tr);
                 if (v.data.length > 0) {
-                    dataTable = $("<table class='table table-bordered'></table>");
+                    dataTable = $("<table class='table table-conflict'></table>");
                     dataThead = $("<thead></thead>");
                     dataTr = $("<tr></tr>");
                     dataThead.append(dataTr);
