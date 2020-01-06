@@ -232,7 +232,7 @@ var gc2table = (function () {
                             autoPan: autoPan,
                             closeButton: true,
                             minWidth: 160,
-                            maxwidth: 800
+                            maxWidth: 800
                         }).openPopup();
 
                         m.map._layers[id].on('popupclose', function(e) {
