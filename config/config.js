@@ -653,7 +653,7 @@ module.exports = {
     // (Database name in GC2 and account name in Carto)
     // ==========================================================
 
-    "autoLoadingConfig": true,
+    "autoLoadingConfig": false,
 
 
     // ====================================================================================
@@ -682,6 +682,21 @@ module.exports = {
     // ===================================
 
     "aboutBox": "<p>My awesome web map</p>",
+
+    // ========================================
+    // Set a width for video elements in popups
+    // Should be a string with units - defaults to '250px'
+    // ========================================
+
+    "popupVideoWidth": "350px",
+
+    
+    // ========================================
+    // Set a width for image elements in popups
+    // Should be a string with units - defaults to '100%'
+    // ========================================
+
+    "popupImageWidth": "350px",
 
 
     // ===================================================

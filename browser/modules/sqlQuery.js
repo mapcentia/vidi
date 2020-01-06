@@ -523,9 +523,16 @@ module.exports = {
                                 if (property.value.type === `bytea`) {
                                     subValue = atob(feature.properties[property.key]);
                                 }*/
+
+                                width = '100%'
+
+                                if(window.vidiConfig.hasOwnProperty('popupImageWidth')) {
+                                    width = window.vidiConfig.popupImageWidth
+                                }
+
                                 value =
                                     `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='width:100%' src='${subValue}'/>
+                                        <img style='`+ width +`' src='${subValue}'/>
                                      </div>`;
                             }
                         } else if (property.value.content && property.value.content === "video") {
@@ -533,8 +540,14 @@ module.exports = {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
                                 let subValue = feature.properties[property.key];
+                                let width = '250px'
+
+                                if(window.vidiConfig.hasOwnProperty('popupVideoWidth')) {
+                                    width = window.vidiConfig.popupVideoWidth
+                                }
+
                                 value =
-                                    `<video width="100%" controls>
+                                    `<video width="`+ width +`" controls>
                                         <source src="${subValue}" type="video/mp4">
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
