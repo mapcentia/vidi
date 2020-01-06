@@ -71,6 +71,8 @@ module.exports = {
                 window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
                 window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
+                window.vidiConfig.popupImageWidth = data.popupImageWidth ? data.popupImageWidth : window.vidiConfig.popupImageWidth;
+                window.vidiConfig.popupVideoWidth = data.popupVideoWidth ? data.popupVideoWidth : window.vidiConfig.popupVideoWidth;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
