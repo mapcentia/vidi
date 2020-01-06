@@ -1609,6 +1609,7 @@ module.exports = {
         let managePopup = L.popup({
             autoPan: false,
             minWidth: 160,
+            maxwidth: 800,
             className: `js-vector-layer-popup custom-popup`
         }).setLatLng(event.latlng).setContent(`<div>
             ${additionalControls}

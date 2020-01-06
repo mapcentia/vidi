@@ -231,7 +231,8 @@ var gc2table = (function () {
                             className: "custom-popup gc2table-custom-popup",
                             autoPan: autoPan,
                             closeButton: true,
-                            minWidth: 160
+                            minWidth: 160,
+                            maxwidth: 800
                         }).openPopup();
 
                         m.map._layers[id].on('popupclose', function(e) {
