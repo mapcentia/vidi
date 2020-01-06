@@ -43,7 +43,7 @@ var gc2table = (function () {
                 $.getScript(host + "/js/typeahead.js-0.10.5/dist/typeahead.bundle.js");
             }
             if (typeof jQuery().bootstrapTable === "undefined") {
-                $.getScript(host + "/js/bootstrap-table/bootstrap-table.js");
+                $.getScript(host + "/js/lib/bootstrap-table/bootstrap-table.js");
             }
             if (typeof _ === "undefined") {
                 $.getScript(host + "/js/underscore/underscore-min.js");
@@ -58,16 +58,16 @@ var gc2table = (function () {
                     typeof _ !== 'undefined' &&
                     typeof jRespond !== "undefined") {
                     if (typeof jQuery().bootstrapTable.locales['da-DK'] === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/bootstrap-table-locale-all.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/bootstrap-table-locale-all.js");
                     }
                     if (typeof jQuery().bootstrapTable.defaults.filterControl === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js");
                     }
                     if (typeof jQuery().bootstrapTable.defaults.exportDataType === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/extensions/export/bootstrap-table-export.min.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js");
                     }
                     if (typeof jQuery().tableExport === "undefined") {
-                        $.getScript(host + "/js/tableExport.jquery.plugin/tableExport.min.js");
+                        $.getScript(host + "/js/lib/tableExport.jquery.plugin/tableExport.js");
                     }
                     if (typeof Backbone === "undefined") {
                         $.getScript("https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js");

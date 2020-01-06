@@ -481,7 +481,6 @@ module.exports = {
 
                             // If any added layers, then add them
                             if (addedLayers.length > 0) {
-
                                 // @todo Review
                                 console.error(`Consider reviewing`);
 
@@ -505,6 +504,11 @@ module.exports = {
             if (selectedStateSnapshot) {
                 stateSnapshots.getSnapshotByID(selectedStateSnapshot).then((state) => {
                     if (state) {
+                        if (state.snapshot.map.layers.length === 0) {
+                            console.log("No active layers in snapshot");
+                        } else {
+                            console.log("Active layers in snapshot");
+                        }
                         this.applyState(state.snapshot).then(initResolve);
                     } else {
                         initializeFromHashPart();

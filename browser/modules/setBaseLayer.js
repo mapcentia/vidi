@@ -30,8 +30,6 @@ var _self = false;
 
 var failedLayers = [];
 
-var jquery = require('jquery');
-require('snackbarjs');
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}
@@ -122,7 +120,7 @@ module.exports = module.exports = {
 
                 // If 100 tiles fails within 10 secs the next base layer is chosen
                 if (numberOfErroredTiles > 100) {
-                    jquery.snackbar({
+                    $.snackbar({
                         content: `Base layer ${str} was loaded with errors (${numberOfErroredTiles} tiles failed to load), trying to load next layer`,
                         htmlAllowed: true,
                         timeout: 7000

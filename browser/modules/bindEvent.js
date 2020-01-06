@@ -28,9 +28,6 @@ let APIBridgeSingletone = require('./api-bridge');
  */
 var apiBridgeInstance = false;
 
-var jRespond = require('jrespond');
-
-
 require('dom-shims');
 require('arrive');
 
@@ -228,8 +225,9 @@ module.exports = {
                 backboneEvents.get().trigger("ready:meta");
                 state.init();
             }).then(() => {
-                layerTree.create();
+                layerTree.create(false, [], true);
                 state.init();
+
             });
         });
 

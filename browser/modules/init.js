@@ -11,8 +11,6 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
-let jquery = require('jquery');
-require('snackbarjs');
 
 const semver = require('semver');
 const md5 = require('md5');
@@ -200,7 +198,7 @@ module.exports = {
      *
      */
     startApp: function () {
-        let humanUsedTemplate = true;
+        let humanUsedTemplate = !(urlVars.px && urlVars.py);
         if (`tmpl` in urlVars) {
             let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
             if (`startupModalSupressionTemplates` in window.vidiConfig && Array.isArray(window.vidiConfig.startupModalSupressionTemplates)) {
@@ -317,7 +315,7 @@ module.exports = {
 
                     // Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./search/*.js', {glob: true});
+                        require('./search/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.searchModules !== "undefined") {
@@ -333,8 +331,10 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./../../extensions/!(vectorLayers)/browser/*.js', {glob: true});
-                        require('./../../extensions/!(vectorLayers)/browser/*/*.js', {glob: true});
+                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -421,7 +421,7 @@ module.exports = {
                         if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
                             if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
                                 (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
-                                jquery.snackbar({
+                                $.snackbar({
                                     id: "snackbar-conflict",
                                     content: `Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`,
                                     htmlAllowed: true,

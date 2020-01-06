@@ -37,6 +37,7 @@ module.exports = {
         "Search with this object": "Search with this object",
         "From drawing": "From drawing",
         "From object in layer": "From object in layer",
+        "Waiting to start": "Waiting to start",
 
         // Drawing
         "Cancel drawing": "Cancel drawing",

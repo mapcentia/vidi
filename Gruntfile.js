@@ -19,10 +19,10 @@ module.exports = function (grunt) {
 
     // Default build parameters
     let copyBootstrapVariablesCommand = 'cp ./config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-    let lessConfig = { "public/css/styles.css": "public/less/styles.default.less" };
+    let lessConfig = {"public/css/styles.css": "public/less/styles.default.less"};
     if (theme && theme === 'watsonc') {
         copyBootstrapVariablesCommand = 'cp ./extensions/' + theme + '/config/_variables.less ./public/js/lib/bootstrap-material-design/less';
-        lessConfig = { "public/css/styles.css": "public/less/styles." + theme + ".less" };
+        lessConfig = {"public/css/styles.css": "public/less/styles." + theme + ".less"};
     }
 
     grunt.initConfig({
@@ -83,11 +83,8 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet.toolbar/leaflet.toolbar.css',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
                         'public/js/lib/leaflet-history/leaflet-history.css',
-                        'public/js/lib/leaflet-measure/leaflet-measure.css',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
-                        'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
-                        'public/js/lib/q-cluster/css/q-cluster.css',
                         // Bootstrap
                         'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
@@ -170,7 +167,13 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify']
+                    browserifyOptions: {
+                        debug: false
+                    },
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify']
                 }
             },
             publish_sw: {
@@ -181,7 +184,10 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.production.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify']
                 }
             },
             publish_sw_dev: {
@@ -192,7 +198,10 @@ module.exports = function (grunt) {
                     alias: {
                         'urls-to-cache': './browser/service-worker/cache.development.js'
                     },
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify']
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify']
                 }
             },
             watch: {
@@ -200,7 +209,10 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
-                    transform: [['babelify', {presets: [['es2015'], ['react'], ['stage-0']], plugins: ["transform-object-rest-spread"]}], 'require-globify', 'windowify'],
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify', 'windowify'],
                     watch: true,
                     keepAlive: true,
                     browserifyOptions: {
@@ -214,65 +226,58 @@ module.exports = function (grunt) {
                 options: {
                     sourceMap: true,
                     sourceMapIncludeSources: true,
-                    compress: false
+                    compress: {
+                        dead_code: true,
+                        drop_debugger: true,
+                        global_defs: {
+                            "DEBUG": false
+                        },
+                    }
                 },
                 files: {
                     'public/js/build/all.min.js': [
                         'public/js/lib/leaflet/leaflet-src.js',
-                        'public/js/lib/leaflet-draw/leaflet.draw.js',
-                        'public/js/lib/Path.Drag.js/src/Path.Drag.js',
-                        'public/js/lib/leaflet.editable/Leaflet.Editable.js',
-                        'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
-                        'public/js/lib/leaflet.toolbar/leaflet.toolbar.js',
-                        'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
                         'public/js/lib/leaflet-history/leaflet-history.js',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.js',
-                        'public/js/lib/leaflet-measure/leaflet-measure.min.js',
+                        'public/js/lib/leaflet-draw/leaflet.draw.js',
+                        'public/js/lib/leaflet.locatecontrol/L.Control.Locate.js',
                         'public/js/lib/Leaflet.utfgrid/L.UTFGrid.js',
-                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
-                        'public/js/lib/leaflet-plugins/Yandex.js',
                         'public/js/lib/leaflet-plugins/Bing.js',
                         'public/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js',
-                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
-                        'public/js/lib/leaflet-glify/glify.js',
-                        'public/js/lib/q-cluster/src/utils.js',
-                        'public/js/lib/q-cluster/src/clustering.js',
-                        'public/js/point-clusterer.js',
-                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
-                        'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
-                        'public/js/lib/leaflet-snap/leaflet.snap.js',
+                        //'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
-                        'public/js/lib/jquery/jquery.js',
-                        'public/js/lib/jquery-ui/jquery-ui.min.js',
-                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
-                        'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
-                        'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
-                        'public/js/lib/jrespond/jRespond.js',
-                        'public/js/lib/mustache.js/mustache.js',
-                        'public/js/lib/handlebars/handlebars.js',
-                        'public/js/lib/underscore/underscore.js',
-                        'public/js/lib/backbone/backbone.js',
-                        'public/js/lib/momentjs/moment-with-locales.js',
-                        'public/js/lib/d3/d3.js',
                         'public/js/lib/localforage/localforage.js',
 
+                        'public/js/lib/jquery/jquery-3.4.1.min.js',
+                        'public/js/lib/jrespond/jRespond.js',
+                        'public/js/lib/mustache.js/mustache.js',
+                        'public/js/lib/underscore/underscore.js',
+                        'public/js/lib/backbone/backbone.js',
+                        'public/js/lib/proj4/proj4-combined.js',
+
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table.js',
-                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
-                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js',
-                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js',
-                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
-                        'public/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js',
-                        'public/js/lib/bootstrap-select/bootstrap-select.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
-                        'public/js/leaflet-easybutton/easy-button.js',
-                        'public/js/proj4js-combined.js',
                         'public/js/bundle.js',
                         'public/js/vidi.js',
+                    ],
+                    'public/js/build/all.async.min.js': [
+                        'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
+                        'public/js/lib/jquery.canvasResize.js/jquery.exif.js',
+                        'public/js/lib/leaflet-snap/leaflet.snap.js',
+                        'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
+                        'public/js/lib/leaflet.editable/Leaflet.Editable.js',
+                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
+                        'public/js/lib/Path.Drag.js/src/Path.Drag.js',
+                        'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
+                        'public/js/lib/jquery-ui/jquery-ui.min.js',
+                        'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
+                        'public/js/lib/snackbarjs/snackbar.min.js',
+                        'public/js/lib/jsts/jsts.min.js',
                     ]
                 }
             }
@@ -306,7 +311,7 @@ module.exports = function (grunt) {
         },
         cacheBust: {
             options: {
-                assets: ['js/build/all.min.js', 'css/build/all.min.css', 'js/templates.js'],
+                assets: ['js/build/all.min.js', 'js/build/all.async.min.js', 'css/build/all.min.css', 'js/templates.js'],
                 queryString: false,
                 baseDir: './public/',
                 jsonOutput: false,
@@ -334,7 +339,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function() {
+    grunt.registerTask('prepareAssets', 'Updates assets if specific modules are enabled', function () {
         if (theme && theme === 'watsonc') {
             fs.createReadStream('./extensions/watsonc/public/index.html').pipe(fs.createWriteStream('./public/index.html'));
             fs.createReadStream('./extensions/watsonc/public/favicon.ico').pipe(fs.createWriteStream('./public/favicon.ico'));
@@ -344,7 +349,7 @@ module.exports = function (grunt) {
         }
     });
 
-    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function() {
+    grunt.registerTask('appendBuildHashToVersion', 'Appends the build hash to the application version', function () {
         var crypto = require('crypto');
         var md5 = crypto.createHash('md5');
 
@@ -383,6 +388,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-version');
 
     grunt.registerTask('default', ['prepareAssets', 'browserify:publish', 'browserify:publish_sw_dev', 'extension-css', 'shell', 'hogan', 'version']);
-    grunt.registerTask('production', ['env', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production', ['env:prod', 'gitreset', 'hogan', 'prepareAssets', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
+    grunt.registerTask('production-test', ['env:prod', 'hogan', 'browserify:publish', 'browserify:publish_sw', 'extension-css', 'shell', 'uglify', 'processhtml', 'cssmin:build', 'cacheBust', 'version', 'appendBuildHashToVersion']);
     grunt.registerTask('extension-css', ['less', 'cssmin:extensions']);
 };

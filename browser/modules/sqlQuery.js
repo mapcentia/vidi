@@ -40,9 +40,6 @@ var db = urlparser.db;
 var JSONSchemaForm = require("react-jsonschema-form");
 const Form = JSONSchemaForm.default;
 
-var jquery = require('jquery');
-require('snackbarjs');
-
 var extensions;
 
 let _self = false;
@@ -332,7 +329,7 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $('#modal-info-body').hide();
-                            jquery.snackbar({
+                            $.snackbar({
                                 content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -527,9 +524,9 @@ module.exports = {
                                     subValue = atob(feature.properties[property.key]);
                                 }*/
                                 value =
-                                    `<a target='_blank' href='${subValue}'>
+                                    `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
                                         <img style='width:250px' src='${subValue}'/>
-                                     </a>`;
+                                     </div>`;
                             }
                         } else if (property.value.content && property.value.content === "video") {
                             if (!feature.properties[property.key]) {

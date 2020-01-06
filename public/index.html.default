@@ -3,7 +3,7 @@
   ~ @author     Martin Høgh <mh@mapcentia.com>
   ~ @copyright  2013-2019 MapCentia ApS
   ~ @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
-  ~ @version    2019.1
+  ~ @version    2019.1.0.rc3
   -->
 <html lang="en">
 <head>
@@ -11,8 +11,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="google" value="notranslate">
+    <meta name="Description" content="A platform for building spatial data infrastructure and deploying browser based GIS.">
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <link rel="mask-icon" href="/images/safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
     <!-- Preload fonts. -->
     <link rel="preload" href="/fonts/roboto-v18-latin-regular.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/fonts/roboto-v18-latin-500.woff2" as="font" type="font/woff2" crossorigin>
@@ -40,16 +47,14 @@
     <link rel="stylesheet" href="/js/lib/leaflet.locatecontrol/L.Control.Locate.css">
     <link rel="stylesheet" href="/js/lib/leaflet.toolbar/leaflet.toolbar.css">
     <link rel="stylesheet" href="/js/lib/leaflet-measure-path/leaflet-measure-path.css">
-    <link rel="stylesheet" href="/js/lib/leaflet-measure/leaflet-measure.css">
-    <link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>
+    <!--<link rel="stylesheet" href="/js/lib/leaflet-measure/leaflet-measure.css">-->
+    <!--<link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>-->
     <link rel="stylesheet" href="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css"/>
-    <link rel="stylesheet" href="/js/lib/q-cluster/css/q-cluster.css"/>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="/js/lib/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/ripples.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css">
-    <link rel="stylesheet" href="/js/lib/bootstrap-select/bootstrap-select.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-table/bootstrap-table.css"/>
     <link rel="stylesheet" href="/js/lib/bootstrap-material-design/dist/css/bootstrap-material-design.css">
     <link rel="stylesheet" href="/js/lib/bootstrap-colorpicker/css/bootstrap-colorpicker.css">
@@ -58,6 +63,9 @@
     <!-- /build -->
 </head>
 <body>
+<noscript>
+    <p>NO JAVASCRIPT, NO MAP!</p>
+</noscript>
 <div class="loadingIndicator">
     <div class="loadingIndicator__bar"></div>
 </div>
@@ -98,8 +106,8 @@
     }
 </script>
 <!-- Shim -->
-<script src="/js/lib/es5-shim/es5-shim.js"></script>
-<script src="/js/lib/es6-shim/es6-shim.js"></script>
+<!--<script src="/js/lib/es5-shim/es5-shim.js"></script>-->
+<!--<script src="/js/lib/es6-shim/es6-shim.js"></script>-->
 <!-- Dynamic js -->
 <script src="/locale"></script>
 <script src="/api/baselayer"></script>
@@ -110,54 +118,24 @@
 <script src="/js/lib/leaflet-history/leaflet-history.js"></script>
 <script src="/js/lib/leaflet-boxzoom/leaflet-boxzoom.js"></script>
 <script src="/js/lib/leaflet-draw/leaflet.draw.js"></script>
-<script src="/js/lib/Path.Drag.js/src/Path.Drag.js"></script>
-<script src="/js/lib/leaflet.editable/Leaflet.Editable.js"></script>
 <script src="/js/lib/leaflet.locatecontrol/L.Control.Locate.js"></script>
-<script src="/js/lib/leaflet.toolbar/leaflet.toolbar.js"></script>
-<script src="/js/lib/leaflet-measure-path/leaflet-measure-path.js"></script>
-<script src="/js/lib/leaflet-measure/leaflet-measure.min.js"></script>
 <script src="/js/lib/Leaflet.utfgrid/L.UTFGrid.js"></script>
-<script src="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js"></script>
-<script src="/js/lib/leaflet-plugins/Yandex.js"></script>
 <script src="/js/lib/leaflet-plugins/Bing.js"></script>
 <script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
-<script src="/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js"></script>
 <script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
-<script src="/js/lib/q-cluster/src/utils.js"></script>
-<script src="/js/lib/q-cluster/src/clustering.js"></script>
-<script src="/js/point-clusterer.js"></script>
-<script src="/js/lib/localforage/localforage.js"></script>
-<script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
-<script src="/js/lib/leaflet-geometryutil/leaflet.geometryutil.js"></script>
-<script src="/js/lib/leaflet-snap/leaflet.snap.js"></script>
 <script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
-<script src="/js/lib/leaflet-glify/glify.js"></script>
-
+<script src="/js/lib/localforage/localforage.js"></script>
 <!-- Core -->
-<script src="/js/lib/jquery/jquery.js"></script>
-<script src="/js/lib/jquery-ui/jquery-ui.min.js"></script>
-<script src="/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js"></script>
-<script src="/js/lib/jquery.canvasResize.js/jquery.canvasResize.js"></script>
-<script src="/js/lib/jquery.canvasResize.js/jquery.exif.js"></script>
+<script src="/js/lib/jquery/jquery-3.4.1.min.js"></script>
 <script src="/js/lib/jrespond/jRespond.js"></script>
 <script src="/js/lib/mustache.js/mustache.js"></script>
-<script src="/js/lib/handlebars/handlebars.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
-<script src="/js/lib/momentjs/moment-with-locales.js"></script>
-<script src="/js/lib/d3/d3.js"></script>
-<script src="/js/proj4js-combined.js"></script>
+<script src="/js/lib/proj4/proj4-combined.js"></script>
 <!-- Bootstrap -->
 <script src="/js/lib/typeahead.js/typeahead.jquery.js"></script>
-<script src="/js/lib/bootstrap-table/bootstrap-table.js"></script>
-<script src="/js/lib/bootstrap-table/bootstrap-table-locale-all.js"></script>
-<script src="/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js"></script>
-<script src="/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
-<script src="/js/lib/tableExport.jquery.plugin/tableExport.js"></script>
 <script src="/js/lib/bootstrap-material-design/dist/js/ripples.js"></script>
 <script src="/js/lib/bootstrap-material-design/dist/js/material.js"></script>
-<script src="/js/lib/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js"></script>
-<script src="/js/lib/bootstrap-select/bootstrap-select.js"></script>
 <script src="/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
@@ -167,5 +145,7 @@
 <script>
     window.MapCentia = new Vidi().init.init();
 </script>
+<!-- Async load Javascript -->
+<script src="/js/build/all.async.min.js" async></script>
 </body>
 </html>

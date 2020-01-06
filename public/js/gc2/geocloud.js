@@ -73,7 +73,7 @@ geocloud = (function () {
         HERESATELLITEDAY = "hereSatelliteDay",
         HEREHYBRIDDAY = "hereHybridDay",
 
-        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
+        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' rel='noopener' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
             4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
             152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
@@ -109,7 +109,7 @@ geocloud = (function () {
         visibility: true,
         lifetime: 0,
         host: host,
-        uri: "/api/v1/sql",
+        uri: "/api/v2/sql",
         db: null,
         sql: null,
         q: null,
@@ -231,6 +231,7 @@ geocloud = (function () {
         this.custom_data = this.defaults.custom_data;
         this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
         this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
+        this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
 
@@ -252,7 +253,7 @@ geocloud = (function () {
                 }
 
                 // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
-                var extendedBounds = map.getBounds().pad(1);
+                var extendedBounds = map.getBounds().pad(0.3);
                 this.buffered_bbox = extendedBounds;
 
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
@@ -298,10 +299,12 @@ geocloud = (function () {
                                     console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
                                     me.geoJSON.features = [];
                                     response.features = [];
+                                    me.featuresLimitReached = true;
                                     me.onMaxFeaturesLimitReached();
                                 }
+                            } else {
+                                me.featuresLimitReached = false;
                             }
-
                             me.layer.addData(response);
                         } else {
                             me.geoJSON = null;
@@ -638,7 +641,7 @@ geocloud = (function () {
                 async: this.async,
                 jsonp: (this.jsonp) ? 'jsonp_callback' : false,
                 data: 'q=' + encodeURIComponent(q) + "&size=" + this.size,
-                url: this.defaults.host + '/api/v1/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
+                url: this.defaults.host + '/api/v2/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
                 success: function (response) {
                     if (typeof response.error !== "undefined") {
                         return false;
@@ -1344,7 +1347,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.mapQuestOSM = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 20,
                         maxNativeZoom: 18
                     });
@@ -1402,7 +1405,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.osm = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 21,
                         maxNativeZoom: 18
                     });
@@ -2799,9 +2802,9 @@ geocloud = (function () {
                 "maxZoom": maxZoom,
                 "attribution": [
                     'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
-                    'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
+                    'Data by <a rel="noopener" href="http://openstreetmap.org">OpenStreetMap</a>, ',
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
                 ].join("")
             };
         },

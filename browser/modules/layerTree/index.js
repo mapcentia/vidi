@@ -10,7 +10,15 @@
 
 'use strict';
 
-import {LOG, SUB_GROUP_DIVIDER, MODULE_NAME, VIRTUAL_LAYERS_SCHEMA, SYSTEM_FIELD_PREFIX, LAYER, ICONS} from './constants';
+import {
+    LOG,
+    SUB_GROUP_DIVIDER,
+    MODULE_NAME,
+    VIRTUAL_LAYERS_SCHEMA,
+    SYSTEM_FIELD_PREFIX,
+    LAYER,
+    ICONS
+} from './constants';
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -20,7 +28,6 @@ var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], on
 const uuidv4 = require('uuid/v4');
 var React = require('react');
 var ReactDOM = require('react-dom');
-require('snackbarjs');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
@@ -553,7 +560,17 @@ module.exports = {
     },
 
     /**
+     * Applies externally provided filters
+     * @param filters
+     */
+    applyFilters: (filters) => {
+        moduleState.arbitraryFilters = filters;
+    },
+
+    /**
      * Applies externally provided state
+     * @param newState
+     * @returns {newState}
      */
     applyState: (newState) => {
         // Setting vector filters
@@ -561,7 +578,6 @@ module.exports = {
             for (let key in newState.arbitraryFilters) {
                 validateFilters(newState.arbitraryFilters[key]);
             }
-
             moduleState.arbitraryFilters = newState.arbitraryFilters;
         } else {
             moduleState.arbitraryFilters = {};
@@ -625,7 +641,7 @@ module.exports = {
      *
      * @returns {Promise}
      */
-    create: (forcedState = false, ignoredInitialStateKeys = []) => {
+    create: (forcedState = false, ignoredInitialStateKeys = [], dontRegisterEvents = false) => {
         if (LOG) console.log(`${MODULE_NAME}: create`, moduleState.isBeingBuilt, forcedState);
 
         queueStatistsics.setLastStatistics(false);
@@ -688,67 +704,72 @@ module.exports = {
          * Some vector layer needs to be reloaded when the map view is changed if the dynamic
          * loading is enabled for the layer.
          */
-        cloud.get().on(`moveend`, () => {
-            let activeLayers = _self.getActiveLayers();
+        if (!dontRegisterEvents) {
+            cloud.get().on(`moveend`, () => {
+                let activeLayers = _self.getActiveLayers();
 
-            let stores = [];
-            for (let layerKey in moduleState.vectorStores) {
-                stores[layerKey] = moduleState.vectorStores[layerKey];
-            }
-
-            for (let layerKey in moduleState.webGLStores) {
-                stores[layerKey] = moduleState.webGLStores[layerKey];
-            }
-
-            for (let layerKey in stores) {
-                let layerIsEnabled = false;
-                let layerPrefix = ``;
-                for (let i = 0; i < activeLayers.length; i++) {
-                    if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
-                        if (activeLayers[i].indexOf(`:`) > -1) {
-                            layerPrefix = activeLayers[i].split(`:`)[0];
-                        }
-
-                        layerIsEnabled = true;
-                        break;
-                    }
+                let stores = [];
+                for (let layerKey in moduleState.vectorStores) {
+                    stores[layerKey] = moduleState.vectorStores[layerKey];
                 }
 
-                if (layerIsEnabled) {
-                    let localTypeStores = false;
-                    if (layerPrefix === LAYER.VECTOR) {
-                        localTypeStores = moduleState.vectorStores;
-                    } else if (layerPrefix === LAYER.WEBGL) {
-                        localTypeStores = moduleState.webGLStores;
-                    }
+                for (let layerKey in moduleState.webGLStores) {
+                    stores[layerKey] = moduleState.webGLStores[layerKey];
+                }
 
-                    let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
-                    let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
-                    let parsedMeta = _self.parseLayerMeta(layerDescription);
-
-                    // Reload should always occur except times when current bbox is completely inside
-                    // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
-                    let needToReload;
-                    if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
-                        || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
-                        needToReload = true;
-                        let currentMapBBox = cloud.get().map.getBounds();
-                        if (`buffered_bbox` in localTypeStores[layerKey]) {
-                            if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
-                                needToReload = false;
+                for (let layerKey in stores) {
+                    let layerIsEnabled = false;
+                    let layerPrefix = ``;
+                    for (let i = 0; i < activeLayers.length; i++) {
+                        if (layerTreeUtils.stripPrefix(activeLayers[i]) === layerTreeUtils.stripPrefix(layerKey)) {
+                            if (activeLayers[i].indexOf(`:`) > -1) {
+                                layerPrefix = activeLayers[i].split(`:`)[0];
                             }
+
+                            layerIsEnabled = true;
+                            break;
                         }
-                    } else {
-                        needToReload = false;
                     }
 
-                    if (needToReload) {
-                        localTypeStores[layerKey].abort();
-                        localTypeStores[layerKey].load();
+                    if (layerIsEnabled) {
+                        let localTypeStores = false;
+                        if (layerPrefix === LAYER.VECTOR) {
+                            localTypeStores = moduleState.vectorStores;
+                        } else if (layerPrefix === LAYER.WEBGL) {
+                            localTypeStores = moduleState.webGLStores;
+                        }
+
+                        let layerKeyNoPrefix = layerTreeUtils.stripPrefix(layerKey);
+                        let layerDescription = meta.getMetaByKey(layerKeyNoPrefix);
+                        let parsedMeta = _self.parseLayerMeta(layerDescription);
+
+                        // Reload should always occur except times when current bbox is completely inside
+                        // of the previously requested bbox (extended one in gc2cloud.js) kept in corresponding store
+                        let needToReload;
+                        if ((parsedMeta && `load_strategy` in parsedMeta && parsedMeta.load_strategy === `d`)
+                            || (layerKeyNoPrefix in moduleState.dynamicLoad && moduleState.dynamicLoad[layerKeyNoPrefix] === true)) {
+                            needToReload = true;
+                            let currentMapBBox = cloud.get().map.getBounds();
+                            if (`buffered_bbox` in localTypeStores[layerKey]) {
+                                if (localTypeStores[layerKey].buffered_bbox === false || localTypeStores[layerKey].buffered_bbox && localTypeStores[layerKey].buffered_bbox.contains(currentMapBBox)) {
+                                    needToReload = false;
+                                }
+                                if (localTypeStores[layerKey].featuresLimitReached) {
+                                    needToReload = true;
+                                }
+                            }
+                        } else {
+                            needToReload = false;
+                        }
+
+                        if (needToReload) {
+                            localTypeStores[layerKey].abort();
+                            localTypeStores[layerKey].load();
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         let result = false;
         if (moduleState.isBeingBuilt) {
@@ -1237,7 +1258,7 @@ module.exports = {
      * @return {void}
      */
     maxFeaturesNotification: (layerKey) => {
-        jquery.snackbar({
+        $.snackbar({
             id: "snackbar-watsonc",
             content: `<span id="conflict-progress">${__("max_number_of_loaded_features_was_reached_notification")} (${layerKey})</span>`,
             htmlAllowed: true,
@@ -1692,6 +1713,7 @@ module.exports = {
                                         break;
                                     case `date`:
                                     case `timestamp with time zone`:
+                                    case `timestamp with timeout zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
@@ -1700,6 +1722,7 @@ module.exports = {
                                         break;
                                     case `text`:
                                     case `string`:
+                                    case `character`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
@@ -1712,7 +1735,12 @@ module.exports = {
                                         }
 
                                         break;
+                                    case `smallint`:
                                     case `integer`:
+                                    case `bigint`:
+                                    case `decimal`:
+                                    case `numeric`:
+                                    case `real`:
                                     case `double precision`:
                                         if (EXPRESSIONS_FOR_NUMBERS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);

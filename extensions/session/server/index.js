@@ -44,7 +44,7 @@ var start = function (u, p, s, d, req, response, status) {
         headers: {'content-type': 'application/json'},
         method: 'POST',
         uri: config.gc2.host + "/api/v2/session/start",
-        form: JSON.stringify(postData)
+        body: JSON.stringify(postData)
     };
 
     request(options, function (err, res, body) {

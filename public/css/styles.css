@@ -1483,3 +1483,6 @@ td.rdtYear:hover {
   margin-top: 0;
   font-size: 18px;
 }
+#editor-attr-dialog img {
+  max-width: 300px !important;
+}

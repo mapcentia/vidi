@@ -15,8 +15,6 @@ var utils;
 var backboneEvents;
 var sessionInstance = false;
 
-var jquery = require('jquery');
-require('snackbarjs');
 
 var exId = `login-modal-body`;
 var autoLogin = false; // Auto login is insecure and sets cookie with login creds.

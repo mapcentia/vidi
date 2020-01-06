@@ -57,10 +57,11 @@ module.exports = {
         return this;
     },
     init: function (onLoad, el, onlyAddress, getProperty) {
-        var type1, type2, type3, type4, gids = [], searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2,
+        var type1, type2, type3, type4, gids = [], searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
-            esrSearchActive = typeof(window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
-            sfeSearchActive = typeof(window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+            esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
+            sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
+            size = typeof (window.vidiConfig.searchConfig.size) !== "undefined" ? window.vidiConfig.searchConfig.size : 10;
 
         // adjust search text
         var searchTxt = "Adresse, matr. nr.";
@@ -158,10 +159,7 @@ module.exports = {
                 });
             });
         }
-
-        $("#" + el).typeahead({
-            highlight: false
-        }, {
+        let standardSearches = [{
             name: 'adresse',
             displayKey: 'value',
             templates: {
@@ -183,7 +181,7 @@ module.exports = {
                         case "vejnavn,bynavn":
                             dsl1 = {
                                 "from": 0,
-                                "size": 20,
+                                "size": size,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -204,7 +202,7 @@ module.exports = {
                                     "properties.postnrnavn": {
                                         "terms": {
                                             "field": "properties.postnrnavn",
-                                            "size": 20,
+                                            "size": size,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -213,19 +211,19 @@ module.exports = {
                                             "properties.postnr": {
                                                 "terms": {
                                                     "field": "properties.postnr",
-                                                    "size": 20
+                                                    "size": size
                                                 },
                                                 "aggregations": {
                                                     "properties.kommunekode": {
                                                         "terms": {
                                                             "field": "properties.kommunekode",
-                                                            "size": 20
+                                                            "size": size
                                                         },
                                                         "aggregations": {
                                                             "properties.regionskode": {
                                                                 "terms": {
                                                                     "field": "properties.regionskode",
-                                                                    "size": 20
+                                                                    "size": size
                                                                 }
                                                             }
                                                         }
@@ -238,7 +236,7 @@ module.exports = {
                             };
                             dsl2 = {
                                 "from": 0,
-                                "size": 20,
+                                "size": size,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -259,7 +257,7 @@ module.exports = {
                                     "properties.vejnavn": {
                                         "terms": {
                                             "field": "properties.vejnavn",
-                                            "size": 20,
+                                            "size": size,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -268,13 +266,13 @@ module.exports = {
                                             "properties.kommunekode": {
                                                 "terms": {
                                                     "field": "properties.kommunekode",
-                                                    "size": 20
+                                                    "size": size
                                                 },
                                                 "aggregations": {
                                                     "properties.regionskode": {
                                                         "terms": {
                                                             "field": "properties.regionskode",
-                                                            "size": 20
+                                                            "size": size
                                                         }
                                                     }
                                                 }
@@ -287,7 +285,7 @@ module.exports = {
                         case "vejnavn_bynavn":
                             dsl1 = {
                                 "from": 0,
-                                "size": 20,
+                                "size": size,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -308,7 +306,7 @@ module.exports = {
                                     "properties.vejnavn": {
                                         "terms": {
                                             "field": "properties.vejnavn",
-                                            "size": 20,
+                                            "size": size,
                                             "order": {
                                                 "_term": "asc"
                                             }
@@ -317,19 +315,19 @@ module.exports = {
                                             "properties.postnrnavn": {
                                                 "terms": {
                                                     "field": "properties.postnrnavn",
-                                                    "size": 20
+                                                    "size": size
                                                 },
                                                 "aggregations": {
                                                     "properties.kommunekode": {
                                                         "terms": {
                                                             "field": "properties.kommunekode",
-                                                            "size": 20
+                                                            "size": size
                                                         },
                                                         "aggregations": {
                                                             "properties.regionskode": {
                                                                 "terms": {
                                                                     "field": "properties.regionskode",
-                                                                    "size": 10
+                                                                    "size": size
                                                                 }
                                                             }
                                                         }
@@ -344,7 +342,7 @@ module.exports = {
                         case "adresse":
                             dsl1 = {
                                 "from": 0,
-                                "size": 20,
+                                "size": size,
                                 "query": {
                                     "bool": {
                                         "must": {
@@ -393,6 +391,8 @@ module.exports = {
                         success: function (response) {
                             if (response.hits === undefined) return;
                             if (type1 === "vejnavn,bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.postnrnavn"] === undefined) return;
                                 $.each(response.aggregations["properties.postnrnavn"].buckets, function (i, hit) {
                                     var str = hit.key;
                                     names.push({value: str});
@@ -406,8 +406,9 @@ module.exports = {
                                     type: "POST",
                                     success: function (response) {
                                         if (response.hits === undefined) return;
-
                                         if (type1 === "vejnavn,bynavn") {
+                                            if (response.aggregations === undefined) return;
+                                            if (response.aggregations["properties.vejnavn"] === undefined) return;
                                             $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
                                                 var str = hit.key;
                                                 names.push({value: str});
@@ -425,6 +426,8 @@ module.exports = {
                                     }
                                 })
                             } else if (type1 === "vejnavn_bynavn") {
+                                if (response.aggregations === undefined) return;
+                                if (response.aggregations["properties.vejnavn"] === undefined) return;
                                 $.each(response.aggregations["properties.vejnavn"].buckets, function (i, hit) {
                                     var str = hit.key;
                                     $.each(hit["properties.postnrnavn"].buckets, function (m, n) {
@@ -479,7 +482,7 @@ module.exports = {
                             case "jordstykke":
                                 dslM = {
                                     "from": 0,
-                                    "size": 20,
+                                    "size": size,
                                     "query": {
                                         "bool": {
                                             "must": {
@@ -518,7 +521,7 @@ module.exports = {
                             case "ejerlav":
                                 dslM = {
                                     "from": 0,
-                                    "size": 20,
+                                    "size": size,
                                     "query": {
                                         "bool": {
                                             "must": {
@@ -542,13 +545,13 @@ module.exports = {
                                                 "order": {
                                                     "_term": "asc"
                                                 },
-                                                "size": 20
+                                                "size": size
                                             },
                                             "aggregations": {
                                                 "properties.kommunekode": {
                                                     "terms": {
                                                         "field": "properties.kommunekode",
-                                                        "size": 20
+                                                        "size": size
                                                     }
                                                 }
                                             }
@@ -568,6 +571,8 @@ module.exports = {
                             success: function (response) {
                                 if (response.hits === undefined) return;
                                 if (type2 === "ejerlav") {
+                                    if (response.aggregations === undefined) return;
+                                    if (response.aggregations["properties.ejerlavsnavn"] === undefined) return;
                                     $.each(response.aggregations["properties.ejerlavsnavn"].buckets, function (i, hit) {
                                         var str = hit.key;
                                         names.push({value: str});
@@ -616,7 +621,7 @@ module.exports = {
                                 case "esr_nr":
                                     dslM = {
                                         "from": 0,
-                                        "size": 100,
+                                        "size": size,
                                         "query": {
                                             "bool": {
                                                 "must": {
@@ -683,7 +688,7 @@ module.exports = {
                                 case "sfe_nr":
                                     dslM = {
                                         "from": 0,
-                                        "size": 100,
+                                        "size": size,
                                         "query": {
                                             "bool": {
                                                 "must": {
@@ -733,10 +738,76 @@ module.exports = {
                     }
                 }
             }
-        });
+        }];
+        let extraSearchesNames = [];
+        let extraSearchesObj = {};
+        if (typeof (window.vidiConfig.searchConfig.extraSearches) !== "undefined") {
+            window.vidiConfig.searchConfig.extraSearches.forEach((v) => {
+                extraSearchesNames.push(v.name);
+                extraSearchesObj[v.name] = v;
+                standardSearches.push(
+                    {
+                        name: v.name,
+                        displayKey: 'value',
+                        templates: {
+                            header: '<h2 class="typeahead-heading">' + v.heading + '</h2>'
+                        },
+                        source: function (query, cb) {
+                            var names = [];
+                            (function ca() {
+
+                                let dsl = {
+                                    "from": 0,
+                                    "size": size,
+                                    "query": {
+                                        "bool": {
+                                            "must": {
+                                                "query_string": {
+                                                    "default_field": "properties." + v.index.field,
+                                                    "query": query.toLowerCase(),
+                                                    "default_operator": "AND"
+                                                }
+                                            }
+                                        }
+                                    }
+                                };
+                                $.ajax({
+                                    url: v.host + '/api/v2/elasticsearch/search/' + v.db + '/' + v.index.name,
+                                    data: JSON.stringify(dsl),
+                                    contentType: "application/json; charset=utf-8",
+                                    scriptCharset: "utf-8",
+                                    dataType: 'json',
+                                    type: "POST",
+                                    success: function (response) {
+                                        if (response.hits === undefined) return;
+                                        $.each(response.hits.hits, function (i, hit) {
+                                            var str = hit._source.properties[v.index.field];
+                                            names.push({value: str});
+                                            gids[str] = hit._source.properties[v.index.key];
+
+                                        });
+                                        names.sort(function (a, b) {
+                                            return a.value - b.value
+                                        });
+                                        cb(names);
+                                    }
+                                })
+                            })();
+                        }
+                    }
+                )
+            });
+        }
+        $("#" + el).typeahead({
+            highlight: false
+        }, ...standardSearches);
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
+            console.log(extraSearchesNames)
+            console.log(name)
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
-                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")) {
+                || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
+                || extraSearchesNames.indexOf(name) !== -1
+            ) {
                 placeStore.reset();
                 switch (name) {
                     case "esr_ejdnr" :
@@ -773,6 +844,13 @@ module.exports = {
                             placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
                         }
                         searchString = datum.value;
+                        placeStore.load();
+                        break;
+                    default: // Extra searches
+                        placeStore.db = extraSearchesObj[name].db;
+                        placeStore.host = extraSearchesObj[name].host;
+                        searchString = datum.value;
+                        placeStore.sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key +"='" + gids[datum.value] + "'";
                         placeStore.load();
                         break;
 

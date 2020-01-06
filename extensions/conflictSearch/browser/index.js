@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -28,7 +28,7 @@ var utils;
  *
  * @type {*|exports|module.exports}
  */
-var search = require('./../../../browser/modules/search/danish');
+var search;
 
 /**
  *
@@ -41,12 +41,6 @@ var backboneEvents;
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./../../../browser/modules/urlparser');
-
-/**
- *
- * @type {exports|module.exports}
- */
-var jsts = require('jsts');
 
 /**
  *
@@ -166,10 +160,6 @@ var Terraformer = require('terraformer-wkt-parser');
 
 var _result;
 
-
-var jquery = require('jquery');
-require('snackbarjs');
-
 /**
  *
  * @private
@@ -263,6 +253,14 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
         print = o.print;
+
+        // Hack to compile Glob files. Don´t call this function!
+        function ಠ_ಠ() {
+            require('./../../../browser/modules/search/*.js', {glob: true});
+        }
+
+        search = require('./../../../browser/modules/search/' + window.vidiConfig.enabledSearch + '.js');
+        search.set(o);
         return this;
     },
 
@@ -594,9 +592,9 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            jquery.snackbar({
+            $.snackbar({
                 id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>",
+                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
                 htmlAllowed: true,
                 timeout: 1000000
             });
@@ -623,10 +621,10 @@ module.exports = module.exports = {
                     data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
                     success: function (response) {
-                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin;
+                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
                         _result = response;
                         setTimeout(function () {
-                            jquery("#snackbar-conflict").snackbar("hide");
+                            $("#snackbar-conflict").snackbar("hide");
                         }, 200);
                         $("#spinner span").hide();
                         $("#result-origin").html(response.text);
@@ -636,6 +634,33 @@ module.exports = module.exports = {
                         fileId = response.file;
                         searchFinish = true;
                         resultOrigin = response.text || "Na";
+
+                        $.each(response.hits, function (i, v) {
+                            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
+                            groups.push(v.meta.layergroup);
+                        });
+                        groups = array_unique(groups.reverse());
+
+                        for (let i = 0; i < groups.length; ++i) {
+                            row = "<tr><td><span class='badge'>" + groups[i] + "</span></td><td></td><td></td></tr>";
+                            hitsTable.append(row);
+                            var count = 0;
+                            $.each(response.hits, function (u, v) {
+                                if (v.hits > 0) {
+                                    let metaData = v.meta;
+                                    if (metaData.layergroup === groups[i]) {
+                                        count++;
+                                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
+                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                                        hitsTable.append(row);
+                                    }
+                                }
+                            });
+                            // Remove empty groups
+                            if (count === 0) {
+                                hitsTable.find("tr").last().remove();
+                            }
+                        };
                         $.each(response.hits, function (i, v) {
                                 var table = i, table1, table2, tr, td, title, metaData = v.meta;
                                 title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
@@ -645,11 +670,24 @@ module.exports = module.exports = {
                                     }
                                     row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                                     if (v.hits > 0) {
-                                        hitsTable.append(row);
+                                        //hitsTable.append(row);
                                         hitsCount++;
                                         if (v.data.length > 0) {
                                             table1 = $("<table class='table table-data'/>");
                                             hitsData.append("<h3>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h3>");
+                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
+                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                            }
+                                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer) {
+                                                $(`<i style="cursor: pointer; color: #999999">mere...</i>`).appendTo(hitsData).on("click", function () {
+                                                    $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333">
+                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                                                        </div>`);
+                                                });
+                                                $(`<div></div>`).appendTo(hitsData);
+                                            }
+                                            ;
                                             $.each(v.data, function (u, row) {
                                                 var key = null, fid = null;
                                                 tr = $("<tr/>");
@@ -712,7 +750,7 @@ module.exports = module.exports = {
                         }
                     },
                     error: function () {
-                        jquery("#snackbar-conflict").snackbar("hide");
+                        $("#snackbar-conflict").snackbar("hide");
                     }
                 })
             })
@@ -785,45 +823,29 @@ var dom = `
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
+                                <div class="alert alert-info" role="alert">Liste med lag, som blev fundet i søgningen.</div>
                                 <div id="hits">
                                     <table class="table table-hover">
-                                        <thead>
-                                        <tr>
-                                            <th>Layer</th>
-                                            <th>Number of objects</th>
-                                            <th>Show</th>
-                                        </tr>
-                                        </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">
+                                <div class="alert alert-info" role="alert">Data fra fundne lag.</div>
                                 <div id="hits-data"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">
+                                <div class="alert alert-info" role="alert">Liste med lag, som IKKE blev fundet i søgningen.</div>
                                 <div id="nohits">
                                     <table class="table table-hover">
-                                        <thead>
-                                        <tr>
-                                            <th>Layer</th>
-                                            <th>Number of objects</th>
-                                            <th>Show</th>
-                                        </tr>
-                                        </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">
+                                <div class="alert alert-info" role="alert">Lag som udløste en fejl i søgningen.</div>
                                 <div id="error">
                                     <table class="table table-hover">
-                                        <thead>
-                                        <tr>
-                                            <th>Layer</th>
-                                            <th>Severity</th>
-                                        </tr>
-                                        </thead>
                                         <tbody></tbody>
                                     </table>
                                 </div>
