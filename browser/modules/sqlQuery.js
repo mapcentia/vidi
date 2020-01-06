@@ -525,7 +525,7 @@ module.exports = {
                                 }*/
                                 value =
                                     `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='width:250px' src='${subValue}'/>
+                                        <img style='width:100%' src='${subValue}'/>
                                      </div>`;
                             }
                         } else if (property.value.content && property.value.content === "video") {
@@ -534,7 +534,7 @@ module.exports = {
                             } else {
                                 let subValue = feature.properties[property.key];
                                 value =
-                                    `<video width="250" controls>
+                                    `<video width="100%" controls>
                                         <source src="${subValue}" type="video/mp4">
                                         <source src="${subValue}" type="video/ogg">
                                         <source src="${subValue}" type="video/webm">
