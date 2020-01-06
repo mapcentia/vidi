@@ -6,8 +6,6 @@
 
 'use strict';
 
-Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32N +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
-
 module.exports = {
     set: function () {
         return this;
@@ -86,7 +84,7 @@ module.exports = {
     },
 
     transform: function (from, to, coordinates) {
-        return Proj4js(from, to, coordinates);
+        return proj4(from, to, coordinates);
     },
 
     popupCenter: function (url, width, height, name) {
