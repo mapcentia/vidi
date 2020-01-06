@@ -687,8 +687,8 @@ module.exports = {
     // Set a width for video elements in popups
     // Should be a string with units - defaults to '250px'
     // ========================================
-
-    "popupVideoWidth": "350px",
+    
+    //"popupVideoWidth": "350px",
 
     
     // ========================================
@@ -696,7 +696,7 @@ module.exports = {
     // Should be a string with units - defaults to '100%'
     // ========================================
 
-    "popupImageWidth": "350px",
+    //"popupImageWidth": "350px",
 
 
     // ===================================================
