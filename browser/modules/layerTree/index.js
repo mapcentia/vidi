@@ -59,6 +59,8 @@ import OfflineModeControlsManager from './OfflineModeControlsManager';
 
 let offlineModeControlsManager = false;
 
+let moveEndEvent = ()=>{};
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -705,7 +707,8 @@ module.exports = {
          * loading is enabled for the layer.
          */
         if (!dontRegisterEvents) {
-            cloud.get().on(`moveend`, () => {
+            cloud.get().map.off(`moveend`, moveEndEvent);
+            moveEndEvent = () => {
                 let activeLayers = _self.getActiveLayers();
 
                 let stores = [];
@@ -768,7 +771,8 @@ module.exports = {
                         }
                     }
                 }
-            });
+            }
+            cloud.get().map.on(`moveend`, moveEndEvent);
         }
 
         let result = false;
