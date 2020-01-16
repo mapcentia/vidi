@@ -19,6 +19,8 @@ const exId = `state-snapshots`;
 
 let customSetOfTitles = false;
 
+let extensions;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init}}

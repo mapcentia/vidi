@@ -1362,6 +1362,8 @@ module.exports = {
             onLoad: (l) => {
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
+                // We fire activeLayersChange event on load, so we are sure state is updated
+                backboneEvents.get().trigger(`${MODULE_NAME}:activeLayersChange`);
                 if (typeof onLoad[LAYER.VECTOR + ':' + layerKey] === "function") {
                     onLoad[LAYER.VECTOR + ':' + layerKey](l);
                 }
