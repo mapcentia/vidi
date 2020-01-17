@@ -178,6 +178,9 @@ module.exports = {
             let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
                 && metaDataKeys[value].fieldconf !== "")
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
+
+            console.log(parsedMeta);
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
@@ -202,6 +205,8 @@ module.exports = {
                     isEmpty = layerObj.isEmpty();
 
                     template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+
+                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
