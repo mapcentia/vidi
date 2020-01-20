@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [Unreleased]
 ### Changed
 - Custom searches can now be added to danish search module.
+- `embed.js` will wait with rendering the map until target element is visible in the DOM, so Vidi is not started in element without width and height.
 
 ## [2019.1.0] - 2019-20-12
 ### Added
