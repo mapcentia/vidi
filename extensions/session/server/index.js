@@ -109,7 +109,7 @@ var start = function (u, p, s, d, req, response, status) {
             resBody.password = postData.password;
             resBody.schema = postData.schema;
             response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
-                maxAge: 900000,
+                maxAge: autoLoginMaxAge,
                 httpOnly: true
             });
         }
