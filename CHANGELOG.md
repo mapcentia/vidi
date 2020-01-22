@@ -7,7 +7,36 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [Unreleased]
 ### Changed
 - Custom searches can now be added to danish search module.
-- `embed.js` will wait with rendering the map until target element is visible in the DOM, so Vidi is not started in element without width and height.
+- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
+- Its now possible to add custom extra searches to `danish.js`. A search needs a Elasticsearch index, which must have a id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
+```javascript
+{
+    searchConfig: {
+        size: 4,
+        komkode: "*",
+        esrSearchActive: true,
+        sfeSearchActive: true, // Example of config for danish search
+        extraSearches: [,{
+            name: "stednavne_search",
+            db: "dk",
+            host: "https://dk.gc2.io",
+            heading: "Stednavne",
+            index: {
+                name: "stednavne/navne_samlet",
+                field: "string",
+                key: "gid",
+
+            },
+            relation: {
+                name: "stednavne.navne_samlet_geom",
+                key: "gid",
+                geom: "the_geom"
+            }
+        }]
+
+    }
+}
+``` 
 
 ## [2019.1.0] - 2019-20-12
 ### Added
