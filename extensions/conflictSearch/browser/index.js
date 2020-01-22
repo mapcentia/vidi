@@ -642,7 +642,7 @@ module.exports = module.exports = {
                         groups = array_unique(groups.reverse());
 
                         for (let i = 0; i < groups.length; ++i) {
-                            row = "<tr><td><span class='badge'>" + groups[i] + "</span></td><td></td><td></td></tr>";
+                            row = "<tr><td><h5>" + groups[i] + "</h5></td><td></td><td></td></tr>";
                             hitsTable.append(row);
                             var count = 0;
                             $.each(response.hits, function (u, v) {
@@ -674,13 +674,13 @@ module.exports = module.exports = {
                                         hitsCount++;
                                         if (v.data.length > 0) {
                                             table1 = $("<table class='table table-data'/>");
-                                            hitsData.append("<h3>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h3>");
+                                            hitsData.append("<h5>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
                                             let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                                             if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                                             }
                                             if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer) {
-                                                $(`<i style="cursor: pointer; color: #999999">mere...</i>`).appendTo(hitsData).on("click", function () {
+                                                $(`<i style="cursor: pointer; color: #999999">Beskrivelse...</i>`).appendTo(hitsData).on("click", function () {
                                                     $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333">
                                                                             <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
                                                                         </div>`);
@@ -799,7 +799,10 @@ var dom = `
 
                     <div class="btn-toolbar bs-component" style="margin: 0;">
                         <div class="btn-group">
-                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> Print rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                        </div>
+                        <div class="btn-group">
+                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
                         </div>
                         <fieldset disabled id="conflict-get-print-fieldset">
                             <div class="btn-group">
@@ -823,7 +826,6 @@ var dom = `
                         </ul>
                         <div class="tab-content">
                             <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
-                                <div class="alert alert-info" role="alert">Liste med lag, som blev fundet i søgningen.</div>
                                 <div id="hits">
                                     <table class="table table-hover">
                                         <tbody></tbody>
@@ -831,11 +833,9 @@ var dom = `
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">
-                                <div class="alert alert-info" role="alert">Data fra fundne lag.</div>
                                 <div id="hits-data"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">
-                                <div class="alert alert-info" role="alert">Liste med lag, som IKKE blev fundet i søgningen.</div>
                                 <div id="nohits">
                                     <table class="table table-hover">
                                         <tbody></tbody>
@@ -843,7 +843,6 @@ var dom = `
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">
-                                <div class="alert alert-info" role="alert">Lag som udløste en fejl i søgningen.</div>
                                 <div id="error">
                                     <table class="table table-hover">
                                         <tbody></tbody>
@@ -855,7 +854,6 @@ var dom = `
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="conflict-info-content">
-                <div class="alert alert-info" role="alert">Når du klikker på et tændt lag, vises resultatet har. Du kan derefter søge med objektet.</div>
                 <div id="conflict-info-box">
                     <div id="conflict-modal-info-body">
                         <ul class="nav nav-tabs" id="conflict-info-tab"></ul>

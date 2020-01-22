@@ -1486,3 +1486,20 @@ td.rdtYear:hover {
 #editor-attr-dialog img {
   max-width: 300px !important;
 }
+.table-conflict {
+  border: 1px solid #eee;
+  table-layout: auto;
+}
+.table-conflict td {
+  border: 1px solid #eee;
+  padding: 5px 10px;
+  max-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.table-conflict th {
+  border: 1px solid #eee !important;
+  padding: 5px 10px !important;
+  font-weight: 400 !important;
+}

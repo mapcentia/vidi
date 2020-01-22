@@ -65,8 +65,12 @@ module.exports = {
             scriptCharset: "utf-8",
             success: function (data) {
                 if (data.status.authenticated) {
+                    
                     // inserted by LKM
                     parent.update();
+                    
+                    //parent.update();
+                    backboneEvents.get().trigger(`refresh:auth`);
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
