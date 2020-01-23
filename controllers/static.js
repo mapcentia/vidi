@@ -28,6 +28,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
     let state = (localRequest.query.state ? `&state=${localRequest.query.state}` : ``);
     let filter = (localRequest.query.filter ? `&initialFilter=${localRequest.query.filter}` : ``);
+    let delay = 200;
 
     if (errorMessages.length === 0) {
         const port = process.env.PORT ? process.env.PORT : 3000;
@@ -50,6 +51,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
 
                         if (localRequest.query.filter) { // Print as soon Vidi is loaded
                             go = true;
+                            delay = 1000; // wait a bit longer because zooming has to finish
                         }
 
                         if (
@@ -79,7 +81,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                                     localResponse.status(500);
                                     localResponse.send(error);
                                 });
-                            }, 200);
+                            }, delay);
                         }
                     });
 
