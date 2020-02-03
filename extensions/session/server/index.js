@@ -92,7 +92,7 @@ var start = function (u, p, s, d, req, response, status) {
         req.session.subUser = data.subuser;
         req.session.screenName = data.screen_name;
         req.session.parentDb = data.parentdb;
-        req.session.custom = data.custom;
+        req.session.properties = data.properties;
 
         console.log("Session started");
 
@@ -104,7 +104,7 @@ var start = function (u, p, s, d, req, response, status) {
             api_key: data.api_key,
             parentdb: data.parentdb,
             subuser: data.subUser,
-            custom: data.custom
+            properties: data.properties
         };
 
         if (autoLogin) {
@@ -160,7 +160,7 @@ router.get('/api/session/status', function (req, response) {
                 screen_name: req.session.gc2UserName,
                 email: req.session.gc2Email,
                 subuser: req.session.subUser,
-                custom: req.session.custom
+                properties: req.session.properties
             }
         });
     }
