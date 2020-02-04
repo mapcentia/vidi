@@ -47,13 +47,17 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 response.send(emptyReport);
                 return;
             }
+            // Sort alpha by layer title
+            //metaData.data.sort((a,b) => (a.f_table_name > b.f_table_name) ? 1 : ((b.f_table_name > a.f_table_name) ? -1 : 0));
+            metaData.data.sort((a,b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
+            metaData.data.reverse();
+            metaData.data.sort((a,b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));
+            metaData.data.reverse();
 
             if (metaData.data === undefined || metaData.data.length === 0) {
-
                 response.send(emptyReport);
                 return;
             }
-
 
             // Count layers
             for (var i = 0; i < metaData.data.length; i = i + 1) {
