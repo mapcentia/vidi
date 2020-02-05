@@ -19,7 +19,6 @@ module.exports = {
     render: function (e) {
         console.log(e);
         var table = $("#report table"), tr, td, dataTable, dataThead, dataTr, u, m, without = [], groups = [];
-        //$("#conflict-data-time").html(e.dateTime);
         $("#conflict-text").html(e.text);
 
         $.each(e.hits, function (i, v) {
@@ -65,9 +64,9 @@ module.exports = {
                                                 dataTr.append("<td>" + "<a target='_blank' rel='noopener' href='" + (v.data[u][m].linkprefix ? v.data[u][m].linkprefix : "") + v.data[u][m].value + "'>Link</a>" + "</td>");
                                             }
                                         }
+                                        dataTable.append(dataTr);
                                     }
                                 } else {
-
                                     flag = true;
                                     for (m = 0; m < v.data[u].length; m++) {
                                         if (!v.data[u][m].key) {
@@ -78,13 +77,11 @@ module.exports = {
                                             }
                                         }
                                     }
-
+                                    dataTable.append(dataTr);
                                 }
-                                dataTable.append(dataTr);
                             }
                             if (flag) {
-                                console.log(arr);
-                                dataTr.append("<td>" + arr.join(", ") + "</td>");
+                                dataTr.append("<td style='white-space: normal'>" + arr.join(", ") + "</td>");
                             }
 
                             $('td', tr).append(dataTable);
@@ -96,8 +93,6 @@ module.exports = {
                 }
             });
         }
-
-
 
         $.each(e.hits, function (i, v) {
             if (v.hits === 0) {
