@@ -689,7 +689,7 @@ module.exports = module.exports = {
                                                 }
                                                 if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer) {
                                                     $(`<i style="cursor: pointer; color: #999999">Beskrivelse...</i>`).appendTo(hitsData).on("click", function () {
-                                                        $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333">
+                                                        $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px">
                                                                             <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
                                                                         </div>`);
                                                     });
@@ -698,7 +698,7 @@ module.exports = module.exports = {
                                                 if (v.data.length > 0) {
                                                     $.each(v.data, function (u, row) {
                                                         var key = null, fid = null;
-                                                        tr = $("<tr style='border-top: 1px solid #eee'/>");
+                                                        tr = $("<tr style='border-top: 0px solid #eee'/>");
                                                         td = $("<td/>");
                                                         table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
                                                         row.sort((a,b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
@@ -715,7 +715,7 @@ module.exports = module.exports = {
                                                             }
                                                         });
                                                         td.append(table2);
-                                                        tr.append("<td style='width: 100px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                        tr.append("<td style='width: 80px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
                                                         tr.append(td);
                                                         table1.append(tr);
                                                     });

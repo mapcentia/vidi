@@ -126,7 +126,6 @@ body {
 }
 .tab-pane {
   padding: 6px;
-  overflow: auto;
 }
 #pane {
   position: fixed;
