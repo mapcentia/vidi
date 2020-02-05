@@ -7,6 +7,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [Unreleased]
 ### Added
 - Custom user data from GC2 is now added to session the object.
+- Handling of invalid JSON configs.
 
 ### Changed
 - Custom searches can now be added to danish search module.
