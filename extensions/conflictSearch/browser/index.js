@@ -682,7 +682,7 @@ module.exports = module.exports = {
                                                 //hitsTable.append(row);
                                                 hitsCount++;
                                                 table1 = $("<table class='table table-data'/>");
-                                                hitsData.append("<h5>" + title + " (" + v.data.length + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                                                hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
                                                 let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
                                                 if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
                                                     hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
@@ -705,9 +705,9 @@ module.exports = module.exports = {
                                                         $.each(row, function (n, field) {
                                                             if (!field.key) {
                                                                 if (!field.link) {
-                                                                    table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>");
+                                                                    table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
                                                                 } else {
-                                                                    table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
+                                                                    table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
                                                                 }
                                                             } else {
                                                                 key = field.name;
@@ -715,7 +715,7 @@ module.exports = module.exports = {
                                                             }
                                                         });
                                                         td.append(table2);
-                                                        tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                        tr.append("<td style='width: 100px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
                                                         tr.append(td);
                                                         table1.append(tr);
                                                     });

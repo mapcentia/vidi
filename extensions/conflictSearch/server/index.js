@@ -152,7 +152,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         table: table,
                         title: metaDataKeys[table.split(".")[1]].f_table_title,
                         group: metaDataKeys[table.split(".")[1]].layergroup,
-                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
                         data: data,
                         num: count + "/" + metaDataFinal.data.length,
                         time: time,

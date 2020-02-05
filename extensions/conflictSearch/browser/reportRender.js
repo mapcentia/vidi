@@ -81,7 +81,7 @@ module.exports = {
                                 }
                             }
                             if (flag) {
-                                dataTr.append("<td style='white-space: normal'>" + arr.join(", ") + "</td>");
+                                dataTr.append("<td style='white-space: normal'>" + arr.join("&nbsp;&nbsp;&nbsp;<span style='color: #eee'>|</span>&nbsp;&nbsp;&nbsp;") + "</td>");
                             }
 
                             $('td', tr).append(dataTable);
