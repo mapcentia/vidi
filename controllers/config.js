@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -10,7 +10,7 @@ var configUrl = require('../config/config.js').configUrl;
 var request = require('request');
 
 router.get('/api/config/:db/:file', function (req, response) {
-    var file = req.params.file, db = req.params.db, url;
+    var file = req.params.file, db = req.params.db, url, json;
 
     if (typeof configUrl === "object") {
         url = configUrl[db] || configUrl._default;
@@ -23,16 +23,23 @@ router.get('/api/config/:db/:file', function (req, response) {
     request.get(url + "/" + file, function (err, res, body) {
 
         if (err || res.statusCode !== 200) {
-
             response.header('content-type', 'application/json');
             response.status(400).send({
                 success: false,
                 message: "Could not get the requested config JSON file."
             });
-
             return;
         }
 
+        try {
+            json = JSON.parse(body);
+        } catch (e) {
+            response.status(400).send({
+                success: false,
+                message: e.message
+            });
+            return;
+        }
         response.send(JSON.parse(body));
     })
 });
