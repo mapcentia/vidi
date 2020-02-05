@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -126,7 +126,8 @@ var gc2table = (function () {
                     color: '#666',
                     dashArray: '',
                     fillOpacity: 0.2
-                }
+                },
+                renderInfoIn: null
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -162,7 +163,7 @@ var gc2table = (function () {
             template = defaults.template,
             pkey = defaults.pkey,
             checkBox = defaults.checkBox,
-            usingCartodb = defaults.usingCartodb;
+            renderInfoIn = defaults.renderInfoIn;
 
         var customOnLoad = false, destroy, assignEventListeners;
 
@@ -222,17 +223,18 @@ var gc2table = (function () {
 
                         if (template) {
                             renderedText = Mustache.render(template, m.map._layers[id].feature.properties);
-                            if (usingCartodb) {
-                                renderedText = $.parseHTML(renderedText)[0].children[1].innerHTML
-                            }
                         }
 
-                        m.map._layers[id].bindPopup(renderedText || str, {
-                            className: "custom-popup gc2table-custom-popup",
-                            autoPan: autoPan,
-                            closeButton: true,
-                            minWidth: 160
-                        }).openPopup();
+                        if (!renderInfoIn) {
+                            m.map._layers[id].bindPopup(renderedText || str, {
+                                className: "custom-popup gc2table-custom-popup",
+                                autoPan: autoPan,
+                                closeButton: true,
+                                minWidth: 160
+                            }).openPopup();
+                        } else {
+                            $(renderInfoIn).html(renderedText);
+                        }
 
                         m.map._layers[id].on('popupclose', function(e) {
                             // Removing the selectedStyle from feature

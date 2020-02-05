@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -45,6 +45,53 @@ var extensions;
 let _self = false;
 
 let editingIsEnabled = false;
+
+let template;
+
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
+var defaultTemplate =
+    `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-xs popup-edit-btn">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-xs popup-delete-btn">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="popup-title">{{_vidi_content.title}}</h3>
+                {{#_vidi_content.fields}}
+                    {{#title}}<h4>{{title}}</h4>{{/title}}
+                    {{#value}}
+                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                    {{/value}}
+                    {{^value}}
+                    <p class="empty">null</p>
+                    {{/value}}
+                {{/_vidi_content.fields}}
+            </div>`;
+
+/**
+ * Default template for raster layers
+ * @type {string}
+ */
+var defaultTemplateRaster =
+    `<div class="cartodb-popup-content">
+                <h4>Class</h4>
+                <p>{{{ class }}}</p>
+                <h4>Value</h4>
+                <p>{{{ value_0 }}}</p>
+             
+             </div>`;
 
 /**
  *
@@ -107,47 +154,6 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
-        /**
-         * A default template for GC2, with a loop
-         * @type {string}
-         */
-        var defaultTemplate =
-            `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
-                    <div class="btn-group btn-group-justified">
-                        <div class="btn-group">
-                            <button class="btn btn-primary btn-xs popup-edit-btn">
-                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-danger btn-xs popup-delete-btn">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <h3 class="popup-title">{{_vidi_content.title}}</h3>
-                {{#_vidi_content.fields}}
-                    {{#title}}<h4>{{title}}</h4>{{/title}}
-                    {{#value}}
-                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                    {{/value}}
-                    {{^value}}
-                    <p class="empty">null</p>
-                    {{/value}}
-                {{/_vidi_content.fields}}
-            </div>`;
-
-        var defaultTemplateRaster =
-            `<div class="cartodb-popup-content">
-                <h4>Class</h4>
-                <p>{{{ class }}}</p>
-                <h4>Value</h4>
-                <p>{{{ value_0 }}}</p>
-             
-             </div>`;
-
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
@@ -180,8 +186,6 @@ module.exports = {
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
-            console.log(parsedMeta);
-
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
 
@@ -196,8 +200,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
-                        template;
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -245,7 +248,7 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            usingCartodb: false
+                            renderInfoIn: parsedMeta.info_element_selector || null
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
@@ -334,6 +337,9 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $('#modal-info-body').hide();
+                            if (parsedMeta.info_element_selector) {
+                                $(parsedMeta.info_element_selector).empty();
+                            }
                             $.snackbar({
                                 content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
@@ -518,7 +524,7 @@ module.exports = {
                     if (property.value.querable) {
                         let value = feature.properties[property.key];
                         if (property.value.link) {
-                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                         } else if (property.value.content && property.value.content === "image") {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
@@ -595,6 +601,14 @@ module.exports = {
 
     setDownloadFunction: function (fn) {
         download.download = fn
+    },
+
+    getVectorTemplate: function (layerKey) {
+        let metaDataKeys = meta.getMetaDataKeys();
+        let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+        return template;
     }
 };
 
