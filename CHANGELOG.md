@@ -37,7 +37,6 @@ and this project adheres to [CalVer](https://calver.org/).
                 geom: "the_geom"
             }
         }]
-
     }
 }
 ``` 
