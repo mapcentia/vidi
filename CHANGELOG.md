@@ -46,6 +46,12 @@ and this project adheres to [CalVer](https://calver.org/).
     - *info_function*: Function which is run when clicking on a vector feature. Takes three args: feature, layer and layer key.
     - *point_to_layer*: Leaflet pointToLayer function.
     - *vector_style*: Leaflet vector styling function.
+    
+- The help buttons now work like toggles, so a second click will close the help box.
+    
+### Fixed
+- Handling of invalid JSON configs, so Node doesn't crash.
+
 
 ## [2019.1.0] - 2019-20-12
 ### Added

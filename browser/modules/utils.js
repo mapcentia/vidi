@@ -52,9 +52,7 @@ module.exports = {
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
-            $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                <button type="button" class="close" data-dismiss="alert">×</button>${info}
-            </div>`);
+            createAlert($(this), info);
         });
         $(`<div></div>`).appendTo(el);
         $(`<div id="${id}"></div>`).appendTo(el);
