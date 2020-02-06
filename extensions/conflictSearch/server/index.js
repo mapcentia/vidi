@@ -47,8 +47,7 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 response.send(emptyReport);
                 return;
             }
-            // Sort alpha by layer title
-            //metaData.data.sort((a,b) => (a.f_table_name > b.f_table_name) ? 1 : ((b.f_table_name > a.f_table_name) ? -1 : 0));
+            // Sort alpha by layer title. This only works in Node v12+ with stable sort
             metaData.data.sort((a,b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
             metaData.data.reverse();
             metaData.data.sort((a,b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));

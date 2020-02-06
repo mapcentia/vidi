@@ -325,7 +325,7 @@ module.exports = module.exports = {
             noUiSlider.create(bufferSlider, {
                 start: startBuffer,
                 connect: "lower",
-                step: 1,
+                step: 0.01,
                 range: {
                     min: -5,
                     max: 500
@@ -668,74 +668,77 @@ module.exports = module.exports = {
                             hitsData.append(row);
                             let count = 0;
                             $.each(response.hits, function (i, v) {
-                                if (v.hits > 0) {
-                                    var table = i, table1, table2, tr, td, title, metaData = v.meta;
-                                    if (metaData.layergroup === groups[u]) {
-                                        count++;
-                                        title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
-                                        if (v.error === null) {
-                                            if (metaData.meta_url) {
-                                                title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
+                                if (metaData.layergroup === groups[u]) {
+                                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
+                                    if (v.error === null) {
+                                        if (metaData.meta_url) {
+                                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                                        }
+                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                                        if (v.hits > 0) {
+                                            count++;
+                                            hitsCount++;
+                                            table1 = $("<table class='table table-data'/>");
+                                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
+                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                                             }
-                                            row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                            if (v.hits > 0) {
-                                                //hitsTable.append(row);
-                                                hitsCount++;
-                                                table1 = $("<table class='table table-data'/>");
-                                                hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
-                                                let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
-                                                if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
-                                                    hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
-                                                }
-                                                if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer) {
-                                                    $(`<i style="cursor: pointer; color: #999999">Beskrivelse...</i>`).appendTo(hitsData).on("click", function () {
-                                                        $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px">
+                                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
+                                                $(`<i style="cursor: pointer; color: #999999">Beskrivelse&hellip;</i>`).appendTo(hitsData).on("click", function () {
+                                                    let me = this;
+                                                    if ($(me).next().children().length === 0) {
+                                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
                                                                             <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
                                                                         </div>`);
-                                                    });
-                                                    $(`<div></div>`).appendTo(hitsData);
-                                                }
-                                                if (v.data.length > 0) {
-                                                    $.each(v.data, function (u, row) {
-                                                        var key = null, fid = null;
-                                                        tr = $("<tr style='border-top: 0px solid #eee'/>");
-                                                        td = $("<td/>");
-                                                        table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
-                                                        row.sort((a,b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
-                                                        $.each(row, function (n, field) {
-                                                            if (!field.key) {
-                                                                if (!field.link) {
-                                                                    table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
-                                                                } else {
-                                                                    table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
-                                                                }
-                                                            } else {
-                                                                key = field.name;
-                                                                fid = field.value;
-                                                            }
-                                                        });
-                                                        td.append(table2);
-                                                        tr.append("<td style='width: 80px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
-                                                        tr.append(td);
-                                                        table1.append(tr);
-                                                    });
-                                                }
-                                                hitsData.append(table1);
-                                            } else {
-                                                noHitsTable.append(row);
-                                                noHitsCount++;
+                                                    } else {
+                                                        $(me).next().find(".alert").alert('close');
+                                                    }
+                                                });
+                                                $(`<div></div>`).appendTo(hitsData);
                                             }
+                                            if (v.data.length > 0) {
+                                                $.each(v.data, function (u, row) {
+                                                    var key = null, fid = null;
+                                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
+                                                    td = $("<td/>");
+                                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
+                                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
+                                                    $.each(row, function (n, field) {
+                                                        if (!field.key) {
+                                                            if (!field.link) {
+                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
+                                                            } else {
+                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
+                                                            }
+                                                        } else {
+                                                            key = field.name;
+                                                            fid = field.value;
+                                                        }
+                                                    });
+                                                    td.append(table2);
+                                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                    tr.append(td);
+                                                    table1.append(tr);
+                                                });
+                                            }
+                                            hitsData.append(table1);
                                         } else {
-                                            row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
-                                            errorTable.append(row);
-                                            errorCount++;
+                                            noHitsTable.append(row);
+                                            noHitsCount++;
                                         }
-                                        $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
-                                        $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
-                                        $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
-                                        $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
+                                    } else {
+                                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
+                                        errorTable.append(row);
+                                        errorCount++;
                                     }
+                                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
+                                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
                                 }
+
                             });
 
                             // Remove empty groups
