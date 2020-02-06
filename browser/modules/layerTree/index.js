@@ -1558,7 +1558,7 @@ module.exports = {
             let metaDataKeys = meta.getMetaDataKeys();
             let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
                 && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate();
+                ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
 
