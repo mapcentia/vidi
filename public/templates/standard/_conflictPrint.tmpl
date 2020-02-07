@@ -23,22 +23,21 @@
 <!--
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
 -->
-<div style="max-width: 670px">
-    <div id="date-time" class="top-div" style="top:20px">{{printDataTime}}</div>
-    <div class="top-div" style="top:30px">Søgning foretaget med: <span id="conflict-text"></span></div>
+<div style="max-width: 690px">
+    <div class="top-div" style="top:30px">Søgning foretaget med <span id="conflict-text"></span> d. {{printDataTime}}</div>
     <!-- map -->
     <div id="pane1" class="top-div" style="width: {{printWidth}}; height: {{printHeight}}; top:40px; display: block; overflow: hidden; border: 1px solid black">
         <div id="container1" style="position: relative; width: 200%; height: 200%; left:-50%; top:-50%; display: inline-block;">
-            <div id="map"></div>
+            <div id="map" ></div>
         </div>
         <div id="legend" class="legend" style="position: absolute; top: 5px; left: 5px; padding: 10px; background-color: white; -webkit-transform: scale(0.6); -webkit-transform-origin:left top; display: {{_showLegend}}"></div>
-        <div id="scalebar" style="position: absolute; bottom: 15px; right: -20px;"></div>
+        <div id="scalebar" style="position: absolute; bottom: 25px; right: -20px;"></div>
         <div id="scale" style="position: absolute; bottom: 5px; right: 10px; font-size: 0.8em;"></div>
     </div>
     <!-- Report -->
     <div id="report" class="top-div" style="/*page-break-before:always;*/margin-top: 60px">
         <table class="table">
-            <caption>Konflikter</caption>
+            <caption><h3>Konflikter</h3></caption>
         </table>
         <div id="without"></div>
     </div>

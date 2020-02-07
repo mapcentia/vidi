@@ -71,7 +71,7 @@ describe("Application", () => {
         newPage = await helpers.waitForPageToLoad(newPage);
         await helpers.sleep(1000);
         expect(await newPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
-        await newPage.close();        
+        await newPage.close();
     });
 
     it("should have only one active module at a time", async () => {
@@ -148,9 +148,9 @@ describe("Application", () => {
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Dynamic load test`);
 
         // Change the base layer
         await page.evaluate(`$('[href="#baselayer-content"]').trigger('click');`);
@@ -174,11 +174,11 @@ describe("Application", () => {
         // Check if the panel for different schema was drawn as well
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(0).text()`)).to.equal(`Test group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(1).text()`)).to.equal(`Dar es Salaam Land Use and Informal Settlement Data Set`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Dynamic load test`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(2).text()`)).to.equal(`Public group`);
         expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(3).text()`)).to.equal(`Snapping`);
-        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Public group`);
+        expect(await page.evaluate(`$('#layers_list').find('.accordion-toggle').eq(4).text()`)).to.equal(`Dynamic load test`);
 
-        expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/10/39.2358/-6.8057/`);
+        expect(page.url()).to.have.string(`/app/aleksandrshumilov/public/#stamenTonerLite/1/0/0/`);
     });
 
     it("should ignore invalid layer in URL", async () => {
@@ -202,7 +202,7 @@ describe("Application", () => {
         expect(await page.evaluate(`$('input[data-gc2-id="public.test_line"]').is(':checked')`)).to.be.true;
     });
 
-    it("should update coordinates upon map changes", async () => {
+    it("should update coordinates after map manipulations", async () => {
         let page = await browser.newPage();
         await page.goto(`${helpers.PAGE_URL_DEFAULT}`);
         page = await helpers.waitForPageToLoad(page);
@@ -227,5 +227,122 @@ describe("Application", () => {
         let updatedCoordinates = await page.evaluate(`$('#coordinates').find('h3').eq(1).next().html()`);
 
         expect(initialCoordinates === updatedCoordinates).to.be.false;
+    });
+
+    it("should not accept GC2 layers as base ones if this is not specified in configuration", async () => {
+        /*
+        Configuration file aleksandrshumilov_baselayers_with_GC2.json:
+
+        {
+            "baseLayers": [{
+                "id": "osm",
+                "name": "OSM"
+            }, {
+                "id": "public.test_poly",
+                "name": "Polygon",
+                "db": "aleksandrshumilov",
+                "host": "https://gc2.mapcentia.com",
+                "config": {
+                    "maxZoom": 21,
+                    "maxNativeZoom": 20,
+                    "attribution": "&copy; Mapbox"
+                }
+            }],
+            "brandName": "Test",
+	        "aboutBox": "Test"
+        }
+        */
+
+        let page = await browser.newPage();
+        await page.goto(`${helpers.PAGE_URL_DEFAULT.replace(`public/#osm`, `public/?config=aleksandrshumilov_baselayers_with_GC2.json#public.test_poly`)}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(2000);
+
+        expect(page.url().indexOf(`#public.test_poly/`) > -1).to.be.true;
+        expect(page.url().indexOf(`/public.test_poly`) === -1).to.be.true;
+
+        await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[href="#coordinates-content"]').trigger('click')`);
+        await helpers.sleep(1000);
+        await page.evaluate(`$('[data-module-id="baseLayer"]').trigger('click')`);
+        await helpers.sleep(1000);
+
+        expect(await page.evaluate(`$('[name="baselayers"][value="public.test_poly"]').is(':checked')`)).to.be.true;
+    });
+
+    it("should accept GC2 layers as base ones if this is specified in configuration", async () => {
+        /*
+        Configuration file aleksandrshumilov_baselayers_without_GC2.json:
+
+        {
+            "baseLayers": [{
+                "id": "osm",
+                "name": "OSM"
+            }],
+            "brandName": "Test",
+	        "aboutBox": "Test"
+        }
+        */
+
+       let page = await browser.newPage();
+       await page.goto(`${helpers.PAGE_URL_DEFAULT.replace(`public/#osm`, `public/?config=aleksandrshumilov_baselayers_without_GC2.json#public.test_poly`)}`);
+       page = await helpers.waitForPageToLoad(page);
+       await helpers.sleep(2000);
+
+       expect(page.url().indexOf(`#osm/`) > 0).to.be.true;
+       expect(page.url().indexOf(`/public.test_poly`) === -1).to.be.true;
+
+       await page.evaluate(`$('[class="floatRight cursorPointer fa fa-reorder"]').trigger('click')`);
+       await helpers.sleep(1000);
+       await page.evaluate(`$('[href="#coordinates-content"]').trigger('click')`);
+       await helpers.sleep(1000);
+       await page.evaluate(`$('[data-module-id="baseLayer"]').trigger('click')`);
+       await helpers.sleep(1000);
+
+       expect(await page.evaluate(`$('[name="baselayers"][value="osm"]').is(':checked')`)).to.be.true;
+    });
+
+    it("should show startup modal and hide it once or forever", async () => {
+        /*
+        Configuration file aleksandrshumilov_with_startup_modal.json
+
+        {
+            "brandName": "Test",
+            "startUpModal": "<h1>Welcome to Vidi</h1><p>HTML markup is allowed in startup modal</p>"
+        }
+        */
+
+        let page = await browser.newPage();
+        const url = helpers.PAGE_URL_DEFAULT.replace(`#osm/13/39.2963/-6.8335/`, `?config=aleksandrshumilov_with_startup_modal.json`);
+        await page.goto(`${url}`);
+        page = await helpers.waitForPageToLoad(page);
+        await helpers.sleep(2000);
+
+        expect(await page.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.true;
+        await page.evaluate(`$('#startup-message-modal .js-close-modal').trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await page.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
+
+        // First reload
+        let firstReloadPage = await browser.newPage();
+        await firstReloadPage.goto(`${url}`);
+        firstReloadPage = await helpers.waitForPageToLoad(firstReloadPage);
+        await helpers.sleep(2000);
+
+        expect(await firstReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.true;
+        await firstReloadPage.evaluate(`$('#startup-message-modal .js-close-modal-do-not-show').trigger('click')`);
+        await helpers.sleep(1000);
+        expect(await firstReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
+
+        expect(await firstReloadPage.evaluate(`$('[href="#draw-collapse"]').is(':visible')`)).to.be.false;
+
+        // Second reload
+        let secondReloadPage = await browser.newPage();
+        await secondReloadPage.goto(`${url}`);
+        secondReloadPage = await helpers.waitForPageToLoad(secondReloadPage);
+        await helpers.sleep(2000);
+
+        expect(await secondReloadPage.evaluate(`$('#startup-message-modal').is(':visible')`)).to.be.false;
     });
 });

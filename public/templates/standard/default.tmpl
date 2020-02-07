@@ -159,7 +159,7 @@
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
                                 <div id="place-search">
-                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')">
+                                    <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
                                         <i class="material-icons help-btn">help_outline</i></div>
                                     <div></div>
                                     <div class="places">
@@ -172,7 +172,7 @@
                                 </div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="info-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Info text}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="togglebutton">
@@ -197,26 +197,26 @@
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="layer-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text overlays}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="layers" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="baselayer-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text baselayers}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="base-layer-list"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="legend-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text legend}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
                                 <div id="legend" class="legend"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="draw-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text draw}}')">
                                     <i class="material-icons help-btn">help_outline</i>
                                 </div>
                                 <div></div>
@@ -414,17 +414,20 @@
 
                                     </div>
                                 </div>
+                                <a class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                                </a>
                                 <div id="draw-table"></div>
 
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{StateSnapshots description}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="form-group" id="state-snapshots" role="tablist"></div>
                             </div>
                             <div role="tabpanel" class="tab-pane fade" id="print-content">
-                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Help text print}}')">
                                     <i class="material-icons help-btn">help_outline</i></div>
                                 <div></div>
                                 <div class="btn-toolbar bs-component" style="margin: 0;">
@@ -610,7 +613,7 @@
                         <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}
                         </a></li>
                         <li>
-                            <a id="session" href="#" data-toggle="modal" data-target="#login-modal">
+                            <a id="session" href="#" data-toggle="modal" data-target="#login-modal" style="display: none">
                                 <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>
                                 <i class="material-icons gc2-session-unlock" aria-hidden="true">lock_open</i>
                                 <span class="module-title">Log in</span>

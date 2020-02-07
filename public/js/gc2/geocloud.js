@@ -38,6 +38,7 @@ geocloud = (function () {
         tweetStore,
         elasticStore,
         tileLayer,
+        createUTFGridLayer,
         createTileLayer,
         createTMSLayer,
         createMVTLayer,
@@ -61,6 +62,7 @@ geocloud = (function () {
         DTKSKAERMKORT_25832 = "dtkSkaermkort@25832",
         DTKSKAERMKORT = "dtkSkaermkort",
         DTKSKAERMKORTDAEMPET = "dtkSkaermkortDaempet",
+        DTKSKAERMKORTGRAA = "dtkSkaermkortGraa",
         DIGITALGLOBE = "DigitalGlobe:Imagery",
         GEODKBRIGHT = "geodkBright",
         LUFTFOTOSERIER2017 = "luftfotoserier2017",
@@ -68,8 +70,10 @@ geocloud = (function () {
         HERENORMALDAY = "hereNormalDay",
         HERENORMALDAYGREY = "hereNormalDayGrey",
         HERENORMALNIGHTGREY = "hereNormalNightGrey",
+        HERESATELLITEDAY = "hereSatelliteDay",
+        HEREHYBRIDDAY = "hereHybridDay",
 
-        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
+        attribution = (window.mapAttribution === undefined) ? "Powered by <a target='_blank' rel='noopener' href='//www.mapcentia.com'>MapCentia GC2</a> " : window.mapAttribution,
         resolutions = [156543.0339280410, 78271.51696402048, 39135.75848201023, 19567.87924100512, 9783.939620502561,
             4891.969810251280, 2445.984905125640, 1222.992452562820, 611.4962262814100, 305.7481131407048,
             152.8740565703525, 76.43702828517624, 38.21851414258813, 19.10925707129406, 9.554628535647032,
@@ -105,12 +109,14 @@ geocloud = (function () {
         visibility: true,
         lifetime: 0,
         host: host,
-        uri: "/api/v1/sql",
+        uri: "/api/v2/sql",
         db: null,
         sql: null,
         q: null,
         name: "Vector",
         id: null,
+        maxFeaturesLimit: false,
+        onMaxFeaturesLimitReached: false,
         rendererOptions: {zIndexing: true},
         projection: (MAPLIB === "leaflet") ? "4326" : "900913",
         //Only leaflet
@@ -199,12 +205,14 @@ geocloud = (function () {
             abort: function () {/* stub */
             }
         };
+
         this.defaults = $.extend({}, STOREDEFAULTS);
         if (config) {
             for (prop in config) {
                 this.defaults[prop] = config[prop];
             }
         }
+
         this.init();
         this.name = this.defaults.name;
         this.id = this.defaults.id;
@@ -221,6 +229,9 @@ geocloud = (function () {
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
+        this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
+        this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
+        this.featuresLimitReached = false;
 
         this.buffered_bbox = false;
 
@@ -242,7 +253,7 @@ geocloud = (function () {
                 }
 
                 // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
-                var extendedBounds = map.getBounds().pad(1);
+                var extendedBounds = map.getBounds().pad(0.3);
                 this.buffered_bbox = extendedBounds;
 
                 sql = sql.replace("{centerX}", map.getCenter().lat.toString());
@@ -263,7 +274,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
                     '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
                     '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
@@ -279,32 +290,28 @@ geocloud = (function () {
                             response = me.transformResponse(response, me.id);
 
                             me.geoJSON = response;
-                            switch (MAPLIB) {
-                                case "ol2":
-                                    me.layer.addFeatures(new OpenLayers.Format.GeoJSON().read(response));
-                                    break;
-                                case "ol3":
-                                    me.layer.getSource().addFeatures(new ol.source.GeoJSON(
-                                        {
-                                            object: response.features[0]
-                                        }
-                                    ));
-
-                                    break;
-                                case "leaflet":
-                                    if (dynamicQueryIsUsed) {
-                                        me.layer.clearLayers();
-                                    }
-
-                                    me.layer.addData(response);
-                                    break;
+                            if (dynamicQueryIsUsed) {
+                                me.layer.clearLayers();
                             }
+
+                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                    console.warn('SQL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                    me.geoJSON.features = [];
+                                    response.features = [];
+                                    me.featuresLimitReached = true;
+                                    me.onMaxFeaturesLimitReached();
+                                }
+                            } else {
+                                me.featuresLimitReached = false;
+                            }
+                            me.layer.addData(response);
                         } else {
                             me.geoJSON = null;
                         }
                     }
                 },
-                error: this.defaults.error,
+                error: this.defaults.error.bind(this),
                 complete: function () {
                     me.onLoad(me);
                 }
@@ -355,6 +362,8 @@ geocloud = (function () {
         this.host = this.defaults.host;
         this.base64 = this.defaults.base64;
         this.custom_data = this.defaults.custom_data;
+        this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
+        this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
 
         this.buffered_bbox = false;
 
@@ -367,15 +376,8 @@ geocloud = (function () {
 
             sql = this.sql;
 
-            var dynamicQueryIsUsed = false;
-
             map = me.defaults.map;
             if (map) {
-                if (sql.indexOf("{minX}") !== -1 && sql.indexOf("{maxX}") !== -1
-                    && sql.indexOf("{minY}") !== -1 && sql.indexOf("{maxY}") !== -1) {
-                    dynamicQueryIsUsed = true;
-                }
-
                 // Extending the area of the bounding box, (bbox_extended_area = (9 * bbox_initial_area))
                 var extendedBounds = map.getBounds().pad(1);
                 this.buffered_bbox = extendedBounds;
@@ -398,7 +400,7 @@ geocloud = (function () {
             xhr = $.ajax({
                 dataType: (this.defaults.jsonp) ? 'jsonp' : 'json',
                 async: this.defaults.async,
-                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(encodeURIComponent(sql))) + "&base64=true" : encodeURIComponent(sql)) +
+                data: ('q=' + (this.base64 ? encodeURIComponent(base64.encode(sql)) + "&base64=true" : encodeURIComponent(sql)) +
                     '&srs=' + this.defaults.projection + '&lifetime=' + this.defaults.lifetime + '&client_encoding=' + this.defaults.clientEncoding +
                     '&key=' + this.defaults.key + '&custom_data=' + this.custom_data),
                 jsonp: (this.defaults.jsonp) ? 'jsonp_callback' : false,
@@ -413,6 +415,14 @@ geocloud = (function () {
                         if (response.features !== null) {
                             response = me.transformResponse(response, me.id);
                             me.geoJSON = response;
+                            if (me.maxFeaturesLimit !== false && me.onMaxFeaturesLimitReached !== false && parseInt(me.maxFeaturesLimit) > 0) {
+                                if (me.geoJSON.features.length >= parseInt(me.maxFeaturesLimit)) {
+                                    console.warn('WebGL store: number of received features exceeds the specified limit (' + me.maxFeaturesLimit + '). Please use filters or adjust the limit.');
+                                    me.geoJSON.features = [];
+                                    response.features = [];
+                                    me.onMaxFeaturesLimitReached();
+                                }
+                            }
 
                             let layer = false;
                             if (me.defaults.type === 'POINT') {
@@ -631,7 +641,7 @@ geocloud = (function () {
                 async: this.async,
                 jsonp: (this.jsonp) ? 'jsonp_callback' : false,
                 data: 'q=' + encodeURIComponent(q) + "&size=" + this.size,
-                url: this.defaults.host + '/api/v1/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
+                url: this.defaults.host + '/api/v2/elasticsearch/search/' + this.defaults.db + "/" + this.defaults.index + "/" + this.defaults.type,
                 success: function (response) {
                     if (typeof response.error !== "undefined") {
                         return false;
@@ -774,6 +784,67 @@ geocloud = (function () {
         }
         return l;
     };
+    /**
+     *
+     * @param layer
+     * @param defaults
+     * @returns {*}
+     */
+    createUTFGridLayer = function (layer, defaults) {
+        var defaultTemplate =
+            `<div>
+        {{#each data}}
+			{{this.title}}: {{this.value}} <br>
+        {{/each}}
+        </div>`;
+        var uri = defaults.host + "/wms/" + defaults.db + "/" + layer.split(".")[0] + "?mode=tile&tilemode=gmap&tile={x}+{y}+{z}&layers=" + layer
+            + "&format=json&map.imagetype=application/json&";
+        var utfGrid = new L.utfGrid(uri, {
+            resolution: 4,
+            pointerCursor: true,
+            //mouseInterval: 66  // Delay for mousemove events
+        }), flag = false;
+        var template, tooltipHtml;
+        utfGrid.id = "__hidden.utfgrid." + layer; // Hide it
+        utfGrid.on('mouseover', _.debounce(function (e) {
+            var tmp = $.extend(true, {}, e.data), fi = [];
+            flag = true;
+            $.each(tmp, function (name, property) {
+                if (typeof defaults.fieldConf[name] !== "undefined" && defaults.fieldConf[name].mouseover) {
+                    let title;
+                    if (
+                        typeof defaults.fieldConf[name] !== "undefined" &&
+                        typeof defaults.fieldConf[name].alias !== "undefined" &&
+                        defaults.fieldConf[name].alias !== ""
+                    ) {
+                        title = defaults.fieldConf[name].alias
+                    } else {
+                        title = name;
+                    }
+                    fi.push({
+                        title: title,
+                        value: property
+                    });
+                }
+            });
+            tmp.data = fi; // Used in a "loop" template
+            template = Handlebars.compile(defaultTemplate);
+            tooltipHtml = template(tmp);
+            $("#tail").fadeIn(100);
+            $("#tail").html(tooltipHtml);
+
+        }, 0));
+        utfGrid.on('mouseout', function (e) {
+            flag = false;
+            setTimeout(function () {
+                if (!flag) {
+                    $("#tail").fadeOut(100);
+                }
+            }, 200)
+
+        });
+        return utfGrid;
+    };
 
     /**
      * ol2 and leaflet
@@ -842,21 +913,30 @@ geocloud = (function () {
 
     /**
      * Creates MVT layer
-     * 
+     *
      * @param {String} layer    Layer identifier
      * @param {Object} defaults Default settings
-     * 
+     *
      * @return {Object}
      */
     createMVTLayer = function (layer, defaults) {
         var l, url, uri;
-        
+
         let parts = layer.split(".");
         var options = {
             attribution: defaults.attribution,
             maxZoom: defaults.maxZoom,
             maxNativeZoom: defaults.maxNativeZoom,
             tileSize: 256,
+            // vectorTileLayerStyles:{
+            //
+            //     "feature.multipolygon": {
+            //         weight: 0,
+            //         fillColor: '#9bc2c4',
+            //         fillOpacity: 1,
+            //         fill: true
+            //     },
+            // },
             ran: function () {
                 return Math.random();
             }
@@ -885,7 +965,7 @@ geocloud = (function () {
 
         if (defaults.layerId) {
             l.id = defaults.layerId;
-        }  else {
+        } else {
             l.id = layer;
         }
 
@@ -1267,7 +1347,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.mapQuestOSM = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 20,
                         maxNativeZoom: 18
                     });
@@ -1325,7 +1405,7 @@ geocloud = (function () {
                     break;
                 case "leaflet":
                     this.osm = new L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                        attribution: "&copy; <a target='_blank' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
+                        attribution: "&copy; <a target='_blank' rel='noopener' href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors",
                         maxZoom: 21,
                         maxNativeZoom: 18
                     });
@@ -1564,6 +1644,16 @@ geocloud = (function () {
                     prettyName = "HERE Normal Night Grey";
                     baseUrl = baseMapTilesBaseUrl + "/" + path + "/maptile/newest/";
                     break;
+                case HERESATELLITEDAY:
+                    name = "satellite.day";
+                    prettyName = "HERE Satellite Day";
+                    baseUrl = aerialTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
+                case HEREHYBRIDDAY:
+                    name = "hybrid.day";
+                    prettyName = "HERE Hybrid Day";
+                    baseUrl = aerialTilesBaseUrl + "/" + path + "/maptile/newest/";
+                    break;
             }
 
             l = new L.TileLayer(baseUrl + name + "/{z}/{x}/{y}/256/png8?app_id=" + window.gc2Options.hereApp.App_Id + "&app_code=" + window.gc2Options.hereApp.App_Code, {
@@ -1581,7 +1671,7 @@ geocloud = (function () {
         //ol2 and leaflet
         this.addDtkSkaermkort = function (name, layer) {
             var l,
-                url = "https://eu1.mapcentia.com/wms/dk/tilecache/";
+                url = "https://gc2.io/mapcache/baselayers/tms/";
 
             switch (MAPLIB) {
                 case "ol2":
@@ -1603,9 +1693,8 @@ geocloud = (function () {
                         attribution: "&copy; Geodatastyrelsen",
                         maxZoom: 21,
                         maxNativeZoom: 19
-
                     });
-                    lControl.addBaseLayer(l);
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -1838,8 +1927,7 @@ geocloud = (function () {
                         maxNativeZoom: 19
 
                     });
-                    lControl.addBaseLayer(l);
-                    console.log(l)
+                    lControl.addBaseLayer(l, name);
                     break;
             }
             l.baseLayer = true;
@@ -2006,10 +2094,13 @@ geocloud = (function () {
                     o = this.addYandex("publicMapHybrid");
                     break;
                 case "dtkSkaermkort":
-                    o = this.addDtkSkaermkort("dtkSkaermkort", "dtk_skaermkort");
+                    o = this.addDtkSkaermkort("dtkSkaermkort", "kortforsyningen.dtk_skaermkort");
                     break;
                 case "dtkSkaermkortDaempet":
-                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "dtk_skaermkort_daempet");
+                    o = this.addDtkSkaermkort("dtkSkaermkortDaempet", "kortforsyningen.dtk_skaermkort_daempet");
+                    break;
+                case "dtkSkaermkortGraa":
+                    o = this.addDtkSkaermkort("dtkSkaermkortGraa", "kortforsyningen.dtk_skaermkort_graa");
                     break;
                 case "dtkSkaermkort@25832":
                     o = this.addDtkSkaermkortUtm("dtkSkaermkort@25832", "dtk_skaermkort");
@@ -2028,6 +2119,12 @@ geocloud = (function () {
                     break;
                 case HERENORMALNIGHTGREY:
                     o = this.addHere(HERENORMALNIGHTGREY);
+                    break;
+                case HERESATELLITEDAY:
+                    o = this.addHere(HERESATELLITEDAY);
+                    break;
+                case HEREHYBRIDDAY:
+                    o = this.addHere(HEREHYBRIDDAY);
                     break;
                 case "geodkBright":
                     o = this.addGeoDk("geodkBright", "geodk.bright");
@@ -2051,7 +2148,44 @@ geocloud = (function () {
             }
             return o;
         };
-        //ol2, ol3 and leaflet
+
+        /**
+         *
+         * @param config
+         * @returns {Array}
+         */
+        this.addUTFGridLayers = function (config) {
+            var layers, layersArr = [],
+                defaults = {
+                    host: host,
+                    layerId: false,
+                    layers: [],
+                    db: null,
+                    mapRequestProxy: false,
+                    visibility: true,
+                    wrapDateLine: true,
+                    tileCached: true,
+                    name: null,
+                    names: [],
+                    uri: null,
+                    fieldConf: {}
+                };
+
+            if (config) {
+                for (prop in config) {
+                    defaults[prop] = config[prop];
+                }
+            }
+            layers = defaults.layers;
+
+            for (var i = 0; i < layers.length; i++) {
+                var l = createUTFGridLayer(layers[i], defaults);
+                this.map.addLayer(l, defaults.name || defaults.names[i] || layers[i]);
+                layersArr.push(l);
+            }
+            return layersArr;
+        };
+
         this.addTileLayers = function (config) {
             var defaults = {
                 host: host,
@@ -2075,13 +2209,11 @@ geocloud = (function () {
                 tileSize: MAPLIB === "ol2" ? OpenLayers.Size(256, 256) : 256,
                 uri: null
             };
-
             if (config) {
                 for (prop in config) {
                     defaults[prop] = config[prop];
                 }
             }
-
             var layers = defaults.layers;
             var layersArr = [];
             for (var i = 0; i < layers.length; i++) {
@@ -2117,6 +2249,7 @@ geocloud = (function () {
 
             return layersArr;
         };
+
 
         //ol2 and leaflet
         this.removeTileLayerByName = function (name) {
@@ -2202,7 +2335,7 @@ geocloud = (function () {
                     break;
             }
         };
-        
+
         this.showLayer = function (name) {
             this.getLayersByName(name).addTo(this.map);
         };
@@ -2639,9 +2772,12 @@ geocloud = (function () {
         DTKSKAERMKORT: DTKSKAERMKORT,
         DTKSKAERMKORT_25832: DTKSKAERMKORT_25832,
         DTKSKAERMKORTDAEMPET: DTKSKAERMKORTDAEMPET,
+        DTKSKAERMKORTGRAA: DTKSKAERMKORTGRAA,
         DIGITALGLOBE: DIGITALGLOBE,
         HERENORMALDAYGREY: HERENORMALDAYGREY,
         HERENORMALNIGHTGREY: HERENORMALNIGHTGREY,
+        HERESATELLITEDAY: HERESATELLITEDAY,
+        HEREHYBRIDDAY: HEREHYBRIDDAY,
         GEODKBRIGHT: GEODKBRIGHT,
         LUFTFOTOSERIER2017: LUFTFOTOSERIER2017,
         setHost: setHost
@@ -2666,9 +2802,9 @@ geocloud = (function () {
                 "maxZoom": maxZoom,
                 "attribution": [
                     'Map tiles by <a href="http://stamen.com">Stamen Design</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
-                    'Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, ',
-                    'under <a href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. ',
+                    'Data by <a rel="noopener" href="http://openstreetmap.org">OpenStreetMap</a>, ',
+                    'under <a rel="noopener" href="http://creativecommons.org/licenses/by-sa/3.0">CC BY SA</a>.'
                 ].join("")
             };
         },

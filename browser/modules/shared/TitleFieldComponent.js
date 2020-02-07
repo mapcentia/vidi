@@ -62,23 +62,30 @@ class TitleFieldComponent extends React.Component {
             }
         }
 
+        let inputStyle = {};
+        if (this.props.layout === `dense`) {
+            inputStyle.marginBottom = `0px`;
+        }
+
         return (<div className="input-group" style={containerStyle}>
             <input
                 id={(this.props.id ? this.props.id : ``)}
                 value={this.state.title}
+                disabled={this.props.disabled}
                 type="text"
                 className="form-control"
-                placeholder={__("New title")}
+                placeholder={this.props.inputPlaceholder ? this.props.inputPlaceholder : __("New title")}
                 onChange={this.onChange.bind(this)}
-                onKeyPress={this.handleKeyPress.bind(this)}/>
+                onKeyPress={this.handleKeyPress.bind(this)}
+                style={inputStyle}/>
             <span className="input-group-btn" style={{ padding: '6px', verticalAlign: 'top' }}>
                 <button
                     title={__(`Save`)}
                     className="btn btn-xs btn-primary"
                     onClick={this.onSave.bind(this)}
-                    disabled={!this.state.title}
+                    disabled={this.props.disabled || !this.state.title}
                     style={buttonStyle}>
-                    <i className="material-icons">save</i>{(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
+                    {this.props.showIcon ? ((this.props.saveIcon ? this.props.saveIcon : (<i className="material-icons">save</i>))) : false} {(this.props.saveButtonText ? ` ` + this.props.saveButtonText : ``)}
                 </button>
                 {cancelControl}
             </span>
@@ -89,7 +96,13 @@ class TitleFieldComponent extends React.Component {
 TitleFieldComponent.propTypes = {
     value: PropTypes.string,
     onAdd: PropTypes.func.isRequired,
-    onCancel: PropTypes.func
+    onCancel: PropTypes.func,
+    layout: PropTypes.string
+};
+
+TitleFieldComponent.defaultProps = {
+    showIcon: true,
+    layout: 'regular'
 };
 
 export default TitleFieldComponent;

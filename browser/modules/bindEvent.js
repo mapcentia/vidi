@@ -8,6 +8,8 @@
 
 import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
 
+var mobile = require('is-mobile');
+
 /**
  *
  * @type {*|exports|module.exports}
@@ -25,9 +27,6 @@ let APIBridgeSingletone = require('./api-bridge');
  * @type {APIBridge}
  */
 var apiBridgeInstance = false;
-
-var jRespond = require('jrespond');
-
 
 require('dom-shims');
 require('arrive');
@@ -121,6 +120,10 @@ module.exports = {
 
         backboneEvents.get().on("allDoneLoading:layers", function () {
             if (!isStarted) {
+                if (mobile()) {
+                    $('ul[role="tablist"]:last-child').attr('style', 'padding-bottom: 100px');
+                }
+
                 isStarted = true;
                 setTimeout(
                     function () {
@@ -159,7 +162,7 @@ module.exports = {
         });
 
         backboneEvents.get().on("startLoading:setBaselayer", function (e) {
-            console.log("Start loading: " + e);
+            console.log("Start loading base layer: " + e);
             doneB = false;
             loadingB = true;
             $(".loadingIndicator").fadeIn(200);
@@ -185,7 +188,7 @@ module.exports = {
         });
 
         backboneEvents.get().on("doneLoading:setBaselayer", function (e) {
-            console.log("Done loading: " + e);
+            console.log("Done loading base layer: " + e);
             doneB = true;
             loadingB = false;
 
@@ -222,8 +225,9 @@ module.exports = {
                 backboneEvents.get().trigger("ready:meta");
                 state.init();
             }).then(() => {
-                layerTree.create();
+                layerTree.create(false, [], true);
                 state.init();
+
             });
         });
 
@@ -263,17 +267,21 @@ module.exports = {
         });
 
         // Set up the open/close functions for side panel
-        var searchPanelOpen, width, collapsedWidth = 250;
+        var searchPanelOpen, width, defaultCollapsedWidth = 260;
 
         $("#main-tabs a").on("click", function (e) {
-            $("#module-container.slide-right").css("right", "0");
-            searchShowFull();
+            if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
+                $("#module-container.slide-right").css("right", "0");
+                searchShowFull();
+            }
         });
 
         $(document).arrive("#main-tabs a", function () {
             $(this).on("click", function (e) {
-                $("#module-container.slide-right").css("right", "0");
-                searchShowFull();
+                if ($(this).data(`module-ignore`) !== true && $(this).data(`module-ignore`) !== `true`) {
+                    $("#module-container.slide-right").css("right", "0");
+                    searchShowFull();
+                }
             });
         });
 
@@ -309,9 +317,17 @@ module.exports = {
         }
 
         var searchShow = function () {
-            $("#search-ribbon").css("right", "-" + (width - collapsedWidth) + "px");
-            $("#pane").css("right", (collapsedWidth - 40) + "px");
-            $('#map').css("width", "calc(100% - " + (collapsedWidth / 2) + "px)");
+            let localCollapsedWidth = Math.max.apply(Math, $('#side-panel #main-tabs > li > a, #side-panel #main-tabs > li [role="tab"]').map(function(){ return $(this).width(); }).get());
+            if (localCollapsedWidth > 0) {
+                if (localCollapsedWidth < 170) localCollapsedWidth = 170;
+                localCollapsedWidth = localCollapsedWidth + 80;
+            } else {
+                localCollapsedWidth = defaultCollapsedWidth + 80;
+            }
+
+            $("#search-ribbon").css("right", "-" + (width - localCollapsedWidth) + "px");
+            $("#pane").css("right", (localCollapsedWidth - 40) + "px");
+            $('#map').css("width", "calc(100% - " + (localCollapsedWidth / 2) + "px)");
             searchPanelOpen = true;
         }
 
@@ -431,7 +447,7 @@ module.exports = {
             var id = ($(this)).parent().parent().attr('id');
 
             $("#" + id).animate({
-                bottom: (($("#" + id).height() * -1) + 20) + "px"
+                bottom: (($("#" + id).height() * -1) + 10) + "px"
             }, 500, function () {
                 $("#" + id + " .expand-less").hide();
                 $("#" + id + " .expand-more").show();
@@ -457,8 +473,7 @@ module.exports = {
             var id = ($(this)).attr('href');
 
             if (id === "#full-screen"){
-                utils.fullScreen();
-                return;
+                utils.toggleFullScreen();
             }
 
             // If print when activate
@@ -493,17 +508,25 @@ module.exports = {
 
         // Module icons
         $("#side-panel ul li a").on("click", function (e) {
-            
-            
             backboneEvents.get().trigger(`off:all`);
 
+            let moduleTitle = $(this).data(`module-title`);
+            $('#module-container').find(`.js-module-title`).text('');
+            if (moduleTitle) $('#module-container').find(`.js-module-title`).text(moduleTitle);
+
             let moduleId = $(this).data(`module-id`);
+            let moduleIgnoreErrors = ($(this).data(`module-ignore-errors`) ? true : false);
+
             setTimeout(() => {
                 if (moduleId && moduleId !== ``) {
                     if (moduleId in applicationModules) {
                         backboneEvents.get().trigger(`on:${moduleId}`);
                     } else {
-                        console.error(`Module ${moduleId} was not found`);
+                        if (moduleIgnoreErrors) {
+                            backboneEvents.get().trigger(`on:${moduleId}`);
+                        } else {
+                            console.error(`Module ${moduleId} was not found`);
+                        }
                     }
                 }
             }, 100);
@@ -511,7 +534,12 @@ module.exports = {
             let id = ($(this));
             $("#side-panel ul li").removeClass("active");
             id.addClass("active");
-            
+        });
+
+        $("#click-for-info-slide.slide-left .close").on("click", function () {
+            $("#click-for-info-slide.slide-left").animate({
+                left: "-100%"
+            }, 500)
         });
 
         // Listen for extensions
@@ -528,11 +556,20 @@ module.exports = {
                         }
                     }
                 }, 100);
+
                 let id = ($(this));
                 $("#side-panel ul li").removeClass("active");
                 id.addClass("active");
             });
         })
 
+        // Listen for fullscreen changes
+        document.addEventListener("fullscreenchange", function(event) {
+            if (document.fullscreenElement) {
+                $("#full-screen-btn i").html("fullscreen_exit")
+            } else {
+                $("#full-screen-btn i").html("fullscreen")
+            }
+        });
     }
 };

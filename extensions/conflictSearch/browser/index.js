@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -28,7 +28,7 @@ var utils;
  *
  * @type {*|exports|module.exports}
  */
-var search = require('./../../../browser/modules/search/danish');
+var search;
 
 /**
  *
@@ -41,12 +41,6 @@ var backboneEvents;
  * @type {*|exports|module.exports}
  */
 var urlparser = require('./../../../browser/modules/urlparser');
-
-/**
- *
- * @type {exports|module.exports}
- */
-var jsts = require('jsts');
 
 /**
  *
@@ -141,7 +135,7 @@ var xhr;
  *
  *  * @type {string}
  */
-var fromDrawingText = "Fra tegning";
+var fromDrawingText = "tegning";
 
 /**
  *
@@ -165,10 +159,6 @@ var searchLoadedLayers = true;
 var Terraformer = require('terraformer-wkt-parser');
 
 var _result;
-
-
-var jquery = require('jquery');
-require('snackbarjs');
 
 /**
  *
@@ -263,6 +253,14 @@ module.exports = module.exports = {
         backboneEvents = o.backboneEvents;
         socketId = o.socketId;
         print = o.print;
+
+        // Hack to compile Glob files. Don´t call this function!
+        function ಠ_ಠ() {
+            require('./../../../browser/modules/search/*.js', {glob: true});
+        }
+
+        search = require('./../../../browser/modules/search/' + window.vidiConfig.enabledSearch + '.js');
+        search.set(o);
         return this;
     },
 
@@ -327,7 +325,7 @@ module.exports = module.exports = {
             noUiSlider.create(bufferSlider, {
                 start: startBuffer,
                 connect: "lower",
-                step: 1,
+                step: 0.01,
                 range: {
                     min: -5,
                     max: 500
@@ -594,9 +592,9 @@ module.exports = module.exports = {
             }).addTo(bufferItems);
             l._layers[Object.keys(l._layers)[0]]._vidi_type = "query_buffer";
 
-            jquery.snackbar({
+            $.snackbar({
                 id: "snackbar-conflict",
-                content: "<span id='conflict-progress'>" + __("Waiting to start....") + "</span>",
+                content: "<span id='conflict-progress'>" + __("Waiting to start") + "....</span>",
                 htmlAllowed: true,
                 timeout: 1000000
             });
@@ -623,10 +621,10 @@ module.exports = module.exports = {
                     data: "db=" + db + "&schema=" + (searchLoadedLayers ? schemataStr : "") + (searchStr !== "" ? "," + searchStr : "") + "&socketId=" + socketId.get() + "&layers=" + visibleLayers.join(",") + "&buffer=" + bufferValue + "&text=" + currentFromText + "&wkt=" + Terraformer.convert(buffer4326),
                     scriptCharset: "utf-8",
                     success: function (response) {
-                        var hitsCount = 0, noHitsCount = 0, errorCount = 0;
+                        var hitsCount = 0, noHitsCount = 0, errorCount = 0, resultOrigin, groups = [];
                         _result = response;
                         setTimeout(function () {
-                            jquery("#snackbar-conflict").snackbar("hide");
+                            $("#snackbar-conflict").snackbar("hide");
                         }, 200);
                         $("#spinner span").hide();
                         $("#result-origin").html(response.text);
@@ -635,59 +633,121 @@ module.exports = module.exports = {
                         $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
                         fileId = response.file;
                         searchFinish = true;
+                        resultOrigin = response.text || "Na";
+
                         $.each(response.hits, function (i, v) {
-                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
-                                title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
-                                if (v.error === null) {
-                                    if (metaData.meta_url) {
-                                        title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
-                                    }
-                                    row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
-                                    if (v.hits > 0) {
+                            v.meta.layergroup = v.meta.layergroup != null ? v.meta.layergroup : "Ungrouped";
+                            groups.push(v.meta.layergroup);
+                        });
+                        groups = array_unique(groups.reverse());
+                        for (let i = 0; i < groups.length; ++i) {
+                            row = "<tr><td><h4 style='font-weight: 400'>" + groups[i] + "</h4></td><td></td><td></td></tr>";
+                            hitsTable.append(row);
+                            let count = 0;
+                            $.each(response.hits, function (u, v) {
+                                if (v.hits > 0) {
+                                    let metaData = v.meta;
+                                    if (metaData.layergroup === groups[i]) {
+                                        count++;
+                                        let title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : u;
+                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + u + "' " + ($.inArray(u, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
                                         hitsTable.append(row);
-                                        hitsCount++;
-                                        if (v.data.length > 0) {
+                                    }
+                                }
+                            });
+                            // Remove empty groups
+                            if (count === 0) {
+                                hitsTable.find("tr").last().remove();
+                            }
+                        }
+                        ;
+
+
+                        for (let u = 0; u < groups.length; ++u) {
+                            row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
+                            hitsData.append(row);
+                            let count = 0;
+                            $.each(response.hits, function (i, v) {
+                                var table = i, table1, table2, tr, td, title, metaData = v.meta;
+                                if (metaData.layergroup === groups[u]) {
+                                    title = (typeof metaData.f_table_title !== "undefined" && metaData.f_table_title !== "" && metaData.f_table_title !== null) ? metaData.f_table_title : table;
+                                    if (v.error === null) {
+                                        if (metaData.meta_url) {
+                                            title = "<a target='_blank' href='" + metaData.meta_url + "'>" + title + "</a>";
+                                        }
+                                        row = "<tr><td>" + title + "</td><td>" + v.hits + "</td><td><div class='checkbox'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></td></tr>";
+                                        if (v.hits > 0) {
+                                            count++;
+                                            hitsCount++;
                                             table1 = $("<table class='table table-data'/>");
-                                            hitsData.append("<h3>" + title + " (" + v.data.length + ")</h3>");
-                                            $.each(v.data, function (u, row) {
-                                                var key = null, fid = null;
-                                                tr = $("<tr/>");
-                                                td = $("<td/>");
-                                                table2 = $("<table class='table'/>");
-                                                $.each(row, function (n, field) {
-                                                    if (!field.key) {
-                                                        if (!field.link) {
-                                                            table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + field.value + "</td></tr>");
-                                                        } else {
-                                                            table2.append("<tr><td style='width: 100px'>" + field.alias + "</td><td>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
-                                                        }
+                                            hitsData.append("<h5>" + title + " (" + v.hits + ")<div class='checkbox' style='float: right; margin-top: 25px'><label><input type='checkbox' data-gc2-id='" + i + "' " + ($.inArray(i, visibleLayers) > -1 ? "checked" : "") + "></label></div></h5>");
+                                            let conflictForLayer = metaData.meta !== null ? JSON.parse(metaData.meta) : null;
+                                            if (conflictForLayer !== null && 'short_conflict_meta_desc' in conflictForLayer) {
+                                                hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
+                                            }
+                                            if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
+                                                $(`<i style="cursor: pointer; color: #999999">Beskrivelse&hellip;</i>`).appendTo(hitsData).on("click", function () {
+                                                    let me = this;
+                                                    if ($(me).next().children().length === 0) {
+                                                        $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
+                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${conflictForLayer.long_conflict_meta_desc}
+                                                                        </div>`);
                                                     } else {
-                                                        key = field.name;
-                                                        fid = field.value;
+                                                        $(me).next().find(".alert").alert('close');
                                                     }
                                                 });
-                                                td.append(table2);
-                                                tr.append("<td class=''><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
-                                                tr.append(td);
-                                                table1.append(tr);
-                                            });
+                                                $(`<div></div>`).appendTo(hitsData);
+                                            }
+                                            if (v.data.length > 0) {
+                                                $.each(v.data, function (u, row) {
+                                                    var key = null, fid = null;
+                                                    tr = $("<tr style='border-top: 0px solid #eee'/>");
+                                                    td = $("<td/>");
+                                                    table2 = $("<table style='margin-bottom: 5px; margin-top: 5px;' class='table'/>");
+                                                    row.sort((a, b) => (a.sort_id > b.sort_id) ? 1 : ((b.sort_id > a.sort_id) ? -1 : 0));
+                                                    $.each(row, function (n, field) {
+                                                        if (!field.key) {
+                                                            if (!field.link) {
+                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
+                                                            } else {
+                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
+                                                            }
+                                                        } else {
+                                                            key = field.name;
+                                                            fid = field.value;
+                                                        }
+                                                    });
+                                                    td.append(table2);
+                                                    tr.append("<td style='width: 60px'><button type='button' class='btn btn-default btn-xs zoom-to-feature' data-gc2-sf-table='" + i + "' data-gc2-sf-key='" + key + "' data-gc2-sf-fid='" + fid + "'>#" + (u + 1) + " <i class='fa fa-search'></i></button></td>");
+                                                    tr.append(td);
+                                                    table1.append(tr);
+                                                });
+                                            }
                                             hitsData.append(table1);
-
+                                        } else {
+                                            noHitsTable.append(row);
+                                            noHitsCount++;
                                         }
                                     } else {
-                                        noHitsTable.append(row);
-                                        noHitsCount++;
+                                        row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
+                                        errorTable.append(row);
+                                        errorCount++;
                                     }
-                                } else {
-                                    row = "<tr><td>" + title + "</td><td>" + v.error + "</td></tr>";
-                                    errorTable.append(row);
-                                    errorCount++;
+                                    $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
+                                    $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
+                                    $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+                                    $('#conflict-result-origin').html(`Søgning foretaget med: <b>${resultOrigin}</b>`);
                                 }
-                                $('#conflict-result-content a[href="#hits-content"] span').html(" (" + hitsCount + ")");
-                                $('#conflict-result-content a[href="#nohits-content"] span').html(" (" + noHitsCount + ")");
-                                $('#conflict-result-content a[href="#error-content"] span').html(" (" + errorCount + ")");
+
+                            });
+
+                            // Remove empty groups
+                            if (count === 0) {
+                                hitsData.find("h4").last().remove();
+                                hitsData.find("hr").last().remove();
                             }
-                        );
+
+                        }
                         $(".zoom-to-feature").click(function (e) {
                             _zoomToFeature($(this).data('gc2-sf-table'), $(this).data('gc2-sf-key'), $(this).data('gc2-sf-fid'));
                             e.stopPropagation();
@@ -710,7 +770,7 @@ module.exports = module.exports = {
                         }
                     },
                     error: function () {
-                        jquery("#snackbar-conflict").snackbar("hide");
+                        $("#snackbar-conflict").snackbar("hide");
                     }
                 })
             })
@@ -733,115 +793,99 @@ module.exports = module.exports = {
     }
 };
 
-var dom = '<div role="tabpanel">' +
-    '<div id="conflict-buffer" style="display: none">' +
-    '<div>' +
-    '<label for="conflict-buffer-value" class="control-label">Buffer</label>' +
-    '<input id="conflict-buffer-value" class="form-control">' +
-    '<div id="conflict-buffer-slider" class="slider shor"></div>' +
-    '</div>' +
-    '</div>' +
-    '<div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">' +
-    '<input id="' + id + '" class="' + id + ' typeahead" type="text" placeholder="Adresse eller matrikelnr.">' +
-    '</div>' +
-    '<div id="conflict-main-tabs-container" style="display: none">' +
-    '<ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">' +
-    '<li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>' +
-    '<li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>' +
-    '<li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>' +
-    '</ul>' +
-    '<!-- Tab panes -->' +
-    '<div class="tab-content" style="display: none">' +
-    '<div role="tabpanel" class="tab-pane active" id="conflict-result-content">' +
-    '<div id="conflict-result">' +
-    '<div id="conflict-result-origin"></div>' +
+var dom = `
+<div role="tabpanel">
+    <div id="conflict-buffer" style="display: none">
+        <div>
+            <label for="conflict-buffer-value" class="control-label">Buffer</label>
+            <input id="conflict-buffer-value" class="form-control">
+            <div id="conflict-buffer-slider" class="slider shor"></div>
+        </div>
+    </div>
+    <div id="conflict-places" class="places" style="margin-bottom: 20px; display: none">
+        <input id="${id}" class="${id} typeahead" type="text" placeholder="Adresse eller matrikelnr.">
+    </div>
+    <div id="conflict-main-tabs-container" style="display: none">
+        <ul class="nav nav-tabs" role="tablist" id="conflict-main-tabs">
+            <li role="presentation" class="active"><a href="#conflict-result-content" aria-controls="" role="tab" data-toggle="tab">Resultat</a></li>
+            <li role="presentation"><a href="#conflict-info-content" aria-controls="" role="tab" data-toggle="tab">Info</a></li>
+            <li role="presentation"><a href="#conflict-log-content" aria-controls="" role="tab" data-toggle="tab">Log</a></li>
+        </ul>
+        <!-- Tab panes -->
+        <div class="tab-content" style="display: none">
+            <div role="tabpanel" class="tab-pane active" id="conflict-result-content">
+                <div id="conflict-result">
+                    <div><span id="conflict-result-origin"></span></div>
 
-    '<div class="btn-toolbar bs-component" style="margin: 0;">' +
-    '<div class="btn-group">' +
-    '<button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class=\'fa fa-cog fa-spin fa-lg\'></i> Print rapport"><i class=\'fa fa-cog fa-lg\'></i> Print rapport</button>' +
-    '</div>' +
-    '<fieldset disabled id="conflict-get-print-fieldset">' +
-    '<div class="btn-group">' +
-    '<a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>' +
-    '<a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>' +
-    '<ul class="dropdown-menu">' +
-    '<li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>' +
-    '<li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>' +
-    '</ul>' +
-    '</div>' +
-    '</fieldset>' +
-    '</div>' +
+                    <div class="btn-toolbar bs-component" style="margin: 0;">
+                        <div class="btn-group">
+                            <button disabled class="btn btn-raised" id="conflict-print-btn" data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> PDF rapport"><i class='fa fa-cog fa-lg'></i> Print rapport</button>
+                        </div>
+                        <div class="btn-group">
+                            <button disabled class="btn btn-raised" id="conflict-set-print-area-btn"><i class='fas fa-expand'></i></button>
+                        </div>
+                        <fieldset disabled id="conflict-get-print-fieldset">
+                            <div class="btn-group">
+                                <a target="_blank" href="javascript:void(0)" class="btn btn-primary btn-raised" id="conflict-open-pdf">Åben PDF</a>
+                                <a href="bootstrap-elements.html" class="btn btn-primary btn-raised dropdown-toggle" data-toggle="dropdown"><span class="caret"></span></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="javascript:void(0)" id="conflict-download-pdf">Download PDF</a></li>
+                                    <li><a target="_blank" href="javascript:void(0)" id="conflict-open-html">Open HTML page</a></li>
+                                </ul>
+                            </div>
+                        </fieldset>
+                    </div>
 
-    '<!--<button class="btn btn-primary btn-xs" id="conflict-geomatic-btn" disabled="true">Hent Geomatic<img src=\'http://www.gifstache.com/images/ajax_loader.gif\' class=\'print-spinner\'/></button>-->' +
-    '<div role="tabpanel">' +
-    '<!-- Nav tabs -->' +
-    '<ul class="nav nav-tabs" role="tablist">' +
-    '<li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>' +
-    '<li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>' +
-    '<li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>' +
-    '<li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>' +
-    '</ul>' +
-    '<div class="tab-content">' +
-    '<div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">' +
-    '<div id="hits">' +
-    '<table class="table table-hover">' +
-    '<thead>' +
-    '<tr>' +
-    '<th>Layer</th>' +
-    '<th>Number of objects</th>' +
-    '<th>Show</th>' +
-    '</tr>' +
-    '</thead>' +
-    '<tbody></tbody>' +
-    '</table>' +
-    '</div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">' +
-    '<div id="hits-data"></div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">' +
-    '<div id="nohits">' +
-    '<table class="table table-hover">' +
-    '<thead>' +
-    '<tr>' +
-    '<th>Layer</th>' +
-    '<th>Number of objects</th>' +
-    '<th>Show</th>' +
-    '</tr>' +
-    '</thead>' +
-    '<tbody></tbody>' +
-    '</table>' +
-    '</div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">' +
-    '<div id="error">' +
-    '<table class="table table-hover">' +
-    '<thead>' +
-    '<tr>' +
-    '<th>Layer</th>' +
-    '<th>Severity</th>' +
-    '</tr>' +
-    '</thead>' +
-    '<tbody></tbody>' +
-    '</table>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="conflict-info-content">' +
-    '<div class="alert alert-info" role="alert">Når du klikker på et tændt lag, vises resultatet har. Du kan derefter søge med objektet.</div>' +
-    '<div id="conflict-info-box">' +
-    '<div id="conflict-modal-info-body">' +
-    '<ul class="nav nav-tabs" id="conflict-info-tab"></ul>' +
-    '<div class="tab-content" id="conflict-info-pane"></div>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '<div role="tabpanel" class="tab-pane" id="conflict-log-content">' +
-    '<textarea style="width: 100%" rows="8" id="conflict-console"></textarea>' +
-    '</div>' +
-    '</div>' +
-    '</div>' +
-    '</div>';
+                    <div role="tabpanel">
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs" role="tablist">
+                            <li role="presentation" class="active"><a href="#hits-content" aria-controls="hits-content" role="tab" data-toggle="tab">Med konflikter<span></span></a></li>
+                            <li role="presentation"><a href="#hits-data-content" aria-controls="hits-data-content" role="tab" data-toggle="tab">Data fra konflikter<span></span></a></li>
+                            <li role="presentation"><a href="#nohits-content" aria-controls="nohits-content" role="tab" data-toggle="tab">Uden konflikter<span></span></a></li>
+                            <li role="presentation"><a href="#error-content" aria-controls="error-content" role="tab" data-toggle="tab">Fejl<span></span></a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div role="tabpanel" class="tab-pane active conflict-result-content" id="hits-content">
+                                <div id="hits">
+                                    <table class="table table-hover">
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane conflict-result-content" id="hits-data-content">
+                                <div id="hits-data"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane conflict-result-content" id="nohits-content">
+                                <div id="nohits">
+                                    <table class="table table-hover">
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane conflict-result-content" id="error-content">
+                                <div id="error">
+                                    <table class="table table-hover">
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="conflict-info-content">
+                <div id="conflict-info-box">
+                    <div id="conflict-modal-info-body">
+                        <ul class="nav nav-tabs" id="conflict-info-tab"></ul>
+                        <div class="tab-content" id="conflict-info-pane"></div>
+                    </div>
+                </div>
+            </div>
+            <div role="tabpanel" class="tab-pane" id="conflict-log-content">
+                <textarea style="width: 100%" rows="8" id="conflict-console"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+`;
+

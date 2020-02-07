@@ -5,6 +5,7 @@
  */
 
 "use strict";
+
 function detailFormatter(index, row) {
     var html = [];
     $.each(row, function (key, value) {
@@ -12,6 +13,7 @@ function detailFormatter(index, row) {
     });
     return html.join('');
 }
+
 function isTouchDevice() {
     try {
         document.createEvent("TouchEvent");
@@ -20,6 +22,7 @@ function isTouchDevice() {
         return false;
     }
 }
+
 function touchScroll(selector) {
     if (isTouchDevice()) {
         var scrollStartPosY = 0;
@@ -44,9 +47,9 @@ function touchScroll(selector) {
 }
 
 function array_unique(ar) {
-    return ar.filter( function onlyUnique(value, index, self) {
+    return ar.filter(function onlyUnique(value, index, self) {
         return self.indexOf(value) === index;
-    } )
+    })
 }
 
 /**
@@ -131,6 +134,9 @@ var Base64 = {
 
     // private method for UTF-8 encoding
     _utf8_encode: function (string) {
+        if (!string) {
+            return "";
+        }
         string = string.replace(/\r\n/g, "\n");
         var utftext = "";
 
@@ -180,5 +186,15 @@ var Base64 = {
 
         }
         return string;
+    }
+};
+
+function createAlert(el, text) {
+    if (el.next().children().length === 0) {
+        el.next().html(`<div class="alert alert-dismissible alert-info" role="alert">
+                                                                            <button type="button" class="close" data-dismiss="alert">×</button>${text}
+                                                                        </div>`);
+    } else {
+        el.next().find(".alert").alert('close');
     }
 }

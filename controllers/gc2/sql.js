@@ -10,11 +10,12 @@ var config = require('../../config/config.js').gc2;
 var request = require('request');
 var fs = require('fs');
 
-router.all('/api/sql/:db', function (req, response) {
+var query = function (req, response) {
+    req.setTimeout(0); // no timeout
     var db = req.params.db,
         q = req.body.q || req.query.q,
         srs = req.body.srs || req.query.srs,
-        lifetime = req.body.lifetime || req.query.lifetime,
+        lifetime = req.body.lifetime || req.query.lifetime || "0",
         client_encoding = req.body.client_encoding || req.query.client_encoding,
         base64 = req.body.base64 || req.query.base64,
         format = req.body.format || req.query.format,
@@ -25,17 +26,18 @@ router.all('/api/sql/:db', function (req, response) {
         writeStream,
         rem,
         headers,
+        uri,
         key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
             var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
 
-    var postData = "q=" + encodeURIComponent(q) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + req.session.gc2ApiKey + "&custom_data=" + (custom_data || ""),
+    var postData = "q=" + (base64 === "true" ? encodeURIComponent(q) : encodeURIComponent(q)) + "&base64=" + (base64 === "true" ? "true" : "false") + "&srs=" + srs + "&lifetime=" + lifetime + "&client_encoding=" + (client_encoding || "UTF8") + "&format=" + (format ? format : "geojson") + "&key=" + (typeof req.session.gc2ApiKey !=="undefined" ? req.session.gc2ApiKey : "xxxxx" /*Dummy key is sent to prevent start of session*/) + "&custom_data=" + (custom_data || ""),
         options;
 
     // Check if user is a sub user
-    if (req.session.gc2UserName && req.session.subUser) {
-        userName = req.session.subUser + "@" + db;
+    if (req.session.screenName && req.session.subUser) {
+        userName = req.session.screenName + "@" + db;
     } else {
         userName = db;
     }
@@ -44,9 +46,13 @@ router.all('/api/sql/:db', function (req, response) {
         postData = postData + "&key=" + req.body.key;
     }
 
+    uri = custom_data !== null && custom_data !== undefined && custom_data !== "null" ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v2/sql/" + userName;
+
+    console.log(uri);
+
     options = {
         method: 'POST',
-        uri: custom_data ? config.host + "/api/v2/sqlwrapper/" + userName : config.host + "/api/v1/sql/" + userName,
+        uri: uri,
         form: postData
     };
 
@@ -69,15 +75,22 @@ router.all('/api/sql/:db', function (req, response) {
         }
     }
 
-    if (!store) {
-        response.writeHead(200, headers);
-    }
+    // if (!store) {
+    //     //response.writeHead(200, headers);
+    // }
 
     rem = request(options);
 
     if (store) {
         writeStream = fs.createWriteStream(__dirname + "/../../public/tmp/stored_results/" + fileName);
     }
+
+    rem.on('response', function(res) {
+        console.log(res.statusCode);
+        if (!store) {
+            response.writeHead(res.statusCode, headers);
+        }
+    });
 
     rem.on('data', function (chunk) {
         if (store) {
@@ -95,5 +108,7 @@ router.all('/api/sql/:db', function (req, response) {
         }
     });
 
-});
+};
+router.all('/api/sql/:db', query);
+router.all('/api/sql/nocache/:db', query);
 module.exports = router;

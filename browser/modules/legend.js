@@ -1,20 +1,32 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-var cloud;
-var meta;
-var _layers;
-var urlparser = require('./urlparser');
-var db = urlparser.db;
-var BACKEND = require('../../config/config.js').backend;
+let cloud;
+let meta;
+let _layers;
+let urlparser = require('./urlparser');
+let db = urlparser.db;
+let BACKEND = require('../../config/config.js').backend;
+let hasBeenVisible = [];
+let hasBeenVisibleTmp = [];
 
 //var CSSParser = require("jscssp").CSSParser;
 
+let arrayUnique = (array) => {
+    let a = array.concat();
+    for(let i=0; i<a.length; ++i) {
+        for(let j=i+1; j<a.length; ++j) {
+            if(a[i] === a[j])
+                a.splice(j--, 1);
+        }
+    }
+    return a;
+};
 
 /**
  *
@@ -29,17 +41,33 @@ module.exports = module.exports = {
     },
     init: function (layerArr, el) {
         return new Promise(function (resolve, reject) {
-            var metaDataKeys = meta.getMetaDataKeys();
+            let metaDataKeys = meta.getMetaDataKeys(), visibleLayers = _layers.getLayers(";"), checked, layerName, param = ``;
 
-            var visibleLayers = _layers.getLayers(";"), layers, checked, layerName;
-
-            if (layerArr) {
-                layers = layerArr.join(";");
-            } else {
-                layers = visibleLayers;
+            // No layers visible
+            if (metaDataKeys.length === 0) {
+                resolve();
             }
 
-            var param = 'l=' + layers + '&db=' + db;
+            if (window.vidiConfig.removeDisabledLayersFromLegend) {
+                if (layerArr) {
+                    layers = layerArr.join(";");
+                } else {
+                    layers = visibleLayers;
+                }
+
+                param = 'l=' + layers + '&db=' + db;
+            } else {
+                hasBeenVisible = arrayUnique([...hasBeenVisible, ...layerArr ? layerArr : visibleLayers.split(";")]);
+
+                // No need to update the legend because no new layers added
+                if (hasBeenVisible.length === hasBeenVisibleTmp.length && hasBeenVisible.every((value, index) => value === hasBeenVisibleTmp[index])) {
+                    resolve();
+                }
+    
+                hasBeenVisibleTmp = hasBeenVisible;
+                param = 'l=' + hasBeenVisible.join(";") + '&db=' + db;
+            }
+
             $.ajax({
                 url: '/api/legend/' + db + '?' + param,
                 success: function (response) {

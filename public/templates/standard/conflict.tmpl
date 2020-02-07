@@ -1,0 +1,697 @@
+<style>
+    .navbar .navbar-brand {
+        height: 48px;
+        line-height: 19px;
+    }
+    #pane {
+        height: 500px;
+        right: 0 !important;
+    }
+
+    #search-ribbon {
+        width: 0 !important;
+        height: 0 !important;
+    }
+    #map {
+        width: 100% !important;
+    }
+    #myNavmenu {
+        width: 0 !important;
+    }
+    #module-container {
+        width: 100% !important;
+        top: 500px;
+        right: 0 !important;
+        left: 0 !important;
+    }
+    #conflict-buffer {
+        display: none !important;
+    }
+    .modal-header {
+        display: none !important;
+    }
+    .help-btn {
+        display: none !important;
+    }
+    #conflict-main-tabs {
+        display: none !important;
+    }
+    #conflict-result .btn-toolbar.bs-component {
+        display: none !important;
+
+    }
+    #hits-data-content {
+        display: block !important;
+
+    }
+    .nav.nav-tabs {
+        display: none !important;
+    }
+    #hits-content {
+        display: none !important;
+    }
+    #conflict-places {
+        margin: 0;
+        position: fixed;
+        top: 0;
+        height: 100px;
+        width: calc(100% - 20px);
+        left: 10px;
+    }
+    .leaflet-control-boxzoom, .history-control, .leaflet-control-locate, .leaflet-control-measurements {
+        display: none !important;
+    }
+
+    .conflict-result-content {
+        overflow: unset;
+    }
+
+</style>
+<script>
+    setInterval(function() {
+        try {
+            window.top.postMessage(document.getElementById("conflict-result-content").scrollHeight, "*");
+        } catch (e) {}
+    }, 500);
+</script>
+<!-- map -->
+<div id="pane">
+    <div id="container">
+        <div id="map"></div>
+    </div>
+</div>
+
+<!-- About Modal -->
+<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
+            </div>
+            <div class="modal-body">
+                {{{aboutBox}}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Login Modal -->
+<div class="modal fade" id="login-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="login-modalLabel"></h3>
+            </div>
+            <div class="modal-body" id="login-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KeplerGL Modal -->
+<div class="modal fade" id="keplergl-modal" tabindex="-1" role="dialog" aria-labelledby="click-modalLabel">
+    <div class="modal-dialog" role="document" style="width: 95%; height: 95%;">
+        <div class="modal-content" style="height: 100%;">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="keplergl-modalLabel">KeplerGL</h3>
+            </div>
+            <div class="modal-body" id="keplergl-modal-body" style="height: calc(100% - 51px);">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="legend-dialog" class="dialog-bottom fade-then-dragging">
+    <div class="modal-header">
+        <button type="button" class="close close-hide" data-module="legend" aria-hidden="true"><i
+                class="material-icons">close</i>
+        </button>
+        <button type="button" class="close expand-more" aria-hidden="true"><i
+                class="material-icons">expand_less</i>
+        </button>
+        <button type="button" class="close expand-less" aria-hidden="true"><i
+                class="material-icons">expand_more</i>
+        </button>
+        <h3 class="modal-title">{{Legend}}</h3>
+    </div>
+    <div class="modal-body"></div>
+</div>
+
+<div id="editor-attr-dialog" class="dialog-bottom fade-then-dragging">
+    <div class="modal-header">
+        <button type="button" class="close editor-attr-dialog__close-hide" data-module="editor" aria-hidden="true"><i
+                class="material-icons">close</i>
+        </button>
+        <button type="button" class="close editor-attr-dialog__expand-more" aria-hidden="true"><i
+                class="material-icons">expand_less</i>
+        </button>
+        <button type="button" class="close editor-attr-dialog__expand-less" aria-hidden="true"><i
+                class="material-icons">expand_more</i>
+        </button>
+        <h3 class="modal-title">Attributes</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group" id="editor-attr-form"></div>
+    </div>
+</div>
+
+<div id="vector-layer-table-view-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
+    <div class="modal-header">
+        <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
+                class="material-icons">close</i>
+        </button>
+        <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+        </button>
+        <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+        </button>
+        <h3 class="modal-title">Table view</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group" id="vector-layer-table-view-form"></div>
+    </div>
+</div>
+
+<div id="watsonc-features-dialog" class="dialog-bottom fade-then-dragging dialog-bottom-wide">
+    <div class="modal-header">
+        <button type="button" class="close close-hide" data-module="editor" aria-hidden="true"><i
+                class="material-icons">close</i>
+        </button>
+        <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
+        </button>
+        <button type="button" class="close expand-less" aria-hidden="true"><i class="material-icons">expand_more</i>
+        </button>
+        <h3 class="modal-title">Watsonc extension</h3>
+    </div>
+    <div class="modal-body">
+        <div class="form-group" id="watsonc-features-dialog-form"></div>
+    </div>
+</div>
+
+<div id="search-ribbon">
+    <div id="search-border" style="display: none"><i class="floatRight cursorPointer fa fa-reorder"></i></div>
+    <div id="search-container">
+        <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-right offcanvas" role="navigation"
+             data-autohide="false" data-recalc="true" style="overflow: hidden">
+
+            <div id="info-modal" class="slide-right">
+                <div class="modal-header">
+                    <button type="button" class="close" aria-hidden="true">×</button>
+                    <h2 class="modal-title"></h2>
+                </div>
+                <div id="info-modal-body-wrapper">
+                    <div class="modal-body" id="info-modal-body"></div>
+                </div>
+            </div>
+
+            <div id="module-container" class="slide-right">
+                <div class="modal-header">
+                    <button type="button" class="close" aria-hidden="true">×</button>
+                    <h2 class="modal-title"></h2>
+                </div>
+                <div id="module-container-wrapper">
+                    <div class="modal-body" id="module-container-body">
+                        <!-- Tab panes -->
+                        <div class="tab-content main-content">
+                            <div role="tabpanel" class="tab-pane active" id="search-content" style="display: none">
+                                <div id="place-search">
+                                    <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Search places}}</div>')">
+                                        <i class="material-icons help-btn">help_outline</i></div>
+                                    <div></div>
+                                    <div class="places">
+                                        <div class="btn-group">
+                                            <input id="custom-search" class="custom-search typeahead" type="text"
+                                                   placeholder="{{Address}}">
+                                            <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="info-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Info text}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <div class="togglebutton">
+                                    <label>
+                                        <input id="advanced-info-btn" type="checkbox"> {{Activate advanced query}}
+                                    </label>
+                                </div>
+                                <div id="buffer" style="display: none">
+                                    <div>
+                                        <label for="buffer-value" class="control-label">{{Buffer}}</label>
+                                        <input id="buffer-value" class="form-control">
+                                        <div id="buffer-slider" class="slider shor"></div>
+                                    </div>
+                                </div>
+                                <div id="info-box">
+                                    <div id="modal-info-body">
+                                        <ul class="nav nav-tabs" id="info-tab"></ul>
+                                        <div class="tab-content" id="info-pane"></div>
+                                    </div>
+                                </div>
+                                <table id="dtable" data-show-toggle="true"></table>
+
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="layer-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text overlays}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <div class="form-group" id="layers" role="tablist"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="baselayer-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text baselayers}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <div class="form-group" id="base-layer-list"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="legend-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text legend}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <a href="#legend-dialog" id="btn-show-legend-in-map" data-module="legend" class="btn btn-raised btn-xs map-tool-btn">{{Show legend on top the map}}</a>
+                                <div id="legend" class="legend"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="draw-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text draw}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i>
+                                </div>
+                                <div></div>
+                                <div class="panel panel-default">
+                                    <div class="panel-heading" role="tab">
+                                        <h4 class="panel-title">
+                                            <a style="display: block" class="accordion-toggle" data-toggle="collapse" href="#draw-collapse">
+                                                <i class="material-icons">&#xE8B8;</i> {{Line style}}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="draw-collapse" class="accordion-body collapse">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div style="margin: 15px 0 0 10px ">
+                                                    <h4>{{{Settings for all new drawings}}}</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+
+                                                <label for="draw-colorpicker-input"
+                                                       class="col-md-3 control-label">{{Color}}</label>
+
+                                                <div id="draw-colorpicker"
+                                                     class="input-group colorpicker-component col-md-10">
+                                                    <input id="draw-colorpicker-input" name="draw-colorpicker-input"
+                                                           type="text" value="#ff0000" class="form-control"
+                                                           style="margin-left: 15px;"/>
+                                                    <span class="input-group-addon"><i
+                                                            style="margin-left: 10px;"></i></span>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-type"
+                                                           class="col-md-3 control-label">{{Type}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-type" name="draw-line-type"
+                                                                class="form-control">
+                                                            <option value="none">{{Solid}}</option>
+                                                            <option value="7, 7">{{Dashed, short}}</option>
+                                                            <option value="12, 7">{{Dashed, medium}}</option>
+                                                            <option value="17, 7">{{Dashed, long}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-weight"
+                                                           class="col-md-3 control-label">{{Weight}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-weight" name="draw-line-weight"
+                                                                class="form-control">
+                                                            <option value="2">{{X-thin}}</option>
+                                                            <option value="3">{{Thin}}</option>
+                                                            <option value="4" selected>{{Medium}}</option>
+                                                            <option value="5">{{Thick}}</option>
+                                                            <option value="6">{{X-Thick}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-type"
+                                                           class="col-md-3 control-label">{{Cap}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-cap" name="draw-line-cap"
+                                                                class="form-control">
+                                                            <option value="butt">{{Butt}}</option>
+                                                            <option value="round">{{Round}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-measure"
+                                                           class="col-md-3 control-label">{{Measure}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <div class="checkbox">
+                                                            <label style="margin-top: 5px">
+                                                                <input id="draw-measure" name="draw-measure"
+                                                                       type="checkbox">
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div style="margin: 15px 0 0 10px "><h4>{{{Settings for new lines only}}}</h4></div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity"
+                                                           class="col-md-3 control-label">{{Extremities}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity" name="draw-line-extremity"
+                                                                class="form-control">
+                                                            <option value="none">{{None}}</option>
+                                                            <option value="arrowM">{{Arrow}}</option>
+                                                            <option value="stopM">{{Stop}}</option>
+                                                            <option value="squareM">{{Square}}</option>
+                                                            <option value="dotM">{{Dot}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity-size"
+                                                           class="col-md-3 control-label">{{Extremity size}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity-size"
+                                                                name="draw-line-extremity-size" class="form-control"
+                                                                disabled>
+                                                            <option value="2">{{X-Small}}</option>
+                                                            <option value="3">{{Small}}</option>
+                                                            <option value="4" selected>{{Medium}}</option>
+                                                            <option value="5">{{Large}}</option>
+                                                            <option value="6">{{X-Large}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+
+                                        <div class="row">
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-extremity-where"
+                                                           class="col-md-3 control-label">{{Extremity ends}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <select id="draw-line-extremity-where"
+                                                                name="draw-line-extremity-where" class="form-control"
+                                                                disabled>
+                                                            <option value="1">{{End}}</option>
+                                                            <option value="2">{{Start}}</option>
+                                                            <option value="3">{{Both}}</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-6">
+                                                <div class="form-group">
+                                                    <label for="draw-line-total-dist"
+                                                           class="col-md-3 control-label">{{Total distance}}</label>
+
+                                                    <div class="col-md-10">
+                                                        <div class="checkbox">
+                                                            <label style="margin-top: 5px">
+                                                                <input id="draw-line-total-dist"
+                                                                       name="draw-line-total-dist"
+                                                                       type="checkbox" disabled>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <a class="btn btn-sm btn-raised" id="_draw_download_geojson" target="_blank" href="javascript:void(0)">
+                                    <i class="fa fa-download" aria-hidden="true"></i> GeoJson
+                                </a>
+                                <div id="draw-table"></div>
+
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="state-snapshots-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{StateSnapshots description}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <div class="form-group" id="state-snapshots" role="tablist"></div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade" id="print-content" style="display: none">
+                                <div class="help-btn" onclick="javascript:$(this).next().html('<div class=\'alert alert-dismissible alert-info\' role=\'alert\'><button type=\'button\' class=\'close\' data-dismiss=\'alert\'>×</button>{{Help text print}}</div>')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
+                                <div class="btn-toolbar bs-component" style="margin: 0;">
+                                    <div class="btn-group">
+                                        <button id="start-print-btn" class="btn btn-raised" style="width: 130px"
+                                                data-loading-text="<i class='fa fa-cog fa-spin fa-lg'></i> {{Make PDF}}" disabled>
+                                            <i class='fa fa-cog fa-lg'></i> {{Make PDF}}
+                                        </button>
+                                    </div>
+                                    <fieldset disabled id="get-print-fieldset">
+                                        <div class="btn-group">
+                                            <a target="_blank" href="javascript:void(0)"
+                                               class="btn btn-primary btn-raised"
+                                               id="open-pdf">{{Open PDF}}</a>
+                                            <a href="bootstrap-elements.html"
+                                               class="btn btn-primary btn-raised dropdown-toggle"
+                                               data-toggle="dropdown"><span class="caret"></span></a>
+                                            <ul class="dropdown-menu">
+                                                <li><a href="javascript:void(0)" id="download-pdf">{{Download}}</a></li>
+                                                <li>
+                                                    <a target="_blank" href="javascript:void(0)" id="open-html">{{Open HTML page}}</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                                <div>
+                                    <form class="form-horizontal" id="print-form" role="form" data-toggle="validator">
+                                        <fieldset>
+                                            <div class="form-group">
+                                                <label for="select-scale"
+                                                       class="col-md-2 control-label">{{Scale}}</label>
+                                                <div class="col-md-10">
+                                                    <div class="input-group">
+                                                        <div class="input-group-btn">
+                                                            <button type="button"
+                                                                    class="btn btn-default dropdown-toggle"
+                                                                    data-toggle="dropdown" aria-haspopup="true"
+                                                                    aria-expanded="false" disabled>1: <span
+                                                                    class="caret"></span></button>
+                                                            <ul id="ul-scale"
+                                                                class="dropdown-menu dropdown-menu-right"></ul>
+                                                        </div>
+                                                        <input type="number" min="200" id="select-scale"
+                                                               class="form-control" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group" style="display: none">
+                                                <label class="col-md-2 control-label">{{Template}}</label>
+                                                <div class="col-md-10" id="print-tmpl"></div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-2 control-label">{{Page size}}</label>
+                                                <div class="col-md-10" id="print-size"></div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-md-2 control-label">{{Orientation}}</label>
+                                                <div class="col-md-10" id="print-orientation"></div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="print-title"
+                                                       class="col-md-2 control-label">{{Title}}</label>
+
+                                                <div class="col-md-10">
+                                                    <input type="text" class="form-control" id="print-title" disabled>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="print-comment"
+                                                       class="col-md-2 control-label">{{Comment}}</label>
+                                                <div class="col-md-10">
+                                        <textarea class="form-control" rows="3" id="print-comment"
+                                                  disabled></textarea>
+                                                    <span class="help-block">{{The comment will be placed on the PDF}}</span>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <div class="togglebutton">
+                                                    <label>
+                                                        <input id="add-legend-btn" type="checkbox" checked
+                                                               disabled> {{Show legend on print}}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="navbar navbar-default" style="display: none">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <a class="navbar-brand" href="javascript:void(0)"><i class="material-icons brand-icon">fullscreen</i>{{brandName}}
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div id="side-panel" style="display: none">
+                <div role="tabpanel">
+                    <!-- Nav tabs -->
+                    <ul class="" role="tablist" id="main-tabs">
+                        <li role="presentation">
+                            <a href="#search-content" aria-controls="search-content" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Search}}" class="material-icons">search</i>
+                                <span class="module-title">{{Search}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="infoClick" href="#info-content" aria-controls="info-content" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Info}}" class="material-icons">info</i>
+                                <span class="module-title">{{Info}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="layerTree" href="#layer-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Layers}}" class="material-icons">layers</i>
+                                <span class="module-title">{{Layers}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="baseLayer" href="#baselayer-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Baselayers}}" class="material-icons">map</i>
+                                <span class="module-title">{{Baselayers}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="legend" href="#legend-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Legend}}" class="material-icons">format_color_text</i>
+                                <span class="module-title">{{Legend}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="draw" href="#draw-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Draw}}" class="material-icons">create</i>
+                                <span class="module-title">{{Draw}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="stateSnapshots" href="#state-snapshots-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{State snapshots}}" class="material-icons">folder</i>
+                                <span class="module-title">{{State snapshots}}</span>
+                            </a>
+                        </li>
+
+                        <li role="presentation">
+                            <a data-module-id="print" href="#print-content" aria-controls="" role="tab" data-toggle="tab">
+                                <i data-container="body" data-toggle="tooltip" data-placement="left"
+                                    title="{{Print}}" class="material-icons">print</i>
+                                <span class="module-title">{{Print}}</span>
+                            </a>
+                        </li>
+
+                        <hr>
+                    </ul>
+                    <ul role="tablist">
+                        <hr>
+                        <li><a href="#" id="btn-reset"><i class="material-icons">replay</i>{{Reset}}</a></li>
+                        <li><a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons">question_answer</i>{{About}}
+                        </a></li>
+                        <li>
+                            <a id="session" href="#" data-toggle="modal" data-target="#login-modal" style="display: none">
+                                <i class="material-icons gc2-session-lock" aria-hidden="true" style="display: none">lock</i>
+                                <i class="material-icons gc2-session-unlock" aria-hidden="true">lock_open</i>
+                                <span class="module-title">Log in</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+</div>

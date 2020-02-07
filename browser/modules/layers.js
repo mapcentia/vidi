@@ -6,8 +6,9 @@
 
 'use strict';
 
-import { GROUP_CHILD_TYPE_LAYER, GROUP_CHILD_TYPE_GROUP } from './layerTree/LayerSorting';
-import { LAYER } from './layerTree/constants';
+import {GROUP_CHILD_TYPE_LAYER} from './layerTree/LayerSorting';
+import {LAYER} from './layerTree/constants';
+import layerTreeUtils from './layerTree/utils';
 
 /**
  *
@@ -55,7 +56,7 @@ var layerTree;
 
 var currentlyLoadedLayers = [];
 
-var uri = null
+var uri = null;
 
 let _self = false;
 
@@ -82,7 +83,8 @@ module.exports = {
     /**
      *
      */
-    init: function () {},
+    init: function () {
+    },
 
     ready: function () {
         return ready;
@@ -102,7 +104,7 @@ module.exports = {
                         || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR + ':'))
                         || (layers[key].id && layers[key].id.startsWith(LAYER.VECTOR_TILE + ':'))
                         || (layers[key].id && layers[key].id.startsWith(LAYER.WEBGL + ':'))) {
-                        
+
                         if (searchedLayerKey) {
                             if (searchedLayerKey === layers[key].id) {
                                 mapLayers.push(layers[key]);
@@ -168,71 +170,118 @@ module.exports = {
     },
 
     setUri: function (str) {
-      uri = str;
+        uri = str;
     },
 
     reorderLayers: () => {
         let order = layerTree.getLatestLayersOrder();
         let layers = _self.getMapLayers();
         if (order) {
-            order.map((orderItem, groupIndex) => {
-                orderItem.children.map((item, index) => {
-                    if (item.type === GROUP_CHILD_TYPE_LAYER) {
+            let indexCounter = 100;
+            const orderSubgroup = (order) => {
+                order.map((item) => {
+                    if (item.type && item.type === GROUP_CHILD_TYPE_LAYER) {
                         layers.map(layer => {
-                            if (layer.id && (layer.id.replace(`v:`, ``) === item.id.replace(`v:`, ``))) {
-                                let zIndex = ((orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
+                            let itemId = false;
+                            if (item.layer) {
+                                itemId = item.layer.f_table_schema + '.' + item.layer.f_table_name;
+                            } else {
+                                itemId = item.id;
+                            }
+
+                            if (!itemId) throw Error(`Unable to detect order item identifier`);
+
+                            if (layer.id && (layerTreeUtils.stripPrefix(layer.id) === layerTreeUtils.stripPrefix(itemId))) {
+                                let zIndex = (10000 - indexCounter);
                                 layer.setZIndex(zIndex);
+                                indexCounter++;
                             }
                         });
-                    } else if (item.type === GROUP_CHILD_TYPE_GROUP) {
-                        item.children.map((childItem, childIndex) => {
-                            layers.map(layer => {
-                                if (layer.id && (layer.id.replace(`v:`, ``) === childItem.id.replace(`v:`, ``))) {
-                                    let zIndex = ((item.children.length - childIndex) + (orderItem.children.length - index) * 100 + ((order.length - groupIndex) + 1) * 10000);
-                                    layer.setZIndex(zIndex);
-                                }
-                            });
-                        });
+                    } else if (item.children) {
+                        orderSubgroup(item.children);
                     } else {
-                        throw new Error(`Invalid order object type`);   
+                        console.error(item);
+                        throw new Error(`Invalid order object type`);
                     }
                 });
-            });
+            };
+
+            orderSubgroup(order);            
         }
     },
 
     /**
+     * Adds a layers UTFGrid. Checks if any fields has mouse over set. Or else the grid is not added.
+     * @param layerKey      Layer key
+     * @returns {boolean}
+     */
+    addUTFGridLayer: function (layerKey) {
+        let metaData = meta.getMetaDataKeys(), fieldConf, useUTFGrid = false, result = false;
+        try {
+            fieldConf = JSON.parse(metaData[layerKey].fieldconf);
+        } catch (e) {
+            fieldConf = {};
+        }
+        for (let key in fieldConf) {
+            if (fieldConf.hasOwnProperty(key)) {
+                if (typeof fieldConf[key].mouseover !== "undefined" && fieldConf[key].mouseover === true) {
+                    useUTFGrid = true;
+                    break;
+                }
+            }
+        }
+        if (useUTFGrid) {
+            result = new Promise((resolve, reject) => {
+                if (metaData[layerKey].type === "RASTER") {
+                    reject();
+                    return;
+                }
+                cloud.get().addUTFGridLayers({
+                    host: host,
+                    layers: [layerKey],
+                    db: db,
+                    uri: uri,
+                    fieldConf: fieldConf
+                });
+                console.info(`${layerKey} UTFgrid was added to the map`);
+                resolve();
+            });
+        }
+        return result;
+    },
+
+    /**
      * Add raster layer
-     * 
-     * @param {String} layerKey                Layer key
-     * @param {Array}  additionalURLParameters Additional URL parameters
-     * 
+     *
+     * @param {String}  layerKey                Layer key
+     * @param {Array}   additionalURLParameters Additional URL parameters
+     *
      * @returns {Promise}
      */
     addLayer: function (layerKey, additionalURLParameters = []) {
         var me = this;
         let result = new Promise((resolve, reject) => {
-            var isBaseLayer, layers = [], metaData = meta.getMetaData();
+            var layers = [], metaData = meta.getMetaData();
 
             let layerWasAdded = false;
 
             $.each(metaData.data, function (i, layerDescription) {
                 let layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
                 if (layer === layerKey) {
-                    // Check if the opacity value differs from the default one
-                    isBaseLayer = !!layerDescription.baselayer;
+                    var isBaseLayer = !!layerDescription.baselayer;
                     layers[[layer]] = cloud.get().addTileLayers({
                         additionalURLParameters,
                         host: host,
                         layers: [layer],
                         db: db,
-                        isBaseLayer: isBaseLayer,
+                        isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
-                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        tileCached: useCache, // Use MapCache or "real" WMS. Defaults to MapCache
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
+                        //name: layerDescription.f_table_name,
                         name: layerDescription.f_table_name,
                         type: "wms", // Always use WMS protocol
                         format: "image/png",
@@ -268,16 +317,15 @@ module.exports = {
                     me.reorderLayers();
 
                     layerWasAdded = true;
+
                     return false;
                 }
             });
 
             if (layerWasAdded) {
-                console.info(`${layerKey} was added to the map`);
                 resolve();
             } else {
-                console.warn(`${layerKey} was not added to the map`);
-                reject();
+                reject(`${layerKey} was not added to the map`);
             }
         });
 
@@ -286,10 +334,10 @@ module.exports = {
 
     /**
      * Add vector tile layer
-     * 
+     *
      * @param {String} layerKey                Layer key
      * @param {Array}  additionalURLParameters Additional URL parameters
-     * 
+     *
      * @returns {Promise}
      */
     addVectorTileLayer: function (layerKey, additionalURLParameters = []) {
@@ -299,7 +347,7 @@ module.exports = {
             let layerWasAdded = false;
             $.each(metaData.data, function (i, layerDescription) {
                 var layer = layerDescription.f_table_schema + "." + layerDescription.f_table_name;
-                let { useLiveWMS, mapRequestProxy } = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
+                let {useCache, mapRequestProxy} = _self.getCachingDataForLayer(layerDescription, additionalURLParameters);
 
                 if (layer === layerKey) {
                     // Check if the opacity value differs from the default one
@@ -312,7 +360,7 @@ module.exports = {
                         db: db,
                         isBaseLayer: isBaseLayer,
                         mapRequestProxy: mapRequestProxy,
-                        tileCached: !useLiveWMS, // Use MapCache or "real" WMS. Defaults to MapCache
+                        tileCached: useCache, // Use MapCache or "real" WMS.
                         singleTile: true, // Always use single tiled. With or without MapCache
                         wrapDateLine: false,
                         displayInLayerSwitcher: true,
@@ -353,22 +401,24 @@ module.exports = {
 
     /**
      * Extracts cache settings from layer description
-     * 
+     *
      * @param {Object} layerDescription        Layer description
      * @param {String} additionalURLParameters Additional URL parameters
-     * 
+     *
      * @returns {Object}
      */
     getCachingDataForLayer: (layerDescription, appendedFiltersString = []) => {
         // If filters are applied or single_tile is true, then request should not be cached
-        let singleTiled = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
-        let useLiveWMS = ((appendedFiltersString.length > 0 && appendedFiltersString[0] !=="") || singleTiled);
+        let setAsCached = (JSON.parse(layerDescription.meta) !== null && JSON.parse(layerDescription.meta).single_tile !== undefined && JSON.parse(layerDescription.meta).single_tile === true);
+        let useCache = setAsCached;
+        if (appendedFiltersString.length > 0 && appendedFiltersString[0] !== "") {
+            useCache = false;
+        }
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
         let mapRequestProxy = false;
-        if (useLiveWMS && layerDescription.authentication === `Read/write`) {
+        if (!useCache && layerDescription.authentication === `Read/write`) {
             mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
         }
-
-        return { useLiveWMS, mapRequestProxy };
+        return {useCache, mapRequestProxy};
     }
 };

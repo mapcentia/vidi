@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,13 +11,17 @@ var tmpl;
 var urlparser = require('./../modules/urlparser');
 var urlVars = urlparser.urlVars;
 var backboneEvents;
-let jquery = require('jquery');
-require('snackbarjs');
 
 const semver = require('semver');
+const md5 = require('md5');
 require("bootstrap");
 
 const cookie = require('js-cookie');
+
+const DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES = ["print.tmpl", "blank.tmpl", {
+    regularExpression: true,
+    name: 'print_[\\w]+\\.tmpl'
+}];
 
 module.exports = {
 
@@ -36,20 +40,29 @@ module.exports = {
      *
      */
     init: function () {
-        var me = this, configFile, stop = false;
+        let me = this, configFile, stop = false;
 
         if (typeof urlVars.session === "string") {
             cookie.set("connect.gc2", urlVars.session, {expires: 1});
         }
 
-        var loadConfig = function () {
-            $.getJSON("/api/config/" + urlparser.db + "/" + configFile, function (data) {
+        let loadConfig = function () {
+            let configParam;
+            if (configFile.startsWith("/")) {
+                configParam = window.gc2host + configFile
+            } else {
+                configParam = "/api/config/" + urlparser.db + "/" + configFile;
+            }
+            $.getJSON(configParam, function (data) {
                 window.vidiConfig.brandName = data.brandName ? data.brandName : window.vidiConfig.brandName;
+                window.vidiConfig.startUpModal = data.startUpModal ? data.startUpModal : window.vidiConfig.startUpModal;
                 window.vidiConfig.baseLayers = data.baseLayers ? data.baseLayers : window.vidiConfig.baseLayers;
                 window.vidiConfig.enabledExtensions = data.enabledExtensions ? data.enabledExtensions : window.vidiConfig.enabledExtensions;
                 window.vidiConfig.searchConfig = data.searchConfig ? data.searchConfig : window.vidiConfig.searchConfig;
                 window.vidiConfig.aboutBox = data.aboutBox ? data.aboutBox : window.vidiConfig.aboutBox;
                 window.vidiConfig.enabledSearch = data.enabledSearch ? data.enabledSearch : window.vidiConfig.enabledSearch;
+                window.vidiConfig.removeDisabledLayersFromLegend = data.removeDisabledLayersFromLegend ? data.removeDisabledLayersFromLegend : window.vidiConfig.removeDisabledLayersFromLegend;
+                window.vidiConfig.snapshot = data.snapshot ? data.snapshot : window.vidiConfig.snapshot;
                 window.vidiConfig.schemata = data.schemata ? data.schemata : window.vidiConfig.schemata;
                 window.vidiConfig.template = data.template ? data.template : window.vidiConfig.template;
                 window.vidiConfig.enabledPrints = data.enabledPrints ? data.enabledPrints : window.vidiConfig.enabledPrints;
@@ -57,6 +70,7 @@ module.exports = {
                 window.vidiConfig.extensionConfig = data.extensionConfig ? data.extensionConfig : window.vidiConfig.extensionConfig;
                 window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
+                window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -150,6 +164,13 @@ module.exports = {
         if (urlVars.l) {
             gc2i18n.dict._showLegend = urlVars.l;
         }
+        if (urlVars.s) {
+            gc2i18n.dict._displaySearch = urlVars.s || "inline";
+        }
+        if (urlVars.his) {
+            gc2i18n.dict._displayhistory = urlVars.his || "inline";
+        }
+
         gc2i18n.dict._showHeader = urlVars.h || "inline";
         gc2i18n.dict.brandName = window.vidiConfig.brandName;
         gc2i18n.dict.aboutBox = window.vidiConfig.aboutBox;
@@ -177,6 +198,63 @@ module.exports = {
      *
      */
     startApp: function () {
+        let humanUsedTemplate = !(urlVars.px && urlVars.py);
+        if (`tmpl` in urlVars) {
+            let supressedModalTemplates = DEFAULT_STARTUP_MODAL_SUPRESSION_TEMPLATES;
+            if (`startupModalSupressionTemplates` in window.vidiConfig && Array.isArray(window.vidiConfig.startupModalSupressionTemplates)) {
+                supressedModalTemplates = window.vidiConfig.startupModalSupressionTemplates;
+            }
+
+            supressedModalTemplates.map(item => {
+                if (typeof item === 'string' || item instanceof String) {
+                    // Exact string template name
+                    if (urlVars.tmpl === item) {
+                        humanUsedTemplate = false;
+                    }
+                } else if (`regularExpression` in item && item.regularExpression) {
+                    // Regular expression
+                    let regexp = new RegExp(item.name);
+                    if (regexp.test(urlVars.tmpl)) {
+                        humanUsedTemplate = false;
+                    }
+                } else {
+                    console.warn(`Unable to process the startup modal supression template, should be either string or RegExp`);
+                }
+            });
+        }
+
+        if (humanUsedTemplate && window.vidiConfig.startUpModal) {
+            if (!cookie.get("vidi-startup-message") || md5(window.vidiConfig.startUpModal) !== cookie.get("vidi-startup-message")) {
+                if ($(`#startup-message-modal`).length === 0) {
+                    $(`body`).append(`<div class="modal fade" id="startup-message-modal" tabindex="-1" role="dialog" aria-labelledby="startup-message-modalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title" id="startup-message-modalLabel">${__(`Startup message`)}</h4>
+                                </div>
+                                <div class="modal-body"></div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default js-close-modal" data-dismiss="modal">${__(`Close`)}</button>
+                                    <button type="button" class="btn btn-default js-close-modal-do-not-show" data-dismiss="modal">${__(`Close and do not show in the future`)}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`);
+                }
+
+                $(`#startup-message-modal`).find(`.modal-body`).html(window.vidiConfig.startUpModal);
+                $(`#startup-message-modal`).find(`.js-close-modal`).click(() => {
+                    $(`#startup-message-modal`).modal('show');
+                });
+
+                $(`#startup-message-modal`).find(`.js-close-modal-do-not-show`).click(() => {
+                    $(`#startup-message-modal`).modal('hide');
+                    cookie.set("vidi-startup-message", md5(window.vidiConfig.startUpModal), {expires: 90});
+                });
+
+                $(`#startup-message-modal`).modal('show');
+            }
+        }
 
         // Add the tooltip div
         // ===================
@@ -218,9 +296,9 @@ module.exports = {
          * Fetch meta > initialize settings > create layer tree >
          * initialize state > load layers > initialize extensions > finish
          */
-        modules.meta.init().then(() => {
-            return modules.setting.init();
-        }, (error) => {
+        modules.meta.init().then((schemataStr) => {
+            return modules.setting.init(schemataStr);
+        }).catch((error) => {
             console.log(error); // Stacktrace
             //alert("Vidi is loaded without schema. Can't set extent or add layers");
             backboneEvents.get().trigger("ready:meta");
@@ -237,7 +315,7 @@ module.exports = {
 
                     // Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./search/*.js', {glob: true});
+                        require('./search/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.searchModules !== "undefined") {
@@ -253,8 +331,10 @@ module.exports = {
 
                     //Hack to compile Glob files. Don´t call this function!
                     function ಠ_ಠ() {
-                        require('./../../extensions/!(vectorLayers)/browser/*.js', {glob: true});
-                        require('./../../extensions/!(vectorLayers)/browser/*/*.js', {glob: true});
+                        require('./../../extensions/*/browser/*.js', {mode: 'expand'});
+                        require('./../../extensions/*/browser/*/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*.js', {mode: 'expand'});
+                        //require('./../../extensions/!(watconc)/browser/*/*.js', {mode: 'expand'});
                     }
 
                     if (typeof vidiConfig.extensions !== "undefined" && typeof vidiConfig.extensions.browser !== "undefined") {
@@ -287,6 +367,11 @@ module.exports = {
 
                             if (enabledExtensionsCopy.length > 0) {
                                 console.warn('Following extensions need to be enabled, but they were not initially compiled: ' + JSON.stringify(enabledExtensionsCopy));
+                            }
+
+                            // Show log in button if session module is enabled
+                            if (window.vidiConfig.enabledExtensions.includes("session") && !enabledExtensionsCopy.includes("session")) {
+                                $("#session").show();
                             }
                         }
                     }
@@ -336,7 +421,7 @@ module.exports = {
                         if (semver.valid(window.vidiConfig.appVersion) !== null && semver.valid(versionValue) !== null) {
                             if (semver.gt(window.vidiConfig.appVersion, versionValue) ||
                                 (window.vidiConfig.appVersion === versionValue && window.vidiConfig.appExtensionsBuild !== extensionsBuildValue)) {
-                                jquery.snackbar({
+                                $.snackbar({
                                     id: "snackbar-conflict",
                                     content: `Updating application to the newest version (current: ${versionValue}, extensions: ${extensionsBuildValue}, latest: ${window.vidiConfig.appVersion}, extensions: ${window.vidiConfig.appExtensionsBuild})?`,
                                     htmlAllowed: true,

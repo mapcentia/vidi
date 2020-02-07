@@ -63,6 +63,7 @@ module.exports = {
         // When conflict search is done, enable the print button
         backboneEvents.get().on("end:conflictSearch", function () {
             $("#conflict-print-btn").prop("disabled", false);
+            $("#conflict-set-print-area-btn").prop("disabled", false);
         });
 
         // Handle conflict info click events
@@ -92,12 +93,20 @@ module.exports = {
         $("#conflict-print-btn").on("click", function () {
             // Trigger print dialog off
             backboneEvents.get().trigger("off:print");
+            $("#conflict-set-print-area-btn").prop("disabled", true);
             $("#conflict-get-print-fieldset").prop("disabled", true);
             $(this).button('loading');
             print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
             print.print(endPrintEventName, conflictSearch.getResult()).then(() => {
                 print.cleanUp(true);
+                $("#conflict-set-print-area-btn").prop("disabled", false);
+
             });
+        });
+
+        $("#conflict-set-print-area-btn").on("click", function () {
+            print.cleanUp(true);
+            print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
         });
 
 

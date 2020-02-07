@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -43,7 +43,7 @@ var gc2table = (function () {
                 $.getScript(host + "/js/typeahead.js-0.10.5/dist/typeahead.bundle.js");
             }
             if (typeof jQuery().bootstrapTable === "undefined") {
-                $.getScript(host + "/js/bootstrap-table/bootstrap-table.js");
+                $.getScript(host + "/js/lib/bootstrap-table/bootstrap-table.js");
             }
             if (typeof _ === "undefined") {
                 $.getScript(host + "/js/underscore/underscore-min.js");
@@ -58,16 +58,16 @@ var gc2table = (function () {
                     typeof _ !== 'undefined' &&
                     typeof jRespond !== "undefined") {
                     if (typeof jQuery().bootstrapTable.locales['da-DK'] === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/bootstrap-table-locale-all.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/bootstrap-table-locale-all.js");
                     }
                     if (typeof jQuery().bootstrapTable.defaults.filterControl === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.min.js");
                     }
                     if (typeof jQuery().bootstrapTable.defaults.exportDataType === "undefined") {
-                        $.getScript(host + "/js/bootstrap-table/extensions/export/bootstrap-table-export.min.js");
+                        $.getScript(host + "/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.min.js");
                     }
                     if (typeof jQuery().tableExport === "undefined") {
-                        $.getScript(host + "/js/tableExport.jquery.plugin/tableExport.min.js");
+                        $.getScript(host + "/js/lib/tableExport.jquery.plugin/tableExport.js");
                     }
                     if (typeof Backbone === "undefined") {
                         $.getScript("https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.3.3/backbone-min.js");
@@ -126,7 +126,8 @@ var gc2table = (function () {
                     color: '#666',
                     dashArray: '',
                     fillOpacity: 0.2
-                }
+                },
+                renderInfoIn: null
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -162,7 +163,7 @@ var gc2table = (function () {
             template = defaults.template,
             pkey = defaults.pkey,
             checkBox = defaults.checkBox,
-            usingCartodb = defaults.usingCartodb;
+            renderInfoIn = defaults.renderInfoIn;
 
         var customOnLoad = false, destroy, assignEventListeners;
 
@@ -222,17 +223,18 @@ var gc2table = (function () {
 
                         if (template) {
                             renderedText = Mustache.render(template, m.map._layers[id].feature.properties);
-                            if (usingCartodb) {
-                                renderedText = $.parseHTML(renderedText)[0].children[1].innerHTML
-                            }
                         }
 
-                        m.map._layers[id].bindPopup(renderedText || str, {
-                            className: "custom-popup gc2table-custom-popup",
-                            autoPan: autoPan,
-                            closeButton: true,
-                            minWidth: 160
-                        }).openPopup();
+                        if (!renderInfoIn) {
+                            m.map._layers[id].bindPopup(renderedText || str, {
+                                className: "custom-popup gc2table-custom-popup",
+                                autoPan: autoPan,
+                                closeButton: true,
+                                minWidth: 160
+                            }).openPopup();
+                        } else {
+                            $(renderInfoIn).html(renderedText);
+                        }
 
                         m.map._layers[id].on('popupclose', function(e) {
                             // Removing the selectedStyle from feature
@@ -343,25 +345,29 @@ var gc2table = (function () {
                         });
 
                         $(el + ' > tbody > tr').on("mouseover", function (e) {
-                            var id = $(this).data('uniqueid');
-                            var layer = m.map._layers[id];
-                            var databaseIdentifier = getDatabaseIdForLayerId(id);
-                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
-                                store.layer._layers[id].setStyle({
-                                    fillColor: "#660000",
-                                    fillOpacity: "0.6"
-                                });
+                            if ($(this).hasClass('no-records-found') === false) {
+                                var id = $(this).data('uniqueid');
+                                var layer = m.map._layers[id];
+                                var databaseIdentifier = getDatabaseIdForLayerId(id);
+                                if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                                    store.layer._layers[id].setStyle({
+                                        fillColor: "#660000",
+                                        fillOpacity: "0.6"
+                                    });
 
-                                onMouseOver(id, layer);
+                                    onMouseOver(id, layer);
+                                }
                             }
                         });
 
                         $(el + ' > tbody > tr').on("mouseout", function (e) {
-                            var id = $(this).data('uniqueid');
-                            var databaseIdentifier = getDatabaseIdForLayerId(id);
-                            if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
-                                if (store.layer && store.layer.resetStyle) {
-                                    store.layer.resetStyle(store.layer._layers[id]);
+                            if ($(this).hasClass('no-records-found') === false) {
+                                var id = $(this).data('uniqueid');
+                                var databaseIdentifier = getDatabaseIdForLayerId(id);
+                                if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
+                                    if (store.layer && store.layer.resetStyle) {
+                                        store.layer.resetStyle(store.layer._layers[id]);
+                                    }
                                 }
                             }
                         });

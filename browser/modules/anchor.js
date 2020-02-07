@@ -1,16 +1,17 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
-var urlparser = require('./urlparser');
-var db = urlparser.db;
-var schema = urlparser.schema;
-var cloud, layers, setBaseLayer;
+let urlparser = require('./urlparser');
+let db = urlparser.db;
+let schema = urlparser.schema;
+let cloud, layers, setBaseLayer;
 let _self = false;
+let initMapParameters;
 
 /**
  *
@@ -74,14 +75,24 @@ module.exports = {
         let result = new Promise((resolve, reject) => {
             if (parameters.x && parameters.y && parameters.zoom) {
                 cloud.get().setView(new L.LatLng(parseFloat(parameters.y), parseFloat(parameters.x)), parameters.zoom);
+                initMapParameters = parameters
+            } else {
+                initMapParameters = null;
             }
-    
+
             setBaseLayer.init(parameters.baseLayer).then(() => {
                 resolve();
+            }).catch(error => {
+                console.error(error);
+                reject();
             });
         });
 
         return result;
+    },
+
+    getInitMapParameters: () => {
+        return initMapParameters;
     },
 
     /**

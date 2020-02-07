@@ -72,13 +72,13 @@ class MarkupGenerator {
         return (`<li
         class="layer-item list-group-item"
         data-gc2-subgroup-id="${name}"
-        style="min-height: 40px; margin-top: 10px; background-color: white;">
+        style="min-height: 40px; margin-top: 10px; background-color: white; border-bottom: 1px solid #CCC;">
             <div class="js-subgroup-id" style="padding-left: 14px;"></div>
             <div class="js-subgroup-children" id="${base64SubgroupName}" style="padding-left: 20px;"></div>
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -136,6 +136,10 @@ class MarkupGenerator {
                         </div>
                     </div>
                     <div style="text-align: right; flex-grow: 1;">
+                        <div style="display: inline-block;">
+                            <div class="btn-group" role="group" style="height: 23px; width: 1px; margin: 10px;"></div>
+                        </div>
+
                         <div class="js-toggle-layer-offline-mode-container" style="display: none;">
                             <div class="btn-group" role="group">
                                 <button type="button" data-layer-key="${layerKey}" class="btn btn-success btn-xs js-set-online" title="${__(`Fetch layer data from server`)}" style="padding: 4px" disabled>
@@ -174,7 +178,7 @@ class MarkupGenerator {
                         <i style="float: right; padding-top: 9px; font-size: 26px;" class="material-icons layer-move-vert">more_vert</i>
         
                         <div style="float: right; padding-top: 12px; padding-right: 10px;">${addButton}
-                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">Info</a>
+                            <a href="javascript:void(0);" data-toggle="tooltip" data-placement="left" title="${tooltip}" style="visibility: ${displayInfo};" class="info-label" data-gc2-id="${layerKey}">${__(`Info`)}</a>
                         </div>
                     </div>
                 </div>

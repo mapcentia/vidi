@@ -7,6 +7,21 @@
 var express = require('express');
 var router = express.Router();
 var request = require('request');
+var config = require('../../../config/config.js');
+var autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
+var autoLoginMaxAge = null;
+
+if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true)
+{
+    if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
+        if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
+            autoLogin = config.extensionConfig.session.autoLogin;
+        }
+        if (typeof config.extensionConfig.session.autoLoginMaxAge !== "undefined") {
+            autoLoginMaxAge = config.extensionConfig.session.autoLoginMaxAge;
+        }
+    }
+}
 
 /**
  *
@@ -14,23 +29,26 @@ var request = require('request');
  */
 var config = require('../../../config/config.js');
 
-router.post('/api/session/start', function (req, response) {
-    var postData;
+var start = function (u, p, s, d, req, response, status) {
+    var postData = {
+        user: u,
+        password: p,
+        schema: s
+    };
 
-    if (req.body.u) {
-        postData = "u=" + req.body.u + "&p=" + req.body.p + "&s=" + req.body.s + "";
+    if (d) {
+        postData.database = d;
     }
 
     var options = {
+        headers: {'content-type': 'application/json'},
         method: 'POST',
-        uri: config.gc2.host + "/api/v1/session/start",
-        form: postData
+        uri: config.gc2.host + "/api/v2/session/start",
+        body: JSON.stringify(postData)
     };
 
     request(options, function (err, res, body) {
-
         var data;
-
         response.header('content-type', 'application/json');
         response.header('Cache-Control', 'no-cache, no-store, must-revalidate');
         response.header('Expires', '0');
@@ -41,6 +59,7 @@ router.post('/api/session/start', function (req, response) {
                 success: false,
                 message: "Could not log in"
             });
+
             return;
         }
 
@@ -52,6 +71,7 @@ router.post('/api/session/start', function (req, response) {
                 message: "Could not parse response from GC2",
                 data: body
             });
+
             return;
         }
 
@@ -60,21 +80,55 @@ router.post('/api/session/start', function (req, response) {
                 success: true,
                 message: "Already logged in"
             });
+
             return;
         }
 
+        data = (`data` in data ? data.data : data);
         req.session.gc2SessionId = data.session_id;
         req.session.gc2ApiKey = data.api_key;
-        req.session.gc2UserName = data.subuser ? data.subuser : data.screen_name;
+        req.session.gc2Email = data.email;
+        req.session.gc2UserName = data.screen_name;
         req.session.subUser = data.subuser;
+        req.session.screenName = data.screen_name;
+        req.session.parentDb = data.parentdb;
+        req.session.properties = data.properties;
 
         console.log("Session started");
-        response.send({
+
+        var resBody = {
             success: true,
-            message: "Logged in"
-        });
+            message: "Logged in",
+            screen_name: data.screen_name,
+            email: data.email,
+            api_key: data.api_key,
+            parentdb: data.parentdb,
+            subuser: data.subUser,
+            properties: data.properties
+        };
+
+        if (autoLogin) {
+            resBody.password = postData.password;
+            resBody.schema = postData.schema;
+            response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
+                maxAge: autoLoginMaxAge,
+                httpOnly: true
+            });
+        }
+
+        if (status) {
+            resBody.status = status;
+            resBody.status.authenticated = true;
+        }
+        response.send(resBody);
     });
 
+};
+
+router.post('/api/session/start', function (req, response) {
+    if (req.body.u) {
+        start(req.body.u, req.body.p, req.body.s, req.body.d, req, response);
+    }
 });
 
 router.get('/api/session/stop', function (req, response) {
@@ -88,13 +142,28 @@ router.get('/api/session/stop', function (req, response) {
 });
 
 router.get('/api/session/status', function (req, response) {
-    response.status(200).send({
-        success: true,
-        status: {
-            authenticated: !!req.session.gc2SessionId,
-            userName: req.session.gc2UserName
-        }
-    });
+    let autoLoginCookie = req.cookies['autoconnect.gc2'];
+    if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
+        var creds = JSON.parse(autoLoginCookie);
+        start(creds.screen_name, creds.password, creds.schema, creds.parentdb, req, response,
+            {
+                screen_name: creds.screen_name,
+                email: creds.email,
+                subuser: creds.subUser
+            }
+        );
+    } else {
+        response.status(200).send({
+            success: true,
+            status: {
+                authenticated: !!req.session.gc2SessionId,
+                screen_name: req.session.gc2UserName,
+                email: req.session.gc2Email,
+                subuser: req.session.subUser,
+                properties: req.session.properties
+            }
+        });
+    }
 });
 
 module.exports = router;

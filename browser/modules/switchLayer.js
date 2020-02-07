@@ -6,7 +6,8 @@
 
 'use strict';
 
-import { LAYER } from './layerTree/constants';
+import {LAYER} from './layerTree/constants';
+
 const layerTreeUtils = require('./layerTree/utils');
 
 const LOG = false;
@@ -55,13 +56,28 @@ module.exports = module.exports = {
     },
 
     /**
-     * Enables vector layer
+     * Loads missing meta for layer
      * 
+     * @returns {Promise}
+     */
+    loadMissingMeta: (gc2Id) => {
+        let loadedSchema = gc2Id;
+        if (gc2Id.split(`.`).length === 2) {
+            loadedSchema = gc2Id.split(`.`)[0];
+        }
+
+        //return meta.init(loadedSchema, true, true);
+        return meta.init(gc2Id, true, true);
+    },
+
+    /**
+     * Enables vector layer
+     *
      * @param {String}  gc2Id         Layer name (with prefix)
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
      * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
-     * 
+     *
      * @returns {Promise}
      */
     enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
@@ -71,9 +87,16 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
             layerTree.setSelectorValue(name, LAYER.VECTOR);
-
             let vectorDataStores = layerTree.getStores();
             if (vectorLayerId in vectorDataStores) {
+                let parentFilters = layerTree.getParentLayerFilters(gc2Id);
+                let parentFiltersHash = btoa(JSON.stringify(parentFilters));
+                if (vectorDataStores[vectorLayerId].defaults.parentFiltersHash !== parentFiltersHash) {
+                    let layerMeta = meta.getMetaByKey(gc2Id);
+                    layerTree.createStore(layerMeta);
+                    vectorDataStores = layerTree.getStores();
+                }
+
                 cloud.get().layerControl.addOverlay(vectorDataStores[vectorLayerId].layer, vectorLayerId);
                 let existingLayer = cloud.get().getLayersByName(vectorLayerId);
                 cloud.get().map.addLayer(existingLayer);
@@ -87,12 +110,12 @@ module.exports = module.exports = {
                 if (failedBefore.reason === `NO_VECTOR_DATA_STORE`) {
                     console.error(`Failed to switch layer while attempting to get the vector data store for ${vectorLayerId} (probably it is not the vector layer)`);
                 } else {
-                    console.error(`Unknown switch layer failure for ${vectorLayerId}`);
+                    console.error(`Unknown switch layer failure for ${vectorLayerId}`, failedBefore);
                 }
 
                 resolve();
             } else {
-                meta.init(gc2Id, true, true).then(layerMeta => {
+                _self.loadMissingMeta(gc2Id).then(() => {
                     // Trying to recreate the layer tree with updated meta and switch layer again
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -119,13 +142,29 @@ module.exports = module.exports = {
     },
 
     /**
+     *
+     * @param gc2Id
+     * @returns {Promise<any>}
+     */
+    enableUTFGrid: (gc2Id) => {
+        let id = gc2Id;
+        return new Promise((resolve, reject) => {
+            layers.addUTFGridLayer(id).then(() => {
+            }).catch((err) => {
+                console.error(`Could not add ${id} UTFGrid tile layer`);
+                resolve();
+            });
+        });
+    },
+
+    /**
      * Enable raster tile vector
-     * 
+     *
      * @param {String}  gc2Id         Layer name (with prefix)
      * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
-     * 
+     *
      * @returns {Promise}
      */
     enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
@@ -157,10 +196,16 @@ module.exports = module.exports = {
                     rasterTileLayer.setUrl(rasterTileLayer._url + "?" + cacheBuster);
                     rasterTileLayer.redraw();
                 }
-
+                // Enable the corresponding UTF grid layer
+                // TODO check "mouseover" properties in fieldConf. No need to switch on if mouse over is not wanted
+                _self.enableUTFGrid(gc2Id);
                 resolve();
-            }).catch((err) => {
-                meta.init(gc2Id, true, true).then(layerMeta => {
+            }).catch(err => {
+                if (err) {
+                    console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`);
+                }
+
+                _self.loadMissingMeta(gc2Id).then(() => {
                     // Trying to recreate the layer tree with updated meta and switch layer again                           
                     layerTree.create().then(() => {
                         // All layers are guaranteed to exist in meta
@@ -184,12 +229,12 @@ module.exports = module.exports = {
 
     /**
      * Enable raster tile vector
-     * 
+     *
      * @param {String}  gc2Id         Layer name (with prefix)
      * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
-     * 
+     *
      * @returns {Promise}
      */
     enableVectorTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
@@ -201,39 +246,38 @@ module.exports = module.exports = {
 
         return new Promise((resolve, reject) => {
             try {
+                let typedGc2Id = LAYER.VECTOR_TILE + `:` + gc2Id;
+                layers.incrementCountLoading(typedGc2Id);
+                layerTree.setSelectorValue(gc2Id, LAYER.VECTOR_TILE);
 
-            let typedGc2Id = LAYER.VECTOR_TILE + `:` + gc2Id;
-            layers.incrementCountLoading(typedGc2Id);
-            layerTree.setSelectorValue(gc2Id, LAYER.VECTOR_TILE);
-
-            let URLParameters = [layerTree.getLayerFilterString(gc2Id)];
-            if (forceReload) {
-                let cacheBuster = `cacheBuster=${Math.random()}`;
-                layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
-                URLParameters.push(cacheBuster);
-            } else {
-                if (gc2Id in layersAlternationHistory) {
-                    if (layersAlternationHistory[gc2Id].updatedLayerTypes.indexOf(LAYER.VECTOR_TILE) === -1) {
-                        layersAlternationHistory[gc2Id].updatedLayerTypes.push(LAYER.VECTOR_TILE);
-                        let cacheBuster = `cacheBuster=${Math.random()}`;
-                        layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
-                        URLParameters.push(cacheBuster);
-                    } else {
-                        URLParameters.push(layersAlternationHistory[gc2Id].cacheBuster);
+                let URLParameters = [layerTree.getLayerFilterString(gc2Id)];
+                if (forceReload) {
+                    let cacheBuster = `cacheBuster=${Math.random()}`;
+                    layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
+                    URLParameters.push(cacheBuster);
+                } else {
+                    if (gc2Id in layersAlternationHistory) {
+                        if (layersAlternationHistory[gc2Id].updatedLayerTypes.indexOf(LAYER.VECTOR_TILE) === -1) {
+                            layersAlternationHistory[gc2Id].updatedLayerTypes.push(LAYER.VECTOR_TILE);
+                            let cacheBuster = `cacheBuster=${Math.random()}`;
+                            layersAlternationHistory[gc2Id].cacheBuster = cacheBuster;
+                            URLParameters.push(cacheBuster);
+                        } else {
+                            URLParameters.push(layersAlternationHistory[gc2Id].cacheBuster);
+                        }
                     }
                 }
-            }
 
-            layers.addVectorTileLayer(gc2Id, URLParameters).then(() => {
-                _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);
-                resolve();
-            }).catch((err) => {
-                if (err) {
-                    console.error(err);
-                    reject();
-                } else {
-                    meta.init(gc2Id, true, true).then(layerMeta => {
-                        // Trying to recreate the layer tree with updated meta and switch layer again                           
+                layers.addVectorTileLayer(gc2Id, URLParameters).then(() => {
+                    _self.checkLayerControl(typedGc2Id, doNotLegend, setupControls);
+                    resolve();
+                }).catch((err) => {
+                    if (err) {
+                        console.warn(`Unable to add layer ${gc2Id}, trying to get meta for it`);
+                    }
+
+                    _self.loadMissingMeta(gc2Id).then(() => {
+                        // Trying to recreate the layer tree with updated meta and switch layer again
                         layerTree.create().then(() => {
                             // All layers are guaranteed to exist in meta
                             let currentLayers = layers.getLayers();
@@ -251,23 +295,22 @@ module.exports = module.exports = {
                         console.error(`Could not add ${typedGc2Id} vector tile layer`);
                         layers.decrementCountLoading(typedGc2Id);
                         resolve();
-                    });
-                }
-            });
-
-
-            } catch(e) { console.log(e); }
+                    });                    
+                });
+            } catch (e) {
+                console.log(e);
+            }
         });
     },
 
     /**
      * Enables WebGL layer
-     * 
+     *
      * @param {String}  gc2Id         Layer name (with prefix)
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
      * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
-     * 
+     *
      * @returns {Promise}
      */
     enableWebGL: (gc2Id, doNotLegend, setupControls, failedBefore) => {
@@ -277,55 +320,57 @@ module.exports = module.exports = {
         return new Promise((resolve, reject) => {
 
             try {
-            layers.incrementCountLoading(webGLLayerId);
-            layerTree.setSelectorValue(name, LAYER.WEBGL);
+                layers.incrementCountLoading(webGLLayerId);
+                layerTree.setSelectorValue(name, LAYER.WEBGL);
 
-            let webGLDataStores = layerTree.getWebGLStores();
-            if (webGLLayerId in webGLDataStores) {
-                backboneEvents.get().trigger("startLoading:layers", webGLLayerId);
-                webGLDataStores[webGLLayerId].load(true, () => {
-                    cloud.get().layerControl.addOverlay(webGLDataStores[webGLLayerId].layer, webGLLayerId);
-                    let existingLayer = cloud.get().getLayersByName(webGLLayerId);
-                    cloud.get().map.addLayer(existingLayer);
-                    _self.checkLayerControl(webGLLayerId, doNotLegend, setupControls);
+                let webGLDataStores = layerTree.getWebGLStores();
+                if (webGLLayerId in webGLDataStores) {
+                    backboneEvents.get().trigger("startLoading:layers", webGLLayerId);
+                    webGLDataStores[webGLLayerId].load(true, () => {
+                        cloud.get().layerControl.addOverlay(webGLDataStores[webGLLayerId].layer, webGLLayerId);
+                        let existingLayer = cloud.get().getLayersByName(webGLLayerId);
+                        cloud.get().map.addLayer(existingLayer);
+                        _self.checkLayerControl(webGLLayerId, doNotLegend, setupControls);
+
+                        resolve();
+                    });
+                } else if (failedBefore !== false) {
+                    if (failedBefore.reason === `NO_WEBGL_DATA_STORE`) {
+                        console.error(`Failed to switch layer while attempting to get the WebGL data store for ${webGLLayerId} (probably it is not the WebGL layer)`);
+                    } else {
+                        console.error(`Unknown switch layer failure for ${webGLLayerId}`);
+                    }
 
                     resolve();
-                });
-            } else if (failedBefore !== false) {
-                if (failedBefore.reason === `NO_WEBGL_DATA_STORE`) {
-                    console.error(`Failed to switch layer while attempting to get the WebGL data store for ${webGLLayerId} (probably it is not the WebGL layer)`);
                 } else {
-                    console.error(`Unknown switch layer failure for ${webGLLayerId}`);
+                    _self.loadMissingMeta(gc2Id).then(() => {
+                        // Trying to recreate the layer tree with updated meta and switch layer again
+                        layerTree.create().then(() => {
+                            // All layers are guaranteed to exist in meta
+                            let currentLayers = layers.getLayers();
+                            if (currentLayers && Array.isArray(currentLayers)) {
+                                layers.getLayers().split(',').map(layerToActivate => {
+                                    _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
+                                });
+                            }
+
+                            _self.init(webGLLayerId, true, false, false, true, {
+                                reason: `NO_WEBGL_DATA_STORE`
+                            }).then(() => {
+                                resolve();
+                            });
+                        });
+                    }).catch(() => {
+                        console.error(`Could not add ${gc2Id} WebGL layer`);
+                        layers.decrementCountLoading(webGLLayerId);
+                        resolve();
+                    });
                 }
 
-                resolve();
-            } else {
-                meta.init(gc2Id, true, true).then(layerMeta => {
-                    // Trying to recreate the layer tree with updated meta and switch layer again
-                    layerTree.create().then(() => {
-                        // All layers are guaranteed to exist in meta
-                        let currentLayers = layers.getLayers();
-                        if (currentLayers && Array.isArray(currentLayers)) {
-                            layers.getLayers().split(',').map(layerToActivate => {
-                                _self.checkLayerControl(layerToActivate, doNotLegend, setupControls);
-                            });
-                        }
 
-                        _self.init(webGLLayerId, true, false, false, true, {
-                            reason: `NO_WEBGL_DATA_STORE`
-                        }).then(() => {
-                            resolve();
-                        });
-                    });
-                }).catch(() => {
-                    console.error(`Could not add ${gc2Id} WebGL layer`);
-                    layers.decrementCountLoading(webGLLayerId);
-                    resolve();
-                });
+            } catch (e) {
+                console.log(e);
             }
-
-
-        } catch(e) { console.log(e);}
         });
     },
 
@@ -333,9 +378,9 @@ module.exports = module.exports = {
      * Registers layer data alternation, this way when is will be loaded next time in format, different
      * from the current one, the cache will be also updated (for example, cache busting will be
      * applied for raster and vector tiles)
-     * 
+     *
      * @param {String} gc2Id Layer identifier
-     * 
+     *
      * @returns {void}
      */
     registerLayerDataAlternation: (gc2Id) => {
@@ -349,14 +394,14 @@ module.exports = module.exports = {
 
     /**
      * Toggles a layer on/off. If visible is true, layer is toggled off and vice versa.
-     * 
+     *
      * @param {String}  name          Layer name (with prefix)
      * @param {Boolean} enable        Enable of disable layer
      * @param {Boolean} doNotLegend   Specifies if legend should be re-generated
      * @param {Boolean} forceReload   Specifies if the layer reload should be perfromed
      * @param {Boolean} setupControls Specifies if layerTree controls should be setup
      * @param {Object}  failedBefore  Specifies if layer loading previously failed (used in recursive init() calling)
-     * 
+     *
      * @returns {Promise}
      */
     init: function (name, enable, doNotLegend, forceReload, setupControls = true, failedBefore = false) {
@@ -376,7 +421,7 @@ module.exports = module.exports = {
             let layerKey = (metaData.data[j].f_table_schema + '.' + metaData.data[j].f_table_name);
             if (layerKey === layerTreeUtils.stripPrefix(name)) {
                 let layer = metaData.data[j];
-                let { isVectorLayer, isRasterTileLayer, isVectorTileLayer } = layerTreeUtils.getPossibleLayerTypes(layer);
+                let {isVectorLayer, isRasterTileLayer, isVectorTileLayer} = layerTreeUtils.getPossibleLayerTypes(layer);
                 let defaultLayerType = layerTreeUtils.getDefaultLayerType(layer);
 
                 if (LOG) console.log(`switchLayer: ${name}, according to meta, is vector (${isVectorLayer}), raster tile (${isRasterTileLayer}), vector tile (${isVectorTileLayer})`);
@@ -431,8 +476,12 @@ module.exports = module.exports = {
                 } else {
                     _self.enableRasterTile(gc2Id, forceReload, doNotLegend, setupControls).then(resolve);
                 }
+
+                layers.reorderLayers();
             } else {
                 _self.uncheckLayerControl(name, doNotLegend, setupControls);
+                //Remove UTF grid layer
+                _self._removeUtfGrid(name);
                 resolve();
             }
         });
@@ -444,7 +493,7 @@ module.exports = module.exports = {
      * Toggles the layer control
      */
     _toggleLayerControl: (enable = false, layerName, doNotLegend, setupControls) => {
-        if (setupControls) {        
+        if (setupControls) {
             if (layerName.indexOf(LAYER.VECTOR + `:`) === 0) {
                 layerTree.setLayerState(LAYER.VECTOR, layerName, true, enable);
             } else if (layerName.indexOf(LAYER.VECTOR_TILE + `:`) === 0) {
@@ -465,19 +514,19 @@ module.exports = module.exports = {
                     c = c + 1;
                 }
             });
-    
+
             $(controlElement).parents(".panel-layertree").find("span:eq(0)").html(c);
         }
 
         pushState.init();
-        if (!doNotLegend) {
+        if (!doNotLegend && (window.vidiConfig.removeDisabledLayersFromLegend ? true : enable)) {
             legend.init();
         }
     },
 
     /**
      * Checks the layer control
-     * 
+     *
      * @param {String} layerName Name of the layer
      */
     checkLayerControl: (layerName, doNotLegend, setupControls = true) => {
@@ -486,11 +535,26 @@ module.exports = module.exports = {
 
     /**
      * Unchecks the layer control
-     * 
+     *
      * @param {String} layerName Name of the layer
      */
     uncheckLayerControl: (layerName, doNotLegend, setupControls = true) => {
         _self._toggleLayerControl(false, layerName, doNotLegend, setupControls);
+    },
+
+    /**
+     * Remove hidden UTF grid layer
+     * @param layerName
+     * @private
+     */
+    _removeUtfGrid: (layerName) => {
+        if (LOG) console.log(`switchLayer: _removeUtfGrid ${layerName}`);
+        let id = "__hidden.utfgrid." + layerName;
+        cloud.get().map.eachLayer(function(layer){
+            if (layer.id === id) {
+                cloud.get().map.removeLayer(layer);
+            }
+        });
     }
 };
 

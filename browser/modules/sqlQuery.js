@@ -1,13 +1,13 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
 const layerTreeUtils = require('./layerTree/utils');
-import { SYSTEM_FIELD_PREFIX } from './layerTree/constants';
+import {SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -30,6 +30,8 @@ var editor;
  */
 var urlparser = require('./urlparser');
 
+var download = require('./download');
+
 /**
  * @type {string}
  */
@@ -38,14 +40,58 @@ var db = urlparser.db;
 var JSONSchemaForm = require("react-jsonschema-form");
 const Form = JSONSchemaForm.default;
 
-var jquery = require('jquery');
-require('snackbarjs');
-
 var extensions;
 
 let _self = false;
 
 let editingIsEnabled = false;
+
+let template;
+
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
+var defaultTemplate =
+    `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-xs popup-edit-btn">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-xs popup-delete-btn">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="popup-title">{{_vidi_content.title}}</h3>
+                {{#_vidi_content.fields}}
+                    {{#title}}<h4>{{title}}</h4>{{/title}}
+                    {{#value}}
+                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
+                    {{/value}}
+                    {{^value}}
+                    <p class="empty">null</p>
+                    {{/value}}
+                {{/_vidi_content.fields}}
+            </div>`;
+
+/**
+ * Default template for raster layers
+ * @type {string}
+ */
+var defaultTemplateRaster =
+    `<div class="cartodb-popup-content">
+                <h4>Class</h4>
+                <p>{{{ class }}}</p>
+                <h4>Value</h4>
+                <p>{{{ value_0 }}}</p>
+             
+             </div>`;
 
 /**
  *
@@ -73,7 +119,7 @@ module.exports = {
 
     /**
      * Performs spatial SQL query and display results on map and in gc2table
-     * 
+     *
      * @param qstore
      * @param wkt
      * @param proj
@@ -108,46 +154,6 @@ module.exports = {
 
         backboneEvents.get().trigger("start:sqlQuery");
 
-        /**
-         * A default template for GC2, with a loop
-         * @type {string}
-         */
-        var defaultTemplate =
-                `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="visibility: hidden; width: 90%;">
-                    <div class="btn-group btn-group-justified">
-                        <div class="btn-group">
-                            <button class="btn btn-primary btn-xs popup-edit-btn">
-                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-danger btn-xs popup-delete-btn">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                {{#_vidi_content.fields}}
-                    {{#title}}<h4>{{title}}</h4>{{/title}}
-                    {{#value}}
-                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                    {{/value}}
-                    {{^value}}
-                    <p class="empty">null</p>
-                    {{/value}}
-                {{/_vidi_content.fields}}
-            </div>`;
-
-        var defaultTemplateRaster =
-            `<div class="cartodb-popup-content">
-                <h4>Class</h4>
-                <p>{{{ class }}}</p>
-                <h4>Value</h4>
-                <p>{{{ value_0 }}}</p>
-             
-             </div>`;
-
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
             if (value.indexOf('v:') === 0) {
@@ -178,6 +184,7 @@ module.exports = {
             let fieldConf = (typeof metaDataKeys[value].fieldconf !== "undefined"
                 && metaDataKeys[value].fieldconf !== "")
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
+            let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
@@ -193,8 +200,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
-                        template;
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -202,6 +208,8 @@ module.exports = {
                     isEmpty = layerObj.isEmpty();
 
                     template = (typeof metaDataKeys[value].infowindow !== "undefined" && metaDataKeys[value].infowindow.template !== "") ? metaDataKeys[value].infowindow.template : metaDataKeys[value].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+
+                    template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
                         $('#modal-info-body').show();
@@ -240,13 +248,13 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            usingCartodb: false
+                            renderInfoIn: parsedMeta.info_element_selector || null
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
                             let popup = e.getPopup();
                             if (popup._closeButton) {
-                                popup._closeButton.onclick = function(clickEvent) {
+                                popup._closeButton.onclick = function (clickEvent) {
                                     if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                 }
                             }
@@ -263,11 +271,11 @@ module.exports = {
 
                             setTimeout(() => {
                                 if (editingIsEnabled && layerIsEditable) {
-                                    $(".gc2-edit-tools").css(`visibility`, `visible`);
+                                    $(".gc2-edit-tools").css(`display`, `inline`);
                                     $(".popup-edit-btn").show();
                                     $(".popup-delete-btn").show();
                                 } else {
-                                    $(".gc2-edit-tools").css(`visibility`, `hidden`);
+                                    $(".gc2-edit-tools").css(`display`, `none`);
                                     $(".popup-edit-btn").hide();
                                     $(".popup-delete-btn").hide();
                                 }
@@ -302,10 +310,10 @@ module.exports = {
                         });
 
                         $("#_download_excel_" + storeId).click(function () {
-                            download(sql, "excel");
+                            download.download(sql, "excel");
                         });
                         $("#_download_geojson_" + storeId).click(function () {
-                            download(sql, "geojson");
+                            download.download(sql, "geojson");
                         });
                         $("#_create_layer_" + storeId).click(function () {
                             let _self = this;
@@ -329,7 +337,10 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $('#modal-info-body').hide();
-                            jquery.snackbar({
+                            if (parsedMeta.info_element_selector) {
+                                $(parsedMeta.info_element_selector).empty();
+                            }
+                            $.snackbar({
                                 content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
@@ -339,7 +350,7 @@ module.exports = {
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
-                            setTimeout(()=>{
+                            setTimeout(() => {
                                 $('#modal-info-body table').bootstrapTable('resetView');
                             }, 300);
                         }
@@ -355,13 +366,13 @@ module.exports = {
                 uri: "/api/sql",
                 clickable: true,
                 id: index,
+                base64: true,
                 styleMap: {
                     weight: 5,
                     color: '#660000',
                     dashArray: '',
                     fillOpacity: 0.2
                 },
-
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
@@ -467,9 +478,11 @@ module.exports = {
         let fieldLabel = false;
         let metaDataKeys = meta.getMetaDataKeys();
         let fieldConf;
+        let keyWithOutPrefix = layerKey.replace(`v:`, ``);
+        let layerTitle = (metaDataKeys[keyWithOutPrefix].f_table_title !== null && metaDataKeys[keyWithOutPrefix].f_table_title !== "") ? metaDataKeys[keyWithOutPrefix].f_table_title : metaDataKeys[keyWithOutPrefix].f_table_name;
 
         // Hardcoded field config for raster layers
-        if (metaDataKeys[layerKey.replace(`v:`, ``)].type === "RASTER") {
+        if (metaDataKeys[keyWithOutPrefix].type === "RASTER") {
             fieldConf = {
                 class: {
                     "alias": "Class",
@@ -486,9 +499,9 @@ module.exports = {
             };
 
         } else {
-            fieldConf = (typeof metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "undefined"
-                && metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf !== "")
-                ? $.parseJSON(metaDataKeys[layerKey.replace(`v:`, ``)].fieldconf) : null;
+            fieldConf = (typeof metaDataKeys[keyWithOutPrefix].fieldconf !== "undefined"
+                && metaDataKeys[keyWithOutPrefix].fieldconf !== "")
+                ? $.parseJSON(metaDataKeys[keyWithOutPrefix].fieldconf) : null;
         }
 
         let cm = [];
@@ -511,21 +524,30 @@ module.exports = {
                     if (property.value.querable) {
                         let value = feature.properties[property.key];
                         if (property.value.link) {
-                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
-                        } else if (property.value.image) {
+                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
+                        } else if (property.value.content && property.value.content === "image") {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
                                 let subValue = feature.properties[property.key];
-                                if (property.value.type === `bytea`) {
-                                    subValue = atob(feature.properties[property.key]);
-                                }
-                                value = `<a target='_blank' href='${subValue}'>
-                                <img style='width:178px' src='${subValue}'/>
-                            </a>`;
+                                value =
+                                    `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                        <img style='width:250px' src='${subValue}'/>
+                                     </div>`;
+                            }
+                        } else if (property.value.content && property.value.content === "video") {
+                            if (!feature.properties[property.key]) {
+                                value = `<i class="fa fa-ban"></i>`;
+                            } else {
+                                let subValue = feature.properties[property.key];
+                                value =
+                                    `<video width="250" controls>
+                                        <source src="${subValue}" type="video/mp4">
+                                        <source src="${subValue}" type="video/ogg">
+                                        <source src="${subValue}" type="video/webm">
+                                    </video>`;
                             }
                         }
-
                         fields.push({title: property.value.alias || property.key, value});
                         fieldLabel = (property.value.alias !== null && property.value.alias !== "") ? property.value.alias : property.key;
                         if (feature.properties[property.key] !== undefined) {
@@ -534,12 +556,14 @@ module.exports = {
                     }
                 });
 
+
                 out.sort(function (a, b) {
                     return a[1] - b[1];
                 });
             }
 
             feature.properties._vidi_content = {};
+            feature.properties._vidi_content.title = layerTitle;
             feature.properties._vidi_content.fields = fields; // Used in a "loop" template
             if (first) {
                 $.each(out, function (name, property) {
@@ -576,7 +600,25 @@ module.exports = {
     },
 
     setDownloadFunction: function (fn) {
-        download = fn
+        download.download = fn
+    },
+
+    getVectorTemplate: function (layerKey) {
+        let metaDataKeys = meta.getMetaDataKeys();
+        let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+        return template;
+    },
+
+    openInfoSlidePanel: function (layerKey = null) {
+        $("#click-for-info-slide.slide-left").show();
+        $("#click-for-info-slide.slide-left").animate({left: "0"}, 200);
+        if (layerKey) {
+            let metaDataKeys = meta.getMetaDataKeys();
+            let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+            $("#click-for-info-slide .modal-title").html(title);
+        }
     }
 };
 
@@ -596,37 +638,4 @@ var sortObject = function (obj) {
         return a.sort_id - b.sort_id;
     });
     return arr; // returns array
-};
-
-var download = function (sql, format) {
-    var request = new XMLHttpRequest();
-    request.open('POST', '/api/sql/' + db, true);
-    request.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charseselectt=UTF-8');
-    request.responseType = 'blob';
-    request.onload = function () {
-        if (request.status === 200) {
-            var filename, type;
-            switch (format) {
-                case "excel":
-                    filename = 'file.xlsx';
-                    type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                    break;
-                default:
-                    filename = 'file.geojson';
-                    type = 'application/json';
-                    break;
-            }
-            var blob = new Blob([request.response], {type: type});
-            var link = document.createElement('a');
-            link.href = window.URL.createObjectURL(blob);
-            link.download = filename;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-        // some error handling should be done here...
-    };
-
-    var uri = 'format=' + format + '&client_encoding=UTF8&srs=4326&q=' + sql;
-    request.send(uri);
 };

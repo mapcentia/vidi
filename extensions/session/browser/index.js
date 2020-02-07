@@ -13,9 +13,8 @@
 var utils;
 
 var backboneEvents;
+var sessionInstance = false;
 
-var jquery = require('jquery');
-require('snackbarjs');
 
 var exId = `login-modal-body`;
 
@@ -53,6 +52,8 @@ module.exports = {
             type: "GET",
             success: function (data) {
                 if (data.status.authenticated) {
+                    //parent.update();
+                    backboneEvents.get().trigger(`refresh:auth`);
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
@@ -72,7 +73,6 @@ module.exports = {
                 return <div className={"alert alert-dismissible " + this.props.alertClass} role="alert">
                     {this.props.statusText}
                 </div>
-
             }
         }
 
@@ -81,7 +81,7 @@ module.exports = {
                 super(props);
 
                 this.state = {
-                    sessionEmail: "",
+                    sessionScreenName: "",
                     sessionPassword: "",
                     statusText: "Type your user name and password",
                     alertClass: "alert-info",
@@ -103,7 +103,7 @@ module.exports = {
             }
 
             validateForm() {
-                return this.state.sessionEmail.length > 0 && this.state.sessionPassword.length > 0 || this.state.auth;
+                return this.state.sessionScreenName.length > 0 && this.state.sessionPassword.length > 0 || this.state.auth;
             }
 
             handleChange(event) {
@@ -113,21 +113,22 @@ module.exports = {
             }
 
             handleSubmit(event) {
-
                 let me = this;
-
                 event.preventDefault();
-
                 if (!me.state.auth) {
+                    let dataToAuthorizeWith = "u=" + me.state.sessionScreenName + "&p=" + me.state.sessionPassword + "&s=public";
+                    if (vidiConfig.appDatabase) {
+                        dataToAuthorizeWith += "&d=" + vidiConfig.appDatabase;
+                    }
+
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/start",
                         type: "POST",
-                        data: "u=" + me.state.sessionEmail + "&p=" + me.state.sessionPassword + "&s=public",
+                        data: dataToAuthorizeWith,
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
-
-                            me.setState({statusText: "Signed in as " + me.state.sessionEmail});
+                            me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Log out"});
                             me.setState({auth: true});
@@ -135,6 +136,7 @@ module.exports = {
                             $(".gc2-session-unlock").hide();
                             parent.update();
                         },
+
                         error: function (error) {
                             me.setState({statusText: "Wrong user name or password"});
                             me.setState({alertClass: "alert-danger"});
@@ -174,8 +176,8 @@ module.exports = {
                         if (data.status.authenticated) {
                             backboneEvents.get().trigger(`session:authChange`, true);
 
-                            me.setState({sessionEmail: data.status.userName});
-                            me.setState({statusText: "Signed in as " + me.state.sessionEmail});
+                            me.setState({sessionScreenName: data.status.screen_name});
+                            me.setState({statusText: `Signed in as ${data.status.screen_name} (${data.status.email})`});
                             me.setState({alertClass: "alert-success"});
                             me.setState({btnText: "Sign out"});
                             me.setState({auth: true});
@@ -195,64 +197,63 @@ module.exports = {
                 });
             }
 
+            authenticated() {
+                return this.state.auth;
+            }
+
             render() {
-
-                return (
-
-                    <div style={this.padding}>
-
-                        <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
-
-                        <div className="login">
-                            <form onSubmit={this.handleSubmit}>
-
-                                <div style={{display: this.state.auth ? 'none' : 'inline'}}>
-                                    <div className="form-group">
-                                        <label htmlFor="session-email">User name</label>
-                                        <input
-                                            id="sessionEmail"
-                                            className="form-control"
-                                            defaultValue={this.state.sessionEmail}
-                                            onChange={this.handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="session-password">Password</label>
-                                        <input
-                                            id="sessionPassword"
-                                            className="form-control"
-                                            defaultValue={this.state.sessionPassword}
-                                            onChange={this.handleChange}
-                                            type="password"
-                                        />
-                                    </div>
+                return (<div style={this.padding}>
+                    <Status statusText={this.state.statusText} alertClass={this.state.alertClass}/>
+                    <div className="login">
+                        <form onSubmit={this.handleSubmit}>
+                            <div style={{display: this.state.auth ? 'none' : 'inline'}}>
+                                <div className="form-group">
+                                    <label htmlFor="session-email">User name</label>
+                                    <input
+                                        id="sessionScreenName"
+                                        className="form-control"
+                                        defaultValue={this.state.sessionScreenName}
+                                        onChange={this.handleChange}
+                                    />
                                 </div>
-
-                                <button
-                                    type="submit"
-                                    disabled={!this.validateForm()}
-                                    className="btn btn-raised"
-                                    style={this.sessionLoginBtn}
-                                >
-                                    {this.state.btnText}
-                                </button>
-
-                            </form>
-                        </div>
-
+                                <div className="form-group">
+                                    <label htmlFor="session-password">Password</label>
+                                    <input
+                                        id="sessionPassword"
+                                        className="form-control"
+                                        defaultValue={this.state.sessionPassword}
+                                        onChange={this.handleChange}
+                                        type="password"
+                                    />
+                                </div>
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={!this.validateForm()}
+                                className="btn btn-raised"
+                                style={this.sessionLoginBtn}
+                            >
+                                {this.state.btnText}
+                            </button>
+                        </form>
                     </div>
-
-
-                );
+                </div>);
             }
         }
 
         if (document.getElementById(exId)) {
-            ReactDOM.render(<Session/>, document.getElementById(exId));
+            sessionInstance = ReactDOM.render(<Session/>, document.getElementById(exId));
         } else {
             console.warn(`Unable to find the container for session extension (element id: ${exId})`);
         }
+    },
+
+    isAuthenticated() {
+        if (sessionInstance) {
+            return sessionInstance.authenticated();
+        } else {
+            return false;
+        }  
     },
 
     update: function () {

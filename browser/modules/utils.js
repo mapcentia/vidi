@@ -1,15 +1,10 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2019 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
-
-var proj4 = require('proj4');
-
-proj4.defs("EPSG:25832", "+title=  ETRF89 / UTM zone 32N EPSG:25832 +proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-
 
 module.exports = {
     set: function () {
@@ -19,8 +14,8 @@ module.exports = {
     },
     formatArea: (areaInSquareMeters) => {
         let result = Math.round(areaInSquareMeters);
-        let ha = (Math.round(areaInSquareMeters / 10000 * 100) / 100);
-        let km2 = (Math.round(areaInSquareMeters / 1000000 * 100) / 100);
+        let ha = (Math.round(areaInSquareMeters / 10000 * 1000) / 1000);
+        let km2 = (Math.round(areaInSquareMeters / 1000000 * 1000) / 1000);
         if (areaInSquareMeters < 10000) {
             // Display square meters
             result = (Math.round(areaInSquareMeters) + ' m2');
@@ -57,9 +52,7 @@ module.exports = {
         </li>`).appendTo("#main-tabs");
         $(`<div role="tabpanel" class="tab-pane fade" id="${id}-content"></div>`).appendTo(".tab-content.main-content");
         $(`<div class="help-btn"><i class="material-icons help-btn">help_outline</i></div>`).appendTo(el).on("click", function () {
-            $(this).next().html(`<div class="alert alert-dismissible alert-info" role="alert">
-                <button type="button" class="close" data-dismiss="alert">×</button>${info}
-            </div>`);
+            createAlert($(this), info);
         });
         $(`<div></div>`).appendTo(el);
         $(`<div id="${id}"></div>`).appendTo(el);
@@ -129,16 +122,17 @@ module.exports = {
 
     },
 
-    fullScreen: function () {
-        let elem = document.getElementsByTagName("body")[0];
-        if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-        } else if (elem.mozRequestFullScreen) {
-            elem.mozRequestFullScreen();
-        } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen();
-        } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen();
+    toggleFullScreen: function() {
+        let fullScreenMode;
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenMode = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenMode = false;
+            }
         }
+        return fullScreenMode;
     }
 };

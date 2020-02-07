@@ -47,13 +47,16 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 response.send(emptyReport);
                 return;
             }
+            // Sort alpha by layer title. This only works in Node v12+ with stable sort
+            metaData.data.sort((a,b) => (a.f_table_title > b.f_table_title) ? 1 : ((b.f_table_title > a.f_table_title) ? -1 : 0));
+            metaData.data.reverse();
+            metaData.data.sort((a,b) => (a.layergroup > b.layergroup) ? 1 : ((b.layergroup > a.layergroup) ? -1 : 0));
+            metaData.data.reverse();
 
             if (metaData.data === undefined || metaData.data.length === 0) {
-
                 response.send(emptyReport);
                 return;
             }
-
 
             // Count layers
             for (var i = 0; i < metaData.data.length; i = i + 1) {
@@ -71,6 +74,8 @@ router.post('/api/extension/conflictSearch', function (req, response) {
 
                 geomField = metaDataFinal.data[count].f_geometry_column;
                 srid = metaDataFinal.data[count].srid;
+
+                console.log(table);
 
                 sql = "SELECT * FROM " + table + " WHERE  ST_intersects(" + geomField + ", ST_Transform(ST_geomfromtext('" + wkt + "',4326)," + srid +"))";
 
@@ -92,14 +97,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                 request.post(options, function (err, res, body) {
 
                     var jsfile, message = null, result, time;
-
-                    if (err || res.statusCode !== 200) {
-                        response.status(401).send({
-                            success: false,
-                            message: body
-                        });
-                        return;
-                    }
 
                     try {
                         jsfile = JSON.parse(body);
@@ -154,12 +151,12 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                         table: table,
                         title: metaDataKeys[table.split(".")[1]].f_table_title,
                         group: metaDataKeys[table.split(".")[1]].layergroup,
-                        hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
+                            hits: (typeof result.features !== "undefined" && result.features !== null) ? result.features.length : 0,
                         data: data,
                         num: count + "/" + metaDataFinal.data.length,
                         time: time,
                         id: socketId,
-                        error: err || null,
+                        error: res.statusCode !== 200 ? JSON.parse(body).message : null,
                         message: message,
                         sql: metaDataKeys[table.split(".")[1]].sql,
                         meta: metaDataKeys[table.split(".")[1]]
@@ -187,8 +184,6 @@ router.post('/api/extension/conflictSearch', function (req, response) {
                     }
                     iter();
                 });
-
-
             })();
         } else {
             console.log(err);
