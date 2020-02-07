@@ -674,7 +674,8 @@ body {
   color: white !important;
 }
 #info-modal,
-#info-modal-top {
+#info-modal-top,
+#click-for-info-slide {
   position: fixed;
   top: 0;
   z-index: 3000;
@@ -1183,7 +1184,8 @@ h4 small {
   -o-transition: all 500ms ease-out;
   transition: all 500ms ease-out;
 }
-#layer-slide-body-wrapper > div {
+#layer-slide-body-wrapper > div,
+#click-for-info-slide-wrapper > div {
   height: calc(100vh - 48px);
 }
 #conflict-result-content {

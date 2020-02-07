@@ -1619,7 +1619,7 @@ module.exports = {
         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
             try {
                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                func(feature, layer, layerKey);
+                func(feature, layer, layerKey, sqlQuery);
             } catch (e) {
                 console.info("Error in click function for: " + layerKey);
                 console.error(e.message);

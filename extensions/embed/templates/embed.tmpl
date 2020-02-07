@@ -316,7 +316,7 @@
         top: -2px;
         font-size: 10pt;
     }
-    #layer-slide, #info-modal-top {
+    #layer-slide, #info-modal-top, #click-for-info-slide {
         position: fixed;
         max-width: 650px;
         z-index: 300000;
@@ -439,11 +439,11 @@
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
-        #layer-slide, #info-modal-top {
+        #layer-slide, #info-modal-top, #click-for-info-slide {
             width: 75%;
             min-width: 240px;
         }
-        #layer-slide, #info-modal-top {
+        #layer-slide, #info-modal-top, #click-for-info-slide {
             right: -75%;
         }
         .export {
@@ -585,6 +585,15 @@
         <div id="info-modal-top-body-wrapper">
             <div class="modal-body">
             </div>
+        </div>
+    </div>
+    <div id="click-for-info-slide" class="slide-left fade-then-dragging">
+        <div class="modal-header">
+            <button type="button" class="close" aria-hidden="true">×</button>
+            <h3 class="modal-title"></h3>
+        </div>
+        <div id="click-for-info-slide-wrapper">
+            <div class="modal-body" id="alternative-info-container"></div>
         </div>
     </div>
 </div>

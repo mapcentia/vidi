@@ -609,6 +609,16 @@ module.exports = {
         let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
         template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
         return template;
+    },
+
+    openInfoSlidePanel: function (layerKey = null) {
+        $("#click-for-info-slide.slide-left").show();
+        $("#click-for-info-slide.slide-left").animate({left: "0"}, 200);
+        if (layerKey) {
+            let metaDataKeys = meta.getMetaDataKeys();
+            let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+            $("#click-for-info-slide .modal-title").html(title);
+        }
     }
 };
 

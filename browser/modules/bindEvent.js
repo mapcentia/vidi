@@ -536,6 +536,12 @@ module.exports = {
             id.addClass("active");
         });
 
+        $("#click-for-info-slide.slide-left .close").on("click", function () {
+            $("#click-for-info-slide.slide-left").animate({
+                left: "-100%"
+            }, 500)
+        });
+
         // Listen for extensions
         $(document).arrive("#side-panel ul li a", function (e, data) {
             $(this).on("click", function (e) {
