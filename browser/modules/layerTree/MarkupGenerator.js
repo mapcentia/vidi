@@ -106,6 +106,7 @@ class MarkupGenerator {
                         <div style="display: inline-block;">
                             <span>
                                 ${text}${lockedLayer} 
+                                <span class="js-tiles-contain-data" style="visibility: hidden;"><i class="fa fa-eye" style="color: green;"></i></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>
@@ -160,7 +161,7 @@ class MarkupGenerator {
                             <a href="javascript:void(0);" class="js-toggle-search" >
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
                             </a>
-                            <a href="javascript:void(0);" class="js-toggle-opacity">
+                            <a href="javascript:void(0);" class="js-toggle-opacity" style="padding-top: 10px;">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                             </a>
                             <a href="javascript:void(0);" class="js-toggle-table-view">
