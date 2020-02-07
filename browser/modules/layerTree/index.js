@@ -448,37 +448,37 @@ module.exports = {
                         hideTableView();
                     }
                 } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                    if (desiredSetupType === LAYER.RASTER_TILE) {
-                        if (moduleState.tileContentCache[layerKey]) {
-                            $(container).find(`.js-tiles-contain-data`).css(`visibility`, `visible`);
+                        if (desiredSetupType === LAYER.RASTER_TILE) {
+                            if (moduleState.tileContentCache[layerKey]) {
+                                $(container).find(`.js-tiles-contain-data`).css(`visibility`, `visible`);
+                            }
                         }
-                    }
 
-                    // Opacity and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideLoadStrategy();
-                        hideOfflineMode();
-                        hideLoadStrategy();
-                        hideTableView();
-                        hideOpacity();
-                    } else {
-                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
-                    }
+                        // Opacity and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideLoadStrategy();
+                            hideOfflineMode();
+                            hideLoadStrategy();
+                            hideTableView();
+                            hideOpacity();
+                        } else {
+                            throw new Error(`${desiredSetupType} control setup is not supported yet`);
+                        }
 
-                    // For all layer types
-                    hideSearch();
-                    if (layerIsEnabled) {
-                        $(container).find(`.js-toggle-search`).show();
-                    } else {
-                        $(container).find(`.js-toggle-search`).hide();
-                        $(container).find('a').removeClass('active');
+                        // For all layer types
+                        hideSearch();
+                        if (layerIsEnabled) {
+                            $(container).find(`.js-toggle-search`).show();
+                        } else {
+                            $(container).find(`.js-toggle-search`).hide();
+                            $(container).find('a').removeClass('active');
 
-                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                    }
+                            // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                            $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                        }
 
-                    $(container).attr(`data-last-layer-type`, desiredSetupType);
-                }, 10);
+                        $(container).attr(`data-last-layer-type`, desiredSetupType);
+                    }}, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;

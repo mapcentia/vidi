@@ -206,7 +206,7 @@ module.exports = {
                 });
             };
 
-            orderSubgroup(order);            
+            orderSubgroup(order);
         }
     },
 
@@ -291,17 +291,16 @@ module.exports = {
                             if (e.target.id && e.target && e.target._bufferCanvas) {
                                 try {
                                     let canvas = e.target._bufferCanvas;
-                                    let data = canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data;
-                                    for (let key in data) {
-                                        if (data[key] !== 0) {
-                                            canvasHasData = true;
-                                            break;
-                                        }
-                                    }
-                                } catch(e) { console.error(e); }
+                                    canvasHasData = new Uint32Array(canvas.getContext('2d')
+                                        .getImageData(0, 0, canvas.width, canvas.height).data.buffer).some(x => x !== 0);
+                                } catch (e) {
+                                    console.error(e);
+                                }
                             }
-
-                            backboneEvents.get().trigger("tileLayerVisibility:layers", { id: e.target.id, dataIsVisible: canvasHasData });
+                            backboneEvents.get().trigger("tileLayerVisibility:layers", {
+                                id: e.target.id,
+                                dataIsVisible: canvasHasData
+                            });
 
                             me.decrementCountLoading(layer);
                             backboneEvents.get().trigger("doneLoading:layers", layer);
