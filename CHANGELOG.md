@@ -4,12 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [Unreleased]
+## [2020.2.0]
 ### Added
 - Custom user data from GC2 is now added to session the object.
 - Handling of invalid JSON configs.
 
 ### Changed
+- CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
 - Custom searches can now be added to danish search module.
 - `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
 - Its now possible to add custom extra searches to `danish.js`. A search needs a Elasticsearch index, which must have a id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
