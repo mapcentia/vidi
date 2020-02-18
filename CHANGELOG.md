@@ -44,7 +44,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - New GC2 Meta properties which controls the info pop-up and styling of vector layers:
     - *info_template*: Mustache template for use in pop-up.
     - *info_element_selector*: Which element to render info template in? Defaults to pop-up.
-    - *info_function*: Function which is run when clicking on a vector feature. Takes three args: feature, layer and layer key.
+    - *info_function*: Function which is run when clicking on a vector feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key (Vidi), SQL store (Vidi) and map (Leaflet).
     - *point_to_layer*: Leaflet pointToLayer function.
     - *vector_style*: Leaflet vector styling function.
     
