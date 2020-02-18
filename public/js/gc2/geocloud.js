@@ -306,6 +306,7 @@ geocloud = (function () {
                                 me.featuresLimitReached = false;
                             }
                             me.layer.addData(response);
+                            me.layer.defaultOptions = me.layer.options; // So layer can be reset
                         } else {
                             me.geoJSON = null;
                         }
