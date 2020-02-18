@@ -58,7 +58,7 @@ const returnPNGForStateSnapshot = (localRequest, localResponse) => {
                             // Print as soon Vidi is done loading
                             (msg.text().indexOf(`Vidi is now loaded`) !== -1 && go) ||
                             // Wait until all overlays from snapshot is loaded
-                            (msg.text().indexOf(`Layers all loaded`) !== -1 && !go)
+                            (msg.text().indexOf(`Layers all loaded L`) !== -1 && !go)
                         ) {
                             console.log('App was loaded, generating PNG');
                             setTimeout(() => {
