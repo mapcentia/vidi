@@ -370,7 +370,7 @@ module.exports = {
                             }
 
                             // Show log in button if session module is enabled
-                            if (window.vidiConfig.enabledExtensions.includes("session") && !enabledExtensionsCopy.includes("session")) {
+                            if (window.vidiConfig.enabledExtensions.indexOf("session") > -1 && !enabledExtensionsCopy.indexOf("session") > -1) {
                                 $("#session").show();
                             }
                         }
