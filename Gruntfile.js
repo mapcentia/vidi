@@ -262,7 +262,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'public/js/bundle.js',
-                        'public/js/vidi.js',
                     ],
                     'public/js/build/all.async.min.js': [
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',

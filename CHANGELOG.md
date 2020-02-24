@@ -8,6 +8,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 
 ### Changed
+- `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.

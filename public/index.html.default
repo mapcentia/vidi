@@ -139,8 +139,6 @@
 <script src="/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
-<!-- Custom -->
-<script src="/js/vidi.js"></script>
 <!-- /build -->
 <script>
     window.MapCentia = new Vidi().init.init();
