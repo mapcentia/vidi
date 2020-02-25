@@ -14,6 +14,7 @@ var utils;
 
 var backboneEvents;
 var sessionInstance = false;
+var userName = null;
 
 
 var exId = `login-modal-body`;
@@ -52,15 +53,16 @@ module.exports = {
             type: "GET",
             success: function (data) {
                 if (data.status.authenticated) {
-                    //parent.update();
                     backboneEvents.get().trigger(`refresh:auth`);
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
+                    userName = data.status.screen_name;
                 } else {
                     backboneEvents.get().trigger(`session:authChange`, false);
                     $(".gc2-session-lock").hide();
                     $(".gc2-session-unlock").show();
+                    userName = null;
                 }
             },
             error: function (error) {
@@ -134,6 +136,7 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            userName = data.screen_name;
                             parent.update();
                         },
 
@@ -156,6 +159,7 @@ module.exports = {
                             me.setState({auth: false});
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            userName = null;
                             parent.update();
                         },
                         error: function (error) {
@@ -259,6 +263,11 @@ module.exports = {
     update: function () {
         backboneEvents.get().trigger("refresh:auth");
         backboneEvents.get().trigger("refresh:meta");
+    },
+
+    getUserName: function () {
+        return userName;
     }
+
 };
 
