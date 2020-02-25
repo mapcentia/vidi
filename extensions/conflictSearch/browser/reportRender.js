@@ -61,6 +61,7 @@ module.exports = {
                                             if (!v.data[u][m].link) {
                                                 dataTr.append("<td>" + v.data[u][m].value + "</td>");
                                             } else {
+                                                // TODO tjek om der er link og lav tomt felt.
                                                 dataTr.append("<td>" + "<a target='_blank' rel='noopener' href='" + (v.data[u][m].linkprefix ? v.data[u][m].linkprefix : "") + v.data[u][m].value + "'>Link</a>" + "</td>");
                                             }
                                         }
@@ -100,7 +101,7 @@ module.exports = {
             }
         });
         if (without.length > 0) {
-            $("#report #without").append("<caption style='white-space: nowrap;'>Unden konflikter</caption>");
+            $("#report #without").append("<caption style='white-space: nowrap;'>Uden konflikter</caption>");
             $("#report #without").append("<div>" + without.join(" | ") + "</div>");
         }
     }
