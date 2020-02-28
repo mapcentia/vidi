@@ -125,7 +125,8 @@ let moduleState = {
     setLayerStateRequests: {},
     vectorStores: [],
     webGLStores: [],
-    virtualLayers: []
+    virtualLayers: [],
+    tileContentCache: {}
 };
 
 /**
@@ -414,17 +415,14 @@ module.exports = {
                             hideTableView();
                         }
 
-                        hideOfflineMode();
-                        if (layerIsEnabled) {
-                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
-                            $(container).find(`.js-toggle-opacity`).show(0);
-                            $(container).find(`.js-toggle-filters`).show(0);
-                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
-                        } else {
-                            hideAddFeature();
-                            hideFilters();
-                            hideOpacity();
-                        }
+                $(container).find(`.js-tiles-contain-data`).css(`visibility`, `hidden`);
+
+                if (desiredSetupType === LAYER.VECTOR) {
+                    // Load strategy and filters should be kept opened after setLayerState()
+                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                        hideOpacity();
+                    }
+
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
                         if (parsedMeta && parsedMeta.single_tile) {
@@ -444,29 +442,43 @@ module.exports = {
                         }
                     } else if (desiredSetupType === LAYER.WEBGL) {
                         hideAddFeature();
-                        hideFilters();
-                        hideOfflineMode();
+                        hideFilters();                   
+                        hideOfflineMode();                   
                         hideLoadStrategy();
                         hideTableView();
-                        hideOpacity();
-                    } else {
-                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
+                } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
+                        if (desiredSetupType === LAYER.RASTER_TILE) {
+                            if (moduleState.tileContentCache[layerKey]) {
+                                $(container).find(`.js-tiles-contain-data`).css(`visibility`, `visible`);
+                            }
+                        }
 
-                    // For all layer types
-                    hideSearch();
-                    if (layerIsEnabled) {
-                        $(container).find(`.js-toggle-search`).show();
-                    } else {
-                        $(container).find(`.js-toggle-search`).hide();
-                        $(container).find('a').removeClass('active');
+                        // Opacity and filters should be kept opened after setLayerState()
+                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
+                            hideLoadStrategy();
+                            hideOfflineMode();
+                            hideLoadStrategy();
+                            hideTableView();
+                            hideOpacity();
+                        } else {
+                            throw new Error(`${desiredSetupType} control setup is not supported yet`);
+                        }
 
-                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                    }
+                        // For all layer types
+                        hideSearch();
+                        if (layerIsEnabled) {
+                            $(container).find(`.js-toggle-search`).show();
+                        } else {
+                            $(container).find(`.js-toggle-search`).hide();
+                            $(container).find('a').removeClass('active');
 
-                    $(container).attr(`data-last-layer-type`, desiredSetupType);
-                }, 10);
+                            // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                            $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                        }
+
+                        $(container).attr(`data-last-layer-type`, desiredSetupType);
+                    }}, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -703,6 +715,15 @@ module.exports = {
             for (let key in groupsToActiveLayers) {
                 layerTreeUtils.setupLayerNumberIndicator(key, groupsToActiveLayers[key], groupsToAddedLayers[key]);
             }
+        });
+
+        /**
+         * Listening to event that indicates if viewport tiles of specific layer contain any data
+         */
+        backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
+            moduleState.tileContentCache[data.id] = data.dataIsVisible;
+            console.log(`### data`, data);
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ?  `visible` : `hidden`));
         });
 
         /**

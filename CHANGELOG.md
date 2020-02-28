@@ -27,6 +27,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Custom user data from GC2 is now added to session the object.
 - Handling of invalid JSON configs.
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixel. Be aware of the canvas being bigger than the view extent because of the buffer. 
 
 ### Changed
 - CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
