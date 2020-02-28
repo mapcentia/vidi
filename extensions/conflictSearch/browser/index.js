@@ -356,7 +356,6 @@ module.exports = module.exports = {
     control: function () {
         var me = this;
 
-
         // Start listen to the web socket
         io.connect().on(socketId.get(), function (data) {
             if (typeof data.num !== "undefined") {
@@ -373,7 +372,6 @@ module.exports = module.exports = {
 
         // Emit "on" event
         backboneEvents.get().trigger("on:conflict");
-
 
         // Show DOM elements
         $("#conflict-buffer").show();
@@ -453,8 +451,10 @@ module.exports = module.exports = {
         });
         cloud.map.on('draw:drawstop', function (e) {
             me.makeSearch(fromDrawingText);
-            // Switch info click on again
-            backboneEvents.get().trigger("on:conflictInfoClick");
+            // Switch info click on again, but wait a bit, so drag n drop of rec and circle doesn't trigger a click
+            setTimeout(() => {
+                backboneEvents.get().trigger("on:conflictInfoClick");
+            }, 300);
         });
         cloud.map.on('draw:editstop', function (e) {
             me.makeSearch(fromDrawingText);
@@ -660,8 +660,6 @@ module.exports = module.exports = {
                                 hitsTable.find("tr").last().remove();
                             }
                         }
-                        ;
-
 
                         for (let u = 0; u < groups.length; ++u) {
                             row = "<h4 style='font-weight: 400'>" + groups[u] + "</h4><hr style='margin-top: 2px; border-top: 1px solid #aaa'>";
@@ -686,7 +684,7 @@ module.exports = module.exports = {
                                                 hitsData.append("<p style='margin: 0'>" + conflictForLayer.short_conflict_meta_desc + "</p>");
                                             }
                                             if (conflictForLayer !== null && 'long_conflict_meta_desc' in conflictForLayer && conflictForLayer.long_conflict_meta_desc !== '') {
-                                                $(`<i style="cursor: pointer; color: #999999">Beskrivelse&hellip;</i>`).appendTo(hitsData).on("click", function () {
+                                                $(`<i style="cursor: pointer; color: #999999">Lagbeskrivelse - klik her</i>`).appendTo(hitsData).on("click", function () {
                                                     let me = this;
                                                     if ($(me).next().children().length === 0) {
                                                         $(me).next().html(`<div class="alert alert-dismissible alert-info" role="alert" style="background-color: #d4d4d4; color: #333; padding: 7px 30px 7px 7px">
@@ -708,9 +706,13 @@ module.exports = module.exports = {
                                                     $.each(row, function (n, field) {
                                                         if (!field.key) {
                                                             if (!field.link) {
-                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + field.value + "</td></tr>");
+                                                                table2.append("<tr><td class='conflict-heading-cell' '>" + field.alias + "</td><td class='conflict-value-cell'>" + (field.value !== null ? field.value : "&nbsp;") + "</td></tr>");
                                                             } else {
-                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>" + "</td></tr>")
+                                                                let link = "&nbsp;";
+                                                                if (field.value && field !== "") {
+                                                                    link = "<a target='_blank' rel='noopener' href='" + (field.linkprefix ? field.linkprefix : "") + field.value + "'>Link</a>"
+                                                                }
+                                                                table2.append("<tr><td class='conflict-heading-cell'>" + field.alias + "</td><td class='conflict-value-cell'>" + link + "</td></tr>")
                                                             }
                                                         } else {
                                                             key = field.name;
@@ -790,6 +792,9 @@ module.exports = module.exports = {
     },
     setSearchStr: function (str) {
         searchStr = str;
+    },
+    getBufferItems: function () {
+        return bufferItems;
     }
 };
 

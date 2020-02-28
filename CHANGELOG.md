@@ -9,9 +9,19 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
+- A lot of improvements in the `conflictSearch` module:
+    - Results are now alpha sorted within layers groups (which is also sorted). Both in web and PDF.
+    - A short and long description can be added for each layer, which is shown the result list. Use GC2 Meta properties: `short_conflict_meta_desc and `long_conflict_meta_desc`. 
+    - The styling of both web and PDF results is better. Tables can't overflow the PDF page.
+    - Ellipsis is used both in web and PDF when fields names / results are too long.
+    - Empty link fields will now just be blank.
+    - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
+    - New button for setting the print extent before creating a PDF.
+    - Mouse click when releasing a rectangle/circle drag is suppressed.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
+- `embed.js` now works in IE11.
 
 ## [2020.2.0]
 ### Added

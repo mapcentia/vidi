@@ -1736,7 +1736,7 @@ td.rdtYear:hover {
 
 .table-conflict {
   border: 1px solid #eee;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .table-conflict td {
@@ -1752,6 +1752,7 @@ td.rdtYear:hover {
   border: 1px solid #eee !important;
   padding: 5px 10px !important;
   font-weight: 400 !important;
+  white-space: nowrap;
 }
 .conflict-heading-cell, .conflict-value-cell {
   white-space: nowrap;
@@ -1761,7 +1762,7 @@ td.rdtYear:hover {
 .conflict-heading-cell {
   width: 1px;
   min-width: 0;
-  max-width: 75px;
+  max-width: 95px;
   padding-right: 10px;
   border-right: 1px solid #eee;
   font-weight: 400;

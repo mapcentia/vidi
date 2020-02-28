@@ -334,6 +334,7 @@ module.exports = {
                 ne = recEdit.getBounds().getNorthEast();
             curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
         });
+        return recScale;
     },
 
     /**
