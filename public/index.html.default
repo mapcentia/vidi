@@ -47,9 +47,10 @@
     <link rel="stylesheet" href="/js/lib/leaflet.locatecontrol/L.Control.Locate.css">
     <link rel="stylesheet" href="/js/lib/leaflet.toolbar/leaflet.toolbar.css">
     <link rel="stylesheet" href="/js/lib/leaflet-measure-path/leaflet-measure-path.css">
-    <!--<link rel="stylesheet" href="/js/lib/leaflet-measure/leaflet-measure.css">-->
-    <!--<link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>-->
+    <link rel="stylesheet" href="/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css"/>
     <link rel="stylesheet" href="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.css"/>
+    <link rel="stylesheet" href="/js/lib/Leaflet.markercluster/MarkerCluster.Default.css"/>
     <!-- Bootstrap -->
     <link rel="stylesheet" href="/js/lib/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="/js/lib/snackbarjs/snackbar.min.css">
@@ -124,6 +125,9 @@
 <script src="/js/lib/Leaflet.GridLayer.GoogleMutant/Leaflet.GoogleMutant.js"></script>
 <script src="/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js"></script>
 <script src="/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js"></script>
+<script src="/js/lib/Leaflet.markercluster/leaflet.markercluster.js"></script>
+<script src="/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js"></script>
+<script src="/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js"></script>
 <script src="/js/lib/localforage/localforage.js"></script>
 <!-- Core -->
 <script src="/js/lib/jquery/jquery-3.4.1.min.js"></script>

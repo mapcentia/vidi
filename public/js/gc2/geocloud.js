@@ -145,7 +145,8 @@ geocloud = (function () {
         },
         key: null,
         base64: true,
-        custom_data: null
+        custom_data: null,
+        clustering: false
     };
 
     // Base class for stores
@@ -161,15 +162,20 @@ geocloud = (function () {
 
         // Initiate base class settings
         this.init = function () {
-            this.onLoad = this.defaults.onLoad;
-            this.loading = this.defaults.loading;
-            this.layer = L.geoJson(null, {
+            this.geoJsonLayer= L.geoJson(null, {
                 style: this.defaults.styleMap,
                 pointToLayer: this.defaults.pointToLayer,
                 onEachFeature: this.defaults.onEachFeature,
                 interactive: this.defaults.clickable,
                 bubblingMouseEvents: false
             });
+            this.onLoad = this.defaults.onLoad;
+            this.loading = this.defaults.loading;
+            if (!this.defaults.clustering) {
+                this.layer = this.geoJsonLayer;
+            } else {
+                this.layer = L.markerClusterGroup();
+            }
 
             this.layer.id = this.defaults.name;
         };
@@ -228,6 +234,7 @@ geocloud = (function () {
         this.method = this.defaults.method;
         this.uri = this.defaults.uri;
         this.base64 = this.defaults.base64;
+        this.clustering = this.defaults.clustering;
         this.custom_data = this.defaults.custom_data;
         this.maxFeaturesLimit = this.defaults.maxFeaturesLimit;
         this.onMaxFeaturesLimitReached = this.defaults.onMaxFeaturesLimitReached;
@@ -281,6 +288,7 @@ geocloud = (function () {
                 url: this.host + this.uri + '/' + this.db,
                 type: this.defaults.method,
                 success: function (response) {
+
                     if (response.success === false && doNotShowAlertOnError === undefined) {
                         alert(response.message);
                     }
@@ -305,8 +313,17 @@ geocloud = (function () {
                             } else {
                                 me.featuresLimitReached = false;
                             }
-                            me.layer.addData(response);
+
+                            if (!me.clustering) {
+                                // In this case me.layer is L.geoJson
+                                me.layer.addData(response);
+                            } else {
+                                // In this case me.layer is L.markerClusterGroup
+                                me.geoJsonLayer.addData(response);
+                                me.layer.addLayer(me.geoJsonLayer);
+                            }
                             me.layer.defaultOptions = me.layer.options; // So layer can be reset
+
                         } else {
                             me.geoJSON = null;
                         }
@@ -1026,8 +1043,7 @@ geocloud = (function () {
                 case "leaflet":
                     if (!extent) {
                         this.map.fitWorld();
-                    }
-                    else {
+                    } else {
                         p1 = transformPoint(extent[0], extent[1], "EPSG:900913", "EPSG:4326");
                         p2 = transformPoint(extent[2], extent[3], "EPSG:900913", "EPSG:4326");
                         this.map.fitBounds([
@@ -1193,8 +1209,7 @@ geocloud = (function () {
             }
             if (layerArr.length > 0) {
                 return layerArr.join(",");
-            }
-            else {
+            } else {
                 return false;
             }
         };
@@ -1450,8 +1465,7 @@ geocloud = (function () {
                     try {
                         this.stamenToner = new L.StamenTileLayer(type);
                         lControl.addBaseLayer(this.stamenToner, prettyName);
-                    }
-                    catch (e) {
+                    } catch (e) {
                     }
                     break;
             }
@@ -2503,8 +2517,7 @@ geocloud = (function () {
                             //queryLayers[i].destroy();
                             this.map.removeLayer(queryLayers[i])
                         }
-                    }
-                    catch (e) {
+                    } catch (e) {
                     }
                     break;
                 case "ol3":
@@ -2514,8 +2527,7 @@ geocloud = (function () {
                         for (var i = 0; i < queryLayers.length; i++) {
                             this.map.removeLayer(queryLayers[i]);
                         }
-                    }
-                    catch (e) {
+                    } catch (e) {
                     }
                     break;
             }
@@ -2602,8 +2614,7 @@ geocloud = (function () {
             var dest = new Proj4js.Proj(d);
             p = new Proj4js.Point(lat, lon);
             Proj4js.transform(source, dest, p);
-        }
-        else {
+        } else {
             p.x = null;
             p.y = null;
         }

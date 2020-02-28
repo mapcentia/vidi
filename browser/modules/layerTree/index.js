@@ -1383,6 +1383,7 @@ module.exports = {
             custom_data,
             styleMap: styles[trackingLayerKey],
             sql,
+            clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);

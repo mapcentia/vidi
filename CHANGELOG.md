@@ -6,6 +6,7 @@ and this project adheres to [CalVer](https://calver.org/).
 
 ## [UNRELEASED]
 ### Added
+- The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -18,6 +19,13 @@ and this project adheres to [CalVer](https://calver.org/).
     - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
     - New button for setting the print extent before creating a PDF.
     - Mouse click when releasing a rectangle/circle drag is suppressed.
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixel. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
+```javascript
+{
+    id: "schema.layer.geom",
+    dataIsVisible: true
+}
+```
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
@@ -27,7 +35,6 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - Custom user data from GC2 is now added to session the object.
 - Handling of invalid JSON configs.
-- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixel. Be aware of the canvas being bigger than the view extent because of the buffer. 
 
 ### Changed
 - CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier

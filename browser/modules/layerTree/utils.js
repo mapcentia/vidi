@@ -362,6 +362,23 @@ const getQueryLimit = (layerMeta) => {
 };
 
 /**
+ * Detects if a vector should be clustered
+ *
+ * @param {Object} layerMeta Layer meta
+ *
+ * @return {Number}
+ */
+const getIfClustering = (layerMeta) => {
+    if (!layerMeta) throw new Error(`Invalid layer meta object`);
+
+    let useClustering = false;
+    if (layerMeta && `use_clustering` in layerMeta) {
+        useClustering = layerMeta.use_clustering;
+    }
+    return useClustering;
+};
+
+/**
  * Detects default (fallback) layer type
  * 
  * @param {Object} layerMeta  Layer meta
@@ -405,5 +422,6 @@ module.exports = {
     getDefaultLayerType,
     setupLayerNumberIndicator,
     isVectorTileLayerId,
-    occurrences
+    occurrences,
+    getIfClustering
 };
