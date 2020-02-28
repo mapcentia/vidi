@@ -161,7 +161,7 @@ class MarkupGenerator {
                             <a href="javascript:void(0);" class="js-toggle-search" >
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Search`)}" class="material-icons">search</i>
                             </a>
-                            <a href="javascript:void(0);" class="js-toggle-opacity" style="padding-top: 10px;">
+                            <a href="javascript:void(0);" class="js-toggle-opacity">
                                 <i data-container="body" data-toggle="tooltip" data-placement="right" title="${__(`Opacity`)}" class="material-icons">opacity</i>
                             </a>
                             <a href="javascript:void(0);" class="js-toggle-table-view">
