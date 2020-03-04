@@ -86,6 +86,8 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
                         'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
                         'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
