@@ -250,6 +250,7 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
                         'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
 
                         'public/js/lib/localforage/localforage.js',
 
