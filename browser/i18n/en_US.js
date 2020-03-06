@@ -161,7 +161,7 @@ module.exports = {
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
         "No drawings in the map": "No drawings in the map",
 
-        "Not a valid scale. Must be over 200.": "Not a valid scale. Must be over 200.",
+        "Not a valid scale. Must be over 100.": "Not a valid scale. Must be over 100.",
 
         "Languages": "Languages",
 
