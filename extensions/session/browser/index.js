@@ -67,7 +67,7 @@ module.exports = {
                 if (data.status.authenticated) {
                     
                     // inserted by LKM
-                    parent.update();
+                    //parent.update();
                     
                     //parent.update();
                     backboneEvents.get().trigger(`refresh:auth`);
