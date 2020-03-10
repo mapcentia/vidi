@@ -29,22 +29,14 @@ if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible 
  */
 var config = require('../../../config/config.js');
 
-var start = function (u, p, s, d, req, response, status) {
-    var postData = {
-        user: u,
-        password: p,
-        schema: s
-    };
+var start = function (dataToAuthorizeWith, req, response, status) {
 
-    if (d) {
-        postData.database = d;
-    }
 
     var options = {
         headers: {'content-type': 'application/json'},
         method: 'POST',
         uri: config.gc2.host + "/api/v2/session/start",
-        body: JSON.stringify(postData)
+        body: JSON.stringify(dataToAuthorizeWith)
     };
 
     request(options, function (err, res, body) {
@@ -108,8 +100,8 @@ var start = function (u, p, s, d, req, response, status) {
         };
 
         if (autoLogin) {
-            resBody.password = postData.password;
-            resBody.schema = postData.schema;
+            resBody.password = dataToAuthorizeWith.password;
+            resBody.schema = dataToAuthorizeWith.schema;
             response.cookie('autoconnect.gc2', JSON.stringify(resBody), {
                 maxAge: autoLoginMaxAge,
                 httpOnly: true
@@ -126,8 +118,9 @@ var start = function (u, p, s, d, req, response, status) {
 };
 
 router.post('/api/session/start', function (req, response) {
-    if (req.body.u) {
-        start(req.body.u, req.body.p, req.body.s, req.body.d, req, response);
+    console.log(req.body)
+    if (req.body) {
+        start(req.body, req, response);
     }
 });
 
@@ -145,7 +138,7 @@ router.get('/api/session/status', function (req, response) {
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
         var creds = JSON.parse(autoLoginCookie);
-        start(creds.screen_name, creds.password, creds.schema, creds.parentdb, req, response,
+        start(creds, req, response,
             {
                 screen_name: creds.screen_name,
                 email: creds.email,

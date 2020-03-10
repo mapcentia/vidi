@@ -118,16 +118,23 @@ module.exports = {
                 let me = this;
                 event.preventDefault();
                 if (!me.state.auth) {
-                    let dataToAuthorizeWith = "u=" + me.state.sessionScreenName + "&p=" + me.state.sessionPassword + "&s=public";
+                    let dataToAuthorizeWith = {
+                        "user":  me.state.sessionScreenName,
+                        "password":  me.state.sessionPassword,
+                        "schema": "public"
+                    };
+
                     if (vidiConfig.appDatabase) {
-                        dataToAuthorizeWith += "&d=" + vidiConfig.appDatabase;
+                        dataToAuthorizeWith.database = vidiConfig.appDatabase;
                     }
 
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/start",
                         type: "POST",
-                        data: dataToAuthorizeWith,
+                        contentType: "application/json; charset=utf-8",
+                        scriptCharset: "utf-8",
+                        data: JSON.stringify(dataToAuthorizeWith),
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
