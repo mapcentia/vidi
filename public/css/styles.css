@@ -1503,3 +1503,12 @@ td.rdtYear:hover {
   padding: 5px 10px !important;
   font-weight: 400 !important;
 }
+
+/* Fix for small screens and leaflet draw module*/
+@media screen and (min-height: 700px) {
+  .leaflet-draw {
+      margin-right: 54px;
+      top: -354px;
+      position: relative;
+  }
+}
