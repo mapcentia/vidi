@@ -1754,3 +1754,16 @@ td.rdtYear:hover {
   padding: 5px 10px !important;
   font-weight: 400 !important;
 }
+
+
+/* fix for small screen and leaflet-draw*/
+/* RGB 03/2020 */
+@media screen {
+  @media (min-height: 700px) {
+      .leaflet-draw {
+          margin-right: 54px;
+          top: -354px;
+          position: relative;
+      }
+  }
+}
