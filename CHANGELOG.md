@@ -7,6 +7,13 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
+- With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
+```javascript
+"cssFiles": [
+   "myStyles1.css",
+   "myStyles2.css"
+]
+```
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

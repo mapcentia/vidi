@@ -22,5 +22,6 @@ router.use(require('./config'));
 router.use(require('./static'));
 router.use(require('./feature'));
 router.use(require('./template'));
+router.use(require('./css'));
 
 module.exports = router;

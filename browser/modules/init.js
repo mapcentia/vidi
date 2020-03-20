@@ -71,7 +71,7 @@ module.exports = {
                 window.vidiConfig.singleTiled = data.singleTiled ? data.singleTiled : window.vidiConfig.singleTiled;
                 window.vidiConfig.doNotCloseLoadScreen = data.doNotCloseLoadScreen ? data.doNotCloseLoadScreen : window.vidiConfig.doNotCloseLoadScreen;
                 window.vidiConfig.startupModalSupressionTemplates = data.startupModalSupressionTemplates ? data.startupModalSupressionTemplates : window.vidiConfig.startupModalSupressionTemplates;
-                window.vidiConfig.loadCss = data.loadCss ? data.loadCss : window.vidiConfig.loadCss;
+                window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {
@@ -106,7 +106,7 @@ module.exports = {
     },
 
     getVersion: function () {
-        var me = this;
+        let me = this;
         $.getJSON(`/app/${urlparser.db}/public/version.json`, function (data) {
             window.vidiConfig.appVersion = data.version;
             window.vidiConfig.appExtensionsBuild = '0';
@@ -256,6 +256,19 @@ module.exports = {
                 $(`#startup-message-modal`).modal('show');
             }
         }
+
+        // Load css files
+        // ==============
+
+        console.log(window.vidiConfig.cssFiles)
+        window.vidiConfig.cssFiles.forEach((file)=>{
+            let url = `/api/css/${urlparser.db}/${file}`;
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: url
+            }).appendTo("head");
+        });
 
         // Add the tooltip div
         // ===================
