@@ -415,14 +415,17 @@ module.exports = {
                             hideTableView();
                         }
 
-                $(container).find(`.js-tiles-contain-data`).css(`visibility`, `hidden`);
-
-                if (desiredSetupType === LAYER.VECTOR) {
-                    // Load strategy and filters should be kept opened after setLayerState()
-                    if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                        hideOpacity();
-                    }
-
+                        hideOfflineMode();
+                        if (layerIsEnabled) {
+                            $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
+                            $(container).find(`.js-toggle-opacity`).show(0);
+                            $(container).find(`.js-toggle-filters`).show(0);
+                            $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                        } else {
+                            hideAddFeature();
+                            hideFilters();
+                            hideOpacity();
+                        }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
                         if (parsedMeta && parsedMeta.single_tile) {
@@ -442,43 +445,29 @@ module.exports = {
                         }
                     } else if (desiredSetupType === LAYER.WEBGL) {
                         hideAddFeature();
-                        hideFilters();                   
-                        hideOfflineMode();                   
+                        hideFilters();
+                        hideOfflineMode();
                         hideLoadStrategy();
                         hideTableView();
+                        hideOpacity();
+                    } else {
+                        throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
-                } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
-                        if (desiredSetupType === LAYER.RASTER_TILE) {
-                            if (moduleState.tileContentCache[layerKey]) {
-                                $(container).find(`.js-tiles-contain-data`).css(`visibility`, `visible`);
-                            }
-                        }
 
-                        // Opacity and filters should be kept opened after setLayerState()
-                        if ($(container).attr(`data-last-layer-type`) !== desiredSetupType) {
-                            hideLoadStrategy();
-                            hideOfflineMode();
-                            hideLoadStrategy();
-                            hideTableView();
-                            hideOpacity();
-                        } else {
-                            throw new Error(`${desiredSetupType} control setup is not supported yet`);
-                        }
+                    // For all layer types
+                    hideSearch();
+                    if (layerIsEnabled) {
+                        $(container).find(`.js-toggle-search`).show();
+                    } else {
+                        $(container).find(`.js-toggle-search`).hide();
+                        $(container).find('a').removeClass('active');
 
-                        // For all layer types
-                        hideSearch();
-                        if (layerIsEnabled) {
-                            $(container).find(`.js-toggle-search`).show();
-                        } else {
-                            $(container).find(`.js-toggle-search`).hide();
-                            $(container).find('a').removeClass('active');
+                        // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
+                        $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                    }
 
-                            // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
-                            $(`.js-layer-settings-table table`).bootstrapTable('resetView');
-                        }
-
-                        $(container).attr(`data-last-layer-type`, desiredSetupType);
-                    }}, 10);
+                    $(container).attr(`data-last-layer-type`, desiredSetupType);
+                }, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
                     moduleState.setLayerStateRequests[layerKey] = false;
@@ -723,7 +712,7 @@ module.exports = {
         backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
             moduleState.tileContentCache[data.id] = data.dataIsVisible;
             console.log(`### data`, data);
-            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ?  `visible` : `hidden`));
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ? `visible` : `hidden`));
         });
 
         /**
@@ -2091,7 +2080,7 @@ module.exports = {
                     try {
                         let func = Function('"use strict";return (' + pointToLayer + ')')();
                         _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
-                    }  catch (e) {
+                    } catch (e) {
                         console.info("Error in point-to-layer function for: " + layerKey);
                         console.error(e.message);
                     }
