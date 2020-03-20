@@ -301,7 +301,7 @@ module.exports = {
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
 
-                            if (response.data.customData !== null) {
+                            if (typeof response.data.customData !== "undefined" && response.data.customData !== null) {
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
                                 // TODO HACK:
                                 reportRender.render(response.data.customData);

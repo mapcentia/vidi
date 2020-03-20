@@ -7,6 +7,9 @@ and this project adheres to [CalVer](https://calver.org/).
 ## [UNRELEASED]
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
+- Print setup can now be "sticky" (by using the state module), so it will not reset when re-activating the module. Stickiness can be toggled and off. Off is default.
+- Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
+- New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
