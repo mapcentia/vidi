@@ -49,8 +49,6 @@ router.get('/api/print/:database', function (req, res) {
                 let r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
-            // We need to set add necessary modules for printing
-            parsedBody.snapshot.modules.print.state = {"modules": {"layerTree": parsedBody.snapshot.modules.layerTree}};
             return print(key, parsedBody.snapshot.modules.print, req, res, true);
         } catch (e) {
             console.log(e.message)
