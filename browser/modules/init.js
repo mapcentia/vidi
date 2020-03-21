@@ -260,15 +260,16 @@ module.exports = {
         // Load css files
         // ==============
 
-        console.log(window.vidiConfig.cssFiles)
-        window.vidiConfig.cssFiles.forEach((file)=>{
-            let url = `/api/css/${urlparser.db}/${file}`;
-            $("<link/>", {
-                rel: "stylesheet",
-                type: "text/css",
-                href: url
-            }).appendTo("head");
-        });
+        if (typeof window.vidiConfig.cssFiles === "object") {
+            window.vidiConfig.cssFiles.forEach((file) => {
+                let url = `/api/css/${urlparser.db}/${file}`;
+                $("<link/>", {
+                    rel: "stylesheet",
+                    type: "text/css",
+                    href: url
+                }).appendTo("head");
+            });
+        }
 
         // Add the tooltip div
         // ===================
