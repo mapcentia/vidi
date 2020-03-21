@@ -4,6 +4,8 @@
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
+//process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+
 var path = require('path');
 require('dotenv').config({path: path.join(__dirname, ".env")});
 
