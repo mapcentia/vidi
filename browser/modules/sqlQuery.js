@@ -48,6 +48,8 @@ let editingIsEnabled = false;
 
 let template;
 
+let elementPrefix;
+
 /**
  * A default template for GC2, with a loop
  * @type {string}
@@ -130,9 +132,10 @@ module.exports = {
      * @param includes
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick) {
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = ()=>{}, prefix="", simple = false, infoText = null) {
         let layers, count = {index: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
+        elementPrefix = prefix;
 
         if (`editor` in extensions) {
             editor = extensions.editor.index;
@@ -212,10 +215,15 @@ module.exports = {
                     template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
-                        $('#modal-info-body').show();
-                        $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $("#info-pane").append(`<div class="tab-pane" id="_${storeId}">
-                            <div>
+                        let display = simple ? "none" : "inline";
+                        let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
+                        let info = infoText ? `<div>${infoText}</div>` : "";
+                        dataShowExport = dataShowColumns = dataShowToggle = dataDetailView = simple ? "false" : "true";
+
+                        $(`#${elementPrefix}modal-info-body`).show();
+                        $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
+                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane" id="_${storeId}">
+                            <div style="display: ${display}">
                                 <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
                                 </a> 
@@ -226,7 +234,8 @@ module.exports = {
                                     <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
-                            <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
+                            ${info}
+                            <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
@@ -248,7 +257,8 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            renderInfoIn: parsedMeta.info_element_selector || null
+                            renderInfoIn: parsedMeta.info_element_selector || null,
+                            onSelect: selectCallBack
                         });
 
                         _table.object.on("openpopup" + "_" + _table.uid, function (e) {
@@ -336,22 +346,22 @@ module.exports = {
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {
-                            $('#modal-info-body').hide();
+                            $(`#${elementPrefix}modal-info-body`).hide();
                             if (parsedMeta.info_element_selector) {
                                 $(parsedMeta.info_element_selector).empty();
                             }
                             $.snackbar({
-                                content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
+                                content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
                             });
                         } else {
-                            $('#main-tabs a[href="#info-content"]').tab('show');
+                            $(`#${elementPrefix}main-tabs a[href="#${elementPrefix}info-content"]`).tab('show');
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
                             setTimeout(() => {
-                                $('#modal-info-body table').bootstrapTable('resetView');
+                                $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
                             }, 300);
                         }
                     }
@@ -595,8 +605,8 @@ module.exports = {
                 cloud.get().removeGeoJsonStore(store);
             }
         });
-        $("#info-tab").empty();
-        $("#info-pane").empty();
+        $(`#${elementPrefix}info-tab`).empty();
+        $(`#${elementPrefix}info-pane`).empty();
     },
 
     setDownloadFunction: function (fn) {

@@ -14,6 +14,7 @@ and this project adheres to [CalVer](https://calver.org/).
    "myStyles2.css"
 ]
 ```
+- Conflict is now using `sqlQuery.js` to show info-click result. So now is multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and call back for when selecting a row.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

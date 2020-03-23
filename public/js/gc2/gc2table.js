@@ -261,7 +261,7 @@ var gc2table = (function () {
                             }, 300);
                         } catch (e) {
                         }
-                        object.trigger("selected" + "_" + uid, e.target._leaflet_id);
+                        object.trigger("selected" + "_" + uid, e.target._leaflet_id, m);
                     }
                 };
                 click.byGC2Table = true;
@@ -328,7 +328,7 @@ var gc2table = (function () {
                             var id = $(this).data('uniqueid');
                             var databaseIdentifier = getDatabaseIdForLayerId(id);
                             if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
-                                object.trigger("selected" + "_" + uid, id);
+                                object.trigger("selected" + "_" + uid, id, m);
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
                                     if (setViewOnSelect) {
