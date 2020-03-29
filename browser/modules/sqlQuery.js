@@ -7,7 +7,7 @@
 'use strict';
 
 const layerTreeUtils = require('./layerTree/utils');
-import {SYSTEM_FIELD_PREFIX} from './layerTree/constants';
+import {LAYER, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -49,6 +49,15 @@ let editingIsEnabled = false;
 let template;
 
 let elementPrefix;
+
+let qStoreShadow;
+
+let defaultSelectedStyle = {
+    weight: 5,
+    color: '#ff0000',
+    fillOpacity: 0.2,
+    opacity: 0.2
+};
 
 /**
  * A default template for GC2, with a loop
@@ -92,7 +101,6 @@ var defaultTemplateRaster =
                 <p>{{{ class }}}</p>
                 <h4>Value</h4>
                 <p>{{{ value_0 }}}</p>
-             
              </div>`;
 
 /**
@@ -132,8 +140,9 @@ module.exports = {
      * @param includes
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = ()=>{}, prefix="", simple = false, infoText = null) {
-        let layers, count = {index: 0}, hit = false, distance, editor = false,
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
+    }, prefix = "", simple = false, infoText = null) {
+        let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
         elementPrefix = prefix;
 
@@ -141,6 +150,8 @@ module.exports = {
             editor = extensions.editor.index;
             editingIsEnabled = true;
         }
+
+        qStoreShadow = qstore;
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
@@ -177,6 +188,7 @@ module.exports = {
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;
             var _key_ = metaDataKeys[value]._key_;
+            var keyWithoutGeom = metaDataKeys[value].f_table_schema + "." + metaDataKeys[value].f_table_name;
             var pkey = metaDataKeys[value].pkey;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
@@ -188,6 +200,22 @@ module.exports = {
                 && metaDataKeys[value].fieldconf !== "")
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
+
+            if (parsedMeta.info_element_selector) {
+                $(parsedMeta.info_element_selector).empty();
+            }
+
+            let styleForSelectedFeatures;
+            if (typeof parsedMeta.tiles_selected_style !== "undefined" && parsedMeta.tiles_selected_style !== "") {
+                try {
+                    styleForSelectedFeatures = JSON.parse(parsedMeta.tiles_selected_style);
+                } catch (e) {
+                    styleForSelectedFeatures = defaultSelectedStyle;
+                    console.error("tiles_selected_style is not valid JSON");
+                }
+            } else {
+                styleForSelectedFeatures = defaultSelectedStyle;
+            }
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
@@ -238,6 +266,15 @@ module.exports = {
                             <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
+                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                            try {
+                                selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                            } catch (e) {
+                                console.info("Error in select function for: " + _key_);
+                                console.error(e.message);
+                            }
+                        }
+                        console.log(parsedMeta.tiles_selected_style)
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
@@ -249,7 +286,7 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
-                            setViewOnSelect: true,
+                            setViewOnSelect: false,
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: true,
@@ -258,59 +295,70 @@ module.exports = {
                             template: template,
                             pkey: pkey,
                             renderInfoIn: parsedMeta.info_element_selector || null,
-                            onSelect: selectCallBack
+                            onSelect: selectCallBack,
+                            key: keyWithoutGeom,
+                            caller: _self,
+                            styleSelected: styleForSelectedFeatures
                         });
 
-                        _table.object.on("openpopup" + "_" + _table.uid, function (e) {
-                            let popup = e.getPopup();
-                            if (popup._closeButton) {
-                                popup._closeButton.onclick = function (clickEvent) {
-                                    if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
-                                }
-                            }
-
-                            let layerIsEditable = false;
-                            if (metaDataKeys[value].meta) {
-                                let parsedMeta = JSON.parse(metaDataKeys[value].meta);
-                                if (parsedMeta && typeof parsedMeta === `object`) {
-                                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                        layerIsEditable = true;
+                        if (!parsedMeta.info_element_selector) {
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                                let popup = e.getPopup();
+                                if (popup._closeButton) {
+                                    popup._closeButton.onclick = function (clickEvent) {
+                                        if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                     }
                                 }
-                            }
 
-                            setTimeout(() => {
-                                if (editingIsEnabled && layerIsEditable) {
-                                    $(".gc2-edit-tools").css(`display`, `inline`);
-                                    $(".popup-edit-btn").show();
-                                    $(".popup-delete-btn").show();
-                                } else {
-                                    $(".gc2-edit-tools").css(`display`, `none`);
-                                    $(".popup-edit-btn").hide();
-                                    $(".popup-delete-btn").hide();
+                                let layerIsEditable = false;
+                                if (metaDataKeys[value].meta) {
+                                    let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
+                                    }
                                 }
-                            }, 100);
 
-                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                editor.edit(e, _key_, qstore);
+                                setTimeout(() => {
+                                    if (editingIsEnabled && layerIsEditable) {
+                                        $(".gc2-edit-tools").css(`display`, `inline`);
+                                        $(".popup-edit-btn").show();
+                                        $(".popup-delete-btn").show();
+                                    } else {
+                                        $(".gc2-edit-tools").css(`display`, `none`);
+                                        $(".popup-edit-btn").hide();
+                                        $(".popup-delete-btn").hide();
+                                    }
+                                }, 100);
+
+                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                    editor.edit(e, _key_, qstore);
+                                });
+
+                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                    if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                                        editor.delete(e, _key_, qstore);
+                                    }
+                                });
                             });
-
-                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
-                                    editor.delete(e, _key_, qstore);
-                                }
-                            });
-                        });
-
+                        }
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable(false, true);
 
-                        // If only one feature is selected, when activate it.
-                        if (Object.keys(layerObj.layer._layers).length === 1) {
-                            _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
-                        }
+                        let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
 
+                        if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                            try {
+                                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                                func(null, null, null, _self, null, cloud.get().map);
+                            } catch (e) {
+                                console.info("Error in click function for: " + _key_);
+                                console.error(e.message);
+                            }
+                        }
                         hit = true;
+                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
 
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
@@ -347,9 +395,6 @@ module.exports = {
                     if (count.index === layers.length) {
                         if (!hit) {
                             $(`#${elementPrefix}modal-info-body`).hide();
-                            if (parsedMeta.info_element_selector) {
-                                $(parsedMeta.info_element_selector).empty();
-                            }
                             $.snackbar({
                                 content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
@@ -360,9 +405,17 @@ module.exports = {
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
+                            // Set visibility. This is not because the element is hidden by default, but it makes it possible to hide the list using custom functions.
+                            if (count.hits > 1) {
+                                $("#modal-info-body").css("visibility", "visible")
+                            }
                             setTimeout(() => {
                                 $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
-                            }, 300);
+                                // If only one hit across all layers, the click the only row
+                                if (count.hits === 1) {
+                                    $("[data-uniqueid]").trigger("click");
+                                }
+                            }, 200);
                         }
                     }
                 };
@@ -377,12 +430,7 @@ module.exports = {
                 clickable: true,
                 id: index,
                 base64: true,
-                styleMap: {
-                    weight: 5,
-                    color: '#660000',
-                    dashArray: '',
-                    fillOpacity: 0.2
-                },
+                styleMap: styleForSelectedFeatures,
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
@@ -609,6 +657,10 @@ module.exports = {
         $(`#${elementPrefix}info-pane`).empty();
     },
 
+    resetAll: function () {
+        this.reset(qStoreShadow);
+    },
+
     setDownloadFunction: function (fn) {
         download.download = fn
     },
@@ -626,8 +678,9 @@ module.exports = {
         $("#click-for-info-slide.slide-left").animate({left: "0"}, 200);
         if (layerKey) {
             let metaDataKeys = meta.getMetaDataKeys();
-            let title = metaDataKeys[layerKey].f_table_title ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+            let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
             $("#click-for-info-slide .modal-title").html(title);
+
         }
     }
 };

@@ -67,7 +67,7 @@ module.exports = {
                             if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
                             if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
                         }, 100);
-                    });
+                    }, ()=>{}, "", true);
                 }, 250);
             }
         });

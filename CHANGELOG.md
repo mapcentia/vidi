@@ -15,6 +15,8 @@ and this project adheres to [CalVer](https://calver.org/).
 ]
 ```
 - Conflict is now using `sqlQuery.js` to show info-click result. So now is multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and call back for when selecting a row.
+- New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
+- New GC2 Meta properties `select_function` which adds an onSelect callback to the result list. 
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

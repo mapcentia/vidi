@@ -685,6 +685,14 @@ body {
   box-sizing: border-box;
   display: inline;
 }
+#click-for-info-slide .modal-title {
+  top: 5px;
+  position: relative;
+  width: 90%;
+}
+#click-for-info-slide .modal-body {
+  padding: 0;
+}
 #module-container {
   position: fixed;
   top: 0;

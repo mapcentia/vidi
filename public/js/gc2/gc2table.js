@@ -122,12 +122,12 @@ var gc2table = (function () {
                 onMouseOver: function () {
                 },
                 styleSelected: {
-                    weight: 5,
-                    color: '#666',
-                    dashArray: '',
-                    fillOpacity: 0.2
+                    fillOpacity: 0.5,
+                    opacity: 0.5
                 },
-                renderInfoIn: null
+                renderInfoIn: null,
+                key: null,
+                caller: null
             }, prop,
             uid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
                 var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -163,9 +163,11 @@ var gc2table = (function () {
             template = defaults.template,
             pkey = defaults.pkey,
             checkBox = defaults.checkBox,
-            renderInfoIn = defaults.renderInfoIn;
+            renderInfoIn = defaults.renderInfoIn,
+            key = defaults.key,
+            caller = defaults.caller;
 
-        var customOnLoad = false, destroy, assignEventListeners;
+        var customOnLoad = false, destroy, assignEventListeners, clickedFlag = false;
 
         $(el).parent("div").addClass("gc2map");
 
@@ -201,16 +203,16 @@ var gc2table = (function () {
                 object.on("selected" + "_" + uid, function (id) {
                     clearSelection();
                     if (id === undefined) return;
-
                     var row = $('*[data-uniqueid="' + id + '"]');
                     row.addClass("selected");
-                    if (setSelectedStyle) {
-                        try {
-                            m.map._layers[id].setStyle(styleSelected);
-                        } catch (e) {
-                            console.warn(e.message);
-                        }
-                    }
+                    m.map._layers[id].setStyle({
+                        opacity: 1,
+                        dashArray: "5 8",
+                        dashSpeed: 10,
+                        lineCap: "butt"
+                    });
+
+                    onSelect(id, m.map._layers[id], key, caller);
 
                     if (openPopUp) {
                         var str = "<table>", renderedText;
@@ -226,7 +228,7 @@ var gc2table = (function () {
                         }
 
                         if (!renderInfoIn) {
-                            m.map._layers[id].bindPopup(renderedText || str, {
+                            m.map._layers[id].bindPopup("<div id='popup-test'></div>" + renderedText || str, {
                                 className: "custom-popup gc2table-custom-popup",
                                 autoPan: autoPan,
                                 closeButton: true,
@@ -236,7 +238,7 @@ var gc2table = (function () {
                             $(renderInfoIn).html(renderedText);
                         }
 
-                        m.map._layers[id].on('popupclose', function(e) {
+                        m.map._layers[id].on('popupclose', function (e) {
                             // Removing the selectedStyle from feature
                             var databaseIdentifier = getDatabaseIdForLayerId(id);
                             if (uncheckedIds.indexOf(databaseIdentifier) > -1) {
@@ -304,7 +306,7 @@ var gc2table = (function () {
                         bindEvent();
                     }, 500);
 
-                var getDatabaseIdForLayerId = function(layerId) {
+                var getDatabaseIdForLayerId = function (layerId) {
                     if (!store.geoJSON) return false;
 
                     var databaseIdentifier = false;
@@ -328,6 +330,7 @@ var gc2table = (function () {
                             var id = $(this).data('uniqueid');
                             var databaseIdentifier = getDatabaseIdForLayerId(id);
                             if (uncheckedIds.indexOf(databaseIdentifier) === -1 || checkBox === false) {
+                                clickedFlag = true;
                                 object.trigger("selected" + "_" + uid, id, m);
                                 var layer = m.map._layers[id];
                                 setTimeout(function () {
@@ -339,8 +342,6 @@ var gc2table = (function () {
                                         }
                                     }
                                 }, 100);
-
-                                onSelect(id, layer);
                             }
                         });
 
@@ -351,10 +352,9 @@ var gc2table = (function () {
                                 var databaseIdentifier = getDatabaseIdForLayerId(id);
                                 if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                                     store.layer._layers[id].setStyle({
-                                        fillColor: "#660000",
-                                        fillOpacity: "0.6"
+                                        opacity: 0.5,
+                                        fillOpacity: 0.5
                                     });
-
                                     onMouseOver(id, layer);
                                 }
                             }
@@ -366,7 +366,11 @@ var gc2table = (function () {
                                 var databaseIdentifier = getDatabaseIdForLayerId(id);
                                 if (uncheckedIds.indexOf(databaseIdentifier) === -1 && checkBox === true) {
                                     if (store.layer && store.layer.resetStyle) {
-                                        store.layer.resetStyle(store.layer._layers[id]);
+                                        if (!clickedFlag) {
+                                            store.layer.resetStyle(store.layer._layers[id]);
+                                        } else {
+                                            clickedFlag = false;
+                                        }
                                     }
                                 }
                             }
@@ -390,7 +394,7 @@ var gc2table = (function () {
                 });
 
                 $(el).on('check-all.bs.table', function (e, m) {
-                    m.map(function(checkedRowItem) {
+                    m.map(function (checkedRowItem) {
                         if (store.layer && store.layer.resetStyle) {
                             store.layer.resetStyle(store.layer._layers[checkedRowItem._id]);
                         }
@@ -400,7 +404,7 @@ var gc2table = (function () {
                 });
 
                 $(el).on('uncheck-all.bs.table', function (e, m) {
-                    m.map(function(uncheckedRowItem) {
+                    m.map(function (uncheckedRowItem) {
                         var databaseIdentifier = getDatabaseIdForLayerId(uncheckedRowItem._id);
                         uncheckedIds.push(parseInt(databaseIdentifier));
 
