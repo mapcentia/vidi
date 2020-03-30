@@ -316,7 +316,7 @@ module.exports = {
 
                 drawLayer.feature = {
                     properties: {
-                        type: type,
+                        type: __(type),
                         area: area,
                         distance: distance
                     }
