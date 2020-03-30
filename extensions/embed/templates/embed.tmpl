@@ -433,9 +433,13 @@
     .dialog-bottom .modal-header {
         padding: 0 15px 5px;
     }
-    .js-toggles-container a:not(.js-toggle-opacity), .js-toggles-container span {
+    .js-toggles-container a, .js-toggles-container span {
         display: none !important;
     }
+    .js-tiles-contain-data {
+        display: none !important;
+    }
+
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
@@ -502,6 +506,7 @@
                     class="material-icons">remove</i></a>
         </div>
         <div id="floating-container-secondary">
+            <div id="locate-btn"></div>
             <a href="#base-layers-dialog" id="base-layers-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>

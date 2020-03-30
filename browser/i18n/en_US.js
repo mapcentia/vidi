@@ -420,6 +420,7 @@ module.exports = {
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "No searchable fields on layer",
-        "Method": "Method"
+        "Method": "Method",
+        "Find me": "Find me"
     }
 };

@@ -71,7 +71,7 @@ module.exports = {
         L.control.locate({
             position: 'topright',
             strings: {
-                title: "Find me"
+                title: __("Find me")
             },
             icon: "fa fa-location-arrow",
             iconLoading: "fa fa-circle-o-notch fa-spin",
