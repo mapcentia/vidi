@@ -81,13 +81,12 @@ var defaultTemplate =
                 </div>
                 <h3 class="popup-title">{{_vidi_content.title}}</h3>
                 {{#_vidi_content.fields}}
-                    {{#title}}<h4>{{title}}</h4>{{/title}}
-                    {{#value}}
-                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                    {{/value}}
-                    {{^value}}
-                    <p class="empty">null</p>
-                    {{/value}}
+                    <h4>{{title}}</h4>
+                    {{#if value}}
+                        <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+                    {{else}}
+                        <p class="empty">null</p>
+                    {{/if}}
                 {{/_vidi_content.fields}}
             </div>`;
 
@@ -98,9 +97,9 @@ var defaultTemplate =
 var defaultTemplateRaster =
     `<div class="cartodb-popup-content">
                 <h4>Class</h4>
-                <p>{{{ class }}}</p>
+                <p>{{{class}}}</p>
                 <h4>Value</h4>
-                <p>{{{ value_0 }}}</p>
+                <p>{{{value_0}}}</p>
              </div>`;
 
 /**
@@ -274,7 +273,6 @@ module.exports = {
                                 console.error(e.message);
                             }
                         }
-                        console.log(parsedMeta.tiles_selected_style)
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
@@ -587,11 +585,42 @@ module.exports = {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
-                                let subValue = feature.properties[property.key];
-                                value =
-                                    `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                if (metaDataKeys[layerKey]["fields"][property.key].type.startsWith("json")) {
+                                    // We use a Handlebars template to create a image carousel
+                                    let carouselId = Base64.encode(layerKey).replace(/=/g, "");
+                                    let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
+                                                    <ol class="carousel-indicators">
+                                                        {{#@root}}
+                                                        <li data-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
+                                                        {{/@root}}
+                                                    </ol>
+                                                    <div class="carousel-inner" role="listbox">
+                                                        {{#@root}}
+                                                        <div class="item {{#if @first}}active{{/if}}">
+                                                            <img style="width: 100%" src="{{src}}" alt="">
+                                                            <div class="carousel-caption">
+                                                                <p>{{att}}</p>
+                                                            </div>
+                                                        </div>
+                                                        {{/@root}}
+                                                    </div>
+                                                    <a class="left carousel-control" href="#${carouselId}" role="button" data-slide="prev">
+                                                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                                        <span class="sr-only">Previous</span>
+                                                    </a>
+                                                    <a class="right carousel-control" href="#${carouselId}" role="button" data-slide="next">
+                                                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                                        <span class="sr-only">Next</span>
+                                                    </a>
+                                                </div>`;
+                                    value = Handlebars.compile(tmpl)(feature.properties[property.key]);
+                                } else {
+                                    let subValue = feature.properties[property.key];
+                                    value =
+                                        `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
                                         <img style='width:250px' src='${subValue}'/>
                                      </div>`;
+                                }
                             }
                         } else if (property.value.content && property.value.content === "video") {
                             if (!feature.properties[property.key]) {

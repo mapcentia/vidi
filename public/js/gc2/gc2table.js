@@ -224,7 +224,7 @@ var gc2table = (function () {
                         str = str + "</table>";
 
                         if (template) {
-                            renderedText = Mustache.render(template, m.map._layers[id].feature.properties);
+                            renderedText = Handlebars.compile(template)(m.map._layers[id].feature.properties);
                         }
 
                         if (!renderInfoIn) {

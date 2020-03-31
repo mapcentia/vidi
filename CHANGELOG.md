@@ -8,15 +8,30 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Added
 - The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
 - With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
-```javascript
-"cssFiles": [
-   "myStyles1.css",
-   "myStyles2.css"
+```json
+{
+  "cssFiles": [
+       "myStyles1.css",
+       "myStyles2.css"
+  ]
+}
+```
+- Conflict is now using `sqlQuery.js` to show info-click result. So now are multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and callback for when selecting a row.
+- New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
+- New GC2 Meta properties `select_function` which adds an onSelect callback to the result list in click-for-info.
+- It now possible to render a image carousel in popups from a click-for-info. Create a JSON field with a value like this and set Content to Image:
+```json
+[
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's an image!"
+  },
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's another image!!"
+  }
 ]
 ```
-- Conflict is now using `sqlQuery.js` to show info-click result. So now is multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and call back for when selecting a row.
-- New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
-- New GC2 Meta properties `select_function` which adds an onSelect callback to the result list. 
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -29,13 +44,14 @@ and this project adheres to [CalVer](https://calver.org/).
     - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
     - New button for setting the print extent before creating a PDF.
     - Mouse click when releasing a rectangle/circle drag is suppressed.
-- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixel. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
-```javascript
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
+```json
 {
-    id: "schema.layer.geom",
-    dataIsVisible: true
+    "id": "schema.layer.geom",
+    "dataIsVisible": true
 }
 ```
+- Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
