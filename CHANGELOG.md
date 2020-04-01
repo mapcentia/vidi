@@ -32,6 +32,17 @@ and this project adheres to [CalVer](https://calver.org/).
   }
 ]
 ```
+- URL's can now be ignored for caching in Service Worker by using the `urlsIgnoredForCaching` setting in `config/config.js`. This setting can only be set in build time. E.g.:
+```json
+{
+    "urlsIgnoredForCaching": [
+        {
+            "regExp": true,
+            "requested": "part_of_the_url"
+        }
+    ]
+}
+```
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

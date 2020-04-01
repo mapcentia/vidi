@@ -10,6 +10,9 @@ const LOG = false;
 const LOG_FETCH_EVENTS = false;
 const LOG_OFFLINE_MODE_EVENTS = false;
 
+const CONFIG = require('../../config/config.js');
+
+
 /**
  * Browser detection
  */
@@ -88,7 +91,7 @@ const urlSubstitution = [{
     local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
-let extensionsIgnoredForCaching = ['JPEG', 'PNG', 'TIFF', 'BMP'];
+let extensionsIgnoredForCaching = ['JPEG','jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
@@ -120,7 +123,12 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/v2/'
-}];
+}
+];
+
+if (typeof CONFIG.urlsIgnoredForCaching === "object") {
+    urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);
+}
 
 /**
  * Broadcasting service messages to clients, mostly used for debugging and validation
@@ -521,7 +529,7 @@ self.addEventListener('install', event => {
     if (LOG) console.log('Service worker: is being installed, caching specified resources');
 
     extensionsIgnoredForCaching.map(item => {
-        let localRegExp = new RegExp(`.${item}[\?]?`, 'i');
+        let localRegExp = new RegExp(`${item}[\?]?`, 'i');
         ignoredExtensionsRegExps.push(localRegExp);
     });
 
