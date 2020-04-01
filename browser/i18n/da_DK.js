@@ -73,8 +73,7 @@ module.exports = {
         "Clear all": "Slet alle",
         "Clear all drawings.": "Slet alle tegninger.",
         "No drawings in the map": "Ingen tegninger i kortet",
-        "Click map to place circle marker.": "Klik for at placere markør",
-        "Cancel": "Afbryd",
+        "Click map to place circle marker": "Klik for at placere markør",
 
         "circlemarker": "tekstboks",
         "polygon": "polygon",
