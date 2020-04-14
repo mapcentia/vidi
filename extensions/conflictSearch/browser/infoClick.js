@@ -56,18 +56,11 @@ module.exports = {
                     clicktimer = undefined;
                     var coords = event.getCoordinate(), wkt;
                     wkt = "POINT(" + coords.x + " " + coords.y + ")";
-                    console.log(qstore)
-                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, (layerId) => {
-                        setTimeout(() => {
-                            let parentLayer = cloud.get().map._layers[layerId];
-                            let clearQueryResults = true;
-                            if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
-                            if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
-                        }, 100);
-                    }, function (id, layer) {
-                        conflictSearch.clearDrawing();
+                    sqlQuery.init(qstore, wkt, "3857", null, null, [coords.lat, coords.lng], false, false, false, () => {
+                    }, (id, layer) => {
+                        conflictSearch.clearDrawing(true);
                         conflictSearch.addDrawing(layer);
-                        conflictSearch.makeSearch(fromObjectText);
+                        conflictSearch.makeSearch(fromObjectText, ()=>{}, id);
                     }, "conflict-", true, "Klik på et resultat for at foretage en søgning indenfor afgrænsningen");
                 }, 250);
             }
