@@ -55,6 +55,8 @@ and this project adheres to [CalVer](https://calver.org/).
     - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
     - New button for setting the print extent before creating a PDF.
     - Mouse click when releasing a rectangle/circle drag is suppressed.
+    - Multiple results from a Select-Object-To-Search-With is now possible. The standard `sqlQuery` is used to create list. 
+    
 - Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
 ```json
 {
