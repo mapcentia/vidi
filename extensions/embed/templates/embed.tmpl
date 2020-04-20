@@ -126,10 +126,7 @@
         left: 0 !important;
     }
     .leaflet-control-locate {
-        margin-top: 0;
-        margin-bottom: 0;
-        box-shadow: none;
-        z-index: 0;
+        display: none;
     }
     .btn-share {
         margin: 5px !important;
@@ -301,9 +298,7 @@
         font-size: 18px;
         font-weight: 300;
     }
-    #burger-btn {
-        display: inline;
-    }
+
     #layer-slide {
         display: inline;
     }
@@ -367,7 +362,7 @@
         position: absolute;
         z-index: 2000;
         width: 350px;
-        left: 63px;
+        right: 63px;
         max-width: calc(100vw - 70px);
     }
     #burger-btn-container {
@@ -377,10 +372,6 @@
         margin-top: 6px;
         border: 1px solid #ccc;
         left: 6px;
-    }
-    #burger-btn {
-        margin: 8px;
-        padding: 2px 8px 2px 8px;
     }
     .icon-bar {
         background-color: #222222;
@@ -392,7 +383,6 @@
         -webkit-border-radius: 0;
         -moz-border-radius: 0;
         border-radius: 0;
-        margin-top: 6px;
         font-size: 18px;
         line-height: 20px;
     }
@@ -415,7 +405,6 @@
     #searchclear {
         height: 16px;
         font-size: 18px;
-        top: 5px;
     }
     #legend-dialog .modal-body {
         height: 210px;
@@ -501,26 +490,28 @@
             <a href="javascript:void(0)" id="zoom-in-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">add</i></a>
             <a href="javascript:void(0)" id="zoom-default-btn" class="btn btn-default btn-fab btn-fab-mini"><i
-                    class="material-icons">home</i></a>
+                    class="material-icons">zoom_out_map</i></a>
             <a href="javascript:void(0)" id="zoom-out-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">remove</i></a>
         </div>
         <div id="floating-container-secondary">
-            <div id="locate-btn"></div>
-            <a href="#base-layers-dialog" id="base-layers-btn"
+            <a href="javascript:void(0)" id="find-me-btn"
+               class="btn btn-default btn-fab btn-fab-mini"><i
+                    class="material-icons">location_on</i>
+            </a>
+            <a id="burger-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>
+
+            <a href="#base-layers-dialog" id="base-layers-btn"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">map</i></a>
+
             <a href="#full-screen" id="full-screen-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">fullscreen</i></a>
         </div>
-        <div id="burger-btn-container">
-            <button type="button" class="navbar-toggle" id="burger-btn">
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-        </div>
+
         <div id="place-search" style="display: {{_displaySearch}}">
             <div class="places">
                 <div class="btn-group">

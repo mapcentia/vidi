@@ -68,19 +68,21 @@ module.exports = {
         /**
          *
          */
-        L.control.locate({
-            position: 'topright',
-            strings: {
-                title: __("Find me")
-            },
-            icon: "fa fa-location-arrow",
-            iconLoading: "fa fa-circle-o-notch fa-spin",
+        let lc =L.control.locate({
             keepCurrentZoomLevel: true,
             drawCircle: false,
             locateOptions: {
                 enableHighAccuracy: true
             }
         }).addTo(map);
+
+        $(`#find-me-btn`).click(() => {
+            lc.stop();
+            lc.start();
+            setTimeout(() => {
+                lc.stop();
+            }, 5000);
+        });
 
         /**
          *

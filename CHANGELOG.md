@@ -66,6 +66,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
 - The load screen is now being dismissed on `ready:meta` instead of `allDoneLoading:layers`. This makes the application interactive sooner. 
+- Embed template is simplified. The burger menu is removed and a round button to the right is inserted. The search is also moved to the right.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
