@@ -151,7 +151,14 @@ module.exports = {
             measurements.toggleMeasurements(true);
         });
 
-        $("#locate-btn").append($(".leaflet-control-locate"));
+        $(`#find-me-btn`).click(() => {
+            let lc = cloud.getLc();
+            lc.stop();
+            lc.start();
+            setTimeout(() => {
+                lc.stop();
+            }, 5000);
+        });
 
     }
 };
