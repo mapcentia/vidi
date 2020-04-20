@@ -383,18 +383,12 @@
         -webkit-border-radius: 0;
         -moz-border-radius: 0;
         border-radius: 0;
-        font-size: 18px;
-        line-height: 20px;
+
     }
     .tt-dropdown-menu {
-        margin-top: 0;
         max-height: calc(-150px + 100vh);
     }
-    .tt-suggestion {
-        padding: 3px 20px;
-        font-size: 14px;
-        line-height: 18px;
-    }
+
     .places .typeahead-heading {
         margin: 0 20px 5px 20px;
         padding: 3px 0;
@@ -402,10 +396,7 @@
         font-size: 16px;
         font-weight: bold;
     }
-    #searchclear {
-        height: 16px;
-        font-size: 18px;
-    }
+
     #legend-dialog .modal-body {
         height: 210px;
     }
@@ -514,11 +505,9 @@
 
         <div id="place-search" style="display: {{_displaySearch}}">
             <div class="places">
-                <div class="btn-group">
-                    <input id="custom-search" class="custom-search typeahead" type="text"
-                           placeholder="{{Address}}">
-                    <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
-                </div>
+                <input id="custom-search" class="custom-search typeahead" type="text"
+                       placeholder="{{Address}}">
+                <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
             </div>
         </div>
     </div>

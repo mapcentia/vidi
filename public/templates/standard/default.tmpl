@@ -158,16 +158,14 @@
                         <!-- Tab panes -->
                         <div class="tab-content main-content">
                             <div role="tabpanel" class="tab-pane active" id="search-content">
+                                <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
+                                    <i class="material-icons help-btn">help_outline</i></div>
+                                <div></div>
                                 <div id="place-search">
-                                    <div class="help-btn" onclick="javascript:createAlert($(this), '{{Search places}}')">
-                                        <i class="material-icons help-btn">help_outline</i></div>
-                                    <div></div>
                                     <div class="places">
-                                        <div class="btn-group">
-                                            <input id="custom-search" class="custom-search typeahead" type="text"
-                                                   placeholder="{{Address}}">
-                                            <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
-                                        </div>
+                                        <input id="custom-search" class="custom-search typeahead" type="text"
+                                               placeholder="{{Address}}">
+                                        <span id="searchclear" class="glyphicon glyphicon-remove-circle"></span>
                                     </div>
                                 </div>
                             </div>
