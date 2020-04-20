@@ -134,14 +134,6 @@ module.exports = {
                         }
                     }, 200
                 );
-
-                setTimeout(
-                    function () {
-                        if (!window.vidiConfig.doNotCloseLoadScreen) {
-                            $("#loadscreen").fadeOut(200);
-                        }
-                    }, 600
-                );
             }
         });
 

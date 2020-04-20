@@ -323,7 +323,6 @@ module.exports = {
         }).finally(() => {
             modules.state.init().then(() => {
                 modules.state.listenAny(`extensions:initialized`, [`layerTree`]);
-
                 try {
 
                     // Require search module
@@ -402,6 +401,7 @@ module.exports = {
                 } catch (e) {
                     console.error("Could not perform application initialization", e.message, e);
                 }
+                $("#loadscreen").fadeOut(200);
             });
         });
 
