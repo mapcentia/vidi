@@ -126,7 +126,9 @@ let moduleState = {
     vectorStores: [],
     webGLStores: [],
     virtualLayers: [],
-    tileContentCache: {}
+    tileContentCache: {},
+    editorFilters: {},
+    editorFiltersActive: {}
 };
 
 /**
@@ -135,6 +137,9 @@ let moduleState = {
  */
 const showdown = require('showdown');
 const converter = new showdown.Converter();
+
+let filterComp = {};
+let lastFilter;
 
 /**
  *
@@ -184,7 +189,6 @@ module.exports = {
                             }
                         }
                     });
-
                     break;
                 }
             });
@@ -559,9 +563,10 @@ module.exports = {
             activeLayers,
             layersOfflineMode,
             opacitySettings,
-            dynamicLoad: moduleState.dynamicLoad
+            dynamicLoad: moduleState.dynamicLoad,
+            editorFilters: moduleState.editorFilters,
+            editorFiltersActive: moduleState.editorFiltersActive
         };
-
         return state;
     },
 
@@ -587,6 +592,18 @@ module.exports = {
             moduleState.arbitraryFilters = newState.arbitraryFilters;
         } else {
             moduleState.arbitraryFilters = {};
+        }
+
+        // Setting editorFilters
+        if (newState !== false && `editorFilters` in newState && typeof newState.editorFilters === `object`) {
+            moduleState.editorFilters = newState.editorFilters;
+        } else {
+            moduleState.editorFilters = {};
+        }
+        if (newState !== false && `editorFiltersActive` in newState && typeof newState.editorFiltersActive === `object`) {
+            moduleState.editorFiltersActive = newState.editorFiltersActive;
+        } else {
+            moduleState.editorFiltersActive = {};
         }
 
         // Setting tile filters
@@ -627,7 +644,9 @@ module.exports = {
                 layersOfflineMode: {},
                 virtualLayers: [],
                 predefinedFilters: {},
-                arbitraryFilters: {}
+                arbitraryFilters: {},
+                editorFilters: {},
+                editorFiltersActive: {}
             };
         } else if (newState.order && newState.order === 'false') {
             newState.order = false;
@@ -882,6 +901,8 @@ module.exports = {
                                 if (forcedState.predefinedFilters) moduleState.predefinedFilters = forcedState.predefinedFilters;
                                 if (forcedState.arbitraryFilters) moduleState.arbitraryFilters = forcedState.arbitraryFilters;
                                 if (forcedState.dynamicLoad) moduleState.dynamicLoad = forcedState.dynamicLoad;
+                                if (forcedState.editorFilters) moduleState.editorFilters = forcedState.editorFilters;
+                                if (forcedState.editorFiltersActive) moduleState.editorFiltersActive = forcedState.editorFiltersActive;
 
                                 if (LOG) console.log(`${MODULE_NAME}: layers that are not in meta`, layersThatAreNotInMeta);
 
@@ -1114,6 +1135,8 @@ module.exports = {
 
                 applySetting(`arbitraryFilters`, {});
                 applySetting(`predefinedFilters`, {});
+                applySetting(`editorFilters`, {});
+                applySetting(`editorFiltersActive`, {});
                 applySetting(`virtualLayers`, []);
                 applySetting(`opacitySettings`, {});
                 applySetting(`dynamicLoad`, {});
@@ -1820,7 +1843,29 @@ module.exports = {
             }
         }
 
-        return appliedFilters[tableName];
+        if (typeof filterComp[layerKey] !== "object" && typeof moduleState.editorFilters[tableName] === "object" && moduleState.editorFilters[tableName].length > 0) {
+            return moduleState.editorFilters[tableName];
+        }
+
+        if (typeof filterComp[layerKey] === "object" && typeof moduleState.editorFiltersActive[tableName] === "boolean" && moduleState.editorFiltersActive[tableName] === true && moduleState.editorFilters[tableName].length > 0) {
+            return moduleState.editorFilters[tableName];
+        }
+
+        let appliedFiltersConcat = [];
+
+        if (appliedFilters[tableName].length > 0) {
+            appliedFiltersConcat = [appliedFilters[tableName].join(` AND `)];
+        }
+
+        if (typeof filterComp[layerKey] === "object" && !filterComp[layerKey].state.editorFiltersActive) {
+            filterComp[layerKey].setState({editorFilters: appliedFiltersConcat})
+            // We update moduleState and trigger a state change because setState doesn't trigger a change event in React
+            moduleState.editorFilters[layerKey] = appliedFiltersConcat;
+            backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+            lastFilter = JSON.stringify(appliedFilters);
+        }
+
+        return appliedFiltersConcat;
     },
 
     createSimulatedLayerDescriptionForVirtualLayer: (item) => {
@@ -2602,9 +2647,20 @@ module.exports = {
                 if (isVirtual === false) {
                     let componentContainerId = `layer-settings-filters-${layerKey}`;
                     $(layerContainer).find('.js-layer-settings-filters').append(`<div id="${componentContainerId}" style="padding-left: 15px; padding-right: 10px; padding-bottom: 10px;"></div>`);
+
                     let localArbitraryfilters = {};
                     if (moduleState.arbitraryFilters && layerKey in moduleState.arbitraryFilters) {
                         localArbitraryfilters = moduleState.arbitraryFilters[layerKey];
+                    }
+
+                    let localEditorFilters = [];
+                    if (moduleState.editorFilters && layerKey in moduleState.editorFilters) {
+                        localEditorFilters = moduleState.editorFilters[layerKey];
+                    }
+
+                    let localEditorFiltersActive = false;
+                    if (moduleState.editorFiltersActive && layerKey in moduleState.editorFiltersActive) {
+                        localEditorFiltersActive = moduleState.editorFiltersActive[layerKey];
                     }
 
                     let localPredefinedFilters = {};
@@ -2639,7 +2695,7 @@ module.exports = {
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     setTimeout(() => {
                         if (document.getElementById(componentContainerId)) {
-                            ReactDOM.render(
+                            filterComp[layerKey] = ReactDOM.render(
                                 <LayerFilter
                                     layer={layer}
                                     layerMeta={meta.parseLayerMeta(layerKey)}
@@ -2649,6 +2705,11 @@ module.exports = {
                                     arbitraryFilters={localArbitraryfilters}
                                     onApplyPredefined={_self.onApplyPredefinedFiltersHandler}
                                     onApplyArbitrary={_self.onApplyArbitraryFiltersHandler}
+                                    onApplyEditor={_self.onApplyEditorFiltersHandler}
+                                    onActivateEditor={_self.onActivateEditorFiltersHandler}
+                                    onChangeEditor={_self.onChangeEditorFiltersHandler}
+                                    editorFilters={localEditorFilters}
+                                    editorFiltersActive={localEditorFiltersActive}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
@@ -2844,6 +2905,20 @@ module.exports = {
         moduleState.predefinedFilters[layerKey] = filters;
         _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
     },
+
+    onChangeEditorFiltersHandler: ({layerKey, filters}, forcedReloadLayerType = false) => {
+        moduleState.editorFilters[layerKey] = filters;
+        backboneEvents.get().trigger(`${MODULE_NAME}:changed`);
+    },
+
+    onApplyEditorFiltersHandler: ({layerKey}, forcedReloadLayerType = false) => {
+        _self.reloadLayerOnFiltersChange(layerKey, forcedReloadLayerType);
+    },
+
+    onActivateEditorFiltersHandler: ({layerKey, active}, forcedReloadLayerType = false) => {
+        moduleState.editorFiltersActive[layerKey] = active;
+    },
+
 
     reloadLayerOnFiltersChange: (layerKey, forcedReloadLayerType = false) => {
         if (layerKey.indexOf(`:`) > -1) {

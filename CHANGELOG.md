@@ -43,6 +43,8 @@ and this project adheres to [CalVer](https://calver.org/).
     ]
 }
 ```
+- Applied filters will now be shown as a WHERE clause in an Ace editor under the filter widgets. It's possible to mutate the clause and apply the altered filters. When doing that, the filter widgets will be disabled until the editor is disabled, and it will then reset to whatever settings the filter widgets has.
+
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
