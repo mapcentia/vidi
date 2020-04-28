@@ -115,9 +115,11 @@ class StateSnapshotsDashboard extends React.Component {
                 contentType: 'application/json; charset=utf-8',
                 dataType: 'json',
                 data: JSON.stringify(data)
-            }).then(() => {
+            }).then((response) => {
                 _self.setState({ loading: false });
                 _self.refreshSnapshotsList();
+                let obj = {"stateId": response.id, "data": data};
+                window.parent.postMessage(obj, '*');
             }).catch(error => {
                 console.error(error);
                 _self.setState({ loading: false });
