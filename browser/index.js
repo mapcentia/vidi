@@ -23,6 +23,8 @@
 
 require('./../public/js/gc2/geocloud.js');
 require('./../public/js/gc2/gc2table.js');
+require('./../public/js/vidi.js');
+
 
 // Hack to compile Glob files. Don´t call this function!
 function ಠ_ಠ() {

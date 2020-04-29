@@ -7,10 +7,10 @@
 var express = require('express');
 var router = express.Router();
 var configUrl = require('../config/config.js').configUrl;
-var request = require('request');
+var fetchUrl = require('fetch').fetchUrl;
 
-router.get('/api/config/:db/:file', function (req, response) {
-    var file = req.params.file, db = req.params.db, url, json;
+router.get('/api/css/:db/:file', function (req, response) {
+    var file = req.params.file, db = req.params.db, url;
 
     if (typeof configUrl === "object") {
         url = configUrl[db] || configUrl._default;
@@ -20,27 +20,22 @@ router.get('/api/config/:db/:file', function (req, response) {
 
     console.log(url + "/" + file);
 
-    request.get(url + "/" + file, function (err, res, body) {
+    options = {
+        method: 'GET',
+        uri: url + "/" + file
+    };
 
-        if (err || res.statusCode !== 200) {
+    fetchUrl(url + "/" + file, function (err, meta, body) {
+        if (err || meta.status !== 200) {
             response.header('content-type', 'application/json');
             response.status(400).send({
                 success: false,
-                message: "Could not get the requested config JSON file."
+                message: "Could not get the requested template file."
             });
             return;
         }
-
-        try {
-            json = JSON.parse(body);
-        } catch (e) {
-            response.status(400).send({
-                success: false,
-                message: e.message
-            });
-            return;
-        }
-        response.send(JSON.parse(body));
-    })
+        response.header('content-type', 'text/css');
+        response.send(body.toString());
+    });
 });
 module.exports = router;

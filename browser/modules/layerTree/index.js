@@ -1,6 +1,6 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -19,6 +19,8 @@ import {
     LAYER,
     ICONS
 } from './constants';
+
+import {OPEN_INFO_IN_ELEMENT} from './../sqlQuery'
 
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
@@ -59,7 +61,8 @@ import OfflineModeControlsManager from './OfflineModeControlsManager';
 
 let offlineModeControlsManager = false;
 
-let moveEndEvent = ()=>{};
+let moveEndEvent = () => {
+};
 
 /**
  *
@@ -122,7 +125,8 @@ let moduleState = {
     setLayerStateRequests: {},
     vectorStores: [],
     webGLStores: [],
-    virtualLayers: []
+    virtualLayers: [],
+    tileContentCache: {}
 };
 
 /**
@@ -337,7 +341,7 @@ module.exports = {
                     let parsedMeta = meta.parseLayerMeta(layerKey);
 
                     const hideFilters = () => {
-                        $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).hide(0);
+                        $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).hide(0);
                         $(container).find('.js-layer-settings-filters').hide(0);
                     };
 
@@ -392,7 +396,7 @@ module.exports = {
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
 
-                            $(container).find(`.js-toggle-filters,.js-toggle-filters-number-of-filters`).show(0);
+                            $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
                             $(container).find(`.js-toggle-table-view`).show(0);
@@ -700,6 +704,15 @@ module.exports = {
             for (let key in groupsToActiveLayers) {
                 layerTreeUtils.setupLayerNumberIndicator(key, groupsToActiveLayers[key], groupsToAddedLayers[key]);
             }
+        });
+
+        /**
+         * Listening to event that indicates if viewport tiles of specific layer contain any data
+         */
+        backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
+            moduleState.tileContentCache[data.id] = data.dataIsVisible;
+            console.log(`### data`, data);
+            $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ? `visible` : `hidden`));
         });
 
         /**
@@ -1359,6 +1372,7 @@ module.exports = {
             custom_data,
             styleMap: styles[trackingLayerKey],
             sql,
+            clustering: layerTreeUtils.getIfClustering(meta.parseLayerMeta(layerKey)),
             onLoad: (l) => {
                 layers.decrementCountLoading(l.id);
                 backboneEvents.get().trigger("doneLoading:layers", l.id);
@@ -1411,7 +1425,7 @@ module.exports = {
                                 editingButtonsMarkup = markupGeneratorInstance.getEditingButtons();
                             }
 
-                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup);
+                            _self.displayAttributesPopup(feature, layer, e, editingButtonsMarkup, layerKey);
 
                             if (moduleState.editingIsEnabled && layerIsEditable) {
                                 $(`.js-vector-layer-popup`).find(".ge-start-edit").unbind("click.ge-start-edit").bind("click.ge-start-edit", function () {
@@ -1436,7 +1450,7 @@ module.exports = {
                 } else {
                     // If there is no handler for specific layer, then display attributes only
                     layer.on("click", function (e) {
-                        _self.displayAttributesPopup(feature, layer, e);
+                        _self.displayAttributesPopup(feature, layer, e, '', layerKey);
                     });
                 }
             },
@@ -1555,7 +1569,7 @@ module.exports = {
             let metaDataKeys = meta.getMetaDataKeys();
             let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined"
                 && metaDataKeys[layerKey].infowindow.template !== "")
-                ? metaDataKeys[layerKey].infowindow.template : layerTreeUtils.getDefaultTemplate();
+                ? metaDataKeys[layerKey].infowindow.template : sqlQuery.getVectorTemplate(layerKey);
             let tableHeaders = sqlQuery.prepareDataForTableView(LAYER.VECTOR + ':' + layerKey,
                 JSON.parse(JSON.stringify(layerWithData[0].toGeoJSON().features)));
 
@@ -1592,8 +1606,10 @@ module.exports = {
         }
     },
 
-    displayAttributesPopup(feature, layer, event, additionalControls = ``) {
+    displayAttributesPopup(feature, layer, event, additionalControls = ``, layerKey) {
         event.originalEvent.clickedOnFeature = true;
+
+        let parsedMeta = _self.parseLayerMeta(meta.getMetaByKey(layerKey, false));
 
         let properties = JSON.parse(JSON.stringify(feature.properties));
         for (var key in properties) {
@@ -1611,16 +1627,37 @@ module.exports = {
             }
         }
 
-        let renderedText = Mustache.render(layerTreeUtils.getDefaultTemplate(), properties);
-        let managePopup = L.popup({
-            autoPan: false,
-            minWidth: 160,
-            maxWidth: 800,
-            className: `js-vector-layer-popup custom-popup`
-        }).setLatLng(event.latlng).setContent(`<div>
+        if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+            try {
+                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                func(feature, layer, layerKey, sqlQuery, moduleState.vectorStores[LAYER.VECTOR + ':' + layerKey], cloud.get().map);
+            } catch (e) {
+                console.info("Error in click function for: " + layerKey);
+                console.error(e.message);
+            }
+        }
+
+        let renderedText = null;
+        try {
+            renderedText = Mustache.render(sqlQuery.getVectorTemplate(layerKey), properties);
+        } catch (e) {
+            console.info("Error in pop-up template for: " + layerKey);
+            console.error(e.message);
+        }
+
+
+        if (typeof parsedMeta.info_element_selector !== "undefined" && parsedMeta.info_element_selector !== "" && renderedText !== null) {
+            $(parsedMeta.info_element_selector).html(renderedText)
+        } else {
+            let managePopup = L.popup({
+                autoPan: false,
+                minWidth: 160,
+                className: `js-vector-layer-popup custom-popup`
+            }).setLatLng(event.latlng).setContent(`<div>
             ${additionalControls}
             <div>${renderedText}</div>
         </div>`).openOn(cloud.get().map);
+        }
     },
 
     /**
@@ -1676,10 +1713,10 @@ module.exports = {
         if (layerDescription) {
             let parsedMeta = _self.parseLayerMeta(layerDescription);
             if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
-                    || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
                 if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
                     moduleState.predefinedFiltersWarningFired = true;
-                    console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                    console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", please update the GC2 backend`);
                 }
 
                 let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
@@ -1689,12 +1726,17 @@ module.exports = {
                     parsedPredefinedFilters = parsedPredefinedFiltersLocal;
                 } catch (e) {
                 }
-
+                let appliedPredefinedFilters = {};
+                appliedPredefinedFilters[tableName] = [];
                 if (parsedPredefinedFilters) {
                     for (let key in parsedPredefinedFilters) {
                         if (filters === false || filters.indexOf(key) === -1) {
-                            appliedFilters[tableName].push(parsedPredefinedFilters[key]);
+                            appliedPredefinedFilters[tableName].push(parsedPredefinedFilters[key]);
                         }
+                    }
+                    if (appliedPredefinedFilters[tableName].length > 0) {
+                        let filtersStr = appliedPredefinedFilters[tableName].join(` OR `);
+                        appliedFilters[tableName].push(`(${filtersStr})`);
                     }
                 }
             }
@@ -2037,6 +2079,30 @@ module.exports = {
                         }
                     }
                 }
+
+                let pointToLayer = (parsedMeta.point_to_layer && parsedMeta.point_to_layer !== "") ? parsedMeta.point_to_layer : null;
+                if (pointToLayer) {
+                    try {
+                        let func = Function('"use strict";return (' + pointToLayer + ')')();
+                        _self.setPointToLayer(LAYER.VECTOR + ':' + layerKey, func);
+                    } catch (e) {
+                        console.info("Error in point-to-layer function for: " + layerKey);
+                        console.error(e.message);
+                    }
+                }
+
+                let vectorStyle = (parsedMeta.vector_style && parsedMeta.vector_style !== "") ? parsedMeta.vector_style : null;
+                if (vectorStyle) {
+                    try {
+                        let func = Function('"use strict";return (' + vectorStyle + ')')();
+                        _self.setStyle(LAYER.VECTOR + ':' + layerKey, func);
+                    } catch (e) {
+                        console.info("Error in style function for: " + layerKey);
+                        console.error(e.message);
+                    }
+
+                }
+
 
                 _self.createStore(layer, isVirtualGroup);
             }
@@ -2543,7 +2609,7 @@ module.exports = {
 
                     let localPredefinedFilters = {};
                     if (parsedMeta && (`wms_filters` in parsedMeta && parsedMeta[`wms_filters`]
-                            || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
+                        || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
                         if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
                             moduleState.predefinedFiltersWarningFired = true;
                             console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
@@ -2925,6 +2991,5 @@ module.exports = {
 
     load: function (id) {
         moduleState.vectorStores[id].load();
-    },
-
+    }
 };

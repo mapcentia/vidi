@@ -84,7 +84,10 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.css',
                         'public/js/lib/leaflet-history/leaflet-history.css',
                         'public/js/lib/leaflet-boxzoom/leaflet-boxzoom.css',
+                        'public/js/lib/Leaflet.extra-markers/css/leaflet.extra-markers.css',
                         'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.css',
+                        'public/js/lib/Leaflet.markercluster/MarkerCluster.Default.css',
                         // Bootstrap
                         'public/js/lib/bootstrap/dist/css/bootstrap.css',
                         'public/js/lib/snackbarjs/snackbar.min.css',
@@ -247,6 +250,10 @@ module.exports = function (grunt) {
                         'public/js/lib/Leaflet.NonTiledLayer/NonTiledLayer.js',
                         //'public/js/lib/leaflet-glify/glify.js',
                         'public/js/lib/leaflet-vector-grid/Leaflet.VectorGrid.bundled.min.js',
+                        'public/js/lib/Leaflet.extra-markers/leaflet.extra-markers.js',
+                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
+                        'public/js/lib/Leaflet.markercluster/leaflet.markercluster.js',
+
                         'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/jquery/jquery-3.4.1.min.js',
@@ -262,7 +269,6 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
 
                         'public/js/bundle.js',
-                        'public/js/vidi.js',
                     ],
                     'public/js/build/all.async.min.js': [
                         'public/js/lib/jquery.canvasResize.js/jquery.canvasResize.js',
@@ -270,7 +276,6 @@ module.exports = function (grunt) {
                         'public/js/lib/leaflet-snap/leaflet.snap.js',
                         'public/js/lib/leaflet-measure-path/leaflet-measure-path.js',
                         'public/js/lib/leaflet.editable/Leaflet.Editable.js',
-                        'public/js/lib/Leaflet.awesome-markers/leaflet.awesome-markers.js',
                         'public/js/lib/leaflet-geometryutil/leaflet.geometryutil.js',
                         'public/js/lib/Path.Drag.js/src/Path.Drag.js',
                         'public/js/lib/leaflet-side-by-side/leaflet-side-by-side.min.js',
@@ -278,6 +283,8 @@ module.exports = function (grunt) {
                         'public/js/lib/jquery-ui-touch/jquery.ui.touch-punch.min.js',
                         'public/js/lib/snackbarjs/snackbar.min.js',
                         'public/js/lib/jsts/jsts.min.js',
+                        'public/js/lib/leaflet-dash-flow/L.Path.DashFlow.js',
+                        'public/js/lib/handlebars/handlebars.js'
                     ]
                 }
             }

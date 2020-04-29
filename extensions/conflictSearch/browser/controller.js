@@ -1,6 +1,6 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
@@ -11,6 +11,7 @@ var conflictSearch;
 var backboneEvents;
 var reportRender;
 var infoClick;
+var cloud;
 var config = require('../../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
@@ -27,6 +28,7 @@ module.exports = {
         infoClick = o.extensions.conflictSearch.infoClick;
         backboneEvents = o.backboneEvents;
         conflictSearch = o.extensions.conflictSearch.index;
+        cloud = o.cloud;
         return this;
     },
     init: function () {
@@ -106,11 +108,11 @@ module.exports = {
 
         $("#conflict-set-print-area-btn").on("click", function () {
             print.cleanUp(true);
-            print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
+            cloud.get().map.panTo(conflictSearch.getBufferItems().getBounds().getCenter());
+            // Wait for panning to end
+            setTimeout(()=>{
+               print.control(printC, scales, "_conflictPrint", "A4", "p", "inline");
+            }, 500);
         });
-
-
-
-
     }
 };

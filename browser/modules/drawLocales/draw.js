@@ -41,7 +41,7 @@ module.exports = {
             },
             circlemarker: {
                 tooltip: {
-                    start: 'Click map to place circle marker.'
+                    start: __('Click map to place circle marker.')
                 }
             },
             polygon: {

@@ -14,6 +14,7 @@ var utils;
 
 var backboneEvents;
 var sessionInstance = false;
+var userName = null;
 
 
 var exId = `login-modal-body`;
@@ -69,10 +70,12 @@ module.exports = {
                     backboneEvents.get().trigger(`session:authChange`, true);
                     $(".gc2-session-lock").show();
                     $(".gc2-session-unlock").hide();
+                    userName = data.status.screen_name;
                 } else {
                     backboneEvents.get().trigger(`session:authChange`, false);
                     $(".gc2-session-lock").hide();
                     $(".gc2-session-unlock").show();
+                    userName = null;
                 }
             },
             error: function (error) {
@@ -128,16 +131,23 @@ module.exports = {
                 let me = this;
                 event.preventDefault();
                 if (!me.state.auth) {
-                    let dataToAuthorizeWith = "u=" + me.state.sessionScreenName + "&p=" + me.state.sessionPassword + "&s=public";
+                    let dataToAuthorizeWith = {
+                        "user":  me.state.sessionScreenName,
+                        "password":  me.state.sessionPassword,
+                        "schema": "public"
+                    };
+
                     if (vidiConfig.appDatabase) {
-                        dataToAuthorizeWith += "&d=" + vidiConfig.appDatabase;
+                        dataToAuthorizeWith.database = vidiConfig.appDatabase;
                     }
 
                     $.ajax({
                         dataType: 'json',
                         url: "/api/session/start",
                         type: "POST",
-                        data: dataToAuthorizeWith,
+                        contentType: "application/json; charset=utf-8",
+                        scriptCharset: "utf-8",
+                        data: JSON.stringify(dataToAuthorizeWith),
                         success: function (data) {
                             backboneEvents.get().trigger(`session:authChange`, true);
                             me.setState({statusText: `Signed in as ${data.screen_name} (${data.email})`});
@@ -146,6 +156,7 @@ module.exports = {
                             me.setState({auth: true});
                             $(".gc2-session-lock").show();
                             $(".gc2-session-unlock").hide();
+                            userName = data.screen_name;
                             parent.update();
                         },
 
@@ -168,6 +179,7 @@ module.exports = {
                             me.setState({auth: false});
                             $(".gc2-session-lock").hide();
                             $(".gc2-session-unlock").show();
+                            userName = null;
                             parent.update();
                         },
                         error: function (error) {
@@ -271,6 +283,11 @@ module.exports = {
     update: function () {
         backboneEvents.get().trigger("refresh:auth");
         backboneEvents.get().trigger("refresh:meta");
+    },
+
+    getUserName: function () {
+        return userName;
     }
+
 };
 

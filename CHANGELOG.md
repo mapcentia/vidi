@@ -4,10 +4,123 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [CalVer](https://calver.org/).
 
-## [Unreleased]
+## [UNRELEASED]
+### Added
+- The awesome Leaflet plugin Leaflet.markercluster is added, so by setting the meta property `use_clustering` to `true` clustering can be enabled on single point vector layers. No other setting for Leaflet.markercluster is available for now.
+- With the `cssFiles` config it's possible to load external css file from the `configUrl`. E.g.:
+```json
+{
+  "cssFiles": [
+       "myStyles1.css",
+       "myStyles2.css"
+  ]
+}
+```
+- Conflict is now using `sqlQuery.js` to show info-click result. So now are multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and callback for when selecting a row.
+- New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
+- New GC2 Meta properties `select_function` which adds an onSelect callback to the result list in click-for-info.
+- It now possible to render an image carousel in popups from a click-for-info. Create a JSON field with a value like this and set Content to Image:
+```json
+[
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's an image!"
+  },
+  {
+    "src": "https://image1.jpeg",
+    "att": "It's another image!!"
+  }
+]
+```
+- URL's can now be ignored for caching in Service Worker by using the `urlsIgnoredForCaching` setting in `config/config.js`. This setting can only be set in build time. E.g.:
+```json
+{
+    "urlsIgnoredForCaching": [
+        {
+            "regExp": true,
+            "requested": "part_of_the_url"
+        }
+    ]
+}
+```
+
 ### Changed
+- `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
+- A lot of improvements in the `conflictSearch` module:
+    - Results are now alpha sorted within layers groups (which is also sorted). Both in web and PDF.
+    - A short and long description can be added for each layer, which is shown the result list. Use GC2 Meta properties: `short_conflict_meta_desc and `long_conflict_meta_desc`. 
+    - The styling of both web and PDF results is better. Tables can't overflow the PDF page.
+    - Ellipsis is used both in web and PDF when fields names / results are too long.
+    - Empty link fields will now just be blank.
+    - Layers with only one report column will be printed as a `|` separated string and not a table with one column.
+    - New button for setting the print extent before creating a PDF.
+    - Mouse click when releasing a rectangle/circle drag is suppressed.
+    - Multiple results from a Select-Object-To-Search-With is now possible. The standard `sqlQuery` is used to create list. 
+    
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is being checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
+```json
+{
+    "id": "schema.layer.geom",
+    "dataIsVisible": true
+}
+```
+- Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
+- The load screen is now being dismissed on `ready:meta` instead of `allDoneLoading:layers`. This makes the application interactive sooner. 
+- Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together like `["(foo=1 OR foo=2)", "(bar=1 OR bar=2)"]`. The GC2 backend can then set the operator between the predefined and arbitrary filters. 
+
+### Fixed
+- Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
+- `embed.js` now works in IE11.
+
+## [2020.2.0]
+### Added
+- Custom user data from GC2 is now added to session the object.
+- Handling of invalid JSON configs.
+
+### Changed
+- CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
 - Custom searches can now be added to danish search module.
-- `embed.js` will wait with rendering the map until target element is visible in the DOM, so Vidi is not started in element without width and height.
+- `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
+- Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
+```javascript
+{
+    searchConfig: {
+        size: 4,
+        komkode: "*",
+        esrSearchActive: true,
+        sfeSearchActive: true, // Example of config for danish search
+        extraSearches: [,{
+            name: "stednavne_search",
+            db: "dk",
+            host: "https://dk.gc2.io",
+            heading: "Stednavne",
+            index: {
+                name: "stednavne/navne_samlet",
+                field: "string",
+                key: "gid",
+
+            },
+            relation: {
+                name: "stednavne.navne_samlet_geom",
+                key: "gid",
+                geom: "the_geom"
+            }
+        }]
+    }
+}
+``` 
+- New GC2 Meta properties which controls the info pop-up and styling of vector layers:
+    - *info_template*: Mustache template for use in pop-up.
+    - *info_element_selector*: Which element to render info template in? Defaults to pop-up.
+    - *info_function*: Function which is run when clicking on a vector feature. Takes five args: feature (Leaflet), layer (Leaflet), layer key (Vidi), SQL store (Vidi) and map (Leaflet).
+    - *point_to_layer*: Leaflet pointToLayer function.
+    - *vector_style*: Leaflet vector styling function.
+    
+- The help buttons now work like toggles, so a second click will close the help box.
+    
+### Fixed
+- Handling of invalid JSON configs, so Node doesn't crash.
+
 
 ## [2019.1.0] - 2019-20-12
 ### Added

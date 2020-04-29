@@ -106,6 +106,7 @@ class MarkupGenerator {
                         <div style="display: inline-block;">
                             <span>
                                 ${text}${lockedLayer} 
+                                <span class="js-tiles-contain-data" style="visibility: hidden;"><i class="fa fa-eye" style="color: green;"></i></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>

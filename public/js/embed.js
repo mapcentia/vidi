@@ -31,18 +31,21 @@
                 iframe.setAttribute("style", "width:" + width + ";height:" + height + ";border: 1px solid rgba(0,0,0,0.1)");
                 iframe.setAttribute("allowfullscreen", "");
                 iframe.setAttribute("src", host + "/app/" + database + "/?state=" + id + "&tmpl=" + tmpl + "&s=" + search + "&his=" + history);
-                targetDiv.append(iframe);
+                targetDiv.appendChild(iframe);
             } else {
                 setTimeout(poll, 100);
             }
         }());
     };
+
     // If script is loaded at bottom of page, when select above elements
-    document.querySelectorAll('[data-vidi-token]').forEach(function (object) {
-        if (object.attributes && object.attributes["data-vidi-token"] && object.attributes["data-vidi-token"] !== null && object.attributes["data-vidi-token"].value !== undefined) {
-            create(object);
+    var tokens = document.querySelectorAll('[data-vidi-token]');
+    for(var i = 0; i < tokens.length; i++){
+        if (tokens[i].attributes && tokens[i].attributes["data-vidi-token"] && tokens[i].attributes["data-vidi-token"] !== null && tokens[i].attributes["data-vidi-token"].value !== undefined) {
+            create(tokens[i]);
         }
-    });
+    }
+
     // If script is loaded at top of page, when use MutationObserver to detect arriving elements
     if (typeof (window.MutationObserver) !== "undefined") {
         new MutationObserver(function (mutations) {

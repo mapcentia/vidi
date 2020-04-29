@@ -57,7 +57,7 @@ module.exports = {
         return this;
     },
     init: function (onLoad, el, onlyAddress, getProperty) {
-        var type1, type2, type3, type4, gids = [], searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
+        var type1, type2, type3, type4, gids = {}, searchString, dslM, shouldA = [], shouldM = [], dsl1, dsl2, size,
             komKode = window.vidiConfig.searchConfig.komkode, placeStore, maxZoom,
             esrSearchActive = typeof (window.vidiConfig.searchConfig.esrSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.esrSearchActive : false,
             sfeSearchActive = typeof (window.vidiConfig.searchConfig.sfeSearchActive) !== "undefined" ? window.vidiConfig.searchConfig.sfeSearchActive : false;
@@ -179,6 +179,7 @@ module.exports = {
                 (function ca() {
                     switch (type1) {
                         case "vejnavn,bynavn":
+                            gids[type1] = [];
                             dsl1 = {
                                 "from": 0,
                                 "size": size,
@@ -283,6 +284,7 @@ module.exports = {
                             };
                             break;
                         case "vejnavn_bynavn":
+                            gids[type1] = [];
                             dsl1 = {
                                 "from": 0,
                                 "size": size,
@@ -340,6 +342,7 @@ module.exports = {
                             };
                             break;
                         case "adresse":
+                            gids[type1] = [];
                             dsl1 = {
                                 "from": 0,
                                 "size": size,
@@ -417,7 +420,7 @@ module.exports = {
                                         if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
                                             type1 = "adresse";
                                             names = [];
-                                            gids = [];
+                                            gids[type1] = [];
                                             ca();
                                         } else {
                                             cb(names);
@@ -440,7 +443,7 @@ module.exports = {
                                 if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
                                     type1 = "adresse";
                                     names = [];
-                                    gids = [];
+                                    gids[type1] = [];
                                     ca();
                                 } else {
                                     cb(names);
@@ -449,13 +452,13 @@ module.exports = {
                             } else if (type1 === "adresse") {
                                 $.each(response.hits.hits, function (i, hit) {
                                     var str = hit._source.properties.string4;
-                                    gids[str] = hit._source.properties.gid;
+                                    gids[type1][str] = hit._source.properties.gid;
                                     names.push({value: str});
                                 });
                                 if (names.length === 1 && (type1 === "vejnavn,bynavn" || type1 === "vejnavn_bynavn")) {
                                     type1 = "adresse";
                                     names = [];
-                                    gids = [];
+                                    gids[type1] = [];
                                     ca();
                                 } else {
                                     cb(names);
@@ -480,6 +483,7 @@ module.exports = {
 
                         switch (type2) {
                             case "jordstykke":
+                                gids[type2] = [];
                                 dslM = {
                                     "from": 0,
                                     "size": size,
@@ -519,6 +523,7 @@ module.exports = {
                                 };
                                 break;
                             case "ejerlav":
+                                gids[type2] = [];
                                 dslM = {
                                     "from": 0,
                                     "size": size,
@@ -580,14 +585,14 @@ module.exports = {
                                 } else {
                                     $.each(response.hits.hits, function (i, hit) {
                                         var str = hit._source.properties.string1;
-                                        gids[str] = hit._source.properties.gid;
+                                        gids[type2][str] = hit._source.properties.gid;
                                         names.push({value: str});
                                     });
                                 }
                                 if (names.length === 1 && (type2 === "ejerlav")) {
                                     type2 = "jordstykke";
                                     names = [];
-                                    gids = [];
+                                    gids[type2] = [];
                                     ca();
                                 } else {
                                     cb(names);
@@ -619,6 +624,7 @@ module.exports = {
                             }
                             switch (type3) {
                                 case "esr_nr":
+                                    gids[type3] = [];
                                     dslM = {
                                         "from": 0,
                                         "size": size,
@@ -651,13 +657,13 @@ module.exports = {
                                         // find only the 20 first real properties
                                         if (names.length < 20 && names.findIndex(x => x.value == str) < 0) {
                                             names.push({value: str});
-                                            gids[str] = hit._source.properties.gid;
+                                            gids[type3][str] = hit._source.properties.gid;
                                         }
                                     });
                                     if (names.length === 1 && (type3 === "esr_ejdnr")) {
                                         type3 = "esr_ejdnr";
                                         names = [];
-                                        gids = [];
+                                        gids[type3] = [];
                                         ca();
                                     } else {
                                         names.sort(function (a, b) {
@@ -683,9 +689,9 @@ module.exports = {
                     type4 = "sfe_nr";
                     if (!onlyAddress) {
                         (function ca() {
-
                             switch (type4) {
                                 case "sfe_nr":
+                                    gids[type4] = [];
                                     dslM = {
                                         "from": 0,
                                         "size": size,
@@ -702,7 +708,6 @@ module.exports = {
                                         }
                                     };
                                     break;
-
                             }
 
                             $.ajax({
@@ -718,13 +723,15 @@ module.exports = {
                                         // find only the 20 first real properties
                                         if (names.length < 20 && names.findIndex(x => x.value === str) < 0) {
                                             names.push({value: str});
-                                            gids[str] = hit._source.properties.gid;
+                                            console.log(type4)
+                                            console.log(str)
+                                            gids[type4][str] = hit._source.properties.gid;
                                         }
                                     });
                                     if (names.length === 1 && (type4 === "sfe_ejdnr")) {
                                         type4 = "sfe_ejdnr";
                                         names = [];
-                                        gids = [];
+                                        gids[type4] = [];
                                         ca();
                                     } else {
                                         names.sort(function (a, b) {
@@ -755,7 +762,7 @@ module.exports = {
                         source: function (query, cb) {
                             var names = [];
                             (function ca() {
-
+                                gids[v.name] = [];
                                 let dsl = {
                                     "from": 0,
                                     "size": size,
@@ -783,7 +790,7 @@ module.exports = {
                                         $.each(response.hits.hits, function (i, hit) {
                                             var str = hit._source.properties[v.index.field];
                                             names.push({value: str});
-                                            gids[str] = hit._source.properties[v.index.key];
+                                            gids[v.name][str] = hit._source.properties[v.index.key];
 
                                         });
                                         names.sort(function (a, b) {
@@ -802,8 +809,6 @@ module.exports = {
             highlight: false
         }, ...standardSearches);
         $('#' + el).bind('typeahead:selected', function (obj, datum, name) {
-            console.log(extraSearchesNames)
-            console.log(name)
             if ((type1 === "adresse" && name === "adresse") || (type2 === "jordstykke" && name === "matrikel")
                 || (type3 === "esr_nr" && name === "esr_ejdnr") || (type4 === "sfe_nr" && name === "sfe_ejdnr")
                 || extraSearchesNames.indexOf(name) !== -1
@@ -814,14 +819,14 @@ module.exports = {
                         placeStore.db = MDB;
                         placeStore.host = MHOST;
                         searchString = datum.value;
-                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
+                        placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type3][datum.value] + ") group by esr_ejendomsnummer";
                         placeStore.load();
                         break;
                     case "sfe_ejdnr" :
                         placeStore.db = MDB;
                         placeStore.host = MHOST;
                         searchString = datum.value;
-                        placeStore.sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by sfe_ejendomsnummer";
+                        placeStore.sql = "SELECT sfe_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE sfe_ejendomsnummer = (SELECT sfe_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type4][datum.value] + ") group by sfe_ejendomsnummer";
                         placeStore.load();
                         break;
                     case "matrikel" :
@@ -829,9 +834,9 @@ module.exports = {
                         placeStore.host = MHOST;
                         searchString = datum.value;
                         if (getProperty) {
-                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[datum.value] + ") group by esr_ejendomsnummer";
+                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE gid=" + gids[type2][datum.value] + ") group by esr_ejendomsnummer";
                         } else {
-                            placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[datum.value] + "'";
+                            placeStore.sql = "SELECT gid,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM matrikel.jordstykke WHERE gid='" + gids[type2][datum.value] + "'";
                         }
                         placeStore.load();
                         break;
@@ -839,9 +844,9 @@ module.exports = {
                         placeStore.db = ADB;
                         placeStore.host = AHOST;
                         if (getProperty) {
-                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'))) group by esr_ejendomsnummer";
+                            placeStore.sql = "SELECT esr_ejendomsnummer,ST_Multi(ST_Union(the_geom)),ST_asgeojson(ST_transform(ST_Multi(ST_Union(the_geom)),4326)) as geojson FROM matrikel.jordstykke WHERE esr_ejendomsnummer = (SELECT esr_ejendomsnummer FROM matrikel.jordstykke WHERE (the_geom && (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "')) AND ST_Intersects(the_geom, (SELECT ST_transform(the_geom, 25832) FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'))) group by esr_ejendomsnummer";
                         } else {
-                            placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[datum.value] + "'";
+                            placeStore.sql = "SELECT id,kommunekode,the_geom,ST_asgeojson(ST_transform(the_geom,4326)) as geojson FROM dar.adgangsadresser WHERE id='" + gids[type1][datum.value] + "'";
                         }
                         searchString = datum.value;
                         placeStore.load();
@@ -850,7 +855,7 @@ module.exports = {
                         placeStore.db = extraSearchesObj[name].db;
                         placeStore.host = extraSearchesObj[name].host;
                         searchString = datum.value;
-                        placeStore.sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key +"='" + gids[datum.value] + "'";
+                        placeStore.sql = "SELECT *,ST_asgeojson(ST_transform(" + extraSearchesObj[name].relation.geom + ",4326)) as geojson FROM " + extraSearchesObj[name].relation.name + " WHERE " + extraSearchesObj[name].relation.key +"='" + gids[name][datum.value] + "'";
                         placeStore.load();
                         break;
 

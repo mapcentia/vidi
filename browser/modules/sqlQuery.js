@@ -1,13 +1,13 @@
 /*
  * @author     Martin Høgh <mh@mapcentia.com>
- * @copyright  2013-2019 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 'use strict';
 
 const layerTreeUtils = require('./layerTree/utils');
-import {SYSTEM_FIELD_PREFIX} from './layerTree/constants';
+import {LAYER, SYSTEM_FIELD_PREFIX} from './layerTree/constants';
 
 /**
  * @type {*|exports|module.exports}
@@ -46,6 +46,62 @@ let _self = false;
 
 let editingIsEnabled = false;
 
+let template;
+
+let elementPrefix;
+
+let qStoreShadow;
+
+let defaultSelectedStyle = {
+    weight: 5,
+    color: '#ff0000',
+    fillOpacity: 0.2,
+    opacity: 0.2
+};
+
+/**
+ * A default template for GC2, with a loop
+ * @type {string}
+ */
+var defaultTemplate =
+    `<div class="cartodb-popup-content">
+                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
+                    <div class="btn-group btn-group-justified">
+                        <div class="btn-group">
+                            <button class="btn btn-primary btn-xs popup-edit-btn">
+                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="btn-group">
+                            <button class="btn btn-danger btn-xs popup-delete-btn">
+                                <i class="fa fa-trash" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="popup-title">{{_vidi_content.title}}</h3>
+                {{#_vidi_content.fields}}
+                    <h4>{{title}}</h4>
+                    {{#if value}}
+                        <p {{#if type}}class="{{type}}"{{/if}}>{{{value}}}</p>
+                    {{else}}
+                        <p class="empty">null</p>
+                    {{/if}}
+                {{/_vidi_content.fields}}
+            </div>`;
+
+/**
+ * Default template for raster layers
+ * @type {string}
+ */
+var defaultTemplateRaster =
+    `<div class="cartodb-popup-content">
+                <h4>Class</h4>
+                <p>{{{class}}}</p>
+                <h4>Value</h4>
+                <p>{{{value_0}}}</p>
+             </div>`;
+
 /**
  *
  * @type {{set: module.exports.set, init: module.exports.init, reset: module.exports.reset}}
@@ -83,14 +139,18 @@ module.exports = {
      * @param includes
      * @param {Function} onPopupCloseButtonClick Fires when feature popup is closed by clicking the Close button
      */
-    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick) {
-        let layers, count = {index: 0}, hit = false, distance, editor = false,
+    init: function (qstore, wkt, proj, callBack, num, infoClickPoint, whereClause, includes, zoomToResult, onPopupCloseButtonClick, selectCallBack = () => {
+    }, prefix = "", simple = false, infoText = null) {
+        let layers, count = {index: 0, hits: 0}, hit = false, distance, editor = false,
             metaDataKeys = meta.getMetaDataKeys();
+        elementPrefix = prefix;
 
         if (`editor` in extensions) {
             editor = extensions.editor.index;
             editingIsEnabled = true;
         }
+
+        qStoreShadow = qstore;
 
         this.reset(qstore);
         layers = _layers.getLayers() ? _layers.getLayers().split(",") : [];
@@ -106,47 +166,6 @@ module.exports = {
         }
 
         backboneEvents.get().trigger("start:sqlQuery");
-
-        /**
-         * A default template for GC2, with a loop
-         * @type {string}
-         */
-        var defaultTemplate =
-            `<div class="cartodb-popup-content">
-                <div class="form-group gc2-edit-tools" style="display: none; width: 90%;">
-                    <div class="btn-group btn-group-justified">
-                        <div class="btn-group">
-                            <button class="btn btn-primary btn-xs popup-edit-btn">
-                                <i class="fa fa-pencil-alt" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                        <div class="btn-group">
-                            <button class="btn btn-danger btn-xs popup-delete-btn">
-                                <i class="fa fa-trash" aria-hidden="true"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <h3 class="popup-title">{{_vidi_content.title}}</h3>
-                {{#_vidi_content.fields}}
-                    {{#title}}<h4>{{title}}</h4>{{/title}}
-                    {{#value}}
-                    <p {{#type}}class="{{ type }}"{{/type}}>{{{ value }}}</p>
-                    {{/value}}
-                    {{^value}}
-                    <p class="empty">null</p>
-                    {{/value}}
-                {{/_vidi_content.fields}}
-            </div>`;
-
-        var defaultTemplateRaster =
-            `<div class="cartodb-popup-content">
-                <h4>Class</h4>
-                <p>{{{ class }}}</p>
-                <h4>Value</h4>
-                <p>{{{ value_0 }}}</p>
-             
-             </div>`;
 
         $.each(layers, function (index, value) {
             // No need to search in the already displayed vector layers
@@ -168,6 +187,7 @@ module.exports = {
             var srid = metaDataKeys[value].srid;
             var key = "_vidi_sql_" + index;
             var _key_ = metaDataKeys[value]._key_;
+            var keyWithoutGeom = metaDataKeys[value].f_table_schema + "." + metaDataKeys[value].f_table_name;
             var pkey = metaDataKeys[value].pkey;
             var geoType = metaDataKeys[value].type;
             var layerTitel = (metaDataKeys[value].f_table_title !== null && metaDataKeys[value].f_table_title !== "") ? metaDataKeys[value].f_table_title : metaDataKeys[value].f_table_name;
@@ -180,7 +200,21 @@ module.exports = {
                 ? $.parseJSON(metaDataKeys[value].fieldconf) : null;
             let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[value]);
 
-            console.log(parsedMeta);
+            if (parsedMeta.info_element_selector) {
+                $(parsedMeta.info_element_selector).empty();
+            }
+
+            let styleForSelectedFeatures;
+            if (typeof parsedMeta.tiles_selected_style !== "undefined" && parsedMeta.tiles_selected_style !== "") {
+                try {
+                    styleForSelectedFeatures = JSON.parse(parsedMeta.tiles_selected_style);
+                } catch (e) {
+                    styleForSelectedFeatures = defaultSelectedStyle;
+                    console.error("tiles_selected_style is not valid JSON");
+                }
+            } else {
+                styleForSelectedFeatures = defaultSelectedStyle;
+            }
 
             _layers.incrementCountLoading(key);
             backboneEvents.get().trigger("startLoading:layers", key);
@@ -196,8 +230,7 @@ module.exports = {
 
             if (!callBack) {
                 onLoad = function () {
-                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql,
-                        template;
+                    var layerObj = this, cm = [], storeId = this.id, sql = this.sql;
 
                     _layers.decrementCountLoading("_vidi_sql_" + storeId);
                     backboneEvents.get().trigger("doneLoading:layers", "_vidi_sql_" + storeId);
@@ -209,10 +242,15 @@ module.exports = {
                     template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
 
                     if (!isEmpty && !not_querable) {
-                        $('#modal-info-body').show();
-                        $("#info-tab").append(`<li><a onclick="setTimeout(()=>{$('#modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
-                        $("#info-pane").append(`<div class="tab-pane" id="_${storeId}">
-                            <div>
+                        let display = simple ? "none" : "inline";
+                        let dataShowExport, dataShowColumns, dataShowToggle, dataDetailView;
+                        let info = infoText ? `<div>${infoText}</div>` : "";
+                        dataShowExport = dataShowColumns = dataShowToggle = dataDetailView = simple ? "false" : "true";
+
+                        $(`#${elementPrefix}modal-info-body`).show();
+                        $(`#${elementPrefix}info-tab`).append(`<li><a onclick="setTimeout(()=>{$('#${elementPrefix}modal-info-body table').bootstrapTable('resetView'),100})" id="tab_${storeId}" data-toggle="tab" href="#_${storeId}">${layerTitel}</a></li>`);
+                        $(`#${elementPrefix}info-pane`).append(`<div class="tab-pane" id="_${storeId}">
+                            <div style="display: ${display}">
                                 <a class="btn btn-sm btn-raised" id="_download_geojson_${storeId}" target="_blank" href="javascript:void(0)">
                                     <i class="fa fa-download" aria-hidden="true"></i> GeoJson
                                 </a> 
@@ -223,9 +261,18 @@ module.exports = {
                                     <i class="fa fa-plus" aria-hidden="true"></i> ${__(`Create virtual layer`)}
                                 </button>
                             </div>
-                            <table class="table" data-detail-view="true" data-detail-formatter="detailFormatter" data-show-toggle="true" data-show-export="false" data-show-columns="true"></table>
+                            ${info}
+                            <table class="table" data-detail-view="${dataDetailView}" data-detail-formatter="detailFormatter" data-show-toggle="${dataShowToggle}" data-show-export="${dataShowExport}" data-show-columns="${dataShowColumns}"></table>
                         </div>`);
 
+                        if (typeof parsedMeta.select_function !== "undefined" && parsedMeta.select_function !== "") {
+                            try {
+                                selectCallBack = Function('"use strict";return (' + parsedMeta.select_function + ')')();
+                            } catch (e) {
+                                console.info("Error in select function for: " + _key_);
+                                console.error(e.message);
+                            }
+                        }
                         cm = _self.prepareDataForTableView(value, layerObj.geoJSON.features);
                         $('#tab_' + storeId).tab('show');
                         var _table = gc2table.init({
@@ -237,7 +284,7 @@ module.exports = {
                             autoUpdate: false,
                             autoPan: false,
                             openPopUp: true,
-                            setViewOnSelect: true,
+                            setViewOnSelect: false,
                             responsive: false,
                             callCustomOnload: false,
                             checkBox: true,
@@ -245,59 +292,71 @@ module.exports = {
                             locale: window._vidiLocale.replace("_", "-"),
                             template: template,
                             pkey: pkey,
-                            usingCartodb: false
+                            renderInfoIn: parsedMeta.info_element_selector || null,
+                            onSelect: selectCallBack,
+                            key: keyWithoutGeom,
+                            caller: _self,
+                            styleSelected: styleForSelectedFeatures
                         });
 
-                        _table.object.on("openpopup" + "_" + _table.uid, function (e) {
-                            let popup = e.getPopup();
-                            if (popup._closeButton) {
-                                popup._closeButton.onclick = function (clickEvent) {
-                                    if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
-                                }
-                            }
-
-                            let layerIsEditable = false;
-                            if (metaDataKeys[value].meta) {
-                                let parsedMeta = JSON.parse(metaDataKeys[value].meta);
-                                if (parsedMeta && typeof parsedMeta === `object`) {
-                                    if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
-                                        layerIsEditable = true;
+                        if (!parsedMeta.info_element_selector) {
+                            _table.object.on("openpopup" + "_" + _table.uid, function (e) {
+                                let popup = e.getPopup();
+                                if (popup._closeButton) {
+                                    popup._closeButton.onclick = function (clickEvent) {
+                                        if (onPopupCloseButtonClick) onPopupCloseButtonClick(e._leaflet_id);
                                     }
                                 }
-                            }
 
-                            setTimeout(() => {
-                                if (editingIsEnabled && layerIsEditable) {
-                                    $(".gc2-edit-tools").css(`display`, `inline`);
-                                    $(".popup-edit-btn").show();
-                                    $(".popup-delete-btn").show();
-                                } else {
-                                    $(".gc2-edit-tools").css(`display`, `none`);
-                                    $(".popup-edit-btn").hide();
-                                    $(".popup-delete-btn").hide();
+                                let layerIsEditable = false;
+                                if (metaDataKeys[value].meta) {
+                                    let parsedMeta = JSON.parse(metaDataKeys[value].meta);
+                                    if (parsedMeta && typeof parsedMeta === `object`) {
+                                        if (`vidi_layer_editable` in parsedMeta && parsedMeta.vidi_layer_editable) {
+                                            layerIsEditable = true;
+                                        }
+                                    }
                                 }
-                            }, 100);
 
-                            $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
-                                editor.edit(e, _key_, qstore);
+                                setTimeout(() => {
+                                    if (editingIsEnabled && layerIsEditable) {
+                                        $(".gc2-edit-tools").css(`display`, `inline`);
+                                        $(".popup-edit-btn").show();
+                                        $(".popup-delete-btn").show();
+                                    } else {
+                                        $(".gc2-edit-tools").css(`display`, `none`);
+                                        $(".popup-edit-btn").hide();
+                                        $(".popup-delete-btn").hide();
+                                    }
+                                }, 100);
+
+                                $(".popup-edit-btn").unbind("click.popup-edit-btn").bind("click.popup-edit-btn", function () {
+                                    editor.edit(e, _key_, qstore);
+                                });
+
+                                $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
+                                    if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
+                                        editor.delete(e, _key_, qstore);
+                                    }
+                                });
                             });
-
-                            $(".popup-delete-btn").unbind("click.popup-delete-btn").bind("click.popup-delete-btn", function () {
-                                if (window.confirm(__(`Are you sure you want to delete the feature?`))) {
-                                    editor.delete(e, _key_, qstore);
-                                }
-                            });
-                        });
-
+                        }
                         // Here inside onLoad we call loadDataInTable(), so the table is populated
                         _table.loadDataInTable(false, true);
 
-                        // If only one feature is selected, when activate it.
-                        if (Object.keys(layerObj.layer._layers).length === 1) {
-                            _table.object.trigger("selected" + "_" + _table.uid, layerObj.layer._layers[Object.keys(layerObj.layer._layers)[0]]._leaflet_id);
-                        }
+                        let showTableInPopup = typeof window.vidiConfig.showTableInPopUp === "boolean" && window.vidiConfig.showTableInPopUp === true;
 
+                        if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
+                            try {
+                                let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
+                                func(null, null, null, _self, null, cloud.get().map);
+                            } catch (e) {
+                                console.info("Error in click function for: " + _key_);
+                                console.error(e.message);
+                            }
+                        }
                         hit = true;
+                        count.hits = count.hits + Object.keys(layerObj.layer._layers).length;
 
                         // Add fancy material raised style to buttons
                         $(".bootstrap-table .btn-default").addClass("btn-raised");
@@ -333,20 +392,28 @@ module.exports = {
                     count.index++;
                     if (count.index === layers.length) {
                         if (!hit) {
-                            $('#modal-info-body').hide();
+                            $(`#${elementPrefix}modal-info-body`).hide();
                             $.snackbar({
-                                content: "<span id='conflict-progress'>" + __("Didn't find anything") + "</span>",
+                                content: "<span id=`conflict-progress`>" + __("Didn't find anything") + "</span>",
                                 htmlAllowed: true,
                                 timeout: 2000
                             });
                         } else {
-                            $('#main-tabs a[href="#info-content"]').tab('show');
+                            $(`#${elementPrefix}main-tabs a[href="#${elementPrefix}info-content"]`).tab('show');
                             if (zoomToResult) {
                                 cloud.get().zoomToExtentOfgeoJsonStore(qstore[storeId], 16);
                             }
+                            // Set visibility. This is not because the element is hidden by default, but it makes it possible to hide the list using custom functions.
+                            if (count.hits > 1) {
+                                $("#modal-info-body").css("visibility", "visible")
+                            }
                             setTimeout(() => {
-                                $('#modal-info-body table').bootstrapTable('resetView');
-                            }, 300);
+                                $(`#${elementPrefix}modal-info-body table`).bootstrapTable('resetView');
+                                // If only one hit across all layers, the click the only row
+                                if (count.hits === 1) {
+                                    $("[data-uniqueid]").trigger("click");
+                                }
+                            }, 200);
                         }
                     }
                 };
@@ -361,12 +428,7 @@ module.exports = {
                 clickable: true,
                 id: index,
                 base64: true,
-                styleMap: {
-                    weight: 5,
-                    color: '#660000',
-                    dashArray: '',
-                    fillOpacity: 0.2
-                },
+                styleMap: styleForSelectedFeatures,
                 // Set _vidi_type on all vector layers,
                 // so they can be recreated as query layers
                 // after serialization
@@ -518,27 +580,47 @@ module.exports = {
                     if (property.value.querable) {
                         let value = feature.properties[property.key];
                         if (property.value.link) {
-                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + "'>Link</a>";
+                            value = "<a target='_blank' rel='noopener' href='" + (property.value.linkprefix ? property.value.linkprefix : "") + feature.properties[property.key] + (property.value.linksuffix ? property.value.linksuffix : "") + "'>Link</a>";
                         } else if (property.value.content && property.value.content === "image") {
                             if (!feature.properties[property.key]) {
                                 value = `<i class="fa fa-ban"></i>`;
                             } else {
-                                let subValue = feature.properties[property.key];
-                                /*
-                                if (property.value.type === `bytea`) {
-                                    subValue = atob(feature.properties[property.key]);
-                                }*/
-
-                                width = '100%'
-
-                                if(window.vidiConfig.hasOwnProperty('popupImageWidth')) {
-                                    width = window.vidiConfig.popupImageWidth
-                                }
-
-                                value =
-                                    `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
-                                        <img style='`+ width +`' src='${subValue}'/>
+                                if (metaDataKeys[layerKey]["fields"][property.key].type.startsWith("json")) {
+                                    // We use a Handlebars template to create a image carousel
+                                    let carouselId = Base64.encode(layerKey).replace(/=/g, "");
+                                    let tmpl = `<div id="${carouselId}" class="carousel slide" data-ride="carousel">
+                                                    <ol class="carousel-indicators">
+                                                        {{#@root}}
+                                                        <li data-target="#${carouselId}" data-slide-to="{{@index}}"  class="{{#if @first}}active{{/if}}"></li>
+                                                        {{/@root}}
+                                                    </ol>
+                                                    <div class="carousel-inner" role="listbox">
+                                                        {{#@root}}
+                                                        <div class="item {{#if @first}}active{{/if}}">
+                                                            <img style="width: 100%" src="{{src}}" alt="">
+                                                            <div class="carousel-caption">
+                                                                <p>{{att}}</p>
+                                                            </div>
+                                                        </div>
+                                                        {{/@root}}
+                                                    </div>
+                                                    <a class="left carousel-control" href="#${carouselId}" role="button" data-slide="prev">
+                                                        <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                                                        <span class="sr-only">Previous</span>
+                                                    </a>
+                                                    <a class="right carousel-control" href="#${carouselId}" role="button" data-slide="next">
+                                                        <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                                                        <span class="sr-only">Next</span>
+                                                    </a>
+                                                </div>`;
+                                    value = Handlebars.compile(tmpl)(feature.properties[property.key]);
+                                } else {
+                                    let subValue = feature.properties[property.key];
+                                    value =
+                                        `<div style="cursor: pointer" onclick="window.open().document.body.innerHTML = '<img src=\\'${subValue}\\' />';">
+                                        <img style='width:250px' src='${subValue}'/>
                                      </div>`;
+                                }
                             }
                         } else if (property.value.content && property.value.content === "video") {
                             if (!feature.properties[property.key]) {
@@ -606,12 +688,35 @@ module.exports = {
                 cloud.get().removeGeoJsonStore(store);
             }
         });
-        $("#info-tab").empty();
-        $("#info-pane").empty();
+        $(`#${elementPrefix}info-tab`).empty();
+        $(`#${elementPrefix}info-pane`).empty();
+    },
+
+    resetAll: function () {
+        this.reset(qStoreShadow);
     },
 
     setDownloadFunction: function (fn) {
         download.download = fn
+    },
+
+    getVectorTemplate: function (layerKey) {
+        let metaDataKeys = meta.getMetaDataKeys();
+        let parsedMeta = layerTree.parseLayerMeta(metaDataKeys[layerKey]);
+        let template = (typeof metaDataKeys[layerKey].infowindow !== "undefined" && metaDataKeys[layerKey].infowindow.template !== "") ? metaDataKeys[layerKey].infowindow.template : metaDataKeys[layerKey].type === "RASTER" ? defaultTemplateRaster : defaultTemplate;
+        template = (parsedMeta.info_template && parsedMeta.info_template !== "") ? parsedMeta.info_template : template;
+        return template;
+    },
+
+    openInfoSlidePanel: function (layerKey = null) {
+        $("#click-for-info-slide.slide-left").show();
+        $("#click-for-info-slide.slide-left").animate({left: "0"}, 200);
+        if (layerKey) {
+            let metaDataKeys = meta.getMetaDataKeys();
+            let title = typeof metaDataKeys[layerKey].f_table_title !== "undefined" ? metaDataKeys[layerKey].f_table_title : metaDataKeys[layerKey].f_table_name;
+            $("#click-for-info-slide .modal-title").html(title);
+
+        }
     }
 };
 

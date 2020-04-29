@@ -44,11 +44,12 @@ How state snapshot is stored in the key-value storage:
  */
 router.get('/api/state-snapshots/:dataBase', (req, res) => {
     let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
-
+    let uri = API_LOCATION + `/` + req.params.dataBase + `?like=state_snapshot_%&filter='{userId}'='${userId}' or '{browserId}'='${browserId}'`;
+    console.log(uri);
     request({
         method: 'GET',
         encoding: 'utf8',
-        uri: API_LOCATION + `/` + req.params.dataBase + `?like=state_snapshot_%`
+        uri: uri
     }, (error, response) => {
         if (error) {
             shared.throwError(res, 'INVALID_OR_EMPTY_EXTERNAL_API_REPLY', {error});

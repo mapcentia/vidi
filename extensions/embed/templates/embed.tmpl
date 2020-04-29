@@ -316,7 +316,7 @@
         top: -2px;
         font-size: 10pt;
     }
-    #layer-slide, #info-modal-top {
+    #layer-slide, #info-modal-top, #click-for-info-slide {
         position: fixed;
         max-width: 650px;
         z-index: 300000;
@@ -433,17 +433,21 @@
     .dialog-bottom .modal-header {
         padding: 0 15px 5px;
     }
-    .js-toggles-container a:not(.js-toggle-opacity), .js-toggles-container span {
+    .js-toggles-container a, .js-toggles-container span {
         display: none !important;
     }
+    .js-tiles-contain-data {
+        display: none !important;
+    }
+
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
-        #layer-slide, #info-modal-top {
+        #layer-slide, #info-modal-top, #click-for-info-slide {
             width: 75%;
             min-width: 240px;
         }
-        #layer-slide, #info-modal-top {
+        #layer-slide, #info-modal-top, #click-for-info-slide {
             right: -75%;
         }
         .export {
@@ -502,6 +506,7 @@
                     class="material-icons">remove</i></a>
         </div>
         <div id="floating-container-secondary">
+            <div id="locate-btn"></div>
             <a href="#base-layers-dialog" id="base-layers-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">layers</i></a>
@@ -587,11 +592,29 @@
             </div>
         </div>
     </div>
+    <div id="click-for-info-slide" class="slide-left fade-then-dragging">
+        <div class="modal-header">
+            <button type="button" class="close" aria-hidden="true">×</button>
+            <h3 class="modal-title"></h3>
+        </div>
+        <div id="click-for-info-slide-wrapper">
+            <div class="modal-body">
+                <div id="modal-info-body">
+                    <ul class="nav nav-tabs" id="info-tab"></ul>
+                    <div class="tab-content" id="info-pane">test</div>
+                </div>
+                <div id="alternative-info-container"></div>
+            </div>
+
+        </div>
+    </div>
 </div>
 <!-- The state-snapshot div must be in the template -->
 <div id="state-snapshots-content" style="display: none">
     <div id="state-snapshots"></div>
 </div>
+<!-- Dummy element for query result -->
+<div id="info-box" style="display: none"></div>
 
 
 

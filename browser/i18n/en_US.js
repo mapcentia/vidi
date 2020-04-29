@@ -72,6 +72,15 @@ module.exports = {
         "Click on a drawing to remove": "Click on a drawing to remove",
         "Clear all": "Clear all",
         "Clear all drawings.": "Clear all drawings.",
+        "No drawings in the map": "Ingen tegninger i kortet",
+        "Click map to place circle marker": "Click map to place circle marker",
+
+        "circlemarker": "circlemarker",
+        "polygon": "polygon",
+        "rectangle": "rectangle",
+        "polyline": "polyline",
+        "circle": "circle",
+        "marker": "marker",
 
         // Report
         "Get as PDF": "Get as PDF",
@@ -159,7 +168,6 @@ module.exports = {
         "Cancel": "Cancel",
         "Ok": "Ok",
         "Apply default style settings for this drawing?": "Apply default style settings for this drawing?",
-        "No drawings in the map": "No drawings in the map",
 
         "Not a valid scale. Must be over 100.": "Not a valid scale. Must be over 100.",
 
@@ -420,6 +428,7 @@ module.exports = {
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "No searchable fields on layer",
-        "Method": "Method"
+        "Method": "Method",
+        "Find me": "Find me"
     }
 };

@@ -76,17 +76,15 @@ body {
 .leaflet-control {
   border: none !important;
   border-radius: 0 !important;
-  background-color: #eee;
-  padding: 2px;
   box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.12), 0 1px 6px 0 rgba(0, 0, 0, 0.12) !important;
+}
+.leaflet-control-locate .fa.fa-location-arrow {
+  transform: translate(0, -2px);
+  font-size: 16px;
 }
 .leaflet-touch .leaflet-control-layers,
 .leaflet-touch .leaflet-bar {
   border: none;
-}
-.leaflet-control-boxzoom {
-  width: 34px !important;
-  height: 34px !important;
 }
 .leaflet-bar a,
 .leaflet-bar a:hover {
@@ -126,7 +124,6 @@ body {
 }
 .tab-pane {
   padding: 6px;
-  overflow: auto;
 }
 #pane {
   position: fixed;
@@ -675,7 +672,8 @@ body {
   color: white !important;
 }
 #info-modal,
-#info-modal-top {
+#info-modal-top,
+#click-for-info-slide {
   position: fixed;
   top: 0;
   z-index: 3000;
@@ -684,6 +682,14 @@ body {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   display: inline;
+}
+#click-for-info-slide .modal-title {
+  top: 5px;
+  position: relative;
+  width: 90%;
+}
+#click-for-info-slide .modal-body {
+  padding: 0;
 }
 #module-container {
   position: fixed;
@@ -1184,7 +1190,8 @@ h4 small {
   -o-transition: all 500ms ease-out;
   transition: all 500ms ease-out;
 }
-#layer-slide-body-wrapper > div {
+#layer-slide-body-wrapper > div,
+#click-for-info-slide-wrapper > div {
   height: calc(100vh - 48px);
 }
 #conflict-result-content {
@@ -1488,7 +1495,7 @@ td.rdtYear:hover {
 }
 .table-conflict {
   border: 1px solid #eee;
-  table-layout: auto;
+  table-layout: fixed;
 }
 .table-conflict td {
   border: 1px solid #eee;
@@ -1502,6 +1509,29 @@ td.rdtYear:hover {
   border: 1px solid #eee !important;
   padding: 5px 10px !important;
   font-weight: 400 !important;
+  white-space: nowrap;
+}
+.conflict-heading-cell,
+.conflict-value-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.conflict-heading-cell {
+  width: 1px;
+  min-width: 0;
+  max-width: 95px;
+  padding-right: 10px;
+  border-right: 1px solid #eee;
+  font-weight: 400;
+}
+.conflict-value-cell {
+  max-width: 0;
+  padding-left: 10px;
+  border-left: 1px solid #eee;
+}
+#alternative-info-container {
+  height: calc(100vh + 1px);
 }
 
 /* Fix for small screens and leaflet draw module*/
