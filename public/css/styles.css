@@ -147,7 +147,7 @@ body {
     max-height: 400px;
 }*/
 img {
-  max-width: none !important;
+  max-width: none;
 }
 #modal-info-body {
   display: none;
