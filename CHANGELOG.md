@@ -19,7 +19,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Conflict is now using `sqlQuery.js` to show info-click result. So now are multiple results possible. The `sqlQuery.js` module now has a Simple mode, a prefix for DOM elements to render in and callback for when selecting a row.
 - New config setting `dontUseAdvancedBaseLayerSwitcher` which will disable the 'Display two layers at once' option in the base layer switcher.
 - New GC2 Meta properties `select_function` which adds an onSelect callback to the result list in click-for-info.
-- It now possible to render a image carousel in popups from a click-for-info. Create a JSON field with a value like this and set Content to Image:
+- It now possible to render an image carousel in popups from a click-for-info. Create a JSON field with a value like this and set Content to Image:
 ```json
 [
   {
@@ -57,7 +57,7 @@ and this project adheres to [CalVer](https://calver.org/).
     - Mouse click when releasing a rectangle/circle drag is suppressed.
     - Multiple results from a Select-Object-To-Search-With is now possible. The standard `sqlQuery` is used to create list. 
     
-- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
+- Indicator in layer tree showing if a tile layer (MapServer or QGIS Server) is visible in the view extent. The Leaflet layer canvas element is being checked for colored pixels. Be aware of the canvas being bigger than the view extent because of the buffer. A event is triggered when a layer changes visibility called `tileLayerVisibility:layers` with a payload like this:
 ```json
 {
     "id": "schema.layer.geom",
@@ -66,12 +66,11 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
 - The load screen is now being dismissed on `ready:meta` instead of `allDoneLoading:layers`. This makes the application interactive sooner. 
-- Embed template is simplified. The burger menu is removed and a round button to the right is inserted. The search is also moved to the right.
+- Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together like `["(foo=1 OR foo=2)", "(bar=1 OR bar=2)"]`. The GC2 backend can then set the operator between the predefined and arbitrary filters. 
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
-- Show info on both layers and base layers now works in embed template.
 
 ## [2020.2.0]
 ### Added
@@ -82,7 +81,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - CalVer is now used with month identifier like this: YYYY.MM.Minor.Modifier
 - Custom searches can now be added to danish search module.
 - `embed.js` will wait with loading Vidi until target element is visible in the DOM. This way, Vidi can be embedded in a element with `display:none`.
-- Its now possible to add custom extra searches to `danish.js`. A search needs a Elasticsearch index, which must have a id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
+- Its now possible to add custom extra searches to `danish.js`. A search needs an Elasticsearch index, which must have an id and string property. The latter is the search string. Also a look-up table/view with geometries is required. An example of a setup:
 ```javascript
 {
     searchConfig: {

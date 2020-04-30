@@ -1639,7 +1639,10 @@ module.exports = {
 
         let renderedText = null;
         try {
-            renderedText = Mustache.render(sqlQuery.getVectorTemplate(layerKey), properties);
+            let tmpl = sqlQuery.getVectorTemplate(layerKey);
+            if (tmpl) {
+                renderedText = Handlebars.compile(tmpl)(properties);
+            }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
             console.error(e.message);
@@ -1716,7 +1719,7 @@ module.exports = {
                 || `predefined_filters` in parsedMeta && parsedMeta[`predefined_filters`])) {
                 if (!parsedMeta[`predefined_filters`] && moduleState.predefinedFiltersWarningFired === false) {
                     moduleState.predefinedFiltersWarningFired = true;
-                    console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", plese update the GC2 backend`);
+                    console.warn(`Deprecation warning: "wms_filters" will be replaced with "predefined_filters", please update the GC2 backend`);
                 }
 
                 let predefinedFiltersRaw = parsedMeta[`predefined_filters`] || parsedMeta[`wms_filters`];
@@ -1726,12 +1729,17 @@ module.exports = {
                     parsedPredefinedFilters = parsedPredefinedFiltersLocal;
                 } catch (e) {
                 }
-
+                let appliedPredefinedFilters = {};
+                appliedPredefinedFilters[tableName] = [];
                 if (parsedPredefinedFilters) {
                     for (let key in parsedPredefinedFilters) {
                         if (filters === false || filters.indexOf(key) === -1) {
-                            appliedFilters[tableName].push(parsedPredefinedFilters[key]);
+                            appliedPredefinedFilters[tableName].push(parsedPredefinedFilters[key]);
                         }
+                    }
+                    if (appliedPredefinedFilters[tableName].length > 0) {
+                        let filtersStr = appliedPredefinedFilters[tableName].join(` OR `);
+                        appliedFilters[tableName].push(`(${filtersStr})`);
                     }
                 }
             }
