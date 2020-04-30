@@ -64,11 +64,6 @@ module.exports = {
 
         metaDataKeys = meta.getMetaDataKeys();
 
-        $("#btn-about").on("click", function (e) {
-            $("#about-modal").modal({});
-
-        });
-
         $("#burger-btn").on("click", function () {
             $("#layer-slide.slide-left").animate({
                 left: "0"

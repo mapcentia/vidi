@@ -420,6 +420,13 @@
         display: none !important;
     }
 
+    .about-bnt {
+        position: absolute;
+        color: #888888;
+        top: 1px;
+        left: 1px;
+    }
+
     @media (max-width: 450px) {
         .navmenu,
         .navbar-offcanvas,
@@ -477,6 +484,7 @@
 <div id="pane">
     <div id="container">
         <div id="map"></div>
+        <a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons about-bnt">question_answer</i>
         <div id="floating-container-primary">
             <a href="javascript:void(0)" id="zoom-in-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">add</i></a>
@@ -595,6 +603,25 @@
 </div>
 <!-- Dummy element for query result -->
 <div id="info-box" style="display: none"></div>
+
+<!-- About Modal -->
+<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title" id="about-modalLabel">{{About}}</h4>
+            </div>
+            <div class="modal-body">
+                {{{aboutBox}}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">{{Close}}</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
