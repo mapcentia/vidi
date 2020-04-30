@@ -71,6 +71,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
+- Show info on both layers and base layers now works in embed template.
 
 ## [2020.2.0]
 ### Added
