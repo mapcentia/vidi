@@ -1639,7 +1639,10 @@ module.exports = {
 
         let renderedText = null;
         try {
-            renderedText = Mustache.render(sqlQuery.getVectorTemplate(layerKey), properties);
+            let tmpl = sqlQuery.getVectorTemplate(layerKey);
+            if (tmpl) {
+                renderedText = Handlebars.compile(tmpl)(properties);
+            }
         } catch (e) {
             console.info("Error in pop-up template for: " + layerKey);
             console.error(e.message);
