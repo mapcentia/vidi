@@ -203,6 +203,18 @@ module.exports = {
     },
 
     /**
+     * Returns filters concatenated into a WHERE clause
+     *
+     * @param layerName string
+     * @returns {*|null}
+     */
+    getFilterStr(layerName) {
+        let filterArr = this.getActiveLayerFilters(layerName);
+        let filterStr = filterArr.length > 0 ? filterArr[0] : null;
+        return filterStr;
+    },
+
+    /**
      * Returns layerTree readiness
      *
      * @returns {Boolean}
