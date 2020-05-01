@@ -325,10 +325,6 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
-    clearEditor() {
-        this.setState({editorFilters: []})
-    }
-
     render() {
         let allRulesAreValid = true;
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
@@ -539,9 +535,6 @@ class VectorLayerFilter extends React.Component {
                         </label>
                         <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
                             <i className="fa fa-check"></i> {__(`Apply`)}
-                        </button>
-                        <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs" onClick={this.clearEditor.bind(this)}>
-                            <i className="fa fa-eraser"></i> {__(`Clear`)}
                         </button>
                     </div>
                 </div>
