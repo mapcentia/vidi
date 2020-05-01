@@ -1,11 +1,14 @@
 /*
  * @author     Alexander Shumilov
- * @copyright  2013-2018 MapCentia ApS
+ * @copyright  2013-2020 MapCentia ApS
  * @license    http://www.gnu.org/licenses/#AGPL  GNU AFFERO GENERAL PUBLIC LICENSE 3
  */
 
 import React from 'react';
+import AceEditor from 'react-ace';
 import PropTypes from 'prop-types';
+import "brace/mode/json";
+import "brace/theme/textmate";
 import {
     validateFilters,
     MATCHES,
@@ -41,7 +44,6 @@ const DUMMY_RULE = {
 class VectorLayerFilter extends React.Component {
     constructor(props) {
         super(props);
-
         let predefinedFilters = [];
         for (let key in props.predefinedFilters) {
             predefinedFilters.push({
@@ -101,7 +103,9 @@ class VectorLayerFilter extends React.Component {
             layer: props.layer,
             arbitraryFilters,
             predefinedFilters,
-            disabledPredefinedFilters
+            disabledPredefinedFilters,
+            editorFilters: props.editorFilters,
+            editorFiltersActive: props.editorFiltersActive
         };
     }
 
@@ -293,6 +297,34 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
+    handleEditorFiltersChange(value) {
+        let parsedValue;
+        try {
+            parsedValue = JSON.parse(value);
+        } catch (e) {
+            parsedValue = null;
+        }
+        this.props.onChangeEditor({
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            filters: parsedValue || null
+        });
+
+    }
+
+    applyEditor() {
+        this.props.onApplyEditor({
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+        });
+    }
+
+    activateEditor() {
+        this.setState({editorFiltersActive: event.target.checked})
+        this.props.onActivateEditor({
+            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+            active: event.target.checked
+        });
+    }
+
     render() {
         let allRulesAreValid = true;
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
@@ -415,24 +447,26 @@ class VectorLayerFilter extends React.Component {
             };
 
             let childrenInfoMarkup = childrenInfo();
-            return (<div className="js-arbitrary-filters">
-                {childrenInfoMarkup}
-                <div className="form-group">
-                    <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
+            return (
+                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                    {childrenInfoMarkup}
+                    <div className="form-group">
+                        <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
+                    </div>
+                    <div>{filterControls}</div>
+                    <div>
+                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}>
+                            <i className="fa fa-plus"></i> {__(`Add condition`)}
+                        </button>
+                        <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid} onClick={this.onRulesApply.bind(this)}>
+                            <i className="fa fa-check"></i> {__(`Apply`)}
+                        </button>
+                        <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
+                            <i className="fa fa-eraser"></i> {__(`Disable`)}
+                        </button>
+                    </div>
                 </div>
-                <div>{filterControls}</div>
-                <div>
-                    <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}>
-                        <i className="fa fa-plus"></i> {__(`Add condition`)}
-                    </button>
-                    <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid} onClick={this.onRulesApply.bind(this)}>
-                        <i className="fa fa-check"></i> {__(`Apply`)}
-                    </button>
-                    <button className="btn btn-sm" type="button" onClick={this.onRulesClear.bind(this)}>
-                        <i className="fa fa-eraser"></i> {__(`Disable`)}
-                    </button>
-                </div>
-            </div>);
+            );
         }
 
         /**
@@ -442,27 +476,69 @@ class VectorLayerFilter extends React.Component {
             let predefinedFiltersTab = [];
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
-                predefinedFiltersTab.push(<div key={`tile_filter_` + index}>
-                    <div style={{display: `inline-block`}}>
-                        <div className="checkbox">
-                            <label>
-                                <input
-                                    checked={filterIsActive}
-                                    onChange={(event) => {
-                                        this.handlePredefinedFiltersChange(event, item.name)
-                                    }}
-                                    type="checkbox"
-                                    name={`tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}/>
-                            </label>
+                predefinedFiltersTab.push(
+                    <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                        <div style={{display: `inline-block`}}>
+                            <div className="checkbox">
+                                <label>
+                                    <input
+                                        checked={filterIsActive}
+                                        onChange={(event) => {
+                                            this.handlePredefinedFiltersChange(event, item.name)
+                                        }}
+                                        type="checkbox"
+                                        name={`tile_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}/>
+                                </label>
+                            </div>
+                        </div>
+                        <div style={{display: `inline-block`}}>
+                            <span>{item.name} ({item.value})</span>
                         </div>
                     </div>
-                    <div style={{display: `inline-block`}}>
-                        <span>{item.name} ({item.value})</span>
-                    </div>
-                </div>);
+                );
             });
 
             return (<div className="js-predefined-filters">{predefinedFiltersTab}</div>);
+        }
+
+        /**
+         * Builds the WHERE field
+         */
+        const buildWhereClauseField = (props) => {
+            return (
+                <div style={{marginTop: "25px"}}>
+                    <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                        <div style={{marginLeft: "10px", marginRight: "10px"}}>
+                            <AceEditor
+                                mode="json"
+                                theme="textmate"
+                                onChange={(value) => {
+                                    this.handleEditorFiltersChange(value)
+                                }}
+                                name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
+                                value={JSON.stringify(
+                                    this.state.editorFilters
+                                )}
+                                width="100%"
+                                height="40px"
+                                maxLines={2}
+                                showPrintMargin={false}
+                                autoScrollEditorIntoView={true}
+                                highlightActiveLine={true}
+                                showGutter={false}
+                                editorProps={{$blockScrolling: true}}/>
+                        </div>
+                    </div>
+                    <div>
+                        <label>
+                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/>
+                        </label>
+                        <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
+                            <i className="fa fa-check"></i> {__(`Apply`)}
+                        </button>
+                    </div>
+                </div>
+            )
         }
 
         let activeFiltersTab = false;
@@ -490,10 +566,13 @@ class VectorLayerFilter extends React.Component {
             activeFiltersTab = buildArbitraryTab();
         }
 
-        return (<div>
-            {tabControl}
-            {activeFiltersTab}
-        </div>);
+        return (
+            <div>
+                {tabControl}
+                {activeFiltersTab}
+                {buildWhereClauseField()}
+            </div>
+        );
     }
 }
 
@@ -506,6 +585,11 @@ VectorLayerFilter.propTypes = {
     arbitraryFilters: PropTypes.object.isRequired,
     onApplyPredefined: PropTypes.func.isRequired,
     onApplyArbitrary: PropTypes.func.isRequired,
+    onChangeEditor: PropTypes.func.isRequired,
+    onActivateEditor: PropTypes.func.isRequired,
+    onApplyEditor: PropTypes.func.isRequired,
+    editorFilters: PropTypes.array.isRequired,
+    editorFiltersActive: PropTypes.bool.isRequired
 };
 
 export default VectorLayerFilter;

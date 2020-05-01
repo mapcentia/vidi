@@ -612,7 +612,7 @@ module.exports = {
      */
     applyState: (state) => {
 
-        if (LOG) console.log(`${MODULE_NAME}: applying state`);
+        if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {
