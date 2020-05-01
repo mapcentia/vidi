@@ -222,10 +222,21 @@ class VectorLayerFilter extends React.Component {
         let columnOptions = [];
         columnOptions.push(<option key={`field_` + layerKey + `_0`} value="null">{__(`Select`)}</option>);
         let columnIndex = 1;
+        let fieldconf = null;
+        if (this.state.layer.fieldconf) {
+            try {
+                fieldconf = JSON.parse(this.state.layer.fieldconf)
+            } catch (e) {
+            }
+        }
         for (let key in this.state.layer.fields) {
             let field = this.state.layer.fields[key];
+            let alias = null;
+            if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
+                alias = fieldconf[key]["alias"];
+            }
             if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-                columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{key}</option>);
+                columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
                 columnIndex++;
             }
         }

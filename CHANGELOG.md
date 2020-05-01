@@ -69,6 +69,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together in one string like `"(foo=1 OR foo=2) AND (bar=1 OR bar=2)"`. Vidi can therefore now set the operator between the predefined and arbitrary filters. 
 - The filters from the layer tree are now set on the Click-For-Info module, so you only get filtered hits.
 - The applied filters will now be shown as a WHERE clause in an Ace editor under the filter widgets. It's possible to mutate the clause and apply the altered filters. When doing that, the filter widgets will be disabled until the editor is disabled. All filters settings are stored in state. 
+- In arbitrary filters, the field alias is now being used if set.
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
