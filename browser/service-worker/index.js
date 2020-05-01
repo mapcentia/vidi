@@ -89,9 +89,6 @@ const urlSubstitution = [{
     regExp: true,
     requested: '/js/lib/leaflet/images/marker-shadow.png',
     local: '/js/lib/leaflet/images/marker-shadow.png'
-}, {
-    regExp: true,
-    requested: '/wms/'
 }];
 
 let extensionsIgnoredForCaching = ['JPEG','jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
@@ -126,6 +123,9 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/api/v2/'
+}, {
+    regExp: true,
+    requested: '/wms/'
 }
 ];
 
