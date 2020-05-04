@@ -742,7 +742,6 @@ module.exports = {
          */
         backboneEvents.get().on(`tileLayerVisibility:layers`, (data) => {
             moduleState.tileContentCache[data.id] = data.dataIsVisible;
-            console.log(`### data`, data);
             $(`[data-gc2-layer-key^="${data.id}."]`).find(`.js-tiles-contain-data`).css(`visibility`, (data.dataIsVisible ? `visible` : `hidden`));
         });
 
@@ -2455,7 +2454,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
