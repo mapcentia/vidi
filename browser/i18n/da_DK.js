@@ -73,7 +73,14 @@ module.exports = {
         "Clear all": "Slet alle",
         "Clear all drawings.": "Slet alle tegninger.",
         "No drawings in the map": "Ingen tegninger i kortet",
+        "Click map to place circle marker": "Klik for at placere markør",
 
+        "circlemarker": "tekstboks",
+        "polygon": "polygon",
+        "rectangle": "rektangel",
+        "polyline": "linje",
+        "circle": "cirkel",
+        "marker": "markør",
 
         // Report
         "Get as PDF": "Hent som PDF",
@@ -421,6 +428,7 @@ module.exports = {
         "Similarity": "Similarity",
         "Tsvector": "Tsvector",
         "No searchable fields on layer": "Ingen søgbare felter på laget",
-        "Method": "Metode"
+        "Method": "Metode",
+        "Find me": "Find mig"
     }
 };

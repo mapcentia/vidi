@@ -108,12 +108,15 @@ module.exports = module.exports = {
         cloud.get().digitalGlobeKey = window.digitalGlobeKey;
 
         // Creating side-by-side mode toggle
-        $("#base-layer-list").append(`
+        if (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "undefined" ||
+            (typeof window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === "boolean" && window.vidiConfig.dontUseAdvancedBaseLayerSwitcher === false)) {
+            $("#base-layer-list").append(`
                 <div class="togglebutton">
                     <label>
                         <input class="js-two-layers-at-once-control" type="checkbox"> ${__(`Display two layers at once`)}
                     </label>
                 </div>`);
+        }
 
         // Creating js-two-layers-at-once-mode-control-container-wrapper
         $("#base-layer-list").append(`<div id ="js-two-layers-at-once-mode-control-container-wrapper"></div>`);

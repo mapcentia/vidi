@@ -15,8 +15,6 @@ var measurements;
 
 var backboneEvents;
 
-var oplevsyddjurs;
-
 var cloud;
 
 var setting;
@@ -150,5 +148,8 @@ module.exports = {
         $("#measurements-module-btn").on("click", function () {
             measurements.toggleMeasurements(true);
         });
+
+        $("#locate-btn").append($(".leaflet-control-locate"));
+
     }
 };

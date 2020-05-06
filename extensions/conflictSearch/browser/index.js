@@ -164,8 +164,8 @@ var _result;
  *
  * @private
  */
-var _clearDrawItems = function () {
-    drawnItems.clearLayers();
+var _clearDrawItems = function (clearOnlyBuffer = false) {
+    if (!clearOnlyBuffer) drawnItems.clearLayers();
     bufferItems.clearLayers();
 };
 
@@ -516,10 +516,11 @@ module.exports = module.exports = {
 
     /**
      * Makes a conflict search
+     * @param text
      * @param callBack
+     * @param id Set specific layer id to use. Else the first in drawnItems will be used
      */
-    makeSearch: function (text, callBack) {
-
+    makeSearch: function (text, callBack, id = null) {
         var primitive, coord,
             layer, buffer = parseFloat($("#conflict-buffer-value").val()), bufferValue = buffer,
             hitsTable = $("#hits-content tbody"),
@@ -542,9 +543,14 @@ module.exports = module.exports = {
             xhr.abort();
         } catch (e) {
         }
-        for (var prop in drawnItems._layers) {
-            layer = drawnItems._layers[prop];
-            break;
+
+        if (id) {
+            layer = drawnItems._layers[id];
+        } else {
+            for (var prop in drawnItems._layers) {
+                layer = drawnItems._layers[prop];
+                break;
+            }
         }
         if (typeof layer === "undefined") {
             return;
@@ -631,6 +637,8 @@ module.exports = module.exports = {
                         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
                         $('#conflict-result-content a[href="#hits-content"]').tab('show');
                         $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+
                         fileId = response.file;
                         searchFinish = true;
                         resultOrigin = response.text || "Na";
@@ -781,8 +789,8 @@ module.exports = module.exports = {
     addDrawing: function (layer) {
         drawnItems.addLayer(layer);
     },
-    clearDrawing: function () {
-        _clearDrawItems();
+    clearDrawing: function (clearOnlyBuffer = false) {
+        _clearDrawItems(clearOnlyBuffer);
     },
     getResult: function () {
         return _result;

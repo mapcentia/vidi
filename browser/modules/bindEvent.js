@@ -38,6 +38,7 @@ var layers;
 var infoClick;
 var setting;
 var state;
+var sqlQuery;
 var applicationModules = false;
 var isStarted = false;
 
@@ -61,6 +62,7 @@ module.exports = {
         setting = modules.setting;
         state = modules.state;
         utils = modules.utils;
+        sqlQuery = modules.sqlQuery;
         return this;
     },
     init: function (str) {
@@ -131,14 +133,6 @@ module.exports = {
                             $("#search-border").trigger("click");
                         }
                     }, 200
-                );
-
-                setTimeout(
-                    function () {
-                        if (!window.vidiConfig.doNotCloseLoadScreen) {
-                            $("#loadscreen").fadeOut(200);
-                        }
-                    }, 600
                 );
             }
         });
@@ -540,6 +534,7 @@ module.exports = {
             $("#click-for-info-slide.slide-left").animate({
                 left: "-100%"
             }, 500)
+            sqlQuery.resetAll();
         });
 
         // Listen for extensions
