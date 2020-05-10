@@ -10,8 +10,10 @@ const MODULE_ID = `print`;
 
 var cloud;
 var printOn = false;
-var recEdit;
-var recScale;
+var boxCount = 0;
+var recEdit = [];
+var recScale = [];
+var curBounds = [];
 var serializeLayers;
 var anchor;
 var printItems = new L.FeatureGroup();
@@ -20,7 +22,7 @@ var db = urlparser.db;
 var urlVars = urlparser.urlVars;
 var schema = urlparser.schema;
 var scale;
-var center;
+var center = [];
 var config = require('../../config/config.js');
 var printC = config.print.templates;
 var scales = config.print.scales;
@@ -44,21 +46,25 @@ var paramsFromDb;
  */
 var _cleanUp = function (hard) {
     try {
-        if (recScale) cloud.get().map.removeLayer(recScale);
-        if (recEdit) cloud.get().map.removeLayer(recEdit);
+        for (let i = 0; i <= boxCount; i++) {
+            cloud.get().map.removeLayer(recScale[i]);
+            cloud.get().map.removeLayer(recEdit[i]);
+        }
     } catch (e) {
-        console.error(e.message)
+        console.log("CleanUp", boxCount)
+        console.error(e.message);
     }
 
     printOn = false;
     if (hard) {
-        center = null;
+        center = [];
         printC = config.print.templates;
         scales = config.print.scales;
         scale = null;
         pageSize = null;
         printingOrientation = null;
         tmpl = null;
+        boxCount = 0;
     }
 };
 
@@ -112,6 +118,11 @@ module.exports = {
             }
         });
 
+        $("#add-print-box-btn").on("click", function () {
+            boxCount++;
+            _self.control(null, null, null, null, null, null, null, null, null, null, null, false);
+        });
+
         cloud.get().map.addLayer(printItems);
         // Set locale for date/time string
         var lc = window._vidiLocale.split("_")[0];
@@ -123,7 +134,7 @@ module.exports = {
     },
 
     off: function () {
-        _cleanUp();
+        _cleanUp(true);
         $("#print-form :input, #start-print-btn, #select-scale").prop("disabled", true);
     },
 
@@ -139,7 +150,7 @@ module.exports = {
         $("#print-size").empty();
         $("#print-orientation").empty();
         $("#select-scale").empty();
-        center = null;
+        center = [];
         scale = null;
 
         // Set up print dialog
@@ -150,7 +161,7 @@ module.exports = {
 
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
-            center = $("#print-sticky").is(":checked") ? center : null;
+            //center = $("#print-sticky").is(":checked") ? center : [];
         });
 
         $("#select-scale").unbind("change");
@@ -192,13 +203,20 @@ module.exports = {
                                 me.control(false,
                                     params.scales, params.tmpl, params.pageSize,
                                     params.orientation, params.legend,
-                                    params.bounds, params.scale, params.title, params.comment, params.sticky);
+                                    params.bounds, params.scale, params.title, params.comment, params.sticky, false);
                             } else {
-                                me.control();
+                                me.control(null, null, null, null, null, null, null, null, null, null, null, false);
                             }
                         });
                     } else {
-                        me.control();
+                        let boxCountTemp = boxCount;
+                        console.log("boxCount before", boxCount)
+                        for (let i = 0; i <= boxCountTemp; i++) {
+                            boxCount = i;
+                            me.control(null, null, null, null, null, null, null, null, null, null, null, false);
+                        }
+                        console.log("boxCount after", boxCount)
+
                     }
                     setTimeout(() => {
                         backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
@@ -257,8 +275,6 @@ module.exports = {
                 $("input:radio[name=print-orientation]:first").trigger("click");
             }, 5)
         }, 5);
-
-
     },
 
     print: (endEventName = "end:print", customData) => {
@@ -275,8 +291,10 @@ module.exports = {
         });
     },
 
-    control: function (p, s, t, pa, o, l, b, sc, ti, cm, st) {
-        _cleanUp();
+    control: function (p, s, t, pa, o, l, b, sc, ti, cm, st, cleanUp = true) {
+        if (cleanUp) {
+            _cleanUp();
+        }
         printC = p ? p : printC;
         scales = s ? s : scales;
         tmpl = t ? t : tmpl;
@@ -316,7 +334,7 @@ module.exports = {
             $("#print-sticky").prop("checked", st);
         }
 
-        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, curBounds, newBounds;
+        var ps = printC[tmpl][pageSize][printingOrientation].mapsizeMm, curScale, newScale, newBounds;
         var _getScale = function (scaleObject) {
             var bounds = scaleObject.getBounds(),
                 sw = bounds.getSouthWest(),
@@ -369,57 +387,62 @@ module.exports = {
                 opacity: 1,
                 aspectRatio: (ps[0] / ps[1])
             });
-            center = rectangle.getBounds().getCenter();
+            center[boxCount] = rectangle.getBounds().getCenter();
             return rectangle;
         };
-        var first = center ? false : true;
-        center = center || cloud.get().map.getCenter(); // Init center as map center
+        console.log("center", center)
+        var first = !center[0];
+        center[boxCount] = center[boxCount] || cloud.get().map.getCenter(); // Init center as map center
         if (bnds) {
             let rec = L.rectangle([[bnds._southWest.lat, bnds._southWest.lng], [bnds._northEast.lat, bnds._northEast.lng]], {
                 color: "yellow",
                 fillOpacity: 0,
                 aspectRatio: (ps[0] / ps[1])
             });
-            recEdit = rectangle(rec.getBounds().getCenter(), cloud.get().map, "yellow", scale, first);
+            recEdit[boxCount] = rectangle(rec.getBounds().getCenter(), cloud.get().map, "yellow", scale, first);
             bnds = null;
         } else {
-            recEdit = rectangle(center, cloud.get().map, "yellow", scale, first);
+            console.log("yellow")
+            console.log("first", first)
+            console.log("boxCount", boxCount)
+            recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "yellow", scale, first);
         }
-        recEdit._vidi_type = "printHelper";
-        printItems.addLayer(recEdit);
-        recEdit.editing.enable();
+        recEdit[boxCount]._vidi_type = "printHelper";
+        recEdit[boxCount]._count = boxCount;
+        printItems.addLayer(recEdit[boxCount]);
+        recEdit[boxCount].editing.enable();
 
-        recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
-        recScale._vidi_type = "print";
-        printItems.addLayer(recScale);
+        recScale[boxCount] = rectangle(recEdit[boxCount].getBounds().getCenter(), recEdit[boxCount], "red");
+        recScale[boxCount]._vidi_type = "print";
+        printItems.addLayer(recScale[boxCount]);
 
-        var sw = recEdit.getBounds().getSouthWest(), ne = recEdit.getBounds().getNorthEast();
+        var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
 
-        curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
+        curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
 
-        recEdit.on('edit', function (e) {
-            rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
+        recEdit[boxCount].on('edit', function (e) {
+            for (let i = 0; i <= boxCount; i++) {
+                rectangle(recEdit[i].getBounds().getCenter(), recEdit[i], "red");
+                if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
+                    scales = config.print.scales;
+                    cloud.get().map.removeLayer(recScale[i]);
+                    // Set bounds from the one being edited to all
+                    recScale[i] = rectangle(recEdit[i].getBounds().getCenter(), recEdit[e.target._count], "red");
+                    recScale[i]._vidi_type = "print";
+                    printItems.addLayer(recScale[i]);
+                    $("#get-print-fieldset").prop("disabled", true);
+                }
+                recEdit[i].editing.disable();
+                recEdit[i].setBounds(recScale[i].getBounds());
+                recEdit[i].editing.enable();
 
-            if (curScale !== newScale || (curBounds[0] !== newBounds[0] && curBounds[1] !== newBounds[1] && curBounds[2] !== newBounds[2] && curBounds[3] !== newBounds[3])) {
-                scales = config.print.scales;
-
-                cloud.get().map.removeLayer(recScale);
-                recScale = rectangle(recEdit.getBounds().getCenter(), recEdit, "red");
-                recScale._vidi_type = "print";
-                printItems.addLayer(recScale);
-                $("#get-print-fieldset").prop("disabled", true);
+                var sw = recEdit[i].getBounds().getSouthWest(),
+                    ne = recEdit[i].getBounds().getNorthEast();
+                curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
             }
-            recEdit.editing.disable();
-            recEdit.setBounds(recScale.getBounds());
-            recEdit.editing.enable();
-
-            var sw = recEdit.getBounds().getSouthWest(),
-                ne = recEdit.getBounds().getNorthEast();
-            curBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
 
             backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
         });
-        return recScale;
     },
 
     getPrintParams: () => {
@@ -508,7 +531,7 @@ module.exports = {
             queryBuffer: (typeof layerQueryBuffer[0] !== "undefined" && layerQueryBuffer[0].geojson.features.length > 0) ? layerQueryBuffer : null,
             queryResult: (typeof layerQueryResult[0] !== "undefined" && layerQueryResult[0].geojson.features.length > 0) ? layerQueryResult : null,
             print: (typeof layerPrint[0] !== "undefined" && layerPrint[0].geojson.features.length > 0) ? layerPrint : null,
-            bounds: recScale.getBounds(),
+            bounds: recScale.map(i => i.getBounds()),
             scale: scale,
             tmpl: tmpl,
             pageSize: pageSize,
@@ -534,7 +557,7 @@ module.exports = {
             }
             data.config = parr.join();
         }
-        recEdit.editing.enable();
+        recEdit[recEdit.length - 1].editing.enable();
         return data;
     },
 
