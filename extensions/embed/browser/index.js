@@ -15,8 +15,6 @@ var measurements;
 
 var backboneEvents;
 
-var oplevsyddjurs;
-
 var cloud;
 
 var setting;

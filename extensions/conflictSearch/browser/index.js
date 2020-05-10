@@ -637,6 +637,8 @@ module.exports = module.exports = {
                         $('#conflict-main-tabs a[href="#conflict-result-content"]').tab('show');
                         $('#conflict-result-content a[href="#hits-content"]').tab('show');
                         $('#conflict-result .btn:first-child').attr("href", "/html?id=" + response.file)
+                        $("#conflict-download-pdf").prop("download", `Søgning foretaget med ${response.text} d. ${response.dateTime}`);
+
                         fileId = response.file;
                         searchFinish = true;
                         resultOrigin = response.text || "Na";
