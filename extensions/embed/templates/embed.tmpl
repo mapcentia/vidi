@@ -484,7 +484,6 @@
 <div id="pane">
     <div id="container">
         <div id="map"></div>
-        <a href="#" data-toggle="modal" data-target="#about-modal"><i class="material-icons about-bnt">question_answer</i>
         <div id="floating-container-primary">
             <a href="javascript:void(0)" id="zoom-in-btn" class="btn btn-default btn-fab btn-fab-mini"><i
                     class="material-icons">add</i></a>
@@ -509,6 +508,10 @@
             <a href="#full-screen" id="full-screen-btn"
                class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
                     class="material-icons">fullscreen</i></a>
+
+            <a href="#" data-target="#about-modal" data-toggle="modal"
+               class="btn btn-default btn-fab btn-fab-mini map-tool-btn"><i
+                    class="material-icons">question_answer</i></a>
         </div>
 
         <div id="place-search" style="display: {{_displaySearch}}">
@@ -519,7 +522,7 @@
             </div>
         </div>
     </div>
-        <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
+    <div id="legend-dialog" class="dialog-bottom fade-then-dragging">
         <div class="modal-header">
             <button type="button" class="close expand-more" aria-hidden="true"><i class="material-icons">expand_less</i>
             </button>
