@@ -74,8 +74,6 @@ module.exports = {
                 window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
                 window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
                 window.vidiConfig.wmsUriReplace = data.wmsUriReplace ? data.wmsUriReplace : window.vidiConfig.wmsUriReplace;
-                window.vidiConfig.cssFiles = data.cssFiles ? data.cssFiles : window.vidiConfig.cssFiles;
-                window.vidiConfig.dontUseAdvancedBaseLayerSwitcher = data.dontUseAdvancedBaseLayerSwitcher ? data.dontUseAdvancedBaseLayerSwitcher : window.vidiConfig.dontUseAdvancedBaseLayerSwitcher;
             }).fail(function () {
                 console.log("Could not load: " + configFile);
                 if (window.vidiConfig.defaultConfig && (window.vidiConfig.defaultConfig !== configFile)) {

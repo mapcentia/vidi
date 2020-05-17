@@ -83,7 +83,6 @@ module.exports = {
         _self = this;
         return this;
     },
-
     init: function () {
         backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => {
             _self.off();
@@ -128,9 +127,6 @@ module.exports = {
         var lc = window._vidiLocale.split("_")[0];
         require('moment/locale/da');
         moment.locale(lc);
-
-        Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
-
     },
 
     off: function () {
@@ -142,6 +138,9 @@ module.exports = {
         callBack = fn;
     },
 
+    /**
+     *
+     */
     on: function () {
         let numOfPrintTmpl = 0;
         alreadySetFromState = false;
