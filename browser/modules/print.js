@@ -14,6 +14,7 @@ var boxCount = 0;
 var recEdit = [];
 var recScale = [];
 var curBounds = [];
+var icons = [];
 var serializeLayers;
 var anchor;
 var printItems = new L.FeatureGroup();
@@ -51,13 +52,17 @@ var _cleanUp = function (hard) {
             cloud.get().map.removeLayer(recEdit[i]);
         }
     } catch (e) {
-        console.log("CleanUp", boxCount)
         console.error(e.message);
     }
+
+    icons.forEach((icon) => {
+        cloud.get().map.removeLayer(icon);
+    })
 
     printOn = false;
     if (hard) {
         center = [];
+        recScale = [];
         printC = config.print.templates;
         scales = config.print.scales;
         scale = null;
@@ -97,6 +102,14 @@ module.exports = {
             _self.off();
         });
 
+        /*cloud.get().map.on('zoomend', () => {
+
+            var newzoom = '' + (100 * cloud.get().map.getZoom() - 1000) + 'px';
+            console.log(newzoom);
+            $('.print-div-icon').css({'font-size': newzoom});
+
+        });*/
+
         state.listenTo(MODULE_ID, _self);
         state.listen(MODULE_ID, `state_change`);
 
@@ -106,7 +119,7 @@ module.exports = {
             $("#download-pdf").attr("download", response.key);
             $("#open-html").attr("href", response.url);
             $("#start-print-btn").button('reset');
-
+            // GeoEnviron
             console.log("GEMessage:LaunchURL:" + urlparser.uriObj.protocol() + "://" + urlparser.uriObj.host() + "/tmp/print/pdf/" + response.key + ".pdf");
         });
 
@@ -120,6 +133,21 @@ module.exports = {
         $("#add-print-box-btn").on("click", function () {
             boxCount++;
             _self.control(null, null, null, null, null, null, null, null, null, null, null, false);
+            backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+        });
+
+        $("#remove-print-box-btn").on("click", function () {
+            if (boxCount > 0) {
+                console.log(icons)
+                cloud.get().map.removeLayer(recScale[boxCount]);
+                cloud.get().map.removeLayer(recEdit[boxCount]);
+                cloud.get().map.removeLayer(icons[boxCount]);
+                recScale.pop()
+                center.pop()
+                icons.pop()
+                boxCount--;
+                backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
+            }
         });
 
         cloud.get().map.addLayer(printItems);
@@ -149,7 +177,7 @@ module.exports = {
         $("#print-size").empty();
         $("#print-orientation").empty();
         $("#select-scale").empty();
-        center = [];
+        //center = [];
         scale = null;
 
         // Set up print dialog
@@ -161,6 +189,7 @@ module.exports = {
         $("#print-sticky").unbind("change");
         $("#print-sticky").change(function (e) {
             //center = $("#print-sticky").is(":checked") ? center : [];
+            //recScale = $("#print-sticky").is(":checked") ? recScale : [];
         });
 
         $("#select-scale").unbind("change");
@@ -199,23 +228,23 @@ module.exports = {
                         state.getState().then(applicationState => {
                             if (typeof applicationState.modules.print !== "undefined") {
                                 let params = applicationState.modules.print;
-                                me.control(false,
-                                    params.scales, params.tmpl, params.pageSize,
-                                    params.orientation, params.legend,
-                                    params.bounds, params.scale, params.title, params.comment, params.sticky, false);
+                                for (let i = 0; i < params.bounds.length; i++) {
+                                    boxCount = i;
+                                    me.control(false,
+                                        params.scales, params.tmpl, params.pageSize,
+                                        params.orientation, params.legend,
+                                        params.bounds[i], params.scale, params.title, params.comment, params.sticky, false);
+                                }
                             } else {
                                 me.control(null, null, null, null, null, null, null, null, null, null, null, false);
                             }
                         });
                     } else {
                         let boxCountTemp = boxCount;
-                        console.log("boxCount before", boxCount)
                         for (let i = 0; i <= boxCountTemp; i++) {
                             boxCount = i;
                             me.control(null, null, null, null, null, null, null, null, null, null, null, false);
                         }
-                        console.log("boxCount after", boxCount)
-
                     }
                     setTimeout(() => {
                         backboneEvents.get().trigger(`${MODULE_ID}:state_change`);
@@ -374,6 +403,8 @@ module.exports = {
                 }
                 scale = scales[scaleIndex];
             }
+            Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
+
             var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
             var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];
             var printSwM = [centerM.x - (printSizeM[0] / 2), centerM.y - (printSizeM[1] / 2)];
@@ -389,7 +420,6 @@ module.exports = {
             center[boxCount] = rectangle.getBounds().getCenter();
             return rectangle;
         };
-        console.log("center", center)
         var first = !center[0];
         center[boxCount] = center[boxCount] || cloud.get().map.getCenter(); // Init center as map center
         if (bnds) {
@@ -401,9 +431,6 @@ module.exports = {
             recEdit[boxCount] = rectangle(rec.getBounds().getCenter(), cloud.get().map, "yellow", scale, first);
             bnds = null;
         } else {
-            console.log("yellow")
-            console.log("first", first)
-            console.log("boxCount", boxCount)
             recEdit[boxCount] = rectangle(center[boxCount], cloud.get().map, "yellow", scale, first);
         }
         recEdit[boxCount]._vidi_type = "printHelper";
@@ -411,26 +438,32 @@ module.exports = {
         printItems.addLayer(recEdit[boxCount]);
         recEdit[boxCount].editing.enable();
 
-        recScale[boxCount] = rectangle(recEdit[boxCount].getBounds().getCenter(), recEdit[boxCount], "red");
+        let c = recEdit[boxCount].getBounds().getCenter();
+        recScale[boxCount] = rectangle(c, recEdit[boxCount], "red");
         recScale[boxCount]._vidi_type = "print";
         printItems.addLayer(recScale[boxCount]);
+        icons[boxCount] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(boxCount + 1)}</span>`})}).addTo(cloud.get().map));
 
         var sw = recEdit[boxCount].getBounds().getSouthWest(), ne = recEdit[boxCount].getBounds().getNorthEast();
-
         curBounds[boxCount] = [sw.lat, sw.lng, ne.lat, ne.lng];
-
         recEdit[boxCount].on('edit', function (e) {
+            icons.forEach((icon) => {
+                cloud.get().map.removeLayer(icon);
+            })
             for (let i = 0; i <= boxCount; i++) {
-                rectangle(recEdit[i].getBounds().getCenter(), recEdit[i], "red");
-                if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
-                    scales = config.print.scales;
-                    cloud.get().map.removeLayer(recScale[i]);
-                    // Set bounds from the one being edited to all
-                    recScale[i] = rectangle(recEdit[i].getBounds().getCenter(), recEdit[e.target._count], "red");
-                    recScale[i]._vidi_type = "print";
-                    printItems.addLayer(recScale[i]);
-                    $("#get-print-fieldset").prop("disabled", true);
-                }
+                let c = recEdit[i].getBounds().getCenter();
+                icons[i] = (L.marker(c, {icon: L.divIcon({className: 'print-div-icon', iconSize: null, html: `<span>${(i + 1)}</span>`})}).addTo(cloud.get().map));
+                center[i] = c; // re-calculate centers
+                rectangle(c, recEdit[i], "red");
+                //if (curScale !== newScale || (curBounds[i][0] !== newBounds[0] && curBounds[i][1] !== newBounds[1] && curBounds[i][2] !== newBounds[2] && curBounds[i][3] !== newBounds[3])) {
+                scales = config.print.scales;
+                cloud.get().map.removeLayer(recScale[i]);
+                // Set bounds from the one being edited to all
+                recScale[i] = rectangle(c, recEdit[e.target._count], "red");
+                recScale[i]._vidi_type = "print";
+                printItems.addLayer(recScale[i]);
+                $("#get-print-fieldset").prop("disabled", true);
+                //}
                 recEdit[i].editing.disable();
                 recEdit[i].setBounds(recScale[i].getBounds());
                 recEdit[i].editing.enable();
@@ -581,7 +614,9 @@ module.exports = {
     },
 
     getState: () => {
-        return _self.getPrintParams();
+        let state = _self.getPrintParams();
+        console.log(state);
+        return state;
     },
 
     applyState: (print) => {
