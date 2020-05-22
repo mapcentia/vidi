@@ -52,7 +52,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
                 message: "Could not log in"
             });
 
-            return;
+            //return;
         }
 
         try {
@@ -64,7 +64,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
                 data: body
             });
 
-            //return;
+            return;
         }
 
         if (req.session.gc2SessionId) {
