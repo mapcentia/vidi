@@ -52,7 +52,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
                 message: "Could not log in"
             });
 
-            //return;
+            return;
         }
 
         try {
