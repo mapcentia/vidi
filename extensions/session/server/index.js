@@ -64,7 +64,7 @@ var start = function (dataToAuthorizeWith, req, response, status) {
                 data: body
             });
 
-            return;
+            //return;
         }
 
         if (req.session.gc2SessionId) {
