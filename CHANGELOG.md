@@ -73,6 +73,15 @@ and this project adheres to [CalVer](https://calver.org/).
 - The filters from the layer tree are now set on the Click-For-Info module, so you only get filtered hits.
 - The applied filters will now be shown as a WHERE clause in an Ace editor under the filter widgets. It's possible to mutate the clause and apply the altered filters. When doing that, the filter widgets will be disabled until the editor is disabled. All filters settings are stored in state. 
 - In arbitrary filters, the field alias is now being used if set.
+- Limits for puppeteer processes can now be set with this in `config/config.js`:
+```json
+{
+  "puppeteerProcesses": {
+        "min": 2,
+        "max": 5
+    }
+}
+```
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.

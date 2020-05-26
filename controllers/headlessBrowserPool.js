@@ -8,6 +8,17 @@ const genericPool = require("generic-pool");
 
 const puppeteer = require('puppeteer');
 
+const config = require('../config/config.js')
+
+let puppeteerProcesses = {};
+
+if (typeof config.puppeteerProcesses !== "undefined") {
+    puppeteerProcesses.min = typeof config.puppeteerProcesses.min !== "undefined" ? config.puppeteerProcesses.min : 0;
+    puppeteerProcesses.max = typeof config.puppeteerProcesses.max !== "undefined" ? config.puppeteerProcesses.max : 2;
+} else {
+    puppeteerProcesses = {min: 0, max: 2};
+}
+
 const startupParameters = {
     headless: true,
     timeout: 10000,
@@ -24,7 +35,7 @@ const startupParameters = {
 module.exports = {
     pool: genericPool.createPool({
         create() {
-            return  puppeteer.launch(startupParameters);
+            return puppeteer.launch(startupParameters);
         },
         destroy(browser) {
             return browser.close();
@@ -36,8 +47,8 @@ module.exports = {
             ])
         },
     }, {
-        min: 2,
-        max: 5,
+        min: puppeteerProcesses.min,
+        max: puppeteerProcesses.max,
         testOnBorrow: true,
         //acquireTimeoutMillis: 15000
     })
