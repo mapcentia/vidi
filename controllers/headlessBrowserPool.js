@@ -36,8 +36,8 @@ module.exports = {
             ])
         },
     }, {
-        min: 4,
-        max: 25,
+        min: 2,
+        max: 5,
         testOnBorrow: true,
         //acquireTimeoutMillis: 15000
     })
