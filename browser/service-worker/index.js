@@ -126,8 +126,7 @@ let urlsIgnoredForCaching = [{
 }, {
     regExp: true,
     requested: '/wms/'
-}
-];
+}];
 
 if (typeof CONFIG.urlsIgnoredForCaching === "object") {
     urlsIgnoredForCaching = urlsIgnoredForCaching.concat(CONFIG.urlsIgnoredForCaching);

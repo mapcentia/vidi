@@ -349,7 +349,7 @@ module.exports = {
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                                func(null, null, null, _self, null, cloud.get().map);
+                                func(this.layer.toGeoJSON(), this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_);
                                 console.error(e.message);
@@ -475,6 +475,8 @@ module.exports = {
             } else {
                 fieldStr = "*";
             }
+            // Get applied filters from layerTree as a WHERE clause
+            let filters = layerTree.getFilterStr(keyWithoutGeom) ? layerTree.getFilterStr(keyWithoutGeom) : "1=1";
             if (!whereClause) {
                 if (geoType === "RASTER" && (!advancedInfo.getSearchOn())) {
                     sql = "SELECT 1 as rid,foo.the_geom,ST_Value(rast, foo.the_geom) As band1, ST_Value(rast, 2, foo.the_geom) As band2, ST_Value(rast, 3, foo.the_geom) As band3 " +
@@ -494,13 +496,13 @@ module.exports = {
                     ];
                 } else {
                     if (geoType !== "POLYGON" && geoType !== "MULTIPOLYGON" && (!advancedInfo.getSearchOn())) {
-                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
+                        sql = "SELECT " + fieldStr + " FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + "))) < " + distance;
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
                         sql = sql + " ORDER BY round(ST_Distance(ST_Transform(\"" + f_geometry_column + "\"," + proj + "), ST_GeomFromText('" + wkt + "'," + proj + ")))";
                     } else {
-                        sql = "SELECT " + fieldStr + " FROM " + value + " WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
+                        sql = "SELECT " + fieldStr + " FROM (SELECT " + fieldStr + " FROM " + value + " WHERE " + filters + ") AS foo WHERE ST_Intersects(ST_Transform(ST_geomfromtext('" + wkt + "'," + proj + ")," + srid + ")," + f_geometry_column + ")";
                         if (versioning) {
                             sql = sql + " AND gc2_version_end_date IS NULL ";
                         }
@@ -516,6 +518,8 @@ module.exports = {
             }
 
             sql = sql + " LIMIT " + (num || 500);
+
+            console.log("Fired SQL:", sql);
 
             qstore[index].onLoad = onLoad || callBack.bind(this, qstore[index], isEmpty, not_querable, layerTitel, fieldConf, layers, count);
             qstore[index].sql = sql;

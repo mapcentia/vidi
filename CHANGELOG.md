@@ -43,6 +43,9 @@ and this project adheres to [CalVer](https://calver.org/).
     ]
 }
 ```
+- Print setup can now be "sticky" (by using the state module), so it will not reset when re-activating the module. Stickiness can be toggled and off. Off is default.
+- Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
+- New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -66,7 +69,19 @@ and this project adheres to [CalVer](https://calver.org/).
 ```
 - Handlebars are now use instead of Mustache for rendering click-for-info templates. Handlebars is more feature rich than Mustache.
 - The load screen is now being dismissed on `ready:meta` instead of `allDoneLoading:layers`. This makes the application interactive sooner. 
-- Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together like `["(foo=1 OR foo=2)", "(bar=1 OR bar=2)"]`. The GC2 backend can then set the operator between the predefined and arbitrary filters. 
+- Predefined filters are now processes as one string. Instead of sending something like this `["foo=1","foo=2"]` to GC2, it is now `["(foo=1 OR foo=2)"]`. This is how arbitrary filters work and both kind of filters are now being processed together in one string like `"(foo=1 OR foo=2) AND (bar=1 OR bar=2)"`. Vidi can therefore now set the operator between the predefined and arbitrary filters. 
+- The filters from the layer tree are now set on the Click-For-Info module, so you only get filtered hits.
+- The applied filters will now be shown as a WHERE clause in an Ace editor under the filter widgets. It's possible to mutate the clause and apply the altered filters. When doing that, the filter widgets will be disabled until the editor is disabled. All filters settings are stored in state. 
+- In arbitrary filters, the field alias is now being used if set.
+- Limits for puppeteer processes can now be set with this in `config/config.js`:
+```json
+{
+  "puppeteerProcesses": {
+        "min": 2,
+        "max": 5
+    }
+}
+```
 
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.

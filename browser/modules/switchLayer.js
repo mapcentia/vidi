@@ -465,6 +465,12 @@ module.exports = module.exports = {
                 vectorDataStores[vectorLayerId].reset();
             }
 
+            // Always trig tileLayerVisibility with false
+            backboneEvents.get().trigger("tileLayerVisibility:layers", {
+                id: gc2Id,
+                dataIsVisible: false
+            });
+
             if (enable) {
                 if (LOG) console.log(`switchLayer: enabling ${name}`);
                 if (name.startsWith(LAYER.VECTOR + ':')) {

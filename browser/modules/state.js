@@ -304,7 +304,7 @@ module.exports = {
                                 cloud.get().map.fitBounds([bounds._northEast, bounds._southWest], {animate: false})
                             }
 
-                            if (response.data.customData !== null) {
+                            if (typeof response.data.customData !== "undefined" && response.data.customData !== null) {
                                 backboneEvents.get().trigger("on:customData", response.data.customData);
                                 // TODO HACK:
                                 reportRender.render(response.data.customData);
@@ -615,7 +615,7 @@ module.exports = {
      */
     applyState: (state) => {
 
-        if (LOG) console.log(`${MODULE_NAME}: applying state`);
+        if (LOG) console.log(`${MODULE_NAME}: applying state`, state);
 
         history.pushState(``, document.title, window.location.pathname + window.location.search);
         let result = new Promise((resolve, reject) => {

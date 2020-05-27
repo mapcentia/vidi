@@ -54,7 +54,6 @@ module.exports = {
         backboneEvents.get().on(endPrintEventName, function (response) {
             $("#conflict-get-print-fieldset").prop("disabled", false);
             $("#conflict-download-pdf, #conflict-open-pdf").prop("href", "/tmp/print/pdf/" + response.key + ".pdf");
-            $("#conflict-download-pdf").prop("download", response.key);
             $("#conflict-open-html").prop("href", response.url);
             $("#conflict-print-btn").button('reset');
             backboneEvents.get().trigger("end:conflictSearchPrint", response);

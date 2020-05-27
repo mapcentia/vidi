@@ -35,13 +35,6 @@ var ready = false;
 
 /**
  *
- * @type {string}
- */
-var BACKEND = require('../../config/config.js').backend;
-
-
-/**
- *
  */
 var meta;
 
@@ -55,6 +48,9 @@ var host = require("./connection").getHost();
 var layerTree;
 
 var currentlyLoadedLayers = [];
+
+var urlVars = urlparser.urlVars;
+
 
 var uri = null;
 
@@ -259,7 +255,16 @@ module.exports = {
      * @returns {Promise}
      */
     addLayer: function (layerKey, additionalURLParameters = []) {
-        var me = this;
+        let me = _self;
+
+        if (window.vidiConfig.wmsUriReplace) {
+            const regex = /\[(.*?)\]/g;
+            const found = window.vidiConfig.wmsUriReplace.match(regex);
+            if (typeof urlVars[found[0].replace("[", "").replace("]", "")] === "string") {
+                _self.setUri(window.vidiConfig.wmsUriReplace.replace(found, urlVars[found[0].replace("[", "").replace("]", "")]));
+            }
+        }
+
         let result = new Promise((resolve, reject) => {
             var layers = [], metaData = meta.getMetaData();
 
@@ -414,10 +419,7 @@ module.exports = {
             useCache = false;
         }
         // Detect if layer is protected and route it through backend if live WMS is used (Mapcache does not need authorization)
-        let mapRequestProxy = false;
-        if (!useCache && layerDescription.authentication === `Read/write`) {
-            mapRequestProxy = urlparser.hostname + `/api/tileRequestProxy`;
-        }
+        let mapRequestProxy = useCache ? false : urlparser.hostname + `/api/tileRequestProxy`;
         return {useCache, mapRequestProxy};
     }
 };

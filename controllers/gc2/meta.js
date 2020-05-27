@@ -14,7 +14,6 @@ router.get('/api/meta/:db/:schema', function (req, response) {
     var db = req.params.db, schema = req.params.schema, url, options;
 
     url = config.host + "/api/v1/meta/" + db + "/" + utf8.encode(schema);
-console.log(req.session.gc2SessionId);
     options = {
         uri: url,
         encoding: 'utf8',

@@ -100,8 +100,6 @@ router.get('/api/state-snapshots/:dataBase', (req, res) => {
  * Get specific state snapshots
  */
 router.get('/api/state-snapshots/:dataBase/:id', (req, res, next) => {
-    let {browserId, userId} = shared.getCurrentUserIdentifiers(req);
-
     request({
         method: 'GET',
         encoding: 'utf8',

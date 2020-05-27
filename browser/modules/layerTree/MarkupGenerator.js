@@ -78,7 +78,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -106,7 +106,7 @@ class MarkupGenerator {
                         <div style="display: inline-block;">
                             <span>
                                 ${text}${lockedLayer} 
-                                <span class="js-tiles-contain-data" style="visibility: hidden;"><i class="fa fa-eye" style="color: green;"></i></span>
+                                <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};"><i class="fa fa-eye" style="color: green;"></i></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>
