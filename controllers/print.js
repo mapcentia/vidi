@@ -11,6 +11,7 @@ var fs = require('fs');
 var headless = require('./headlessBrowserPool').pool;
 const shared = require('./gc2/shared');
 const request = require('request');
+const PDFMerge = require('pdf-merge');
 
 
 /**
@@ -18,15 +19,41 @@ const request = require('request');
  * @type {module.exports.print|{templates, scales}}
  */
 router.post('/api/print', function (req, response) {
-    req.setTimeout(0); // no timeout
-    var body = req.body;
-    var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+        req.setTimeout(0); // no timeout
+        var body = req.body;
+        var count = {"n": 0}; // Must be passed as copy of a reference
+        var files = [];
+        var poll = () => {
+            setTimeout(() => {
+                if (count.n === body.bounds.length) {
+                    console.log("Done All. Merging...");
+                    var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                    PDFMerge(files, {output: `${__dirname}/../public/tmp/print/pdf/${key}.pdf`})
+                        .then((buffer) => {
+                            response.send({success: true, key});
+                        });
 
-    return print(key, body, req, response);
-});
+                } else {
+                    poll();
+                }
+            }, 1000)
+        }
+        if (body.bounds.length > 1) {
+            poll()
+        }
+        for (let i = 0; i < body.bounds.length; i++) {
+            var key = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+            files.push(`${__dirname}/../public/tmp/print/pdf/${key}.pdf`);
+            print(key, body, req, response, false, i, count);
+        }
+    }
+);
 
 router.get('/api/print/:database', function (req, res) {
     const port = process.env.PORT ? process.env.PORT : 3000;
@@ -70,7 +97,7 @@ router.get('/api/postdata', function (req, response) {
     });
 });
 
-function print(key, q, req, response, outputPng = false) {
+function print(key, q, req, response, outputPng = false, frame = 0, count) {
     fs.writeFile(__dirname + "/../public/tmp/print/json/" + key, JSON.stringify(q), async (err) => {
         if (err) {
             response.send({success: true, error: err});
@@ -78,7 +105,7 @@ function print(key, q, req, response, outputPng = false) {
         }
         const margin = q.tmpl === "_conflictPrint" ? {left: '0.4cm', top: '1cm', right: '0.4cm', bottom: '1cm'} : 0;
         const port = process.env.PORT ? process.env.PORT : 3000;
-        let url = "http://127.0.0.1:" + port + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&session=' + (typeof req.cookies["connect.gc2"] !== "undefined" ? encodeURIComponent(req.cookies["connect.gc2"]) : "") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
+        let url = "http://127.0.0.1:" + port + '/app/' + q.db + '/' + q.schema + '/' + (q.queryString !== "" ? q.queryString : "?") + '&frame=' + frame + '&session=' + (typeof req.cookies["connect.gc2"] !== "undefined" ? encodeURIComponent(req.cookies["connect.gc2"]) : "") + '&tmpl=' + q.tmpl + '.tmpl&l=' + q.legend + '&h=' + q.header + '&px=' + q.px + '&py=' + q.py + '&td=' + q.dateTime + '&d=' + q.date + '&k=' + key + '&t=' + q.title + '&c=' + q.comment + q.anchor;
         console.log(`Printing ` + url);
 
         let check = false;
@@ -100,9 +127,13 @@ function print(key, q, req, response, outputPng = false) {
                                         printBackground: true,
                                         margin: margin
                                     }).then(() => {
-                                        console.log('Done');
+                                        console.log('Done #', count.n);
+                                        if (q.bounds.length === 1) { // Only one page. No need to merge
+                                            console.log('Only one page. No need to merge.');
+                                            response.send({success: true, key, url});
+                                        }
                                         headless.destroy(browser);
-                                        response.send({success: true, key, url});
+                                        count.n++;
                                     });
                                 }, delay);
                             }

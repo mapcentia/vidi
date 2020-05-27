@@ -1554,3 +1554,18 @@ td.rdtYear:hover {
 #alternative-info-container {
   height: calc(100vh + 1px);
 }
+.print-div-icon {
+  font-size: 55px;
+  font-weight: bold;
+  opacity: 60%;
+  color: red;
+  margin-left: -28px;
+  margin-top: -28px;
+  width: 56px;
+  height: 56px;
+  text-align: center;
+  line-height: 45px;
+}
+.leaflet-edit-move {
+  opacity: 50%;
+}
