@@ -349,7 +349,7 @@ module.exports = {
                         if (typeof parsedMeta.info_function !== "undefined" && parsedMeta.info_function !== "") {
                             try {
                                 let func = Function('"use strict";return (' + parsedMeta.info_function + ')')();
-                                func(null, null, null, _self, null, cloud.get().map);
+                                func(this.layer.toGeoJSON(), this.layer, keyWithoutGeom, _self, this, cloud.get().map);
                             } catch (e) {
                                 console.info("Error in click function for: " + _key_);
                                 console.error(e.message);
