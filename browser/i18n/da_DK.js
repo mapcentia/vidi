@@ -90,7 +90,7 @@ module.exports = {
         "Print": "Print",
         "Search places": "Søg på steder",
         "Activate advanced query": "Aktivér avanceret forespørgsel",
-        "Help text overlays": "Slå  overlejringskort til og fra. Tændte kort bliver forspørgbare.",
+        "Help text overlays": "Slå overlejringslag til og fra. Viste lag vil være spørgbare.",
         "Help text baselayers": "Vælg baggrundskort. Det er muligt at sammenligne to baggrundskort. Her kan man vælge om de to baggrundskort skal vises ved siden af hinanden eller om de skal lægges ovenpå hinanden. Ved førstnævnte kan man \\'swipe\\' mellem de to kort og ved sidstnævnte kan man ændre det øverste korts gennemsigtighed.",
         "Help text legend": "Signatur for tændte overlejringskort",
         "Help text draw": "Tegn dit eget kort. Brug markører, linjer, flader, firkanter og cirkler. Under \\'Standard stilart for tegninger\\' kan du sætte farve, linjetyper, pilehoveder mm. Alle nye tegninger får disse indstillinger. Klik på en allerede tegnet figur for at tilføje standardindstillingerne.",
