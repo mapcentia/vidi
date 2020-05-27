@@ -11,8 +11,7 @@ var config = require('../../../config/config.js');
 var autoLogin = false; // Auto login is insecure and sets cookie with login creds. DO NOT USE
 var autoLoginMaxAge = null;
 
-if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true)
-{
+if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible === true) {
     if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.session !== "undefined") {
         if (typeof config.extensionConfig.session.autoLogin !== "undefined") {
             autoLogin = config.extensionConfig.session.autoLogin;
@@ -30,8 +29,6 @@ if (typeof config.autoLoginPossible !== "undefined" && config.autoLoginPossible 
 var config = require('../../../config/config.js');
 
 var start = function (dataToAuthorizeWith, req, response, status) {
-
-
     var options = {
         headers: {'content-type': 'application/json'},
         method: 'POST',
@@ -137,8 +134,14 @@ router.get('/api/session/stop', function (req, response) {
 router.get('/api/session/status', function (req, response) {
     let autoLoginCookie = req.cookies['autoconnect.gc2'];
     if (autoLogin && autoLoginCookie && !req.session.gc2SessionId) {
-        var creds = JSON.parse(autoLoginCookie);
-        start(creds, req, response,
+        let creds = JSON.parse(autoLoginCookie);
+        let credsForGc2 = {
+            "user": creds.screen_name,
+            "password": creds.password,
+            "schema": creds.schema,
+            "database": creds.parentdb
+        }
+        start(credsForGc2, req, response,
             {
                 screen_name: creds.screen_name,
                 email: creds.email,
