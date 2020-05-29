@@ -141,7 +141,7 @@ router.get('/api/session/status', function (req, response) {
         autoLoginMaxAge = req.query.autoLoginMaxAge;
     */
     if (autoLogin === false && typeof req.query.autoLogin !== "undefined")
-        autoLogin = req.query.autoLogin === "true " ? true: false;
+        autoLogin = req.query.autoLogin === "true" ? true: false;
     
     if (typeof  req.query.autoLoginMaxAge  !== "undefined")
         autoLoginMaxAge = typeof parseInt(req.query.autoLoginMaxAge) === "number" ? parseInt(req.query.autoLoginMaxAge) : 0 ; // Eller hvad nu default skal være
