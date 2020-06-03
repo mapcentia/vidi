@@ -667,6 +667,9 @@ module.exports = {
                 "documentCreate": ["index"]
             },
             {
+                "lerConverter": ["index"]
+            },
+            {
                 "MapGOMenu": ["index", "reportRender", "infoClick", "controller"]
             }
         ],
@@ -679,6 +682,9 @@ module.exports = {
             },
             {
                 "documentCreate": ["index"]
+            },
+            {
+                "lerConverter": ["index"]
             },
             {
                 "MapGOMenu": ["index"]

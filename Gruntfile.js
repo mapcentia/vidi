@@ -311,7 +311,7 @@ module.exports = function (grunt) {
         shell: {
             default: {
                 command: [
-                    copyBootstrapVariablesCommand,
+                    //copyBootstrapVariablesCommand,
                     'grunt --gruntfile ./public/js/lib/bootstrap-material-design/Gruntfile.js dist-less'
                 ].join('&&')
             }
