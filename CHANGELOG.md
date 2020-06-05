@@ -46,6 +46,8 @@ and this project adheres to [CalVer](https://calver.org/).
 - Print setup can now be "sticky" (by using the state module), so it will not reset when re-activating the module. Stickiness can be toggled and off. Off is default.
 - Print setup is now stored in state snapshots. After state snapshot is activated the print setup will use the stored settings. The sticky toggle must be set to on or else the default print settings will be used.
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
+- New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
+    - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)  
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
