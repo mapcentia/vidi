@@ -372,7 +372,7 @@ module.exports = {
                     };
 
                     const hideTableView = () => {
-                        $(container).find(`.js-toggle-table-view`).hide(0);
+                        $(container).find(`.js-toggle-table`).hide(0);
                         $(container).find('.js-layer-settings-table').hide(0);
                     };
 
@@ -411,11 +411,11 @@ module.exports = {
 
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
-
+                            $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                            $(container).find(`.js-toggle-table-view`).show(0);
+                            $(container).find(`.js-toggle-table`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -423,6 +423,7 @@ module.exports = {
                             hideLoadStrategy();
                             hideOpacity();
                             hideTableView();
+                            hideSearch();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -437,10 +438,12 @@ module.exports = {
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
                             $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                            $(container).find(`.js-toggle-search`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
                             hideOpacity();
+                            hideSearch();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -466,23 +469,46 @@ module.exports = {
                         hideLoadStrategy();
                         hideTableView();
                         hideOpacity();
+                        hideSearch();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
 
-                    // For all layer types
-                    hideSearch();
-                    if (layerIsEnabled) {
-                        $(container).find(`.js-toggle-search`).show();
-                    } else {
-                        $(container).find(`.js-toggle-search`).hide();
-                        $(container).find('a').removeClass('active');
+                    // Open filter dialog.
+                    if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
+                        if (layerIsEnabled) {
+                            if (parsedMeta.default_open_tools) {
+                                try {
+                                    let arr = JSON.parse(parsedMeta.default_open_tools);
+                                    arr.forEach((i) => {
+                                        setTimeout(() => {
+                                            if ($(container).find(`.js-toggle-${i}`).is(':visible')) {
+                                                if (i !== "table") {
+                                                    $(container).find(`.js-layer-settings-${i}`).show(0);
+                                                    $(container).find(`.js-toggle-${i}`).addClass('active');
+                                                } else {
+                                                    console.info("'table is not supported in default open tools'")
+                                                }
+                                            }
+                                        }, 100);
+                                    })
+                                } catch (e) {
+                                    console.warn(`Unable to open tools for ${layerKey}`, parsedMeta[`default_open_tools`]);
+                                }
+                            }
+                        }
+                    }
 
+                    // For all layer types
+                    if (!layerIsEnabled) {
                         // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                        // Remove active class from all buttons
+                        $(container).find('a').removeClass('active');
                     }
 
                     $(container).attr(`data-last-layer-type`, desiredSetupType);
+
                 }, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
@@ -2773,12 +2799,12 @@ module.exports = {
                     }
 
                     // Table view
-                    $(layerContainer).find(`.js-toggle-table-view`).click(() => {
+                    $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         if ($(tableContainerId + ` table`).length === 1) $(tableContainerId + ` table`).empty();
                         _self.createTable(layerKey, true);
 
-                        _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                        _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
 
                         if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
