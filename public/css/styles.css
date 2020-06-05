@@ -672,8 +672,7 @@ body {
   color: white !important;
 }
 #info-modal,
-#info-modal-top,
-#click-for-info-slide {
+#info-modal-top {
   position: fixed;
   top: 0;
   z-index: 3000;
@@ -682,6 +681,18 @@ body {
   -webkit-box-sizing: border-box;
   box-sizing: border-box;
   display: inline;
+}
+#click-for-info-slide {
+  position: fixed;
+  max-width: 650px;
+  z-index: 300000;
+  min-width: 350px;
+  width: 30%;
+  height: 100%;
+  background-color: white;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  display: block;
 }
 #click-for-info-slide .modal-title {
   top: 5px;
