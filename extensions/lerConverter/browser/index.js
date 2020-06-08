@@ -92,7 +92,18 @@ var SetGUI_ControlState = function (state_Enum) {
         state_Enum -= GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT;
     }  
 }
-
+require('snackbarjs');
+/**
+ * Displays a snack!
+ * @param {*} msg 
+ */
+var snack = function (msg) {
+    jquery.snackbar({
+        htmlAllowed: true,
+        content: '<p>'+msg+'</p>',
+        timeout: 10000
+    });
+}
 var _USERSTR = "";
 /**
  * Checks login
@@ -285,28 +296,24 @@ module.exports = {
 
                         clicktimer = setTimeout(function (e) {
 
-                            let coords = event.getCoordinate(), p, url;
-                            p = utils.transform("EPSG:3857", "EPSG:4326", coords);
-                            clicktimer = undefined;
-
-                            switch (me.state.selectedOption) {
-                                case "google":
-                                    url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
-                                    break;
-
-                                case "mapillary":
-                                    url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
-                                    break;
-
-                                case "skraafoto":
-                                    url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
-                                    break;
-
-                                case "cowi":
-                                    url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
-                                    break;
-                            }
-                            parentThis.callBack(url);
+                            //let coords = event.getCoordinate(), p, url;
+                            //p = utils.transform("EPSG:3857", "EPSG:4326", coords);
+                            //clicktimer = undefined;
+                            //switch (me.state.selectedOption) {
+                            //    case "google":
+                            //        url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
+                            //        break;
+                            //    case "mapillary":
+                            //        url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
+                            //        break;
+                            //    case "skraafoto":
+                            //        url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                            //        break;
+                            //    case "cowi":
+                            //        url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
+                            //        break;
+                            //}
+                            //parentThis.callBack(url);
 
                         }, 250);
                     }
