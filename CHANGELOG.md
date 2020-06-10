@@ -88,6 +88,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
+- Accept 'da' locale in request headers. Only da-DK worked so far.
 
 ## [2020.2.0]
 ### Added
