@@ -8,10 +8,13 @@ var express = require('express');
 var router = express.Router();
 
 router.get('/locale', function(request, response) {
-    var lang = request.acceptsLanguages('en', 'en-US', 'da-DK');
+    var lang = request.acceptsLanguages('en', 'en-US', 'da', 'da-DK');
     if (lang) {
         if (lang === "en") {
             lang = "en-US";
+        }
+        if (lang === "da") {
+            lang = "da-DK";
         }
     } else {
         lang = "en-US";
