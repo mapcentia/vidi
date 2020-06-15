@@ -2758,6 +2758,11 @@ module.exports = {
                         }
                     }
 
+                    let isFilterImmutable = false;
+                    if (parsedMeta.filter_immutable) {
+                        isFilterImmutable = typeof parsedMeta.filter_immutable === "boolean" ? parsedMeta.filter_immutable : false;
+                    }
+
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     setTimeout(() => {
@@ -2777,6 +2782,7 @@ module.exports = {
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
                                     editorFilters={localEditorFilters}
                                     editorFiltersActive={localEditorFiltersActive}
+                                    isFilterImmutable={isFilterImmutable}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
