@@ -336,6 +336,29 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
+    handleReset() {
+        let props = this.props;
+        let arbitraryFilters = props.arbitraryFilters || {};
+        let resetArbitraryFilters = {match: arbitraryFilters.match, columns: []};
+        if (props.presetFilters.length === 0) {
+            resetArbitraryFilters.columns.push(DUMMY_RULE);
+        } else {
+            arbitraryFilters.columns.forEach((a) => {
+                props.presetFilters.forEach((p) => {
+                    if (p.field === a.fieldname) {
+                        resetArbitraryFilters.columns.push({fieldname: p.field, expression: p.operator, value: ""});
+                    }
+                })
+            })
+        }
+        if (`match` in resetArbitraryFilters === false) resetArbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
+        if (`columns` in resetArbitraryFilters === false) resetArbitraryFilters[`columns`] = new Array();
+        // Validating the arbitraryFilters structure
+        validateFilters(resetArbitraryFilters);
+        this.onRulesClear();
+        this.setState({arbitraryFilters: resetArbitraryFilters});
+    }
+
     render() {
         let allRulesAreValid = true;
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
@@ -552,6 +575,10 @@ class VectorLayerFilter extends React.Component {
             )
         }
 
+        const buildResetButton = (props) => {
+            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}><i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+        }
+
         let activeFiltersTab = false;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
@@ -582,6 +609,7 @@ class VectorLayerFilter extends React.Component {
                 {tabControl}
                 {activeFiltersTab}
                 {buildWhereClauseField()}
+                {buildResetButton()}
             </div>
         );
     }

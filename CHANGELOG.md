@@ -54,6 +54,7 @@ and this project adheres to [CalVer](https://calver.org/).
         - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
     - *filter_immutable*: boolean, make the filter setup immutable.
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+- A Reset filter button is added, which will reset the filter to the original state.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
