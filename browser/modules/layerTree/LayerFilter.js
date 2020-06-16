@@ -339,7 +339,7 @@ class VectorLayerFilter extends React.Component {
     handleReset() {
         let props = this.props;
         let arbitraryFilters = props.arbitraryFilters || {};
-        let resetArbitraryFilters = {match: arbitraryFilters.match, columns: []};
+        let resetArbitraryFilters = {match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]), columns: []};
         if (props.presetFilters.length === 0) {
             resetArbitraryFilters.columns.push(DUMMY_RULE);
         } else {
@@ -351,8 +351,6 @@ class VectorLayerFilter extends React.Component {
                 })
             })
         }
-        if (`match` in resetArbitraryFilters === false) resetArbitraryFilters[`match`] = (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]);
-        if (`columns` in resetArbitraryFilters === false) resetArbitraryFilters[`columns`] = new Array();
         // Validating the arbitraryFilters structure
         validateFilters(resetArbitraryFilters);
         this.onRulesClear();
