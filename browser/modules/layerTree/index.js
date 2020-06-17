@@ -25,7 +25,7 @@ import {OPEN_INFO_IN_ELEMENT} from './../sqlQuery'
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], tables = {};
+    onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
 const uuidv4 = require('uuid/v4');
 var React = require('react');
@@ -292,6 +292,31 @@ module.exports = {
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         let parentFilters = _self.getParentLayerFilters(layerKey);
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+
+        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
+                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
+                    childLayersThatShouldBeEnabled.push(i.rel);
+                }
+                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
+                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
+
+            })
+        }
+
+        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
+                if ('disable_check_box' in parsedMetaChildLayer && parsedMetaChildLayer.disable_check_box) {
+                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
+                    switchLayer.init(i.rel, false, true, false);
+                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
+                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
+                }
+            })
+        }
 
         let overallFilters = activeFilters.concat(parentFilters);
         if (overallFilters.length > 0) {
@@ -372,7 +397,7 @@ module.exports = {
                     };
 
                     const hideTableView = () => {
-                        $(container).find(`.js-toggle-table-view`).hide(0);
+                        $(container).find(`.js-toggle-table`).hide(0);
                         $(container).find('.js-layer-settings-table').hide(0);
                     };
 
@@ -411,11 +436,11 @@ module.exports = {
 
                         if (layerIsEnabled) {
                             $(container).find('.gc2-add-feature').css(`visibility`, `visible`);
-
+                            $(container).find(`.js-toggle-search`).show(0);
                             $(container).find(`.js-toggle-filters, .js-toggle-filters-number-of-filters`).show(0);
                             $(container).find(`.js-toggle-load-strategy`).show(0);
                             $(container).find(`.js-toggle-layer-offline-mode-container`).css(`display`, `inline-block`);
-                            $(container).find(`.js-toggle-table-view`).show(0);
+                            $(container).find(`.js-toggle-table`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
@@ -423,6 +448,7 @@ module.exports = {
                             hideLoadStrategy();
                             hideOpacity();
                             hideTableView();
+                            hideSearch();
                         }
                     } else if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE) {
                         // Opacity and filters should be kept opened after setLayerState()
@@ -437,10 +463,12 @@ module.exports = {
                             $(container).find(`.js-toggle-opacity`).show(0);
                             $(container).find(`.js-toggle-filters`).show(0);
                             $(container).find(`.js-toggle-filters-number-of-filters`).show(0);
+                            $(container).find(`.js-toggle-search`).show(0);
                         } else {
                             hideAddFeature();
                             hideFilters();
                             hideOpacity();
+                            hideSearch();
                         }
 
                         // Hide filters if cached, but not if layer has a valid predefined filter
@@ -466,23 +494,46 @@ module.exports = {
                         hideLoadStrategy();
                         hideTableView();
                         hideOpacity();
+                        hideSearch();
                     } else {
                         throw new Error(`${desiredSetupType} control setup is not supported yet`);
                     }
 
-                    // For all layer types
-                    hideSearch();
-                    if (layerIsEnabled) {
-                        $(container).find(`.js-toggle-search`).show();
-                    } else {
-                        $(container).find(`.js-toggle-search`).hide();
-                        $(container).find('a').removeClass('active');
+                    // Open filter dialog.
+                    if (desiredSetupType === LAYER.RASTER_TILE || desiredSetupType === LAYER.VECTOR_TILE || desiredSetupType === LAYER.VECTOR) {
+                        if (layerIsEnabled) {
+                            if (parsedMeta.default_open_tools) {
+                                try {
+                                    let arr = JSON.parse(parsedMeta.default_open_tools);
+                                    arr.forEach((i) => {
+                                        setTimeout(() => {
+                                            if ($(container).find(`.js-toggle-${i}`).is(':visible')) {
+                                                if (i !== "table") {
+                                                    $(container).find(`.js-layer-settings-${i}`).show(0);
+                                                    $(container).find(`.js-toggle-${i}`).addClass('active');
+                                                } else {
+                                                    console.info("'table is not supported in default open tools'")
+                                                }
+                                            }
+                                        }, 100);
+                                    })
+                                } catch (e) {
+                                    console.warn(`Unable to open tools for ${layerKey}`, parsedMeta[`default_open_tools`]);
+                                }
+                            }
+                        }
+                    }
 
+                    // For all layer types
+                    if (!layerIsEnabled) {
                         // Refresh all tables when closing one panel, because DOM changes can make the tables un-aligned
                         $(`.js-layer-settings-table table`).bootstrapTable('resetView');
+                        // Remove active class from all buttons
+                        $(container).find('a').removeClass('active');
                     }
 
                     $(container).attr(`data-last-layer-type`, desiredSetupType);
+
                 }, 10);
             } else {
                 if (layerKey in moduleState.setLayerStateRequests === false) {
@@ -2423,7 +2474,12 @@ module.exports = {
 
             let layerIsEditable = false;
             let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
+            let disableCheckBox = false;
             let parsedMeta = false;
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+            let layerTypeSelector = ``;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
@@ -2431,18 +2487,15 @@ module.exports = {
                         layerIsEditable = true;
                     }
 
+                    if (`disable_check_box` in parsedMeta && parsedMeta.disable_check_box && _self.getChildLayersThatShouldBeEnabled().includes(layerKey) === false) {
+                        disableCheckBox = true;
+                    }
+
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
                 }
             }
-
-            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
-            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-
-            let layerTypeSelector = ``;
             if (!singleTypeLayer) {
                 layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, specifiers);
             }
@@ -2454,7 +2507,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
@@ -2765,12 +2818,12 @@ module.exports = {
                     }
 
                     // Table view
-                    $(layerContainer).find(`.js-toggle-table-view`).click(() => {
+                    $(layerContainer).find(`.js-toggle-table`).click(() => {
                         let tableContainerId = `#table_view-${layerKey.replace(".", "_")}`;
                         if ($(tableContainerId + ` table`).length === 1) $(tableContainerId + ` table`).empty();
                         _self.createTable(layerKey, true);
 
-                        _self._selectIcon($(layerContainer).find('.js-toggle-table-view'));
+                        _self._selectIcon($(layerContainer).find('.js-toggle-table'));
                         $(layerContainer).find('.js-layer-settings-table').toggle();
 
                         if ($(tableContainerId).length !== 1) throw new Error(`Unable to find the table view container`);
@@ -2998,7 +3051,10 @@ module.exports = {
                 if (childIsReloaded) {
                     backboneEvents.get().once("doneLoading:layers", function (e) {
                         if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
-                            reloadLayer();
+                            // Check if child layer should be reloaded.
+                            if (_self.getChildLayersThatShouldBeEnabled().includes(localLayerKey)) {
+                                reloadLayer();
+                            }
                         }
                     });
                 } else {
@@ -3080,5 +3136,9 @@ module.exports = {
 
     load: function (id) {
         moduleState.vectorStores[id].load();
+    },
+
+    getChildLayersThatShouldBeEnabled: function () {
+        return childLayersThatShouldBeEnabled;
     }
 };
