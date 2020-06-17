@@ -48,7 +48,14 @@ and this project adheres to [CalVer](https://calver.org/).
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - `embed.js` has two new attributes: `data-vidi-use-config` and `data-vidi-use-schema`. These will trigger the use of schema and/or config from the token if present.
 - New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
-    - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)  
+    - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
+- New GC2 properties:
+    - *disable_check_box*: boolean, disables the layer check box:
+        - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
+        - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
+    - *filter_immutable*: boolean, make the filter setup immutable.
+        - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+- A Reset filter button is added, which will reset the filter to the original state.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
@@ -89,6 +96,7 @@ and this project adheres to [CalVer](https://calver.org/).
 ### Fixed
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
+- Accept 'da' locale in request headers. Only da-DK worked so far.
 
 ## [2020.2.0]
 ### Added

@@ -8,10 +8,11 @@
  * Generates HTML chunks that are later used in layerTree module, no logic or any interaction
  * should be implemented here, only raw markup.
  *
- * @todo Rewrite layerTree using React or Angular
+ * @todo Rewrite layerTree using React
  */
 
-import { LAYER, ICONS} from './constants';
+import {LAYER, ICONS} from './constants';
+
 const regularButtonStyle = `padding: 2px 10px 2px 10px; color: black; border-radius: 4px; height: 22px; margin: 0px;`;
 
 class MarkupGenerator {
@@ -78,7 +79,7 @@ class MarkupGenerator {
         </li>`);
     }
 
-    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState) {
+    getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive, layer, layerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, isSubLayer, moduleState, disableCheckBox) {
         let queueFailedButtonStyle = regularButtonStyle + ` background-color: orange; padding-left: 4px; padding-right: 4px;`;
         let queueRejectedByServerButtonStyle = regularButtonStyle + ` background-color: red; padding-left: 4px; padding-right: 4px;`;
         let tooltip = layer.f_table_abstract || ``;
@@ -93,6 +94,7 @@ class MarkupGenerator {
                                 <label>
                                     <input type="checkbox"
                                         ${(layerIsActive ? `checked="checked"` : ``)}
+                                        ${(disableCheckBox ? `disabled` : ``)}
                                         class="js-show-layer-control"
                                         id="${layer.f_table_name}"
                                         data-gc2-id="${layer.f_table_schema}.${layer.f_table_name}"
@@ -105,8 +107,9 @@ class MarkupGenerator {
         
                         <div style="display: inline-block;">
                             <span>
-                                ${text}${lockedLayer} 
+                                ${text}${lockedLayer}
                                 <span class="js-tiles-contain-data" style="visibility: ${moduleState.tileContentCache[layerKey] ? "inline" : "hidden"};"><i class="fa fa-eye" style="color: green;"></i></span>
+                                <span class="js-layer-is-disabled" style="visibility: ${disableCheckBox ? "inline" : "hidden"};"><i class="fa fa-ban" style="color: red;"></i></span>
                                 <span style="display: none" class="_gc2_layer_sort_id">(${layer.sort_id})</span>
                             </span>
                         </div>

@@ -25,7 +25,7 @@ import {OPEN_INFO_IN_ELEMENT} from './../sqlQuery'
 var _self, meta, layers, sqlQuery, switchLayer, cloud, legend, state, backboneEvents;
 
 var onEachFeature = [], pointToLayer = [], onSelectedStyle = [], onLoad = [], onSelect = [],
-    onMouseOver = [], cm = [], styles = [], tables = {};
+    onMouseOver = [], cm = [], styles = [], tables = {}, childLayersThatShouldBeEnabled = [];
 
 const uuidv4 = require('uuid/v4');
 var React = require('react');
@@ -292,6 +292,31 @@ module.exports = {
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         let parentFilters = _self.getParentLayerFilters(layerKey);
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+
+        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
+                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
+                    childLayersThatShouldBeEnabled.push(i.rel);
+                }
+                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
+                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
+
+            })
+        }
+
+        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
+                if ('disable_check_box' in parsedMetaChildLayer && parsedMetaChildLayer.disable_check_box) {
+                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
+                    switchLayer.init(i.rel, false, true, false);
+                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
+                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
+                }
+            })
+        }
 
         let overallFilters = activeFilters.concat(parentFilters);
         if (overallFilters.length > 0) {
@@ -2449,7 +2474,12 @@ module.exports = {
 
             let layerIsEditable = false;
             let displayInfo = layer.f_table_abstract ? `visible` : `hidden`;
+            let disableCheckBox = false;
             let parsedMeta = false;
+            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
+            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
+            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
+            let layerTypeSelector = ``;
             if (layer.meta) {
                 parsedMeta = _self.parseLayerMeta(layer);
                 if (parsedMeta) {
@@ -2457,18 +2487,15 @@ module.exports = {
                         layerIsEditable = true;
                     }
 
+                    if (`disable_check_box` in parsedMeta && parsedMeta.disable_check_box && _self.getChildLayersThatShouldBeEnabled().includes(layerKey) === false) {
+                        disableCheckBox = true;
+                    }
+
                     if (`meta_desc` in parsedMeta) {
                         displayInfo = (parsedMeta.meta_desc || layer.f_table_abstract) ? `visible` : `hidden`;
                     }
                 }
             }
-
-            let layerKey = layer.f_table_schema + "." + layer.f_table_name;
-            let layerKeyWithGeom = layerKey + "." + layer.f_geometry_column;
-
-            let lockedLayer = (layer.authentication === "Read/write" ? " <i class=\"fa fa-lock gc2-session-lock\" aria-hidden=\"true\"></i>" : "");
-
-            let layerTypeSelector = ``;
             if (!singleTypeLayer) {
                 layerTypeSelector = markupGeneratorInstance.getLayerTypeSelector(selectorLabel, specifiers);
             }
@@ -2480,7 +2507,7 @@ module.exports = {
             }
 
             let layerControlRecord = $(markupGeneratorInstance.getLayerControlRecord(layerKeyWithGeom, layerKey, layerIsActive,
-                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState));
+                layer, defaultLayerType, layerTypeSelector, text, lockedLayer, addButton, displayInfo, subgroupId !== false, moduleState, disableCheckBox));
 
             // Callback for selecting specific layer type to enable (layer type dropdown)
             $(layerControlRecord).find('[class^="js-layer-type-selector"]').on('click', (e, data) => {
@@ -2739,6 +2766,11 @@ module.exports = {
                         }
                     }
 
+                    let isFilterImmutable = false;
+                    if (parsedMeta.filter_immutable) {
+                        isFilterImmutable = typeof parsedMeta.filter_immutable === "boolean" ? parsedMeta.filter_immutable : false;
+                    }
+
                     let activeFilters = _self.getActiveLayerFilters(layerKey);
                     $(layerContainer).find(`.js-toggle-filters-number-of-filters`).text(activeFilters.length);
                     setTimeout(() => {
@@ -2758,6 +2790,7 @@ module.exports = {
                                     onChangeEditor={_self.onChangeEditorFiltersHandler}
                                     editorFilters={localEditorFilters}
                                     editorFiltersActive={localEditorFiltersActive}
+                                    isFilterImmutable={isFilterImmutable}
                                 />, document.getElementById(componentContainerId));
                             $(layerContainer).find('.js-layer-settings-filters').hide(0);
 
@@ -3032,7 +3065,10 @@ module.exports = {
                 if (childIsReloaded) {
                     backboneEvents.get().once("doneLoading:layers", function (e) {
                         if (layerTreeUtils.stripPrefix(e) === layerTreeUtils.stripPrefix(layerKey)) {
-                            reloadLayer();
+                            // Check if child layer should be reloaded.
+                            if (_self.getChildLayersThatShouldBeEnabled().includes(localLayerKey)) {
+                                reloadLayer();
+                            }
                         }
                     });
                 } else {
@@ -3114,5 +3150,9 @@ module.exports = {
 
     load: function (id) {
         moduleState.vectorStores[id].load();
+    },
+
+    getChildLayersThatShouldBeEnabled: function () {
+        return childLayersThatShouldBeEnabled;
     }
 };
