@@ -288,43 +288,15 @@ module.exports = {
         if (!layerKey || [LAYER.VECTOR + `:`, LAYER.VECTOR_TILE + `:`].indexOf(layerKey) === 0 || layerKey.indexOf(`.`) === -1) {
             throw new Error(`Invalid tile layer name ${layerKey}`);
         }
-
         let parameterString = ``;
         let activeFilters = _self.getActiveLayerFilters(layerKey);
         let parentFilters = _self.getParentLayerFilters(layerKey);
-        let parsedMeta = meta.parseLayerMeta(layerKey);
-
-        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
-            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
-                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
-                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
-                    childLayersThatShouldBeEnabled.push(i.rel);
-                }
-                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
-                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
-
-            })
-        }
-
-        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
-            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
-                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
-                if ('disable_check_box' in parsedMetaChildLayer && parsedMetaChildLayer.disable_check_box) {
-                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
-                    switchLayer.init(i.rel, false, true, false);
-                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
-                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
-                }
-            })
-        }
-
         let overallFilters = activeFilters.concat(parentFilters);
         if (overallFilters.length > 0) {
             let data = {};
             data[layerKey] = overallFilters;
             parameterString = `filters=` + encodeURIComponent(Base64.encode(JSON.stringify(data)));
         }
-
         $(`[data-gc2-layer-key^="${layerKey}"]`).find(`.js-toggle-filters-number-of-filters`).text(overallFilters.length);
         return parameterString;
     },
@@ -3146,5 +3118,9 @@ module.exports = {
 
     getChildLayersThatShouldBeEnabled: function () {
         return childLayersThatShouldBeEnabled;
+    },
+
+    setChildLayersThatShouldBeEnabled: function (arr) {
+        childLayersThatShouldBeEnabled = arr;
     }
 };
