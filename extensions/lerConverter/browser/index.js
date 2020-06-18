@@ -7,7 +7,9 @@
 'use strict';
 
 /* Import big-brains*/
-import ZipUploadWidget from "./ZipUploadWidget";
+import Dropzone from 'react-dropzone';
+import JSZip from 'jszip';
+import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
 
 /**
  *
@@ -225,9 +227,77 @@ module.exports = {
             }
         };
 
-
+        console.log('run login check!');
         _checkLogin()
 
+        /**
+         * Parses xml to JSON
+         * @param {*} xmlData 
+         */
+        var parsetoJSON = function(xmlData){
+            var parser = require('fast-xml-parser');
+            var options = {
+                attributeNamePrefix : "@_",
+                attrNodeName: "attr", //default is 'false'
+                textNodeName : "#text",
+                ignoreAttributes : true,
+                ignoreNameSpace : false,
+                allowBooleanAttributes : false,
+                parseNodeValue : true,
+                parseAttributeValue : false,
+                trimValues: true,
+                cdataTagName: "__cdata", //default is 'false'
+                cdataPositionChar: "\\c",
+                parseTrueNumberOnly: false,
+                arrayMode: false, //"strict"
+                stopNodes: ["parse-me-as-string"]
+            };
+        
+            if( parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
+                var jsonObj = parser.parse(xmlData,options);
+                //console.log(jsonObj)
+                return jsonObj
+            }
+        
+            // Intermediate obj
+            //var tObj = parser.getTraversalObj(xmlData,options);
+            //console.log(tObj)
+            //var jsonObj = parser.convertToJson(tObj,options);
+            //console.log(jsonObj)
+        }
+        
+        /**
+         * Reads file contents
+         * @param {*} zipblob 
+         */
+        //var readContents = function(zipblob) {
+        //    var newZip = new JSZip();
+        //    newZip.loadAsync(zipblob).then(function (zip) {
+        //        Object.keys(zip.files).forEach(function (filename) {
+        //          //console.log(filename)
+        //
+        //          /* Handle graveforespoergsel */
+        //          if (filename.indexOf('Graveforespoergsel') != -1){
+        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
+        //          }
+        //          /* Handle Ledninger */
+        //          if (filename == 'consolidated.gml'){
+        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
+        //          }
+        //          /* Show Status */
+        //          if (filename == 'LedningsejerStatusListe.xml'){
+        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
+        //          }
+        //      })
+        //    }).then(()=>{
+        //        console.log('ass')
+        //        return 'asshat'
+        //    })
+        //}
+
+
+        
+        
         /**
          *
          */
@@ -237,7 +307,8 @@ module.exports = {
 
                 this.state = {
                     active: false,
-                    selectedOption: "google"
+                    selectedOption: "google",
+                    ejerliste: []
                 };
 
                 this.onChange = this.onChange.bind(this);
@@ -279,64 +350,103 @@ module.exports = {
                 });
 
                 // Handle click events on map
+                // Do we need click events for this extension?
                 // ==========================
 
-                mapObj.on("dblclick", function () {
-                    clicktimer = undefined;
-                });
-                mapObj.on("click", function (e) {
-                    let event = new geocloud.clickEvent(e, cloud);
-                    if (clicktimer) {
-                        clearTimeout(clicktimer);
-                    }
-                    else {
-                        if (me.state.active === false) {
-                            return;
-                        }
-
-                        clicktimer = setTimeout(function (e) {
-
-                            //let coords = event.getCoordinate(), p, url;
-                            //p = utils.transform("EPSG:3857", "EPSG:4326", coords);
-                            //clicktimer = undefined;
-                            //switch (me.state.selectedOption) {
-                            //    case "google":
-                            //        url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
-                            //        break;
-                            //    case "mapillary":
-                            //        url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
-                            //        break;
-                            //    case "skraafoto":
-                            //        url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
-                            //        break;
-                            //    case "cowi":
-                            //        url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
-                            //        break;
-                            //}
-                            //parentThis.callBack(url);
-
-                        }, 250);
-                    }
-                });
+                //mapObj.on("dblclick", function () {
+                //    clicktimer = undefined;
+                //});
+                //mapObj.on("click", function (e) {
+                //    let event = new geocloud.clickEvent(e, cloud);
+                //    if (clicktimer) {
+                //        clearTimeout(clicktimer);
+                //    }
+                //    else {
+                //        if (me.state.active === false) {
+                //            return;
+                //        }
+                //        clicktimer = setTimeout(function (e) {
+                //            //let coords = event.getCoordinate(), p, url;
+                //            //p = utils.transform("EPSG:3857", "EPSG:4326", coords);
+                //            //clicktimer = undefined;
+                //            //switch (me.state.selectedOption) {
+                //            //    case "google":
+                //            //        url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
+                //            //        break;
+                //            //    case "mapillary":
+                //            //        url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
+                //            //        break;
+                //            //    case "skraafoto":
+                //            //        url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
+                //            //        break;
+                //            //    case "cowi":
+                //            //        url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
+                //            //        break;
+                //            //}
+                //            //parentThis.callBack(url);
+                //        }, 250);
+                //    }
+                //});
             }
 
-            /**
-             *
-             * @returns {XML}
-             */
+            onDrop(files) {
+                const _self = this;
+                //TODO: screen input
+                console.log(this.readContents(files[0]))
+            }
+
+            readContents(zipblob) {
+                var newZip = new JSZip();
+                newZip.loadAsync(zipblob).then(function (zip) {
+                    Object.keys(zip.files).forEach(function (filename) {
+                      //console.log(filename)
+                    
+                      /* Handle graveforespoergsel */
+                      if (filename.indexOf('Graveforespoergsel') != -1){
+                        zip.files[filename].async('string').then(fileData => {
+                            console.log(parsetoJSON(fileData))
+                        })
+                      }
+                      /* Handle Ledninger */
+                      if (filename == 'consolidated.gml'){
+                        zip.files[filename].async('string').then(fileData => {
+                            console.log(parsetoJSON(fileData))
+                        })
+                      }
+                      /* Show Status */
+                      if (filename == 'LedningsejerStatusListe.xml'){
+                        zip.files[filename].async('string').then(fileData => { 
+                            console.log(parsetoJSON(fileData))
+                            this.setState
+                        })
+                      }
+                  })
+                }).then(()=>{
+                    /* Alle filer er læst og parsed.*/
+                    console.log('ass')
+                })
+            }
+
             render() {
                 return (
-
                     <div role="tabpanel">
                         <div className="form-group">
                             <div id="lerConverter-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
                             <div id="lerConverter-feature-dropzone">
-                                <ZipUploadWidget />
+                                <Dropzone
+                                onDrop={this.onDrop.bind(this)}
+                                style={{
+                                    width: '100%', height: '50px', padding: '5px', border: '1px green dashed'
+                                }}
+                                >
+                                    <p>Drop it dawg</p>
+                                </Dropzone>
                             </div>
-                            <p> Hello World! </p>
-
+                            <div id="lerConverter-feature-ledningsejerliste">
+                                <LedningsEjerStatusTable statusliste={this.state.ejerliste} />
+                            </div>
                         </div>
                     </div>
                 );
