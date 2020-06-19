@@ -99,17 +99,17 @@ module.exports = {
     },
 
     cursorStyle: function () {
-
         return {
             crosshair: function () {
                 document.getElementById('map').style.cursor = 'crosshair'
             },
-
+            pointer: function () {
+                document.getElementById('map').style.cursor = 'pointer'
+            },
             reset: function () {
                 document.getElementById('map').style.cursor = ''
             }
         }
-
     },
 
     __: function (txt, dict) {
