@@ -1542,7 +1542,7 @@ td.rdtYear:hover {
   border-left: 1px solid #eee;
 }
 /* fix for small screen and leaflet-draw*/
-/* RGB 03/2020 */
+/* Geopartner, RGB 03/2020 */
 @media screen and (max-height: 700px) {
   .leaflet-draw.leaflet-control {
     margin-right: 54px !important;
