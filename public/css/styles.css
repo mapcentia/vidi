@@ -1541,15 +1541,15 @@ td.rdtYear:hover {
   padding-left: 10px;
   border-left: 1px solid #eee;
 }
+/* fix for small screen and leaflet-draw*/
+/* RGB 03/2020 */
+@media screen and (max-height: 700px) {
+  .leaflet-draw.leaflet-control {
+    margin-right: 54px !important;
+    top: -330px;
+    position: relative;
+  }
+}
 #alternative-info-container {
   height: calc(100vh + 1px);
-}
-
-/* Fix for small screens and leaflet draw module*/
-@media screen and (min-height: 700px) {
-  .leaflet-draw {
-      margin-right: 54px;
-      top: -354px;
-      position: relative;
-  }
 }

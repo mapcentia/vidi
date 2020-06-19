@@ -431,8 +431,8 @@ module.exports = {
         }
 
         var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null, uriObj = new uriJs(window.location.href);
-        if (isNaN(scale) || scale < 200) {
-            alert(__("Not a valid scale. Must be over 200."));
+        if (isNaN(scale) || scale < 100) {
+            alert(__("Not a valid scale. Must be over 100."));
             return false;
         }
         backboneEvents.get().trigger("start:print");
