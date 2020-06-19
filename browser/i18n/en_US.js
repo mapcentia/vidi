@@ -220,6 +220,8 @@ module.exports = {
         "Refresh existing cache for layer": "Refresh existing cache for layer",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamic layer is cached only within the last requested bounding box",
         "Apply": "Apply",
+        "Reset filter": "Reset filter",
+        "Filter editor": "Filter editor",
 
         // Base layers
         "Side-by-side mode": "Side-by-side mode",

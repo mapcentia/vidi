@@ -108,7 +108,7 @@ module.exports = {
         "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
-        "Sticky": "Sticky",
+        "Sticky": "Husk indstillinger",
         "Add new box": "Tilføj ny boks",
         "Remove last box": "Fjern seneste boks",
 
@@ -220,6 +220,8 @@ module.exports = {
         "Refresh existing cache for layer": "Genindlæs eksisterende cache for lag",
         "Dynamic layer is cached only within the last requested bounding box": "Dynamiske lag er kun cached inden for det sidst ønskede udsnit",
         "Apply": "Anvend",
+        "Reset filter": "Nulstil filter",
+        "Filter editor": "Filter editor",
 
         // Base layers
         "Side-by-side mode": "Dobbelt baggrundskort",

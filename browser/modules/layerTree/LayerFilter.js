@@ -563,7 +563,7 @@ class VectorLayerFilter extends React.Component {
                     </div>
                     <div>
                         <label>
-                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/>
+                            <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
                         </label>
                         <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
                             <i className="fa fa-check"></i> {__(`Apply`)}
@@ -571,11 +571,11 @@ class VectorLayerFilter extends React.Component {
                     </div>
                 </div>
             )
-        }
+        };
 
         const buildResetButton = (props) => {
             return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}><i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
-        }
+        };
 
         let activeFiltersTab = false;
         let tabControl = false;
