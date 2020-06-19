@@ -234,7 +234,8 @@ module.exports = {
          * Parses xml to JSON
          * @param {*} xmlData 
          */
-        var parsetoJSON = function(xmlData){
+        var parsetoJSON = function (xmlData){
+            var jsonObj, Err = {}
             var parser = require('fast-xml-parser');
             var options = {
                 attributeNamePrefix : "@_",
@@ -253,49 +254,23 @@ module.exports = {
                 stopNodes: ["parse-me-as-string"]
             };
         
-            if( parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
-                var jsonObj = parser.parse(xmlData,options);
-                //console.log(jsonObj)
-                return jsonObj
-            }
+            return new Promise(function(resolve, reject) {
+                if( parser.validate(xmlData) === true) { //optional (it'll return an object in case it's not valid)
+                    jsonObj = parser.parse(xmlData,options);
+                    //console.log(jsonObj)
+                    resolve(jsonObj)
+                } else {
+                    err = parser.validate(xmlData)
+                    reject(err)
+                }
+            });
         
             // Intermediate obj
             //var tObj = parser.getTraversalObj(xmlData,options);
             //console.log(tObj)
             //var jsonObj = parser.convertToJson(tObj,options);
             //console.log(jsonObj)
-        }
-        
-        /**
-         * Reads file contents
-         * @param {*} zipblob 
-         */
-        //var readContents = function(zipblob) {
-        //    var newZip = new JSZip();
-        //    newZip.loadAsync(zipblob).then(function (zip) {
-        //        Object.keys(zip.files).forEach(function (filename) {
-        //          //console.log(filename)
-        //
-        //          /* Handle graveforespoergsel */
-        //          if (filename.indexOf('Graveforespoergsel') != -1){
-        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
-        //          }
-        //          /* Handle Ledninger */
-        //          if (filename == 'consolidated.gml'){
-        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
-        //          }
-        //          /* Show Status */
-        //          if (filename == 'LedningsejerStatusListe.xml'){
-        //            zip.files[filename].async('string').then(fileData => { console.log(parsetoJSON(fileData)) })
-        //          }
-        //      })
-        //    }).then(()=>{
-        //        console.log('ass')
-        //        return 'asshat'
-        //    })
-        //}
-
-
+        }       
         
         
         /**
@@ -307,17 +282,10 @@ module.exports = {
 
                 this.state = {
                     active: false,
-                    selectedOption: "google",
                     ejerliste: []
                 };
 
-                this.onChange = this.onChange.bind(this);
-            }
-
-            onChange(changeEvent) {
-                this.setState({
-                    selectedOption: changeEvent.target.value
-                });
+                this.readContents = this.readContents.bind(this)
             }
 
             /**
@@ -388,46 +356,70 @@ module.exports = {
                 //    }
                 //});
             }
+            
+            /**
+             * Sets the state using async
+             * @param {*} state 
+             */
+            setStateAsync(state) {
+                return new Promise((resolve) => {
+                  this.setState(state, resolve)
+                });
+            }
+
 
             onDrop(files) {
                 const _self = this;
                 //TODO: screen input
-                console.log(this.readContents(files[0]))
+                this.readContents(files[0])
+
             }
 
+            /**
+             * 
+             * @param {*} zipblob 
+             */
             readContents(zipblob) {
+                var _self = this;
                 var newZip = new JSZip();
                 newZip.loadAsync(zipblob).then(function (zip) {
                     Object.keys(zip.files).forEach(function (filename) {
                       //console.log(filename)
+                      
                     
                       /* Handle graveforespoergsel */
                       if (filename.indexOf('Graveforespoergsel') != -1){
                         zip.files[filename].async('string').then(fileData => {
-                            console.log(parsetoJSON(fileData))
+                            //console.log(parsetoJSON(fileData))
                         })
                       }
                       /* Handle Ledninger */
                       if (filename == 'consolidated.gml'){
                         zip.files[filename].async('string').then(fileData => {
-                            console.log(parsetoJSON(fileData))
+                            //console.log(parsetoJSON(fileData))
                         })
                       }
                       /* Show Status */
                       if (filename == 'LedningsejerStatusListe.xml'){
-                        zip.files[filename].async('string').then(fileData => { 
-                            console.log(parsetoJSON(fileData))
-                            this.setState
+                        zip.files[filename].async('string').then(fileData => {
+                            parsetoJSON(fileData).then(jsObj => {
+                                _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer}, () => {
+                                    console.log(this)
+                                    console.log(_self.state)
+                                    console.log(_self.state.ejerliste)
+                                })
+                            })
                         })
                       }
-                  })
-                }).then(()=>{
+                    })
+                  }).finally(() =>{
                     /* Alle filer er læst og parsed.*/
-                    console.log('ass')
+                    console.log('Stopped reading contents')
                 })
             }
 
             render() {
+                
                 return (
                     <div role="tabpanel">
                         <div className="form-group">
@@ -438,7 +430,10 @@ module.exports = {
                                 <Dropzone
                                 onDrop={this.onDrop.bind(this)}
                                 style={{
-                                    width: '100%', height: '50px', padding: '5px', border: '1px green dashed'
+                                    width: '100%',
+                                    height: '50px',
+                                    padding: '5px',
+                                    border: '1px green dashed'
                                 }}
                                 >
                                     <p>Drop it dawg</p>
@@ -458,7 +453,6 @@ module.exports = {
         // Append to DOM
         //==============
         try {
-
             ReactDOM.render(
                 <LerConverter/>,
                 document.getElementById(exId)

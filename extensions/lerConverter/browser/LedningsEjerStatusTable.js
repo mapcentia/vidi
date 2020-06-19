@@ -15,10 +15,9 @@ class LedningsEjerStatusTable extends React.Component {
             ejerliste: props.statusliste
         };
     }
-
-
     render() {
-        if (this.state.ejerliste.length == 0) {
+        console.log(this.props.statusliste)
+        if (this.props.statusliste.length == 0) {
             return (
                 <p>Nothing here</p>
             )
