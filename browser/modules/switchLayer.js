@@ -575,7 +575,7 @@ module.exports = module.exports = {
         let childLayersThatShouldBeEnabled = layerTree.getChildLayersThatShouldBeEnabled();
         let parsedMeta = meta.parseLayerMeta(layerKey);
         let activeFilters = layerTree.getActiveLayerFilters(layerKey);
-        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
+        if (parsedMeta && 'referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
             JSON.parse(parsedMeta.referenced_by).forEach((i) => {
                 // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
                 if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
@@ -586,7 +586,7 @@ module.exports = module.exports = {
 
             })
         }
-        if ('referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
+        if (parsedMeta && 'referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
             JSON.parse(parsedMeta.referenced_by).forEach((i) => {
                 let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
                 if ('disable_check_box' in parsedMetaChildLayer && parsedMetaChildLayer.disable_check_box) {
@@ -598,7 +598,5 @@ module.exports = module.exports = {
             })
         }
         layerTree.setChildLayersThatShouldBeEnabled(childLayersThatShouldBeEnabled);
-    },
-
+    }
 };
-
