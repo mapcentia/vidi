@@ -108,6 +108,7 @@ module.exports = {
         "Title": "Titel",
         "Comment": "Kommentar",
         "The comment will be placed on the PDF": "Kommentaren vil blive placeret på PDF'en",
+        "Sticky": "Sticky",
 
         "Draw a line": "Tegn en linje",
         "Draw an area": "Tegn en flade",
