@@ -232,7 +232,7 @@ module.exports = {
         "Default map extent": "Går tilbage til start udsnittet",
         "Previous extent": "Forrige udsnit",
         "Next extent": "Næste udsnit",
-        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område område",
+        "Click here then draw a square on the map, to zoom in to an area": "Klik her og træk derefter en firkant på kortet for at zoome til et område",
 
         // APIBridge
         "Not authorized to perform this action": "Ikke autoriseret til at udføre denne handling.",
