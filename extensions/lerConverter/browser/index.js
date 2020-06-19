@@ -281,7 +281,7 @@ module.exports = {
                 super(props);
 
                 this.state = {
-                    active: false,
+                    loading: false,
                     ejerliste: []
                 };
 
@@ -382,6 +382,9 @@ module.exports = {
             readContents(zipblob) {
                 var _self = this;
                 var newZip = new JSZip();
+
+                _self.setState({loading:true})
+
                 newZip.loadAsync(zipblob).then(function (zip) {
                     Object.keys(zip.files).forEach(function (filename) {
                       //console.log(filename)
@@ -403,11 +406,7 @@ module.exports = {
                       if (filename == 'LedningsejerStatusListe.xml'){
                         zip.files[filename].async('string').then(fileData => {
                             parsetoJSON(fileData).then(jsObj => {
-                                _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer}, () => {
-                                    console.log(this)
-                                    console.log(_self.state)
-                                    console.log(_self.state.ejerliste)
-                                })
+                                _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})
                             })
                         })
                       }
@@ -415,6 +414,7 @@ module.exports = {
                   }).finally(() =>{
                     /* Alle filer er læst og parsed.*/
                     console.log('Stopped reading contents')
+                    _self.setState({loading:false})
                 })
             }
 
