@@ -48,10 +48,14 @@ and this project adheres to [CalVer](https://calver.org/).
 - New print API `/api/print/[database]/?state=[state id]` which will return the stored print from a snapshot as PNG (PDF is coming). The print will be created on the fly.
 - New GC2 Meta property which automatically can open a layer tool when the layer is switch on:
     - *default_open_tools*: JSON array with tools to open. Available options: `["filters","opacity","load-strategy","search"]` ("table" are not supported)
-- New GC2 property which disables the layer check box:
-    - *disable_check_box*: boolean
-    - When filtering a layer all child layers with a disabled check box will be enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
-    - This makes it possible for setup child layers, which can only be viewed when filtered by its parent layer. 
+- New GC2 properties:
+    - *disable_check_box*: boolean, disables the layer check box:
+        - When filtering a layer all its child layers with this property set to true will have their check boxes enabled. And when the filters are disabled again all child layers will be turned off and have their check boxes disabled again.
+        - This makes it possible to setup child layers, which can only be viewed when filtered by its parent layer.
+    - *filter_immutable*: boolean, make the filter setup immutable.
+        - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
+- A Reset filter button is added, which will reset the filter to the original state.
+- The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
