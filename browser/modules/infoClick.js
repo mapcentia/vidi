@@ -32,13 +32,19 @@ module.exports = {
     },
 
     init: function () {
-        backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => { _self.reset(); });
-        backboneEvents.get().on(`off:all`, () => {
-            _self.off(); 
+        backboneEvents.get().on(`reset:all reset:${MODULE_ID}`, () => {
             _self.reset();
         });
-        backboneEvents.get().on(`on:${MODULE_ID}`, () => { _self.active(true); });
-        backboneEvents.get().on(`off:${MODULE_ID}`, () => { _self.active(false); });
+        backboneEvents.get().on(`off:all`, () => {
+            _self.off();
+            _self.reset();
+        });
+        backboneEvents.get().on(`on:${MODULE_ID}`, () => {
+            _self.active(true);
+        });
+        backboneEvents.get().on(`off:${MODULE_ID}`, () => {
+            _self.active(false);
+        });
 
         cloud.get().on("dblclick", function () {
             clicktimer = undefined;
@@ -67,7 +73,8 @@ module.exports = {
                             if (parentLayer && parentLayer.editor && parentLayer.editor.enabled()) clearQueryResults = false;
                             if (clearQueryResults) backboneEvents.get().trigger("sqlQuery:clear");
                         }, 100);
-                    }, ()=>{}, "", true);
+                    }, () => {
+                    }, "", true);
                 }, 250);
             }
         });
@@ -88,10 +95,22 @@ module.exports = {
         if (!a) {
             this.reset();
             utils.cursorStyle().reset();
-
         } else {
-            utils.cursorStyle().crosshair();
-
+            if (typeof window.vidiConfig.infoClickCursorStyle !== "undefined") {
+                switch (window.vidiConfig.infoClickCursorStyle) {
+                    case "pointer":
+                        utils.cursorStyle().pointer();
+                        break;
+                    case "crosshair":
+                        utils.cursorStyle().crosshair();
+                        break;
+                    default:
+                        utils.cursorStyle().crosshair();
+                        break;
+                }
+            } else {
+                utils.cursorStyle().crosshair();
+            }
         }
         active = a;
     },

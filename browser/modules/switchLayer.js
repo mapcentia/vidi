@@ -57,7 +57,7 @@ module.exports = module.exports = {
 
     /**
      * Loads missing meta for layer
-     * 
+     *
      * @returns {Promise}
      */
     loadMissingMeta: (gc2Id) => {
@@ -82,7 +82,7 @@ module.exports = module.exports = {
      */
     enableVector: (gc2Id, doNotLegend, setupControls, failedBefore) => {
         if (LOG) console.log(`switchLayer: enableVector ${gc2Id}`);
-
+        _self.enableCheckBoxesOnChildren(gc2Id);
         let vectorLayerId = LAYER.VECTOR + `:` + gc2Id;
         return new Promise((resolve, reject) => {
             layers.incrementCountLoading(vectorLayerId);
@@ -168,13 +168,16 @@ module.exports = module.exports = {
      * @returns {Promise}
      */
     enableRasterTile: (gc2Id, forceReload, doNotLegend, setupControls) => {
-        if (LOG) console.log(`switchLayer: enableRasterTile ${gc2Id}`);
+        if (LOG) console.log(`switchLa.yer: enableRasterTile ${gc2Id}`);
 
         return new Promise((resolve, reject) => {
             // Only one layer at a time, so using the raster tile layer identifier
             layers.incrementCountLoading(gc2Id);
             layerTree.setSelectorValue(gc2Id, LAYER.RASTER_TILE);
+            _self.enableCheckBoxesOnChildren(gc2Id);
+
             layers.addLayer(gc2Id, [layerTree.getLayerFilterString(gc2Id)]).then(() => {
+
                 _self.checkLayerControl(gc2Id, doNotLegend, setupControls);
 
                 let cacheBuster = ``;
@@ -295,7 +298,7 @@ module.exports = module.exports = {
                         console.error(`Could not add ${typedGc2Id} vector tile layer`);
                         layers.decrementCountLoading(typedGc2Id);
                         resolve();
-                    });                    
+                    });
                 });
             } catch (e) {
                 console.log(e);
@@ -556,11 +559,44 @@ module.exports = module.exports = {
     _removeUtfGrid: (layerName) => {
         if (LOG) console.log(`switchLayer: _removeUtfGrid ${layerName}`);
         let id = "__hidden.utfgrid." + layerName;
-        cloud.get().map.eachLayer(function(layer){
+        cloud.get().map.eachLayer(function (layer) {
             if (layer.id === id) {
                 cloud.get().map.removeLayer(layer);
             }
         });
+    },
+
+    /**
+     * Finds child layers and enables their check boxes if the parent layer is filtered. Have only effect if the child layers have the disable_check_box GC2 property
+     *
+     * @param {string} layerKey Layer identifier
+     */
+    enableCheckBoxesOnChildren: (layerKey) => {
+        let childLayersThatShouldBeEnabled = layerTree.getChildLayersThatShouldBeEnabled();
+        let parsedMeta = meta.parseLayerMeta(layerKey);
+        let activeFilters = layerTree.getActiveLayerFilters(layerKey);
+        if (parsedMeta && 'referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length > 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                // Store keys in array, so when re-rendering the layer tree, it can pick up which layers to enable
+                if (childLayersThatShouldBeEnabled.indexOf(i.rel) === -1) {
+                    childLayersThatShouldBeEnabled.push(i.rel);
+                }
+                $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, false);
+                $(`[data-gc2-layer-key^="${i.rel}."]`).find(`.js-layer-is-disabled`).css(`visibility`, `hidden`);
+
+            })
+        }
+        if (parsedMeta && 'referenced_by' in parsedMeta && parsedMeta.referenced_by && activeFilters.length === 0) {
+            JSON.parse(parsedMeta.referenced_by).forEach((i) => {
+                let parsedMetaChildLayer = meta.parseLayerMeta(i.rel);
+                if ('disable_check_box' in parsedMetaChildLayer && parsedMetaChildLayer.disable_check_box) {
+                    childLayersThatShouldBeEnabled = childLayersThatShouldBeEnabled.filter(item => item !== i.rel);
+                    _self.init(i.rel, false, true, false);
+                    $(`*[data-gc2-id="${i.rel}"]`).prop(`disabled`, true);
+                    $(`[data-gc2-layer-key^="${i.rel}"]`).find(`.js-layer-is-disabled`).css(`visibility`, `visible`);
+                }
+            })
+        }
+        layerTree.setChildLayersThatShouldBeEnabled(childLayersThatShouldBeEnabled);
     }
 };
-

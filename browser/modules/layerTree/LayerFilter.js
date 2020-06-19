@@ -336,6 +336,27 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
+    handleReset() {
+        let props = this.props;
+        let arbitraryFilters = props.arbitraryFilters || {};
+        let resetArbitraryFilters = {match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]), columns: []};
+        if (props.presetFilters.length === 0) {
+            resetArbitraryFilters.columns.push(DUMMY_RULE);
+        } else {
+            arbitraryFilters.columns.forEach((a) => {
+                props.presetFilters.forEach((p) => {
+                    if (p.field === a.fieldname) {
+                        resetArbitraryFilters.columns.push({fieldname: p.field, expression: p.operator, value: ""});
+                    }
+                })
+            })
+        }
+        // Validating the arbitraryFilters structure
+        validateFilters(resetArbitraryFilters);
+        this.onRulesClear();
+        this.setState({arbitraryFilters: resetArbitraryFilters});
+    }
+
     render() {
         let allRulesAreValid = true;
         let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
@@ -415,7 +436,7 @@ class VectorLayerFilter extends React.Component {
             controlDivStyle.maxWidth = `160px`;
             filterControls.push(<div key={`column_` + index} style={{display: `flex`}}>
                 <div className="form-group" style={divStyle}>
-                    <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)}>
+                    <button className="btn btn-xs btn-warning" type="button" onClick={this.onRuleDelete.bind(this, index)} style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <i className="fa fa-minus"></i>
                     </button>
                 </div>
@@ -461,12 +482,12 @@ class VectorLayerFilter extends React.Component {
             return (
                 <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                     {childrenInfoMarkup}
-                    <div className="form-group">
+                    <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
                     </div>
                     <div>{filterControls}</div>
                     <div>
-                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)}>
+                        <button className="btn btn-sm" type="button" onClick={this.onRuleAdd.bind(this)} style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                             <i className="fa fa-plus"></i> {__(`Add condition`)}
                         </button>
                         <button className="btn btn-sm btn-success" type="button" disabled={!allRulesAreValid} onClick={this.onRulesApply.bind(this)}>
@@ -517,7 +538,7 @@ class VectorLayerFilter extends React.Component {
          */
         const buildWhereClauseField = (props) => {
             return (
-                <div style={{marginTop: "25px"}}>
+                <div style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                         <div style={{marginLeft: "10px", marginRight: "10px"}}>
                             <AceEditor
@@ -552,6 +573,10 @@ class VectorLayerFilter extends React.Component {
             )
         }
 
+        const buildResetButton = (props) => {
+            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}><i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+        }
+
         let activeFiltersTab = false;
         let tabControl = false;
         if (Object.keys(this.state.predefinedFilters).length > 0) {
@@ -582,6 +607,7 @@ class VectorLayerFilter extends React.Component {
                 {tabControl}
                 {activeFiltersTab}
                 {buildWhereClauseField()}
+                {buildResetButton()}
             </div>
         );
     }
@@ -600,7 +626,9 @@ VectorLayerFilter.propTypes = {
     onActivateEditor: PropTypes.func.isRequired,
     onApplyEditor: PropTypes.func.isRequired,
     editorFilters: PropTypes.array.isRequired,
-    editorFiltersActive: PropTypes.bool.isRequired
+    editorFiltersActive: PropTypes.bool.isRequired,
+    isFilterImmutable: PropTypes.bool.isRequired,
+
 };
 
 export default VectorLayerFilter;
