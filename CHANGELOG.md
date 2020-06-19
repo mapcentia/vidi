@@ -56,6 +56,7 @@ and this project adheres to [CalVer](https://calver.org/).
     - *filter_immutable*: boolean, make the filter setup immutable.
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
 - A Reset filter button is added, which will reset the filter to the original state.
+- The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.
