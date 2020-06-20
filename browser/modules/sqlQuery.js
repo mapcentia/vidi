@@ -37,9 +37,6 @@ var download = require('./download');
  */
 var db = urlparser.db;
 
-var JSONSchemaForm = require("react-jsonschema-form");
-const Form = JSONSchemaForm.default;
-
 var extensions;
 
 let _self = false;
