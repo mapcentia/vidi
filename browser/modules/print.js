@@ -36,7 +36,6 @@ var moment = require('moment');
 var meta;
 var state;
 var _self = false;
-var uriJs = require('urijs');
 var callBack = () => {
 };
 var alreadySetFromState = false;
@@ -481,7 +480,7 @@ module.exports = {
             return paramsFromDb;
         }
 
-        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null, uriObj = new uriJs(window.location.href);
+        var layerQueryDraw = [], layerQueryResult = [], layerQueryBuffer = [], layerPrint = [], e, parr, configFile = null;
         if (isNaN(scale) || scale < 200) {
             alert(__("Not a valid scale. Must be over 200."));
             return false;
@@ -573,7 +572,7 @@ module.exports = {
             metaData: meta.getMetaData(),
             px: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[0],
             py: config.print.templates[tmpl][pageSize][printingOrientation].mapsizePx[1],
-            queryString: uriObj.search(),
+            queryString: urlparser.search,
             customData: null,
             scales: scales,
             sticky: $("#print-sticky").is(":checked")
