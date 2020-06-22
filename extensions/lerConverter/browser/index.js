@@ -281,7 +281,10 @@ module.exports = {
                 super(props);
 
                 this.state = {
+                    done: false,
                     loading: false,
+                    progress: 0,
+                    progressText: '',
                     ejerliste: []
                 };
 
@@ -358,16 +361,9 @@ module.exports = {
             }
             
             /**
-             * Sets the state using async
-             * @param {*} state 
+             * Handle file selected
+             * @param {*} files 
              */
-            setStateAsync(state) {
-                return new Promise((resolve) => {
-                  this.setState(state, resolve)
-                });
-            }
-
-
             onDrop(files) {
                 const _self = this;
                 //TODO: screen input
@@ -383,38 +379,50 @@ module.exports = {
                 var _self = this;
                 var newZip = new JSZip();
 
-                _self.setState({loading:true})
+                _self.setState({loading:true, done: false})
 
                 newZip.loadAsync(zipblob).then(function (zip) {
-                    Object.keys(zip.files).forEach(function (filename) {
-                      //console.log(filename)
-                      
-                    
-                      /* Handle graveforespoergsel */
-                      if (filename.indexOf('Graveforespoergsel') != -1){
-                        zip.files[filename].async('string').then(fileData => {
-                            //console.log(parsetoJSON(fileData))
-                        })
-                      }
-                      /* Handle Ledninger */
-                      if (filename == 'consolidated.gml'){
-                        zip.files[filename].async('string').then(fileData => {
-                            //console.log(parsetoJSON(fileData))
-                        })
-                      }
-                      /* Show Status */
-                      if (filename == 'LedningsejerStatusListe.xml'){
-                        zip.files[filename].async('string').then(fileData => {
-                            parsetoJSON(fileData).then(jsObj => {
-                                _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})
-                            })
-                        })
-                      }
+                    /* Load Status - 'LedningsejerStatusListe.xml' */
+                    _self.setState({
+                        progress: 10,
+                        progressText:'Indlæser statusliste'
                     })
-                  }).finally(() =>{
+                    zip.files['LedningsejerStatusListe.xml'].async('string').then(fileData => {
+                        parsetoJSON(fileData).then(jsObj => {
+                            _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})
+                        })
+                    })
+                    return zip
+                }).then(function (zip) {
+                    /* Load graveforespoergsel */
+                    _self.setState({
+                        progress: 20,
+                        progressText:'Indlæser graveforespørgsel'
+                    })
+                    if (filename.indexOf('Graveforespoergsel') != -1){
+                        zip.files[filename].async('string').then(fileData => {
+                            //console.log(parsetoJSON(fileData))
+                        })
+                      }
+                    return zip
+                }).then(function (zip) {
+                    /* Load data - 'consolidated.gml' */
+                    _self.setState({
+                        progress: 60,
+                        progressText:'Indlæser ledningsdata'
+                    })
+                    zip.files['consolidated.gml'].async('string').then(fileData => {
+                        //console.log(parsetoJSON(fileData))
+                    })
+                }).finally(() =>{
                     /* Alle filer er læst og parsed.*/
                     console.log('Stopped reading contents')
-                    _self.setState({loading:false})
+                    _self.setState({
+                        loading:false,
+                        done: true,
+                        progress: 100,
+                        progressText:'Ledningspakke indlæst'
+                    })
                 })
             }
 
