@@ -5,10 +5,7 @@
  */
 
 import React from 'react';
-import AceEditor from 'react-ace';
 import PropTypes from 'prop-types';
-import "brace/mode/json";
-import "brace/theme/textmate";
 import {
     validateFilters,
     MATCHES,
@@ -308,19 +305,7 @@ class VectorLayerFilter extends React.Component {
         });
     }
 
-    handleEditorFiltersChange(value) {
-        let parsedValue;
-        try {
-            parsedValue = JSON.parse(value);
-        } catch (e) {
-            parsedValue = null;
-        }
-        this.props.onChangeEditor({
-            layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
-            filters: parsedValue || null
-        });
 
-    }
 
     applyEditor() {
         this.props.onApplyEditor({
@@ -531,34 +516,38 @@ class VectorLayerFilter extends React.Component {
             });
 
             return (<div className="js-predefined-filters">{predefinedFiltersTab}</div>);
-        }
+        };
 
         /**
          * Builds the WHERE field
          */
-        const buildWhereClauseField = (props) => {
+        const buildWhereClauseField = () => {
+            const handleChange = (event) => {
+                let parsedValue;
+                try {
+                    parsedValue = JSON.parse(event.target.value);
+                } catch (e) {
+                    parsedValue = null;
+                    return;
+                }
+                this.setState({"editorFilters": parsedValue});
+                this.props.onChangeEditor({
+                    layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
+                    filters: parsedValue || null
+                });
+            };
             return (
                 <div style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                         <div style={{marginLeft: "10px", marginRight: "10px"}}>
-                            <AceEditor
-                                mode="json"
-                                theme="textmate"
-                                onChange={(value) => {
-                                    this.handleEditorFiltersChange(value)
-                                }}
+                            <textarea
+                                style={{"width": "100%", " boxSizing": "border-box", "height": "26px"}}
+                                onChange={handleChange}
                                 name={`editor_filter_` + (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name)}
                                 value={JSON.stringify(
                                     this.state.editorFilters
                                 )}
-                                width="100%"
-                                height="40px"
-                                maxLines={2}
-                                showPrintMargin={false}
-                                autoScrollEditorIntoView={true}
-                                highlightActiveLine={true}
-                                showGutter={false}
-                                editorProps={{$blockScrolling: true}}/>
+                             />
                         </div>
                     </div>
                     <div>

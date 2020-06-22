@@ -80,7 +80,6 @@
     "cookie-parser": "^1.4.3",
     "cors": "^2.7.1",
     "crypto-browserify": "^3.11.0",
-    "dayjs": "^1.8.28",
     "detect-browser": "^2.4.0",
     "dom-shims": "^0.1.4",
     "dotenv": "^8.0.0",
