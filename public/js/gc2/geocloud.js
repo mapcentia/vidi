@@ -2608,17 +2608,10 @@ geocloud = (function () {
         };
     };
     transformPoint = function (lat, lon, s, d) {
-        var p = [];
-        if (typeof Proj4js === "object") {
-            var source = new Proj4js.Proj(s);    //source coordinates will be in Longitude/Latitude
-            var dest = new Proj4js.Proj(d);
-            p = new Proj4js.Point(lat, lon);
-            Proj4js.transform(source, dest, p);
-        } else {
-            p.x = null;
-            p.y = null;
-        }
-        return p;
+        const proj4 = require("proj4");
+        proj4.defs("EPSG:32632", "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs");
+        let p = proj4(s, d, [parseFloat(lat), parseFloat(lon)]);
+        return {x: p[0], y: p[1]}
     };
 
     base64 = {

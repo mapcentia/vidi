@@ -386,9 +386,6 @@ module.exports = {
             newScale = scale;
             newBounds = [sw.lat, sw.lng, ne.lat, ne.lng];
 
-            // Get utm zone
-            var zone = require('./utmZone.js').getZone(sw.lat, sw.lng);
-            Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=" + zone + " +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
             return scale;
         };
         var rectangle = function (initCenter, scaleObject, color, initScale, isFirst, rec = false) {
@@ -403,7 +400,6 @@ module.exports = {
                 }
                 scale = scales[scaleIndex];
             }
-            Proj4js.defs["EPSG:32632"] = "+proj=utm +zone=32 +ellps=WGS84 +datum=WGS84 +units=m +no_defs";
 
             var centerM = geocloud.transformPoint(initCenter.lng, initCenter.lat, "EPSG:4326", "EPSG:32632");
             var printSizeM = [(ps[0] * scale / 1000), (ps[1] * scale / 1000)];

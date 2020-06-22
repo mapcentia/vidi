@@ -170,8 +170,20 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js'],
                 },
                 options: {
+                    transform: [['babelify', {
+                        presets: [['es2015'], ['react'], ['stage-0']],
+                        plugins: ["transform-object-rest-spread"]
+                    }], 'require-globify', 'windowify', 'envify']
+                }
+            },
+            debug: {
+                files: {
+                    'public/js/bundle.js': ['browser/index.js'],
+                },
+                options: {
                     browserifyOptions: {
-                        debug: false
+                        debug: true,
+                        fullPaths: true
                     },
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
@@ -212,15 +224,16 @@ module.exports = function (grunt) {
                     'public/js/bundle.js': ['browser/index.js']
                 },
                 options: {
+                    browserifyOptions: {
+                        debug: true,
+                        fullPaths: true
+                    },
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
                         plugins: ["transform-object-rest-spread"]
                     }], 'require-globify', 'windowify'],
                     watch: true,
-                    keepAlive: true,
-                    browserifyOptions: {
-                        debug: true
-                    }
+                    keepAlive: true
                 }
             }
         },
@@ -233,7 +246,7 @@ module.exports = function (grunt) {
                         dead_code: true,
                         drop_debugger: true,
                         global_defs: {
-                            "DEBUG": false
+                            "DEBUG": true
                         },
                     }
                 },
@@ -261,7 +274,6 @@ module.exports = function (grunt) {
                         'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
-                        'public/js/lib/proj4/proj4-combined.js',
 
                         'public/js/lib/typeahead.js/typeahead.jquery.js',
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
