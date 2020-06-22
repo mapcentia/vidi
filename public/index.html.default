@@ -131,8 +131,6 @@
 <script src="/js/lib/localforage/localforage.js"></script>
 <!-- Core -->
 <script src="/js/lib/jquery/jquery-3.4.1.min.js"></script>
-<script src="/js/lib/jrespond/jRespond.js"></script>
-<script src="/js/lib/mustache.js/mustache.js"></script>
 <script src="/js/lib/underscore/underscore.js"></script>
 <script src="/js/lib/backbone/backbone.js"></script>
 <!-- Bootstrap -->
@@ -140,6 +138,11 @@
 <script src="/js/lib/bootstrap-material-design/dist/js/ripples.js"></script>
 <script src="/js/lib/bootstrap-material-design/dist/js/material.js"></script>
 <script src="/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js"></script>
+<script src="/js/lib/bootstrap-table/bootstrap-table.js"></script>
+<script src="/js/lib/bootstrap-table/bootstrap-table-locale-all.js"></script>
+<script src="/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js"></script>
+<script src="/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js"></script>
+<script src="/js/lib/tableExport.jquery.plugin/tableExport.js"></script>
 <!-- Browserify modules-->
 <script src="/js/bundle.js"></script>
 <!-- /build -->

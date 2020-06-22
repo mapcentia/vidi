@@ -33,6 +33,7 @@ var ReactDOM = require('react-dom');
 
 import moment from 'moment';
 import noUiSlider from 'nouislider';
+import mustache from 'mustache';
 
 import LayerFilter from './LayerFilter';
 import LoadStrategyToggle from './LoadStrategyToggle';
@@ -131,12 +132,7 @@ let moduleState = {
     editorFiltersActive: {}
 };
 
-/**
- *
- * @type {showdown.Converter}
- */
-const showdown = require('showdown');
-const converter = new showdown.Converter();
+const marked = require('marked');
 
 let filterComp = {};
 let lastFilter;
@@ -2549,11 +2545,11 @@ module.exports = {
                 html = (parsedMeta !== null
                     && typeof parsedMeta.meta_desc !== "undefined"
                     && parsedMeta.meta_desc !== "") ?
-                    converter.makeHtml(parsedMeta.meta_desc) : abstract;
+                    marked(parsedMeta.meta_desc) : abstract;
 
                 moment.locale('da');
 
-                html = html ? Mustache.render(html, parsedMeta) : "";
+                html = html ? mustache.render(html, parsedMeta) : "";
 
                 // Right slide in default.tmpl
                 $("#info-modal.slide-right").css("right", "0");

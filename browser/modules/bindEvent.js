@@ -9,6 +9,7 @@
 import { LAYER, LAYER_TYPE_DEFAULT } from './layerTree/constants';
 
 var mobile = require('is-mobile');
+var jrespond = require('jrespond');
 
 /**
  *
@@ -340,7 +341,7 @@ module.exports = {
             $("#side-panel ul li").removeClass("active");
         };
 
-        var jRes = jRespond([
+        var jRes = jrespond([
             {
                 label: 'phone',
                 enter: 0,

@@ -270,8 +270,6 @@ module.exports = function (grunt) {
                         'public/js/lib/localforage/localforage.js',
 
                         'public/js/lib/jquery/jquery-3.4.1.min.js',
-                        'public/js/lib/jrespond/jRespond.js',
-                        'public/js/lib/mustache.js/mustache.js',
                         'public/js/lib/underscore/underscore.js',
                         'public/js/lib/backbone/backbone.js',
 
@@ -279,6 +277,11 @@ module.exports = function (grunt) {
                         'public/js/lib/bootstrap-material-design/dist/js/ripples.js',
                         'public/js/lib/bootstrap-material-design/dist/js/material.js',
                         'public/js/lib/bootstrap-colorpicker/js/bootstrap-colorpicker.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table.js',
+                        'public/js/lib/bootstrap-table/bootstrap-table-locale-all.js',
+                        'public/js/lib/bootstrap-table/extensions/export/bootstrap-table-export.js',
+                        'public/js/lib/bootstrap-table/extensions/filter-control/bootstrap-table-filter-control.js',
+                        'public/js/lib/tableExport.jquery.plugin/tableExport.js',
 
                         'public/js/bundle.js',
                     ],
