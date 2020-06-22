@@ -28,9 +28,6 @@ var legend;
 
 var metaDataKeys;
 
-var showdown = require('showdown');
-var converter = new showdown.Converter();
-
 /**
  *
  * @returns {*}
