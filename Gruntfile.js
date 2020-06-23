@@ -202,7 +202,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
                         plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify']
                 }
             },
             publish_sw_dev: {
@@ -216,7 +216,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
                         plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]]
+                    }], 'require-globify']
                 }
             },
             watch: {
@@ -231,7 +231,7 @@ module.exports = function (grunt) {
                     transform: [['babelify', {
                         presets: [['es2015'], ['react'], ['stage-0']],
                         plugins: ["transform-object-rest-spread"]
-                    }], 'require-globify', 'windowify'],
+                    }], 'require-globify', 'windowify', 'envify', ['browserify-css', { global: true }]],
                     watch: true,
                     keepAlive: true
                 }
