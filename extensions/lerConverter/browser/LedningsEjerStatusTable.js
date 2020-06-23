@@ -21,9 +21,6 @@ const OK = {
 }
 
 var printOmr = function (omr) {
-    console.log(omr)
-
-    
     if (Array.isArray(omr)) {
         /* If we got array: */
         return omr.map(o => (
@@ -36,6 +33,8 @@ var printOmr = function (omr) {
 }
 
 var statusline = function (omr, status) {
+    //console.log(omr)
+    //console.log(status)
     return (<p>{status}</p>)
 }
 

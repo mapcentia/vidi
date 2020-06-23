@@ -10,6 +10,8 @@
 import Dropzone from 'react-dropzone';
 import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
+import { object, reject } from 'underscore';
+import { transform } from 'async';
 
 /**
  *
@@ -51,10 +53,6 @@ var clicktimer;
  */
 var mapObj;
 
-var cowiUrl;
-
-var mapillaryUrl = "https://www.mapillary.com/app/?z=17";
-
 var config = require('../../../config/config.js');
 
 if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
@@ -65,6 +63,24 @@ if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConf
         cowiUrl = config.extensionConfig.streetView.cowi;
     }
 }
+
+/**
+ * Slice array into chunks
+ * @param {*} n 
+ */
+Array.range = function(n) {
+    // Array.range(5) --> [0,1,2,3,4]
+    return Array.apply(null,Array(n)).map((x,i) => i)
+  };
+  
+  Object.defineProperty(Array.prototype, 'chunk', {
+    value: function(n) {
+  
+      // ACTUAL CODE FOR CHUNKING ARRAY:
+      return Array.range(Math.ceil(this.length/n)).map((x,i) => this.slice(i*n,i*n+n));
+  
+    }
+  });
 
 /**
  * This function sets gui contorls visible/invisible according to the specific state
@@ -229,6 +245,7 @@ module.exports = {
 
         console.log('run login check!');
         _checkLogin()
+        
 
         /**
          * Parses xml to JSON
@@ -242,10 +259,10 @@ module.exports = {
                 attrNodeName: "attr", //default is 'false'
                 textNodeName : "#text",
                 ignoreAttributes : true,
-                ignoreNameSpace : false,
+                ignoreNameSpace : true,
                 allowBooleanAttributes : false,
                 parseNodeValue : true,
-                parseAttributeValue : false,
+                parseAttributeValue : true,
                 trimValues: true,
                 cdataTagName: "__cdata", //default is 'false'
                 cdataPositionChar: "\\c",
@@ -270,7 +287,191 @@ module.exports = {
             //console.log(tObj)
             //var jsonObj = parser.convertToJson(tObj,options);
             //console.log(jsonObj)
-        }       
+        }
+
+        /**
+         * Adds prefix to object
+         * @param {*} obj 
+         * @param {*} prefix 
+         */
+        var rename = function(obj, prefix){
+            if(typeof obj !== 'object' || !obj){
+                return false;    // check the obj argument somehow
+            }
+            var keys = Object.keys(obj),
+                keysLen = keys.length,
+                prefix = prefix || '';
+            for(var i=0; i<keysLen ;i++){
+                obj[prefix+keys[i]] = obj[keys[i]];
+                if(typeof obj[keys[i]]=== 'object'){
+                    rename(obj[prefix+keys[i]],prefix);
+                }
+                delete obj[keys[i]];
+            }
+            return obj;
+        };
+
+        var handleGeometry = function(obj) {
+            //console.log(obj)
+            let geomObj = {}
+
+            // Points
+            if ('Point' in obj) {
+                let pts = Object.values(obj["Point"])[0]
+                geomObj = {
+                    type: "Point",
+                    coordinates: pts.split(' ').map(Number)
+                }
+            // LineString
+            } else if ('LineString' in obj) {
+                let pts = Object.values(obj["LineString"])[0]
+                geomObj = {
+                    type: "LineString",
+                    coordinates: pts.split(' ').map(Number).chunk(3)
+                }
+            } else if ('LinearRing' in obj) {
+            // PolygonPatch / Polygon
+                let pts = Object.values(obj["LinearRing"])[0]
+                geomObj = {
+                    type: "Polygon",
+                    coordinates: pts.split(' ').map(Number).chunk(3)
+                }
+            } else {
+                // Matched nothing, go further
+                return handleGeometry(Object.values(obj)[0])
+            }
+
+            //TODO: Improve handeling of multi's
+            
+            //console.log(geomObj)
+            return geomObj
+
+        }
+
+        /**
+         * Parse consolidated to an array of data and enrich
+         * first object will always be the foresp. itself - handle accordingly
+         * @param {*} consolidated 
+         */
+        var parseConsolidated = function (consolidated){
+            const cons = consolidated['FeatureCollection']['featureMember']
+            //console.log(cons)
+
+            const returnObj = {
+                foresp: {},
+                forespNummer: 0,
+                data: []
+            }
+            const foresp = [], owner = [], packageinfo = [], profil = [], data = []
+            
+            /* sort the package */
+            for (const i in cons){
+                /* Lets sort it out */
+                if (cons[i]["Graveforesp"]){
+                    foresp.push(Object.values(cons[i])[0])
+                } else if (cons[i]["UtilityPackageInfo"]){
+                    packageinfo.push(rename(Object.values(cons[i])[0],'svar_'))
+                } else if (cons[i]["UtilityOwner"]){
+                    owner.push(rename(Object.values(cons[i])[0],'svar_'))
+                } else if (cons[i]["Kontaktprofil"]){
+                    profil.push(rename(Object.values(cons[i])[0],'svar_'))
+                } else {
+                    data.push(Object.values(cons[i])[0])
+                }
+            }
+
+            /* TODO: Parse indberetning */
+
+            /* Enrich each data value with contant, package and owner information - overwrite duplicate information*/
+            try {
+                data.forEach(function(item) {
+
+                    let obj = {}
+                    obj = Object.assign(obj, item)
+                    obj = Object.assign(obj, profil.find(o => o.svar_indberetningsNr === item.indberetningsNr))
+                    obj = Object.assign(obj, owner.find(o => o.svar_ledningsejer === item.ledningsejer))
+                    obj = Object.assign(obj, packageinfo.find(o => o.svar_indberetningsNr === item.indberetningsNr))
+                    
+                    // Remove specifics
+                    delete obj.svar_folderName
+                    delete obj.svar_forventetAfleveringstidpunkt
+                    delete obj.svar_objectType
+                    delete obj.svar_cvr
+                    delete obj.svar_ledningsejer
+                    delete obj.svar_indberetningsområde
+
+                    // clean values
+                    obj["objectType"] = obj["objectType"].replace('ler:','')
+
+                    //Redo Geometry
+                    //console.log(obj.geometri)
+                    let geom = handleGeometry(obj.geometri);
+                    //console.log(geom)
+                    delete obj.geometri;
+
+                    //hack to geojson obj
+                    obj = {
+                        type: 'Feature',
+                        properties: obj,
+                        geometry: geom
+                    }
+
+                    returnObj.data.push(obj)
+                    //TODO: gather up
+                })
+            } catch (error) {
+                console.log(error)
+                reject(error)
+            }
+
+            // Handle Graveforsp.
+            try {
+                foresp.forEach(function(item) {
+                    //console.log(item)
+
+                    let geom = handleGeometry(item.polygonProperty)
+                    delete item.polygonProperty
+                    delete item.graveart_anden
+                    delete item.graveart_id
+                    delete item.fid
+
+                    item.objectType = item.objectType.replace('lergml:','')
+
+                    returnObj.forespNummer = item.orderNo
+                    returnObj.foresp = {
+                        type: 'Feature',
+                        properties: item,
+                        geometry: geom
+                    };
+
+                })
+            } catch (error) {
+                console.log(error)
+                reject(error)            
+            }
+
+        
+            console.log('Fandt elementer: '.concat(packageinfo.length,' UtilityPackageInfo, ',owner.length, ' UtilityOwner, ',profil.length, ' Kontaktprofil, ', data.length,' data'))
+            
+            // use promise to return data in stream
+            return new Promise(function(resolve, reject) {
+            //    if( true ) { //optional (it'll return an object in case it's not valid)
+            //        jsonObj = parser.parse(xmlData,options);
+            //        //console.log(jsonObj)
+            //        resolve(jsonObj)
+            //    } else {
+            //        err = parser.validate(xmlData)
+            //        reject(err)
+            //    }
+                resolve(returnObj)
+            });
+        
+            // Intermediate obj
+            //var tObj = parser.getTraversalObj(xmlData,options);
+            //console.log(tObj)
+            //var jsonObj = parser.convertToJson(tObj,options);
+            //console.log(jsonObj)
+        }     
         
         
         /**
@@ -281,6 +482,7 @@ module.exports = {
                 super(props);
 
                 this.state = {
+                    active: false,
                     done: false,
                     loading: false,
                     progress: 0,
@@ -381,40 +583,44 @@ module.exports = {
 
                 _self.setState({loading:true, done: false})
 
-                newZip.loadAsync(zipblob).then(function (zip) {
-                    /* Load Status - 'LedningsejerStatusListe.xml' */
+                newZip.loadAsync(zipblob)
+                .then(function (zip) {
+                    /* Load Status - 'LedningsejerStatusListe.xml', set state */
                     _self.setState({
                         progress: 10,
                         progressText:'Indlæser statusliste'
                     })
-                    zip.files['LedningsejerStatusListe.xml'].async('string').then(fileData => {
+                    zip.files['LedningsejerStatusListe.xml'].async('string')
+                    .then(fileData => {
                         parsetoJSON(fileData).then(jsObj => {
-                            _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})
+                            _self.setState({
+                                ejerliste:jsObj.LedningsejerListe.Ledningsejer
+                            })
                         })
                     })
-                    return zip
-                }).then(function (zip) {
-                    /* Load graveforespoergsel */
-                    _self.setState({
-                        progress: 20,
-                        progressText:'Indlæser graveforespørgsel'
-                    })
-                    if (filename.indexOf('Graveforespoergsel') != -1){
-                        zip.files[filename].async('string').then(fileData => {
-                            //console.log(parsetoJSON(fileData))
-                        })
-                      }
-                    return zip
+                    return zip //pass on same zip to next then
                 }).then(function (zip) {
                     /* Load data - 'consolidated.gml' */
                     _self.setState({
                         progress: 60,
                         progressText:'Indlæser ledningsdata'
                     })
-                    zip.files['consolidated.gml'].async('string').then(fileData => {
-                        //console.log(parsetoJSON(fileData))
+                    zip.files['consolidated.gml'].async('string')
+                    .then(fileData => {
+                        parsetoJSON(fileData)
+                        .then(jsObj => {
+                            //parse jsObj of consolidated
+                            parseConsolidated(jsObj)
+                            .then( parsed => {
+                                console.log(zip)
+                                //when parsed clear 
+                            })
+
+
+
+                        })
                     })
-                }).finally(() =>{
+                }).then(() =>{
                     /* Alle filer er læst og parsed.*/
                     console.log('Stopped reading contents')
                     _self.setState({
@@ -423,11 +629,12 @@ module.exports = {
                         progress: 100,
                         progressText:'Ledningspakke indlæst'
                     })
+                }).catch(function(error) {
+                    console.log(error)
                 })
             }
 
-            render() {
-                
+            render() {          
                 return (
                     <div role="tabpanel">
                         <div className="form-group">
