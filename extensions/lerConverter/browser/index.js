@@ -10,8 +10,7 @@
 import Dropzone from 'react-dropzone';
 import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
-import { object, reject } from 'underscore';
-import { transform } from 'async';
+
 
 /**
  *
@@ -52,6 +51,11 @@ var clicktimer;
  *
  */
 var mapObj;
+
+var gc2host = 'http://localhost:3000'
+
+const SQLURL = gc2host + '/api/extension/lerSQL'
+const FEATUREURL = gc2host + 'api/extension/lerFeature'
 
 var config = require('../../../config/config.js');
 
@@ -133,11 +137,12 @@ var _checkLogin = function () {
         async: false,
         scriptCharset: "utf-8",
         success: function (response) {
+            console.table(response)
             if (response.status.authenticated == true) {
                 // determine user role (USER OR SUB_USER)
-                if (response.status.subUser == false) {
+                if (response.status.subuser == false) {
                     currentUserRole = userRole.USER;
-                    _USERSTR = response.status.userName
+                    _USERSTR = response.status.screen_name
                     console.log(_USERSTR)
                     return response.status.authenticated;
                 } else {
@@ -149,6 +154,7 @@ var _checkLogin = function () {
             } else {
                 _USERSTR = "";
                 console.log(_USERSTR)
+                console.log(response.status)
                 return response.status.unauthorized;
 
             } 
@@ -473,6 +479,32 @@ module.exports = {
             //console.log(jsonObj)
         }     
         
+        var clearForespoergsel = function (forespNummer) {
+            let qry = 'SELECT * FROM ' +schema +'.graveforespoegsel'
+            let opts = {
+                method: 'POST',
+                body:JSON.stringify({q: qry})
+            }
+
+            fetch(SQLURL, opts)
+            .then(async response => {
+                const data = await response.json();
+                console.log(data)
+    
+                // check for error response
+                if (!response.ok) {
+                    // get error message from body or default to response status
+                    const error = (data && data.message) || response.status;
+                    console.log(error)
+                    return Promise.reject(error);
+                }
+
+            })
+            .catch(error => {
+                this.setState({ errorMessage: error.toString() });
+                console.error('There was an error!', error);
+            });
+        }
         
         /**
          *
@@ -591,44 +623,24 @@ module.exports = {
                         progressText:'Indlæser statusliste'
                     })
                     zip.files['LedningsejerStatusListe.xml'].async('string')
-                    .then(fileData => {
-                        parsetoJSON(fileData).then(jsObj => {
-                            _self.setState({
-                                ejerliste:jsObj.LedningsejerListe.Ledningsejer
-                            })
-                        })
-                    })
+                        .then(fileData => parsetoJSON(fileData))
+                        .then(jsObj => _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})) // Set state when done
                     return zip //pass on same zip to next then
-                }).then(function (zip) {
+                })
+                .then(function (zip) {
                     /* Load data - 'consolidated.gml' */
                     _self.setState({
                         progress: 60,
                         progressText:'Indlæser ledningsdata'
                     })
                     zip.files['consolidated.gml'].async('string')
-                    .then(fileData => {
-                        parsetoJSON(fileData)
-                        .then(jsObj => {
-                            //parse jsObj of consolidated
-                            parseConsolidated(jsObj)
-                            .then( parsed => {
-                                console.log(zip)
-                                //when parsed clear 
-                            })
-
-
-
+                        .then(fileData => parsetoJSON(fileData))
+                        .then(jsObj => parseConsolidated(jsObj))
+                        .then(parsed => {
+                            //clear based on forespNummer
+                            clearForespoergsel(parsed.forespNummer)
+                                .then(d => {return d})
                         })
-                    })
-                }).then(() =>{
-                    /* Alle filer er læst og parsed.*/
-                    console.log('Stopped reading contents')
-                    _self.setState({
-                        loading:false,
-                        done: true,
-                        progress: 100,
-                        progressText:'Ledningspakke indlæst'
-                    })
                 }).catch(function(error) {
                     console.log(error)
                 })

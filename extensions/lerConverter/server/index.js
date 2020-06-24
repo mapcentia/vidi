@@ -7,6 +7,7 @@ var fs = require('fs');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 
+
 /**
 *
 * @type {string}
@@ -25,45 +26,49 @@ const DAYSSINCE = 25569
 const MILISECSDAY = 86400000
 
 
-/**
- * Endpoint for getting 
- */
-router.post('/api/extension/lerFeature', function (req, response) {
-    //inject into db then
-    //send the stuff to docunote
-    response.setHeader('Content-Type', 'application/json');
-    console.table(req.body)
-
-    // check if addresscase is already created
-    const qrystr = 'SELECT adrfileid, parenttype FROM ' + req.body.schema + '.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
-    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.body.db);
-
-    return {shitIsDone:'Yo!'}
-
-});
 
 /**
- * Endpoint for getting 
+ * Endpoint for SQL 
  */
 router.post('/api/extension/lerSQL', function (req, response) {
-    //inject into db then
-    //send the stuff to docunote
+    console.log(response.headersSent)
     response.setHeader('Content-Type', 'application/json');
-    console.table(req.body)
 
-    // check if addresscase is already created
-    const qrystr = 'SELECT adrfileid, parenttype FROM ' + req.body.schema + '.adressesager WHERE adresseguid = \'' + req.body.features[0].properties.adgangsadresseid + '\'';
-    var getExistinAdrCaseGc2Promise = ReqToGC2(req.session, qrystr, req.body.db);
+    console.log(req.body)
+    console.log(req)
+    console.log(req.session)
 
-    return {shitIsDone:'Yo!'}
-
+    // If user is not currently inside a session, hit 'em with a nice 401
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+        response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+    } else {
+        try {
+            SQLAPI(req)
+            .then(r => response.status(200).json(r))
+            .catch(r => response.status(500).json(r))
+        } catch (error) {
+            response.status(500).json(error)
+        }
+    }
 });
+
+/**
+ * Endpoint for FeatureAPI
+ */
+router.post('api/extension/lerFeature', function(req, response) {
+    
+    response.setHeader('Content-Type', 'application/json');
+    console.log(req)
+    FeatureAPI(req)
+
+    response.status(200).send({shitIsDone:'Yo! - feature'})
+})
 
 
 // post case to gc2 
-function FeatureAPI(req, db) {
+function FeatureAPI(req) {
     if (req.session.subUser)
-        var userstr = req.session.gc2UserName + '@' + db;
+        var userstr = req.session.gc2UserName + '@' + req.session.parentDb;
     else {
         var userstr = req.session.gc2UserName;
     }
@@ -74,7 +79,7 @@ function FeatureAPI(req, db) {
                 'Content-Length': Buffer.byteLength(postData),
                 'GC2-API-KEY': req.session.gc2ApiKey
             },
-            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' +  req.body.schema + '.' + req.body.tablename + '.the_geom' + '/4326',
+            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' +  req.body.schema + '.' + req.body.tablename + '.the_geom' + '/25832',
             body: postData,
             method: 'POST'
 
@@ -94,9 +99,9 @@ function FeatureAPI(req, db) {
     });
 }
 
-function SQLAPI(req, db) {
+function SQLAPI(req) {
     if (req.session.subUser)
-        var userstr = req.session.screenName + '@' + db;
+        var userstr = req.session.screenName + '@' + req.session.parentDb;
     else {
         var userstr = req.session.gc2UserName;
     }
