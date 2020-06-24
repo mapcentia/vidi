@@ -537,7 +537,7 @@ class VectorLayerFilter extends React.Component {
                 });
             };
             return (
-                <div style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
+                <div className="where-clause-field" style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                         <div style={{marginLeft: "10px", marginRight: "10px"}}>
                             <textarea
