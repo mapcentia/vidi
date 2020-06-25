@@ -162,7 +162,7 @@ geocloud = (function () {
 
         // Initiate base class settings
         this.init = function () {
-            this.geoJsonLayer= L.geoJson(null, {
+            this.geoJsonLayer = L.geoJson(null, {
                 style: this.defaults.styleMap,
                 pointToLayer: this.defaults.pointToLayer,
                 onEachFeature: this.defaults.onEachFeature,
@@ -174,7 +174,14 @@ geocloud = (function () {
             if (!this.defaults.clustering) {
                 this.layer = this.geoJsonLayer;
             } else {
-                this.layer = L.markerClusterGroup();
+                this.layer = L.markerClusterGroup({
+                    maxClusterRadius: 30,
+                    polygonOptions: {
+                        weight: 0,
+                        fillColor: "#333333",
+                        fillOpacity: 0.5,
+                    }
+                });
             }
 
             this.layer.id = this.defaults.name;
