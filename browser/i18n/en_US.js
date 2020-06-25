@@ -75,7 +75,6 @@ module.exports = {
         "No drawings in the map": "Ingen tegninger i kortet",
         "Click map to place circle marker": "Click map to place circle marker",
 
-        "circlemarker": "circlemarker",
         "polygon": "polygon",
         "rectangle": "rectangle",
         "polyline": "polyline",
