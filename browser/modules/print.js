@@ -51,12 +51,12 @@ var _cleanUp = function (hard) {
             cloud.get().map.removeLayer(recEdit[i]);
         }
     } catch (e) {
-        console.error(e.message);
+        //console.error(e.message);
     }
 
     icons.forEach((icon) => {
         cloud.get().map.removeLayer(icon);
-    })
+    });
 
     printOn = false;
     if (hard) {
@@ -610,7 +610,6 @@ module.exports = {
 
     getState: () => {
         let state = _self.getPrintParams();
-        console.log(state);
         return state;
     },
 
