@@ -84,7 +84,8 @@ class VectorLayerFilter extends React.Component {
                     arbitraryFilters.columns.push({
                         fieldname: item.field,
                         expression: item.operator,
-                        value: ``
+                        value: ``,
+                        restriction: this.props.layer.fields[item.field].restriction || false
                     });
                 }
             });
