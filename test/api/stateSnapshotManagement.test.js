@@ -7,7 +7,7 @@ const request = require(`request`);
 const helpers = require(`./../helpers`);
 
 let AUTH_COOKIE = false;
-const TRACKER_COOKIE = `vidi-state-tracker=1b0c07a6-2db0-49ad-860b-aa50c64887f0`;
+const TRACKER_COOKIE = `vidi-state-tracker=6cafa811-2ae7-45f4-907db-2c14fb811e53`;
 
 let anonymousStateSnapshotId = false;
 let nonAnonymousStateSnapshotId = false;
@@ -47,8 +47,10 @@ describe('State snapshot management API', () => {
             method: 'POST',
             json: true,
             body: {
-                u: `aleksandrshumilov`,
-                p: `qewadszcx`
+                "database": "test",
+                "password": "Silke2009",
+                "schema": "public",
+                "user": "test"
             }
         }, (error, response) => {
             AUTH_COOKIE = response.headers[`set-cookie`][0].split(`;`)[0];

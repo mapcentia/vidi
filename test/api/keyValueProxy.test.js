@@ -18,8 +18,10 @@ describe('Key-value proxy', () => {
             method: 'POST',
             json: true,
             body: {
-                u: `aleksandrshumilov`,
-                p: `qewadszcx`
+                "database": "test",
+                "password": "Silke2009",
+                "schema": "public",
+                "user": "test"
             }
         }, (error, response) => {
             AUTH_COOKIE = response.headers[`set-cookie`][0].split(`;`)[0];
