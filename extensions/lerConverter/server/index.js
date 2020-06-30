@@ -25,31 +25,51 @@ const DAYSSINCE = 25569
 // milisecs pr. day
 const MILISECSDAY = 86400000
 
+var userString = function (req) {
+    var userstr = ''
+    if (req.session.subUser)
+        var userstr = req.session.gc2UserName + '@' + req.session.parentDb;
+    else {
+        var userstr = req.session.gc2UserName;
+    }
+    return userstr
+}
+
 
 
 /**
  * Endpoint for SQL 
  */
 router.post('/api/extension/lerSQL', function (req, response) {
-    console.log(response.headersSent)
     response.setHeader('Content-Type', 'application/json');
 
-    console.log(req.body)
-    console.log(req)
-    console.log(req.session)
+    console.table(req.body)
 
     // If user is not currently inside a session, hit 'em with a nice 401
     if (!req.session.hasOwnProperty("gc2SessionId")) {
         response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
-    } else {
-        try {
-            SQLAPI(req)
-            .then(r => response.status(200).json(r))
-            .catch(r => response.status(500).json(r))
-        } catch (error) {
-            response.status(500).json(error)
-        }
     }
+
+    // Check if query exists
+    if(!req.body.hasOwnProperty("q")) {
+        response.status(500).json({error:"Forespørgsel mangler i parametren 'q'"})
+    }
+
+    // Go ahead with the logic
+    try {
+        SQLAPI(req.body.q, req)
+        .then(r => {
+            console.log(r)
+            response.status(200).json(r)
+        })
+        .catch(r => {
+            response.status(500).json(r)
+        })
+    } catch (error) {
+        console.log(error)
+        response.status(500).json(error)
+    }
+    
 });
 
 /**
@@ -65,13 +85,9 @@ router.post('api/extension/lerFeature', function(req, response) {
 })
 
 
-// post case to gc2 
+// Use FeatureAPI
 function FeatureAPI(req) {
-    if (req.session.subUser)
-        var userstr = req.session.gc2UserName + '@' + req.session.parentDb;
-    else {
-        var userstr = req.session.gc2UserName;
-    }
+    var userstr = userString(req)
     var postData = JSON.stringify(req.body),
         options = {
             headers: {
@@ -99,19 +115,16 @@ function FeatureAPI(req) {
     });
 }
 
-function SQLAPI(req) {
-    if (req.session.subUser)
-        var userstr = req.session.screenName + '@' + req.session.parentDb;
-    else {
-        var userstr = req.session.gc2UserName;
-    }
+// Use SQLAPI
+function SQLAPI(q, req) {
+    var userstr = userString(req)
     var options = {
-        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+requrl + '&key='+req.session.gc2ApiKey,
+        url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+q + '&key='+req.session.gc2ApiKey,
         headers: {
             'GC2-API-KEY': req.session.gc2ApiKey
         }
     };
-    console.log(requrl)
+    console.log(q)
     // Return new promise 
     return new Promise(function(resolve, reject) {
         // Do async job

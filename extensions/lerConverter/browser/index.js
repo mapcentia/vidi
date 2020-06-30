@@ -128,7 +128,7 @@ var snack = function (msg) {
 }
 var _USERSTR = "";
 /**
- * Checks login
+ * Checks login, routes to correct schema if prople are lost!
  */
 var _checkLogin = function () {    
     xhr = $.ajax({
@@ -153,9 +153,19 @@ var _checkLogin = function () {
 
             } else {
                 _USERSTR = "";
-                console.log(_USERSTR)
-                console.log(response.status)
-                return response.status.unauthorized;
+                console.log("User not logged in - triggering screen")
+
+                ////Trigger loading module
+                //document.getElementById("session").click()
+                ////Hide some elements
+                //setStyle("#login-modal-body > div > div.alert.alert-dismissible.alert-info",{'display':'none'})
+                //setStyle("#login-modal > div > div > div.modal-footer",{'display':'none'})
+                //setStyle("#login-modal > div > div > div.modal-header",{'display':'none'})
+                ////Manipulate modal to fit screen, move form to center
+                //setStyle("#login-modal", {'padding':'0px'})
+                //setStyle("#login-modal > div > div",{'width': '100%','height':'100vh'})
+
+                
 
             } 
         },
@@ -165,6 +175,18 @@ var _checkLogin = function () {
     })
     
 };
+
+/**
+ * 
+ * @param {*} objId - querySelector
+ * @param {*} propertyObject - CSS properties
+ */
+var setStyle = function( objId, propertyObject )
+{
+ var elem = document.querySelector(objId);
+ for (var property in propertyObject)
+    elem.style[property] = propertyObject[property];
+}
 
 /**
  *
@@ -480,10 +502,18 @@ module.exports = {
         }     
         
         var clearForespoergsel = function (forespNummer) {
-            let qry = 'SELECT * FROM ' +schema +'.graveforespoegsel'
+            let qry = 'SELECT * FROM ' + schema +'.graveforespoegsel'
             let opts = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                  },
                 method: 'POST',
-                body:JSON.stringify({q: qry})
+                body: JSON.stringify(
+                    {
+                        q: qry
+                    }
+                    )
             }
 
             fetch(SQLURL, opts)
