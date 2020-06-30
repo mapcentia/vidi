@@ -229,7 +229,7 @@ class VectorLayerFilter extends React.Component {
         }
         for (let key in this.state.layer.fields) {
             let field = this.state.layer.fields[key];
-            if (fieldconf[key] === undefined || (typeof fieldconf[key]["filter"] !== "undefined" && fieldconf[key]["filter"] !== true)) {
+            if ((fieldconf === null || fieldconf[key] === undefined) || (typeof fieldconf[key]["filter"] !== "undefined" && fieldconf[key]["filter"] !== true)) {
                 let alias = null;
                 if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
                     alias = fieldconf[key]["alias"];
