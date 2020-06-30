@@ -229,13 +229,16 @@ class VectorLayerFilter extends React.Component {
         }
         for (let key in this.state.layer.fields) {
             let field = this.state.layer.fields[key];
-            let alias = null;
-            if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
-                alias = fieldconf[key]["alias"];
-            }
-            if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
-                columnOptions.push(<option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
-                columnIndex++;
+            if (fieldconf[key] === undefined || (typeof fieldconf[key]["filter"] !== "undefined" && fieldconf[key]["filter"] !== true)) {
+                let alias = null;
+                if (fieldconf && typeof fieldconf[key] === "object" && typeof fieldconf[key]["alias"] !== "undefined") {
+                    alias = fieldconf[key]["alias"];
+                }
+                if (ALLOWED_TYPES_IN_FILTER.indexOf(field.type) !== -1) {
+                    columnOptions.push(
+                        <option key={`field_` + layerKey + `_` + columnIndex} value={key}>{alias || key}</option>);
+                    columnIndex++;
+                }
             }
         }
 
@@ -307,7 +310,6 @@ class VectorLayerFilter extends React.Component {
     }
 
 
-
     applyEditor() {
         this.props.onApplyEditor({
             layerKey: (this.props.layer.f_table_schema + `.` + this.props.layer.f_table_name),
@@ -325,7 +327,10 @@ class VectorLayerFilter extends React.Component {
     handleReset() {
         let props = this.props;
         let arbitraryFilters = props.arbitraryFilters || {};
-        let resetArbitraryFilters = {match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]), columns: []};
+        let resetArbitraryFilters = {
+            match: (props.layerMeta && `default_match` in props.layerMeta && MATCHES.indexOf(props.layerMeta.default_match) > -1 ? props.layerMeta.default_match : MATCHES[0]),
+            columns: []
+        };
         if (props.presetFilters.length === 0) {
             resetArbitraryFilters.columns.push(DUMMY_RULE);
         } else {
@@ -466,7 +471,10 @@ class VectorLayerFilter extends React.Component {
 
             let childrenInfoMarkup = childrenInfo();
             return (
-                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                <div className="js-arbitrary-filters" style={this.state.editorFiltersActive ? {
+                    pointerEvents: "none",
+                    opacity: "0.2"
+                } : {}}>
                     {childrenInfoMarkup}
                     <div className="form-group" style={{display: this.props.isFilterImmutable ? "none" : "inline"}}>
                         <p>{__(`Match`)} {matchSelector} {__(`of the following`)}</p>
@@ -495,7 +503,10 @@ class VectorLayerFilter extends React.Component {
             this.state.predefinedFilters.map((item, index) => {
                 let filterIsActive = (this.state.disabledPredefinedFilters.indexOf(item.name) === -1);
                 predefinedFiltersTab.push(
-                    <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
+                    <div key={`tile_filter_` + index} style={this.state.editorFiltersActive ? {
+                        pointerEvents: "none",
+                        opacity: "0.2"
+                    } : {}}>
                         <div style={{display: `inline-block`}}>
                             <div className="checkbox">
                                 <label>
@@ -538,7 +549,10 @@ class VectorLayerFilter extends React.Component {
                 });
             };
             return (
-                <div className="where-clause-field" style={{marginTop: "25px", display: this.props.isFilterImmutable ? "none" : "inline"}}>
+                <div className="where-clause-field" style={{
+                    marginTop: "25px",
+                    display: this.props.isFilterImmutable ? "none" : "inline"
+                }}>
                     <div style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}}>
                         <div style={{marginLeft: "10px", marginRight: "10px"}}>
                             <textarea
@@ -548,14 +562,17 @@ class VectorLayerFilter extends React.Component {
                                 value={JSON.stringify(
                                     this.state.editorFilters
                                 )}
-                             />
+                            />
                         </div>
                     </div>
                     <div>
                         <label>
                             <input type="checkbox" checked={this.state.editorFiltersActive} onChange={this.activateEditor.bind(this)}/> {__(`Filter editor`)}
                         </label>
-                        <button style={!this.state.editorFiltersActive ? {pointerEvents: "none", opacity: "0.2"} : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
+                        <button style={!this.state.editorFiltersActive ? {
+                            pointerEvents: "none",
+                            opacity: "0.2"
+                        } : {}} type="button" className="btn btn-xs btn-success" onClick={this.applyEditor.bind(this)}>
                             <i className="fa fa-check"></i> {__(`Apply`)}
                         </button>
                     </div>
@@ -564,7 +581,8 @@ class VectorLayerFilter extends React.Component {
         };
 
         const buildResetButton = (props) => {
-            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}><i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
+            return (<button className="btn btn-xs btn-danger" onClick={this.handleReset.bind(this)}>
+                <i className="fa fa-reply"></i> {__(`Reset filter`)}</button>)
         };
 
         let activeFiltersTab = false;
