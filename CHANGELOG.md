@@ -57,6 +57,7 @@ and this project adheres to [CalVer](https://calver.org/).
         - Then set, the arbitrary filter setup can't be changes. Only values can. Should be used together with `filter_config`.
 - A Reset filter button is added, which will reset the filter to the original state.
 - The `infoClickCursorStyle` setting will set cursor style when using feature info click. Can be set to `pointer` or `crosshair`. The setting can be set in `config/config.js` or in a runtime config.
+- New Autocomplete control in filters. The control will fetch distinct values from PostgreSQL for use in the autocomplete field. All distinct values are fetch at once. 100.000 dictinct values can be handle witout problems. Only works on text fields and must be enabled in GC2 Structure tab.
 
 ### Changed
 - `public\js\vidi.js`is now required instead of loaded in a script tag. This way it's transpiled and can contain new JavaScript syntax.

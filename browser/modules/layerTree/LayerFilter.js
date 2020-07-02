@@ -15,7 +15,14 @@ import {
     EXPRESSIONS_FOR_BOOLEANS,
     EXPRESSIONS
 } from './filterUtils';
-import {StringControl, NumberControl, BooleanControl, DatetimeControl, DateControl} from './controls';
+import {
+    StringControl,
+    NumberControl,
+    BooleanControl,
+    DatetimeControl,
+    DateControl,
+    AutocompleteControl
+} from './controls';
 
 /**
  * Layer filter component
@@ -350,7 +357,7 @@ class VectorLayerFilter extends React.Component {
 
     render() {
         let allRulesAreValid = true;
-        let layerKey = this.state.layer.f_table_name + '.' + this.state.layer.f_table_schema;
+        let layerKey = this.state.layer.f_table_schema + '.' + this.state.layer.f_table_name;
 
         let matchSelectorOptions = [];
         MATCHES.map((match, index) => {
@@ -405,7 +412,21 @@ class VectorLayerFilter extends React.Component {
                     this.changeValue(value, index);
                 };
 
-                if (STRING_TYPES.indexOf(type) !== -1) {
+                let fieldconf = null;
+                if (this.state.layer.fieldconf) {
+                    try {
+                        fieldconf = JSON.parse(this.state.layer.fieldconf)
+                    } catch (e) {
+                    }
+                }
+
+                console.log(column.fieldname)
+                console.log(fieldconf)
+
+                if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
+                    control = (
+                        <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} onChange={changeHandler}/>);
+                } else if (STRING_TYPES.indexOf(type) !== -1) {
                     control = (
                         <StringControl id={id} value={column.value} restriction={column.restriction} onChange={changeHandler}/>);
                 } else if (NUMBER_TYPES.indexOf(type) !== -1) {
