@@ -420,9 +420,6 @@ class VectorLayerFilter extends React.Component {
                     }
                 }
 
-                console.log(column.fieldname)
-                console.log(fieldconf)
-
                 if (STRING_TYPES.indexOf(type) !== -1 && fieldconf && fieldconf[column.fieldname] && fieldconf[column.fieldname].autocomplete) {
                     control = (
                         <AutocompleteControl id={id} value={column.value} layerKey={layerKey} field={column.fieldname} restriction={column.restriction} onChange={changeHandler}/>);
@@ -542,7 +539,7 @@ class VectorLayerFilter extends React.Component {
                             </div>
                         </div>
                         <div style={{display: `inline-block`}}>
-                            <span>{item.name} ({item.value})</span>
+                            <span>{item.name}</span>
                         </div>
                     </div>
                 );
