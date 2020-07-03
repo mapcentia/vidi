@@ -86,6 +86,10 @@ Array.range = function(n) {
     }
   });
 
+  function hasChild(obj){
+    return !!Object.keys(obj).length;
+  }
+
 /**
  * This function sets gui contorls visible/invisible according to the specific state
  * Legal values, choose from GUI_CONTROL_STATE Enumeration.
@@ -274,6 +278,23 @@ module.exports = {
         console.log('run login check!');
         _checkLogin()
         
+        /**
+         * Flattens object
+         * @param {*} obj 
+         */
+        var flattenObject = function(obj) {
+            const flattened = {}
+          
+            Object.keys(obj).forEach((key) => {
+              if (typeof obj[key] === 'object' && obj[key] !== null) {
+                Object.assign(flattened, flattenObject(obj[key]))
+              } else {
+                flattened[key] = obj[key]
+              }
+            })
+          
+            return flattened
+          }
 
         /**
          * Parses xml to JSON
@@ -283,10 +304,10 @@ module.exports = {
             var jsonObj, Err = {}
             var parser = require('fast-xml-parser');
             var options = {
-                attributeNamePrefix : "@_",
+                attributeNamePrefix : "",
                 attrNodeName: "attr", //default is 'false'
-                textNodeName : "#text",
-                ignoreAttributes : true,
+                textNodeName : "value",
+                ignoreAttributes : false,
                 ignoreNameSpace : true,
                 allowBooleanAttributes : false,
                 parseNodeValue : true,
@@ -339,39 +360,67 @@ module.exports = {
             return obj;
         };
 
-        var handleGeometry = function(obj) {
-            //console.log(obj)
-            let geomObj = {}
+        var geo = function(obj) {
+            let dim = 3
+            let coords = ''
+            //console.table(obj)
 
+            if (obj.hasOwnProperty('attr')){
+                if (obj.attr.hasOwnProperty('srsDimension')){
+                    dim = obj.attr.srsDimension
+                }
+                coords = obj.value.split(' ').map(Number).chunk(dim)
+            } else {
+                coords = obj.split(' ').map(Number).chunk(dim)
+            }
+
+            return coords
+        }
+
+        var handleGeometry = function(obj) {
+            //console.table()
+            let geomObj = {}
+            let flat = flattenObject(obj)
+
+            if (!typeof obj === 'object') {
+                return null
+            }
+
+            // Handle type
             // Points
             if ('Point' in obj) {
-                let pts = Object.values(obj["Point"])[0]
-                geomObj = {
-                    type: "Point",
-                    coordinates: pts.split(' ').map(Number)
-                }
-            // LineString
+                geomObj.type = 'Point'
             } else if ('LineString' in obj) {
-                let pts = Object.values(obj["LineString"])[0]
-                geomObj = {
-                    type: "LineString",
-                    coordinates: pts.split(' ').map(Number).chunk(3)
-                }
-            } else if ('LinearRing' in obj) {
-            // PolygonPatch / Polygon
-                let pts = Object.values(obj["LinearRing"])[0]
-                geomObj = {
-                    type: "Polygon",
-                    coordinates: pts.split(' ').map(Number).chunk(3)
-                }
+                geomObj.type = 'LineString'
+            } else if ('Surface' in obj) {
+                geomObj.type = "Polygon"
             } else {
-                // Matched nothing, go further
-                return handleGeometry(Object.values(obj)[0])
+                // Matched nothing, kill 
+                return null  
             }
 
             //TODO: Improve handeling of multi's
-            
-            //console.log(geomObj)
+
+            // Handle geometry
+            console.table(flat)
+
+            let dim = 2
+            if (flat.hasOwnProperty('srsDimension')){
+                dim = flat.srsDimension
+            }
+            if (flat.hasOwnProperty('posList')){
+                geomObj.coords = flat.posList.split(' ').map(Number).chunk(dim)
+            } else if (flat.hasOwnProperty('pos')) {
+                geomObj.coords = flat.pos.split(' ').map(Number)
+            } else if (flat.hasOwnProperty('coordinates')){
+                let coords = flat.coordinates.split(' ')
+                console.log(coords)
+            } else if (flat.hasOwnProperty('value')) {
+                geomObj.coords = flat.value.split(' ').map(Number).chunk(dim)
+            } else {
+                geomObj = null
+            }
+        
             return geomObj
 
         }
@@ -430,10 +479,22 @@ module.exports = {
 
                     // clean values
                     obj["objectType"] = obj["objectType"].replace('ler:','')
+                    delete obj.attr;
+                    delete obj.svar_attr;
+
+                    // etableringstidspunkt
+                    if (obj.hasOwnProperty('etableringstidspunkt')) {
+                        if (obj.etableringstidspunkt.hasOwnProperty('attr')){
+                            //can only be "before"
+                            obj.etableringstidspunkt = 'Før '+ obj.etableringstidspunkt.value
+                        }
+                    }
 
                     //Redo Geometry
                     //console.log(obj.geometri)
+                    console.log(obj.geometri)
                     let geom = handleGeometry(obj.geometri);
+                    console.log(geom)
                     //console.log(geom)
                     delete obj.geometri;
 
@@ -457,7 +518,10 @@ module.exports = {
                 foresp.forEach(function(item) {
                     //console.log(item)
 
+                    console.log(item.polygonProperty)
                     let geom = handleGeometry(item.polygonProperty)
+                    console.log(geom)
+
                     delete item.polygonProperty
                     delete item.graveart_anden
                     delete item.graveart_id
@@ -480,6 +544,7 @@ module.exports = {
 
         
             console.log('Fandt elementer: '.concat(packageinfo.length,' UtilityPackageInfo, ',owner.length, ' UtilityOwner, ',profil.length, ' Kontaktprofil, ', data.length,' data'))
+            console.log(returnObj)
             
             // use promise to return data in stream
             return new Promise(function(resolve, reject) {
@@ -501,22 +566,13 @@ module.exports = {
             //console.log(jsonObj)
         }     
         
-        var clearForespoergsel = function (forespNummer) {
-            let qry = 'SELECT * FROM ' + schema +'.graveforespoegsel'
+        var readForespoergsels = function (forespNummer) {
             let opts = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                  },
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
                 method: 'POST',
-                body: JSON.stringify(
-                    {
-                        q: qry
-                    }
-                    )
+                body: JSON.stringify({nummer: forespNummer})
             }
-
-            fetch(SQLURL, opts)
+            fetch(gc2host + '/api/extension/getForespoergsel', opts)
             .then(async response => {
                 const data = await response.json();
                 console.log(data)
@@ -667,9 +723,7 @@ module.exports = {
                         .then(fileData => parsetoJSON(fileData))
                         .then(jsObj => parseConsolidated(jsObj))
                         .then(parsed => {
-                            //clear based on forespNummer
-                            clearForespoergsel(parsed.forespNummer)
-                                .then(d => {return d})
+                            console.table(parsed)
                         })
                 }).catch(function(error) {
                     console.log(error)

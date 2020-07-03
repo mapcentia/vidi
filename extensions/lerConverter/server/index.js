@@ -35,6 +35,42 @@ var userString = function (req) {
     return userstr
 }
 
+/**
+ * Endpoint for getting distinct foresp. in current schema 
+ */
+router.post('/api/extension/getForespoergsel', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    console.table(req.body)
+    console.table(req.session)
+
+    // If user is not currently inside a session, hit 'em with a nice 401
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+        response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+    }
+
+    // Check if query exists
+    if(!req.body.hasOwnProperty("nummer")) {
+        response.status(500).json({error:"Forespørgsel mangler i parametren 'nummer'"})
+    }
+
+    // Go ahead with the logic
+    let q = 'Select * from '
+    try {
+        SQLAPI(req.body.q, req)
+        .then(r => {
+            console.log(r)
+            response.status(200).json(r)
+        })
+        .catch(r => {
+            response.status(500).json(r)
+        })
+    } catch (error) {
+        console.log(error)
+        response.status(500).json(error)
+    }
+    
+});
 
 
 /**
