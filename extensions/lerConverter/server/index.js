@@ -42,7 +42,9 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
     console.table(req.body)
+    let b = req.body
     console.table(req.session)
+    let s = req.session
 
     // If user is not currently inside a session, hit 'em with a nice 401
     if (!req.session.hasOwnProperty("gc2SessionId")) {
@@ -55,7 +57,7 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
     }
 
     // Go ahead with the logic
-    let q = 'Select * from '
+    let q = 'Select forespnummer from '+ s.gc2screenName+'.graveforespoegsel'
     try {
         SQLAPI(req.body.q, req)
         .then(r => {
@@ -72,14 +74,16 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
     
 });
 
-
 /**
- * Endpoint for SQL 
+ * Endpoint for upserting features from LER 
  */
-router.post('/api/extension/lerSQL', function (req, response) {
+router.post('/api/extension/upsertForespoergsel', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    console.table(req.body)
+    //console.table(req.body)
+    let b = req.body
+    //console.table(req.session)
+    let s = req.session
 
     // If user is not currently inside a session, hit 'em with a nice 401
     if (!req.session.hasOwnProperty("gc2SessionId")) {
@@ -87,15 +91,38 @@ router.post('/api/extension/lerSQL', function (req, response) {
     }
 
     // Check if query exists
-    if(!req.body.hasOwnProperty("q")) {
-        response.status(500).json({error:"Forespørgsel mangler i parametren 'q'"})
+    if(!req.body.hasOwnProperty("foresp") && !req.body.hasOwnProperty("forespNummer") && !req.body.hasOwnProperty("data")) {
+        response.status(500).json({error:"Forespørgsel er ikke komplet. 'foresp','forespNummer','data'"})
     }
 
     // Go ahead with the logic
+    // sort in types then delete sync-like
+    var lines = [], polys = [], pts = []
+    let f;
+
+    b.data.forEach(f => {
+        //console.log(f)
+        // Pass if unparsed
+        if (f.geometry === null) {
+            return
+        } else if (f.geometry.type == 'MultiLineString') {
+            lines.push(f)
+        } else if (f.geometry.type == 'MultiPolygon') {
+            pts.push(f)
+        } else if (f.geometry.type == 'MultiPoint') {
+            polys.push(f)
+        }
+    })
+
+    console.log('Got: '+b.forespNummer+'. Lines: '+lines.length+', Polygons: '+polys.length+', Points: '+pts.length)
+
     try {
-        SQLAPI(req.body.q, req)
+        // delete existing
+        //SQLAPI('delete from '+s.screenName+'.ler_line WHERE ', req)
+        fc = {type:'FeatureCollection',features: lines}
+        FeatureAPI(req, fc, 'ler_line', '7416')
         .then(r => {
-            console.log(r)
+            //console.log(r)
             response.status(200).json(r)
         })
         .catch(r => {
@@ -108,30 +135,20 @@ router.post('/api/extension/lerSQL', function (req, response) {
     
 });
 
-/**
- * Endpoint for FeatureAPI
- */
-router.post('api/extension/lerFeature', function(req, response) {
-    
-    response.setHeader('Content-Type', 'application/json');
-    console.log(req)
-    FeatureAPI(req)
-
-    response.status(200).send({shitIsDone:'Yo! - feature'})
-})
 
 
 // Use FeatureAPI
-function FeatureAPI(req) {
+function FeatureAPI(req, featurecollection, table, crs) {
     var userstr = userString(req)
-    var postData = JSON.stringify(req.body),
-        options = {
+    var postData = JSON.stringify(featurecollection)
+    //console.log(postData)
+    var options = {
             headers: {
                 'Content-Type': 'application/json; charset=utf-8',
                 'Content-Length': Buffer.byteLength(postData),
                 'GC2-API-KEY': req.session.gc2ApiKey
             },
-            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' +  req.body.schema + '.' + req.body.tablename + '.the_geom' + '/25832',
+            uri: GC2_HOST +'/api/v2/feature/' + userstr + '/' +  req.session.screenName + '.' + table + '.the_geom' + '/' + crs,
             body: postData,
             method: 'POST'
 
@@ -140,10 +157,16 @@ function FeatureAPI(req) {
     return new Promise(function(resolve, reject) {
         request(options, function(err, resp, body) {
             if (err) {
-                console.log(err)
-                reject(err);
+                p = JSON.parse(body)
+                console.log(p.message)
+                reject(JSON.parse(body));
             } else {
-                console.log(resp)
+                p = JSON.parse(body)
+                if (p.message.hasOwnProperty('ServiceException')){
+                    console.log(p.message.ServiceException.substring(0,200))
+                } else {
+                    console.log(p.message)
+                }
                 resolve(JSON.parse(body));
             }
         })
@@ -166,10 +189,10 @@ function SQLAPI(q, req) {
         // Do async job
         request.get(options, function(err, resp, body) {
             if (err) {
-                console.log(err)
+                //console.log(err)
                 reject(err);
             } else {
-                console.log(resp)
+                //console.log(resp)
                 resolve(JSON.parse(body));
             }
         })

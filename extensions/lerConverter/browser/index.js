@@ -360,21 +360,15 @@ module.exports = {
             return obj;
         };
 
-        var geo = function(obj) {
-            let dim = 3
-            let coords = ''
-            //console.table(obj)
-
-            if (obj.hasOwnProperty('attr')){
-                if (obj.attr.hasOwnProperty('srsDimension')){
-                    dim = obj.attr.srsDimension
-                }
-                coords = obj.value.split(' ').map(Number).chunk(dim)
-            } else {
-                coords = obj.split(' ').map(Number).chunk(dim)
+        var lc = function (obj) {
+            var key, keys = Object.keys(obj);
+            var n = keys.length;
+            var newobj={}
+            while (n--) {
+              key = keys[n];
+              newobj[key.toLowerCase()] = obj[key];
             }
-
-            return coords
+            return newobj
         }
 
         var handleGeometry = function(obj) {
@@ -389,12 +383,14 @@ module.exports = {
             // Handle type
             // Points
             if ('Point' in obj) {
-                geomObj.type = 'Point'
+                geomObj.type = 'MultiPoint'
             } else if ('LineString' in obj) {
-                geomObj.type = 'LineString'
+                geomObj.type = 'MultiLineString'
             } else if ('Surface' in obj) {
-                geomObj.type = "Polygon"
-            } else {
+                geomObj.type = "MultiPolygon"
+            } else if ('Polygon' in obj) {
+                geomObj.type = "MultiPolygon"
+            }else {
                 // Matched nothing, kill 
                 return null  
             }
@@ -402,23 +398,28 @@ module.exports = {
             //TODO: Improve handeling of multi's
 
             // Handle geometry
-            console.table(flat)
+            //console.table(flat)
 
             let dim = 2
             if (flat.hasOwnProperty('srsDimension')){
                 dim = flat.srsDimension
             }
             if (flat.hasOwnProperty('posList')){
-                geomObj.coords = flat.posList.split(' ').map(Number).chunk(dim)
+                geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
             } else if (flat.hasOwnProperty('pos')) {
-                geomObj.coords = flat.pos.split(' ').map(Number)
+                geomObj.coordinates = [flat.pos.split(' ').map(Number)]
             } else if (flat.hasOwnProperty('coordinates')){
                 let coords = flat.coordinates.split(' ')
-                console.log(coords)
+                geomObj.coordinates = []
+                let c;
+                for (c in coords) {
+                    geomObj.coordinates.push([c.split(',').map(Number)])
+                }
             } else if (flat.hasOwnProperty('value')) {
-                geomObj.coords = flat.value.split(' ').map(Number).chunk(dim)
+                geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
             } else {
-                geomObj = null
+                // hard-pass on the rest for now
+                geomObj = {type:'unkonwn', coordinates:null}
             }
         
             return geomObj
@@ -457,6 +458,39 @@ module.exports = {
                 }
             }
 
+            // Handle Graveforsp.
+            try {
+                foresp.forEach(function(item) {
+                    //console.log(item)
+
+                    //console.log(item.polygonProperty)
+                    let geom = handleGeometry(item.polygonProperty)
+                    //console.log(geom)
+
+                    delete item.polygonProperty
+                    delete item.graveart_anden
+                    delete item.graveart_id
+                    delete item.fid
+
+                    item.objectType = item.objectType.replace('lergml:','')
+
+                    returnObj.forespNummer = item.orderNo
+
+                    item.forespNummer = returnObj.forespNummer
+                    delete item.orderNo
+
+                    returnObj.foresp = {
+                        type: 'Feature',
+                        properties: lc(item),
+                        geometry: geom
+                    };
+
+                })
+            } catch (error) {
+                console.log(error)
+                reject(error)            
+            }
+
             /* TODO: Parse indberetning */
 
             /* Enrich each data value with contant, package and owner information - overwrite duplicate information*/
@@ -476,11 +510,14 @@ module.exports = {
                     delete obj.svar_cvr
                     delete obj.svar_ledningsejer
                     delete obj.svar_indberetningsområde
+                    delete obj.indberetningsNr
 
                     // clean values
                     obj["objectType"] = obj["objectType"].replace('ler:','')
                     delete obj.attr;
                     delete obj.svar_attr;
+
+                    obj.forespNummer = returnObj.forespNummer
 
                     // etableringstidspunkt
                     if (obj.hasOwnProperty('etableringstidspunkt')) {
@@ -492,56 +529,24 @@ module.exports = {
 
                     //Redo Geometry
                     //console.log(obj.geometri)
-                    console.log(obj.geometri)
                     let geom = handleGeometry(obj.geometri);
-                    console.log(geom)
                     //console.log(geom)
                     delete obj.geometri;
 
                     //hack to geojson obj
                     obj = {
                         type: 'Feature',
-                        properties: obj,
+                        properties: lc(obj),
                         geometry: geom
                     }
 
-                    returnObj.data.push(obj)
+                    returnObj.data.push(lc(obj))
                     //TODO: gather up
                 })
             } catch (error) {
                 console.log(error)
                 reject(error)
             }
-
-            // Handle Graveforsp.
-            try {
-                foresp.forEach(function(item) {
-                    //console.log(item)
-
-                    console.log(item.polygonProperty)
-                    let geom = handleGeometry(item.polygonProperty)
-                    console.log(geom)
-
-                    delete item.polygonProperty
-                    delete item.graveart_anden
-                    delete item.graveart_id
-                    delete item.fid
-
-                    item.objectType = item.objectType.replace('lergml:','')
-
-                    returnObj.forespNummer = item.orderNo
-                    returnObj.foresp = {
-                        type: 'Feature',
-                        properties: item,
-                        geometry: geom
-                    };
-
-                })
-            } catch (error) {
-                console.log(error)
-                reject(error)            
-            }
-
         
             console.log('Fandt elementer: '.concat(packageinfo.length,' UtilityPackageInfo, ',owner.length, ' UtilityOwner, ',profil.length, ' Kontaktprofil, ', data.length,' data'))
             console.log(returnObj)
@@ -566,7 +571,7 @@ module.exports = {
             //console.log(jsonObj)
         }     
         
-        var readForespoergsels = function (forespNummer) {
+        var readForespoergselOption = function (forespNummer) {
             let opts = {
                 headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
                 method: 'POST',
@@ -591,6 +596,33 @@ module.exports = {
                 console.error('There was an error!', error);
             });
         }
+
+        var pushForespoergsel = function (obj) {
+            let opts = {
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                method: 'POST',
+                body: JSON.stringify(obj)
+            }
+            fetch(gc2host + '/api/extension/upsertForespoergsel', opts)
+            .then(async response => {
+                const data = await response.json();
+                console.log(data)
+    
+                // check for error response
+                if (!response.ok) {
+                    // get error message from body or default to response status
+                    const error = (data && data.message) || response.status;
+                    console.log(error)
+                    return Promise.reject(error);
+                }
+
+            })
+            .catch(error => {
+                this.setState({ errorMessage: error.toString() });
+                console.error('There was an error!', error);
+            });
+        }
+
         
         /**
          *
@@ -605,7 +637,8 @@ module.exports = {
                     loading: false,
                     progress: 0,
                     progressText: '',
-                    ejerliste: []
+                    ejerliste: [],
+                    selectedForespoergsel: ''
                 };
 
                 this.readContents = this.readContents.bind(this)
@@ -723,7 +756,14 @@ module.exports = {
                         .then(fileData => parsetoJSON(fileData))
                         .then(jsObj => parseConsolidated(jsObj))
                         .then(parsed => {
-                            console.table(parsed)
+                            pushForespoergsel(parsed)
+                            .then(r => {
+                                console.log(r)
+                                _self.setState({done: true})
+                            })
+                            .catch(e => {
+                                console.log(e)
+                            })
                         })
                 }).catch(function(error) {
                     console.log(error)
