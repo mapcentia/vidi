@@ -175,7 +175,7 @@ geocloud = (function () {
                 this.layer = this.geoJsonLayer;
             } else {
                 this.layer = L.markerClusterGroup({
-                    maxClusterRadius: 30,
+                    maxClusterRadius: 0,
                     polygonOptions: {
                         weight: 0,
                         fillColor: "#333333",
