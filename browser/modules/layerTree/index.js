@@ -1823,7 +1823,7 @@ module.exports = {
                                         break;
                                     case `date`:
                                     case `timestamp with time zone`:
-                                    case `timestamp with timeout zone`:
+                                    case `timestamp without time zone`:
                                         if (EXPRESSIONS_FOR_DATES.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
                                         }
