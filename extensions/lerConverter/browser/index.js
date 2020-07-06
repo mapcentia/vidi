@@ -398,6 +398,7 @@ module.exports = {
             //TODO: Improve handeling of multi's
 
             // Handle geometry
+            flat.type = geomObj.type
             //console.table(flat)
 
             let dim = 2
@@ -405,21 +406,33 @@ module.exports = {
                 dim = flat.srsDimension
             }
             if (flat.hasOwnProperty('posList')){
-                geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
+                if (flat.type == 'MultiPolygon'){
+                    geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
+                    let rings = [geomObj.coordinates]
+                    let multis = [rings]
+                    geomObj.coordinates = multis
+                } else {
+                    geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
+                }
             } else if (flat.hasOwnProperty('pos')) {
                 geomObj.coordinates = [flat.pos.split(' ').map(Number)]
-            } else if (flat.hasOwnProperty('coordinates')){
+            } else if (flat.hasOwnProperty('coordinates')){   
                 let coords = flat.coordinates.split(' ')
                 geomObj.coordinates = []
                 let c;
                 for (c in coords) {
-                    geomObj.coordinates.push([c.split(',').map(Number)])
+                    //console.log(coords[c])
+                    geomObj.coordinates.push([coords[c].split(',').map(Number)])
                 }
+                let rings = [geomObj.coordinates]
+                let multis = [rings]
+                geomObj.coordinates = multis
+
             } else if (flat.hasOwnProperty('value')) {
                 geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
             } else {
                 // hard-pass on the rest for now
-                geomObj = {type:'unkonwn', coordinates:null}
+                geomObj = {type:'unknown', coordinates:null}
             }
         
             return geomObj
@@ -525,6 +538,20 @@ module.exports = {
                             //can only be "before"
                             obj.etableringstidspunkt = 'Før '+ obj.etableringstidspunkt.value
                         }
+                    }
+
+                    // postfix rest of attributes
+                    for (const [key, value] of Object.entries(obj)) {
+                        // skip geom
+                        if (key == 'geometri'){
+                            continue
+                        }
+
+                        if (typeof value == 'object'){
+                            //console.log(value);
+                            obj[key] = value.value + ' ' + value.attr.uom
+                            //console.log(obj[key])
+                        } 
                     }
 
                     //Redo Geometry

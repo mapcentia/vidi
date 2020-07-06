@@ -3,7 +3,6 @@ var request = require('request');
 var router = express.Router();
 var http = require('http');
 var https = require('https');
-var fs = require('fs');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 
@@ -49,11 +48,13 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
     // If user is not currently inside a session, hit 'em with a nice 401
     if (!req.session.hasOwnProperty("gc2SessionId")) {
         response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+        return
     }
 
     // Check if query exists
     if(!req.body.hasOwnProperty("nummer")) {
         response.status(500).json({error:"Forespørgsel mangler i parametren 'nummer'"})
+        return
     }
 
     // Go ahead with the logic
@@ -88,17 +89,19 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
     // If user is not currently inside a session, hit 'em with a nice 401
     if (!req.session.hasOwnProperty("gc2SessionId")) {
         response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+        return
     }
 
     // Check if query exists
     if(!req.body.hasOwnProperty("foresp") && !req.body.hasOwnProperty("forespNummer") && !req.body.hasOwnProperty("data")) {
         response.status(500).json({error:"Forespørgsel er ikke komplet. 'foresp','forespNummer','data'"})
+        return
     }
 
     // Go ahead with the logic
     // sort in types then delete sync-like
     var lines = [], polys = [], pts = []
-    let f;
+    var f, fc, chain;
 
     b.data.forEach(f => {
         //console.log(f)
@@ -108,25 +111,58 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         } else if (f.geometry.type == 'MultiLineString') {
             lines.push(f)
         } else if (f.geometry.type == 'MultiPolygon') {
-            pts.push(f)
-        } else if (f.geometry.type == 'MultiPoint') {
             polys.push(f)
+        } else if (f.geometry.type == 'MultiPoint') {
+            pts.push(f)
         }
     })
 
     console.log('Got: '+b.forespNummer+'. Lines: '+lines.length+', Polygons: '+polys.length+', Points: '+pts.length)
 
     try {
-        // delete existing
-        //SQLAPI('delete from '+s.screenName+'.ler_line WHERE ', req)
-        fc = {type:'FeatureCollection',features: lines}
-        FeatureAPI(req, fc, 'ler_line', '7416')
+        lines = {type:'FeatureCollection',features: lines}
+        pts = {type:'FeatureCollection',features: pts}
+        polys = {type:'FeatureCollection',features: polys}
+        fors = {type:'FeatureCollection',features: [b.foresp]}
+
+        chain = [
+            SQLAPI('delete from '+s.screenName+'.graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.lines WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.points WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.polygons WHERE forespnummer = '+b.forespNummer, req)
+        ]
+
+        // Add forespoergsel
+        chain.push(FeatureAPI(req, fors, 'graveforespoergsel', '25832'))
+
+        // Add layers that exist
+        if (lines.features.length > 0) {
+            chain.push(FeatureAPI(req, lines, 'lines', '7416'))
+        }
+        if (pts.features.length > 0) {
+            chain.push(FeatureAPI(req, pts, 'points', '7416'))
+        }
+        if (polys.features.length > 0) {
+            chain.push(FeatureAPI(req, polys, 'polygons', '7416'))
+        }
+        
+        Promise.all(chain)
         .then(r => {
             //console.log(r)
             response.status(200).json(r)
         })
         .catch(r => {
-            response.status(500).json(r)
+            // clean house anyhow
+            chain = [
+                SQLAPI('delete from '+s.screenName+'.graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.lines WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.points WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.polygons WHERE forespnummer = '+b.forespNummer, req),
+            ]
+            Promise.all(chain)
+            .finally(
+                response.status(500).json(r)
+            )
         })
     } catch (error) {
         console.log(error)
@@ -165,7 +201,7 @@ function FeatureAPI(req, featurecollection, table, crs) {
                 if (p.message.hasOwnProperty('ServiceException')){
                     console.log(p.message.ServiceException.substring(0,200))
                 } else {
-                    console.log(p.message)
+                    //console.log(p.message)
                 }
                 resolve(JSON.parse(body));
             }
