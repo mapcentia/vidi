@@ -90,34 +90,6 @@ Array.range = function(n) {
     return !!Object.keys(obj).length;
   }
 
-/**
- * This function sets gui contorls visible/invisible according to the specific state
- * Legal values, choose from GUI_CONTROL_STATE Enumeration.
- * Important notice, one or more states can be set simultaneuosly
- * @param state_Enum The number to set controls visible/invisible
- * @private
- */
-var SetGUI_ControlState = function (state_Enum) {
-    if (state_Enum >= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE) {
-        // implementation specific is to hide all controls
-        $('#lerConverter-feature-editcontent').hide();        
-
-        // subtract this enumeration, and continue
-        state_Enum -= GUI_CONTROL_STATE.NO_CONTROLS_VISIBLE;
-    }
-    if (state_Enum >= GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT) {
-        $('#lerConverter-feature-login').show(); 
-
-        // subtract this enumeration, and continue
-        state_Enum -= GUI_CONTROL_STATE.AUTHENTICATE_SHOW_ALERT;
-    }
-    if (state_Enum >= GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT) {        
-        $('#lerConverter-feature-login').hide(); 
-
-        // subtract this enumeration, and continue
-        state_Enum -= GUI_CONTROL_STATE.AUTHENTICATE_HIDE_ALERT;
-    }  
-}
 require('snackbarjs');
 /**
  * Displays a snack!
@@ -131,54 +103,6 @@ var snack = function (msg) {
     });
 }
 var _USERSTR = "";
-/**
- * Checks login, routes to correct schema if prople are lost!
- */
-var _checkLogin = function () {    
-    xhr = $.ajax({
-        method: "GET",
-        url: "/api/session/status",
-        async: false,
-        scriptCharset: "utf-8",
-        success: function (response) {
-            console.table(response)
-            if (response.status.authenticated == true) {
-                // determine user role (USER OR SUB_USER)
-                if (response.status.subuser == false) {
-                    currentUserRole = userRole.USER;
-                    _USERSTR = response.status.screen_name
-                    console.log(_USERSTR)
-                    return response.status.authenticated;
-                } else {
-                    currentUserRole = userRole.SUB_USER;
-                    _USERSTR = response.status.screen_name + '@' + urlparser.db;
-                    return response.status.authenticated;
-                }
-
-            } else {
-                _USERSTR = "";
-                console.log("User not logged in - triggering screen")
-
-                ////Trigger loading module
-                //document.getElementById("session").click()
-                ////Hide some elements
-                //setStyle("#login-modal-body > div > div.alert.alert-dismissible.alert-info",{'display':'none'})
-                //setStyle("#login-modal > div > div > div.modal-footer",{'display':'none'})
-                //setStyle("#login-modal > div > div > div.modal-header",{'display':'none'})
-                ////Manipulate modal to fit screen, move form to center
-                //setStyle("#login-modal", {'padding':'0px'})
-                //setStyle("#login-modal > div > div",{'width': '100%','height':'100vh'})
-
-                
-
-            } 
-        },
-        error: function () {
-            throw new Error('Fejl i _checkLogin request');
-        }
-    })
-    
-};
 
 /**
  * 
@@ -274,9 +198,6 @@ module.exports = {
                 return txt;
             }
         };
-
-        console.log('run login check!');
-        _checkLogin()
         
         /**
          * Flattens object
@@ -662,6 +583,7 @@ module.exports = {
                     active: false,
                     done: false,
                     loading: false,
+                    authed: false,
                     progress: 0,
                     progressText: '',
                     ejerliste: [],
@@ -699,6 +621,15 @@ module.exports = {
                     });
                     utils.cursorStyle().reset();
                 });
+
+                // On auth change, handle Auth state
+                backboneEvents.get().on(`session:authChange`, () => {
+                    console.log('Auth changed!')
+                    fetch("/api/session/status")
+                    .then(r => r.json())
+                    .then(obj => me.setState({authed: obj.status.authenticated}))
+                    .catch(e => me.setState({authed: false}))
+                })
 
                 // Handle click events on map
                 // Do we need click events for this extension?
@@ -797,13 +728,17 @@ module.exports = {
                 })
             }
 
-            render() {          
+            render() {
+                const _self = this;
+                const authed = _self.state.authed
+                console.log(_self.state)
                 return (
                     <div role="tabpanel">
                         <div className="form-group">
                             <div id="lerConverter-feature-login" className="alert alert-info" role="alert">
                                 {__("MissingLogin")}
                             </div>
+                            <p>{authed ? 'yup' : 'nay'}</p>
                             <div id="lerConverter-feature-dropzone">
                                 <Dropzone
                                 onDrop={this.onDrop.bind(this)}
@@ -822,8 +757,9 @@ module.exports = {
                             </div>
                         </div>
                     </div>
-                );
+                )
             }
+            
         }
 
         utils.createMainTab(exId, __("Plugin Tooltip"), __("Info"), require('./../../../browser/modules/height')().max, "create_new_folder", false, exId);
