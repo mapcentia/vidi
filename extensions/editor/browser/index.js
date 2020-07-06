@@ -480,7 +480,7 @@ module.exports = {
                 <div style={{"padding": "15px"}}>
                     <Form
                         className="feature-attribute-editing-form"
-                        schema={schema}
+                        schema={schema} noHtml5Validate
                         uiSchema={uiSchema}
                         widgets={widgets}
                         onSubmit={onSubmit}>
@@ -816,11 +816,11 @@ module.exports = {
 
             cloud.get().map.closePopup();
             ReactDOM.unmountComponentAtNode(document.getElementById(EDITOR_FORM_CONTAINER_ID));
-            for (let key in schema.properties) {
+            /*for (let key in schema.properties) {
                 if (key in eventFeatureCopy.properties && eventFeatureCopy.properties[key]) {
                     eventFeatureCopy.properties[key] = `` + eventFeatureCopy.properties[key];
                 }
-            }
+            }*/
             let eventFeatureParsed = {};
             for (let [key, value] of Object.entries(eventFeatureCopy.properties)) {
                 if (fields[key].type.includes("timestamp with time zone")) {
@@ -836,7 +836,7 @@ module.exports = {
                 <div style={{"padding": "15px"}}>
                     <Form
                         className="feature-attribute-editing-form"
-                        schema={schema}
+                        schema={schema} noHtml5Validate
                         widgets={widgets}
                         uiSchema={uiSchema}
                         formData={eventFeatureParsed}
