@@ -727,6 +727,7 @@ module.exports = {
                     eventFeatureCopy.properties[key] = undefined;
                 }
             });
+            console.log(eventFeatureCopy);
 
             // Transform field values according to their types
             Object.keys(fields).map(key => {
@@ -769,10 +770,15 @@ module.exports = {
 
                 // Set GeoJSON properties from form values
                 Object.keys(eventFeatureCopy.properties).map(function (key) {
-                    GeoJSON.properties[key] = formData.formData[key];
-                    // Set undefined values back to NULL
-                    if (GeoJSON.properties[key] === undefined) {
-                        GeoJSON.properties[key] = null;
+                    if (!key.startsWith("gc2_")) {
+                        GeoJSON.properties[key] = formData.formData[key];
+                        // Set undefined values back to NULL
+                        if (GeoJSON.properties[key] === undefined) {
+                            GeoJSON.properties[key] = null;
+                        }
+                    } else {
+                        // Remove system fields, which should not be updated by the user
+                        delete GeoJSON.properties[key];
                     }
                 });
 
