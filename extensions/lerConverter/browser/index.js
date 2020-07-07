@@ -10,6 +10,10 @@
 import Dropzone from 'react-dropzone';
 import JSZip from 'jszip';
 import LedningsEjerStatusTable from "./LedningsEjerStatusTable";
+import LedningsProgress from "./LedningsProgress";
+import LedningsDownload from "./LedningsDownload";
+import Button from '@material-ui/core/Button';
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 
 /**
@@ -54,19 +58,7 @@ var mapObj;
 
 var gc2host = 'http://localhost:3000'
 
-const SQLURL = gc2host + '/api/extension/lerSQL'
-const FEATUREURL = gc2host + 'api/extension/lerFeature'
-
 var config = require('../../../config/config.js');
-
-if (typeof config.extensionConfig !== "undefined" && typeof config.extensionConfig.streetView !== "undefined") {
-    if (typeof config.extensionConfig.streetView.mapillary !== "undefined") {
-        mapillaryUrl = config.extensionConfig.streetView.mapillary;
-    }
-    if (typeof config.extensionConfig.streetView.cowi !== "undefined") {
-        cowiUrl = config.extensionConfig.streetView.cowi;
-    }
-}
 
 /**
  * Slice array into chunks
@@ -102,7 +94,6 @@ var snack = function (msg) {
         timeout: 10000
     });
 }
-var _USERSTR = "";
 
 /**
  * 
@@ -251,12 +242,6 @@ module.exports = {
                     reject(err)
                 }
             });
-        
-            // Intermediate obj
-            //var tObj = parser.getTraversalObj(xmlData,options);
-            //console.log(tObj)
-            //var jsonObj = parser.convertToJson(tObj,options);
-            //console.log(jsonObj)
         }
 
         /**
@@ -342,7 +327,6 @@ module.exports = {
                 geomObj.coordinates = []
                 let c;
                 for (c in coords) {
-                    //console.log(coords[c])
                     geomObj.coordinates.push([coords[c].split(',').map(Number)])
                 }
                 let rings = [geomObj.coordinates]
@@ -501,22 +485,9 @@ module.exports = {
             
             // use promise to return data in stream
             return new Promise(function(resolve, reject) {
-            //    if( true ) { //optional (it'll return an object in case it's not valid)
-            //        jsonObj = parser.parse(xmlData,options);
-            //        //console.log(jsonObj)
-            //        resolve(jsonObj)
-            //    } else {
-            //        err = parser.validate(xmlData)
-            //        reject(err)
-            //    }
                 resolve(returnObj)
             });
         
-            // Intermediate obj
-            //var tObj = parser.getTraversalObj(xmlData,options);
-            //console.log(tObj)
-            //var jsonObj = parser.convertToJson(tObj,options);
-            //console.log(jsonObj)
         }     
         
         var readForespoergselOption = function (forespNummer) {
@@ -525,24 +496,15 @@ module.exports = {
                 method: 'POST',
                 body: JSON.stringify({nummer: forespNummer})
             }
-            fetch(gc2host + '/api/extension/getForespoergsel', opts)
-            .then(async response => {
-                const data = await response.json();
-                console.log(data)
-    
-                // check for error response
-                if (!response.ok) {
-                    // get error message from body or default to response status
-                    const error = (data && data.message) || response.status;
-                    console.log(error)
-                    return Promise.reject(error);
-                }
-
+            return new Promise(function(resolve, reject) {
+                // Do async job and resolve
+                fetch(gc2host + '/api/extension/getForespoergsel', opts)
+                .then(r => {
+                    const data = r.json();
+                    resolve(data)
+                })
+                .catch(e => reject(e))
             })
-            .catch(error => {
-                this.setState({ errorMessage: error.toString() });
-                console.error('There was an error!', error);
-            });
         }
 
         var pushForespoergsel = function (obj) {
@@ -551,24 +513,26 @@ module.exports = {
                 method: 'POST',
                 body: JSON.stringify(obj)
             }
-            fetch(gc2host + '/api/extension/upsertForespoergsel', opts)
-            .then(async response => {
-                const data = await response.json();
-                console.log(data)
-    
-                // check for error response
-                if (!response.ok) {
-                    // get error message from body or default to response status
-                    const error = (data && data.message) || response.status;
-                    console.log(error)
-                    return Promise.reject(error);
-                }
-
+            return new Promise(function(resolve, reject) {
+                // Do async job and resolve
+                fetch(gc2host + '/api/extension/upsertForespoergsel', opts)
+                .then(r => {
+                    const data = r.json();
+                    resolve(data)
+                })
+                .catch(e => reject(e))
             })
-            .catch(error => {
-                this.setState({ errorMessage: error.toString() });
-                console.error('There was an error!', error);
-            });
+        }
+
+        var pushStatus = function (obj){
+            let opts = {
+                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                method: 'POST',
+                body: JSON.stringify(obj)
+            }
+            console.log(obj)
+
+            fetch(gc2host + '/api/extension/upsertStatus', opts)
         }
 
         
@@ -586,8 +550,7 @@ module.exports = {
                     authed: false,
                     progress: 0,
                     progressText: '',
-                    ejerliste: [],
-                    selectedForespoergsel: ''
+                    ejerliste: []
                 };
 
                 this.readContents = this.readContents.bind(this)
@@ -630,45 +593,6 @@ module.exports = {
                     .then(obj => me.setState({authed: obj.status.authenticated}))
                     .catch(e => me.setState({authed: false}))
                 })
-
-                // Handle click events on map
-                // Do we need click events for this extension?
-                // ==========================
-
-                //mapObj.on("dblclick", function () {
-                //    clicktimer = undefined;
-                //});
-                //mapObj.on("click", function (e) {
-                //    let event = new geocloud.clickEvent(e, cloud);
-                //    if (clicktimer) {
-                //        clearTimeout(clicktimer);
-                //    }
-                //    else {
-                //        if (me.state.active === false) {
-                //            return;
-                //        }
-                //        clicktimer = setTimeout(function (e) {
-                //            //let coords = event.getCoordinate(), p, url;
-                //            //p = utils.transform("EPSG:3857", "EPSG:4326", coords);
-                //            //clicktimer = undefined;
-                //            //switch (me.state.selectedOption) {
-                //            //    case "google":
-                //            //        url = "http://maps.google.com/maps?q=&layer=c&cbll=" + p.y + "," + p.x + "&cbp=11,0,0,0,0";
-                //            //        break;
-                //            //    case "mapillary":
-                //            //        url = mapillaryUrl + "&lat=" + p.y + "&lng=" + p.x;
-                //            //        break;
-                //            //    case "skraafoto":
-                //            //        url = "https://skraafoto.kortforsyningen.dk/oblivisionjsoff/index.aspx?project=Denmark&lon=" + p.x + "&lat=" + p.y;
-                //            //        break;
-                //            //    case "cowi":
-                //            //        url = cowiUrl + "&srid=4326&x=" + p.x + "&y=" + p.y;
-                //            //        break;
-                //            //}
-                //            //parentThis.callBack(url);
-                //        }, 250);
-                //    }
-                //});
             }
             
             /**
@@ -682,6 +606,23 @@ module.exports = {
 
             }
 
+            onOptionChange(option) {
+
+            }
+
+            formatHandleChange(event) {
+                const _self = this
+                _self.setState({selectedFormat: event.target.value})
+            }
+
+            onBackClickHandler() {
+                const _self = this
+                _self.setState({
+                    done: false,
+                    ledningsejer: []
+                })
+            }
+
             /**
              * 
              * @param {*} zipblob 
@@ -690,25 +631,32 @@ module.exports = {
                 var _self = this;
                 var newZip = new JSZip();
 
-                _self.setState({loading:true, done: false})
+                _self.setState({
+                    loading:true,
+                    done: false,
+                    progress: 0,
+                    progressText: 'Læser ledningspakkke',
+                    ejerliste: []
+                })
 
                 newZip.loadAsync(zipblob)
                 .then(function (zip) {
                     /* Load Status - 'LedningsejerStatusListe.xml', set state */
                     _self.setState({
-                        progress: 10,
+                        progress: 20,
                         progressText:'Indlæser statusliste'
                     })
                     zip.files['LedningsejerStatusListe.xml'].async('string')
                         .then(fileData => parsetoJSON(fileData))
                         .then(jsObj => _self.setState({ejerliste:jsObj.LedningsejerListe.Ledningsejer})) // Set state when done
+                        .then(_self.setState({progress: 30, progressText:'Gemmer status'}))
                     return zip //pass on same zip to next then
                 })
                 .then(function (zip) {
                     /* Load data - 'consolidated.gml' */
                     _self.setState({
-                        progress: 60,
-                        progressText:'Indlæser ledningsdata'
+                        progress: 70,
+                        progressText:'Gemmer ledningsdata'
                     })
                     zip.files['consolidated.gml'].async('string')
                         .then(fileData => parsetoJSON(fileData))
@@ -717,8 +665,9 @@ module.exports = {
                             pushForespoergsel(parsed)
                             .then(r => {
                                 console.log(r)
-                                _self.setState({done: true})
+                                _self.setState({progress: 100, progressText:'Færdig!'})
                             })
+                            .then(_self.setState({loading: false, done:true}))
                             .catch(e => {
                                 console.log(e)
                             })
@@ -730,34 +679,96 @@ module.exports = {
 
             render() {
                 const _self = this;
-                const authed = _self.state.authed
-                console.log(_self.state)
-                return (
-                    <div role="tabpanel">
-                        <div className="form-group">
-                            <div id="lerConverter-feature-login" className="alert alert-info" role="alert">
-                                {__("MissingLogin")}
+                const s = _self.state
+                console.log(s)
+
+                const formControl = {
+                    minWidth: 120
+                }
+                const margin = {
+                    margin: 10
+                }
+
+                if (s.authed) {
+                    // Logged in
+                    if (s.loading) {
+                        // If Loading, show progress
+                        return (
+                            <div role="tabpanel">
+                                <div className="form-group">
+                                    <div>
+                                        <LedningsProgress 
+                                        progress={s.progress}
+                                        text={s.progressText}
+                                        />
+                                    </div>
+                                </div>
                             </div>
-                            <p>{authed ? 'yup' : 'nay'}</p>
-                            <div id="lerConverter-feature-dropzone">
-                                <Dropzone
-                                onDrop={this.onDrop.bind(this)}
-                                style={{
-                                    width: '100%',
-                                    height: '50px',
-                                    padding: '5px',
-                                    border: '1px green dashed'
-                                }}
-                                >
-                                    <p>Drop it dawg</p>
-                                </Dropzone>
+                        )
+                    } else if (s.done) {
+                        // Either selected or uploaded.
+                        return (
+                            <div role="tabpanel">
+                                <div className="form-group">
+                                    <div style={{display: 'flex'}}>
+                                        <Button
+                                        size="large" color="default" variant="contained" style={margin}
+                                          onClick={_self.onBackClickHandler.bind(this)}
+                                        >
+                                           <ArrowBackIcon
+                                           fontSize="small"
+                                           /> Tilbage
+                                        </Button>
+                                        <LedningsDownload style={margin} 
+                                        size="large" color="default" variant="contained"
+                                            endpoint="/api/extension/upsertForespoergsel"
+                                        />
+                                    </div>
+                                    <div id="lerConverter-feature-ledningsejerliste">
+                                        <LedningsEjerStatusTable statusliste={s.ejerliste} />
+                                    </div>
+                                </div>
                             </div>
-                            <div id="lerConverter-feature-ledningsejerliste">
-                                <LedningsEjerStatusTable statusliste={this.state.ejerliste} />
+                        )
+                    } else {
+                        //
+                        return (
+                            <div role="tabpanel">
+                                <div className="form-group">
+                                    <p>dropdown</p>
+                                    <div id="lerConverter-feature-dropzone">
+                                        <Dropzone
+                                        onDrop={_self.onDrop.bind(this)}
+                                        style={{
+                                            width: '80%',
+                                            height: '120px',
+                                            padding: '50px',
+                                            border: '1px green dashed',
+                                            margin: '20px auto 20px auto',
+                                            textAlign: 'center'
+                                        }}
+                                        >
+                                            <p>Smid din ledningspakke her, eller vælg filen</p>
+                                        </Dropzone>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+                } else {
+                    // Not Logged in
+                    return (
+                        <div role="tabpanel">
+                            <div className="form-group">
+                                <div id="lerConverter-feature-login" className="alert alert-info" role="alert">
+                                    {__("MissingLogin")}
+                                </div>
+                                <p>Her skal være en knap der starter session med: document.getElementById("session").click()</p>
                             </div>
                         </div>
-                    </div>
-                )
+                    )
+                }
+
             }
             
         }

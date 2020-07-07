@@ -19,6 +19,8 @@ moment.locale("da_DK");
 
 var BACKEND = config.backend;
 
+var TABLEPREFIX = 'lerkonvert_'
+
 // Days from 19000101 to 19700101
 const DAYSSINCE = 25569
 // milisecs pr. day
@@ -32,6 +34,17 @@ var userString = function (req) {
         var userstr = req.session.gc2UserName;
     }
     return userstr
+}
+
+var lc = function (obj) {
+    var key, keys = Object.keys(obj);
+    var n = keys.length;
+    var newobj={}
+    while (n--) {
+      key = keys[n];
+      newobj[key.toLowerCase()] = obj[key];
+    }
+    return newobj
 }
 
 /**
@@ -126,24 +139,24 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         fors = {type:'FeatureCollection',features: [b.foresp]}
 
         chain = [
-            SQLAPI('delete from '+s.screenName+'.graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.lines WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.points WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.polygons WHERE forespnummer = '+b.forespNummer, req)
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'lines WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'points WHERE forespnummer = '+b.forespNummer, req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'polygons WHERE forespnummer = '+b.forespNummer, req)
         ]
 
         // Add forespoergsel
-        chain.push(FeatureAPI(req, fors, 'graveforespoergsel', '25832'))
+        chain.push(FeatureAPI(req, fors, TABLEPREFIX + 'graveforespoergsel', '25832'))
 
         // Add layers that exist
         if (lines.features.length > 0) {
-            chain.push(FeatureAPI(req, lines, 'lines', '7416'))
+            chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
         }
         if (pts.features.length > 0) {
-            chain.push(FeatureAPI(req, pts, 'points', '7416'))
+            chain.push(FeatureAPI(req, pts, TABLEPREFIX + 'points', '7416'))
         }
         if (polys.features.length > 0) {
-            chain.push(FeatureAPI(req, polys, 'polygons', '7416'))
+            chain.push(FeatureAPI(req, polys, TABLEPREFIX + 'polygons', '7416'))
         }
         
         Promise.all(chain)
@@ -154,10 +167,10 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         .catch(r => {
             // clean house anyhow
             chain = [
-                SQLAPI('delete from '+s.screenName+'.graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
-                SQLAPI('delete from '+s.screenName+'.lines WHERE forespnummer = '+b.forespNummer, req),
-                SQLAPI('delete from '+s.screenName+'.points WHERE forespnummer = '+b.forespNummer, req),
-                SQLAPI('delete from '+s.screenName+'.polygons WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'lines WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'points WHERE forespnummer = '+b.forespNummer, req),
+                SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'polygons WHERE forespnummer = '+b.forespNummer, req),
             ]
             Promise.all(chain)
             .finally(
@@ -167,8 +180,45 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
     } catch (error) {
         console.log(error)
         response.status(500).json(error)
+    } 
+});
+
+/**
+ * Endpoint for upserting features from LER 
+ */
+router.post('/api/extension/upsertStatus', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    console.table(req.body)
+    let b = req.body
+    //console.table(req.session)
+    let s = req.session
+
+
+    // If user is not currently inside a session, hit 'em with a nice 401
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+        response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+        return
     }
+
+    // Check if query exists
+    if(!req.body.hasOwnProperty("Ledningsejerliste")) {
+        response.status(500).json({error:"Forespørgsel er ikke komplet. 'Ledningsejerliste'"})
+        return
+    }
+
+    // Build featurecollection
     
+    console.log(b.Ledningsejerliste.Ledningsejer)
+    var ledningsejer = b.Ledningsejerliste.Ledningsejer
+    var fc = {}
+    var f = []
+
+    ledningsejer.forEach(l =>{
+        console.log(l)
+    })
+
+
 });
 
 
