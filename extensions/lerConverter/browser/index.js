@@ -327,11 +327,14 @@ module.exports = {
                 geomObj.coordinates = []
                 let c;
                 for (c in coords) {
-                    geomObj.coordinates.push([coords[c].split(',').map(Number)])
+                    geomObj.coordinates.push(coords[c].split(',').map(Number))
                 }
                 let rings = [geomObj.coordinates]
                 let multis = [rings]
                 geomObj.coordinates = multis
+
+                console.log(JSON.stringify(geomObj))
+
 
             } else if (flat.hasOwnProperty('value')) {
                 geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
@@ -381,9 +384,9 @@ module.exports = {
                 foresp.forEach(function(item) {
                     //console.log(item)
 
-                    //console.log(item.polygonProperty)
+                    console.log(item.polygonProperty)
                     let geom = handleGeometry(item.polygonProperty)
-                    //console.log(geom)
+                    console.log(geom)
 
                     delete item.polygonProperty
                     delete item.graveart_anden
