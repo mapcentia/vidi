@@ -100,6 +100,7 @@ and this project adheres to [CalVer](https://calver.org/).
 - Using `indexOf` instead of `includes`, because the latter is not transpiled in Babel. It's an Internet Explorer issue.
 - `embed.js` now works in IE11.
 - Accept 'da' locale in request headers. Only da-DK worked so far.
+- If the Service Worker doesn't get registered when Vidi will now start anyways without the Service Worker. On a hard refresh (Ctrl-f5) the Service Worker will claim the clients, so a hard refresh will not unregister Service Worker, but the cache will be deleted. 
 
 ## [2020.2.0]
 ### Added

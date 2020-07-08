@@ -417,6 +417,10 @@ module.exports = {
                         console.log('Service worker was registered and activated');
                         backboneEvents.get().trigger(`ready:serviceWorker`);
                         clearInterval(checkInterval);
+                    } else {
+                        navigator.serviceWorker.ready.then(() => {
+                            registration.active.postMessage("claimMe");
+                        });
                     }
                 }, 1000);
             }).catch(error => {

@@ -6,7 +6,7 @@
 
 const CACHE_NAME = 'vidi-static-cache';
 const API_ROUTES_START = 'api';
-const LOG = false;
+const LOG = true;
 const LOG_FETCH_EVENTS = false;
 const LOG_OFFLINE_MODE_EVENTS = false;
 
@@ -91,7 +91,7 @@ const urlSubstitution = [{
     local: '/js/lib/leaflet/images/marker-shadow.png'
 }];
 
-let extensionsIgnoredForCaching = ['JPEG','jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
+let extensionsIgnoredForCaching = ['JPEG', 'jpeg', 'jpg', 'PNG', 'TIFF', 'BMP'];
 
 let urlsIgnoredForCaching = [{
     regExp: true,
@@ -586,7 +586,13 @@ self.addEventListener('activate', event => {
  * "message" event handler
  */
 self.addEventListener('message', (event) => {
-    if (`force` in event.data) {
+    if (event.data === "claimMe") {
+        if (LOG) console.log('Service worker: clients claimed after a hard refresh');
+        caches.delete("vidi-static-cache").then(() => {
+            self.clients.claim();
+            console.log('Service worker: vidi-static-cache deleted');
+        });
+    } else if (`force` in event.data) {
         if (event.data && event.data.force) {
 
             if (LOG) console.log('Service worker: forcing caching of files with ignored extensions');

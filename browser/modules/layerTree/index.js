@@ -1077,8 +1077,12 @@ module.exports = {
 
                                         if (`serviceWorker` in navigator) {
                                             if (navigator.serviceWorker.controller) {
+                                                // Service worker is registered
                                                 setOfflineModeSettingsForCache().then(resolve);
                                             } else {
+                                                // Service worker is NOT registered but don't wait
+                                                turnOnActiveLayersAndFinishBuilding().then(resolve);
+
                                                 backboneEvents.get().once(`ready:serviceWorker`, () => {
                                                     setTimeout(() => {
                                                         if (`serviceWorker` in navigator && navigator.serviceWorker.controller) {
@@ -1090,6 +1094,7 @@ module.exports = {
                                                 });
                                             }
                                         } else {
+                                            // Browser doesn't support service workers
                                             turnOnActiveLayersAndFinishBuilding().then(resolve);
                                         }
                                     }, 1000);
@@ -1691,7 +1696,7 @@ module.exports = {
         }
 
         let renderedText = null;
-        Handlebars.registerHelper('breaklines', function(text) {
+        Handlebars.registerHelper('breaklines', function (text) {
             text = Handlebars.Utils.escapeExpression(text);
             text = text.replace(/(\r\n|\n|\r)/gm, '<br>');
             return new Handlebars.SafeString(text);
