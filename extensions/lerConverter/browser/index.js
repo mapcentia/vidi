@@ -40,8 +40,9 @@ var backboneEvents;
 
 /**
  *
+ * @type {*|exports|module.exports}
  */
-var transformPoint;
+var layerTree = require('./../../../browser/modules/layerTree');
 
 
 /**
@@ -60,8 +61,8 @@ var clicktimer;
  */
 var mapObj;
 
+var DClayers = []
 var gc2host = 'http://localhost:3000'
-
 var config = require('../../../config/config.js');
 
 /**
@@ -531,6 +532,77 @@ module.exports = {
             fetch(gc2host + '/api/extension/upsertStatus', opts)
         }
 
+        var buildFilter = function (key = undefined) {
+            //Empty stuff
+            var filter = {}
+        
+            for (let l in DClayers) {
+        
+                var tablename = DClayers[l].split('.')[1] //hack
+        
+                if (!key) {
+                    // If no key is set, create the "clear" filter
+                    filter[DClayers[l]] = {
+                        "match": "any",
+                        "columns": []
+                    }
+                } else {
+                    filter[DClayers[l]] = {
+                        "match": "any",
+                        "columns": [{
+                            "fieldname": 'forespnummer',
+                            "expression": '=',
+                            "value": String(key),
+                            "restriction": false
+                        }]
+                    }
+                }
+        
+            }
+            console.log(filter)
+            // Return the stuff
+            return filter
+        }
+        
+        var applyFilter = function (filter) {
+            for (let layerKey in filter){
+                console.log('lerConverter - Apply filter to '+layerKey)
+        
+                //Make sure layer is on
+                //TODO tænd laget hvis det ikke allerede er tændt! - skal være tændt før man kan ApplyFilter
+                layerTree.reloadLayer(layerKey)            
+                    
+                //Toggle the filter
+                if (filter[layerKey].columns.length == 0) {
+                    // insert fixed dummy filter
+                    // in order to filter out all features from layer
+                    //var blankfeed = {expression: "=",
+                    //                fieldname: "forespnummer",
+                    //                restriction: false,
+                    //                value: "0"};
+                    //filter[layerKey].columns.push(blankfeed);
+        
+                    layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+                } else {
+                    layerTree.onApplyArbitraryFiltersHandler({ layerKey,filters: filter[layerKey]}, 't');
+                }
+                //Reload
+                layerTree.reloadLayerOnFiltersChange(layerKey)
+        
+                continue;
+            }
+        };
+        var clearFilters = function () {
+            // clear filters from layers that might be on! - then reload
+            console.log('lerConverter - cleaning filters for reload')
+        
+            //Buildfilter with no value for "clear" value
+            var filter = buildFilter()
+        
+            // apply filter
+            applyFilter(filter);
+        };
+
         
         /**
          *
@@ -573,6 +645,7 @@ module.exports = {
                     me.setState({
                         active: true
                     });
+                    me.populateDClayers()
                     utils.cursorStyle().crosshair();
                 });
 
@@ -621,6 +694,7 @@ module.exports = {
                     foresp: ''
                 }, () => {
                     _self.populateForespoergselOption() // On back click, populate select with new foresp
+                    clearFilters()
                 })
             }
 
@@ -628,10 +702,11 @@ module.exports = {
                 const _self = this
                 _self.setState({foresp:String(event.target.value)})
                 _self.getForespoergsel(String(event.target.value))
+                _self.setState({done:true})
             }
 
             /**
-             * 
+             * Reads content of uploaded ZIP-file
              * @param {*} zipblob 
              */
             readContents(zipblob) {
@@ -684,7 +759,7 @@ module.exports = {
                                 } else {
                                     console.log('all fine!')
                                     _self.setState({isError: false, progress: 100, progressText:'Færdig!'})
-                                    setTimeout(_self.setState({loading: false, done:true}), Math.floor(wait/4)) // Go to ready
+                                    setTimeout(_self.setState({loading: false, done: true},() => {_self.getForespoergsel(String(parsed.forespNummer))}), Math.floor(wait/4)) // Go to ready
                                 }
                             })
                             .catch(e => {
@@ -696,6 +771,29 @@ module.exports = {
                 })
             }
 
+            /**
+             * Populate the list of active layers used in filters
+             */
+            populateDClayers() {
+                try {
+                    metaData.data.forEach(function(d) {
+                      if (d.f_table_name) {
+                        if (d.f_table_name.includes('lerkonvert_')) {
+                            DClayers.push(d.f_table_schema+'.'+d.f_table_name);
+                        }
+                      }
+                    });
+                    //console.log(DClayers)
+                } catch (error) {
+                    console.info('lerConverter - Kunne ikke finde lag med korrekt tag')
+                    
+                }
+
+            }
+
+            /**
+             * Populate the forsp-select with foresp currently saved in schema
+             */
             populateForespoergselOption() {
                 var _self = this;
                 let opts = {
@@ -712,6 +810,10 @@ module.exports = {
                 .catch(e => console.log(e))
             }
 
+            /**
+             * Reads extents and status of saved foresp
+             * @param {*} forespNummer 
+             */
             getForespoergsel(forespNummer) {
                 var _self = this;
                 let opts = {
@@ -723,7 +825,7 @@ module.exports = {
                 fetch(gc2host + '/api/extension/getForespoergsel', opts)
                 .then(r => r.json())
                 .then(d => {
-                    console.log(d);
+                    //console.log(d);
 
                     // Zoom to location
                     //TODO: this has to be better for sorting then status is incomming!
@@ -736,11 +838,17 @@ module.exports = {
                         ]
                     ];
                     cloud.get().map.fitBounds(bounds)
+                    // Apply filter
+                    applyFilter(buildFilter(f.forespnummer))
+
+                    // TODO: CHANGE STATUS
                 })
                 .catch(e => console.log(e))
             }
 
-
+            /**
+             * Renders component
+             */
             render() {
                 const _self = this;
                 const s = _self.state
