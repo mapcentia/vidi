@@ -7,8 +7,6 @@ var moment = require('moment');
 var config = require('../../../config/config.js');
 var he = require('he');
 var fetch = require('node-fetch');
-//var allSettled = require('promise.allsettled');
-//allSettled.shim();
 
 
 /**
@@ -48,27 +46,6 @@ Array.range = function(n) {
     }
   }
 );
-
-allSettled = function(promiseList) {
-    let results = new Array(promiseList.length);
-
-    return new Promise((ok, rej) => {
-
-        let fillAndCheck = function(i) {
-            return function(ret) {
-                results[i] = ret;
-                for(let j = 0; j < results.length; j++) {
-                    if (results[j] == null) return;
-                }
-                ok(results);
-            }
-        };
-
-        for(let i=0;i<promiseList.length;i++) {
-            promiseList[i].then(fillAndCheck(i), fillAndCheck(i));
-        }
-    });
-}
 
 var userString = function (req) {
     var userstr = ''
@@ -130,7 +107,7 @@ var buildSQL = function(feature, table, geom_col, crs) {
  * @param {*} table 
  * @param {*} crs 
  */
-var buildSQLArray = function(features, table, geom_col, crs) {
+var buildSQLArray = function(features, table, geom_col, crs, timestamp) {
     //console.log(feature)
 
     let values = []
@@ -144,9 +121,9 @@ var buildSQLArray = function(features, table, geom_col, crs) {
     
 
     // Loop features to get value sets
-    
     features.forEach(f => {
         let nestedValues = []
+        
 
         // Loop distinct keys
         into.forEach(k => {
@@ -156,8 +133,9 @@ var buildSQLArray = function(features, table, geom_col, crs) {
                 nestedValues.push('null')
             }
         })
-        // Append geometry
+        // Append geometry & uploadtime
         nestedValues.push("ST_SetSRID(ST_GeomFromGeoJSON('"+ JSON.stringify(f.geometry) +"'),"+crs+")")
+        nestedValues.push("'"+he.decode(String(timestamp))+"'")
 
         // Add to values
         let nest = "("+nestedValues.join(',')+")"
@@ -165,9 +143,12 @@ var buildSQLArray = function(features, table, geom_col, crs) {
         values.push(nest)
     })
 
-    // Add geomemtry column
+    // Add geomemtry & timestamp column
     into = Array.from(into)
     into.push(geom_col)
+    into.push('svar_uploadtime')
+
+
     
 
     // Build final string
@@ -259,6 +240,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
     })
 
     console.log('Got: '+b.forespNummer+'. Lines: '+lines.length+', Polygons: '+polys.length+', Points: '+pts.length)
+    let uploadTime = new Date().toLocaleString()
 
     try {
         lines = {type:'FeatureCollection',features: lines}
@@ -267,17 +249,16 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         fors = {type:'FeatureCollection',features: [b.foresp]}
 
         clean = [
-            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'lines WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'points WHERE forespnummer = '+b.forespNummer, req),
-            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'polygons WHERE forespnummer = '+b.forespNummer, req)
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel WHERE forespnummer = '+b.forespNummer+" AND svar_uploadtime < '"+uploadTime+"'", req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'lines WHERE forespnummer = '+b.forespNummer+" AND svar_uploadtime < '"+uploadTime+"'", req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'points WHERE forespnummer = '+b.forespNummer+" AND svar_uploadtime < '"+uploadTime+"'", req),
+            SQLAPI('delete from '+s.screenName+'.' + TABLEPREFIX + 'polygons WHERE forespnummer = '+b.forespNummer+" AND svar_uploadtime < '"+uploadTime+"'", req)
         ]
         post = []
 
         // Add forespoergsel
-        //TODO: change to SQLAPI
         //chain.push(FeatureAPI(req, fors, TABLEPREFIX + 'graveforespoergsel', '25832'))
-        post.push(SQLAPI(buildSQLArray(fors.features, s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel', 'the_geom', '25832'), req))
+        post.push(SQLAPI(buildSQLArray(fors.features, s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel', 'the_geom', '25832', uploadTime), req))
 
         // Add layers that exist, add chunks
         var CHUNKSIZE = 50
@@ -286,17 +267,17 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         try {
             if (lines.features.length > 0) {
                 chunks = lines.features.chunk(CHUNKSIZE)
-                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'lines', 'the_geom', '7416'), req))})
+                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'lines', 'the_geom', '7416', uploadTime), req))})
                 //chain.push(FeatureAPI(req, lines, TABLEPREFIX + 'lines', '7416'))
             }
             if (pts.features.length > 0) {
                 chunks = pts.features.chunk(CHUNKSIZE)
-                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'points', 'the_geom', '7416'), req))})
+                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'points', 'the_geom', '7416', uploadTime), req))})
                 //chain.push(FeatureAPI(req, pts, TABLEPREFIX + 'points', '7416'))
             }
             if (polys.features.length > 0) {
                 chunks = polys.features.chunk(CHUNKSIZE)
-                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'polygons', 'the_geom', '7416'), req))})
+                chunks.forEach(g=> {post.push(SQLAPI(buildSQLArray(g, s.screenName+'.' + TABLEPREFIX + 'polygons', 'the_geom', '7416', uploadTime), req))})
                 //chain.push(FeatureAPI(req, polys, TABLEPREFIX + 'polygons', '7416'))
             }
         } catch (error) {
@@ -305,13 +286,17 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         }
 
         // Execute entire chain
-        allSettled(clean) // delete existing 
+        Promise.all(clean) // delete existing 
         .then(d => {
             //console.log(d)
-            allSettled(post)
+            Promise.all(post) // add new data
             .then(r => {
                 //console.log(r)
                 response.status(200).json(r)
+            })
+            .catch(error => {
+                console.log(error)
+                response.status(500).json(error)
             })
         })
         .catch(r => {
@@ -421,7 +406,7 @@ function SQLAPI(q, req) {
 
     // Return new promise 
     return new Promise(function(resolve, reject) {
-        console.log(q.substring(0,60))
+        console.log(q.substring(0,175))
         fetch(url, options)
         .then(r => r.json())
         .then(data => {
