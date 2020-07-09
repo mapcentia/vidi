@@ -159,12 +159,12 @@ var buildSQLArray = function(features, table, geom_col, crs, timestamp) {
 /**
  * Endpoint for getting distinct foresp. in current schema 
  */
-router.post('/api/extension/getForespoergsel', function (req, response) {
+router.post('/api/extension/getForespoergselOption', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
 
-    console.table(req.body)
+    //console.table(req.body)
     let b = req.body
-    console.table(req.session)
+    //console.table(req.session)
     let s = req.session
 
     // If user is not currently inside a session, hit 'em with a nice 401
@@ -173,19 +173,18 @@ router.post('/api/extension/getForespoergsel', function (req, response) {
         return
     }
 
-    // Check if query exists
-    if(!req.body.hasOwnProperty("nummer")) {
-        response.status(500).json({error:"Forespørgsel mangler i parametren 'nummer'"})
-        return
-    }
-
     // Go ahead with the logic
-    let q = 'Select forespnummer from '+ s.gc2screenName+'.graveforespoegsel'
+    let q = 'Select forespnummer, bemaerkning from '+ s.screenName+'.'+TABLEPREFIX+'graveforespoergsel'
     try {
-        SQLAPI(req.body.q, req)
+        SQLAPI(q, req)
         .then(r => {
-            console.log(r)
-            response.status(200).json(r)
+            //console.log(r)
+            let returnArray = []
+            r.features.forEach(f => {
+                //console.log(f)
+                returnArray.push(f.properties)
+            })
+            response.status(200).json(returnArray)
         })
         .catch(r => {
             response.status(500).json(r)

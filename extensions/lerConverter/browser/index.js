@@ -14,7 +14,11 @@ import LedningsProgress from "./LedningsProgress";
 import LedningsDownload from "./LedningsDownload";
 import Button from '@material-ui/core/Button';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-
+import Select from '@material-ui/core/Select';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
 
 /**
  *
@@ -498,23 +502,6 @@ module.exports = {
             });
         
         }     
-        
-        var readForespoergselOption = function (forespNummer) {
-            let opts = {
-                headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
-                method: 'POST',
-                body: JSON.stringify({nummer: forespNummer})
-            }
-            return new Promise(function(resolve, reject) {
-                // Do async job and resolve
-                fetch(gc2host + '/api/extension/getForespoergselOption', opts)
-                .then(r => {
-                    const data = r.json();
-                    resolve(data)
-                })
-                .catch(e => reject(e))
-            })
-        }
 
         var pushForespoergsel = function (obj) {
             let opts = {
@@ -561,14 +548,16 @@ module.exports = {
                     progressText: '',
                     ejerliste: [],
                     isError: false,
-                    errorList: []
+                    errorList: [],
+                    forespOptions: [],
+                    foresp: ''
                 };
 
                 this.readContents = this.readContents.bind(this)
             }
 
             /**
-             *
+             * Handle activation on mount
              */
             componentDidMount() {
                 let me = this;
@@ -601,10 +590,16 @@ module.exports = {
                     console.log('Auth changed!')
                     fetch("/api/session/status")
                     .then(r => r.json())
-                    .then(obj => me.setState({authed: obj.status.authenticated}))
+                    .then(obj => me.setState({authed: obj.status.authenticated},() =>{
+                        // Get foresp. if we really logged in.
+                        if (me.state.authed) {
+                            me.populateForespoergselOption() //
+                        }
+                    }))
                     .catch(e => me.setState({authed: false}))
                 })
             }
+
             
             /**
              * Handle file selected
@@ -622,8 +617,23 @@ module.exports = {
                 _self.setState({
                     done: false,
                     loading: false,
-                    ledningsejer: []
+                    ledningsejer: [],
+                    foresp: ''
+                }, () => {
+                    _self.populateForespoergselOption() // On back click, populate select with new foresp
                 })
+            }
+
+            setLayerFilters(){
+
+            }
+            cleanLayerFilters(){
+
+            }
+
+            handleForespSelectChange(event){
+                const _self = this
+                _self.setState({foresp:String(event.target.value)})
             }
 
             /**
@@ -692,6 +702,23 @@ module.exports = {
                 })
             }
 
+            populateForespoergselOption() {
+                var _self = this;
+                let opts = {
+                    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                    method: 'POST',
+                }
+                // Do async job
+                fetch(gc2host + '/api/extension/getForespoergselOption', opts)
+                .then(r => r.json())
+                .then(d => {
+                    //console.log(d)
+                    _self.setState({forespOptions: d})
+                })
+                .catch(e => console.log(e))
+            }
+
+
             render() {
                 const _self = this;
                 const s = _self.state
@@ -754,7 +781,28 @@ module.exports = {
                         return (
                             <div role="tabpanel">
                                 <div className="form-group">
-                                    <p>dropdown</p>
+                                    <div id="lerConverter-feature-select-container" style={{
+                                        width: '80%',
+                                        margin: '10px auto 10px auto'
+                                    }}>
+                                    <FormControl style={{
+                                        width: '100%',
+                                        padding: '20px'
+
+                                    }}>
+                                      <InputLabel id="lerConverter-feature-select-label">Vælg eksisterende forespørgsel</InputLabel>
+                                      <Select
+                                        id="lerConverter-feature-select"
+                                        value={s.foresp}
+                                        onChange={_self.handleForespSelectChange.bind(this)}
+                                      >
+                                        {s.forespOptions.map(f => <MenuItem key={f.forespnummer} value={f.forespnummer}>{f.forespnummer+': '+f.bemaerkning}</MenuItem>)}
+                                      </Select>
+                                    </FormControl>
+                                    <div>
+                                        <p>Eller</p>
+                                    </div>
+                                    </div>
                                     <div id="lerConverter-feature-dropzone">
                                         <Dropzone
                                         onDrop={_self.onDrop.bind(this)}
