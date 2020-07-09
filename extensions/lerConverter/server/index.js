@@ -57,50 +57,6 @@ var userString = function (req) {
     return userstr
 }
 
-var lc = function (obj) {
-    var key, keys = Object.keys(obj);
-    var n = keys.length;
-    var newobj={}
-    while (n--) {
-      key = keys[n];
-      newobj[key.toLowerCase()] = obj[key];
-    }
-    return newobj
-}
-
-/**
- * Builds INSERT with a single feature
- * @param {*} feature 
- * @param {*} table 
- * @param {*} crs 
- */
-var buildSQL = function(feature, table, geom_col, crs) {
-    //console.log(feature)
-
-    let values = []
-    let into = []
-
-    // Route content
-    for (const [key, value] of Object.entries(feature.properties)) {
-        //console.log(`${key}: ${value}`);
-        if (value != ''){
-
-            // 
-            values.push("'"+he.decode(String(value))+"'")
-            into.push(key)
-        }
-      }
-    
-    // Append geometry
-    let geomString = "ST_SetSRID(ST_GeomFromGeoJSON('"+ JSON.stringify(feature.geometry) +"'),"+crs+")"
-    values.push(geomString)
-    into.push('the_geom')
-
-    // Build final string
-    let str = 'INSERT INTO '+table+ ' ('+into.join(',')+') VALUES ('+values.join(',')+')'
-    return str
-}
-
 /**
  * Builds INSERT statement with multiple features
  * @param {*} features
@@ -157,7 +113,7 @@ var buildSQLArray = function(features, table, geom_col, crs, timestamp) {
 }
 
 /**
- * Endpoint for getting distinct foresp. in current schema 
+ * Endpoint for populating foresp. in current schema 
  */
 router.post('/api/extension/getForespoergselOption', function (req, response) {
     response.setHeader('Content-Type', 'application/json');
@@ -174,7 +130,7 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
     }
 
     // Go ahead with the logic
-    let q = 'Select forespnummer, bemaerkning from '+ s.screenName+'.'+TABLEPREFIX+'graveforespoergsel'
+    let q = 'SELECT forespnummer, bemaerkning FROM '+ s.screenName+'.'+TABLEPREFIX+'graveforespoergsel ORDER by forespnummer DESC '
     try {
         SQLAPI(q, req)
         .then(r => {
@@ -183,6 +139,69 @@ router.post('/api/extension/getForespoergselOption', function (req, response) {
             r.features.forEach(f => {
                 //console.log(f)
                 returnArray.push(f.properties)
+            })
+            response.status(200).json(returnArray)
+        })
+        .catch(r => {
+            response.status(500).json(r)
+        })
+    } catch (error) {
+        console.log(error)
+        response.status(500).json(error)
+    }
+    
+});
+
+/**
+ * Endpoint for getting specific foresp.
+ */
+router.post('/api/extension/getForespoergsel', function (req, response) {
+    response.setHeader('Content-Type', 'application/json');
+
+    //console.table(req.body)
+    let b = req.body
+    //console.table(req.session)
+    let s = req.session
+
+    // If user is not currently inside a session, hit 'em with a nice 401
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+        response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+        return
+    }
+
+    // Check if query exists
+    if(!req.body.hasOwnProperty("forespNummer")) {
+        response.status(500).json({error:"Forespørgsel er ikke komplet. 'forespNummer'"})
+        return
+    }
+
+    let chain = []
+    let buffer = 50
+    // Go ahead with the logic
+    let q =     'Select forespnummer,bemaerkning,svar_uploadtime,graveperiode_fra,graveperiode_til,\
+                ST_XMax(ST_Extent(ST_Transform(ST_Expand(the_geom,'+buffer+'),4326))) xmax,\
+                ST_XMin(ST_Extent(ST_Transform(ST_Expand(the_geom,'+buffer+'),4326))) xmin,\
+                ST_YMax(ST_Extent(ST_Transform(ST_Expand(the_geom,'+buffer+'),4326))) ymax,\
+                ST_YMin(ST_Extent(ST_Transform(ST_Expand(the_geom,'+buffer+'),4326))) ymin,\
+                the_geom\
+                from '+ s.screenName+'.'+TABLEPREFIX+'graveforespoergsel\
+                where forespnummer = '+ b.forespNummer +'\
+                GROUP BY forespnummer, bemaerkning,svar_uploadtime,graveperiode_fra,graveperiode_til, the_geom'
+    
+    chain.push(SQLAPI(q, req))
+    q = 'SELECT * FROM ' + s.screenName+'.'+TABLEPREFIX+'status'
+    chain.push(SQLAPI(q, req))
+
+
+    try {
+        Promise.all(chain)
+        .then(r => {
+            //console.log(r)
+
+            let returnArray = []
+            r[0].features.forEach(f => {
+                //console.log(f)
+                returnArray.push(f)
             })
             response.status(200).json(returnArray)
         })

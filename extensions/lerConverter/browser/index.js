@@ -624,16 +624,10 @@ module.exports = {
                 })
             }
 
-            setLayerFilters(){
-
-            }
-            cleanLayerFilters(){
-
-            }
-
             handleForespSelectChange(event){
                 const _self = this
                 _self.setState({foresp:String(event.target.value)})
+                _self.getForespoergsel(String(event.target.value))
             }
 
             /**
@@ -686,7 +680,7 @@ module.exports = {
                                     console.log('errors!')
                                     console.log(errs)
                                     _self.setState({errorList: errs, isError: true, progress: 100, progressText:'Der skete en fejl!'})
-                                    setTimeout(_self.setState({loading: true, done:false}), wait) // Return to start
+                                    setTimeout(_self.setState({loading: true, done:false}, () => {}), wait) // Return to start
                                 } else {
                                     console.log('all fine!')
                                     _self.setState({isError: false, progress: 100, progressText:'Færdig!'})
@@ -714,6 +708,34 @@ module.exports = {
                 .then(d => {
                     //console.log(d)
                     _self.setState({forespOptions: d})
+                })
+                .catch(e => console.log(e))
+            }
+
+            getForespoergsel(forespNummer) {
+                var _self = this;
+                let opts = {
+                    headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+                    method: 'POST',
+                    body: JSON.stringify({forespNummer: forespNummer})
+                }
+                // Do async job
+                fetch(gc2host + '/api/extension/getForespoergsel', opts)
+                .then(r => r.json())
+                .then(d => {
+                    console.log(d);
+
+                    // Zoom to location
+                    //TODO: this has to be better for sorting then status is incomming!
+                    let f = d[0].properties;
+                    let bounds = [
+                        [
+                            f.ymin, f.xmin
+                        ],[
+                            f.ymax, f.xmax
+                        ]
+                    ];
+                    cloud.get().map.fitBounds(bounds)
                 })
                 .catch(e => console.log(e))
             }
