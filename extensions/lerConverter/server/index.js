@@ -6,6 +6,9 @@ var https = require('https');
 var moment = require('moment');
 var config = require('../../../config/config.js');
 var he = require('he');
+var fetch = require('node-fetch');
+//var allSettled = require('promise.allsettled');
+//allSettled.shim();
 
 
 /**
@@ -43,7 +46,29 @@ Array.range = function(n) {
       return Array.range(Math.ceil(this.length/n)).map((x,i) => this.slice(i*n,i*n+n));
   
     }
-  });
+  }
+);
+
+allSettled = function(promiseList) {
+    let results = new Array(promiseList.length);
+
+    return new Promise((ok, rej) => {
+
+        let fillAndCheck = function(i) {
+            return function(ret) {
+                results[i] = ret;
+                for(let j = 0; j < results.length; j++) {
+                    if (results[j] == null) return;
+                }
+                ok(results);
+            }
+        };
+
+        for(let i=0;i<promiseList.length;i++) {
+            promiseList[i].then(fillAndCheck(i), fillAndCheck(i));
+        }
+    });
+}
 
 var userString = function (req) {
     var userstr = ''
@@ -255,7 +280,7 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         post.push(SQLAPI(buildSQLArray(fors.features, s.screenName+'.' + TABLEPREFIX + 'graveforespoergsel', 'the_geom', '25832'), req))
 
         // Add layers that exist, add chunks
-        var CHUNKSIZE = 100
+        var CHUNKSIZE = 50
         var chunks;
 
         try {
@@ -280,14 +305,17 @@ router.post('/api/extension/upsertForespoergsel', function (req, response) {
         }
 
         // Execute entire chain
-        Promise.all(clean)
-        .then(Promise.all(post)
-        .then(r => {
-            //console.log(r)
-            response.status(200).json(r)
-        }))
+        allSettled(clean) // delete existing 
+        .then(d => {
+            //console.log(d)
+            allSettled(post)
+            .then(r => {
+                //console.log(r)
+                response.status(200).json(r)
+            })
+        })
         .catch(r => {
-            // clean house on any error
+            // clean on any error
             Promise.all(clean)
             .finally(
                 response.status(500).json(r)
@@ -354,21 +382,23 @@ function FeatureAPI(req, featurecollection, table, crs) {
             body: postData,
             method: 'POST'
         };
+
     return new Promise(function(resolve, reject) {
-        request(options, function(err, resp, body) {
-            if (err) {
-                p = JSON.parse(body)
-                console.log(p.message)
-                reject(JSON.parse(body));
+        console.log(q.substring(0,60))
+        fetch(url, options)
+        .then(r => r.json())
+        .then(data => {
+            // if message is present, is error
+            if (data.hasOwnProperty('message') ){
+                console.log(data.message)
+                reject(data)
             } else {
-                p = JSON.parse(body)
-                if (p.message.hasOwnProperty('ServiceException')){
-                    console.log(p.message.ServiceException.substring(0,200))
-                } else {
-                    //console.log(p.message)
-                }
-                resolve(JSON.parse(body));
+                console.log('Success: '+ data.success+' - Q: '+postData.substring(0,60))
+                resolve(data)
             }
+        })
+        .catch(error => {
+            reject(error)
         })
     });
 }
@@ -377,10 +407,8 @@ function FeatureAPI(req, featurecollection, table, crs) {
 function SQLAPI(q, req) {
     var userstr = userString(req)
     var postData = JSON.stringify({key: req.session.gc2ApiKey,q:q})
-    
+    var url = GC2_HOST + '/api/v2/sql/' + userstr
     var options = {
-        //url: GC2_HOST + '/api/v1/sql/' + userstr + '?q='+encodeURI(q) + '&key='+req.session.gc2ApiKey,
-        url: GC2_HOST + '/api/v2/sql/' + userstr,
         method: 'POST',
         headers: {
             'Content-Type': 'application/json; charset=utf-8',
@@ -393,21 +421,21 @@ function SQLAPI(q, req) {
 
     // Return new promise 
     return new Promise(function(resolve, reject) {
-        request(options, function(err, resp, body) {
-            p = JSON.parse(body)
-
-            if (p.hasOwnProperty('message') ){
-                console.log(p.message)
+        console.log(q.substring(0,60))
+        fetch(url, options)
+        .then(r => r.json())
+        .then(data => {
+            // if message is present, is error
+            if (data.hasOwnProperty('message') ){
+                console.log(data.message)
+                reject(data)
             } else {
-                //console.log(p)
+                console.log('Success: '+ data.success+' - Q: '+q.substring(0,60))
+                resolve(data)
             }
-
-
-            if (err) {
-                reject(JSON.parse(body));
-            } else {
-                resolve(JSON.parse(body));
-            }
+        })
+        .catch(error => {
+            reject(error)
         })
     });
 };

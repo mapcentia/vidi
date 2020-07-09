@@ -290,10 +290,13 @@ module.exports = {
             // Points
             if ('Point' in obj) {
                 geomObj.type = 'MultiPoint'
+                //console.log(geomObj)
             } else if ('LineString' in obj) {
                 geomObj.type = 'MultiLineString'
             } else if ('Surface' in obj) {
                 geomObj.type = "MultiPolygon"
+                console.log(obj)
+                console.log(flat)
             } else if ('Polygon' in obj) {
                 geomObj.type = "MultiPolygon"
             }else {
@@ -313,10 +316,11 @@ module.exports = {
             }
             if (flat.hasOwnProperty('posList')){
                 if (flat.type == 'MultiPolygon'){
-                    geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
+                    geomObj.coordinates = flat.posList.split(' ').map(Number).chunk(dim)
                     let rings = [geomObj.coordinates]
                     let multis = [rings]
                     geomObj.coordinates = multis
+
                 } else {
                     geomObj.coordinates = [flat.posList.split(' ').map(Number).chunk(dim)]
                 }
@@ -333,11 +337,13 @@ module.exports = {
                 let multis = [rings]
                 geomObj.coordinates = multis
 
-                console.log(JSON.stringify(geomObj))
-
-
             } else if (flat.hasOwnProperty('value')) {
-                geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
+                if (flat.type == 'MultiPoint') {
+                    geomObj.coordinates = flat.value.split(' ').map(Number).chunk(dim)
+                } else {
+                    geomObj.coordinates = [flat.value.split(' ').map(Number).chunk(dim)]
+                }
+                
             } else {
                 // hard-pass on the rest for now
                 geomObj = {type:'unknown', coordinates:null}
@@ -384,9 +390,9 @@ module.exports = {
                 foresp.forEach(function(item) {
                     //console.log(item)
 
-                    console.log(item.polygonProperty)
+                    //console.log(item.polygonProperty)
                     let geom = handleGeometry(item.polygonProperty)
-                    console.log(geom)
+                    //console.log(geom)
 
                     delete item.polygonProperty
                     delete item.graveart_anden
@@ -501,7 +507,7 @@ module.exports = {
             }
             return new Promise(function(resolve, reject) {
                 // Do async job and resolve
-                fetch(gc2host + '/api/extension/getForespoergsel', opts)
+                fetch(gc2host + '/api/extension/getForespoergselOption', opts)
                 .then(r => {
                     const data = r.json();
                     resolve(data)
@@ -553,7 +559,9 @@ module.exports = {
                     authed: false,
                     progress: 0,
                     progressText: '',
-                    ejerliste: []
+                    ejerliste: [],
+                    isError: false,
+                    errorList: []
                 };
 
                 this.readContents = this.readContents.bind(this)
@@ -609,19 +617,11 @@ module.exports = {
 
             }
 
-            onOptionChange(option) {
-
-            }
-
-            formatHandleChange(event) {
-                const _self = this
-                _self.setState({selectedFormat: event.target.value})
-            }
-
             onBackClickHandler() {
                 const _self = this
                 _self.setState({
                     done: false,
+                    loading: false,
                     ledningsejer: []
                 })
             }
@@ -639,7 +639,9 @@ module.exports = {
                     done: false,
                     progress: 0,
                     progressText: 'Læser ledningspakkke',
-                    ejerliste: []
+                    ejerliste: [],
+                    isError: false,
+                    errorList: []
                 })
 
                 newZip.loadAsync(zipblob)
@@ -667,10 +669,20 @@ module.exports = {
                         .then(parsed => {
                             pushForespoergsel(parsed)
                             .then(r => {
-                                console.log(r)
-                                _self.setState({progress: 100, progressText:'Færdig!'})
+                                //console.log(r)
+                                let wait = 5000
+                                if (r.some(i => i.success === false)) {
+                                    let errs = r.filter(obj => {return obj.success === false})
+                                    console.log('errors!')
+                                    console.log(errs)
+                                    _self.setState({errorList: errs, isError: true, progress: 100, progressText:'Der skete en fejl!'})
+                                    setTimeout(_self.setState({loading: true, done:false}), wait) // Return to start
+                                } else {
+                                    console.log('all fine!')
+                                    _self.setState({isError: false, progress: 100, progressText:'Færdig!'})
+                                    setTimeout(_self.setState({loading: false, done:true}), Math.floor(wait/4)) // Go to ready
+                                }
                             })
-                            .then(_self.setState({loading: false, done:true}))
                             .catch(e => {
                                 console.log(e)
                             })
@@ -683,7 +695,7 @@ module.exports = {
             render() {
                 const _self = this;
                 const s = _self.state
-                console.log(s)
+                //console.log(s)
 
                 const formControl = {
                     minWidth: 120
@@ -703,7 +715,11 @@ module.exports = {
                                         <LedningsProgress 
                                         progress={s.progress}
                                         text={s.progressText}
+                                        iserror={s.isError}
+                                        errorlist={s.errorList}
                                         />
+                                        {s.isError === true ? 
+                                        <Button size="large" color="default" style={margin} onClick={_self.onBackClickHandler.bind(this)} ><ArrowBackIcon fontSize="small" /> Tilbage</Button> : ''}
                                     </div>
                                 </div>
                             </div>

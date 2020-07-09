@@ -8,12 +8,6 @@ import React from 'react';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 
-var statusline = function (omr, status) {
-    //console.log(omr)
-    //console.log(status)
-    return (<p>{status}</p>)
-}
-
 class LedningsProgress extends React.Component {
     constructor(props) {
         super(props);
@@ -22,9 +16,19 @@ class LedningsProgress extends React.Component {
             ejerliste: props.statusliste
         };
     }
+
+    getVariant(integer){
+        if (integer < 100) {
+            return 'indeterminate'
+        } else {
+            return 'static'
+        }
+    }
+
     render() {
+        const _self = this
         const p = this.props
-        console.log(p)
+        //console.log(p)
 
         const flexContainer = {
             height: '100%',
@@ -56,8 +60,9 @@ class LedningsProgress extends React.Component {
         return (
             <div style={flexContainer}>
                 <div style={row}>
-                    <div style={flexItem}><CircularProgress variant="static" value={p.progress}/></div>
+                    <div style={flexItem}><CircularProgress variant={_self.getVariant(p.progress)} value={p.progress} color={p.iserror === true ? 'secondary' : 'inherit'}/></div>
                     <div style={flexItem}>{p.text}</div>
+                    {p.errorlist.map(f => <div style={flexItem}><p style={{fontSize: '10pt'}}>{f.message}</p></div>)}
                 </div>
             </div>
         );
