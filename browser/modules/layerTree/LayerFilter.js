@@ -29,7 +29,7 @@ import {
  */
 const SELECT_WIDTH = `50px`;
 
-const STRING_TYPES = [`text`, `string`, `character`, `character varying`];
+const STRING_TYPES = [`text`, `string`, `character`, `character varying`, `uuid`];
 const NUMBER_TYPES = [`smallint`, `bigint`, `integer`, `double precision`, `numeric`, `decimal`, 'real'];
 const DATE_TYPES = [`date`];
 const DATETIME_TYPES = [`timestamp`, `timestamp with time zone`, `timestamp without time zone`];

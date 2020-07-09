@@ -1838,6 +1838,7 @@ module.exports = {
                                     case `text`:
                                     case `string`:
                                     case `character`:
+                                    case `uuid`:
                                     case `character varying`:
                                         if (EXPRESSIONS_FOR_STRINGS.indexOf(column.expression) === -1) {
                                             throw new Error(`Unable to apply ${column.expression} expression to ${column.fieldname} (${layerDescription.fields[key].type} type)`);
