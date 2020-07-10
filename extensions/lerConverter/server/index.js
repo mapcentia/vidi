@@ -7,6 +7,7 @@ var moment = require('moment');
 var config = require('../../../config/config.js');
 var he = require('he');
 var fetch = require('node-fetch');
+const wkt = require('wkt');
 
 
 /**
@@ -147,8 +148,9 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
     let getChain = []
     let layers = ['lines','points','polygons','graveforespoergsel']
     
+    // Define how to get features
     layers.forEach(t => {
-        let q = 'SELECT * FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+        let q = 'SELECT *, ST_AsText(the_geom) as the_geom_wkt FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
         getChain.push(SQLAPI(q, req))
     })
 
@@ -161,7 +163,19 @@ router.post('/api/extension/downloadForespoergsel', function (req, response) {
             r.forEach(f => {
                 //console.log(f)
                 if (f.features.length > 0) {
-                    returnArray = returnArray.concat(f.features)
+                    // Because SQLAPI is an idiot, handle it this way
+                    f.features.forEach(s => {
+                        console.log(s)
+                        try {
+                            let feat = {}
+                            feat.geometry = wkt.parse(s.properties.the_geom_wkt)
+                            feat.properties = s.properties
+                            delete feat.properties.the_geom_wkt
+                            returnArray.push(feat)
+                        } catch (error) {
+                            console.log(error)   
+                        }
+                    })
                 }
             })
             let fc = {type: "FeatureCollection", features: returnArray} //this is base output. with null's

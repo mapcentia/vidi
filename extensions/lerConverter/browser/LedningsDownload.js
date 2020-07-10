@@ -99,10 +99,9 @@ class LedningsDownload extends React.Component {
                 a.addEventListener('click', clickHandler, false);
                 a.click();
             })
+            .then(_self.setState({open:false,format: ''}))
+            .catch(e => console.log(e))
         })
-
-
-        //.then(_self.setState({open:false,format: ''}))
         .catch(e => console.log(e))
     };
 
