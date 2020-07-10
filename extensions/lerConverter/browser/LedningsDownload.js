@@ -65,6 +65,47 @@ class LedningsDownload extends React.Component {
         });
     };
 
+    handleDownload = () => {
+        const _self = this
+
+        const clickHandler = () => {
+            setTimeout(() => {
+              URL.revokeObjectURL(file);
+              this.removeEventListener('click', clickHandler);
+            }, 150);
+          };
+
+        // Close and handle download
+        let options = {
+            headers: {'Accept': 'application/json', 'Content-Type': 'application/json'},
+            method: 'POST',
+            body: JSON.stringify({forespNummer: _self.props.forespnummer, format: _self.state.format})
+        }
+        let url = _self.props.endpoint
+        fetch(url, options)
+        .then( r => r.json())
+        .then( d => {
+            console.log(d)
+            let urlBlob = "data:" + d.mimetype + ";base64," + d.base64
+
+            //build blob
+            fetch(urlBlob)
+            .then(blobResponse => blobResponse.blob())
+            .then(blob => {
+                let file = window.URL.createObjectURL(blob);
+                let a = document.createElement('a');
+                a.href = file;
+                a.setAttribute('download', d.filename);
+                a.addEventListener('click', clickHandler, false);
+                a.click();
+            })
+        })
+
+
+        //.then(_self.setState({open:false,format: ''}))
+        .catch(e => console.log(e))
+    };
+
     render() {
         const p = this.props
         const _self = this;
@@ -114,7 +155,7 @@ class LedningsDownload extends React.Component {
                   <Button onClick={_self.handleClose} color="default" size={p.size} variant={p.variant}>
                     Fortryd
                   </Button>
-                  <Button onClick={_self.handleClose} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
+                  <Button onClick={_self.handleDownload} color="primary" size={p.size} variant={p.variant} disabled={s.format == '' ? true : false}>
                     Download
                   </Button>
                 </DialogActions>

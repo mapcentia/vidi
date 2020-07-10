@@ -897,7 +897,8 @@ module.exports = {
                                         </Button>
                                         <LedningsDownload style={margin} 
                                         size="large" color="default" variant="contained"
-                                            endpoint="/api/extension/upsertForespoergsel"
+                                            endpoint="/api/extension/downloadForespoergsel"
+                                            forespnummer={s.foresp}
                                         />
                                     </div>
                                     <div id="lerConverter-feature-ledningsejerliste">

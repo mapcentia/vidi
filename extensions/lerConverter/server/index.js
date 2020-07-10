@@ -113,6 +113,100 @@ var buildSQLArray = function(features, table, geom_col, crs, timestamp) {
 }
 
 /**
+ * Endpoint for file download 
+ */
+router.post('/api/extension/downloadForespoergsel', function (req, response) {
+
+    //console.table(req.body)
+    let b = req.body
+    //console.table(req.session)
+    let s = req.session
+
+    // If user is not currently inside a session, hit 'em with a nice 401
+    if (!req.session.hasOwnProperty("gc2SessionId")) {
+        response.status(401).json({error:"Du skal være logget ind for at benytte løsningen."})
+        return
+    }
+
+    // Check if query exists
+    if(!b.hasOwnProperty("forespNummer") && !b.hasOwnProperty('format')) {
+        response.status(500).json({error:"Forespørgsel er ikke komplet. 'forespNummer', 'format'"})
+        return
+    }
+
+    let allowedFormats = ['shp','dxf','geojson']
+    if(allowedFormats.indexOf(b.format) > -1){
+        //console.log(b.format)
+    } else {
+        response.status(500).json({error:"Format ikke understøttet: '"+b.format+"' - brug en af: "+ allowedFormats.toString()})
+        return     
+    }
+
+    // Get contents of each type as a starting point. drop multis to simple geometries in database
+    //TODO: add crs toggle here
+    let getChain = []
+    let layers = ['lines','points','polygons','graveforespoergsel']
+    
+    layers.forEach(t => {
+        let q = 'SELECT * FROM '+ s.screenName+'.'+TABLEPREFIX+t+' where forespnummer = '+ b.forespNummer
+        getChain.push(SQLAPI(q, req))
+    })
+
+    // Send data in formats
+    try {
+        Promise.all(getChain) // Get all features
+        .then(r => {
+            //console.log(r)
+            let returnArray = []
+            r.forEach(f => {
+                //console.log(f)
+                if (f.features.length > 0) {
+                    returnArray = returnArray.concat(f.features)
+                }
+            })
+            let fc = {type: "FeatureCollection", features: returnArray} //this is base output. with null's
+            let fn = 'Ledningspakke_'+String(b.forespNummer)+'_'+b.format+'.'
+
+            // Handle formats, must all end in a Buffer
+            var base64, ext, contentType, payload
+            switch(b.format) {
+                case 'geojson':
+                    try {
+                        // just return what we got from DB
+                        base64 = JSON.stringify(fc)
+                        base64 = new Buffer.from(base64).toString("base64")
+                        ext = 'geojson'
+                        contentType = 'application/json'
+                    } catch (error) {
+                        response.status(500).json({error:error})
+                        return
+                    }
+                    break;
+                default:
+                    response.status(500).json({error:"Format ikke understøttet: '"+b.format})
+                    return     
+            }
+
+            // headers and return
+            payload = {
+                base64: base64,
+                filename: fn+ext,
+                mimetype: contentType
+            }
+            response.status(200).json(payload)
+        })
+        .catch(r => {
+            // if SQL went wrong
+            response.status(500).json(r)
+        })
+    } catch (error) {
+        console.log(error)
+        response.status(500).json(error)
+    }
+    
+});
+
+/**
  * Endpoint for populating foresp. in current schema 
  */
 router.post('/api/extension/getForespoergselOption', function (req, response) {
